@@ -145,7 +145,12 @@
       js: BASE + "shared/widget-kits/linear/LinearGaugeTextLayout.js",
       css: undefined,
       globalKey: "DyniLinearGaugeTextLayout",
-      deps: ["LinearGaugeLabelFit", "TextLayoutScaleHelpers", "CanvasTextFitting", "HtmlWidgetUtils"]
+      deps: [
+        "LinearGaugeLabelFit",
+        "TextLayoutScaleHelpers",
+        "CanvasTextFitting",
+        "HtmlWidgetUtils"
+      ]
   };
 
   sf.TextLayoutPrimitives = {
@@ -173,7 +178,12 @@
       js: BASE + "shared/widget-kits/text/TextLayoutEngine.js",
       css: undefined,
       globalKey: "DyniTextLayoutEngine",
-      deps: ["ValueMath", "TextLayoutPrimitives", "TextLayoutComposite", "ResponsiveScaleProfile"]
+      deps: [
+        "ValueMath",
+        "TextLayoutPrimitives",
+        "TextLayoutComposite",
+        "ResponsiveScaleProfile"
+      ]
   };
 
   sf.TextLayoutComposite = {

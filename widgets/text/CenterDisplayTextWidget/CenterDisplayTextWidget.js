@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniCenterDisplayTextWidget = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniCenterDisplayTextWidget = factory();
+  }
 }(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
@@ -23,7 +25,9 @@
     }
     return width;
   }
-  function computeResponsiveLineMaxPx(rect, ratio, fillScale) { return Math.max(1, Math.floor(rect.h * ratio * fillScale)); }
+  function computeResponsiveLineMaxPx(rect, ratio, fillScale) {
+    return Math.max(1, Math.floor(rect.h * ratio * fillScale));
+  }
   function computeRelationValueMaxPx(layout, textFillScale) {
     const rowRects = layout.rowRects;
     let maxPx = 0;
@@ -160,7 +164,12 @@
     const valueOffset = row.caption ? (pairX - rect.x + labelWidth + gap) : (pairX - rect.x);
     return {
       labelRect: { x: pairX, y: rect.y, w: labelWidth, h: rect.h },
-      valueRect: { x: rect.x + valueOffset, y: rect.y, w: Math.max(1, rect.x + rect.w - (rect.x + valueOffset)), h: rect.h },
+      valueRect: {
+        x: rect.x + valueOffset,
+        y: rect.y,
+        w: Math.max(1, rect.x + rect.w - (rect.x + valueOffset)),
+        h: rect.h
+      },
       valueText: valueText,
       labelMaxPx: labelMaxPx,
       valueMaxPx: valueMaxPx

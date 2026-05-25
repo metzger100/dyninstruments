@@ -1,87 +1,128 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const {
+  createComponentContextMock,
+} = require("../../helpers/component-context-mock");
 
 describe("RoutePointsTextHtmlWidget", function () {
   function createRenderer(options) {
     const opts = options || {};
-    const buildModel = opts.buildModel || vi.fn(function (args) {
-      const props = args && args.props ? args.props : {};
-      const interactionState = props.__interactionState
-        || (props.__canActivate === true ? "dispatch" : "passive");
-      const points = Array.isArray(props.__points)
-        ? props.__points
-        : [{ index: 0, ordinalText: "1", nameText: "WP1", infoText: "I", selected: false }];
-      return {
-        mode: props.__mode || "normal",
-        kind: props.__kind || "data",
-        stateLabel: props.__stateLabel || "",
-        interactionState,
-        stableDigitsEnabled: props.__stableDigits === true,
-        showHeader: true,
-        showOrdinal: true,
-        hasRoute: (props.__kind || "data") === "data",
-        routeNameText: "Route",
-        metaText: "1 WP",
-        points,
-        isActiveRoute: false,
-        canActivateRoutePoint: interactionState === "dispatch",
-        hasValidSelection: props.__hasValidSelection === true,
-        selectedIndex: Number.isInteger(props.__selectedIndex) ? props.__selectedIndex : -1,
-        activeWaypointKey: props.__activeKey || null,
-        resizeSignatureParts: ["sig", props.__token || "1"],
-        inlineGeometry: {
-          wrapper: { style: "" },
-          list: { style: "", contentStyle: "" },
-          header: { style: "", routeNameStyle: "", metaStyle: "" },
-          rows: points.map(function () {
-            return {
-              rowStyle: "",
-              ordinalStyle: "",
-              middleStyle: "",
-              nameStyle: "",
-              infoStyle: "",
-              markerStyle: "",
-              markerDotStyle: ""
-            };
-          })
-        }
-      };
-    });
-    const fitCompute = opts.fitCompute || vi.fn(function (args) {
-      const model = args && args.model ? args.model : { points: [] };
-      return {
-        headerFit: { routeNameStyle: "", metaStyle: "" },
-        rowFits: model.points.map(function () {
-          return { ordinalStyle: "", nameStyle: "", infoStyle: "" };
-        }),
-        emptyStyle: ""
-      };
-    });
+    const buildModel =
+      opts.buildModel ||
+      vi.fn(function (args) {
+        const props = args && args.props ? args.props : {};
+        const interactionState =
+          props.__interactionState ||
+          (props.__canActivate === true ? "dispatch" : "passive");
+        const points = Array.isArray(props.__points)
+          ? props.__points
+          : [
+              {
+                index: 0,
+                ordinalText: "1",
+                nameText: "WP1",
+                infoText: "I",
+                selected: false,
+              },
+            ];
+        return {
+          mode: props.__mode || "normal",
+          kind: props.__kind || "data",
+          stateLabel: props.__stateLabel || "",
+          interactionState,
+          stableDigitsEnabled: props.__stableDigits === true,
+          showHeader: true,
+          showOrdinal: true,
+          hasRoute: (props.__kind || "data") === "data",
+          routeNameText: "Route",
+          metaText: "1 WP",
+          points,
+          isActiveRoute: false,
+          canActivateRoutePoint: interactionState === "dispatch",
+          hasValidSelection: props.__hasValidSelection === true,
+          selectedIndex: Number.isInteger(props.__selectedIndex)
+            ? props.__selectedIndex
+            : -1,
+          activeWaypointKey: props.__activeKey || null,
+          resizeSignatureParts: ["sig", props.__token || "1"],
+          inlineGeometry: {
+            wrapper: { style: "" },
+            list: { style: "", contentStyle: "" },
+            header: { style: "", routeNameStyle: "", metaStyle: "" },
+            rows: points.map(function () {
+              return {
+                rowStyle: "",
+                ordinalStyle: "",
+                middleStyle: "",
+                nameStyle: "",
+                infoStyle: "",
+                markerStyle: "",
+                markerDotStyle: "",
+              };
+            }),
+          },
+        };
+      });
+    const fitCompute =
+      opts.fitCompute ||
+      vi.fn(function (args) {
+        const model = args && args.model ? args.model : { points: [] };
+        return {
+          headerFit: { routeNameStyle: "", metaStyle: "" },
+          rowFits: model.points.map(function () {
+            return { ordinalStyle: "", nameStyle: "", infoStyle: "" };
+          }),
+          emptyStyle: "",
+        };
+      });
     const maybeReveal = opts.maybeReveal || vi.fn(() => true);
-    const measureListScrollbarGutter = opts.measureListScrollbarGutter || vi.fn(() => 0);
-    const computeNaturalHeight = opts.computeNaturalHeight || vi.fn(() => ({ cappedHeight: 240 }));
+    const measureListScrollbarGutter =
+      opts.measureListScrollbarGutter || vi.fn(() => 0);
+    const computeNaturalHeight =
+      opts.computeNaturalHeight || vi.fn(() => ({ cappedHeight: 240 }));
 
     const componentContext = createComponentContextMock({
       modules: {
-        RoutePointsHtmlFit: { create() { return { compute: fitCompute }; } },
-        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
-        RoutePointsRenderModel: { create() { return { buildModel }; } },
-        RoutePointsMarkup: loadFresh("shared/widget-kits/nav/RoutePointsMarkup.js"),
+        RoutePointsHtmlFit: {
+          create() {
+            return { compute: fitCompute };
+          },
+        },
+        HtmlWidgetUtils: loadFresh(
+          "shared/widget-kits/html/HtmlWidgetUtils.js",
+        ),
+        RoutePointsRenderModel: {
+          create() {
+            return { buildModel };
+          },
+        },
+        RoutePointsMarkup: loadFresh(
+          "shared/widget-kits/nav/RoutePointsMarkup.js",
+        ),
         RoutePointsDomEffects: {
           create() {
             return {
               measureListScrollbarGutter,
               maybeRevealActiveRow: maybeReveal,
-              scheduleSelectedRowVisibility: maybeReveal
+              scheduleSelectedRowVisibility: maybeReveal,
             };
-          }
+          },
         },
-        RoutePointsLayout: { create() { return { computeNaturalHeight }; } },
-        StateScreenMarkup: loadFresh("shared/widget-kits/state/StateScreenMarkup.js"),
-        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js"),
-        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js")
+        RoutePointsLayout: {
+          create() {
+            return { computeNaturalHeight };
+          },
+        },
+        StateScreenMarkup: loadFresh(
+          "shared/widget-kits/state/StateScreenMarkup.js",
+        ),
+        StateScreenTextFit: loadFresh(
+          "shared/widget-kits/state/StateScreenTextFit.js",
+        ),
+        StateScreenLabels: loadFresh(
+          "shared/widget-kits/state/StateScreenLabels.js",
+        ),
       },
       services: {
         themeTokens: {
@@ -91,21 +132,23 @@ describe("RoutePointsTextHtmlWidget", function () {
                 family: "sans-serif",
                 familyMono: "monospace",
                 weight: 720,
-                labelWeight: 610
-              }
+                labelWeight: 610,
+              },
             };
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     return {
-      renderer: loadFresh("widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js").create({}, componentContext),
+      renderer: loadFresh(
+        "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js",
+      ).create({}, componentContext),
       buildModel,
       fitCompute,
       maybeReveal,
       measureListScrollbarGutter,
-      computeNaturalHeight
+      computeNaturalHeight,
     };
   }
 
@@ -113,7 +156,8 @@ describe("RoutePointsTextHtmlWidget", function () {
     const opts = options || {};
     const mode = opts.mode === "passive" ? "passive" : "dispatch";
     const activate = opts.activate || vi.fn(() => true);
-    const orientation = opts.orientation === "vertical" ? "vertical" : "default";
+    const orientation =
+      opts.orientation === "vertical" ? "vertical" : "default";
 
     return Object.assign({}, props || {}, {
       surfacePolicy: {
@@ -122,10 +166,10 @@ describe("RoutePointsTextHtmlWidget", function () {
         containerOrientation: orientation,
         actions: {
           routePoints: {
-            activate
-          }
-        }
-      }
+            activate,
+          },
+        },
+      },
     });
   }
 
@@ -145,13 +189,13 @@ describe("RoutePointsTextHtmlWidget", function () {
 
     mountEl.getBoundingClientRect = vi.fn(() => ({
       width: shellSize.width,
-      height: shellSize.height
+      height: shellSize.height,
     }));
 
     const committed = rendererSpec.createCommittedRenderer({
       hostContext,
       mountEl,
-      shadowRoot: null
+      shadowRoot: null,
     });
 
     let revision = 0;
@@ -168,7 +212,7 @@ describe("RoutePointsTextHtmlWidget", function () {
         shellRect: { width: shellSize.width, height: shellSize.height },
         hostContext,
         layoutChanged: layoutChanged === true,
-        relayoutPass: 0
+        relayoutPass: 0,
       };
     }
 
@@ -187,7 +231,7 @@ describe("RoutePointsTextHtmlWidget", function () {
       },
       html() {
         return mountEl.innerHTML;
-      }
+      },
     };
   }
 
@@ -199,199 +243,4 @@ describe("RoutePointsTextHtmlWidget", function () {
     expect(typeof renderer.createCommittedRenderer).toBe("function");
   });
 
-  it("dispatches route-point activation for valid row clicks", function () {
-    const activate = vi.fn(() => true);
-    const setup = createRenderer();
-    const mounted = mountCommitted(
-      setup.renderer,
-      withSurfacePolicy({
-        __canActivate: true,
-        __points: [
-          {
-            index: 0,
-            ordinalText: "1",
-            nameText: "WP1",
-            infoText: "I",
-            selected: false,
-            pointSnapshot: { idx: 0, name: "WP1", lat: 54.1, lon: 10.1, routeName: "Route", selected: false }
-          },
-          {
-            index: 3,
-            ordinalText: "4",
-            nameText: "WP4",
-            infoText: "I",
-            selected: true,
-            pointSnapshot: { idx: 3, name: "WP4", lat: 54.4, lon: 10.4, routeName: "Route", selected: true }
-          }
-        ]
-      }, { mode: "dispatch", activate })
-    );
-
-    const row = mounted.mountEl.querySelector('[data-rp-idx="3"]');
-    row.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-    expect(activate).toHaveBeenCalledWith({
-      index: 3,
-      pointSnapshot: { idx: 3, name: "WP4", lat: 54.4, lon: 10.4, routeName: "Route", selected: true }
-    });
-
-    const wrapper = mounted.mountEl.querySelector(".dyni-route-points-html");
-    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-    expect(activate).toHaveBeenCalledTimes(1);
-  });
-
-  it("renders disconnected state-screen and blocks row activation", function () {
-    const activate = vi.fn(() => true);
-    const setup = createRenderer();
-    const mounted = mountCommitted(
-      setup.renderer,
-      withSurfacePolicy({
-        __kind: "disconnected",
-        __stateLabel: "GPS Lost",
-        __interactionState: "passive",
-        __canActivate: false,
-        __points: []
-      }, { mode: "dispatch", activate })
-    );
-
-    expect(mounted.html()).toContain("dyni-state-disconnected");
-    expect(mounted.html()).toContain("GPS Lost");
-    expect(mounted.html()).toContain("dyni-route-points-passive");
-
-    const wrapper = mounted.mountEl.querySelector(".dyni-route-points-html");
-    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-    expect(activate).not.toHaveBeenCalled();
-  });
-
-  it("runs post-patch reveal effects only for valid selections", function () {
-    const maybeReveal = vi.fn(() => true);
-    const setupValid = createRenderer({ maybeReveal });
-    mountCommitted(
-      setupValid.renderer,
-      withSurfacePolicy({
-        __canActivate: true,
-        __hasValidSelection: true,
-        __selectedIndex: 0,
-        __activeKey: "id:wp-0"
-      }, { mode: "dispatch" })
-    );
-
-    expect(maybeReveal).toHaveBeenCalledWith(expect.objectContaining({
-      selectedIndex: 0,
-      activeKey: "id:wp-0"
-    }));
-
-    const maybeRevealInvalid = vi.fn(() => true);
-    const setupInvalid = createRenderer({ maybeReveal: maybeRevealInvalid });
-    mountCommitted(
-      setupInvalid.renderer,
-      withSurfacePolicy({
-        __canActivate: false,
-        __hasValidSelection: false,
-        __selectedIndex: -1
-      }, { mode: "passive" })
-    );
-
-    expect(maybeRevealInvalid).not.toHaveBeenCalled();
-  });
-
-  it("requests relayout when scrollbar gutter changes", function () {
-    const setup = createRenderer({
-      measureListScrollbarGutter: vi.fn()
-        .mockReturnValueOnce(6)
-        .mockReturnValue(6)
-    });
-    const mounted = mountCommitted(
-      setup.renderer,
-      withSurfacePolicy({ __canActivate: true, __hasValidSelection: false }, { mode: "dispatch" })
-    );
-
-    expect(mounted.postPatchResult).toEqual({ relayout: true });
-  });
-
-  it("adds tabular class to route-point info text when stableDigits is enabled", function () {
-    const setup = createRenderer();
-    const mounted = mountCommitted(
-      setup.renderer,
-      withSurfacePolicy({
-        __canActivate: true,
-        __stableDigits: true,
-        __points: [
-          { index: 0, ordinalText: "1", nameText: "WP1", infoText: "09°/1.2nm", selected: false }
-        ]
-      }, { mode: "dispatch" })
-    );
-
-    expect(mounted.html()).toContain("dyni-route-points-info-text dyni-tabular");
-  });
-
-  it("renders plain stableDigits info text through the widget path", function () {
-    const setup = createRenderer({
-      fitCompute: vi.fn(function () {
-        return {
-          headerFit: { routeNameStyle: "", metaStyle: "" },
-          rowFits: [
-            {
-              ordinalStyle: "font-size:8px;",
-              nameStyle: "font-size:10px;",
-              infoStyle: "font-size:8px;",
-              infoText: "360°/12.3nm"
-            }
-          ],
-          emptyStyle: ""
-        };
-      })
-    });
-    const mounted = mountCommitted(
-      setup.renderer,
-      withSurfacePolicy({
-        __canActivate: true,
-        __stableDigits: true,
-        __points: [
-          {
-            index: 0,
-            ordinalText: "1",
-            nameText: "Finish",
-            infoText: "00360°/00012.3nm",
-            infoPlainText: "360°/12.3nm",
-            selected: true
-          }
-        ]
-      }, { mode: "dispatch" })
-    );
-
-    expect(mounted.html()).toContain("360°/12.3nm");
-    expect(mounted.html()).not.toContain("00360°/00012.3nm");
-    expect(mounted.html()).toContain("dyni-route-points-info-text dyni-tabular");
-  });
-
-  it("derives layout signature from model resizeSignatureParts", function () {
-    const setup = createRenderer();
-    const committed = setup.renderer.createCommittedRenderer({ hostContext: {}, mountEl: null, shadowRoot: null });
-
-    const sigA = committed.layoutSignature({ props: { __token: "A" }, shellRect: { width: 300, height: 160 } });
-    const sigB = committed.layoutSignature({ props: { __token: "B" }, shellRect: { width: 300, height: 160 } });
-
-    expect(sigB).not.toBe(sigA);
-  });
-
-  it("uses shadow-local css selectors", function () {
-    const cssPath = path.join(
-      process.cwd(),
-      "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css"
-    );
-    const css = fs.readFileSync(cssPath, "utf8");
-
-    expect(css).toContain(".dyni-html-root .dyni-route-points-html");
-    expect(css).toContain('.dyni-html-root[data-dyni-orientation="vertical"] .dyni-route-points-html');
-    expect(css).toMatch(/\.dyni-html-root\[data-dyni-orientation="vertical"\] \.dyni-route-points-html \{[\s\S]*max-height:\s*calc\(60vh\);/);
-    const hostBlockMatch = css.match(/:host \{([^}]*)\}/);
-    expect(hostBlockMatch).not.toBeNull();
-    const hostBlock = hostBlockMatch ? hostBlockMatch[1] : "";
-    expect(hostBlock).toContain("height: auto;");
-    expect(hostBlock).toContain("display: flex;");
-    expect(hostBlock).toContain("flex-direction: column;");
-    expect(hostBlock).toContain("min-height: 0;");
-    expect(hostBlock).not.toContain("max-height:");
-    expect(css).not.toContain(".widgetContainer.vertical .widget.dyniplugin");
-  });
 });

@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniTextLayoutComposite = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniTextLayoutComposite = factory();
+  }
 }(this, function () {
   "use strict";
   const ROW_SAFE_RATIO = 0.92;
@@ -74,7 +76,14 @@
           weight: cfg.labelWeight
         })
         : { px: 0 };
-      return { hTop: hTop, hMid: hMid, hBot: hBot, cPx: cFit.px, vPx: vFit.px, uPx: uFit.px };
+      return {
+        hTop: hTop,
+        hMid: hMid,
+        hBot: hBot,
+        cPx: cFit.px,
+        vPx: vFit.px,
+        uPx: uFit.px
+      };
     }
     function drawThreeRowBlock(args) {
       const cfg = args || {};

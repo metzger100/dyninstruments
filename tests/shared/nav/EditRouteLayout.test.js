@@ -1,20 +1,33 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const {
+  createComponentContextMock,
+} = require("../../helpers/component-context-mock");
 
 describe("EditRouteLayout", function () {
   function createLayout() {
-    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-    const editRouteLayoutMath = loadFresh("shared/widget-kits/nav/EditRouteLayoutMath.js");
-    const editRouteLayoutGeometry = loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js");
-    return loadFresh("shared/widget-kits/nav/EditRouteLayout.js").create({}, createComponentContextMock({
-      modules: {
-        ResponsiveScaleProfile: responsiveScaleProfile,
-        LayoutRectMath: layoutRectMath,
-        EditRouteLayoutMath: editRouteLayoutMath,
-        EditRouteLayoutGeometry: editRouteLayoutGeometry
-      }
-    }));
+    const responsiveScaleProfile = loadFresh(
+      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+    );
+    const layoutRectMath = loadFresh(
+      "shared/widget-kits/layout/LayoutRectMath.js",
+    );
+    const editRouteLayoutMath = loadFresh(
+      "shared/widget-kits/nav/EditRouteLayoutMath.js",
+    );
+    const editRouteLayoutGeometry = loadFresh(
+      "shared/widget-kits/nav/EditRouteLayoutGeometry.js",
+    );
+    return loadFresh("shared/widget-kits/nav/EditRouteLayout.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          ResponsiveScaleProfile: responsiveScaleProfile,
+          LayoutRectMath: layoutRectMath,
+          EditRouteLayoutMath: editRouteLayoutMath,
+          EditRouteLayoutGeometry: editRouteLayoutGeometry,
+        },
+      }),
+    );
   }
 
   it("returns flat boxes for name, PTS, DST, RTE, and ETA", function () {
@@ -25,25 +38,38 @@ describe("EditRouteLayout", function () {
       hasRoute: true,
       isLocalRoute: false,
       ratioThresholdNormal: 1.2,
-      ratioThresholdFlat: 3.8
+      ratioThresholdFlat: 3.8,
     });
 
     expect(out.mode).toBe("flat");
-    expect(out.metricVisibility).toEqual({ pts: true, dst: true, rte: true, rteEta: true });
+    expect(out.metricVisibility).toEqual({
+      pts: true,
+      dst: true,
+      rte: true,
+      rteEta: true,
+    });
     expect(out.nameBarRect.w).toBe(out.contentRect.w);
     expect(out.flatMetricRows).toBeGreaterThanOrEqual(1);
     expect(out.flatMetricColumns).toBeGreaterThanOrEqual(2);
-    expect(out.flatWrapperLayoutStyle).toContain("grid-template-rows:minmax(0,");
+    expect(out.flatWrapperLayoutStyle).toContain(
+      "grid-template-rows:minmax(0,",
+    );
     expect(out.flatWrapperLayoutStyle).toContain("gap:");
-    expect(out.flatMetricsLayoutStyle).toContain("grid-template-columns:repeat(" + String(out.flatMetricColumns));
+    expect(out.flatMetricsLayoutStyle).toContain(
+      "grid-template-columns:repeat(" + String(out.flatMetricColumns),
+    );
     expect(out.metricBoxes.pts).toBeTruthy();
     expect(out.metricBoxes.dst).toBeTruthy();
     expect(out.metricBoxes.rte).toBeTruthy();
     expect(out.metricBoxes.rteEta).toBeTruthy();
     expect(out.metricBoxes.pts.unitRect).toBeNull();
     expect(out.metricBoxes.rteEta.unitRect).toBeNull();
-    expect(out.metricBoxes.dst.valueTextRect).toEqual(out.metricBoxes.dst.valueRect);
-    expect(out.metricBoxes.rte.valueTextRect).toEqual(out.metricBoxes.rte.valueRect);
+    expect(out.metricBoxes.dst.valueTextRect).toEqual(
+      out.metricBoxes.dst.valueRect,
+    );
+    expect(out.metricBoxes.rte.valueTextRect).toEqual(
+      out.metricBoxes.rte.valueRect,
+    );
     expect(out.metricBoxes.dst.unitRect).toBeNull();
     expect(out.metricBoxes.rte.unitRect).toBeNull();
   });
@@ -56,20 +82,31 @@ describe("EditRouteLayout", function () {
       hasRoute: true,
       isLocalRoute: false,
       ratioThresholdNormal: 1.2,
-      ratioThresholdFlat: 3.8
+      ratioThresholdFlat: 3.8,
     });
 
     expect(out.mode).toBe("normal");
-    expect(out.metricVisibility).toEqual({ pts: true, dst: true, rte: true, rteEta: true });
+    expect(out.metricVisibility).toEqual({
+      pts: true,
+      dst: true,
+      rte: true,
+      rteEta: true,
+    });
     expect(out.metricBoxes.pts).toBeTruthy();
     expect(out.metricBoxes.dst).toBeTruthy();
     expect(out.metricBoxes.rte).toBeTruthy();
     expect(out.metricBoxes.rteEta).toBeTruthy();
     expect(out.metricBoxes.pts.unitRect).toBeNull();
     expect(out.metricBoxes.rteEta.unitRect).toBeNull();
-    expect(out.metricBoxes.pts.valueTextRect.w).toBe(out.metricBoxes.pts.valueRect.w);
-    expect(out.metricBoxes.rteEta.valueTextRect.w).toBe(out.metricBoxes.rteEta.valueRect.w);
-    expect(out.metricBoxes.rte.valueTextRect.w).toBe(out.metricBoxes.rte.valueRect.w);
+    expect(out.metricBoxes.pts.valueTextRect.w).toBe(
+      out.metricBoxes.pts.valueRect.w,
+    );
+    expect(out.metricBoxes.rteEta.valueTextRect.w).toBe(
+      out.metricBoxes.rteEta.valueRect.w,
+    );
+    expect(out.metricBoxes.rte.valueTextRect.w).toBe(
+      out.metricBoxes.rte.valueRect.w,
+    );
     expect(out.metricBoxes.rte.unitRect).toBeNull();
   });
 
@@ -81,7 +118,7 @@ describe("EditRouteLayout", function () {
       hasRoute: true,
       isLocalRoute: false,
       ratioThresholdNormal: undefined,
-      ratioThresholdFlat: undefined
+      ratioThresholdFlat: undefined,
     });
     const nullThresholds = layout.computeLayout({
       W: 320,
@@ -89,7 +126,7 @@ describe("EditRouteLayout", function () {
       hasRoute: true,
       isLocalRoute: false,
       ratioThresholdNormal: null,
-      ratioThresholdFlat: null
+      ratioThresholdFlat: null,
     });
     const blankThresholds = layout.computeLayout({
       W: 320,
@@ -97,7 +134,7 @@ describe("EditRouteLayout", function () {
       hasRoute: true,
       isLocalRoute: false,
       ratioThresholdNormal: "   ",
-      ratioThresholdFlat: ""
+      ratioThresholdFlat: "",
     });
 
     expect(baseline.mode).toBe("normal");
@@ -113,17 +150,27 @@ describe("EditRouteLayout", function () {
       hasRoute: true,
       isLocalRoute: false,
       ratioThresholdNormal: 1.2,
-      ratioThresholdFlat: 3.8
+      ratioThresholdFlat: 3.8,
     });
 
     expect(out.mode).toBe("high");
-    expect(out.metricBoxes.pts.labelRect.x).toBeLessThan(out.metricBoxes.pts.valueRect.x);
-    expect(out.metricBoxes.dst.tileRect.y).toBeGreaterThan(out.metricBoxes.pts.tileRect.y);
-    expect(out.metricBoxes.rte.tileRect.y).toBeGreaterThan(out.metricBoxes.dst.tileRect.y);
-    expect(out.metricBoxes.rteEta.tileRect.y).toBeGreaterThan(out.metricBoxes.rte.tileRect.y);
+    expect(out.metricBoxes.pts.labelRect.x).toBeLessThan(
+      out.metricBoxes.pts.valueRect.x,
+    );
+    expect(out.metricBoxes.dst.tileRect.y).toBeGreaterThan(
+      out.metricBoxes.pts.tileRect.y,
+    );
+    expect(out.metricBoxes.rte.tileRect.y).toBeGreaterThan(
+      out.metricBoxes.dst.tileRect.y,
+    );
+    expect(out.metricBoxes.rteEta.tileRect.y).toBeGreaterThan(
+      out.metricBoxes.rte.tileRect.y,
+    );
     expect(out.metricBoxes.pts.unitRect).toBeNull();
     expect(out.metricBoxes.rteEta.unitRect).toBeNull();
-    expect(out.metricBoxes.rte.unitRect.x).toBeGreaterThan(out.metricBoxes.rte.valueTextRect.x);
+    expect(out.metricBoxes.rte.unitRect.x).toBeGreaterThan(
+      out.metricBoxes.rte.valueTextRect.x,
+    );
   });
 
   it("does not reserve unit boxes when a metric has no unit", function () {
@@ -138,13 +185,15 @@ describe("EditRouteLayout", function () {
         pts: false,
         dst: true,
         rte: false,
-        rteEta: false
-      }
+        rteEta: false,
+      },
     });
 
     expect(out.metricBoxes.dst.unitRect).toBeNull();
     expect(out.metricBoxes.rte.unitRect).toBeNull();
-    expect(out.metricBoxes.rte.valueTextRect.w).toBe(out.metricBoxes.rte.valueRect.w);
+    expect(out.metricBoxes.rte.valueTextRect.w).toBe(
+      out.metricBoxes.rte.valueRect.w,
+    );
   });
 
   it("omits all metric boxes when no route is available", function () {
@@ -156,14 +205,21 @@ describe("EditRouteLayout", function () {
         W: 280,
         H: 180,
         hasRoute: false,
-        isLocalRoute: true
+        isLocalRoute: true,
       });
 
-      expect(out.metricVisibility).toEqual({ pts: false, dst: false, rte: false, rteEta: false });
+      expect(out.metricVisibility).toEqual({
+        pts: false,
+        dst: false,
+        rte: false,
+        rteEta: false,
+      });
       expect(Object.keys(out.metricBoxes)).toEqual([]);
       expect(out.sourceBadgeRect).toBeNull();
       if (mode === "flat") {
-        expect(out.flatWrapperLayoutStyle).toContain('grid-template-areas:"name";');
+        expect(out.flatWrapperLayoutStyle).toContain(
+          'grid-template-areas:"name";',
+        );
         expect(out.flatWrapperLayoutStyle).toContain("padding:");
         expect(out.flatMetricsLayoutStyle).toBe("");
       }
@@ -178,14 +234,14 @@ describe("EditRouteLayout", function () {
       W: 320,
       H: 220,
       hasRoute: true,
-      isLocalRoute: true
+      isLocalRoute: true,
     });
     const serverOut = layout.computeLayout({
       mode: "normal",
       W: 320,
       H: 220,
       hasRoute: true,
-      isLocalRoute: false
+      isLocalRoute: false,
     });
 
     expect(localOut.sourceBadgeRect).toBeTruthy();
@@ -203,7 +259,7 @@ describe("EditRouteLayout", function () {
       isVerticalCommitted: true,
       effectiveLayoutHeight: 410,
       ratioThresholdNormal: 1.2,
-      ratioThresholdFlat: 3.8
+      ratioThresholdFlat: 3.8,
     });
 
     expect(out.mode).toBe("high");
@@ -220,7 +276,7 @@ describe("EditRouteLayout", function () {
       hasRoute: true,
       isLocalRoute: false,
       ratioThresholdNormal: 1.2,
-      ratioThresholdFlat: 3.8
+      ratioThresholdFlat: 3.8,
     });
     const verticalA = layout.computeLayout({
       W: 240,
@@ -228,7 +284,7 @@ describe("EditRouteLayout", function () {
       hasRoute: true,
       isLocalRoute: false,
       isVerticalCommitted: true,
-      effectiveLayoutHeight: 400
+      effectiveLayoutHeight: 400,
     });
     const verticalB = layout.computeLayout({
       W: 240,
@@ -236,17 +292,23 @@ describe("EditRouteLayout", function () {
       hasRoute: true,
       isLocalRoute: false,
       isVerticalCommitted: true,
-      effectiveLayoutHeight: 640
+      effectiveLayoutHeight: 640,
     });
 
     expect(hostSized.responsive.minDim).toBe(70);
     expect(verticalA.responsive.minDim).toBe(240);
-    expect(verticalA.responsive.textFillScale).toBe(verticalB.responsive.textFillScale);
+    expect(verticalA.responsive.textFillScale).toBe(
+      verticalB.responsive.textFillScale,
+    );
   });
 
   it("exposes vertical-shell metadata with 7/8 aspect-ratio and 8em min-height", function () {
     const layout = createLayout();
-    const vertical = layout.computeVerticalShellProfile({ W: 280, H: 100, isVerticalCommitted: true });
+    const vertical = layout.computeVerticalShellProfile({
+      W: 280,
+      H: 100,
+      isVerticalCommitted: true,
+    });
 
     expect(vertical.aspectRatio).toBe("7/8");
     expect(vertical.minHeight).toBe("8em");
@@ -261,13 +323,13 @@ describe("EditRouteLayout", function () {
       W: width,
       H: 100,
       isVerticalCommitted: true,
-      effectiveLayoutHeight: null
+      effectiveLayoutHeight: null,
     });
     const blankHeight = layout.computeVerticalShellProfile({
       W: width,
       H: 100,
       isVerticalCommitted: true,
-      effectiveLayoutHeight: "   "
+      effectiveLayoutHeight: "   ",
     });
 
     expect(nullHeight.effectiveLayoutHeight).toBe(widthDrivenHeight);

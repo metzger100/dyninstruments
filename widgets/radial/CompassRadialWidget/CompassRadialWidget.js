@@ -6,11 +6,22 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniCompassRadialWidget = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniCompassRadialWidget = factory();
+  }
 }(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
-  const COMPASS_LABELS = { 0: "N", 45: "NE", 90: "E", 135: "SE", 180: "S", 225: "SW", 270: "W", 315: "NW" };
+  const COMPASS_LABELS = {
+    0: "N",
+    45: "NE",
+    90: "E",
+    135: "SE",
+    180: "S",
+    225: "SW",
+    270: "W",
+    315: "NW"
+  };
   const COMPASS_LABEL_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
   function create(def, componentContext) {
@@ -53,7 +64,12 @@
         drawCtx.textAlign = "center";
         drawCtx.textBaseline = "middle";
         drawCtx.fillText(text, width / 2, height / 2);
-        sprites.push({ angleDeg: angleDeg, canvas: sprite, width: width, height: height });
+        sprites.push({
+          angleDeg: angleDeg,
+          canvas: sprite,
+          width: width,
+          height: height
+        });
       }
 
       return { sprites: sprites, labelRadius: labelRadius };

@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniTextLayoutPrimitives = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniTextLayoutPrimitives = factory();
+  }
 }(this, function () {
   "use strict";
 
@@ -163,7 +165,14 @@
         total = vW + (unitText ? gap + uW : 0);
       }
 
-      return { vPx: vPx, uPx: unitText ? uPx : 0, vW: vW, uW: uW, total: total, gap: gap };
+      return {
+        vPx: vPx,
+        uPx: unitText ? uPx : 0,
+        vW: vW,
+        uW: uW,
+        total: total,
+        gap: gap
+      };
     }
 
     // Vertical safety factor: fitted text must stay inside its allocated row band.
@@ -207,7 +216,9 @@
         primitiveSetFont(ctx, sPx, labelWeight, family);
         const cW = captionText ? ctx.measureText(captionText).width : 0;
         const uW = unitText ? ctx.measureText(unitText).width : 0;
-        const total = (captionText ? cW + gap : 0) + vW + (unitText ? gap + uW : 0);
+        const captionWidth = captionText ? cW + gap : 0;
+        const unitWidth = unitText ? gap + uW : 0;
+        const total = captionWidth + vW + unitWidth;
         const ok = total <= maxW + 0.01 && vPx <= safeMaxH && sPx <= safeMaxH &&
           (!extraValueCheck || extraValueCheck({
             valuePx: vPx,
@@ -238,7 +249,9 @@
         cW: baseCaptionWidth,
         vW: baseValueWidth,
         uW: baseUnitWidth,
-        total: (captionText ? baseCaptionWidth + gap : 0) + baseValueWidth + (unitText ? gap + baseUnitWidth : 0),
+        total: (captionText ? baseCaptionWidth + gap : 0)
+          + baseValueWidth
+          + (unitText ? gap + baseUnitWidth : 0),
         gap: gap
       };
     }

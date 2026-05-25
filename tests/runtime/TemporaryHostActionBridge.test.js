@@ -3,12 +3,15 @@ const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 describe("runtime/TemporaryHostActionBridge.js", function () {
   function makeElement(options) {
     const opts = options || {};
-    return Object.assign({
-      parentElement: null,
-      querySelectorAll() {
-        return [];
-      }
-    }, opts);
+    return Object.assign(
+      {
+        parentElement: null,
+        querySelectorAll() {
+          return [];
+        },
+      },
+      opts,
+    );
   }
 
   function createBridgeContext(options) {
@@ -17,11 +20,15 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     const alarmWidgetRoots = opts.alarmWidgetRoots || [];
     const routePointsActivate = opts.routePointsActivate || vi.fn(() => true);
     const includeGlobalApi = opts.includeGlobalApi !== false;
-    const capturedApi = opts.hostApi || (includeGlobalApi ? {
-      routePoints: {
-        activate: routePointsActivate
-      }
-    } : null);
+    const capturedApi =
+      opts.hostApi ||
+      (includeGlobalApi
+        ? {
+            routePoints: {
+              activate: routePointsActivate,
+            },
+          }
+        : null);
     function hasClassName(root, className) {
       const value = root && root.className;
       if (typeof value !== "string") {
@@ -30,7 +37,9 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       return value.split(/\s+/).indexOf(className) >= 0;
     }
     const getElementById = vi.fn(function (id) {
-      return Object.prototype.hasOwnProperty.call(pageRoots, id) ? pageRoots[id] : null;
+      return Object.prototype.hasOwnProperty.call(pageRoots, id)
+        ? pageRoots[id]
+        : null;
     });
     const querySelectorAll = vi.fn(function (selector) {
       if (selector === ".alarmWidget") {
@@ -45,19 +54,21 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
         runtime: {},
         state: {},
         config: { shared: {}, clusters: [] },
-        ...(capturedApi ? { avnavApi: capturedApi } : {})
+        ...(capturedApi ? { avnavApi: capturedApi } : {}),
       },
-      avnav: includeGlobalApi ? {
-        api: {
-          routePoints: {
-            activate: routePointsActivate
+      avnav: includeGlobalApi
+        ? {
+            api: {
+              routePoints: {
+                activate: routePointsActivate,
+              },
+            },
           }
-        }
-      } : {},
+        : {},
       document: {
         getElementById: getElementById,
-        querySelectorAll: querySelectorAll
-      }
+        querySelectorAll: querySelectorAll,
+      },
     });
 
     runIifeScript("runtime/namespace.js", context);
@@ -67,7 +78,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       context,
       bridge: context.DyniPlugin.runtime.createTemporaryHostActionBridge(),
       routePointsActivate,
-      getElementById
+      getElementById,
     };
   }
 
@@ -78,17 +89,20 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       lat: 54 + index * 0.01,
       lon: 10 + index * 0.01,
       routeName: "Harbor Run",
-      selected: false
+      selected: false,
     };
     return {
       index: index,
-      pointSnapshot: Object.assign(basePoint, overrides || {})
+      pointSnapshot: Object.assign(basePoint, overrides || {}),
     };
   }
 
   it("returns a singleton hostActions facade with the documented shape", function () {
     const navRoot = makeElement({
-      __reactFiber$nav: { memoizedProps: { onItemClick: vi.fn() }, return: null }
+      __reactFiber$nav: {
+        memoizedProps: { onItemClick: vi.fn() },
+        return: null,
+      },
     });
     const { bridge } = createBridgeContext({ pageRoots: { navpage: navRoot } });
 
@@ -106,27 +120,43 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
   });
 
   it("reports page-aware capabilities for nav, gps, edit-route, and other pages", function () {
-    const nav = createBridgeContext({ pageRoots: { navpage: makeElement() } }).bridge.getHostActions().getCapabilities();
-    const gps = createBridgeContext({ pageRoots: { gpspage: makeElement() } }).bridge.getHostActions().getCapabilities();
+    const nav = createBridgeContext({ pageRoots: { navpage: makeElement() } })
+      .bridge.getHostActions()
+      .getCapabilities();
+    const gps = createBridgeContext({ pageRoots: { gpspage: makeElement() } })
+      .bridge.getHostActions()
+      .getCapabilities();
     const editRoute = createBridgeContext({
       pageRoots: {
         editroutepage: makeElement({
-          __reactFiber$edit: { memoizedProps: { widgetClick: vi.fn() }, return: null }
-        })
-      }
-    }).bridge.getHostActions().getCapabilities();
+          __reactFiber$edit: {
+            memoizedProps: { widgetClick: vi.fn() },
+            return: null,
+          },
+        }),
+      },
+    })
+      .bridge.getHostActions()
+      .getCapabilities();
     const editRouteNoParity = createBridgeContext({
-      pageRoots: { editroutepage: makeElement() }
-    }).bridge.getHostActions().getCapabilities();
-    const other = createBridgeContext({ pageRoots: {} }).bridge.getHostActions().getCapabilities();
+      pageRoots: { editroutepage: makeElement() },
+    })
+      .bridge.getHostActions()
+      .getCapabilities();
+    const other = createBridgeContext({ pageRoots: {} })
+      .bridge.getHostActions()
+      .getCapabilities();
 
     expect(nav).toEqual({
       pageId: "navpage",
       routePoints: { activate: "unsupported" },
       map: { checkAutoZoom: "dispatch" },
-      routeEditor: { openActiveRoute: "dispatch", openEditRoute: "unsupported" },
+      routeEditor: {
+        openActiveRoute: "dispatch",
+        openEditRoute: "unsupported",
+      },
       ais: { showInfo: "dispatch" },
-      alarm: { stopAll: "unsupported" }
+      alarm: { stopAll: "unsupported" },
     });
     expect(gps).toEqual({
       pageId: "gpspage",
@@ -134,24 +164,30 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       map: { checkAutoZoom: "unsupported" },
       routeEditor: { openActiveRoute: "passive", openEditRoute: "unsupported" },
       ais: { showInfo: "dispatch" },
-      alarm: { stopAll: "unsupported" }
+      alarm: { stopAll: "unsupported" },
     });
     expect(editRoute).toEqual({
       pageId: "editroutepage",
       routePoints: { activate: "dispatch" },
       map: { checkAutoZoom: "unsupported" },
-      routeEditor: { openActiveRoute: "unsupported", openEditRoute: "dispatch" },
+      routeEditor: {
+        openActiveRoute: "unsupported",
+        openEditRoute: "dispatch",
+      },
       ais: { showInfo: "unsupported" },
-      alarm: { stopAll: "unsupported" }
+      alarm: { stopAll: "unsupported" },
     });
     expect(editRouteNoParity.routePoints.activate).toBe("unsupported");
     expect(other).toEqual({
       pageId: "other",
       routePoints: { activate: "unsupported" },
       map: { checkAutoZoom: "unsupported" },
-      routeEditor: { openActiveRoute: "unsupported", openEditRoute: "unsupported" },
+      routeEditor: {
+        openActiveRoute: "unsupported",
+        openEditRoute: "unsupported",
+      },
       ais: { showInfo: "unsupported" },
-      alarm: { stopAll: "unsupported" }
+      alarm: { stopAll: "unsupported" },
     });
   });
 
@@ -186,8 +222,11 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     const gpsHandler = vi.fn();
     const pageRoots = {
       navpage: makeElement({
-        __reactFiber$nav: { memoizedProps: { onItemClick: navHandler }, return: null }
-      })
+        __reactFiber$nav: {
+          memoizedProps: { onItemClick: navHandler },
+          return: null,
+        },
+      }),
     };
     const { bridge } = createBridgeContext({ pageRoots: pageRoots });
     const hostActions = bridge.getHostActions();
@@ -198,7 +237,10 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
 
     delete pageRoots.navpage;
     pageRoots.gpspage = makeElement({
-      __reactFiber$gps: { memoizedProps: { onItemClick: gpsHandler }, return: null }
+      __reactFiber$gps: {
+        memoizedProps: { onItemClick: gpsHandler },
+        return: null,
+      },
     });
 
     const gpsCapabilities = hostActions.getCapabilities();
@@ -214,9 +256,14 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
   it("resolves capabilities once per dispatch path instead of recomputing twice", function () {
     const navHandler = vi.fn();
     const navRoot = makeElement({
-      __reactFiber$nav: { memoizedProps: { onItemClick: navHandler }, return: null }
+      __reactFiber$nav: {
+        memoizedProps: { onItemClick: navHandler },
+        return: null,
+      },
     });
-    const { bridge, getElementById } = createBridgeContext({ pageRoots: { navpage: navRoot } });
+    const { bridge, getElementById } = createBridgeContext({
+      pageRoots: { navpage: navRoot },
+    });
 
     getElementById.mockClear();
     expect(bridge.getHostActions().map.checkAutoZoom()).toBe(true);
@@ -225,7 +272,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       "editroutepage",
       "gpspage",
       "navpage",
-      "navpage"
+      "navpage",
     ]);
   });
 
@@ -233,279 +280,22 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     const routePointsActivate = vi.fn(() => true);
     const { bridge } = createBridgeContext({
       pageRoots: { gpspage: makeElement() },
-      routePointsActivate
+      routePointsActivate,
     });
 
-    expect(bridge.getHostActions().routePoints.activate(makeRoutePointPayload(3))).toBe(true);
+    expect(
+      bridge.getHostActions().routePoints.activate(makeRoutePointPayload(3)),
+    ).toBe(true);
     expect(routePointsActivate).toHaveBeenCalledWith(3);
 
     const unsupported = createBridgeContext({
-      pageRoots: { navpage: makeElement() }
+      pageRoots: { navpage: makeElement() },
     }).bridge;
-    expect(unsupported.getHostActions().routePoints.activate(makeRoutePointPayload(1))).toBe(false);
+    expect(
+      unsupported
+        .getHostActions()
+        .routePoints.activate(makeRoutePointPayload(1)),
+    ).toBe(false);
   });
 
-  it("rejects missing or blank route-point indexes instead of coercing to zero", function () {
-    const routePointsActivate = vi.fn(() => true);
-    const { bridge } = createBridgeContext({
-      pageRoots: { gpspage: makeElement() },
-      routePointsActivate
-    });
-    const hostActions = bridge.getHostActions();
-
-    [null, undefined, "", "   "].forEach(function (value) {
-      expect(function () {
-        hostActions.routePoints.activate({
-          index: value,
-          pointSnapshot: {
-            idx: 1,
-            lat: 54.1,
-            lon: 10.1,
-            routeName: "Harbor Run"
-          }
-        });
-      }).toThrow(/TemporaryHostActionBridge: routePoints\.activate requires a non-negative integer index/);
-    });
-    expect(routePointsActivate).not.toHaveBeenCalled();
-  });
-
-  it("resolves routePoints from the captured DyniPlugin.avnavApi when the wrapper global is absent", function () {
-    const routePointsActivate = vi.fn(() => true);
-    const { bridge } = createBridgeContext({
-      includeGlobalApi: false,
-      hostApi: {
-        routePoints: {
-          activate: routePointsActivate
-        }
-      },
-      pageRoots: { gpspage: makeElement() }
-    });
-
-    expect(bridge.getHostActions().routePoints.activate(makeRoutePointPayload(4))).toBe(true);
-    expect(routePointsActivate).toHaveBeenCalledWith(4);
-  });
-
-  it("rejects null/blank route-point coordinates on editroutepage", function () {
-    const editHandler = vi.fn();
-    const editRoot = makeElement({
-      __reactFiber$edit: { memoizedProps: { onItemClick: editHandler }, return: null }
-    });
-    const { bridge } = createBridgeContext({ pageRoots: { editroutepage: editRoot } });
-    const hostActions = bridge.getHostActions();
-
-    expect(function () {
-      hostActions.routePoints.activate(makeRoutePointPayload(3, { lat: null }));
-    }).toThrow(/TemporaryHostActionBridge: routePoints\.activate requires finite pointSnapshot\.lat\/lon on editroutepage/);
-    expect(function () {
-      hostActions.routePoints.activate(makeRoutePointPayload(3, { lon: "   " }));
-    }).toThrow(/TemporaryHostActionBridge: routePoints\.activate requires finite pointSnapshot\.lat\/lon on editroutepage/);
-    expect(editHandler).not.toHaveBeenCalled();
-  });
-
-  it("does not coerce blank optional course/distance fields in editroute payloads", function () {
-    const editHandler = vi.fn();
-    const editRoot = makeElement({
-      __reactFiber$edit: { memoizedProps: { onItemClick: editHandler }, return: null }
-    });
-    const { bridge } = createBridgeContext({ pageRoots: { editroutepage: editRoot } });
-    const hostActions = bridge.getHostActions();
-
-    expect(hostActions.routePoints.activate(makeRoutePointPayload(5, {
-      course: "",
-      distance: "   "
-    }))).toBe(true);
-
-    expect(editHandler).toHaveBeenCalledTimes(1);
-    expect(editHandler.mock.calls[0][0].avnav.point).toEqual({
-      idx: 5,
-      name: "WP5",
-      lat: 54.05,
-      lon: 10.05,
-      routeName: "Harbor Run",
-      selected: false
-    });
-  });
-
-  it("throws explicit errors when a dispatch-capable gps routePoints relay path fails", function () {
-    const { bridge } = createBridgeContext({
-      pageRoots: { gpspage: makeElement() },
-      routePointsActivate: vi.fn(() => false)
-    });
-
-    expect(function () {
-      bridge.getHostActions().routePoints.activate(makeRoutePointPayload(2));
-    }).toThrow(/TemporaryHostActionBridge: routePoints\.activate returned false/);
-  });
-
-  it("dispatches map, route-editor, and ais actions through page onItemClick handlers", function () {
-    const navHandler = vi.fn();
-    const gpsHandler = vi.fn();
-    const editHandler = vi.fn();
-    const navRoot = makeElement({
-      __reactFiber$nav: { memoizedProps: { onItemClick: navHandler }, return: null }
-    });
-    const gpsContainer = makeElement({
-      __reactFiber$gps: { memoizedProps: { onItemClick: gpsHandler }, return: null }
-    });
-    const gpsRoot = makeElement({
-      querySelectorAll() {
-        return [gpsContainer];
-      }
-    });
-    const editRoot = makeElement({
-      __reactFiber$edit: { memoizedProps: { onItemClick: editHandler }, return: null }
-    });
-
-    const navBridge = createBridgeContext({ pageRoots: { navpage: navRoot } }).bridge;
-    const gpsBridge = createBridgeContext({ pageRoots: { gpspage: gpsRoot } }).bridge;
-    const editRelay = vi.fn(() => true);
-    const editBridgeContext = createBridgeContext({
-      pageRoots: { editroutepage: editRoot },
-      routePointsActivate: editRelay
-    });
-    const editBridge = editBridgeContext.bridge;
-
-    expect(navBridge.getHostActions().map.checkAutoZoom()).toBe(true);
-    expect(navBridge.getHostActions().routeEditor.openActiveRoute()).toBe(true);
-    expect(gpsBridge.getHostActions().ais.showInfo("123456789")).toBe(true);
-    expect(editBridge.getHostActions().routeEditor.openEditRoute()).toBe(true);
-    expect(editBridge.getHostActions().routePoints.activate(makeRoutePointPayload(7, { selected: true }))).toBe(true);
-
-    expect(navHandler.mock.calls[0][0].avnav).toEqual({ item: { name: "Zoom" } });
-    expect(navHandler.mock.calls[1][0].avnav).toEqual({ item: { name: "ActiveRoute" } });
-    expect(gpsHandler.mock.calls[0][0].avnav).toEqual({ item: { name: "AisTarget" }, mmsi: "123456789" });
-    expect(editHandler.mock.calls[0][0].avnav).toEqual({ item: { name: "EditRoute" } });
-    expect(editHandler.mock.calls[1][0].avnav).toEqual({
-      item: { name: "RoutePoints" },
-      point: { idx: 7, name: "WP7", lat: 54.07, lon: 10.07, routeName: "Harbor Run", selected: true }
-    });
-    expect(editRelay).not.toHaveBeenCalled();
-  });
-
-  it("discovers alarm dispatch on any visible page with a mounted native alarm widget", function () {
-    const alarmClick = vi.fn();
-    const alarmWidget = makeElement({
-      className: "alarmWidget",
-      __reactFiber$alarm: { memoizedProps: { onClick: alarmClick }, return: null }
-    });
-    const { bridge } = createBridgeContext({
-      pageRoots: {},
-      alarmWidgetRoots: [alarmWidget]
-    });
-    const hostActions = bridge.getHostActions();
-
-    expect(hostActions.getCapabilities()).toEqual({
-      pageId: "other",
-      routePoints: { activate: "unsupported" },
-      map: { checkAutoZoom: "unsupported" },
-      routeEditor: { openActiveRoute: "unsupported", openEditRoute: "unsupported" },
-      ais: { showInfo: "unsupported" },
-      alarm: { stopAll: "dispatch" }
-    });
-    expect(hostActions.alarm.stopAll()).toBe(true);
-    expect(alarmClick).toHaveBeenCalledTimes(1);
-  });
-
-  it("ignores dyn alarm roots when discovering native alarm dispatch", function () {
-    const dynAlarmClick = vi.fn();
-    const dynAlarmRoot = makeElement({
-      className: "dyni-alarm-root",
-      __reactFiber$dynAlarm: { memoizedProps: { onClick: dynAlarmClick }, return: null }
-    });
-    const { bridge } = createBridgeContext({
-      pageRoots: {},
-      alarmWidgetRoots: [dynAlarmRoot]
-    });
-    const hostActions = bridge.getHostActions();
-
-    expect(hostActions.getCapabilities().alarm.stopAll).toBe("unsupported");
-    expect(hostActions.alarm.stopAll()).toBe(false);
-    expect(dynAlarmClick).toHaveBeenCalledTimes(0);
-  });
-
-  it("keeps alarm stop-all unsupported and non-throwing when no native alarm widget is mounted", function () {
-    const { bridge } = createBridgeContext({
-      pageRoots: {},
-      alarmWidgetRoots: []
-    });
-    const hostActions = bridge.getHostActions();
-    let result = null;
-
-    expect(hostActions.getCapabilities().alarm.stopAll).toBe("unsupported");
-    expect(function () {
-      result = hostActions.alarm.stopAll();
-    }).not.toThrow();
-    expect(result).toBe(false);
-  });
-
-  it("throws when alarm dispatch capability disappears before invocation", function () {
-    const alarmClick = vi.fn();
-    const alarmWidget = makeElement({
-      className: "alarmWidget",
-      __reactFiber$alarm: { memoizedProps: { onClick: alarmClick }, return: null }
-    });
-    const { bridge, context } = createBridgeContext({
-      pageRoots: {},
-      alarmWidgetRoots: [alarmWidget]
-    });
-    const hostActions = bridge.getHostActions();
-
-    expect(hostActions.getCapabilities().alarm.stopAll).toBe("dispatch");
-    context.document.querySelectorAll.mockReturnValue([]);
-
-    expect(function () {
-      hostActions.alarm.stopAll();
-    }).toThrow(/TemporaryHostActionBridge: alarm\.stopAll missing native \.alarmWidget click path/);
-  });
-
-  it("fails closed on editroutepage when parity dispatch was granted but handler disappears", function () {
-    const editRoot = makeElement({
-      __reactFiber$edit: { memoizedProps: { widgetClick: vi.fn() }, return: null }
-    });
-    const { bridge } = createBridgeContext({ pageRoots: { editroutepage: editRoot } });
-    const hostActions = bridge.getHostActions();
-
-    expect(hostActions.getCapabilities().routePoints.activate).toBe("dispatch");
-    delete editRoot.__reactFiber$edit;
-
-    expect(function () {
-      hostActions.routePoints.activate(makeRoutePointPayload(1));
-    }).toThrow(/TemporaryHostActionBridge: routePoints\.activate parity dispatch unavailable on editroutepage/);
-  });
-
-  it("returns false for passive or unsupported action modes before dispatch", function () {
-    const gpsBridge = createBridgeContext({ pageRoots: { gpspage: makeElement() } }).bridge;
-    const otherBridge = createBridgeContext({ pageRoots: {} }).bridge;
-
-    expect(gpsBridge.getHostActions().map.checkAutoZoom()).toBe(false);
-    expect(gpsBridge.getHostActions().routeEditor.openActiveRoute()).toBe(false);
-    expect(otherBridge.getHostActions().ais.showInfo("123")).toBe(false);
-  });
-
-  it("throws explicit errors when a dispatch-capable page handler is missing", function () {
-    const { bridge } = createBridgeContext({
-      pageRoots: { navpage: makeElement() }
-    });
-
-    expect(function () {
-      bridge.getHostActions().routeEditor.openActiveRoute();
-    }).toThrow(/TemporaryHostActionBridge: routeEditor\.openActiveRoute missing host onItemClick handler/);
-  });
-
-  it("invalidates the facade after destroy", function () {
-    const root = makeElement({
-      __reactFiber$nav: { memoizedProps: { onItemClick: vi.fn() }, return: null }
-    });
-    const { bridge } = createBridgeContext({ pageRoots: { navpage: root } });
-    const hostActions = bridge.getHostActions();
-
-    bridge.destroy();
-
-    expect(function () {
-      bridge.getHostActions();
-    }).toThrow(/TemporaryHostActionBridge: bridge was destroyed/);
-    expect(function () {
-      hostActions.getCapabilities();
-    }).toThrow(/TemporaryHostActionBridge: bridge was destroyed/);
-  });
 });

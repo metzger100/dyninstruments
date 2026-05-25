@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetHtmlFit = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetHtmlFit = factory();
+  }
 }(this, function () {
   "use strict";
 

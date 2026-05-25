@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniFullCircleRadialTextLayout = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniFullCircleRadialTextLayout = factory();
+  }
 }(this, function () {
   "use strict";
 
@@ -184,7 +186,12 @@
   function drawSingleCompactCenterRow(state, display) {
     const normal = state.layout && state.layout.normal;
     const box = normal && normal.compactCenterHeight
-      ? { x: state.layout.contentRect.x, y: state.layout.contentRect.y, w: state.layout.contentRect.w, h: normal.compactCenterHeight }
+      ? {
+        x: state.layout.contentRect.x,
+        y: state.layout.contentRect.y,
+        w: state.layout.contentRect.w,
+        h: normal.compactCenterHeight
+      }
       : null;
     if (!box || box.w <= 0 || box.h <= 0) {
       return;
@@ -291,7 +298,12 @@
       const sizes = measureBlockSizes(state, display, boxWidth, blockHeight);
       const score = scoreSingleCandidate(display, sizes, boxWidth, blockHeight);
       if (!best || score > best.score) {
-        best = { blockHeight: blockHeight, boxWidth: boxWidth, score: score, sizes: sizes };
+        best = {
+          blockHeight: blockHeight,
+          boxWidth: boxWidth,
+          score: score,
+          sizes: sizes
+        };
       }
     }
 
@@ -332,7 +344,13 @@
       const rightSizes = measureBlockSizes(state, right, halfWidth, blockHeight);
       const score = scoreDualCandidate(left, right, leftSizes, rightSizes, halfWidth, blockHeight);
       if (!best || score > best.score) {
-        best = { blockHeight: blockHeight, halfWidth: halfWidth, score: score, leftSizes: leftSizes, rightSizes: rightSizes };
+        best = {
+          blockHeight: blockHeight,
+          halfWidth: halfWidth,
+          score: score,
+          leftSizes: leftSizes,
+          rightSizes: rightSizes
+        };
       }
     }
 

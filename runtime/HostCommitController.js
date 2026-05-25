@@ -267,7 +267,12 @@
 
     function initState() {
       clearAsyncHandles();
-      clearPendingState({ status: "reset", waitStage: "reset", revision: state.renderRevision, instanceId: state.instanceId });
+      clearPendingState({
+        status: "reset",
+        waitStage: "reset",
+        revision: state.renderRevision,
+        instanceId: state.instanceId
+      });
       state = createState(nextInstanceId(instancePrefix));
       markStateSnapshotDirty();
       return getState();

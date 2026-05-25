@@ -1,306 +1,41 @@
-const { loadFresh } = require("../../helpers/load-umd");
-const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const {
+  createHarness,
+  createMockCanvas,
+  createMockContext2D,
+} = require("./XteDisplayWidget.harness.js");
+const {
+  makeProps,
+  fillTextValues,
+} = require("./XteDisplayWidget.test-model.js");
 
 describe("XteDisplayWidget", function () {
-  function createHarness(options) {
-    const opts = options || {};
-    const distanceDivisor = Number.isFinite(opts.distanceDivisor) ? opts.distanceDivisor : 1;
-    const calls = {
-      staticDraws: [],
-      dynamicDraws: [],
-      modeHistory: [],
-      layoutHistory: [],
-      overlays: 0,
-      valueRows: [],
-      captionRows: [],
-      waypointChecks: [],
-      waypointTextFillScales: [],
-      metricTextFillScales: []
-    };
-
-    const defaultTheme = {
-      surface: {
-        fg: "#ffffff"
-      },
-      colors: {
-        pointer: "#aa0011",
-        laylineStb: "#00aa66",
-        laylinePort: "#cc4466",
-        warning: "#ccaa33",
-        alarm: "#ff3344"
-      },
-      font: {
-        family: "sans-serif",
-        weight: 720,
-        labelWeight: 640
-      },
-      strokeWeight: 1,
-      pointerDepthWeight: 1
-    };
-    const themeOverrides = opts.theme || {};
-    const theme = {
-      surface: Object.assign({}, defaultTheme.surface, themeOverrides.surface || {}),
-      colors: Object.assign({}, defaultTheme.colors, themeOverrides.colors || {}),
-      font: Object.assign({}, defaultTheme.font, themeOverrides.font || {}),
-      strokeWeight: Object.prototype.hasOwnProperty.call(themeOverrides, "strokeWeight")
-        ? themeOverrides.strokeWeight
-        : defaultTheme.strokeWeight,
-      pointerDepthWeight: Object.prototype.hasOwnProperty.call(themeOverrides, "pointerDepthWeight")
-        ? themeOverrides.pointerDepthWeight
-        : defaultTheme.pointerDepthWeight
-    };
-
-    const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
-    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
-    const realPrimitives = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js").create({}, createComponentContextMock({
-      modules: {
-        GeometryScale: geometryScale
-      }
-    }));
-    const realLayout = loadFresh("shared/widget-kits/xte/XteHighwayLayout.js").create({}, createComponentContextMock({
-      modules: {
-        ResponsiveScaleProfile: responsiveScaleProfile,
-        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
-      }
-    }));
-    const realTileLayout = loadFresh("shared/widget-kits/text/TextTileLayout.js").create();
-    const textTileLayout = {
-      id: "TextTileLayout",
-      measureMetricTile(args) {
-        if (typeof (args && args.textFillScale) === "number" && isFinite(args.textFillScale)) {
-          calls.metricTextFillScales.push(args.textFillScale);
-        }
-        return realTileLayout.measureMetricTile(args);
-      },
-      drawMetricTile(args) {
-        if (typeof (args && args.textFillScale) === "number" && isFinite(args.textFillScale)) {
-          calls.metricTextFillScales.push(args.textFillScale);
-        }
-        return realTileLayout.drawMetricTile(args);
-      },
-      measureFittedLine(args) {
-        if (typeof (args && args.textFillScale) === "number" && isFinite(args.textFillScale)) {
-          calls.waypointTextFillScales.push(args.textFillScale);
-        }
-        return realTileLayout.measureFittedLine(args);
-      },
-      drawFittedLine(args) {
-        return realTileLayout.drawFittedLine(args);
-      }
-    };
-
-    const applyFormatter = typeof opts.applyFormatter === "function"
-      ? opts.applyFormatter
-      : function (value, formatterOptions) {
-        if (formatterOptions.formatter === "formatDistance") {
-          if (typeof value !== "number" || !isFinite(value)) {
-            return "---";
-          }
-          return (value / distanceDivisor).toFixed(2);
-        }
-        if (formatterOptions.formatter === "formatDirection360") {
-          if (typeof value !== "number" || !isFinite(value)) {
-            return "---";
-          }
-          const rounded = ((Math.round(value) % 360) + 360) % 360;
-          const leading = !!(formatterOptions.formatterParameters && formatterOptions.formatterParameters[0]);
-          return leading ? String(rounded).padStart(3, "0") : String(rounded);
-        }
-        return String(value);
-      };
-
-    const spec = loadFresh("widgets/text/XteDisplayWidget/XteDisplayWidget.js").create({}, createComponentContextMock({
-      modules: {
-        CanvasLayerCache: layerCache,
-        GaugeToolkit: {
-          create() {
-            return {
-              theme: {
-                resolveForRoot() {
-                  return theme;
-                }
-              },
-              value: {
-                isFiniteNumber(value) {
-                  return typeof value === "number" && isFinite(value);
-                },
-                computePad(W, H) {
-                  return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
-                },
-                computeGap(W, H) {
-                  return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
-                },
-                computeMode(ratio, thresholdNormal, thresholdFlat) {
-                  if (ratio < thresholdNormal) return "high";
-                  if (ratio > thresholdFlat) return "flat";
-                  return "normal";
-                }
-              },
-              text: {
-                drawDisconnectOverlay() {
-                  calls.overlays += 1;
-                },
-                fitSingleTextPx() {
-                  return 12;
-                },
-                setFont(ctx, px, weight, family) {
-                  ctx.font = weight + " " + px + "px " + family;
-                },
-                measureTextWidth(ctx, text) {
-                  return ctx.measureText(String(text || "")).width;
-                },
-                drawCaptionMax(ctx, family, x, y, w, h, caption) {
-                  calls.captionRows.push({ caption: String(caption), w, h });
-                },
-                measureValueUnitFit() {
-                  return { vPx: 12, uPx: 10, gap: 6, total: 0 };
-                },
-                drawValueUnitWithFit(ctx, family, x, y, w, h, value, unit) {
-                  calls.valueRows.push({ value: String(value), unit: String(unit || ""), w, h });
-                }
-              }
-            };
-          }
-        },
-        XteHighwayPrimitives: {
-          create() {
-            return {
-              highwayGeometry: realPrimitives.highwayGeometry,
-              drawStaticHighway(ctx, geom, colors, mode, primaryDim, strokeWeight) {
-                calls.staticDraws.push({ colors, mode, geom, primaryDim, strokeWeight });
-              },
-              drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, primaryDim, strokeWeight, pointerDepthWeight) {
-                calls.dynamicDraws.push({ colors, xteNormalized, overflow, geom, primaryDim, strokeWeight, pointerDepthWeight });
-              },
-              shouldShowWaypoint(mode, layout, showWpName, name, fit) {
-                const result = realPrimitives.shouldShowWaypoint(mode, layout, showWpName, name, fit);
-                calls.waypointChecks.push({ mode, showWpName, name, result, rect: layout && layout.nameRect, fit });
-                return result;
-              }
-            };
-          }
-        },
-        XteHighwayLayout: {
-          create() {
-            return {
-              id: "XteHighwayLayout",
-              computeMode(W, H, thresholdNormal, thresholdFlat) {
-                const mode = realLayout.computeMode(W, H, thresholdNormal, thresholdFlat);
-                calls.modeHistory.push(mode);
-                return mode;
-              },
-              computeInsets: realLayout.computeInsets,
-              createContentRect: realLayout.createContentRect,
-              computeLayout(args) {
-                const layout = realLayout.computeLayout(args);
-                calls.layoutHistory.push(layout);
-                return layout;
-              },
-              computeMetricTileSpacing: realLayout.computeMetricTileSpacing
-            };
-          }
-        },
-        TextTileLayout: textTileLayout,
-        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
-        UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
-        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-        SpringEasing: loadFresh("shared/widget-kits/anim/SpringEasing.js"),
-        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
-        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
-        StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js")
-      },
-      services: {
-        format: { applyFormatter },
-        canvas: {
-          setupCanvas(canvas) {
-            const ctx = canvas.getContext("2d");
-            const rect = canvas.getBoundingClientRect();
-            return { ctx, W: Math.round(rect.width), H: Math.round(rect.height) };
-          }
-        },
-        dom: {
-          requirePluginRoot(target) {
-            return target;
-          }
-        }
-      }
-    }));
-
-    return { spec, calls, theme };
-  }
-
-  function makeProps(overrides) {
-    const opts = overrides || {};
-    const base = {
-      display: {
-        xte: 0.25,
-        cog: 93,
-        dtw: 0.72,
-        btw: 92,
-        wpName: "Fairway Buoy",
-        disconnect: false
-      },
-      captions: {
-        xte: "XTE",
-        track: "COG",
-        dtw: "DST",
-        brg: "BRG"
-      },
-      units: {
-        xte: "nm",
-        track: "°",
-        dtw: "nm",
-        brg: "°"
-      },
-      formatUnits: {
-        xte: "nm",
-        dtw: "nm"
-      },
-      layout: {
-        leadingZero: true,
-        showWpName: true,
-        hideTextualMetrics: false,
-        easing: true,
-        xteRatioThresholdNormal: 0.85,
-        xteRatioThresholdFlat: 2.3
-      },
-      stableDigits: false
-    };
-    const out = Object.assign({}, base, opts);
-    out.display = Object.assign({}, base.display, opts.display || {});
-    out.captions = Object.assign({}, base.captions, opts.captions || {});
-    out.units = Object.assign({}, base.units, opts.units || {});
-    out.formatUnits = Object.assign({}, base.formatUnits, opts.formatUnits || {});
-    out.layout = Object.assign({}, base.layout, opts.layout || {});
-    if (Object.prototype.hasOwnProperty.call(opts, "xte")) out.display.xte = opts.xte;
-    if (Object.prototype.hasOwnProperty.call(opts, "cog")) out.display.cog = opts.cog;
-    if (Object.prototype.hasOwnProperty.call(opts, "dtw")) out.display.dtw = opts.dtw;
-    if (Object.prototype.hasOwnProperty.call(opts, "btw")) out.display.btw = opts.btw;
-    if (Object.prototype.hasOwnProperty.call(opts, "wpName")) out.display.wpName = opts.wpName;
-    if (Object.prototype.hasOwnProperty.call(opts, "disconnect")) out.display.disconnect = opts.disconnect;
-    if (Object.prototype.hasOwnProperty.call(opts, "leadingZero")) out.layout.leadingZero = opts.leadingZero;
-    if (Object.prototype.hasOwnProperty.call(opts, "showWpName")) out.layout.showWpName = opts.showWpName;
-    if (Object.prototype.hasOwnProperty.call(opts, "hideTextualMetrics")) out.layout.hideTextualMetrics = opts.hideTextualMetrics;
-    if (Object.prototype.hasOwnProperty.call(opts, "easing")) out.layout.easing = opts.easing;
-    if (Object.prototype.hasOwnProperty.call(opts, "xteRatioThresholdNormal")) out.layout.xteRatioThresholdNormal = opts.xteRatioThresholdNormal;
-    if (Object.prototype.hasOwnProperty.call(opts, "xteRatioThresholdFlat")) out.layout.xteRatioThresholdFlat = opts.xteRatioThresholdFlat;
-    return out;
-  }
-
-  function fillTextValues(ctx) {
-    return ctx.calls
-      .filter((entry) => entry.name === "fillText")
-      .map((entry) => String(entry.args[0]));
-  }
-
   it("selects flat/normal/high modes from aspect ratio", function () {
     const harness = createHarness();
 
-    harness.spec.renderCanvas(createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() }), makeProps());
-    harness.spec.renderCanvas(createMockCanvas({ rectWidth: 220, rectHeight: 220, ctx: createMockContext2D() }), makeProps());
-    harness.spec.renderCanvas(createMockCanvas({ rectWidth: 120, rectHeight: 300, ctx: createMockContext2D() }), makeProps());
+    harness.spec.renderCanvas(
+      createMockCanvas({
+        rectWidth: 480,
+        rectHeight: 120,
+        ctx: createMockContext2D(),
+      }),
+      makeProps(),
+    );
+    harness.spec.renderCanvas(
+      createMockCanvas({
+        rectWidth: 220,
+        rectHeight: 220,
+        ctx: createMockContext2D(),
+      }),
+      makeProps(),
+    );
+    harness.spec.renderCanvas(
+      createMockCanvas({
+        rectWidth: 120,
+        rectHeight: 300,
+        ctx: createMockContext2D(),
+      }),
+      makeProps(),
+    );
 
     expect(harness.calls.modeHistory[0]).toBe("flat");
     expect(harness.calls.modeHistory[1]).toBe("normal");
@@ -309,20 +44,35 @@ describe("XteDisplayWidget", function () {
 
   it("passes shared theme weights and colors into static and dynamic highway calls", function () {
     const harness = createHarness();
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+    const canvas = createMockCanvas({
+      rectWidth: 320,
+      rectHeight: 180,
+      ctx: createMockContext2D(),
+    });
 
     harness.spec.renderCanvas(canvas, makeProps());
     const layout = harness.calls.layoutHistory[0];
-    const expectedPrimaryDim = Math.max(1, Math.min(layout.highway.w, layout.highway.h));
+    const expectedPrimaryDim = Math.max(
+      1,
+      Math.min(layout.highway.w, layout.highway.h),
+    );
 
-    expect(harness.calls.staticDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
-    expect(harness.calls.staticDraws[0].colors.alarm).toBe(harness.theme.colors.alarm);
+    expect(harness.calls.staticDraws[0].colors.pointer).toBe(
+      harness.theme.colors.pointer,
+    );
+    expect(harness.calls.staticDraws[0].colors.alarm).toBe(
+      harness.theme.colors.alarm,
+    );
     expect(harness.calls.staticDraws[0].colors.roadLine).toBe("#ffffff");
     expect(harness.calls.staticDraws[0].colors.stripeLine).toBe("#ffffff");
     expect(harness.calls.staticDraws[0].primaryDim).toBe(expectedPrimaryDim);
     expect(harness.calls.staticDraws[0].strokeWeight).toBe(1);
-    expect(harness.calls.dynamicDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
-    expect(harness.calls.dynamicDraws[0].colors.alarm).toBe(harness.theme.colors.alarm);
+    expect(harness.calls.dynamicDraws[0].colors.pointer).toBe(
+      harness.theme.colors.pointer,
+    );
+    expect(harness.calls.dynamicDraws[0].colors.alarm).toBe(
+      harness.theme.colors.alarm,
+    );
     expect(harness.calls.dynamicDraws[0].primaryDim).toBe(expectedPrimaryDim);
     expect(harness.calls.dynamicDraws[0].strokeWeight).toBe(1);
     expect(harness.calls.dynamicDraws[0].pointerDepthWeight).toBe(1);
@@ -332,14 +82,20 @@ describe("XteDisplayWidget", function () {
     const harness = createHarness({
       theme: {
         strokeWeight: 1.7,
-        pointerDepthWeight: 1.35
-      }
+        pointerDepthWeight: 1.35,
+      },
     });
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+    const canvas = createMockCanvas({
+      rectWidth: 320,
+      rectHeight: 180,
+      ctx: createMockContext2D(),
+    });
 
     harness.spec.renderCanvas(canvas, makeProps());
 
-    expect(harness.calls.staticDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
+    expect(harness.calls.staticDraws[0].colors.pointer).toBe(
+      harness.theme.colors.pointer,
+    );
     expect(harness.calls.staticDraws[0].colors.roadLine).toBe("#ffffff");
     expect(harness.calls.staticDraws[0].colors.stripeLine).toBe("#ffffff");
     expect(harness.calls.staticDraws[0].strokeWeight).toBe(1.7);
@@ -351,14 +107,20 @@ describe("XteDisplayWidget", function () {
     const harness = createHarness({
       theme: {
         strokeWeight: 0,
-        pointerDepthWeight: -2
-      }
+        pointerDepthWeight: -2,
+      },
     });
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
+    const canvas = createMockCanvas({
+      rectWidth: 320,
+      rectHeight: 180,
+      ctx: createMockContext2D(),
+    });
 
     harness.spec.renderCanvas(canvas, makeProps());
 
-    expect(harness.calls.staticDraws[0].colors.pointer).toBe(harness.theme.colors.pointer);
+    expect(harness.calls.staticDraws[0].colors.pointer).toBe(
+      harness.theme.colors.pointer,
+    );
     expect(harness.calls.staticDraws[0].colors.roadLine).toBe("#ffffff");
     expect(harness.calls.staticDraws[0].colors.stripeLine).toBe("#ffffff");
     expect(harness.calls.staticDraws[0].strokeWeight).toBe(0);
@@ -369,39 +131,70 @@ describe("XteDisplayWidget", function () {
   it("hides waypoint name before core metrics in constrained layouts", function () {
     const harness = createHarness();
     const narrowCtx = createMockContext2D();
-    const narrowCanvas = createMockCanvas({ rectWidth: 160, rectHeight: 80, ctx: narrowCtx });
+    const narrowCanvas = createMockCanvas({
+      rectWidth: 160,
+      rectHeight: 80,
+      ctx: narrowCtx,
+    });
 
     harness.spec.renderCanvas(narrowCanvas, makeProps({ showWpName: true }));
 
-    const fillTexts = narrowCtx.calls.filter((entry) => entry.name === "fillText");
+    const fillTexts = narrowCtx.calls.filter(
+      (entry) => entry.name === "fillText",
+    );
     expect(fillTexts).toHaveLength(0);
     expect(harness.calls.valueRows).toHaveLength(4);
-    expect(harness.calls.waypointChecks[harness.calls.waypointChecks.length - 1].result).toBe(false);
+    expect(
+      harness.calls.waypointChecks[harness.calls.waypointChecks.length - 1]
+        .result,
+    ).toBe(false);
   });
 
   it("reuses header space for metric rows in flat mode when waypoint name is disabled", function () {
     const harness = createHarness();
-    const wideCanvasA = createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() });
-    const wideCanvasB = createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() });
+    const wideCanvasA = createMockCanvas({
+      rectWidth: 480,
+      rectHeight: 120,
+      ctx: createMockContext2D(),
+    });
+    const wideCanvasB = createMockCanvas({
+      rectWidth: 480,
+      rectHeight: 120,
+      ctx: createMockContext2D(),
+    });
 
-    harness.spec.renderCanvas(wideCanvasA, makeProps({ showWpName: true, wpName: "Fairway Buoy" }));
-    harness.spec.renderCanvas(wideCanvasB, makeProps({ showWpName: false, wpName: "Fairway Buoy" }));
+    harness.spec.renderCanvas(
+      wideCanvasA,
+      makeProps({ showWpName: true, wpName: "Fairway Buoy" }),
+    );
+    harness.spec.renderCanvas(
+      wideCanvasB,
+      makeProps({ showWpName: false, wpName: "Fairway Buoy" }),
+    );
 
     const layoutWithName = harness.calls.layoutHistory[0];
     const layoutWithoutName = harness.calls.layoutHistory[1];
 
     expect(layoutWithName.mode).toBe("flat");
     expect(layoutWithoutName.mode).toBe("flat");
-    expect(layoutWithoutName.metricRects.cog.y).toBeLessThan(layoutWithName.metricRects.cog.y);
-    expect(layoutWithoutName.metricRects.cog.h).toBeGreaterThan(layoutWithName.metricRects.cog.h);
+    expect(layoutWithoutName.metricRects.cog.y).toBeLessThan(
+      layoutWithName.metricRects.cog.y,
+    );
+    expect(layoutWithoutName.metricRects.cog.h).toBeGreaterThan(
+      layoutWithName.metricRects.cog.h,
+    );
   });
 
   it("uses equal two-column metric widths in high mode", function () {
     const harness = createHarness();
 
     harness.spec.renderCanvas(
-      createMockCanvas({ rectWidth: 120, rectHeight: 300, ctx: createMockContext2D() }),
-      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
+      createMockCanvas({
+        rectWidth: 120,
+        rectHeight: 300,
+        ctx: createMockContext2D(),
+      }),
+      makeProps({ showWpName: true, wpName: "Fairway Buoy" }),
     );
 
     const layout = harness.calls.layoutHistory[0];
@@ -415,28 +208,52 @@ describe("XteDisplayWidget", function () {
     const harness = createHarness();
 
     harness.spec.renderCanvas(
-      createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() }),
-      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
+      createMockCanvas({
+        rectWidth: 480,
+        rectHeight: 120,
+        ctx: createMockContext2D(),
+      }),
+      makeProps({ showWpName: true, wpName: "Fairway Buoy" }),
     );
     harness.spec.renderCanvas(
-      createMockCanvas({ rectWidth: 480, rectHeight: 120, ctx: createMockContext2D() }),
-      makeProps({ showWpName: false, wpName: "Fairway Buoy" })
+      createMockCanvas({
+        rectWidth: 480,
+        rectHeight: 120,
+        ctx: createMockContext2D(),
+      }),
+      makeProps({ showWpName: false, wpName: "Fairway Buoy" }),
     );
     harness.spec.renderCanvas(
-      createMockCanvas({ rectWidth: 220, rectHeight: 220, ctx: createMockContext2D() }),
-      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
+      createMockCanvas({
+        rectWidth: 220,
+        rectHeight: 220,
+        ctx: createMockContext2D(),
+      }),
+      makeProps({ showWpName: true, wpName: "Fairway Buoy" }),
     );
     harness.spec.renderCanvas(
-      createMockCanvas({ rectWidth: 220, rectHeight: 220, ctx: createMockContext2D() }),
-      makeProps({ showWpName: false, wpName: "Fairway Buoy" })
+      createMockCanvas({
+        rectWidth: 220,
+        rectHeight: 220,
+        ctx: createMockContext2D(),
+      }),
+      makeProps({ showWpName: false, wpName: "Fairway Buoy" }),
     );
     harness.spec.renderCanvas(
-      createMockCanvas({ rectWidth: 120, rectHeight: 300, ctx: createMockContext2D() }),
-      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
+      createMockCanvas({
+        rectWidth: 120,
+        rectHeight: 300,
+        ctx: createMockContext2D(),
+      }),
+      makeProps({ showWpName: true, wpName: "Fairway Buoy" }),
     );
     harness.spec.renderCanvas(
-      createMockCanvas({ rectWidth: 120, rectHeight: 300, ctx: createMockContext2D() }),
-      makeProps({ showWpName: false, wpName: "Fairway Buoy" })
+      createMockCanvas({
+        rectWidth: 120,
+        rectHeight: 300,
+        ctx: createMockContext2D(),
+      }),
+      makeProps({ showWpName: false, wpName: "Fairway Buoy" }),
     );
 
     const flatOn = harness.calls.staticDraws[0].geom;
@@ -453,7 +270,11 @@ describe("XteDisplayWidget", function () {
 
   it("uses fixed +/-1 XTE scale for marker normalization", function () {
     const harness = createHarness();
-    const canvas = createMockCanvas({ rectWidth: 300, rectHeight: 180, ctx: createMockContext2D() });
+    const canvas = createMockCanvas({
+      rectWidth: 300,
+      rectHeight: 180,
+      ctx: createMockContext2D(),
+    });
 
     harness.spec.renderCanvas(canvas, makeProps({ xte: 0.1, easing: false }));
     harness.spec.renderCanvas(canvas, makeProps({ xte: 1.0, easing: false }));
@@ -468,334 +289,4 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.dynamicDraws[5].xteNormalized).toBeCloseTo(0.2, 6);
   });
 
-  it("reuses static cache for stable inputs and invalidates on geometry changes", function () {
-    const harness = createHarness();
-    const canvasA = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-    const canvasB = createMockCanvas({ rectWidth: 360, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvasA, makeProps());
-    harness.spec.renderCanvas(canvasA, makeProps());
-    expect(harness.calls.staticDraws).toHaveLength(1);
-
-    harness.spec.renderCanvas(canvasB, makeProps());
-    expect(harness.calls.staticDraws).toHaveLength(2);
-  });
-
-  it("applies a DPR-aware transform when rebuilding the static layer cache", function () {
-    const harness = createHarness();
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-    canvas.width = 640;
-    canvas.height = 360;
-
-    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.25, easing: false }));
-    harness.spec.renderCanvas(canvas, makeProps({ xte: 0.4, easing: false }));
-
-    expect(harness.calls.staticDraws).toHaveLength(1);
-    expect(harness.calls.dynamicDraws).toHaveLength(2);
-
-    const drawImageCalls = canvas.__ctx.calls.filter((entry) => entry.name === "drawImage");
-    expect(drawImageCalls.length).toBeGreaterThan(0);
-    const layerCanvas = drawImageCalls[0].args[0];
-    const layerCalls = layerCanvas.__ctx.calls;
-    const layerSetTransform = layerCalls.find((entry) => entry.name === "setTransform");
-    const layerClearRect = layerCalls.find((entry) => entry.name === "clearRect");
-    const setTransformIndex = layerCalls.findIndex((entry) => entry.name === "setTransform");
-    const clearRectIndex = layerCalls.findIndex((entry) => entry.name === "clearRect");
-
-    expect(layerSetTransform.args).toEqual([2, 0, 0, 2, 0, 0]);
-    expect(layerClearRect.args).toEqual([0, 0, 320, 180]);
-    expect(setTransformIndex).toBeGreaterThanOrEqual(0);
-    expect(clearRectIndex).toBeGreaterThanOrEqual(0);
-    expect(setTransformIndex).toBeLessThan(clearRectIndex);
-  });
-
-  it("invalidates static cache when strokeWeight changes", function () {
-    const harness = createHarness({
-      theme: {
-        strokeWeight: 1
-      }
-    });
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps());
-    expect(harness.calls.staticDraws).toHaveLength(1);
-
-    harness.theme.strokeWeight = 1.8;
-    harness.spec.renderCanvas(canvas, makeProps());
-    expect(harness.calls.staticDraws).toHaveLength(2);
-  });
-
-  it("keeps the static cache when only pointerDepthWeight changes", function () {
-    const harness = createHarness({
-      theme: {
-        pointerDepthWeight: 1
-      }
-    });
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps());
-    expect(harness.calls.staticDraws).toHaveLength(1);
-    expect(harness.calls.dynamicDraws[0].pointerDepthWeight).toBe(1);
-
-    harness.theme.pointerDepthWeight = 1.6;
-    harness.spec.renderCanvas(canvas, makeProps());
-
-    expect(harness.calls.staticDraws).toHaveLength(1);
-    expect(harness.calls.dynamicDraws).toHaveLength(2);
-    expect(harness.calls.dynamicDraws[1].pointerDepthWeight).toBe(1.6);
-  });
-
-  it("keeps the static cache when only dynamic pointer/alarm colors change", function () {
-    const harness = createHarness();
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps());
-    expect(harness.calls.staticDraws).toHaveLength(1);
-    expect(harness.calls.dynamicDraws).toHaveLength(1);
-
-    harness.theme.colors.pointer = "#00ccee";
-    harness.theme.colors.alarm = "#ff1100";
-    harness.spec.renderCanvas(canvas, makeProps());
-
-    expect(harness.calls.staticDraws).toHaveLength(1);
-    expect(harness.calls.dynamicDraws).toHaveLength(2);
-    expect(harness.calls.dynamicDraws[1].colors.pointer).toBe("#00ccee");
-    expect(harness.calls.dynamicDraws[1].colors.alarm).toBe("#ff1100");
-  });
-
-  it("keeps the highway frame visible and suppresses the indicator when required values are missing", function () {
-    const harness = createHarness();
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps({ xte: undefined }));
-    expect(harness.calls.staticDraws).toHaveLength(1);
-    expect(harness.calls.dynamicDraws).toHaveLength(0);
-    expect(harness.calls.valueRows[1].value).toBe("---");
-    expect(harness.calls.valueRows[2].value).toBe("0.72");
-
-    harness.spec.renderCanvas(canvas, makeProps({ disconnect: true }));
-    expect(harness.calls.overlays).toBe(0);
-    expect(harness.calls.staticDraws).toHaveLength(1);
-    expect(harness.calls.dynamicDraws).toHaveLength(0);
-    expect(harness.calls.valueRows).toHaveLength(4);
-    expect(fillTextValues(canvas.__ctx)).toContain("GPS Lost");
-  });
-
-  it("draws the highway indicator when xte is finite even if other guidance values are missing", function () {
-    const harness = createHarness();
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps({
-      cog: undefined,
-      dtw: undefined,
-      btw: undefined
-    }));
-
-    expect(harness.calls.staticDraws).toHaveLength(1);
-    expect(harness.calls.dynamicDraws).toHaveLength(1);
-    expect(harness.calls.valueRows[0].value).toBe("---");
-    expect(harness.calls.valueRows[2].value).toBe("---");
-    expect(harness.calls.valueRows[3].value).toBe("---");
-  });
-
-  it("renders noTarget state-screen when wpName is an empty string", function () {
-    const harness = createHarness();
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps({ wpName: "" }));
-
-    expect(harness.calls.staticDraws).toHaveLength(0);
-    expect(harness.calls.dynamicDraws).toHaveLength(0);
-    expect(harness.calls.valueRows).toHaveLength(0);
-    expect(fillTextValues(canvas.__ctx)).toContain("No Waypoint");
-  });
-
-  it("renders noTarget state-screen when wpName is empty even with hidden textual metrics", function () {
-    const harness = createHarness();
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps({
-      wpName: "",
-      hideTextualMetrics: true
-    }));
-
-    expect(harness.calls.staticDraws).toHaveLength(0);
-    expect(harness.calls.dynamicDraws).toHaveLength(0);
-    expect(harness.calls.valueRows).toHaveLength(0);
-    expect(harness.calls.waypointChecks).toHaveLength(0);
-    expect(fillTextValues(canvas.__ctx)).toContain("No Waypoint");
-  });
-
-  it("keeps disconnected precedence over noTarget", function () {
-    const harness = createHarness();
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps({
-      disconnect: true,
-      wpName: "",
-      hideTextualMetrics: true
-    }));
-
-    expect(harness.calls.staticDraws).toHaveLength(0);
-    expect(harness.calls.dynamicDraws).toHaveLength(0);
-    expect(harness.calls.valueRows).toHaveLength(0);
-    expect(fillTextValues(canvas.__ctx)).toContain("GPS Lost");
-    expect(fillTextValues(canvas.__ctx)).not.toContain("No Waypoint");
-  });
-
-  it("renders graphics-only highway layout and skips text fitting when textual metrics are hidden", function () {
-    const harness = createHarness();
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps({
-      hideTextualMetrics: true,
-      wpName: "Fairway Buoy",
-      showWpName: true
-    }));
-
-    expect(harness.calls.layoutHistory[0].nameRect).toBeNull();
-    expect(harness.calls.layoutHistory[0].metricRects).toBeNull();
-    expect(harness.calls.waypointTextFillScales).toHaveLength(0);
-    expect(harness.calls.metricTextFillScales).toHaveLength(0);
-    expect(harness.calls.valueRows).toHaveLength(0);
-    expect(harness.calls.staticDraws).toHaveLength(1);
-    expect(harness.calls.dynamicDraws).toHaveLength(1);
-  });
-
-  it("normalizes known formatter fallback tokens to --- across all metric rows", function () {
-    const harness = createHarness({
-      applyFormatter(value, formatterOptions) {
-        const cfg = formatterOptions || {};
-        if (cfg.formatter === "formatDistance") {
-          return "    -";
-        }
-        if (cfg.formatter === "formatDirection360") {
-          return "--:--:--";
-        }
-        return cfg.default;
-      }
-    });
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps());
-
-    expect(harness.calls.valueRows[0].value).toBe("---");
-    expect(harness.calls.valueRows[1].value).toBe("---");
-    expect(harness.calls.valueRows[2].value).toBe("---");
-    expect(harness.calls.valueRows[3].value).toBe("---");
-  });
-
-  it("uses provided DST unit directly without local fallback", function () {
-    const harness = createHarness();
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps({ units: { dtw: undefined } }));
-
-    expect(harness.calls.valueRows[2].unit).toBe("");
-  });
-
-  it("uses dedicated track and bearing units when provided", function () {
-    const harness = createHarness();
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps({
-      units: {
-        track: "degT",
-        brg: "degM"
-      }
-    }));
-
-    expect(harness.calls.valueRows[0].unit).toBe("degT");
-    expect(harness.calls.valueRows[3].unit).toBe("degM");
-  });
-
-  it("uses dedicated track/bearing units directly without heading-unit fallback", function () {
-    const harness = createHarness();
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps({
-      units: {
-        track: undefined,
-        brg: undefined
-      }
-    }));
-
-    expect(harness.calls.valueRows[0].unit).toBe("");
-    expect(harness.calls.valueRows[3].unit).toBe("");
-  });
-
-  it("normalizes marker placement using formatted distance magnitude", function () {
-    const harness = createHarness({ distanceDivisor: 1852 });
-    const canvas = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-
-    harness.spec.renderCanvas(canvas, makeProps({ xte: 1852 }));
-
-    expect(harness.calls.dynamicDraws).toHaveLength(1);
-    expect(harness.calls.dynamicDraws[0].overflow).toBe(false);
-    expect(harness.calls.dynamicDraws[0].xteNormalized).toBeCloseTo(1.0, 6);
-  });
-
-  it("passes stronger compact text-fill scaling to waypoint and metric tiles", function () {
-    const compactHarness = createHarness();
-    const largeHarness = createHarness();
-
-    compactHarness.spec.renderCanvas(
-      createMockCanvas({ rectWidth: 161, rectHeight: 80, ctx: createMockContext2D() }),
-      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
-    );
-    largeHarness.spec.renderCanvas(
-      createMockCanvas({ rectWidth: 520, rectHeight: 260, ctx: createMockContext2D() }),
-      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
-    );
-
-    expect(compactHarness.calls.modeHistory[0]).toBe("normal");
-    expect(largeHarness.calls.modeHistory[0]).toBe("normal");
-    expect(compactHarness.calls.waypointTextFillScales[0]).toBeGreaterThan(largeHarness.calls.waypointTextFillScales[0]);
-    expect(compactHarness.calls.metricTextFillScales[0]).toBeGreaterThan(largeHarness.calls.metricTextFillScales[0]);
-  });
-
-  it("keeps XTE side suffix alignment for R/L and preserves an empty slot at zero", function () {
-    function renderXteValue(xte) {
-      const harness = createHarness();
-      harness.spec.renderCanvas(
-        createMockCanvas({ rectWidth: 520, rectHeight: 260, ctx: createMockContext2D() }),
-        makeProps({ stableDigits: true, xte: xte })
-      );
-      return harness.calls.valueRows[1].value;
-    }
-
-    const rightValue = renderXteValue(0.25);
-    const leftValue = renderXteValue(-0.25);
-    const zeroValue = renderXteValue(0);
-
-    expect(rightValue.endsWith("R")).toBe(true);
-    expect(leftValue.endsWith("L")).toBe(true);
-    expect(/[RL]$/.test(zeroValue)).toBe(false);
-    expect(rightValue.length).toBe(leftValue.length);
-    expect(rightValue.length).toBe(zeroValue.length);
-  });
-
-  it("keeps spring state keyed by canvas and snaps immediately when easing is disabled", function () {
-    const harness = createHarness();
-    const canvasA = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-    const canvasB = createMockCanvas({ rectWidth: 320, rectHeight: 180, ctx: createMockContext2D() });
-    const nowSpy = vi.spyOn(Date, "now");
-
-    try {
-      nowSpy.mockReturnValue(0);
-      expect(harness.spec.renderCanvas(canvasA, makeProps({ xte: 0.25 }))).toBeUndefined();
-
-      nowSpy.mockReturnValue(16);
-      expect(harness.spec.renderCanvas(canvasA, makeProps({ xte: 1.25 }))).toEqual({ wantsFollowUpFrame: true });
-
-      nowSpy.mockReturnValue(16);
-      expect(harness.spec.renderCanvas(canvasB, makeProps({ xte: 1.25 }))).toBeUndefined();
-
-      nowSpy.mockReturnValue(32);
-      expect(harness.spec.renderCanvas(canvasA, makeProps({ xte: 1.25, easing: false }))).toBeUndefined();
-    }
-    finally {
-      nowSpy.mockRestore();
-    }
-  });
 });

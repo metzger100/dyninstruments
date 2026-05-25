@@ -20,7 +20,7 @@ const DEFAULT_MODULE_PATHS = {
   RegattaTimerPhase: "shared/widget-kits/vessel/RegattaTimerPhase.js",
   StateScreenLabels: "shared/widget-kits/state/StateScreenLabels.js",
   StateScreenTextFit: "shared/widget-kits/state/StateScreenTextFit.js",
-  StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js"
+  StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js",
 };
 
 function createComponentContextMock(options) {
@@ -31,8 +31,10 @@ function createComponentContextMock(options) {
   const instanceCache = Object.create(null);
 
   const perf = services.perf || {
-    startSpan() { return null; },
-    endSpan() {}
+    startSpan() {
+      return null;
+    },
+    endSpan() {},
   };
 
   const format = services.format || {
@@ -44,26 +46,36 @@ function createComponentContextMock(options) {
         return "---";
       }
       return String(value);
-    }
+    },
   };
 
   const canvas = services.canvas || {
-    setupCanvas() { return null; }
+    setupCanvas() {
+      return null;
+    },
   };
 
   const dom = services.dom || {
-    requirePluginRoot() { return null; },
-    getNightModeState() { return false; }
+    requirePluginRoot() {
+      return null;
+    },
+    getNightModeState() {
+      return false;
+    },
   };
 
-  const hostActionsSnapshot = Object.prototype.hasOwnProperty.call(services, "hostActions")
+  const hostActionsSnapshot = Object.prototype.hasOwnProperty.call(
+    services,
+    "hostActions",
+  )
     ? services.hostActions
     : {};
-  const hostActions = typeof hostActionsSnapshot === "function"
-    ? hostActionsSnapshot
-    : function () {
-      return hostActionsSnapshot;
-    };
+  const hostActions =
+    typeof hostActionsSnapshot === "function"
+      ? hostActionsSnapshot
+      : function () {
+          return hostActionsSnapshot;
+        };
 
   if (hostActionsSnapshot && typeof hostActionsSnapshot === "object") {
     Object.keys(hostActionsSnapshot).forEach(function (key) {
@@ -75,10 +87,15 @@ function createComponentContextMock(options) {
     resolveForRoot() {
       return {
         surface: { fg: "#000", bg: "#fff", border: "#000" },
-        font: { family: "sans-serif", familyMono: "monospace", weight: 700, labelWeight: 700 },
-        colors: {}
+        font: {
+          family: "sans-serif",
+          familyMono: "monospace",
+          weight: 700,
+          labelWeight: 700,
+        },
+        colors: {},
       };
-    }
+    },
   };
 
   const context = {
@@ -87,33 +104,39 @@ function createComponentContextMock(options) {
         if (Object.prototype.hasOwnProperty.call(instanceCache, id)) {
           return instanceCache[id];
         }
-        if (!Object.prototype.hasOwnProperty.call(modules, id) && Object.prototype.hasOwnProperty.call(DEFAULT_MODULE_PATHS, id)) {
+        if (
+          !Object.prototype.hasOwnProperty.call(modules, id) &&
+          Object.prototype.hasOwnProperty.call(DEFAULT_MODULE_PATHS, id)
+        ) {
           modules[id] = loadFresh(DEFAULT_MODULE_PATHS[id]);
         }
         if (!Object.prototype.hasOwnProperty.call(modules, id)) {
-          throw new Error("component-context-mock: missing module '" + id + "'");
+          throw new Error(
+            "component-context-mock: missing module '" + id + "'",
+          );
         }
         const entry = modules[id];
-        const value = entry && typeof entry.create === "function"
-          ? entry.create(def, context)
-          : entry;
+        const value =
+          entry && typeof entry.create === "function"
+            ? entry.create(def, context)
+            : entry;
         instanceCache[id] = value;
         return value;
-      }
+      },
     },
     theme: {
-      tokens: themeTokens
+      tokens: themeTokens,
     },
     perf: perf,
     format: format,
     canvas: canvas,
     dom: dom,
-    hostActions: hostActions
+    hostActions: hostActions,
   };
 
   return context;
 }
 
 module.exports = {
-  createComponentContextMock
+  createComponentContextMock,
 };

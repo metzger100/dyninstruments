@@ -56,7 +56,14 @@
       css: undefined,
       shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"],
       globalKey: "DyniAisTargetTextHtmlWidget",
-      deps: ["AisTargetHtmlFit", "HtmlWidgetUtils", "HtmlWidgetLifecycle", "AisTargetRenderModel", "AisTargetMarkup", "ValueMath"]
+      deps: [
+        "AisTargetHtmlFit",
+        "HtmlWidgetUtils",
+        "HtmlWidgetLifecycle",
+        "AisTargetRenderModel",
+        "AisTargetMarkup",
+        "ValueMath"
+      ]
   };
 
   w.ActiveRouteTextHtmlWidget = {
@@ -108,7 +115,13 @@
       css: undefined,
       shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"],
       globalKey: "DyniEditRouteTextHtmlWidget",
-      deps: ["EditRouteHtmlFit", "HtmlWidgetUtils", "HtmlWidgetLifecycle", "EditRouteRenderModel", "EditRouteMarkup"]
+      deps: [
+        "EditRouteHtmlFit",
+        "HtmlWidgetUtils",
+        "HtmlWidgetLifecycle",
+        "EditRouteRenderModel",
+        "EditRouteMarkup"
+      ]
   };
 
   w.RoutePointsRenderModel = {

@@ -36,7 +36,13 @@
       js: BASE + "shared/widget-kits/radial/FullCircleRadialLayout.js",
       css: undefined,
       globalKey: "DyniFullCircleRadialLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale", "TextLayoutScaleHelpers", "ValueMath"]
+      deps: [
+        "ResponsiveScaleProfile",
+        "LayoutRectMath",
+        "GeometryScale",
+        "TextLayoutScaleHelpers",
+        "ValueMath"
+      ]
     },
     FullCircleRadialTextLayout: {
       js: BASE + "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
@@ -75,7 +81,13 @@
       js: BASE + "shared/widget-kits/radial/RadialToolkit.js",
       css: undefined,
       globalKey: "DyniRadialToolkit",
-      deps: ["GaugeToolkit", "RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives", "RadialFrameRenderer"]
+      deps: [
+        "GaugeToolkit",
+        "RadialAngleMath",
+        "RadialTickMath",
+        "RadialCanvasPrimitives",
+        "RadialFrameRenderer"
+      ]
     },
     SemicircleRadialEngine: {
       js: BASE + "shared/widget-kits/radial/SemicircleRadialEngine.js",
@@ -99,7 +111,13 @@
       js: BASE + "shared/widget-kits/radial/SemicircleRadialLayout.js",
       css: undefined,
       globalKey: "DyniSemicircleRadialLayout",
-      deps: ["ResponsiveScaleProfile", "LayoutRectMath", "GeometryScale", "TextLayoutScaleHelpers", "ValueMath"]
+      deps: [
+        "ResponsiveScaleProfile",
+        "LayoutRectMath",
+        "GeometryScale",
+        "TextLayoutScaleHelpers",
+        "ValueMath"
+      ]
     },
     SemicircleRadialTextLayout: {
       js: BASE + "shared/widget-kits/radial/SemicircleRadialTextLayout.js",

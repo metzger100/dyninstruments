@@ -18,31 +18,73 @@ function createMockContext2D(options) {
     textAlign: "left",
     textBaseline: "alphabetic",
     font: "10px sans-serif",
-    save() { rec("save", arguments); },
-    restore() { rec("restore", arguments); },
-    beginPath() { rec("beginPath", arguments); },
-    closePath() { rec("closePath", arguments); },
-    rect() { rec("rect", arguments); },
-    clip() { rec("clip", arguments); },
-    arc() { rec("arc", arguments); },
-    stroke() { rec("stroke", arguments); },
-    fill() { rec("fill", arguments); },
-    moveTo() { rec("moveTo", arguments); },
-    lineTo() { rec("lineTo", arguments); },
-    clearRect() { rec("clearRect", arguments); },
-    fillRect() { rec("fillRect", arguments); },
-    strokeRect() { rec("strokeRect", arguments); },
-    setTransform() { rec("setTransform", arguments); },
-    setLineDash() { rec("setLineDash", arguments); },
-    translate() { rec("translate", arguments); },
-    scale() { rec("scale", arguments); },
-    rotate() { rec("rotate", arguments); },
-    drawImage() { rec("drawImage", arguments); },
-    fillText() { rec("fillText", arguments); },
+    save() {
+      rec("save", arguments);
+    },
+    restore() {
+      rec("restore", arguments);
+    },
+    beginPath() {
+      rec("beginPath", arguments);
+    },
+    closePath() {
+      rec("closePath", arguments);
+    },
+    rect() {
+      rec("rect", arguments);
+    },
+    clip() {
+      rec("clip", arguments);
+    },
+    arc() {
+      rec("arc", arguments);
+    },
+    stroke() {
+      rec("stroke", arguments);
+    },
+    fill() {
+      rec("fill", arguments);
+    },
+    moveTo() {
+      rec("moveTo", arguments);
+    },
+    lineTo() {
+      rec("lineTo", arguments);
+    },
+    clearRect() {
+      rec("clearRect", arguments);
+    },
+    fillRect() {
+      rec("fillRect", arguments);
+    },
+    strokeRect() {
+      rec("strokeRect", arguments);
+    },
+    setTransform() {
+      rec("setTransform", arguments);
+    },
+    setLineDash() {
+      rec("setLineDash", arguments);
+    },
+    translate() {
+      rec("translate", arguments);
+    },
+    scale() {
+      rec("scale", arguments);
+    },
+    rotate() {
+      rec("rotate", arguments);
+    },
+    drawImage() {
+      rec("drawImage", arguments);
+    },
+    fillText() {
+      rec("fillText", arguments);
+    },
     measureText(text) {
       rec("measureText", arguments);
       return { width: String(text || "").length * charWidth };
-    }
+    },
   };
 
   return ctx;
@@ -68,11 +110,18 @@ function createMockCanvas(options) {
       return type === "2d" ? ctx : null;
     },
     getBoundingClientRect() {
-      return { width: rectW, height: rectH, top: 0, left: 0, right: rectW, bottom: rectH };
+      return {
+        width: rectW,
+        height: rectH,
+        top: 0,
+        left: 0,
+        right: rectW,
+        bottom: rectH,
+      };
     },
     closest() {
       return null;
-    }
+    },
   };
 }
 
@@ -101,7 +150,7 @@ function createMockOwnerDocument(options) {
       },
       closest() {
         return null;
-      }
+      },
     };
   };
   return doc;
@@ -110,5 +159,5 @@ function createMockOwnerDocument(options) {
 module.exports = {
   createMockCanvas,
   createMockContext2D,
-  createMockOwnerDocument
+  createMockOwnerDocument,
 };

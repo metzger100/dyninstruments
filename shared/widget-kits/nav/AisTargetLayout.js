@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetLayout = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetLayout = factory();
+  }
 }(this, function () {
   "use strict";
 
@@ -217,7 +219,12 @@
         const metricRows = rectApi.splitStack(out.metricsRect, insets.metricGridGap, 2, rectApi.makeRect);
         const rowA = rectApi.splitRow(metricRows[0], insets.metricGridGap, 2, rectApi.makeRect);
         const rowB = rectApi.splitRow(metricRows[1], insets.metricGridGap, 2, rectApi.makeRect);
-        fillInlineMetricBoxes(out, [rowA[0], rowA[1], rowB[0], rowB[1]], insets.responsive, mode);
+        fillInlineMetricBoxes(
+          out,
+          [rowA[0], rowA[1], rowB[0], rowB[1]],
+          insets.responsive,
+          mode
+        );
         return finalize(out);
       }
 

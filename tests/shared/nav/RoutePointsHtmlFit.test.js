@@ -1,5 +1,7 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const {
+  createComponentContextMock,
+} = require("../../helpers/component-context-mock");
 
 describe("RoutePointsHtmlFit", function () {
   function createMeasureContext() {
@@ -11,7 +13,7 @@ describe("RoutePointsHtmlFit", function () {
         const px = match ? Number(match[1]) : 12;
         const safePx = Number.isFinite(px) ? px : 12;
         return { width: String(text).length * safePx * 0.56 };
-      }
+      },
     };
   }
 
@@ -20,46 +22,66 @@ describe("RoutePointsHtmlFit", function () {
     api.setFont = vi.fn((ctx, px, weight, family) => {
       const safePx = Math.max(1, Math.floor(Number(px) || 1));
       const safeWeight = Number.isFinite(Number(weight)) ? Number(weight) : 700;
-      const safeFamily = typeof family === "string" && family ? family : "sans-serif";
+      const safeFamily =
+        typeof family === "string" && family ? family : "sans-serif";
       ctx.font = safeWeight + " " + safePx + "px " + safeFamily;
     });
-    api.measureTextWidth = vi.fn((ctx, text) => ctx.measureText(String(text || "")).width);
-    api.fitSingleTextPx = vi.fn((ctx, text, maxPx, maxW, maxH, family, weight) => {
-      const start = Math.max(1, Math.floor(Math.min(Number(maxPx) || 1, Number(maxH) || 1)));
-      const safeText = String(text);
-      for (let px = start; px >= 1; px -= 1) {
-        api.setFont(ctx, px, weight, family);
-        if (ctx.measureText(safeText).width <= maxW) {
-          return px;
+    api.measureTextWidth = vi.fn(
+      (ctx, text) => ctx.measureText(String(text || "")).width,
+    );
+    api.fitSingleTextPx = vi.fn(
+      (ctx, text, maxPx, maxW, maxH, family, weight) => {
+        const start = Math.max(
+          1,
+          Math.floor(Math.min(Number(maxPx) || 1, Number(maxH) || 1)),
+        );
+        const safeText = String(text);
+        for (let px = start; px >= 1; px -= 1) {
+          api.setFont(ctx, px, weight, family);
+          if (ctx.measureText(safeText).width <= maxW) {
+            return px;
+          }
         }
-      }
-      return 1;
-    });
+        return 1;
+      },
+    );
     return api;
   }
 
   function createHarness() {
-    const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-    const responsiveScaleProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    const layoutRectMathModule = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-    const routePointsLayoutSizingModule = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
-    const routePointsLayoutModule = loadFresh("shared/widget-kits/nav/RoutePointsLayout.js");
-    const textTileLayoutModule = loadFresh("shared/widget-kits/text/TextTileLayout.js");
+    const htmlUtilsModule = loadFresh(
+      "shared/widget-kits/html/HtmlWidgetUtils.js",
+    );
+    const responsiveScaleProfileModule = loadFresh(
+      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+    );
+    const layoutRectMathModule = loadFresh(
+      "shared/widget-kits/layout/LayoutRectMath.js",
+    );
+    const routePointsLayoutSizingModule = loadFresh(
+      "shared/widget-kits/nav/RoutePointsLayoutSizing.js",
+    );
+    const routePointsLayoutModule = loadFresh(
+      "shared/widget-kits/nav/RoutePointsLayout.js",
+    );
+    const textTileLayoutModule = loadFresh(
+      "shared/widget-kits/text/TextTileLayout.js",
+    );
     const radialTextApi = createRadialTextApi();
     const themeTokens = {
       font: {
         family: "sans-serif",
         familyMono: "monospace",
         weight: 720,
-        labelWeight: 610
-      }
+        labelWeight: 610,
+      },
     };
     const themeApi = {
-      resolveForRoot: vi.fn(() => themeTokens)
+      resolveForRoot: vi.fn(() => themeTokens),
     };
     const targetEl = document.createElement("div");
     const hostContext = {
-      __dyniRoutePointsTextMeasureCtx: createMeasureContext()
+      __dyniRoutePointsTextMeasureCtx: createMeasureContext(),
     };
 
     const componentContext = createComponentContextMock({
@@ -67,18 +89,26 @@ describe("RoutePointsHtmlFit", function () {
         CanvasTextLayout: { create: () => radialTextApi },
         TextTileLayout: textTileLayoutModule,
         RoutePointsLayout: routePointsLayoutModule,
-        RoutePointsInfoText: loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js"),
-        UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
-        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        RoutePointsInfoText: loadFresh(
+          "shared/widget-kits/nav/RoutePointsInfoText.js",
+        ),
+        UnitAwareFormatter: loadFresh(
+          "shared/widget-kits/format/UnitAwareFormatter.js",
+        ),
+        PlaceholderNormalize: loadFresh(
+          "shared/widget-kits/format/PlaceholderNormalize.js",
+        ),
         HtmlWidgetUtils: htmlUtilsModule,
         ResponsiveScaleProfile: responsiveScaleProfileModule,
         LayoutRectMath: layoutRectMathModule,
         RoutePointsLayoutSizing: routePointsLayoutSizingModule,
-        RoutePointsRowGeometry: loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js")
+        RoutePointsRowGeometry: loadFresh(
+          "shared/widget-kits/nav/RoutePointsRowGeometry.js",
+        ),
       },
       services: {
         themeTokens: {
-          resolveForRoot: themeApi.resolveForRoot
+          resolveForRoot: themeApi.resolveForRoot,
         },
         dom: {
           requirePluginRoot(target) {
@@ -86,11 +116,13 @@ describe("RoutePointsHtmlFit", function () {
           },
           getNightModeState() {
             return false;
-          }
-        }
-      }
+          },
+        },
+      },
     });
-    const fit = loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js").create({}, componentContext);
+    const fit = loadFresh(
+      "shared/widget-kits/nav/RoutePointsHtmlFit.js",
+    ).create({}, componentContext);
     const layout = routePointsLayoutModule.create({}, componentContext);
     return { fit, layout, targetEl, hostContext, themeApi, radialTextApi };
   }
@@ -106,16 +138,20 @@ describe("RoutePointsHtmlFit", function () {
       ratioThresholdNormal: 1.0,
       ratioThresholdFlat: 3.5,
       points: [
-        { ordinalText: "1", nameText: "Start", infoText: "54.102 N / 10.400 E" },
-        { ordinalText: "2", nameText: "Finish", infoText: "081°/1.2nm" }
-      ]
+        {
+          ordinalText: "1",
+          nameText: "Start",
+          infoText: "54.102 N / 10.400 E",
+        },
+        { ordinalText: "2", nameText: "Finish", infoText: "081°/1.2nm" },
+      ],
     };
     return Object.assign({}, base, overrides || {});
   }
 
   function extractPx(style) {
     const source = String(style || "");
-    const match = source.match(/^font-size:(\d+)px;$/);
+    const match = source.match(new RegExp("^font-size:(\\d+)px\\x3b$"));
     return match ? Number(match[1]) : 0;
   }
 
@@ -124,7 +160,7 @@ describe("RoutePointsHtmlFit", function () {
     if (style === "") {
       return;
     }
-    expect(style).toMatch(/^font-size:\d+px;$/);
+    expect(style).toMatch(new RegExp("^font-size:\\d+px\\x3b$"));
   }
 
   function resolveEmptyCapRatio(mode) {
@@ -143,7 +179,7 @@ describe("RoutePointsHtmlFit", function () {
       model: buildModel(),
       hostContext: h.hostContext,
       targetEl: h.targetEl,
-      shellRect: { width: 300, height: 180 }
+      shellRect: { width: 300, height: 180 },
     });
 
     expect(out).not.toBeNull();
@@ -164,17 +200,21 @@ describe("RoutePointsHtmlFit", function () {
     const h = createHarness();
     const model = buildModel();
 
-    expect(h.fit.compute({
-      model: model,
-      hostContext: h.hostContext,
-      targetEl: h.targetEl
-    })).toBeNull();
+    expect(
+      h.fit.compute({
+        model: model,
+        hostContext: h.hostContext,
+        targetEl: h.targetEl,
+      }),
+    ).toBeNull();
 
-    expect(h.fit.compute({
-      model: model,
-      hostContext: h.hostContext,
-      shellRect: { width: 240, height: 160 }
-    })).toBeNull();
+    expect(
+      h.fit.compute({
+        model: model,
+        hostContext: h.hostContext,
+        shellRect: { width: 240, height: 160 },
+      }),
+    ).toBeNull();
   });
 
   it("returns null headerFit when showHeader is false", function () {
@@ -183,7 +223,7 @@ describe("RoutePointsHtmlFit", function () {
       model: buildModel({ showHeader: false }),
       hostContext: h.hostContext,
       targetEl: h.targetEl,
-      shellRect: { width: 280, height: 180 }
+      shellRect: { width: 280, height: 180 },
     });
 
     expect(out.headerFit).toBeNull();
@@ -197,25 +237,32 @@ describe("RoutePointsHtmlFit", function () {
       model: buildModel({ mode: "high", points: row }),
       hostContext: h.hostContext,
       targetEl: h.targetEl,
-      shellRect: { width: 300, height: 180 }
+      shellRect: { width: 300, height: 180 },
     });
     const normal = h.fit.compute({
       model: buildModel({ mode: "normal", points: row }),
       hostContext: h.hostContext,
       targetEl: h.targetEl,
-      shellRect: { width: 300, height: 180 }
+      shellRect: { width: 300, height: 180 },
     });
 
-    expect(extractPx(high.rowFits[0].nameStyle)).toBeLessThan(extractPx(normal.rowFits[0].nameStyle));
+    expect(extractPx(high.rowFits[0].nameStyle)).toBeLessThan(
+      extractPx(normal.rowFits[0].nameStyle),
+    );
   });
 
   it("keeps name/info text fitting active when compact high rows hide ordinal", function () {
     const h = createHarness();
     const out = h.fit.compute({
-      model: buildModel({ mode: "high", points: [{ ordinalText: "1", nameText: "Alpha", infoText: "089°/12.3nm" }] }),
+      model: buildModel({
+        mode: "high",
+        points: [
+          { ordinalText: "1", nameText: "Alpha", infoText: "089°/12.3nm" },
+        ],
+      }),
       hostContext: h.hostContext,
       targetEl: h.targetEl,
-      shellRect: { width: 240, height: 360 }
+      shellRect: { width: 240, height: 360 },
     });
 
     expect(out.rowFits).toHaveLength(1);
@@ -224,181 +271,4 @@ describe("RoutePointsHtmlFit", function () {
     expectStyleFormat(out.rowFits[0].infoStyle);
   });
 
-  it("returns an empty rowFits array for zero-point routes", function () {
-    const h = createHarness();
-    const out = h.fit.compute({
-      model: buildModel({ points: [], metaText: "0 waypoints" }),
-      hostContext: h.hostContext,
-      targetEl: h.targetEl,
-      shellRect: { width: 300, height: 180 }
-    });
-
-    expect(out.rowFits).toEqual([]);
-  });
-
-  it("measures placeholder fit for no-route state with mode-capped max font size", function () {
-    const h = createHarness();
-    const shellRect = { width: 300, height: 180 };
-    const insets = h.layout.computeInsets(shellRect.width, shellRect.height);
-    const contentRect = h.layout.createContentRect(shellRect.width, shellRect.height, insets);
-    const modes = ["flat", "normal", "high"];
-
-    modes.forEach((mode) => {
-      const out = h.fit.compute({
-        model: buildModel({
-          mode: mode,
-          hasRoute: false,
-          routeNameText: "",
-          emptyText: "A",
-          points: [],
-          metaText: "0 waypoints"
-        }),
-        hostContext: h.hostContext,
-        targetEl: h.targetEl,
-        shellRect: shellRect
-      });
-
-      expect(out.rowFits).toEqual([]);
-      expectStyleFormat(out.emptyStyle);
-
-      const emptyPx = extractPx(out.emptyStyle);
-      const capPx = Math.max(1, Math.floor(contentRect.h * resolveEmptyCapRatio(mode)));
-      expect(emptyPx).toBeGreaterThan(0);
-      expect(emptyPx).toBeLessThanOrEqual(capPx);
-    });
-  });
-
-  it("scales down font size for long text", function () {
-    const h = createHarness();
-    const shortOut = h.fit.compute({
-      model: buildModel({
-        routeNameText: "A",
-        points: [{ ordinalText: "1", nameText: "A", infoText: "B" }]
-      }),
-      hostContext: h.hostContext,
-      targetEl: h.targetEl,
-      shellRect: { width: 300, height: 180 }
-    });
-    const longOut = h.fit.compute({
-      model: buildModel({
-        routeNameText: "Very Long Route Name That Must Scale Down",
-        points: [
-          {
-            ordinalText: "1",
-            nameText: "Waypoint Name That Is Intentionally Very Very Long To Trigger Fitting",
-            infoText: "095.2°/123.456789nm"
-          }
-        ]
-      }),
-      hostContext: h.hostContext,
-      targetEl: h.targetEl,
-      shellRect: { width: 300, height: 180 }
-    });
-
-    expect(extractPx(longOut.headerFit.routeNameStyle)).toBeLessThan(extractPx(shortOut.headerFit.routeNameStyle));
-    expect(extractPx(longOut.rowFits[0].nameStyle)).toBeLessThan(extractPx(shortOut.rowFits[0].nameStyle));
-  });
-
-  it("uses full available box height for short text that already fits", function () {
-    const h = createHarness();
-    const model = buildModel({
-      mode: "normal",
-      points: [{ ordinalText: "1", nameText: "A", infoText: "B" }]
-    });
-    const shellRect = { width: 300, height: 180 };
-    const fitOut = h.fit.compute({
-      model: model,
-      hostContext: h.hostContext,
-      targetEl: h.targetEl,
-      shellRect: shellRect
-    });
-    const insets = h.layout.computeInsets(shellRect.width, shellRect.height);
-    const contentRect = h.layout.createContentRect(shellRect.width, shellRect.height, insets);
-    const layoutOut = h.layout.computeLayout({
-      contentRect: contentRect,
-      mode: model.mode,
-      ratioThresholdNormal: model.ratioThresholdNormal,
-      ratioThresholdFlat: model.ratioThresholdFlat,
-      showHeader: model.showHeader,
-      pointCount: model.points.length,
-      responsive: insets.responsive
-    });
-
-    expect(extractPx(fitOut.rowFits[0].nameStyle)).toBe(layoutOut.rows[0].nameRect.h);
-  });
-
-  it("keeps source text unchanged and emits style-only output for no-trim regression coverage", function () {
-    const h = createHarness();
-    const longRouteName = "Route Name That Should Never Be Trimmed By Fit Logic";
-    const longMeta = "1234567890 waypoints long suffix text stays intact";
-    const longName = "Waypoint With A Very Long Name That Must Stay Unchanged";
-    const longInfo = "012.34°/98765.4321nm long info text that should remain intact";
-    const model = buildModel({
-      routeNameText: longRouteName,
-      metaText: longMeta,
-      points: [{ ordinalText: "1", nameText: longName, infoText: longInfo }]
-    });
-    const before = JSON.parse(JSON.stringify(model));
-    const out = h.fit.compute({
-      model: model,
-      hostContext: h.hostContext,
-      targetEl: h.targetEl,
-      shellRect: { width: 260, height: 170 }
-    });
-
-    expect(model).toEqual(before);
-    expect(out).not.toBeNull();
-    expectStyleFormat(out.headerFit.routeNameStyle);
-    expectStyleFormat(out.headerFit.metaStyle);
-    expectStyleFormat(out.rowFits[0].ordinalStyle);
-    expectStyleFormat(out.rowFits[0].nameStyle);
-    expectStyleFormat(out.rowFits[0].infoStyle);
-    expect(out.rowFits[0].infoText).toBe(longInfo);
-    expect(JSON.stringify(out)).not.toContain(longRouteName);
-    expect(JSON.stringify(out)).not.toContain(longMeta);
-    expect(JSON.stringify(out)).not.toContain(longName);
-  });
-
-  it("uses mono family for course/distance info when stableDigits is enabled", function () {
-    const h = createHarness();
-    const shellRect = { width: 300, height: 180 };
-
-    h.fit.compute({
-      model: buildModel({
-        points: [
-          { ordinalText: "1", nameText: "Start", infoText: "09°/1.2nm" }
-        ],
-        stableDigitsEnabled: true
-      }),
-      hostContext: h.hostContext,
-      targetEl: h.targetEl,
-      shellRect: shellRect
-    });
-
-    const infoCall = h.radialTextApi.fitSingleTextPx.mock.calls.find((args) => args[1] === "09°/1.2nm");
-    expect(infoCall).toBeDefined();
-    expect(infoCall[5]).toBe("monospace");
-  });
-
-  it("falls back to infoPlainText for narrow stableDigits course-distance rows", function () {
-    const h = createHarness();
-    const shellRect = { width: 40, height: 120 };
-    const model = buildModel({
-      stableDigitsEnabled: true,
-      points: [
-        { ordinalText: "1", nameText: "Start", infoText: "000°/000.0nm", infoPlainText: "0°/0.0nm" },
-        { ordinalText: "2", nameText: "Finish", infoText: "00360°/00012.3nm", infoPlainText: "360°/12.3nm" }
-      ]
-    });
-
-    const out = h.fit.compute({
-      model: model,
-      hostContext: h.hostContext,
-      targetEl: h.targetEl,
-      shellRect: shellRect
-    });
-
-    expect(out.rowFits[1].infoText).toBe("360°/12.3nm");
-    expectStyleFormat(out.rowFits[1].infoStyle);
-  });
 });

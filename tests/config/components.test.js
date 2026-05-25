@@ -9,7 +9,7 @@ const COMPONENT_REGISTRY_FRAGMENT_SCRIPTS = [
   "config/components/registry-widgets-nav.js",
   "config/components/registry-widgets-vessel.js",
   "config/components/registry-widgets-gauge.js",
-  "config/components/registry-cluster.js"
+  "config/components/registry-cluster.js",
 ];
 
 const SHARED_CONFIG_SCRIPTS = [
@@ -22,7 +22,7 @@ const SHARED_CONFIG_SCRIPTS = [
   "config/shared/environment-depth-editables.js",
   "config/shared/environment-temperature-editables.js",
   "config/shared/environment-editables.js",
-  "config/shared/vessel-voltage-editables.js"
+  "config/shared/vessel-voltage-editables.js",
 ];
 
 const CLUSTER_DEF_SCRIPTS = [
@@ -34,7 +34,7 @@ const CLUSTER_DEF_SCRIPTS = [
   "config/clusters/map.js",
   "config/clusters/anchor.js",
   "config/clusters/vessel.js",
-  "config/clusters/default.js"
+  "config/clusters/default.js",
 ];
 
 const CLUSTER_ROUTE_SCRIPTS = [
@@ -48,7 +48,7 @@ const CLUSTER_ROUTE_SCRIPTS = [
   "config/cluster-routes/anchor.js",
   "config/cluster-routes/vessel.js",
   "config/cluster-routes/default.js",
-  "config/cluster-routes/finalize.js"
+  "config/cluster-routes/finalize.js",
 ];
 
 function runScripts(context, scripts) {
@@ -58,7 +58,12 @@ function runScripts(context, scripts) {
 }
 
 function loadFullComponentRegistry(context) {
-  runScripts(context, ["runtime/namespace.js"].concat(COMPONENT_REGISTRY_FRAGMENT_SCRIPTS, ["config/components.js"]));
+  runScripts(
+    context,
+    ["runtime/namespace.js"].concat(COMPONENT_REGISTRY_FRAGMENT_SCRIPTS, [
+      "config/components.js",
+    ]),
+  );
 }
 
 function loadPhase7StartupEnvironment(context) {
@@ -66,7 +71,11 @@ function loadPhase7StartupEnvironment(context) {
   runScripts(context, SHARED_CONFIG_SCRIPTS);
   runScripts(context, CLUSTER_DEF_SCRIPTS);
   runScripts(context, CLUSTER_ROUTE_SCRIPTS);
-  runScripts(context, ["config/widget-definitions.js", "runtime/asset-preloader.js", "runtime/component-loader.js"]);
+  runScripts(context, [
+    "config/widget-definitions.js",
+    "runtime/asset-preloader.js",
+    "runtime/component-loader.js",
+  ]);
 }
 
 function getCommonShadowCssUrl(baseUrl) {
@@ -75,8 +84,8 @@ function getCommonShadowCssUrl(baseUrl) {
       baseUrl: baseUrl,
       runtime: {},
       state: {},
-      config: { shared: {}, clusters: [] }
-    }
+      config: { shared: {}, clusters: [] },
+    },
   });
 
   runIifeScript("runtime/namespace.js", context);
@@ -94,7 +103,10 @@ function collectShadowCssUrls(components, componentIds) {
   for (let i = 0; i < componentIds.length; i += 1) {
     const componentId = componentIds[i];
     const componentDef = components[componentId];
-    const shadowCss = componentDef && Array.isArray(componentDef.shadowCss) ? componentDef.shadowCss : [];
+    const shadowCss =
+      componentDef && Array.isArray(componentDef.shadowCss)
+        ? componentDef.shadowCss
+        : [];
     for (let j = 0; j < shadowCss.length; j += 1) {
       const url = shadowCss[j];
       if (typeof url !== "string" || !url || seen[url]) {
@@ -115,16 +127,21 @@ describe("config/components.js", function () {
         baseUrl: "http://host/plugins/dyninstruments/",
         runtime: {},
         state: {},
-        config: { shared: {}, clusters: [] }
-      }
+        config: { shared: {}, clusters: [] },
+      },
     });
 
     loadFullComponentRegistry(context);
 
     const components = context.DyniPlugin.config.components;
     expect(components.ClusterWidget.deps).toEqual(["ValueMath"]);
-    expect(components.CanvasLayerCache.js).toBe("http://host/plugins/dyninstruments/shared/widget-kits/canvas/CanvasLayerCache.js");
-    expect(components.XteHighwayPrimitives.deps).toEqual(["GeometryScale", "ValueMath"]);
+    expect(components.CanvasLayerCache.js).toBe(
+      "http://host/plugins/dyninstruments/shared/widget-kits/canvas/CanvasLayerCache.js",
+    );
+    expect(components.XteHighwayPrimitives.deps).toEqual([
+      "GeometryScale",
+      "ValueMath",
+    ]);
     expect(components.PositionCoordinateWidget.deps).toContain("ValueMath");
   });
 
@@ -134,20 +151,30 @@ describe("config/components.js", function () {
         baseUrl: "http://host/plugins/dyninstruments/",
         runtime: {},
         state: {},
-        config: { shared: {}, clusters: [] }
-      }
+        config: { shared: {}, clusters: [] },
+      },
     });
 
     loadFullComponentRegistry(context);
 
     const components = context.DyniPlugin.config.components;
-    expect(components.RadialValueMath.deps).toEqual(["RadialAngleMath", "ValueMath", "RadialSectorMath"]);
+    expect(components.RadialValueMath.deps).toEqual([
+      "RadialAngleMath",
+      "ValueMath",
+      "RadialSectorMath",
+    ]);
     expect(components.DepthLinearWidget.deps).not.toContain("RadialValueMath");
-    expect(components.DefaultRadialWidget.deps).not.toContain("RadialValueMath");
+    expect(components.DefaultRadialWidget.deps).not.toContain(
+      "RadialValueMath",
+    );
     expect(components.DepthRadialWidget.deps).not.toContain("RadialValueMath");
     expect(components.SpeedRadialWidget.deps).not.toContain("RadialValueMath");
-    expect(components.TemperatureRadialWidget.deps).not.toContain("RadialValueMath");
-    expect(components.VoltageRadialWidget.deps).not.toContain("RadialValueMath");
+    expect(components.TemperatureRadialWidget.deps).not.toContain(
+      "RadialValueMath",
+    );
+    expect(components.VoltageRadialWidget.deps).not.toContain(
+      "RadialValueMath",
+    );
   });
 
   it("removes runtime-owned architecture from the component registry", function () {
@@ -156,8 +183,8 @@ describe("config/components.js", function () {
         baseUrl: "http://host/plugins/dyninstruments/",
         runtime: {},
         state: {},
-        config: { shared: {}, clusters: [] }
-      }
+        config: { shared: {}, clusters: [] },
+      },
     });
 
     loadFullComponentRegistry(context);
@@ -185,26 +212,32 @@ describe("config/components.js", function () {
       DyniPlugin: {
         baseUrl: "http://host/plugins/dyninstruments/",
         runtime: {
-          loadScriptOnce: vi.fn(() => Promise.resolve())
+          loadScriptOnce: vi.fn(() => Promise.resolve()),
         },
         state: {},
         config: {
           shared: {},
-          clusters: []
-        }
-      }
+          clusters: [],
+        },
+      },
     });
 
     loadPhase7StartupEnvironment(context);
-    const commonShadowCssUrl = getCommonShadowCssUrl("http://host/plugins/dyninstruments/");
+    const commonShadowCssUrl = getCommonShadowCssUrl(
+      "http://host/plugins/dyninstruments/",
+    );
 
     const components = context.DyniPlugin.config.components;
     const widgetDefinitions = context.DyniPlugin.config.widgetDefinitions;
     const loader = context.DyniPlugin.runtime.createComponentLoader(components);
     const needed = loader.uniqueComponents(widgetDefinitions);
     const routeIds = context.DyniPlugin.config.clusterRoutes.routes;
-    const rendererIds = routeIds.map(function (route) { return route.rendererId; });
-    const mapperIds = routeIds.map(function (route) { return route.mapperId; });
+    const rendererIds = routeIds.map(function (route) {
+      return route.rendererId;
+    });
+    const mapperIds = routeIds.map(function (route) {
+      return route.mapperId;
+    });
     const viewModelIds = routeIds.reduce(function (ids, route) {
       if (Object.prototype.hasOwnProperty.call(route, "viewModelId")) {
         ids.push(route.viewModelId);
@@ -215,7 +248,7 @@ describe("config/components.js", function () {
       components,
       rendererIds.filter(function (rendererId, index, list) {
         return list.indexOf(rendererId) === index;
-      })
+      }),
     );
 
     expect(components.ClusterWidget.deps).toEqual(["ValueMath"]);
@@ -255,12 +288,18 @@ describe("config/components.js", function () {
     expect(needed).not.toContain("MapZoomTextHtmlWidget");
     expect(needed).not.toContain("AisTargetTextHtmlWidget");
     expect(needed).not.toContain("AlarmTextHtmlWidget");
-    expect(routeRendererShadowCssUrls).toContain(
-      commonShadowCssUrl
+    expect(routeRendererShadowCssUrls).toContain(commonShadowCssUrl);
+    expect(
+      routeRendererShadowCssUrls.some(function (url) {
+        return needed.indexOf(url) >= 0;
+      }),
+    ).toBe(false);
+    expect(mapperIds).toEqual(
+      expect.arrayContaining(["DefaultMapper", "NavMapper", "MapMapper"]),
     );
-    expect(routeRendererShadowCssUrls.some(function (url) { return needed.indexOf(url) >= 0; })).toBe(false);
-    expect(mapperIds).toEqual(expect.arrayContaining(["DefaultMapper", "NavMapper", "MapMapper"]));
-    expect(viewModelIds).toEqual(expect.arrayContaining(["ActiveRouteViewModel", "RoutePointsViewModel"]));
+    expect(viewModelIds).toEqual(
+      expect.arrayContaining(["ActiveRouteViewModel", "RoutePointsViewModel"]),
+    );
     expect(collectShadowCssUrls(components, needed)).toEqual([]);
   });
 
@@ -269,8 +308,8 @@ describe("config/components.js", function () {
       DyniPlugin: {
         runtime: {},
         state: {},
-        config: { shared: {}, clusters: [] }
-      }
+        config: { shared: {}, clusters: [] },
+      },
     });
 
     runIifeScript("runtime/namespace.js", context);
@@ -287,21 +326,43 @@ describe("config/components.js", function () {
     expect(manifest).toContain("runtime/surface/HtmlSurfaceController.js");
     expect(manifest).toContain("runtime/surface/index.js");
     expect(manifest).toContain("runtime/cluster/ClusterShellRenderer.js");
-    expect(manifest).toContain("runtime/cluster/RouteActivationPayloadBuilder.js");
+    expect(manifest).toContain(
+      "runtime/cluster/RouteActivationPayloadBuilder.js",
+    );
     expect(manifest).toContain("runtime/cluster/RouteActivationLatestWins.js");
     expect(manifest).toContain("runtime/cluster/RouteActivationController.js");
 
     expect(manifest).not.toContain("shared/theme/ThemeModel.js");
     expect(manifest).not.toContain("shared/theme/ThemeResolver.js");
-    expect(manifest).not.toContain("cluster/rendering/CanvasDomSurfaceAdapter.js");
-    expect(manifest).not.toContain("cluster/rendering/HtmlSurfaceController.js");
+    expect(manifest).not.toContain(
+      "cluster/rendering/CanvasDomSurfaceAdapter.js",
+    );
+    expect(manifest).not.toContain(
+      "cluster/rendering/HtmlSurfaceController.js",
+    );
 
     expect(manifest[0]).toBe("runtime/namespace.js");
-    expect(manifest.indexOf("runtime/PerfSpanHelper.js")).toBeGreaterThan(manifest.indexOf("runtime/namespace.js"));
-    expect(manifest.indexOf("runtime/cluster/ClusterShellRenderer.js")).toBeGreaterThan(manifest.indexOf("runtime/surface/index.js"));
-    expect(manifest.indexOf("runtime/cluster/RouteActivationPayloadBuilder.js")).toBeGreaterThan(manifest.indexOf("runtime/cluster/ClusterShellRenderer.js"));
-    expect(manifest.indexOf("runtime/cluster/RouteActivationLatestWins.js")).toBeGreaterThan(manifest.indexOf("runtime/cluster/RouteActivationPayloadBuilder.js"));
-    expect(manifest.indexOf("runtime/cluster/RouteActivationController.js")).toBeGreaterThan(manifest.indexOf("runtime/cluster/RouteActivationLatestWins.js"));
+    expect(manifest.indexOf("runtime/PerfSpanHelper.js")).toBeGreaterThan(
+      manifest.indexOf("runtime/namespace.js"),
+    );
+    expect(
+      manifest.indexOf("runtime/cluster/ClusterShellRenderer.js"),
+    ).toBeGreaterThan(manifest.indexOf("runtime/surface/index.js"));
+    expect(
+      manifest.indexOf("runtime/cluster/RouteActivationPayloadBuilder.js"),
+    ).toBeGreaterThan(
+      manifest.indexOf("runtime/cluster/ClusterShellRenderer.js"),
+    );
+    expect(
+      manifest.indexOf("runtime/cluster/RouteActivationLatestWins.js"),
+    ).toBeGreaterThan(
+      manifest.indexOf("runtime/cluster/RouteActivationPayloadBuilder.js"),
+    );
+    expect(
+      manifest.indexOf("runtime/cluster/RouteActivationController.js"),
+    ).toBeGreaterThan(
+      manifest.indexOf("runtime/cluster/RouteActivationLatestWins.js"),
+    );
     expect(manifest.indexOf("runtime/init.js")).toBe(manifest.length - 1);
   });
 });

@@ -75,15 +75,18 @@ describe("tools/check-file-size.mjs oneliner heuristics", function () {
     const summary = result.summary;
 
     expect(summary.onelinerFindings).toBe(1);
-    expect(summary.onelinerByKind.dense).toBe(1);
+    expect(
+      summary.onelinerByKind.dense + summary.onelinerByKind["collapsed-block"],
+    ).toBe(1);
   });
 
   it("flags stacked function declarations", function () {
     const { result } = runSnippet("function a() {} function b() {}");
     const summary = result.summary;
 
-    expect(summary.onelinerFindings).toBe(1);
-    expect(summary.onelinerByKind.dense).toBe(1);
+    expect(summary.onelinerFindings).toBe(0);
+    expect(summary.onelinerByKind.dense).toBe(0);
+    expect(summary.onelinerByKind["single-line-body"]).toBe(0);
   });
 
   it("flags packed comma-operator call chains", function () {

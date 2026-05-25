@@ -6,12 +6,16 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniStableDigits = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniStableDigits = factory();
+  }
 }(this, function () {
   "use strict";
 
   const hasOwn = Object.prototype.hasOwnProperty;
-  const NUMBER_PARTS_RE = /^\s*([+-]?)(\d+)(?:[.,](\d+))?\s*(.*?)\s*$/;
+  const NUMBER_PARTS_RE = new RegExp(
+    "^\\s*([+-]?)(\\d+)(?:[.,](\\d+))?\\s*(.*?)\\s*$"
+  );
   let toText;
 
   function toIntegerWidth(value) {

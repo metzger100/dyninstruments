@@ -1,14 +1,23 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const {
+  createComponentContextMock,
+} = require("../../helpers/component-context-mock");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("StateScreenCanvasOverlay", function () {
   function createOverlay() {
-    return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js").create({}, createComponentContextMock({
-      modules: {
-        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js")
-      }
-    }));
+    return loadFresh(
+      "shared/widget-kits/state/StateScreenCanvasOverlay.js",
+    ).create(
+      {},
+      createComponentContextMock({
+        modules: {
+          StateScreenLabels: loadFresh(
+            "shared/widget-kits/state/StateScreenLabels.js",
+          ),
+        },
+      }),
+    );
   }
 
   function readFontPx(ctx) {
@@ -22,7 +31,7 @@ describe("StateScreenCanvasOverlay", function () {
       disconnected: "GPS Lost",
       noRoute: "No Route",
       noTarget: "No Waypoint",
-      noAis: "No AIS"
+      noAis: "No AIS",
     };
 
     Object.keys(expected).forEach((kind) => {
@@ -34,7 +43,7 @@ describe("StateScreenCanvasOverlay", function () {
         H: 200,
         family: "Roboto",
         color: "#f0f0f0",
-        labelWeight: 650
+        labelWeight: 650,
       });
 
       const fillRectCall = ctx.calls.find((entry) => entry.name === "fillRect");
@@ -50,10 +59,10 @@ describe("StateScreenCanvasOverlay", function () {
   it("reduces font size on a narrow canvas versus a same-area square canvas", function () {
     const overlay = createOverlay();
     const narrowCtx = createMockContext2D({
-      charWidth: 1
+      charWidth: 1,
     });
     const squareCtx = createMockContext2D({
-      charWidth: 1
+      charWidth: 1,
     });
 
     narrowCtx.measureText = function (text) {
@@ -74,7 +83,7 @@ describe("StateScreenCanvasOverlay", function () {
       H: 400,
       family: "Roboto",
       color: "#f0f0f0",
-      labelWeight: 650
+      labelWeight: 650,
     });
     overlay.drawStateScreen({
       ctx: squareCtx,
@@ -83,7 +92,7 @@ describe("StateScreenCanvasOverlay", function () {
       H: 200,
       family: "Roboto",
       color: "#f0f0f0",
-      labelWeight: 650
+      labelWeight: 650,
     });
 
     expect(readFontPx(narrowCtx)).toBeLessThan(readFontPx(squareCtx));
@@ -93,7 +102,11 @@ describe("StateScreenCanvasOverlay", function () {
     const overlay = createOverlay();
     const ctx = createMockContext2D();
 
-    expect(() => overlay.drawStateScreen({ ctx: ctx, kind: "hidden", W: 10, H: 10 })).toThrow("invalid on canvas");
-    expect(() => overlay.drawStateScreen({ ctx: ctx, kind: "data", W: 10, H: 10 })).toThrow("invalid on canvas");
+    expect(() =>
+      overlay.drawStateScreen({ ctx: ctx, kind: "hidden", W: 10, H: 10 }),
+    ).toThrow("invalid on canvas");
+    expect(() =>
+      overlay.drawStateScreen({ ctx: ctx, kind: "data", W: 10, H: 10 }),
+    ).toThrow("invalid on canvas");
   });
 });

@@ -1,6 +1,11 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const {
+  createMockCanvas,
+  createMockContext2D,
+} = require("../../helpers/mock-canvas");
+const {
+  createComponentContextMock,
+} = require("../../helpers/component-context-mock");
 
 describe("PositionCoordinateWidget phase 4", function () {
   let previousAvnav;
@@ -18,21 +23,44 @@ describe("PositionCoordinateWidget phase 4", function () {
   function makeComponentContext() {
     const themeTokens = {
       surface: { fg: "#fff" },
-      font: { family: "sans-serif", familyMono: "monospace", weight: 730, labelWeight: 610 }
+      font: {
+        family: "sans-serif",
+        familyMono: "monospace",
+        weight: 730,
+        labelWeight: 610,
+      },
     };
-    const textLayoutEngineModule = loadFresh("shared/widget-kits/text/TextLayoutEngine.js");
+    const textLayoutEngineModule = loadFresh(
+      "shared/widget-kits/text/TextLayoutEngine.js",
+    );
     const modules = {
-      RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js"),
-      RadialTextFitting: loadFresh("shared/widget-kits/radial/RadialTextFitting.js"),
-      CanvasTextLayout: loadFresh("shared/widget-kits/text/CanvasTextLayout.js"),
+      RadialAngleMath: loadFresh(
+        "shared/widget-kits/radial/RadialAngleMath.js",
+      ),
+      RadialTextFitting: loadFresh(
+        "shared/widget-kits/radial/RadialTextFitting.js",
+      ),
+      CanvasTextLayout: loadFresh(
+        "shared/widget-kits/text/CanvasTextLayout.js",
+      ),
       ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js"),
-      TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
-      TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
-      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js")
+      TextLayoutPrimitives: loadFresh(
+        "shared/widget-kits/text/TextLayoutPrimitives.js",
+      ),
+      TextLayoutComposite: loadFresh(
+        "shared/widget-kits/text/TextLayoutComposite.js",
+      ),
+      ResponsiveScaleProfile: loadFresh(
+        "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+      ),
     };
     const applyFormatter = vi.fn(function (raw, props) {
       const fpRaw = props && props.formatterParameters;
-      const fp = Array.isArray(fpRaw) ? fpRaw : (typeof fpRaw === "string" ? fpRaw.split(",") : []);
+      const fp = Array.isArray(fpRaw)
+        ? fpRaw
+        : typeof fpRaw === "string"
+          ? fpRaw.split(",")
+          : [];
       try {
         if (props && typeof props.formatter === "function") {
           return props.formatter.apply(null, [raw].concat(fp));
@@ -45,10 +73,14 @@ describe("PositionCoordinateWidget phase 4", function () {
           globalThis.avnav.api.formatter &&
           typeof globalThis.avnav.api.formatter[props.formatter] === "function"
         ) {
-          return globalThis.avnav.api.formatter[props.formatter].apply(globalThis.avnav.api.formatter, [raw].concat(fp));
+          return globalThis.avnav.api.formatter[props.formatter].apply(
+            globalThis.avnav.api.formatter,
+            [raw].concat(fp),
+          );
         }
       } catch (ignore) {}
-      if (raw == null || Number.isNaN(raw)) return (props && props.default) || "---";
+      if (raw == null || Number.isNaN(raw))
+        return (props && props.default) || "---";
       return String(raw);
     });
 
@@ -57,20 +89,28 @@ describe("PositionCoordinateWidget phase 4", function () {
         ThemeResolver: {
           resolveForRoot() {
             return themeTokens;
-          }
+          },
         },
         TextLayoutEngine: textLayoutEngineModule,
-        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
-        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
-        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
-        StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
+        PlaceholderNormalize: loadFresh(
+          "shared/widget-kits/format/PlaceholderNormalize.js",
+        ),
+        StateScreenLabels: loadFresh(
+          "shared/widget-kits/state/StateScreenLabels.js",
+        ),
+        StateScreenPrecedence: loadFresh(
+          "shared/widget-kits/state/StateScreenPrecedence.js",
+        ),
+        StateScreenCanvasOverlay: loadFresh(
+          "shared/widget-kits/state/StateScreenCanvasOverlay.js",
+        ),
         RadialAngleMath: modules.RadialAngleMath,
         RadialTextFitting: modules.RadialTextFitting,
         CanvasTextLayout: modules.CanvasTextLayout,
         ValueMath: modules.ValueMath,
         TextLayoutPrimitives: modules.TextLayoutPrimitives,
         TextLayoutComposite: modules.TextLayoutComposite,
-        ResponsiveScaleProfile: modules.ResponsiveScaleProfile
+        ResponsiveScaleProfile: modules.ResponsiveScaleProfile,
       },
       services: {
         format: { applyFormatter },
@@ -78,20 +118,24 @@ describe("PositionCoordinateWidget phase 4", function () {
           setupCanvas(canvas) {
             const ctx = canvas.getContext("2d");
             const rect = canvas.getBoundingClientRect();
-            return { ctx, W: Math.round(rect.width), H: Math.round(rect.height) };
-          }
+            return {
+              ctx,
+              W: Math.round(rect.width),
+              H: Math.round(rect.height),
+            };
+          },
         },
         dom: {
           requirePluginRoot(target) {
             return target;
-          }
+          },
         },
         themeTokens: {
           resolveForRoot() {
             return themeTokens;
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 
@@ -109,7 +153,7 @@ describe("PositionCoordinateWidget phase 4", function () {
         text: String(arguments[0]),
         x: arguments[1],
         y: arguments[2],
-        font: ctx.font
+        font: ctx.font,
       });
       return originalFillText.apply(this, arguments);
     };
@@ -125,28 +169,33 @@ describe("PositionCoordinateWidget phase 4", function () {
     globalThis.avnav = {
       api: {
         formatter: {
-          formatDate(value) { return value === rawClock ? "DATE" : "DATE_BAD"; },
-          formatTime(value) { return value === rawClock ? "TIME" : "TIME_BAD"; }
-        }
-      }
+          formatDate(value) {
+            return value === rawClock ? "DATE" : "DATE_BAD";
+          },
+          formatTime(value) {
+            return value === rawClock ? "TIME" : "TIME_BAD";
+          },
+        },
+      },
     };
 
-    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
-      .create({}, makeComponentContext());
+    const spec = loadFresh(
+      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
+    ).create({}, makeComponentContext());
 
     [
       {
         displayVariant: "dateTime",
         value: [rawClock, rawClock],
         expectedTexts: ["DATE", "TIME"],
-        fontText: "TIME"
+        fontText: "TIME",
       },
       {
         displayVariant: "timeStatus",
         value: [rawClock, true],
         expectedTexts: ["🟢", "TIME"],
-        fontText: "TIME"
-      }
+        fontText: "TIME",
+      },
     ].forEach(function (item) {
       const ctx = createMockContext2D();
       const captured = captureTextCalls(ctx);
@@ -157,14 +206,16 @@ describe("PositionCoordinateWidget phase 4", function () {
         displayVariant: item.displayVariant,
         ratioThresholdNormal: 1.0,
         ratioThresholdFlat: 3.0,
-        default: "NA"
+        default: "NA",
       });
 
       item.expectedTexts.forEach(function (text) {
         expect(fillTextValues(ctx)).toContain(text);
       });
       expect(String(ctx.textAlign)).toBe("center");
-      expect(String(findTextCall(captured, item.fontText).font)).toContain("monospace");
+      expect(String(findTextCall(captured, item.fontText).font)).toContain(
+        "monospace",
+      );
     });
   });
 
@@ -173,14 +224,19 @@ describe("PositionCoordinateWidget phase 4", function () {
     globalThis.avnav = {
       api: {
         formatter: {
-          formatDate(value) { return value === rawClock ? "DATE" : "DATE_BAD"; },
-          formatTime(value) { return value === rawClock ? "TIME" : "TIME_BAD"; }
-        }
-      }
+          formatDate(value) {
+            return value === rawClock ? "DATE" : "DATE_BAD";
+          },
+          formatTime(value) {
+            return value === rawClock ? "TIME" : "TIME_BAD";
+          },
+        },
+      },
     };
 
-    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js")
-      .create({}, makeComponentContext());
+    const spec = loadFresh(
+      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
+    ).create({}, makeComponentContext());
 
     const ctx = createMockContext2D();
     const captured = captureTextCalls(ctx);
@@ -193,7 +249,7 @@ describe("PositionCoordinateWidget phase 4", function () {
       coordinatesTabular: true,
       ratioThresholdNormal: 1.0,
       ratioThresholdFlat: 3.0,
-      default: "NA"
+      default: "NA",
     });
 
     expect(fillTextValues(ctx)).toContain("DATE");

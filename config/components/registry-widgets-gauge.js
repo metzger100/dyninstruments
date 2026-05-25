@@ -36,21 +36,38 @@
       js: BASE + "widgets/radial/CompassRadialWidget/CompassRadialWidget.js",
       css: undefined,
       globalKey: "DyniCompassRadialWidget",
-      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "SpringEasing", "StableDigits"]
+      deps: [
+        "FullCircleRadialEngine",
+        "FullCircleRadialTextLayout",
+        "SpringEasing",
+        "StableDigits"
+      ]
   };
 
   w.DepthLinearWidget = {
       js: BASE + "widgets/linear/DepthLinearWidget/DepthLinearWidget.js",
       css: undefined,
       globalKey: "DyniDepthLinearWidget",
-      deps: ["LinearGaugeEngine", "ValueMath", "DepthDisplayFormatter", "PlaceholderNormalize", "UnitAwareFormatter"]
+      deps: [
+        "LinearGaugeEngine",
+        "ValueMath",
+        "DepthDisplayFormatter",
+        "PlaceholderNormalize",
+        "UnitAwareFormatter"
+      ]
   };
 
   w.DepthRadialWidget = {
       js: BASE + "widgets/radial/DepthRadialWidget/DepthRadialWidget.js",
       css: undefined,
       globalKey: "DyniDepthRadialWidget",
-      deps: ["SemicircleRadialEngine", "ValueMath", "DepthDisplayFormatter", "PlaceholderNormalize", "UnitAwareFormatter"]
+      deps: [
+        "SemicircleRadialEngine",
+        "ValueMath",
+        "DepthDisplayFormatter",
+        "PlaceholderNormalize",
+        "UnitAwareFormatter"
+      ]
   };
 
   w.DefaultRadialWidget = {
@@ -120,7 +137,14 @@
       js: BASE + "widgets/radial/WindRadialWidget/WindRadialWidget.js",
       css: undefined,
       globalKey: "DyniWindRadialWidget",
-      deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "ValueMath", "SpringEasing", "StableDigits", "PlaceholderNormalize"]
+      deps: [
+        "FullCircleRadialEngine",
+        "FullCircleRadialTextLayout",
+        "ValueMath",
+        "SpringEasing",
+        "StableDigits",
+        "PlaceholderNormalize"
+      ]
   };
 
 }(this));

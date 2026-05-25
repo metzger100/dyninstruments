@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniGeometryScale = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniGeometryScale = factory();
+  }
 }(this, function () {
   "use strict";
 

@@ -6,7 +6,9 @@ const { spawnSync } = require("node:child_process");
 function runReal(command, args, cwd) {
   const result = spawnSync(command, args, { cwd, encoding: "utf8" });
   if (result.status !== 0) {
-    throw new Error(`${command} ${args.join(" ")} failed\n${result.stderr || result.stdout}`);
+    throw new Error(
+      `${command} ${args.join(" ")} failed\n${result.stderr || result.stdout}`,
+    );
   }
   return result.stdout || "";
 }
@@ -39,7 +41,9 @@ describe("release-create", function () {
   it("creates release artifacts, commit, and annotated tag while treating perf check as advisory", async function () {
     const { createRelease } = await import("../../tools/release-create.mjs");
 
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-create-"));
+    const tempRoot = fs.mkdtempSync(
+      path.join(os.tmpdir(), "dyni-release-create-"),
+    );
     const version = "1.2.3";
     const tag = `v${version}`;
     const notesRel = `releases/dyninstruments-${version}.md`;
@@ -48,9 +52,17 @@ describe("release-create", function () {
       writeFile(tempRoot, "plugin.js", "console.log('plugin');\n");
       writeFile(tempRoot, "plugin.mjs", "export default function () {}\n");
       writeFile(tempRoot, "plugin.css", "body {}\n");
-      writeFile(tempRoot, "runtime/plugin-bootstrap-core.js", "console.log('bootstrap core');\n");
+      writeFile(
+        tempRoot,
+        "runtime/plugin-bootstrap-core.js",
+        "console.log('bootstrap core');\n",
+      );
       writeFile(tempRoot, "runtime/init.js", "console.log('init');\n");
-      writeFile(tempRoot, "config/bootstrap-manifest.js", "(function(){})();\n");
+      writeFile(
+        tempRoot,
+        "config/bootstrap-manifest.js",
+        "(function(){})();\n",
+      );
       writeFile(tempRoot, "assets/fonts/Roboto-Regular.woff2", "fontdata\n");
 
       runReal("git", ["init"], tempRoot);
@@ -68,7 +80,7 @@ describe("release-create", function () {
         "runtime/plugin-bootstrap-core.js",
         "runtime/init.js",
         "config/bootstrap-manifest.js",
-        "assets/fonts/Roboto-Regular.woff2"
+        "assets/fonts/Roboto-Regular.woff2",
       ];
 
       let zippedEntries = [];
@@ -79,11 +91,19 @@ describe("release-create", function () {
         version,
         runCommand(command, args, options = {}) {
           if (command === "npm") {
-            if (args[0] === "run" && (args[1] === "check:core" || args[1] === "test:coverage:check")) {
+            if (
+              args[0] === "run" &&
+              (args[1] === "check:core" || args[1] === "test:coverage:check")
+            ) {
               return { status: 0, stdout: "ok\n", stderr: "", error: null };
             }
             if (args[0] === "run" && args[1] === "perf:check") {
-              return { status: 1, stdout: "perf regression\n", stderr: "", error: null };
+              return {
+                status: 1,
+                stdout: "perf regression\n",
+                stderr: "",
+                error: null,
+              };
             }
           }
 
@@ -96,7 +116,10 @@ describe("release-create", function () {
             const stageRoot = path.join(options.cwd, "dyninstruments");
             zippedEntries = listRelativeFiles(stageRoot);
             fs.mkdirSync(path.dirname(outputZipAbs), { recursive: true });
-            fs.writeFileSync(outputZipAbs, "fake zip\n" + zippedEntries.join("\n"));
+            fs.writeFileSync(
+              outputZipAbs,
+              "fake zip\n" + zippedEntries.join("\n"),
+            );
             return { status: 0, stdout: "", stderr: "", error: null };
           }
 
@@ -105,19 +128,24 @@ describe("release-create", function () {
               const stdout = runReal("git", args, tempRoot);
               return { status: 0, stdout, stderr: "", error: null };
             } catch (error) {
-              return { status: 1, stdout: "", stderr: String(error.message || error), error: null };
+              return {
+                status: 1,
+                stdout: "",
+                stderr: String(error.message || error),
+                error: null,
+              };
             }
           }
 
           const result = spawnSync(command, args, {
             cwd: options.cwd,
-            encoding: "utf8"
+            encoding: "utf8",
           });
           return {
             status: result.status,
             stdout: result.stdout || "",
             stderr: result.stderr || "",
-            error: result.error || null
+            error: result.error || null,
           };
         },
         manifestBuilder() {
@@ -133,8 +161,8 @@ describe("release-create", function () {
           log() {},
           warn(message) {
             warnings.push(message);
-          }
-        }
+          },
+        },
       });
 
       const releaseZipRel = `releases/dyninstruments-${version}.zip`;
@@ -142,7 +170,9 @@ describe("release-create", function () {
       expect(result.tag).toBe(tag);
       expect(fs.existsSync(path.join(tempRoot, releaseZipRel))).toBe(true);
       expect(fs.existsSync(path.join(tempRoot, notesRel))).toBe(true);
-      expect(fs.readFileSync(path.join(tempRoot, notesRel), "utf8")).toContain("# Release 1.2.3");
+      expect(fs.readFileSync(path.join(tempRoot, notesRel), "utf8")).toContain(
+        "# Release 1.2.3",
+      );
 
       expect(zippedEntries).toEqual([
         "assets/fonts/Roboto-Regular.woff2",
@@ -152,10 +182,14 @@ describe("release-create", function () {
         "plugin.js",
         "plugin.mjs",
         "runtime/init.js",
-        "runtime/plugin-bootstrap-core.js"
+        "runtime/plugin-bootstrap-core.js",
       ]);
 
-      const headMessage = runReal("git", ["log", "-1", "--pretty=%s"], tempRoot).trim();
+      const headMessage = runReal(
+        "git",
+        ["log", "-1", "--pretty=%s"],
+        tempRoot,
+      ).trim();
       expect(headMessage).toBe("release: v1.2.3");
 
       const tagType = runReal("git", ["cat-file", "-t", tag], tempRoot).trim();
@@ -164,13 +198,19 @@ describe("release-create", function () {
       const taggedObject = runReal("git", ["cat-file", "-p", tag], tempRoot);
       expect(taggedObject).toContain("Release v1.2.3");
 
-      const statusOutput = runReal("git", ["status", "--porcelain", "--untracked-files=all"], tempRoot).trim();
+      const statusOutput = runReal(
+        "git",
+        ["status", "--porcelain", "--untracked-files=all"],
+        tempRoot,
+      ).trim();
       expect(statusOutput).toBe("");
       expect(() => {
         runReal("git", ["ls-files", "--error-unmatch", notesRel], tempRoot);
       }).not.toThrow();
 
-      expect(warnings.some((line) => line.includes("perf:check failed"))).toBe(true);
+      expect(warnings.some((line) => line.includes("perf:check failed"))).toBe(
+        true,
+      );
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }

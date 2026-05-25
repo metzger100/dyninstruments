@@ -32,7 +32,13 @@
       css: undefined,
       shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css"],
       globalKey: "DyniAlarmTextHtmlWidget",
-      deps: ["AlarmHtmlFit", "HtmlWidgetUtils", "AlarmRenderModel", "AlarmMarkup", "ValueMath"]
+      deps: [
+        "AlarmHtmlFit",
+        "HtmlWidgetUtils",
+        "AlarmRenderModel",
+        "AlarmMarkup",
+        "ValueMath"
+      ]
   };
 
   w.AlarmMarkup = {
@@ -75,21 +81,43 @@
       css: undefined,
       shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.css"],
       globalKey: "DyniRegattaTimerTextHtmlWidget",
-      deps: ["RegattaTimerModel", "RegattaTimerAudio", "RegattaTimerSessionStore", "RegattaTimerMarkup", "RegattaTimerHtmlFit", "HtmlWidgetUtils", "ValueMath"]
+      deps: [
+        "RegattaTimerModel",
+        "RegattaTimerAudio",
+        "RegattaTimerSessionStore",
+        "RegattaTimerMarkup",
+        "RegattaTimerHtmlFit",
+        "HtmlWidgetUtils",
+        "ValueMath"
+      ]
   };
 
   w.PositionCoordinateWidget = {
       js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
       css: undefined,
       globalKey: "DyniPositionCoordinateWidget",
-      deps: ["TextLayoutEngine", "ValueMath", "PlaceholderNormalize", "StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
+      deps: [
+        "TextLayoutEngine",
+        "ValueMath",
+        "PlaceholderNormalize",
+        "StateScreenLabels",
+        "StateScreenPrecedence",
+        "StateScreenCanvasOverlay"
+      ]
   };
 
   w.ThreeValueTextWidget = {
       js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
       css: undefined,
       globalKey: "DyniThreeValueTextWidget",
-      deps: ["TextLayoutEngine", "PlaceholderNormalize", "StableDigits", "StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
+      deps: [
+        "TextLayoutEngine",
+        "PlaceholderNormalize",
+        "StableDigits",
+        "StateScreenLabels",
+        "StateScreenPrecedence",
+        "StateScreenCanvasOverlay"
+      ]
   };
 
   w.XteDisplayWidget = {

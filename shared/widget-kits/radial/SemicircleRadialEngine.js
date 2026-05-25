@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniSemicircleRadialEngine = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniSemicircleRadialEngine = factory();
+  }
 }(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
@@ -147,7 +149,15 @@
         const stateKind = stateScreenPrecedence.pickFirst([{ kind: "disconnected", when: p.disconnect === true }, { kind: "data", when: true }]);
         ctx.clearRect(0, 0, W, H);
         if (stateKind !== stateScreenLabels.KINDS.DATA) {
-          stateScreenCanvasOverlay.drawStateScreen({ ctx: ctx, W: W, H: H, family: paint.family, color: paint.color, labelWeight: labelWeight, kind: stateKind });
+          stateScreenCanvasOverlay.drawStateScreen({
+            ctx: ctx,
+            W: W,
+            H: H,
+            family: paint.family,
+            color: paint.color,
+            labelWeight: labelWeight,
+            kind: stateKind
+          });
           return;
         }
         const ratioNormal = value.isFiniteNumber(p[ratioProps.normal]) ? p[ratioProps.normal] : modeDefaults.normal;
@@ -171,7 +181,13 @@
             insets: insets,
             responsive: insets.responsive
           });
-          memoLayout = { key: memoKey, themeRef: theme, mode: mode, insets: insets, layout: layout };
+          memoLayout = {
+            key: memoKey,
+            themeRef: theme,
+            mode: mode,
+            insets: insets,
+            layout: layout
+          };
         }
         const valueWeight = theme.font.weight;
         const family = stableDigitsEnabled

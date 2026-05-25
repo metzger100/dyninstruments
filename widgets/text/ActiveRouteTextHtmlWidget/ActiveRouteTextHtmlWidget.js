@@ -7,7 +7,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniActiveRouteTextHtmlWidget = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniActiveRouteTextHtmlWidget = factory();
+  }
 }(this, function () {
   "use strict";
 
@@ -191,7 +193,12 @@
       { id: "rteEta", caption: model.etaCaption, value: model.etaText, unit: model.etaUnit }
     ];
     if (model.isApproaching) {
-      metricSpecs.push({ id: "next", caption: model.nextCourseCaption, value: model.nextCourseText, unit: model.nextCourseUnit });
+      metricSpecs.push({
+        id: "next",
+        caption: model.nextCourseCaption,
+        value: model.nextCourseText,
+        unit: model.nextCourseUnit
+      });
     }
     let metricsHtml = "";
     for (let i = 0; i < metricSpecs.length; i += 1) {

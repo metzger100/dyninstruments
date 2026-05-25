@@ -1,30 +1,58 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const {
+  createComponentContextMock,
+} = require("../../helpers/component-context-mock");
 
 describe("AisTargetTextHtmlWidget", function () {
   function createRenderer(options) {
     const opts = options || {};
-    const fitCompute = opts.fitCompute || vi.fn(function () {
-      return {
-        nameStyle: "font-size:12px;",
-        frontStyle: "font-size:10px;",
-        placeholderStyle: "font-size:11px;",
-        metrics: {
-          dst: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-          cpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-          tcpa: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" },
-          brg: { captionStyle: "font-size:8px;", valueRowStyle: "", valueStyle: "font-size:11px;", unitStyle: "font-size:7px;" }
-        },
-        accentStyle: "background-color:#c33;"
-      };
-    });
+    const fitCompute =
+      opts.fitCompute ||
+      vi.fn(function () {
+        return {
+          nameStyle: "font-size:12px;",
+          frontStyle: "font-size:10px;",
+          placeholderStyle: "font-size:11px;",
+          metrics: {
+            dst: {
+              captionStyle: "font-size:8px;",
+              valueRowStyle: "",
+              valueStyle: "font-size:11px;",
+              unitStyle: "font-size:7px;",
+            },
+            cpa: {
+              captionStyle: "font-size:8px;",
+              valueRowStyle: "",
+              valueStyle: "font-size:11px;",
+              unitStyle: "font-size:7px;",
+            },
+            tcpa: {
+              captionStyle: "font-size:8px;",
+              valueRowStyle: "",
+              valueStyle: "font-size:11px;",
+              unitStyle: "font-size:7px;",
+            },
+            brg: {
+              captionStyle: "font-size:8px;",
+              valueRowStyle: "",
+              valueStyle: "font-size:11px;",
+              unitStyle: "font-size:7px;",
+            },
+          },
+          accentStyle: "background-color:#c33;",
+        };
+      });
 
-    const applyFormatter = opts.applyFormatter || function (value, formatterOptions) {
+    const applyFormatter =
+      opts.applyFormatter ||
+      function (value, formatterOptions) {
         const cfg = formatterOptions || {};
         const formatter = cfg.formatter;
-        const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
+        const params = Array.isArray(cfg.formatterParameters)
+          ? cfg.formatterParameters
+          : [];
         if (value == null) {
           return cfg.default;
         }
@@ -41,24 +69,56 @@ describe("AisTargetTextHtmlWidget", function () {
       };
     const componentContext = createComponentContextMock({
       modules: {
-        AisTargetHtmlFit: { create() { return { compute: fitCompute }; } },
-        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
-        AisTargetRenderModel: loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js"),
-        UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
+        AisTargetHtmlFit: {
+          create() {
+            return { compute: fitCompute };
+          },
+        },
+        HtmlWidgetUtils: loadFresh(
+          "shared/widget-kits/html/HtmlWidgetUtils.js",
+        ),
+        AisTargetRenderModel: loadFresh(
+          "shared/widget-kits/nav/AisTargetRenderModel.js",
+        ),
+        UnitAwareFormatter: loadFresh(
+          "shared/widget-kits/format/UnitAwareFormatter.js",
+        ),
         AisTargetMarkup: loadFresh("shared/widget-kits/nav/AisTargetMarkup.js"),
         AisTargetLayout: loadFresh("shared/widget-kits/nav/AisTargetLayout.js"),
-        AisTargetLayoutSizing: loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js"),
-        ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
-        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-        AisTargetLayoutGeometry: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js"),
-        AisTargetLayoutMath: loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js"),
-        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        AisTargetLayoutSizing: loadFresh(
+          "shared/widget-kits/nav/AisTargetLayoutSizing.js",
+        ),
+        ResponsiveScaleProfile: loadFresh(
+          "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+        ),
+        LayoutRectMath: loadFresh(
+          "shared/widget-kits/layout/LayoutRectMath.js",
+        ),
+        AisTargetLayoutGeometry: loadFresh(
+          "shared/widget-kits/nav/AisTargetLayoutGeometry.js",
+        ),
+        AisTargetLayoutMath: loadFresh(
+          "shared/widget-kits/nav/AisTargetLayoutMath.js",
+        ),
+        PlaceholderNormalize: loadFresh(
+          "shared/widget-kits/format/PlaceholderNormalize.js",
+        ),
         StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
-        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
-        StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
-        StateScreenMarkup: loadFresh("shared/widget-kits/state/StateScreenMarkup.js"),
-        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js")
+        StateScreenLabels: loadFresh(
+          "shared/widget-kits/state/StateScreenLabels.js",
+        ),
+        StateScreenPrecedence: loadFresh(
+          "shared/widget-kits/state/StateScreenPrecedence.js",
+        ),
+        StateScreenInteraction: loadFresh(
+          "shared/widget-kits/state/StateScreenInteraction.js",
+        ),
+        StateScreenMarkup: loadFresh(
+          "shared/widget-kits/state/StateScreenMarkup.js",
+        ),
+        StateScreenTextFit: loadFresh(
+          "shared/widget-kits/state/StateScreenTextFit.js",
+        ),
       },
       services: {
         format: { applyFormatter },
@@ -69,17 +129,19 @@ describe("AisTargetTextHtmlWidget", function () {
                 family: "sans-serif",
                 familyMono: "monospace",
                 weight: 720,
-                labelWeight: 610
-              }
+                labelWeight: 610,
+              },
             };
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     return {
-      renderer: loadFresh("widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js").create({}, componentContext),
-      fitCompute
+      renderer: loadFresh(
+        "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js",
+      ).create({}, componentContext),
+      fitCompute,
     };
   }
 
@@ -97,43 +159,61 @@ describe("AisTargetTextHtmlWidget", function () {
         distance: 4.2,
         cpa: 0.7,
         tcpa: 42,
-        headingTo: 112
+        headingTo: 112,
       },
       layout: {
         ratioThresholdNormal: 1.2,
-        ratioThresholdFlat: 3.8
+        ratioThresholdFlat: 3.8,
       },
       captions: {
         dst: "DST",
         cpa: "DCPA",
         tcpa: "TCPA",
-        brg: "BRG"
+        brg: "BRG",
       },
       units: {
         dst: "nm",
         cpa: "nm",
         tcpa: "min",
-        brg: "°"
+        brg: "°",
       },
       formatUnits: {
         dst: "nm",
-        cpa: "nm"
+        cpa: "nm",
       },
-      default: "---"
+      default: "---",
     };
 
     const out = Object.assign({}, base, overrides || {});
-    out.domain = Object.assign({}, base.domain, overrides && overrides.domain ? overrides.domain : {});
-    out.layout = Object.assign({}, base.layout, overrides && overrides.layout ? overrides.layout : {});
-    out.captions = Object.assign({}, base.captions, overrides && overrides.captions ? overrides.captions : {});
-    out.units = Object.assign({}, base.units, overrides && overrides.units ? overrides.units : {});
+    out.domain = Object.assign(
+      {},
+      base.domain,
+      overrides && overrides.domain ? overrides.domain : {},
+    );
+    out.layout = Object.assign(
+      {},
+      base.layout,
+      overrides && overrides.layout ? overrides.layout : {},
+    );
+    out.captions = Object.assign(
+      {},
+      base.captions,
+      overrides && overrides.captions ? overrides.captions : {},
+    );
+    out.units = Object.assign(
+      {},
+      base.units,
+      overrides && overrides.units ? overrides.units : {},
+    );
     return out;
   }
 
   function withSurfacePolicy(props, options) {
     const opts = options || {};
-    const interactionMode = opts.interactionMode === "passive" ? "passive" : "dispatch";
-    const containerOrientation = opts.containerOrientation === "vertical" ? "vertical" : "default";
+    const interactionMode =
+      opts.interactionMode === "passive" ? "passive" : "dispatch";
+    const containerOrientation =
+      opts.containerOrientation === "vertical" ? "vertical" : "default";
     const showInfo = opts.showInfo || vi.fn(() => true);
 
     return Object.assign({}, props || {}, {
@@ -143,10 +223,10 @@ describe("AisTargetTextHtmlWidget", function () {
         interaction: { mode: interactionMode },
         actions: {
           ais: {
-            showInfo
-          }
-        }
-      }
+            showInfo,
+          },
+        },
+      },
     });
   }
 
@@ -166,13 +246,13 @@ describe("AisTargetTextHtmlWidget", function () {
 
     mountEl.getBoundingClientRect = vi.fn(() => ({
       width: shellSize.width,
-      height: shellSize.height
+      height: shellSize.height,
     }));
 
     const committed = rendererSpec.createCommittedRenderer({
       hostContext,
       mountEl,
-      shadowRoot: null
+      shadowRoot: null,
     });
 
     function payload(nextProps, revision, layoutChanged) {
@@ -186,7 +266,7 @@ describe("AisTargetTextHtmlWidget", function () {
         shellRect: { width: shellSize.width, height: shellSize.height },
         hostContext,
         layoutChanged: layoutChanged === true,
-        relayoutPass: 0
+        relayoutPass: 0,
       };
     }
 
@@ -199,7 +279,7 @@ describe("AisTargetTextHtmlWidget", function () {
       committed,
       html() {
         return mountEl.innerHTML;
-      }
+      },
     };
   }
 
@@ -222,8 +302,8 @@ describe("AisTargetTextHtmlWidget", function () {
       setup.renderer,
       withSurfacePolicy(makeProps(), {
         interactionMode: "dispatch",
-        showInfo
-      })
+        showInfo,
+      }),
     );
 
     const html = mounted.html();
@@ -234,192 +314,11 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(html).toContain("dyni-ais-target-open-hotspot");
 
     const wrapper = mounted.mountEl.querySelector(".dyni-ais-target-html");
-    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    wrapper.dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true }),
+    );
     expect(showInfo).toHaveBeenCalledWith("211234560");
     expect(setup.fitCompute).toHaveBeenCalledTimes(1);
   });
 
-  it("updates emitted accent strip width when shell width changes at the same height", function () {
-    const renderer = createRenderer().renderer;
-    const props = withSurfacePolicy(makeProps({
-      domain: {
-        hasColorRole: true,
-        colorRole: "warning"
-      }
-    }), {
-      interactionMode: "dispatch"
-    });
-    const narrowMounted = mountCommitted(renderer, props, { shellSize: { width: 180, height: 100 } });
-    const wideMounted = mountCommitted(renderer, props, { shellSize: { width: 320, height: 100 } });
-    const narrowAccent = narrowMounted.mountEl.querySelector(".dyni-ais-target-state-accent");
-    const wideAccent = wideMounted.mountEl.querySelector(".dyni-ais-target-state-accent");
-    const narrowWidth = readInlinePx(narrowAccent && narrowAccent.style ? narrowAccent.style.width : "");
-    const wideWidth = readInlinePx(wideAccent && wideAccent.style ? wideAccent.style.width : "");
-    const narrowRadius = readInlinePx(narrowAccent && narrowAccent.style ? narrowAccent.style.borderRadius : "");
-    const wideRadius = readInlinePx(wideAccent && wideAccent.style ? wideAccent.style.borderRadius : "");
-
-    expect(narrowAccent).toBeTruthy();
-    expect(wideAccent).toBeTruthy();
-    expect(wideWidth).toBeGreaterThan(narrowWidth);
-    expect(narrowRadius).toBe(narrowWidth);
-    expect(wideRadius).toBe(wideWidth);
-  });
-
-  it("stays passive in edit mode", function () {
-    const showInfo = vi.fn(() => true);
-    const mounted = mountCommitted(
-      createRenderer().renderer,
-      withSurfacePolicy(makeProps({ editing: true }), {
-        interactionMode: "dispatch",
-        showInfo
-      })
-    );
-
-    const html = mounted.html();
-    expect(html).toContain("dyni-ais-target-open-passive");
-
-    const wrapper = mounted.mountEl.querySelector(".dyni-ais-target-html");
-    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-    expect(showInfo).not.toHaveBeenCalled();
-  });
-
-  it("renders flat branch and noAis state for gps page", function () {
-    const flatMounted = mountCommitted(
-      createRenderer().renderer,
-      withSurfacePolicy(makeProps({ domain: { showTcpaBranch: false, frontText: "Back" } }), {
-        interactionMode: "dispatch"
-      }),
-      { shellSize: { width: 640, height: 120 } }
-    );
-    const placeholderMounted = mountCommitted(
-      createRenderer().renderer,
-      withSurfacePolicy(makeProps({ domain: { hasTargetIdentity: false } }), {
-        pageId: "gpspage",
-        interactionMode: "passive"
-      })
-    );
-
-    expect(flatMounted.html()).toContain("dyni-ais-target-mode-flat");
-    expect(flatMounted.html()).toContain("dyni-ais-target-branch-brg");
-    expect(flatMounted.html()).toContain("dyni-ais-target-metric-value");
-    expect(flatMounted.html()).not.toContain("dyni-ais-target-metric-value-row");
-
-    expect(placeholderMounted.html()).toContain("dyni-state-no-ais");
-    expect(placeholderMounted.html()).toContain("No AIS");
-  });
-
-  it("renders noAis state for vertical containers outside gpspage when identity is missing", function () {
-    const mounted = mountCommitted(
-      createRenderer().renderer,
-      withSurfacePolicy(makeProps({
-        domain: {
-          hasTargetIdentity: false,
-          hasDispatchMmsi: false
-        }
-      }), {
-        pageId: "other",
-        containerOrientation: "vertical",
-        interactionMode: "passive"
-      }),
-      { shellSize: { width: 220, height: 300 } }
-    );
-
-    expect(mounted.html()).toContain("dyni-state-no-ais");
-    expect(mounted.html()).toContain("No AIS");
-    expect(mounted.html()).not.toContain("dyni-state-hidden");
-  });
-
-  it("renders stableDigits metric values with tabular classes", function () {
-    const renderer = createRenderer({
-      applyFormatter(value, formatterOptions) {
-        const cfg = formatterOptions || {};
-        if (value == null) {
-          return cfg.default;
-        }
-        return String(value);
-      }
-    }).renderer;
-    const mounted = mountCommitted(
-      renderer,
-      withSurfacePolicy(makeProps({ stableDigits: true }), {
-        interactionMode: "dispatch"
-      })
-    );
-
-    expect(mounted.html()).toContain("dyni-ais-target-metric-value-text dyni-tabular");
-    expect(mounted.html()).toContain("04.2");
-    expect(mounted.html()).toContain("00.7");
-  });
-
-  it("applies AIS hidden/disconnected precedence exception", function () {
-    const hiddenMounted = mountCommitted(
-      createRenderer().renderer,
-      withSurfacePolicy(makeProps({
-        disconnect: true,
-        domain: { hasTargetIdentity: false, hasDispatchMmsi: false }
-      }), {
-        pageId: "other",
-        interactionMode: "dispatch"
-      })
-    );
-    expect(hiddenMounted.html()).toContain("dyni-state-hidden");
-    expect(hiddenMounted.html()).not.toContain("GPS Lost");
-
-    const disconnectedMounted = mountCommitted(
-      createRenderer().renderer,
-      withSurfacePolicy(makeProps({
-        disconnect: true,
-        domain: { hasTargetIdentity: false, hasDispatchMmsi: false }
-      }), {
-        pageId: "gpspage",
-        interactionMode: "dispatch"
-      })
-    );
-    expect(disconnectedMounted.html()).toContain("dyni-state-disconnected");
-    expect(disconnectedMounted.html()).toContain("GPS Lost");
-  });
-
-  it("updates layout signatures for branch and interaction changes", function () {
-    const renderer = createRenderer().renderer;
-    const committed = renderer.createCommittedRenderer({ hostContext: {}, mountEl: null, shadowRoot: null });
-
-    const dispatchTcpa = committed.layoutSignature({
-      props: withSurfacePolicy(makeProps(), { interactionMode: "dispatch" }),
-      shellRect: { width: 320, height: 180 }
-    });
-    const dispatchBrg = committed.layoutSignature({
-      props: withSurfacePolicy(makeProps({ domain: { showTcpaBranch: false } }), { interactionMode: "dispatch" }),
-      shellRect: { width: 320, height: 180 }
-    });
-    const passiveTcpa = committed.layoutSignature({
-      props: withSurfacePolicy(makeProps(), { interactionMode: "passive" }),
-      shellRect: { width: 320, height: 180 }
-    });
-    const verticalA = committed.layoutSignature({
-      props: withSurfacePolicy(makeProps(), { containerOrientation: "vertical", interactionMode: "dispatch" }),
-      shellRect: { width: 220, height: 120 }
-    });
-    const verticalB = committed.layoutSignature({
-      props: withSurfacePolicy(makeProps(), { containerOrientation: "vertical", interactionMode: "dispatch" }),
-      shellRect: { width: 220, height: 340 }
-    });
-
-    expect(dispatchBrg).not.toBe(dispatchTcpa);
-    expect(passiveTcpa).not.toBe(dispatchTcpa);
-    expect(verticalB).toBe(verticalA);
-  });
-
-  it("uses shadow-local css selectors", function () {
-    const cssPath = path.join(
-      process.cwd(),
-      "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"
-    );
-    const css = fs.readFileSync(cssPath, "utf8");
-
-    expect(css).toContain(".dyni-html-root .dyni-ais-target-html");
-    expect(css).not.toContain(".widgetContainer.vertical .widget.dyniplugin");
-    // Vertical mode must not self-expand beyond the committed surface box
-    expect(css).not.toMatch(/aspect-ratio.*7\s*\/\s*8/);
-    expect(css).not.toMatch(/min-height.*8em/);
-  });
 });

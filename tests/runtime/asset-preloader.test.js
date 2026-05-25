@@ -4,11 +4,18 @@ function createFetchResponse(kind, value, ok) {
   return {
     ok: ok !== false,
     status: ok === false ? 404 : 200,
-    text: kind === "text" ? vi.fn(() => Promise.resolve(value)) : vi.fn(() => Promise.reject(new Error("unexpected text()"))),
-    json: kind === "json" ? vi.fn(() => Promise.resolve(value)) : vi.fn(() => Promise.reject(new Error("unexpected json()"))),
-    arrayBuffer: kind === "arrayBuffer"
-      ? vi.fn(() => Promise.resolve(value))
-      : vi.fn(() => Promise.reject(new Error("unexpected arrayBuffer()")))
+    text:
+      kind === "text"
+        ? vi.fn(() => Promise.resolve(value))
+        : vi.fn(() => Promise.reject(new Error("unexpected text()"))),
+    json:
+      kind === "json"
+        ? vi.fn(() => Promise.resolve(value))
+        : vi.fn(() => Promise.reject(new Error("unexpected json()"))),
+    arrayBuffer:
+      kind === "arrayBuffer"
+        ? vi.fn(() => Promise.resolve(value))
+        : vi.fn(() => Promise.reject(new Error("unexpected arrayBuffer()"))),
   };
 }
 
@@ -53,13 +60,13 @@ function setup(options) {
     FontFace: FakeFontFace,
     document: {
       fonts: {
-        add: fontsAdd
-      }
+        add: fontsAdd,
+      },
     },
     DyniPlugin: {
       baseUrl: "http://host/plugins/dyninstruments/",
-      runtime: {}
-    }
+      runtime: {},
+    },
   });
 
   runIifeScript("runtime/asset-preloader.js", context);
@@ -67,7 +74,7 @@ function setup(options) {
   return {
     context,
     fetchMock,
-    fontsAdd
+    fontsAdd,
   };
 }
 
@@ -89,18 +96,20 @@ describe("runtime/asset-preloader.js", function () {
         [svgUrl]: svgResponse,
         [audioUrl]: audioResponse,
         [jsonUrl]: jsonResponse,
-        [fontUrl]: createFetchResponse("arrayBuffer", new ArrayBuffer(16))
-      }
+        [fontUrl]: createFetchResponse("arrayBuffer", new ArrayBuffer(16)),
+      },
     });
 
-    const preloader = context.DyniPlugin.runtime.createAssetPreloader(context.DyniPlugin.baseUrl);
+    const preloader = context.DyniPlugin.runtime.createAssetPreloader(
+      context.DyniPlugin.baseUrl,
+    );
 
     await preloader.preloadAssets([
       { key: "icon", path: "assets/icon.svg", type: "svg" },
       { key: "image", path: "assets/image.png", type: "image" },
       { key: "tone", path: "assets/tone.mp3", type: "audio" },
       { key: "meta", path: "assets/meta.json", type: "json" },
-      { key: "font", path: "assets/font.woff2", type: "font" }
+      { key: "font", path: "assets/font.woff2", type: "font" },
     ]);
 
     expect(fetchMock).toHaveBeenCalledWith(svgUrl);
@@ -125,20 +134,22 @@ describe("runtime/asset-preloader.js", function () {
     const { context } = setup({
       responses: {
         [failedUrl]: createFetchResponse("text", "nope", false),
-        [dupOneUrl]: createFetchResponse("text", "<svg></svg>")
-      }
+        [dupOneUrl]: createFetchResponse("text", "<svg></svg>"),
+      },
     });
 
-    const preloader = context.DyniPlugin.runtime.createAssetPreloader(context.DyniPlugin.baseUrl);
+    const preloader = context.DyniPlugin.runtime.createAssetPreloader(
+      context.DyniPlugin.baseUrl,
+    );
     await preloader.preloadAssets([
-      { key: "failed", path: "assets/fail.svg", type: "svg" }
+      { key: "failed", path: "assets/fail.svg", type: "svg" },
     ]);
 
     expect(preloader.getAsset("failed")).toBeNull();
     expect(function () {
       preloader.preloadAssets([
         { key: "dup", path: "assets/one.svg", type: "svg" },
-        { key: "dup", path: "assets/two.svg", type: "svg" }
+        { key: "dup", path: "assets/two.svg", type: "svg" },
       ]);
     }).toThrow("duplicate asset key");
     warn.mockRestore();

@@ -27,15 +27,15 @@ describe("runtime/component-loader.js", function () {
       DyniPlugin: {
         baseUrl: "http://host/plugins/dyninstruments/",
         runtime: {
-          loadScriptOnce: runtimeLoadScriptOnce
+          loadScriptOnce: runtimeLoadScriptOnce,
         },
         state: {},
-        config: { shared: {}, clusters: [] }
+        config: { shared: {}, clusters: [] },
       },
       DyniComponents: {
         DyniA: { id: "A", create() {} },
-        DyniB: { id: "B", create() {} }
-      }
+        DyniB: { id: "B", create() {} },
+      },
     });
 
     runIifeScript("runtime/asset-preloader.js", context);
@@ -45,7 +45,7 @@ describe("runtime/component-loader.js", function () {
       dom,
       runtime: context.DyniPlugin.runtime,
       context,
-      runtimeLoadScriptOnce
+      runtimeLoadScriptOnce,
     };
   }
 
@@ -53,7 +53,7 @@ describe("runtime/component-loader.js", function () {
     const { runtime, dom } = setup();
     const loader = runtime.createComponentLoader({
       A: { js: "/a.js", css: "/a.css", globalKey: "DyniA", deps: ["B"] },
-      B: { js: "/b.js", css: undefined, globalKey: "DyniB" }
+      B: { js: "/b.js", css: undefined, globalKey: "DyniB" },
     });
 
     const first = loader.loadComponent("A");
@@ -63,7 +63,10 @@ describe("runtime/component-loader.js", function () {
     await first;
     await flushPromises();
 
-    expect(dom.appendedScripts.map((s) => s.id)).toEqual(["dyni-js-B", "dyni-js-A"]);
+    expect(dom.appendedScripts.map((s) => s.id)).toEqual([
+      "dyni-js-B",
+      "dyni-js-A",
+    ]);
     expect(dom.appendedLinks.map((l) => l.id)).toEqual(["dyni-css-A"]);
   });
 
@@ -81,21 +84,35 @@ describe("runtime/component-loader.js", function () {
     context.DyniComponents.Broken = { id: "Broken" };
 
     const loader = runtime.createComponentLoader({
-      Broken: { js: "/broken.js", css: undefined, globalKey: "Broken" }
+      Broken: { js: "/broken.js", css: undefined, globalKey: "Broken" },
     });
 
-    await expect(loader.loadComponent("Broken")).rejects.toThrow("Component not found or invalid");
+    await expect(loader.loadComponent("Broken")).rejects.toThrow(
+      "Component not found or invalid",
+    );
   });
 
   it("accepts module-shaped components when apiShape is module", async function () {
     const { runtime, context } = setup();
-    context.DyniComponents.ThemeModel = { id: "ThemeModel", normalizePresetName() { return "default"; } };
+    context.DyniComponents.ThemeModel = {
+      id: "ThemeModel",
+      normalizePresetName() {
+        return "default";
+      },
+    };
 
     const loader = runtime.createComponentLoader({
-      ThemeModel: { js: "/theme-model.js", css: undefined, globalKey: "ThemeModel", apiShape: "module" }
+      ThemeModel: {
+        js: "/theme-model.js",
+        css: undefined,
+        globalKey: "ThemeModel",
+        apiShape: "module",
+      },
     });
 
-    await expect(loader.loadComponent("ThemeModel")).resolves.toEqual(context.DyniComponents.ThemeModel);
+    await expect(loader.loadComponent("ThemeModel")).resolves.toEqual(
+      context.DyniComponents.ThemeModel,
+    );
   });
 
   it("rejects unknown apiShape values", async function () {
@@ -103,10 +120,17 @@ describe("runtime/component-loader.js", function () {
     context.DyniComponents.Weird = { id: "Weird", create() {} };
 
     const loader = runtime.createComponentLoader({
-      Weird: { js: "/weird.js", css: undefined, globalKey: "Weird", apiShape: "mystery" }
+      Weird: {
+        js: "/weird.js",
+        css: undefined,
+        globalKey: "Weird",
+        apiShape: "mystery",
+      },
     });
 
-    await expect(loader.loadComponent("Weird")).rejects.toThrow("Unsupported apiShape");
+    await expect(loader.loadComponent("Weird")).rejects.toThrow(
+      "Unsupported apiShape",
+    );
   });
 
   it("collects unique widgets with transitive dependencies", function () {
@@ -114,10 +138,14 @@ describe("runtime/component-loader.js", function () {
     const loader = runtime.createComponentLoader({
       A: { deps: ["B"] },
       B: { deps: ["C"] },
-      C: {}
+      C: {},
     });
 
-    const ids = loader.uniqueComponents([{ widget: "A" }, { widget: "A" }, { widget: "C" }]);
+    const ids = loader.uniqueComponents([
+      { widget: "A" },
+      { widget: "A" },
+      { widget: "C" },
+    ]);
     expect(new Set(ids)).toEqual(new Set(["A", "B", "C"]));
   });
 
@@ -129,20 +157,20 @@ describe("runtime/component-loader.js", function () {
       DyniPlugin: {
         baseUrl: "http://host/plugins/dyninstruments/",
         runtime: {
-          loadScriptOnce: runtimeLoadScriptOnce
+          loadScriptOnce: runtimeLoadScriptOnce,
         },
         state: {},
-        config: { shared: {}, clusters: [] }
+        config: { shared: {}, clusters: [] },
       },
       DyniComponents: {
-        DyniA: { id: "A", create() {} }
-      }
+        DyniA: { id: "A", create() {} },
+      },
     });
 
     runIifeScript("runtime/asset-preloader.js", context);
     runIifeScript("runtime/component-loader.js", context);
     const loader = context.DyniPlugin.runtime.createComponentLoader({
-      A: { js: "/a.js", css: undefined, globalKey: "DyniA" }
+      A: { js: "/a.js", css: undefined, globalKey: "DyniA" },
     });
 
     await loader.loadComponent("A");
@@ -160,7 +188,7 @@ describe("runtime/component-loader.js", function () {
       status: 200,
       text: vi.fn(() => Promise.resolve("<svg></svg>")),
       json: vi.fn(() => Promise.resolve({})),
-      arrayBuffer: vi.fn(() => Promise.resolve(new ArrayBuffer(1)))
+      arrayBuffer: vi.fn(() => Promise.resolve(new ArrayBuffer(1))),
     };
     const imageLoadCalls = [];
     class FakeImage {
@@ -198,8 +226,8 @@ describe("runtime/component-loader.js", function () {
       document: {
         ...dom.document,
         fonts: {
-          add: vi.fn()
-        }
+          add: vi.fn(),
+        },
       },
       fetch: contextFetch,
       Image: FakeImage,
@@ -211,15 +239,15 @@ describe("runtime/component-loader.js", function () {
       },
       DyniPlugin: {
         runtime: {
-          loadScriptOnce: runtimeLoadScriptOnce
+          loadScriptOnce: runtimeLoadScriptOnce,
         },
         state: {},
         config: { shared: {}, clusters: [] },
-        baseUrl: "http://host/plugins/dyninstruments/"
+        baseUrl: "http://host/plugins/dyninstruments/",
       },
       DyniComponents: {
-        DyniA: { id: "A", create() {} }
-      }
+        DyniA: { id: "A", create() {} },
+      },
     });
 
     runIifeScript("runtime/asset-preloader.js", context);
@@ -232,18 +260,21 @@ describe("runtime/component-loader.js", function () {
         globalKey: "DyniA",
         assets: [
           { key: "svg-icon", path: "assets/icon.svg", type: "svg" },
-          { key: "photo", path: "assets/photo.png", type: "image" }
-        ]
-      }
+          { key: "photo", path: "assets/photo.png", type: "image" },
+        ],
+      },
     });
 
     await loader.loadComponent("A");
     await flushPromises();
 
-    expect(context.DyniPlugin.runtime.assetUrl("assets/icon.svg"))
-      .toBe("http://host/plugins/dyninstruments/assets/icon.svg");
+    expect(context.DyniPlugin.runtime.assetUrl("assets/icon.svg")).toBe(
+      "http://host/plugins/dyninstruments/assets/icon.svg",
+    );
     expect(context.DyniPlugin.runtime.getAsset("svg-icon")).toBe("<svg></svg>");
-    expect(context.DyniPlugin.runtime.getAsset("photo").srcValue).toBe(imageUrl);
+    expect(context.DyniPlugin.runtime.getAsset("photo").srcValue).toBe(
+      imageUrl,
+    );
     expect(imageLoadCalls).toEqual([imageUrl]);
     expect(contextFetch).toHaveBeenCalledWith(svgUrl);
   });
@@ -252,8 +283,8 @@ describe("runtime/component-loader.js", function () {
     const { runtime } = setup();
     runtime.theme = {
       tokens: {
-        resolveForRoot: vi.fn(() => ({}))
-      }
+        resolveForRoot: vi.fn(() => ({})),
+      },
     };
     runtime.perf = { startSpan: vi.fn(), endSpan: vi.fn() };
     runtime.format = { applyFormatter: vi.fn() };
@@ -262,7 +293,7 @@ describe("runtime/component-loader.js", function () {
     runtime.hostActions = vi.fn(() => ({}));
 
     const loader = runtime.createComponentLoader({
-      A: { js: "/a.js", css: undefined, globalKey: "DyniA" }
+      A: { js: "/a.js", css: undefined, globalKey: "DyniA" },
     });
 
     expect(function () {
@@ -274,18 +305,21 @@ describe("runtime/component-loader.js", function () {
     const { runtime, context } = setup();
     runtime.theme = {
       tokens: {
-        resolveForRoot: vi.fn(() => ({ token: true }))
-      }
+        resolveForRoot: vi.fn(() => ({ token: true })),
+      },
     };
     runtime.perf = { startSpan: vi.fn(() => null), endSpan: vi.fn() };
     runtime.format = { applyFormatter: vi.fn((v) => String(v)) };
     runtime.canvas = { setupCanvas: vi.fn() };
-    runtime.dom = { requirePluginRoot: vi.fn(), getNightModeState: vi.fn(() => false) };
+    runtime.dom = {
+      requirePluginRoot: vi.fn(),
+      getNightModeState: vi.fn(() => false),
+    };
     const hostActions = { routePoints: {} };
     runtime.hostActions = vi.fn(() => hostActions);
 
     context.DyniComponents.DyniDep = {
-      create: vi.fn(() => ({ dep: true }))
+      create: vi.fn(() => ({ dep: true })),
     };
     context.DyniComponents.DyniA = {
       create: vi.fn((def, componentContext) => ({
@@ -296,13 +330,13 @@ describe("runtime/component-loader.js", function () {
         format: componentContext.format,
         canvas: componentContext.canvas,
         dom: componentContext.dom,
-        hostActions: componentContext.hostActions
-      }))
+        hostActions: componentContext.hostActions,
+      })),
     };
 
     const loader = runtime.createComponentLoader({
       A: { js: "/a.js", css: undefined, globalKey: "DyniA", deps: ["Dep"] },
-      Dep: { js: "/dep.js", css: undefined, globalKey: "DyniDep" }
+      Dep: { js: "/dep.js", css: undefined, globalKey: "DyniDep" },
     });
 
     await loader.loadComponent("A");
@@ -326,24 +360,27 @@ describe("runtime/component-loader.js", function () {
     const { runtime, context } = setup();
     runtime.theme = {
       tokens: {
-        resolveForRoot: vi.fn(() => ({}))
-      }
+        resolveForRoot: vi.fn(() => ({})),
+      },
     };
     runtime.perf = { startSpan: vi.fn(() => null), endSpan: vi.fn() };
     runtime.format = { applyFormatter: vi.fn((v) => String(v)) };
     runtime.canvas = { setupCanvas: vi.fn() };
-    runtime.dom = { requirePluginRoot: vi.fn(), getNightModeState: vi.fn(() => false) };
+    runtime.dom = {
+      requirePluginRoot: vi.fn(),
+      getNightModeState: vi.fn(() => false),
+    };
     runtime.hostActions = vi.fn(() => ({}));
 
     context.DyniComponents.DyniA = {
       create: vi.fn((def, componentContext) => {
         componentContext.components.require("MissingDep");
         return {};
-      })
+      }),
     };
 
     const loader = runtime.createComponentLoader({
-      A: { js: "/a.js", css: undefined, globalKey: "DyniA" }
+      A: { js: "/a.js", css: undefined, globalKey: "DyniA" },
     });
     await loader.loadComponent("A");
 
@@ -356,13 +393,16 @@ describe("runtime/component-loader.js", function () {
     const { runtime, context } = setup();
     runtime.theme = {
       tokens: {
-        resolveForRoot: vi.fn(() => ({}))
-      }
+        resolveForRoot: vi.fn(() => ({})),
+      },
     };
     runtime.perf = { startSpan: vi.fn(() => null), endSpan: vi.fn() };
     runtime.format = { applyFormatter: vi.fn((v) => String(v)) };
     runtime.canvas = { setupCanvas: vi.fn() };
-    runtime.dom = { requirePluginRoot: vi.fn(), getNightModeState: vi.fn(() => false) };
+    runtime.dom = {
+      requirePluginRoot: vi.fn(),
+      getNightModeState: vi.fn(() => false),
+    };
     runtime.hostActions = vi.fn(() => ({}));
 
     context.DyniComponents.DyniA = { create: vi.fn(() => ({})) };
@@ -370,7 +410,7 @@ describe("runtime/component-loader.js", function () {
 
     const loader = runtime.createComponentLoader({
       A: { js: "/a.js", css: undefined, globalKey: "DyniA", deps: ["B"] },
-      B: { js: "/b.js", css: undefined, globalKey: "DyniB", deps: ["A"] }
+      B: { js: "/b.js", css: undefined, globalKey: "DyniB", deps: ["A"] },
     });
 
     expect(function () {

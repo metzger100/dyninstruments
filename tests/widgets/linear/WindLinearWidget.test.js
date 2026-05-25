@@ -1,17 +1,30 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const {
+  createComponentContextMock,
+} = require("../../helpers/component-context-mock");
 
 describe("WindLinearWidget", function () {
   it("configures centered180 dual wind display and mirrored layline sectors", function () {
     let captured;
-    const applyFormatter = vi.fn((value, spec) => "spd:" + String(value) + ":" + spec.formatterParameters[0]);
+    const applyFormatter = vi.fn(
+      (value, spec) =>
+        "spd:" + String(value) + ":" + spec.formatterParameters[0],
+    );
 
-    const mod = loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js");
-    mod.create({}, createComponentContextMock({
-      modules: {
-        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
-        ValueMath: { create() { return {
+    const mod = loadFresh(
+      "widgets/linear/WindLinearWidget/WindLinearWidget.js",
+    );
+    mod.create(
+      {},
+      createComponentContextMock({
+        modules: {
+          StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+          PlaceholderNormalize: loadFresh(
+            "shared/widget-kits/format/PlaceholderNormalize.js",
+          ),
+          ValueMath: {
+            create() {
+              return {
                 clamp(value, lo, hi) {
                   const n = Number(value);
                   if (!isFinite(n)) return lo;
@@ -19,30 +32,47 @@ describe("WindLinearWidget", function () {
                 },
                 toOptionalFiniteNumber(value) {
                   if (value == null) return undefined;
-                  if (typeof value === "string" && value.trim() === "") return undefined;
+                  if (typeof value === "string" && value.trim() === "")
+                    return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
                 formatAngle180(value, leadingZero) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
-                  let wrapped = ((n + 180) % 360 + 360) % 360 - 180;
+                  let wrapped = ((((n + 180) % 360) + 360) % 360) - 180;
                   if (wrapped === 180) wrapped = -180;
                   const abs = Math.abs(Math.round(wrapped));
-                  const base = leadingZero ? String(abs).padStart(3, "0") : String(abs);
+                  const base = leadingZero
+                    ? String(abs).padStart(3, "0")
+                    : String(abs);
                   return wrapped < 0 ? "-" + base : base;
-                }
-              }; } },
-        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
-      },
-      services: { format: { applyFormatter } }
-    }));
+                },
+              };
+            },
+          },
+          LinearGaugeEngine: {
+            create() {
+              return {
+                createRenderer(cfg) {
+                  captured = cfg;
+                  return function () {};
+                },
+              };
+            },
+          },
+        },
+        services: { format: { applyFormatter } },
+      }),
+    );
 
     expect(captured.axisMode).toBe("centered180");
-    expect(captured.hideTextualMetricsProp).toBe("windLinearHideTextualMetrics");
+    expect(captured.hideTextualMetricsProp).toBe(
+      "windLinearHideTextualMetrics",
+    );
     expect(captured.ratioProps).toEqual({
       normal: "windLinearRatioThresholdNormal",
-      flat: "windLinearRatioThresholdFlat"
+      flat: "windLinearRatioThresholdFlat",
     });
     expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps()).toEqual({ major: 30, minor: 10 });
@@ -56,7 +86,7 @@ describe("WindLinearWidget", function () {
       formatter: "formatSpeed",
       formatterParameters: ["kn"],
       leadingZero: true,
-      captionUnitScale: 0.8
+      captionUnitScale: 0.8,
     });
 
     expect(display.num).toBe(-32);
@@ -66,10 +96,13 @@ describe("WindLinearWidget", function () {
     expect(display.left.unit).toBe("°");
     expect(display.right.unit).toBe("kn");
     expect(display.right.value).toBe("spd:6.1:kn");
-    expect(applyFormatter).toHaveBeenCalledWith(6.1, expect.objectContaining({
-      formatter: "formatSpeed",
-      formatterParameters: ["kn"]
-    }));
+    expect(applyFormatter).toHaveBeenCalledWith(
+      6.1,
+      expect.objectContaining({
+        formatter: "formatSpeed",
+        formatterParameters: ["kn"],
+      }),
+    );
 
     const wrapped = captured.formatDisplay(337, {
       speed: 6.1,
@@ -80,54 +113,76 @@ describe("WindLinearWidget", function () {
       formatter: "formatSpeed",
       formatterParameters: ["kn"],
       leadingZero: true,
-      captionUnitScale: 0.8
+      captionUnitScale: 0.8,
     });
     expect(wrapped.text).toBe("-023");
     expect(wrapped.num).toBe(-23);
 
-    const sectors = captured.buildSectors({
-      windLinearLayEnabled: true,
-      windLinearLayMin: 25,
-      windLinearLayMax: 45
-    }, -180, 180, { min: -180, max: 180 }, {
-      clamp(v, lo, hi) {
-        return Math.max(lo, Math.min(hi, Number(v)));
-      }
-    }, {
-      colors: {
-        laylinePort: "#ff7a76",
-        laylineStb: "#82b683"
-      }
-    });
+    const sectors = captured.buildSectors(
+      {
+        windLinearLayEnabled: true,
+        windLinearLayMin: 25,
+        windLinearLayMax: 45,
+      },
+      -180,
+      180,
+      { min: -180, max: 180 },
+      {
+        clamp(v, lo, hi) {
+          return Math.max(lo, Math.min(hi, Number(v)));
+        },
+      },
+      {
+        colors: {
+          laylinePort: "#ff7a76",
+          laylineStb: "#82b683",
+        },
+      },
+    );
 
     expect(sectors).toEqual([
       { from: -45, to: -25, color: "#ff7a76" },
-      { from: 25, to: 45, color: "#82b683" }
+      { from: 25, to: 45, color: "#82b683" },
     ]);
 
-    expect(captured.buildSectors({
-      windLinearLayEnabled: false,
-      windLinearLayMin: 25,
-      windLinearLayMax: 45
-    }, -180, 180, { min: -180, max: 180 }, {
-      clamp(v, lo, hi) {
-        return Math.max(lo, Math.min(hi, Number(v)));
-      }
-    }, {
-      colors: {
-        laylinePort: "#ff7a76",
-        laylineStb: "#82b683"
-      }
-    })).toEqual([]);
+    expect(
+      captured.buildSectors(
+        {
+          windLinearLayEnabled: false,
+          windLinearLayMin: 25,
+          windLinearLayMax: 45,
+        },
+        -180,
+        180,
+        { min: -180, max: 180 },
+        {
+          clamp(v, lo, hi) {
+            return Math.max(lo, Math.min(hi, Number(v)));
+          },
+        },
+        {
+          colors: {
+            laylinePort: "#ff7a76",
+            laylineStb: "#82b683",
+          },
+        },
+      ),
+    ).toEqual([]);
   });
 
   it("renders dual-value text across flat, normal, and high modes", function () {
     let captured;
-    loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create({}, createComponentContextMock({
-      modules: {
-        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
-        ValueMath: { create() { return {
+    loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+          PlaceholderNormalize: loadFresh(
+            "shared/widget-kits/format/PlaceholderNormalize.js",
+          ),
+          ValueMath: {
+            create() {
+              return {
                 clamp(value, lo, hi) {
                   const n = Number(value);
                   if (!isFinite(n)) return lo;
@@ -135,29 +190,48 @@ describe("WindLinearWidget", function () {
                 },
                 toOptionalFiniteNumber(value) {
                   if (value == null) return undefined;
-                  if (typeof value === "string" && value.trim() === "") return undefined;
+                  if (typeof value === "string" && value.trim() === "")
+                    return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
                 formatAngle180(value) {
                   const n = Number(value);
                   return isFinite(n) ? String(Math.round(n)) : "---";
-                }
-              }; } },
-        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
-      },
-      services: { format: { applyFormatter(value) { return String(value); } } }
-    }));
+                },
+              };
+            },
+          },
+          LinearGaugeEngine: {
+            create() {
+              return {
+                createRenderer(cfg) {
+                  captured = cfg;
+                  return function () {};
+                },
+              };
+            },
+          },
+        },
+        services: {
+          format: {
+            applyFormatter(value) {
+              return String(value);
+            },
+          },
+        },
+      }),
+    );
 
     expect(captured.layout).toEqual({
       normalVariant: "stacked",
-      highVariant: "split"
+      highVariant: "split",
     });
 
     const calls = {
       caption: 0,
       value: 0,
-      inline: 0
+      inline: 0,
     };
     const api = {
       text: {},
@@ -170,28 +244,28 @@ describe("WindLinearWidget", function () {
         },
         drawInlineRow() {
           calls.inline += 1;
-        }
-      }
+        },
+      },
     };
     const state = {
       layout: {
         dualRowGap: 8,
         textTopBox: { x: 0, y: 0, w: 280, h: 60 },
-        textBottomBox: { x: 0, y: 160, w: 280, h: 66 }
-      }
+        textBottomBox: { x: 0, y: 160, w: 280, h: 66 },
+      },
     };
     const display = {
       secScale: 0.8,
       parsed: {
         left: { caption: "AWA", value: "23", unit: "°" },
-        right: { caption: "AWS", value: "5.5", unit: "kn" }
+        right: { caption: "AWS", value: "5.5", unit: "kn" },
       },
       rowBoxes: {
         captionBox: { x: 0, y: 0, w: 280, h: 30 },
         valueBox: { x: 0, y: 30, w: 280, h: 40 },
         top: null,
-        bottom: null
-      }
+        bottom: null,
+      },
     };
 
     captured.drawMode.flat(state, {}, display, api);
@@ -203,211 +277,4 @@ describe("WindLinearWidget", function () {
     expect(calls.inline).toBe(2);
   });
 
-  it("uses layout-owned dual gaps for flat/normal and full-width rows for split high", function () {
-    let captured;
-    loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create({}, createComponentContextMock({
-      modules: {
-        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
-        ValueMath: { create() { return {
-                clamp(value, lo, hi) {
-                  const n = Number(value);
-                  if (!isFinite(n)) return lo;
-                  return Math.max(lo, Math.min(hi, n));
-                },
-                toOptionalFiniteNumber(value) {
-                  if (value == null) return undefined;
-                  if (typeof value === "string" && value.trim() === "") return undefined;
-                  const n = Number(value);
-                  return Number.isFinite(n) ? n : undefined;
-                },
-                formatAngle180(value) {
-                  const n = Number(value);
-                  return isFinite(n) ? String(Math.round(n)) : "---";
-                }
-              }; } },
-        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
-      },
-      services: { format: { applyFormatter(value) { return String(value); } } }
-    }));
-
-    const state = {
-      textFillScale: 1.18,
-      layout: {
-        dualRowGap: 1,
-        textTopBox: { x: 0, y: 0, w: 20, h: 18 },
-        textBottomBox: { x: 0, y: 28, w: 20, h: 18 }
-      }
-    };
-    const display = {
-      secScale: 0.8,
-      parsed: {
-        left: { caption: "AWA", value: "23", unit: "°" },
-        right: { caption: "AWS", value: "5.5", unit: "kn" }
-      },
-      rowBoxes: {
-        captionBox: { x: 0, y: 0, w: 20, h: 8 },
-        valueBox: { x: 0, y: 8, w: 20, h: 10 },
-        top: null,
-        bottom: null
-      }
-    };
-
-    function renderMode(modeName) {
-      const calls = [];
-      const api = {
-        text: {},
-        textLayout: {
-          drawCaptionRow(innerState, textApi, caption, box, secScale, align) {
-            calls.push({ type: "caption", textFillScale: innerState.textFillScale, caption, box, align });
-          },
-          drawValueUnitRow(innerState, textApi, value, unit, box, secScale, align) {
-            calls.push({ type: "value", textFillScale: innerState.textFillScale, value, unit, box, align });
-          },
-          drawInlineRow(innerState, textApi, caption, value, unit, box) {
-            calls.push({ type: "inline", textFillScale: innerState.textFillScale, caption, value, unit, box });
-          }
-        }
-      };
-      captured.drawMode[modeName](state, {}, display, api);
-      return calls;
-    }
-
-    const flatCalls = renderMode("flat");
-    const normalCalls = renderMode("normal");
-    const highCalls = renderMode("high");
-    const flatLeftCaption = flatCalls.find((entry) => entry.type === "caption" && entry.caption === "AWA");
-    const flatRightCaption = flatCalls.find((entry) => entry.type === "caption" && entry.caption === "AWS");
-    const normalLeftCaption = normalCalls.find((entry) => entry.type === "caption" && entry.caption === "AWA");
-    const normalRightCaption = normalCalls.find((entry) => entry.type === "caption" && entry.caption === "AWS");
-    const highTopInline = highCalls.find((entry) => entry.type === "inline" && entry.caption === "AWA");
-    const highBottomInline = highCalls.find((entry) => entry.type === "inline" && entry.caption === "AWS");
-
-    expect(flatLeftCaption.box.w).toBe(9);
-    expect(flatRightCaption.box.x - (flatLeftCaption.box.x + flatLeftCaption.box.w)).toBe(1);
-    expect(normalRightCaption.box.x - (normalLeftCaption.box.x + normalLeftCaption.box.w)).toBe(1);
-    expect(highTopInline.box).toEqual(state.layout.textTopBox);
-    expect(highBottomInline.box).toEqual(state.layout.textBottomBox);
-    expect(flatLeftCaption.textFillScale).toBe(1.18);
-    expect(normalLeftCaption.textFillScale).toBe(1.18);
-    expect(highTopInline.textFillScale).toBe(1.18);
-    expect(flatCalls.some((entry) => entry.type === "inline")).toBe(false);
-    expect(normalCalls.some((entry) => entry.type === "inline")).toBe(false);
-    expect(highCalls.filter((entry) => entry.type === "inline")).toHaveLength(2);
-  });
-
-  it("keeps missing speed values on placeholder path instead of numeric zero formatting", function () {
-    let captured;
-    const applyFormatter = vi.fn((value) => "spd:" + String(value));
-
-    loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create({}, createComponentContextMock({
-      modules: {
-        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
-        ValueMath: { create() { return {
-                clamp(value, lo, hi) {
-                  const n = Number(value);
-                  if (!isFinite(n)) return lo;
-                  return Math.max(lo, Math.min(hi, n));
-                },
-                toOptionalFiniteNumber(value) {
-                  if (value == null) return undefined;
-                  if (typeof value === "string" && value.trim() === "") return undefined;
-                  const n = Number(value);
-                  return Number.isFinite(n) ? n : undefined;
-                },
-                formatAngle180(value) {
-                  const n = Number(value);
-                  return isFinite(n) ? String(Math.round(n)) : "---";
-                }
-              }; } },
-        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
-      },
-      services: { format: { applyFormatter } }
-    }));
-
-    [null, undefined, "", "   "].forEach(function (rawSpeed) {
-      const display = captured.formatDisplay(15, {
-        speed: rawSpeed,
-        default: "---",
-        angleCaption: "AWA",
-        speedCaption: "AWS",
-        angleUnit: "°",
-        speedUnit: "kn"
-      });
-
-      expect(display.num).toBe(15);
-      expect(display.right.value).toBe("---");
-    });
-    expect(applyFormatter).not.toHaveBeenCalled();
-
-    const valid = captured.formatDisplay(15, {
-      speed: "4.2",
-      default: "---",
-      angleCaption: "AWA",
-      speedCaption: "AWS",
-      angleUnit: "°",
-      speedUnit: "kn"
-    });
-    expect(valid.right.value).toBe("spd:4.2");
-    expect(applyFormatter).toHaveBeenCalledWith(4.2, expect.objectContaining({
-      default: "---"
-    }));
-  });
-
-  it("keeps missing angle values on placeholder path instead of numeric zero formatting", function () {
-    let captured;
-
-    loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create({}, createComponentContextMock({
-      modules: {
-        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
-        ValueMath: { create() { return {
-                clamp(value, lo, hi) {
-                  const n = Number(value);
-                  if (!isFinite(n)) return lo;
-                  return Math.max(lo, Math.min(hi, n));
-                },
-                toOptionalFiniteNumber(value) {
-                  if (value == null) return undefined;
-                  if (typeof value === "string" && value.trim() === "") return undefined;
-                  const n = Number(value);
-                  return Number.isFinite(n) ? n : undefined;
-                },
-                formatAngle180(value) {
-                  const n = Number(value);
-                  return isFinite(n) ? String(Math.round(n)) : "---";
-                }
-              }; } },
-        LinearGaugeEngine: { create() { return { createRenderer(cfg) { captured = cfg; return function () {}; } }; } }
-      },
-      services: { format: { applyFormatter(value) { return String(value); } } }
-    }));
-
-    [null, undefined, "", "   "].forEach(function (rawAngle) {
-      const display = captured.formatDisplay(rawAngle, {
-        default: "---",
-        angleCaption: "AWA",
-        speedCaption: "AWS",
-        angleUnit: "°",
-        speedUnit: "kn",
-        speed: 4.2
-      });
-
-      expect(Number.isNaN(display.num)).toBe(true);
-      expect(display.text).toBe("---");
-      expect(display.left.value).toBe("---");
-    });
-
-    const valid = captured.formatDisplay("4.2", {
-      default: "---",
-      angleCaption: "AWA",
-      speedCaption: "AWS",
-      angleUnit: "°",
-      speedUnit: "kn",
-      speed: 4.2
-    });
-    expect(valid.num).toBe(4);
-    expect(valid.text).toBe("4");
-  });
 });

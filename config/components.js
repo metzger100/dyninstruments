@@ -16,7 +16,12 @@
   }
 
   const groups = shared.componentRegistryGroups;
-  const orderedGroupIds = ["sharedFoundation", "sharedEngines", "widgets", "cluster"];
+  const orderedGroupIds = [
+    "sharedFoundation",
+    "sharedEngines",
+    "widgets",
+    "cluster"
+  ];
   const mergedComponents = {};
 
   if (!groups || typeof groups !== "object") {

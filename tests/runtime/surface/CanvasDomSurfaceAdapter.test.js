@@ -1,15 +1,23 @@
-const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
+const {
+  createScriptContext,
+  runIifeScript,
+} = require("../../helpers/eval-iife");
 
 describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
   function createRuntime(extra) {
-    const context = createScriptContext(Object.assign({
-      DyniPlugin: {
-        runtime: {},
-        state: {},
-        config: { shared: {}, clusters: [] }
-      },
-      devicePixelRatio: 2
-    }, extra || {}));
+    const context = createScriptContext(
+      Object.assign(
+        {
+          DyniPlugin: {
+            runtime: {},
+            state: {},
+            config: { shared: {}, clusters: [] },
+          },
+          devicePixelRatio: 2,
+        },
+        extra || {},
+      ),
+    );
 
     runIifeScript("runtime/namespace.js", context);
     runIifeScript("runtime/PerfSpanHelper.js", context);
@@ -35,7 +43,7 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
           next.push(name);
         }
         el.className = next.join(" ");
-      }
+      },
     };
   }
 
@@ -67,7 +75,7 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
         }
         const classNameToFind = selector.slice(1);
         return findByClass(this, classNameToFind);
-      }
+      },
     };
     el.classList = createClassList(el);
     return el;
@@ -77,7 +85,11 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
     if (!root) {
       return null;
     }
-    if (root.classList && typeof root.classList.contains === "function" && root.classList.contains(className)) {
+    if (
+      root.classList &&
+      typeof root.classList.contains === "function" &&
+      root.classList.contains(className)
+    ) {
       return root;
     }
     for (let i = 0; i < root.children.length; i += 1) {
@@ -98,16 +110,25 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
         if (name === "canvas") {
           node.width = 0;
           node.height = 0;
-          node.getContext = vi.fn(function () { return {}; });
+          node.getContext = vi.fn(function () {
+            return {};
+          });
           node.clientWidth = 320;
           node.clientHeight = 180;
           node.getBoundingClientRect = function () {
-            return { width: 320, height: 180, top: 0, left: 0, right: 320, bottom: 180 };
+            return {
+              width: 320,
+              height: 180,
+              top: 0,
+              left: 0,
+              right: 320,
+              bottom: 180,
+            };
           };
           createdCanvases.push(node);
         }
         return node;
-      }
+      },
     };
 
     const shellEl = createElement(doc, "div", "widgetData dyni-shell");
@@ -125,7 +146,7 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
       shellEl,
       surfaceEl,
       mountEl,
-      createdCanvases
+      createdCanvases,
     };
   }
 
@@ -136,9 +157,13 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
       dom.shellEl.classList.add("dyni-surface-canvas");
     }
     const context = createRuntime();
-    const rootEl = createElement(dom.doc, "div", "widget dyniplugin dyni-host-html");
+    const rootEl = createElement(
+      dom.doc,
+      "div",
+      "widget dyniplugin dyni-host-html",
+    );
     const rendererSpec = opts.rendererSpec || {
-      renderCanvas: vi.fn()
+      renderCanvas: vi.fn(),
     };
 
     const frameQueue = [];
@@ -180,7 +205,7 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
       requestAnimationFrame: requestAnimationFrameStub,
       cancelAnimationFrame: cancelAnimationFrameStub,
       ResizeObserver: opts.ResizeObserver || ResizeObserverStub,
-      hostContext: opts.hostContext
+      hostContext: opts.hostContext,
     });
 
     function payload(nextProps, nextRevision) {
@@ -189,7 +214,7 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
         rootEl: rootEl,
         shellEl: dom.shellEl,
         props: nextProps,
-        revision: nextRevision
+        revision: nextRevision,
       };
     }
 
@@ -204,7 +229,7 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
       observerInstances,
       frameQueue,
       canceledFrames,
-      runNextFrame
+      runNextFrame,
     };
   }
 
@@ -215,19 +240,26 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
 
     expect(h.dom.createdCanvases).toHaveLength(1);
     expect(h.dom.mountEl.children).toHaveLength(1);
-    expect(h.dom.mountEl.children[0].className).toBe("dyni-surface-canvas-node");
+    expect(h.dom.mountEl.children[0].className).toBe(
+      "dyni-surface-canvas-node",
+    );
     expect(h.dom.surfaceEl.style.fontSize).toBe("initial");
     expect(h.dom.surfaceEl.style.width).toBe("100%");
     expect(h.dom.mountEl.style.height).toBe("100%");
     expect(h.frameQueue).toHaveLength(1);
     expect(h.observerInstances).toHaveLength(1);
-    expect(h.observerInstances[0].observe).toHaveBeenCalledWith(h.dom.surfaceEl);
+    expect(h.observerInstances[0].observe).toHaveBeenCalledWith(
+      h.dom.surfaceEl,
+    );
     expect(h.rendererSpec.renderCanvas).not.toHaveBeenCalled();
 
     h.runNextFrame();
 
     expect(h.rendererSpec.renderCanvas).toHaveBeenCalledTimes(1);
-    expect(h.rendererSpec.renderCanvas).toHaveBeenCalledWith(h.dom.createdCanvases[0], { value: 12 });
+    expect(h.rendererSpec.renderCanvas).toHaveBeenCalledWith(
+      h.dom.createdCanvases[0],
+      { value: 12 },
+    );
   });
 
   it("prefers nested .dyni-surface-canvas over shell-level class collisions", function () {
@@ -237,7 +269,9 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
 
     expect(h.dom.shellEl.style.fontSize || "").toBe("");
     expect(h.dom.surfaceEl.style.fontSize).toBe("initial");
-    expect(h.observerInstances[0].observe).toHaveBeenCalledWith(h.dom.surfaceEl);
+    expect(h.observerInstances[0].observe).toHaveBeenCalledWith(
+      h.dom.surfaceEl,
+    );
   });
 
   it("update repaints on changed props and skips repaint for shallow-identical props", function () {
@@ -250,7 +284,10 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
     expect(h.frameQueue).toHaveLength(1);
     h.runNextFrame();
     expect(h.rendererSpec.renderCanvas).toHaveBeenCalledTimes(1);
-    expect(h.rendererSpec.renderCanvas).toHaveBeenCalledWith(h.dom.createdCanvases[0], { value: 8, caption: "SPD" });
+    expect(h.rendererSpec.renderCanvas).toHaveBeenCalledWith(
+      h.dom.createdCanvases[0],
+      { value: 8, caption: "SPD" },
+    );
 
     h.rendererSpec.renderCanvas.mockClear();
     h.controller.update(h.payload({ value: 8, caption: "SPD" }, 3));
@@ -271,20 +308,28 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
           name: token && token.name,
           tags: {
             ...(token && token.tags ? token.tags : {}),
-            ...(tags && typeof tags === "object" ? tags : {})
-          }
+            ...(tags && typeof tags === "object" ? tags : {}),
+          },
         });
-      }
+      },
     };
 
     try {
-      h.controller.attach(h.payload({ value: 5, cluster: "speed", kind: "sogRadial" }, 1));
+      h.controller.attach(
+        h.payload({ value: 5, cluster: "speed", kind: "sogRadial" }, 1),
+      );
       h.runNextFrame();
 
-      expect(spans.some((entry) => entry.name === "CanvasDomSurfaceAdapter.schedulePaint->paintNow")).toBe(true);
-      expect(spans.some((entry) => entry.name === "Renderer.renderCanvas")).toBe(true);
-    }
-    finally {
+      expect(
+        spans.some(
+          (entry) =>
+            entry.name === "CanvasDomSurfaceAdapter.schedulePaint->paintNow",
+        ),
+      ).toBe(true);
+      expect(
+        spans.some((entry) => entry.name === "Renderer.renderCanvas"),
+      ).toBe(true);
+    } finally {
       h.context.__DYNI_PERF_HOOKS__ = previousHooks;
     }
   });
@@ -295,7 +340,7 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
       renderCanvas: vi.fn(function () {
         calls += 1;
         return calls === 1 ? { wantsFollowUpFrame: true } : undefined;
-      })
+      }),
     };
     const h = createHarness({ rendererSpec: rendererSpec });
 
@@ -315,7 +360,7 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
     const rendererSpec = {
       renderCanvas: vi.fn(function () {
         return { wantsFollowUpFrame: true };
-      })
+      }),
     };
     const h = createHarness({ rendererSpec: rendererSpec });
 
@@ -351,7 +396,7 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
         rendererSpec: {},
         requestAnimationFrame: vi.fn(),
         cancelAnimationFrame: vi.fn(),
-        ResizeObserver: function () {}
+        ResizeObserver: function () {},
       });
     }).toThrow("rendererSpec.renderCanvas");
 
@@ -360,7 +405,7 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
         rendererSpec: { renderCanvas: vi.fn() },
         requestAnimationFrame: vi.fn(),
         cancelAnimationFrame: vi.fn(),
-        ResizeObserver: null
+        ResizeObserver: null,
       });
     }).toThrow("ResizeObserver");
 

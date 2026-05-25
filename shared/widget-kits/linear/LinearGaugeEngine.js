@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniLinearGaugeEngine = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniLinearGaugeEngine = factory();
+  }
 }(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
@@ -112,7 +114,15 @@
         const stateKind = stateScreenPrecedence.pickFirst([{ kind: "disconnected", when: p.disconnect === true }, { kind: "data", when: true }]);
         ctx.clearRect(0, 0, W, H);
         if (stateKind !== stateScreenLabels.KINDS.DATA) {
-          stateScreenCanvasOverlay.drawStateScreen({ ctx: ctx, W: W, H: H, family: family, color: color, labelWeight: labelWeight, kind: stateKind });
+          stateScreenCanvasOverlay.drawStateScreen({
+            ctx: ctx,
+            W: W,
+            H: H,
+            family: family,
+            color: color,
+            labelWeight: labelWeight,
+            kind: stateKind
+          });
           return;
         }
         const hideTextualMetrics = p.hideTextualMetrics === true
@@ -152,7 +162,14 @@
           }
           axisProps.value = easedDisplayNum;
         }
-        const hookApiBase = { primitives: primitives, math: math, textLayout: textLayout, text: text, value: value, theme: theme };
+        const hookApiBase = {
+          primitives: primitives,
+          math: math,
+          textLayout: textLayout,
+          text: text,
+          value: value,
+          theme: theme
+        };
         const defaultAxis = math.resolveAxisDomain(axisMode, range);
         const axis = resolveAxisFn ? resolveAxisFn(axisProps, range, defaultAxis, hookApiBase) : defaultAxis;
         const valueRawText = display.text.trim() || p.default;

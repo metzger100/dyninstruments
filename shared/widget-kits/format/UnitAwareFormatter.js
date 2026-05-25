@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniUnitAwareFormatter = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniUnitAwareFormatter = factory();
+  }
 }(this, function () {
   "use strict";
 
@@ -28,7 +30,9 @@
 
   function extractNumericDisplay(valueText, defaultValue) {
     const text = toText(valueText).trim();
-    const match = text.match(/^([+-]?(?:\d+(?:[.,]\d+)?|\.\d+))/);
+    const match = text.match(
+      new RegExp("^([+-]?(?:\\d+(?:[.,]\\d+)?|\\.\\d+))")
+    );
     if (!match) {
       return defaultValue;
     }

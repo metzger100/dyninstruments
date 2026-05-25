@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniEditRouteLayout = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniEditRouteLayout = factory();
+  }
 }(this, function () {
   "use strict";
 
@@ -50,7 +52,12 @@
     highNameBandScale: 0.88,
     normalNameBandScale: 0.9
   };
-  const DEFAULT_METRIC_HAS_UNIT = { pts: false, dst: true, rte: true, rteEta: false };
+  const DEFAULT_METRIC_HAS_UNIT = {
+    pts: false,
+    dst: true,
+    rte: true,
+    rteEta: false
+  };
 
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
@@ -277,7 +284,12 @@
       });
       const insets = computeInsets(W, effectiveH, { isVerticalCommitted: verticalShell.isVerticalCommitted });
       const contentRect = cfg.contentRect || createContentRect(W, effectiveH, insets);
-      const metricVisibility = { pts: hasRoute, dst: hasRoute, rte: hasRoute, rteEta: hasRoute };
+      const metricVisibility = {
+        pts: hasRoute,
+        dst: hasRoute,
+        rte: hasRoute,
+        rteEta: hasRoute
+      };
       const metricHasUnitConfig = cfg.metricHasUnit && typeof cfg.metricHasUnit === "object"
         ? cfg.metricHasUnit
         : {};

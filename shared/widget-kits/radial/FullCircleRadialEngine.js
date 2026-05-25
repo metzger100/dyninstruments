@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniFullCircleRadialEngine = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniFullCircleRadialEngine = factory();
+  }
 }(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
@@ -87,7 +89,15 @@
 
         ctx.clearRect(0, 0, W, H);
         if (stateKind !== stateScreenLabels.KINDS.DATA) {
-          stateScreenCanvasOverlay.drawStateScreen({ ctx: ctx, W: W, H: H, family: family, color: color, labelWeight: labelWeight, kind: stateKind });
+          stateScreenCanvasOverlay.drawStateScreen({
+            ctx: ctx,
+            W: W,
+            H: H,
+            family: family,
+            color: color,
+            labelWeight: labelWeight,
+            kind: stateKind
+          });
           return;
         }
         ctx.fillStyle = color;

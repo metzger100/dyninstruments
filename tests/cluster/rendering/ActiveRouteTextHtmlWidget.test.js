@@ -1,258 +1,15 @@
-const fs = require("node:fs");
 const path = require("node:path");
-const { loadFresh } = require("../../helpers/load-umd");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const fs = require("node:fs");
+const {
+  ORIGINAL_DYNI_PLUGIN,
+  createRenderer,
+  makeProps,
+  withSurfacePolicy,
+  createSurfaceDom,
+  mountCommitted,
+} = require("./ActiveRouteTextHtmlWidget.harness.js");
 
 describe("ActiveRouteTextHtmlWidget", function () {
-  const ORIGINAL_DYNI_PLUGIN = globalThis.DyniPlugin;
-
-  function createRenderer(options) {
-    const opts = options || {};
-    const fitCompute = opts.fitCompute || vi.fn(function () {
-      return {
-        routeNameStyle: "font-size:14px;",
-        metrics: {
-          remain: { captionStyle: "font-size:12px;", valueStyle: "font-size:18px;", unitStyle: "font-size:11px;", gapStyle: "gap:4px;" },
-          rteEta: { captionStyle: "font-size:11px;", valueStyle: "font-size:17px;", unitStyle: "font-size:10px;", gapStyle: "gap:4px;" },
-          next: { captionStyle: "font-size:10px;", valueStyle: "font-size:16px;", unitStyle: "font-size:9px;", gapStyle: "gap:4px;" }
-        }
-      };
-    });
-    const htmlFitStub = {
-      ensureDisplayProps(props) {
-        return props;
-      },
-      resolveDisplayMode(props, shellRect, htmlUtils) {
-        return htmlUtils.resolveRatioModeForRect({
-          shellRect: shellRect,
-          ratioThresholdNormal: props.ratioThresholdNormal,
-          ratioThresholdFlat: props.ratioThresholdFlat,
-          defaultRatioThresholdNormal: 1.2,
-          defaultRatioThresholdFlat: 3.8,
-          defaultMode: "normal"
-        });
-      },
-      formatActiveRouteMetric(rawValue, formatter, formatterParameters, defaultText, placeholderNormalize) {
-        const out = String(applyFormatter(rawValue, {
-          formatter: formatter,
-          formatterParameters: formatterParameters,
-          default: defaultText
-        }));
-        return placeholderNormalize.normalize(out, defaultText);
-      },
-      textLength(value) {
-        return value == null ? 0 : String(value).length;
-      },
-    normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
-      if (!stableDigitsEnabled) {
-        return { padded: rawText, plain: rawText };
-      }
-        return stableDigits.normalize(rawText, {
-          integerWidth: stableDigits.resolveIntegerWidth(rawText, minWidth),
-          reserveSignSlot: true
-        });
-      }
-    };
-    const applyFormatter = opts.applyFormatter || function (value, formatterOptions) {
-        const cfg = formatterOptions || {};
-        if (value == null) {
-          return cfg.default;
-        }
-        if (cfg.formatter === "formatDistance") {
-          return "DIST:" + String(value);
-        }
-        if (cfg.formatter === "formatTime") {
-          return "TIME:" + String(value);
-        }
-        if (cfg.formatter === "formatClock") {
-          return "CLOCK:" + String(value);
-        }
-        if (cfg.formatter === "formatDirection") {
-          return "DIR:" + String(value);
-        }
-        return String(value);
-      };
-    const componentContext = createComponentContextMock({
-      modules: {
-        ActiveRouteHtmlFit: { create: () => Object.assign({ compute: fitCompute }, htmlFitStub) },
-        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
-        PreparedPayloadModelCache: loadFresh("shared/widget-kits/html/PreparedPayloadModelCache.js"),
-        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
-        StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
-        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
-        StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
-        StateScreenMarkup: loadFresh("shared/widget-kits/state/StateScreenMarkup.js"),
-        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js")
-      },
-      services: {
-        format: { applyFormatter },
-        themeTokens: {
-          resolveForRoot() {
-            return {
-              font: {
-                family: "sans-serif",
-                familyMono: "monospace",
-                weight: 720,
-                labelWeight: 610
-              }
-            };
-          }
-        }
-      }
-    });
-
-    return {
-      renderer: loadFresh("widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js").create({}, componentContext),
-      fitCompute
-    };
-  }
-
-  afterEach(function () {
-    if (typeof ORIGINAL_DYNI_PLUGIN === "undefined") {
-      delete globalThis.DyniPlugin;
-    } else {
-      globalThis.DyniPlugin = ORIGINAL_DYNI_PLUGIN;
-    }
-  });
-
-  function makeProps(overrides) {
-    const opts = overrides || {};
-    const base = {
-      display: {
-        remain: 12.4,
-        rteEta: "2026-03-06T11:45:00Z",
-        nextCourse: 93,
-        isApproaching: true,
-        routeName: "Harbor Run",
-        disconnect: false,
-        hideSeconds: false
-      },
-      captions: {
-        remain: "RTE",
-        rteEta: "ETA",
-        nextCourse: "NEXT"
-      },
-      units: {
-        remain: "nm",
-        rteEta: "",
-        nextCourse: "deg"
-      },
-      formatUnits: {
-        remain: "nm"
-      },
-      default: "---"
-    };
-    const out = Object.assign({}, base, opts);
-    out.display = Object.assign({}, base.display, opts.display || {});
-    out.captions = Object.assign({}, base.captions, opts.captions || {});
-    out.units = Object.assign({}, base.units, opts.units || {});
-    out.formatUnits = Object.assign({}, base.formatUnits, opts.formatUnits || {});
-    if (Object.prototype.hasOwnProperty.call(opts, "routeName")) out.display.routeName = opts.routeName;
-    if (Object.prototype.hasOwnProperty.call(opts, "disconnect")) out.display.disconnect = opts.disconnect;
-    if (Object.prototype.hasOwnProperty.call(opts, "hideSeconds")) out.display.hideSeconds = opts.hideSeconds;
-    return out;
-  }
-
-  function withSurfacePolicy(props, options) {
-    const opts = options || {};
-    const mode = opts.mode === "passive" ? "passive" : "dispatch";
-    const openActiveRoute = opts.openActiveRoute || vi.fn(() => true);
-    const pageId = opts.pageId || "navpage";
-    const orientation = opts.orientation === "vertical" ? "vertical" : "default";
-    return Object.assign({}, props || {}, {
-      surfacePolicy: {
-        pageId,
-        containerOrientation: orientation,
-        interaction: { mode },
-        actions: {
-          routeEditor: {
-            openActiveRoute
-          }
-        }
-      }
-    });
-  }
-
-  function createSurfaceDom() {
-    const rootEl = document.createElement("div");
-    rootEl.className = "widget dyniplugin dyni-host-html";
-    const shellEl = document.createElement("div");
-    shellEl.className = "widgetData dyni-shell";
-    const mountEl = document.createElement("div");
-    mountEl.className = "dyni-surface-html-mount";
-    shellEl.appendChild(mountEl);
-    rootEl.appendChild(shellEl);
-    mountEl.getBoundingClientRect = vi.fn(() => ({
-      width: 320,
-      height: 180
-    }));
-    return {
-      rootEl,
-      shellEl,
-      mountEl
-    };
-  }
-
-  function mountCommitted(rendererSpec, props, options) {
-    const opts = options || {};
-    const shellSize = opts.shellSize || { width: 320, height: 180 };
-    const hostContext = opts.hostContext || {};
-    const rootEl = document.createElement("div");
-    rootEl.className = "widget dyniplugin dyni-host-html";
-    const shellEl = document.createElement("div");
-    shellEl.className = "widgetData dyni-shell";
-    const mountEl = document.createElement("div");
-    mountEl.className = "dyni-surface-html-mount";
-    shellEl.appendChild(mountEl);
-    rootEl.appendChild(shellEl);
-    hostContext.__dyniHostCommitState = { rootEl, shellEl };
-
-    mountEl.getBoundingClientRect = vi.fn(() => ({
-      width: shellSize.width,
-      height: shellSize.height
-    }));
-
-    const committed = rendererSpec.createCommittedRenderer({
-      hostContext,
-      mountEl,
-      shadowRoot: null
-    });
-
-    function buildPayload(nextProps, revision, layoutChanged) {
-      return {
-        props: nextProps,
-        revision,
-        rootEl,
-        shellEl,
-        mountEl,
-        shadowRoot: null,
-        shellRect: { width: shellSize.width, height: shellSize.height },
-        hostContext,
-        layoutChanged: layoutChanged === true,
-        relayoutPass: 0
-      };
-    }
-
-    const initial = buildPayload(props, 1, true);
-    committed.mount(mountEl, initial);
-    committed.postPatch(initial);
-
-    return {
-      hostContext,
-      mountEl,
-      committed,
-      update(nextProps) {
-        const payload = buildPayload(nextProps, 2, true);
-        committed.update(payload);
-        committed.postPatch(payload);
-      },
-      html() {
-        return mountEl.innerHTML;
-      }
-    };
-  }
-
   it("exposes committed renderer contract", function () {
     const setup = createRenderer();
     const renderer = setup.renderer;
@@ -266,7 +23,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const openActiveRoute = vi.fn(() => true);
     const mounted = mountCommitted(
       setup.renderer,
-      withSurfacePolicy(makeProps(), { mode: "dispatch", openActiveRoute })
+      withSurfacePolicy(makeProps(), { mode: "dispatch", openActiveRoute }),
     );
 
     const html = mounted.html();
@@ -275,12 +32,22 @@ describe("ActiveRouteTextHtmlWidget", function () {
     expect(html).toContain('data-dyni-action="active-route-open"');
     expect(html).toContain("dyni-active-route-open-hotspot");
     expect(html).toContain("DIST:12.4");
-    expect(mounted.mountEl.querySelector(".dyni-active-route-metric-value-row").getAttribute("style")).toBe("gap:4px;");
+    expect(
+      mounted.mountEl
+        .querySelector(".dyni-active-route-metric-value-row")
+        .getAttribute("style"),
+    ).toBe("gap:4px;");
     expect(setup.fitCompute).toHaveBeenCalledTimes(1);
-    expect(mounted.mountEl.querySelector(".dyni-active-route-metric-caption").getAttribute("style")).toBe("font-size:12px;");
+    expect(
+      mounted.mountEl
+        .querySelector(".dyni-active-route-metric-caption")
+        .getAttribute("style"),
+    ).toBe("font-size:12px;");
 
     const wrapper = mounted.mountEl.querySelector(".dyni-active-route-html");
-    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    wrapper.dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true }),
+    );
     expect(openActiveRoute).toHaveBeenCalledTimes(1);
   });
 
@@ -289,14 +56,19 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const setup = createRenderer();
     const mounted = mountCommitted(
       setup.renderer,
-      withSurfacePolicy(makeProps({ editing: true }), { mode: "dispatch", openActiveRoute })
+      withSurfacePolicy(makeProps({ editing: true }), {
+        mode: "dispatch",
+        openActiveRoute,
+      }),
     );
 
     const html = mounted.html();
     expect(html).toContain("dyni-active-route-open-passive");
 
     const wrapper = mounted.mountEl.querySelector(".dyni-active-route-html");
-    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    wrapper.dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true }),
+    );
     expect(openActiveRoute).not.toHaveBeenCalled();
   });
 
@@ -306,25 +78,42 @@ describe("ActiveRouteTextHtmlWidget", function () {
 
     const disconnected = mountCommitted(
       setup.renderer,
-      withSurfacePolicy(makeProps({ disconnect: true }), { mode: "dispatch", openActiveRoute })
+      withSurfacePolicy(makeProps({ disconnect: true }), {
+        mode: "dispatch",
+        openActiveRoute,
+      }),
     );
     expect(disconnected.html()).toContain("dyni-state-disconnected");
     expect(disconnected.html()).toContain("GPS Lost");
     expect(disconnected.html()).toContain("dyni-active-route-open-passive");
     expect(disconnected.html()).not.toContain("dyni-active-route-open-hotspot");
-    disconnected.mountEl.querySelector(".dyni-active-route-html").dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    disconnected.mountEl
+      .querySelector(".dyni-active-route-html")
+      .dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
     expect(openActiveRoute).not.toHaveBeenCalled();
 
     const noRouteByWpServer = mountCommitted(
       setup.renderer,
-      withSurfacePolicy(makeProps({ disconnect: false, wpServer: false, routeName: "Harbor Run" }), { mode: "dispatch", openActiveRoute })
+      withSurfacePolicy(
+        makeProps({
+          disconnect: false,
+          wpServer: false,
+          routeName: "Harbor Run",
+        }),
+        { mode: "dispatch", openActiveRoute },
+      ),
     );
     expect(noRouteByWpServer.html()).toContain("dyni-state-no-route");
     expect(noRouteByWpServer.html()).toContain("No Route");
 
     const noRouteByEmptyName = mountCommitted(
       setup.renderer,
-      withSurfacePolicy(makeProps({ disconnect: false, wpServer: true, routeName: "   " }), { mode: "dispatch", openActiveRoute })
+      withSurfacePolicy(
+        makeProps({ disconnect: false, wpServer: true, routeName: "   " }),
+        { mode: "dispatch", openActiveRoute },
+      ),
     );
     expect(noRouteByEmptyName.html()).toContain("dyni-state-no-route");
     expect(noRouteByEmptyName.html()).toContain("No Route");
@@ -335,7 +124,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const mounted = mountCommitted(
       setup.renderer,
       withSurfacePolicy(makeProps({ disconnect: true }), { mode: "dispatch" }),
-      { shellSize: { width: 2, height: 2 } }
+      { shellSize: { width: 2, height: 2 } },
     );
 
     const label = mounted.mountEl.querySelector(".dyni-state-screen-label");
@@ -347,7 +136,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const setup = createRenderer();
     const mounted = mountCommitted(
       setup.renderer,
-      withSurfacePolicy(makeProps({ hideSeconds: true }), { mode: "dispatch" })
+      withSurfacePolicy(makeProps({ hideSeconds: true }), { mode: "dispatch" }),
     );
 
     expect(mounted.html()).toContain("CLOCK:");
@@ -371,15 +160,16 @@ describe("ActiveRouteTextHtmlWidget", function () {
           return "NO DATA";
         }
         return value == null ? cfg.default : String(value);
-      }
+      },
     });
     const mounted = mountCommitted(
       setup.renderer,
-      withSurfacePolicy(makeProps(), { mode: "dispatch" })
+      withSurfacePolicy(makeProps(), { mode: "dispatch" }),
     );
 
-    const valueTexts = Array.from(mounted.mountEl.querySelectorAll(".dyni-active-route-metric-value"))
-      .map((el) => el.textContent);
+    const valueTexts = Array.from(
+      mounted.mountEl.querySelectorAll(".dyni-active-route-metric-value"),
+    ).map((el) => el.textContent);
     expect(valueTexts).toEqual(["---", "---", "---"]);
     expect(mounted.html()).not.toContain("--:--:--");
     expect(mounted.html()).not.toContain("NO DATA");
@@ -389,10 +179,14 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const setup = createRenderer();
     const mounted = mountCommitted(
       setup.renderer,
-      withSurfacePolicy(makeProps({ stableDigits: true }), { mode: "dispatch" })
+      withSurfacePolicy(makeProps({ stableDigits: true }), {
+        mode: "dispatch",
+      }),
     );
 
-    const valueEls = mounted.mountEl.querySelectorAll(".dyni-active-route-metric-value");
+    const valueEls = mounted.mountEl.querySelectorAll(
+      ".dyni-active-route-metric-value",
+    );
     expect(valueEls.length).toBeGreaterThan(0);
     valueEls.forEach((el) => {
       expect(el.classList.contains("dyni-tabular")).toBe(true);
@@ -404,15 +198,31 @@ describe("ActiveRouteTextHtmlWidget", function () {
       return {
         routeNameStyle: "font-size:14px;",
         metrics: {
-          remain: { captionStyle: "font-size:12px;", valueStyle: "font-size:18px;", unitStyle: "font-size:11px;" },
-          rteEta: { captionStyle: "font-size:11px;", valueStyle: "font-size:17px;", unitStyle: "font-size:10px;" },
-          next: { captionStyle: "font-size:10px;", valueStyle: "font-size:16px;", unitStyle: "font-size:9px;" }
-        }
+          remain: {
+            captionStyle: "font-size:12px;",
+            valueStyle: "font-size:18px;",
+            unitStyle: "font-size:11px;",
+          },
+          rteEta: {
+            captionStyle: "font-size:11px;",
+            valueStyle: "font-size:17px;",
+            unitStyle: "font-size:10px;",
+          },
+          next: {
+            captionStyle: "font-size:10px;",
+            valueStyle: "font-size:16px;",
+            unitStyle: "font-size:9px;",
+          },
+        },
       };
     });
     const setup = createRenderer({ fitCompute });
     const hostContext = {};
-    const committed = setup.renderer.createCommittedRenderer({ hostContext, mountEl: null, shadowRoot: null });
+    const committed = setup.renderer.createCommittedRenderer({
+      hostContext,
+      mountEl: null,
+      shadowRoot: null,
+    });
     const rootEl = document.createElement("div");
     const shellEl = document.createElement("div");
     const mountEl = document.createElement("div");
@@ -430,7 +240,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
         shellRect: { width: 320, height: 180 },
         hostContext: hostContext,
         layoutChanged: layoutChanged === true,
-        relayoutPass: 0
+        relayoutPass: 0,
       };
     }
 
@@ -445,15 +255,19 @@ describe("ActiveRouteTextHtmlWidget", function () {
 
   it("updates layout signature when ratio-driven mode changes", function () {
     const setup = createRenderer();
-    const committed = setup.renderer.createCommittedRenderer({ hostContext: {}, mountEl: null, shadowRoot: null });
+    const committed = setup.renderer.createCommittedRenderer({
+      hostContext: {},
+      mountEl: null,
+      shadowRoot: null,
+    });
 
     const baseSig = committed.layoutSignature({
       props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
-      shellRect: { width: 220, height: 180 }
+      shellRect: { width: 220, height: 180 },
     });
     const flatSig = committed.layoutSignature({
       props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
-      shellRect: { width: 520, height: 120 }
+      shellRect: { width: 520, height: 120 },
     });
 
     expect(flatSig).not.toBe(baseSig);
@@ -463,7 +277,11 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const setup = createRenderer();
     const mounted = mountCommitted(
       setup.renderer,
-      withSurfacePolicy(makeProps(), { mode: "dispatch", pageId: "editroutepage", orientation: "vertical" })
+      withSurfacePolicy(makeProps(), {
+        mode: "dispatch",
+        pageId: "editroutepage",
+        orientation: "vertical",
+      }),
     );
 
     const root = mounted.mountEl.querySelector(".dyni-html-root");
@@ -473,7 +291,10 @@ describe("ActiveRouteTextHtmlWidget", function () {
   });
 
   it("uses shadow-local css selectors", function () {
-    const cssPath = path.join(process.cwd(), "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css");
+    const cssPath = path.join(
+      process.cwd(),
+      "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css",
+    );
     const css = fs.readFileSync(cssPath, "utf8");
 
     expect(css).toContain(".dyni-html-root .dyni-active-route-html");
@@ -505,7 +326,11 @@ describe("ActiveRouteTextHtmlWidget", function () {
     });
     const setup = createRenderer({ applyFormatter });
     const hostContext = {};
-    const committed = setup.renderer.createCommittedRenderer({ hostContext, mountEl: null, shadowRoot: null });
+    const committed = setup.renderer.createCommittedRenderer({
+      hostContext,
+      mountEl: null,
+      shadowRoot: null,
+    });
     const rootEl = document.createElement("div");
     const shellEl = document.createElement("div");
     const mountEl = document.createElement("div");
@@ -523,7 +348,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
         shellRect,
         hostContext,
         layoutChanged: layoutChanged === true,
-        relayoutPass: 0
+        relayoutPass: 0,
       };
     }
 
@@ -533,17 +358,32 @@ describe("ActiveRouteTextHtmlWidget", function () {
     committed.mount(mountEl, initial);
     expect(applyFormatter).toHaveBeenCalledTimes(3);
 
-    const revisionChanged = buildPayload(propsA, 2, { width: 320, height: 180 }, false);
+    const revisionChanged = buildPayload(
+      propsA,
+      2,
+      { width: 320, height: 180 },
+      false,
+    );
     committed.layoutSignature(revisionChanged);
     committed.update(revisionChanged);
     expect(applyFormatter).toHaveBeenCalledTimes(6);
 
-    const propsIdentityChanged = buildPayload(withSurfacePolicy(makeProps(), { mode: "dispatch" }), 2, { width: 320, height: 180 }, false);
+    const propsIdentityChanged = buildPayload(
+      withSurfacePolicy(makeProps(), { mode: "dispatch" }),
+      2,
+      { width: 320, height: 180 },
+      false,
+    );
     committed.layoutSignature(propsIdentityChanged);
     committed.update(propsIdentityChanged);
     expect(applyFormatter).toHaveBeenCalledTimes(9);
 
-    const shellSizeChanged = buildPayload(propsIdentityChanged.props, 2, { width: 321, height: 180 }, true);
+    const shellSizeChanged = buildPayload(
+      propsIdentityChanged.props,
+      2,
+      { width: 321, height: 180 },
+      true,
+    );
     committed.layoutSignature(shellSizeChanged);
     committed.update(shellSizeChanged);
     expect(applyFormatter).toHaveBeenCalledTimes(12);
@@ -556,7 +396,11 @@ describe("ActiveRouteTextHtmlWidget", function () {
     });
     const setup = createRenderer({ applyFormatter });
     const hostContext = {};
-    const committed = setup.renderer.createCommittedRenderer({ hostContext, mountEl: null, shadowRoot: null });
+    const committed = setup.renderer.createCommittedRenderer({
+      hostContext,
+      mountEl: null,
+      shadowRoot: null,
+    });
     const rootEl = document.createElement("div");
     const shellEl = document.createElement("div");
     const mountEl = document.createElement("div");
@@ -573,7 +417,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
       shellRect: { width: 320, height: 180 },
       hostContext,
       layoutChanged: true,
-      relayoutPass: 0
+      relayoutPass: 0,
     };
 
     committed.layoutSignature(payload);

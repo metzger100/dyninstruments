@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniMapZoomHtmlFit = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniMapZoomHtmlFit = factory();
+  }
 }(this, function () {
   "use strict";
 
@@ -74,7 +76,12 @@
         useMono: cfg.useMono === true,
         monoFamily: cfg.monoFamily
       });
-      return { captionPx: fitHigh.cPx, valuePx: fitHigh.vPx, unitPx: fitHigh.uPx, modeFit: fitHigh };
+      return {
+        captionPx: fitHigh.cPx,
+        valuePx: fitHigh.vPx,
+        unitPx: fitHigh.uPx,
+        modeFit: fitHigh
+      };
     }
     if (cfg.mode === "normal") {
       const fitNormal = text.fitValueUnitCaptionRows({
@@ -95,7 +102,12 @@
         useMono: cfg.useMono === true,
         monoFamily: cfg.monoFamily
       });
-      return { captionPx: fitNormal.cPx, valuePx: fitNormal.vPx, unitPx: fitNormal.uPx, modeFit: fitNormal };
+      return {
+        captionPx: fitNormal.cPx,
+        valuePx: fitNormal.vPx,
+        unitPx: fitNormal.uPx,
+        modeFit: fitNormal
+      };
     }
     const fitFlat = text.fitInlineTriplet({
       ctx: cfg.ctx,

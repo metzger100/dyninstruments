@@ -1,6 +1,11 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
-const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
+const {
+  createComponentContextMock,
+} = require("../../helpers/component-context-mock");
+const {
+  createMockCanvas,
+  createMockContext2D,
+} = require("../../helpers/mock-canvas");
 
 describe("CanvasLayerCache", function () {
   function createCache(spec) {
@@ -12,7 +17,7 @@ describe("CanvasLayerCache", function () {
     const canvas = createMockCanvas({
       rectWidth: rectW,
       rectHeight: rectH,
-      ctx: createMockContext2D()
+      ctx: createMockContext2D(),
     });
     canvas.width = bufferW;
     canvas.height = bufferH;
@@ -31,7 +36,12 @@ describe("CanvasLayerCache", function () {
     const rebuilt = [];
 
     const rebuild = function (layerCtx, layerName, layerCanvas) {
-      rebuilt.push({ layerName: layerName, width: layerCanvas.width, height: layerCanvas.height, layerCtx: layerCtx });
+      rebuilt.push({
+        layerName: layerName,
+        width: layerCanvas.width,
+        height: layerCanvas.height,
+        layerCtx: layerCtx,
+      });
     };
 
     cache.ensureLayer(canvas, { marker: "a" }, rebuild);
@@ -112,6 +122,9 @@ describe("CanvasLayerCache", function () {
     canvas.height = 400;
     cache.ensureLayer(canvas, "same-key", rebuild);
 
-    expect(sizes).toEqual([[400, 200], [800, 400]]);
+    expect(sizes).toEqual([
+      [400, 200],
+      [800, 400],
+    ]);
   });
 });

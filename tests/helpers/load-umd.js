@@ -17,7 +17,7 @@ const DEFAULT_MODULE_PATHS = {
   HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
   StateScreenLabels: "shared/widget-kits/state/StateScreenLabels.js",
   StateScreenTextFit: "shared/widget-kits/state/StateScreenTextFit.js",
-  StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js"
+  StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js",
 };
 
 function createDefaultContext(def) {
@@ -27,36 +27,52 @@ function createDefaultContext(def) {
       require(id) {
         if (!modules[id]) {
           if (!DEFAULT_MODULE_PATHS[id]) {
-            throw new Error("load-umd default context: missing module '" + id + "'");
+            throw new Error(
+              "load-umd default context: missing module '" + id + "'",
+            );
           }
           const mod = loadFresh(DEFAULT_MODULE_PATHS[id]);
-          modules[id] = typeof mod.create === "function" ? mod.create(def, context) : mod;
+          modules[id] =
+            typeof mod.create === "function" ? mod.create(def, context) : mod;
         }
         return modules[id];
-      }
+      },
     },
     theme: {
       tokens: {
         resolveForRoot() {
           return {
             surface: { fg: "#000", bg: "#fff", border: "#000" },
-            font: { family: "sans-serif", familyMono: "monospace", weight: 700, labelWeight: 700 },
-            colors: {}
+            font: {
+              family: "sans-serif",
+              familyMono: "monospace",
+              weight: 700,
+              labelWeight: 700,
+            },
+            colors: {},
           };
-        }
-      }
-    }
+        },
+      },
+    },
   };
   return context;
 }
 
 function wrapCreate(mod) {
-  if (!mod || typeof mod.create !== "function" || mod.__dyniTestCreateWrapped === true) {
+  if (
+    !mod ||
+    typeof mod.create !== "function" ||
+    mod.__dyniTestCreateWrapped === true
+  ) {
     return mod;
   }
   const originalCreate = mod.create;
   mod.create = function (def, componentContext) {
-    return originalCreate.call(mod, def, componentContext || createDefaultContext(def || {}));
+    return originalCreate.call(
+      mod,
+      def,
+      componentContext || createDefaultContext(def || {}),
+    );
   };
   Object.defineProperty(mod, "__dyniTestCreateWrapped", { value: true });
   return mod;
@@ -70,5 +86,5 @@ function loadFresh(relPath) {
 }
 
 module.exports = {
-  loadFresh
+  loadFresh,
 };

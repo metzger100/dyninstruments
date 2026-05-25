@@ -8,15 +8,20 @@ describe("runtime/init.js", function () {
   }
 
   function createBridgeRuntimeMock() {
-    const hostActions = { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
+    const hostActions = {
+      getCapabilities: vi.fn(),
+      routePoints: {},
+      routeEditor: {},
+      ais: {},
+    };
     const bridge = {
       getHostActions: vi.fn(() => hostActions),
-      destroy: vi.fn()
+      destroy: vi.fn(),
     };
     return {
       hostActions,
       bridge,
-      createTemporaryHostActionBridge: vi.fn(() => bridge)
+      createTemporaryHostActionBridge: vi.fn(() => bridge),
     };
   }
 
@@ -25,14 +30,14 @@ describe("runtime/init.js", function () {
       configure: vi.fn(),
       applyToRoot: vi.fn(),
       resolveStartupPresetName: vi.fn(() => "default"),
-      preloadShadowCssUrls: vi.fn(() => Promise.resolve([]))
+      preloadShadowCssUrls: vi.fn(() => Promise.resolve([])),
     };
   }
 
   function createShellRendererMock() {
     return {
       normalizeRouteFrame: vi.fn(),
-      renderRouteShell: vi.fn()
+      renderRouteShell: vi.fn(),
     };
   }
 
@@ -43,26 +48,31 @@ describe("runtime/init.js", function () {
     const uniqueComponents = vi.fn(() => ["A", "B"]);
     const themeRuntime = createThemeRuntimeMock();
     const shellRenderer = createShellRendererMock();
-    const { bridge, hostActions, createTemporaryHostActionBridge } = createBridgeRuntimeMock();
+    const { bridge, hostActions, createTemporaryHostActionBridge } =
+      createBridgeRuntimeMock();
 
     const context = createScriptContext({
       avnav: {
         api: {
           registerWidget,
-          log: vi.fn()
-        }
+          log: vi.fn(),
+        },
       },
       DyniPlugin: {
         avnavApi: {
           registerWidget,
-          log: vi.fn()
+          log: vi.fn(),
         },
         runtime: {
           theme: themeRuntime,
           createTemporaryHostActionBridge,
           clusterShellRenderer: shellRenderer,
-          createComponentLoader: vi.fn(() => ({ uniqueComponents, loadComponent, createInstance })),
-          registerWidget: vi.fn()
+          createComponentLoader: vi.fn(() => ({
+            uniqueComponents,
+            loadComponent,
+            createInstance,
+          })),
+          registerWidget: vi.fn(),
         },
         state: {},
         config: {
@@ -70,24 +80,31 @@ describe("runtime/init.js", function () {
           clusters: [],
           components: {
             A: { shadowCss: ["/a.css", "/shared.css"] },
-            B: { shadowCss: ["/b.css", "/shared.css"] }
+            B: { shadowCss: ["/b.css", "/shared.css"] },
           },
-          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
-        }
-      }
+          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }],
+        },
+      },
     });
 
     loadInitRuntime(context);
     await context.DyniPlugin.runtime.runInit();
     await flushPromises();
 
-    expect(uniqueComponents).toHaveBeenCalledWith([{ widget: "A", def: { name: "dyni_test" } }]);
+    expect(uniqueComponents).toHaveBeenCalledWith([
+      { widget: "A", def: { name: "dyni_test" } },
+    ]);
     expect(loadComponent.mock.calls.map((call) => call[0])).toEqual(["A", "B"]);
     expect(themeRuntime.preloadShadowCssUrls).not.toHaveBeenCalled();
-    expect(themeRuntime.configure).toHaveBeenCalledWith({ activePresetName: "default" });
+    expect(themeRuntime.configure).toHaveBeenCalledWith({
+      activePresetName: "default",
+    });
     expect(context.DyniPlugin.runtime.clusterShellRenderer).toBe(shellRenderer);
     expect(createInstance).toHaveBeenCalledWith("A", { name: "dyni_test" });
-    expect(context.DyniPlugin.runtime.registerWidget).toHaveBeenCalledWith({ id: "WidgetSpec" }, { widget: "A", def: { name: "dyni_test" } });
+    expect(context.DyniPlugin.runtime.registerWidget).toHaveBeenCalledWith(
+      { id: "WidgetSpec" },
+      { widget: "A", def: { name: "dyni_test" } },
+    );
     expect(context.DyniPlugin.state.hostActionBridge).toBe(bridge);
     expect(typeof context.DyniPlugin.runtime.hostActions).toBe("function");
     expect(context.DyniPlugin.runtime.hostActions()).toBe(hostActions);
@@ -96,24 +113,34 @@ describe("runtime/init.js", function () {
   it("re-reads the current host action facade on every runtime.hostActions call", async function () {
     const themeRuntime = createThemeRuntimeMock();
     const shellRenderer = createShellRendererMock();
-    const firstHostActions = { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
-    const secondHostActions = { getCapabilities: vi.fn(), routePoints: {}, routeEditor: {}, ais: {} };
+    const firstHostActions = {
+      getCapabilities: vi.fn(),
+      routePoints: {},
+      routeEditor: {},
+      ais: {},
+    };
+    const secondHostActions = {
+      getCapabilities: vi.fn(),
+      routePoints: {},
+      routeEditor: {},
+      ais: {},
+    };
     const bridge = {
       getHostActions: vi.fn(() => firstHostActions),
-      destroy: vi.fn()
+      destroy: vi.fn(),
     };
 
     const context = createScriptContext({
       avnav: {
         api: {
           registerWidget: vi.fn(),
-          log: vi.fn()
-        }
+          log: vi.fn(),
+        },
       },
       DyniPlugin: {
         avnavApi: {
           registerWidget: vi.fn(),
-          log: vi.fn()
+          log: vi.fn(),
         },
         runtime: {
           theme: themeRuntime,
@@ -122,18 +149,18 @@ describe("runtime/init.js", function () {
           createComponentLoader: vi.fn(() => ({
             uniqueComponents: () => ["A"],
             loadComponent: () => Promise.resolve({}),
-            createInstance: () => ({})
+            createInstance: () => ({}),
           })),
-          registerWidget: vi.fn()
+          registerWidget: vi.fn(),
         },
         state: {},
         config: {
           shared: {},
           clusters: [],
           components: { A: {} },
-          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
-        }
-      }
+          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }],
+        },
+      },
     });
 
     loadInitRuntime(context);
@@ -155,7 +182,7 @@ describe("runtime/init.js", function () {
       DyniPlugin: {
         avnavApi: {
           log: hostLog,
-          registerWidget: vi.fn()
+          registerWidget: vi.fn(),
         },
         runtime: {
           theme: themeRuntime,
@@ -164,43 +191,46 @@ describe("runtime/init.js", function () {
           createComponentLoader: vi.fn(() => ({
             uniqueComponents: () => ["A"],
             loadComponent: () => Promise.resolve({}),
-            createInstance: () => ({})
+            createInstance: () => ({}),
           })),
-          registerWidget: vi.fn()
+          registerWidget: vi.fn(),
         },
         state: {},
         config: {
           shared: {},
           clusters: [],
           components: { A: {} },
-          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
-        }
-      }
+          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }],
+        },
+      },
     });
 
     loadInitRuntime(context);
     await context.DyniPlugin.runtime.runInit();
 
-    expect(hostLog).toHaveBeenCalledWith("dyninstruments component init ok (clustered): 1 widgets");
+    expect(hostLog).toHaveBeenCalledWith(
+      "dyninstruments component init ok (clustered): 1 widgets",
+    );
   });
 
   it("resets init state and bridge when component loading fails", async function () {
     const err = vi.fn();
     const themeRuntime = createThemeRuntimeMock();
     const shellRenderer = createShellRendererMock();
-    const { bridge, createTemporaryHostActionBridge } = createBridgeRuntimeMock();
+    const { bridge, createTemporaryHostActionBridge } =
+      createBridgeRuntimeMock();
     const context = createScriptContext({
       console: { error: err },
       avnav: {
         api: {
           registerWidget: vi.fn(),
-          log: vi.fn()
-        }
+          log: vi.fn(),
+        },
       },
       DyniPlugin: {
         avnavApi: {
           registerWidget: vi.fn(),
-          log: vi.fn()
+          log: vi.fn(),
         },
         runtime: {
           theme: themeRuntime,
@@ -209,22 +239,24 @@ describe("runtime/init.js", function () {
           createComponentLoader: vi.fn(() => ({
             uniqueComponents: () => ["A"],
             loadComponent: () => Promise.reject(new Error("load failed")),
-            createInstance: vi.fn()
+            createInstance: vi.fn(),
           })),
-          registerWidget: vi.fn()
+          registerWidget: vi.fn(),
         },
         state: {},
         config: {
           shared: {},
           clusters: [],
           components: { A: {} },
-          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }]
-        }
-      }
+          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }],
+        },
+      },
     });
 
     loadInitRuntime(context);
-    await expect(context.DyniPlugin.runtime.runInit()).rejects.toThrow("load failed");
+    await expect(context.DyniPlugin.runtime.runInit()).rejects.toThrow(
+      "load failed",
+    );
 
     expect(context.DyniPlugin.state.initStarted).toBe(false);
     expect(bridge.destroy).toHaveBeenCalledTimes(1);
@@ -240,12 +272,17 @@ describe("runtime/init.js", function () {
       DyniPlugin: {
         runtime: {
           theme: createThemeRuntimeMock(),
-          clusterShellRenderer: createShellRendererMock()
+          clusterShellRenderer: createShellRendererMock(),
         },
         state: {},
-        config: { shared: {}, clusters: [], components: {}, widgetDefinitions: [] }
+        config: {
+          shared: {},
+          clusters: [],
+          components: {},
+          widgetDefinitions: [],
+        },
       },
-      avnav: undefined
+      avnav: undefined,
     });
 
     loadInitRuntime(context);
@@ -260,11 +297,16 @@ describe("runtime/init.js", function () {
       DyniPlugin: {
         runtime: {
           theme: createThemeRuntimeMock(),
-          clusterShellRenderer: createShellRendererMock()
+          clusterShellRenderer: createShellRendererMock(),
         },
         state: { initStarted: true, initPromise },
-        config: { shared: {}, clusters: [], components: {}, widgetDefinitions: [] }
-      }
+        config: {
+          shared: {},
+          clusters: [],
+          components: {},
+          widgetDefinitions: [],
+        },
+      },
     });
 
     loadInitRuntime(context);

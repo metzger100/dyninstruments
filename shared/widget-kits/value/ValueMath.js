@@ -6,7 +6,9 @@
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniValueMath = factory(); }
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniValueMath = factory();
+  }
 }(this, function () {
   "use strict";
 
@@ -146,7 +148,7 @@
   }
 
   function extractNumberText(text) {
-    const match = String(text).match(/-?\d+(?:\.\d+)?/);
+    const match = String(text).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
     return match ? match[0] : "";
   }
 

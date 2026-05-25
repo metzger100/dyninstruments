@@ -1,5 +1,7 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const {
+  createComponentContextMock,
+} = require("../../helpers/component-context-mock");
 
 describe("SpeedRadialWidget", function () {
   it("passes SemicircleRadialEngine config with high-end sectors", function () {
@@ -16,109 +18,159 @@ describe("SpeedRadialWidget", function () {
       return Number(value).toFixed(1) + " " + spec.formatterParameters[0];
     });
 
-    const mod = loadFresh("widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js");
-    const spec = mod.create({}, createComponentContextMock({
-      modules: {
-        PlaceholderNormalize: {
-          create() {
-            return {
-              normalize(text, defaultText) {
-                if (text == null) {
-                  return defaultText == null ? "---" : defaultText;
-                }
-                const value = String(text).trim();
-                return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
-              }
-            };
-          }
-        },
-        ValueMath: {
-          create() {
-            return {
-                formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
+    const mod = loadFresh(
+      "widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js",
+    );
+    const spec = mod.create(
+      {},
+      createComponentContextMock({
+        modules: {
+          PlaceholderNormalize: {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  const value = String(text).trim();
+                  return value === "NO DATA" || /^-+$/.test(value)
+                    ? defaultText == null
+                      ? "---"
+                      : defaultText
+                    : String(text);
+                },
+              };
+            },
+          },
+          ValueMath: {
+            create() {
+              return {
+                formatGaugeDisplay(
+                  raw,
+                  props,
+                  applyFormatter,
+                  normalize,
+                  defaultFormatter,
+                  defaultParameters,
+                ) {
                   const p = props || {};
-                  const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
+                  const defaultText = Object.prototype.hasOwnProperty.call(
+                    p,
+                    "default",
+                  )
                     ? p.default
                     : normalize(undefined, undefined);
                   const n = Number(raw);
                   if (!Number.isFinite(n)) {
                     return { num: NaN, text: defaultText };
                   }
-                  const formatter = Object.prototype.hasOwnProperty.call(p, "formatter") ? p.formatter : defaultFormatter;
-                  const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
-                    ? p.formatterParameters
-                    : defaultParameters;
-                  const formatted = normalize(String(applyFormatter(n, {
-                    formatter: formatter,
-                    formatterParameters: formatterParameters,
-                    default: defaultText
-                  })), defaultText);
-                  const match = String(formatted).match(/-?\d+(?:\.\d+)?/);
+                  const formatter = Object.prototype.hasOwnProperty.call(
+                    p,
+                    "formatter",
+                  )
+                    ? p.formatter
+                    : defaultFormatter;
+                  const formatterParameters =
+                    Object.prototype.hasOwnProperty.call(
+                      p,
+                      "formatterParameters",
+                    )
+                      ? p.formatterParameters
+                      : defaultParameters;
+                  const formatted = normalize(
+                    String(
+                      applyFormatter(n, {
+                        formatter: formatter,
+                        formatterParameters: formatterParameters,
+                        default: defaultText,
+                      }),
+                    ),
+                    defaultText,
+                  );
+                  const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
-                  return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+                  return Number.isFinite(num)
+                    ? { num: num, text: match[0] }
+                    : { num: NaN, text: defaultText };
                 },
                 extractNumberText(text) {
-                  const match = String(text).match(/-?\d+(?:\.\d+)?/);
+                  const match = String(text).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   return match ? match[0] : "";
                 },
-                resolveStandardTickSteps
+                resolveStandardTickSteps,
               };
-          }
+            },
+          },
+          SemicircleRadialEngine: {
+            create() {
+              return {
+                createRenderer(cfg) {
+                  captured = cfg;
+                  return renderCanvas;
+                },
+              };
+            },
+          },
         },
-        SemicircleRadialEngine: {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return renderCanvas;
-              }
-            };
-          }
-        }
-      },
-      services: {
-        format: { applyFormatter }
-      }
-    }));
+        services: {
+          format: { applyFormatter },
+        },
+      }),
+    );
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.unitDefault).toBe("kn");
     expect(captured).not.toHaveProperty("rangeDefaults");
     expect(captured.ratioProps).toEqual({
       normal: "speedRadialRatioThresholdNormal",
-      flat: "speedRadialRatioThresholdFlat"
+      flat: "speedRadialRatioThresholdFlat",
     });
-    expect(captured.hideTextualMetricsProp).toBe("speedRadialHideTextualMetrics");
+    expect(captured.hideTextualMetricsProp).toBe(
+      "speedRadialHideTextualMetrics",
+    );
     expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(6)).toEqual({ major: 1, minor: 0.5 });
     expect(captured.tickSteps(30)).toEqual({ major: 5, minor: 1 });
     expect(resolveStandardTickSteps).toHaveBeenCalledTimes(2);
-    expect(captured.formatDisplay(6.44, {
-      formatter: "formatSpeed",
-      formatterParameters: ["kn"]
-    }, "kn")).toEqual({ num: 6.4, text: "6.4" });
+    expect(
+      captured.formatDisplay(
+        6.44,
+        {
+          formatter: "formatSpeed",
+          formatterParameters: ["kn"],
+        },
+        "kn",
+      ),
+    ).toEqual({ num: 6.4, text: "6.4" });
     expect(applyFormatter).toHaveBeenCalled();
 
     const theme = {
       colors: {
         warning: "#123456",
-        alarm: "#654321"
-      }
+        alarm: "#654321",
+      },
     };
-    const sectors = captured.buildSectors({ speedRadialWarningFrom: 20, speedRadialAlarmFrom: 25 }, 0, 30, {}, {
-      buildHighEndSectors(props, minV, maxV, arc, options) {
-        receivedProps = props;
-        receivedOptions = options;
-        return [
-          { a0: 20, a1: 25, color: options.warningColor },
-          { a0: 25, a1: 30, color: options.alarmColor }
-        ];
-      }
-    }, theme);
+    const sectors = captured.buildSectors(
+      { speedRadialWarningFrom: 20, speedRadialAlarmFrom: 25 },
+      0,
+      30,
+      {},
+      {
+        buildHighEndSectors(props, minV, maxV, arc, options) {
+          receivedProps = props;
+          receivedOptions = options;
+          return [
+            { a0: 20, a1: 25, color: options.warningColor },
+            { a0: 25, a1: 30, color: options.alarmColor },
+          ];
+        },
+      },
+      theme,
+    );
 
     expect(sectors).toEqual([
       { a0: 20, a1: 25, color: "#123456" },
-      { a0: 25, a1: 30, color: "#654321" }
+      { a0: 25, a1: 30, color: "#654321" },
     ]);
     expect(receivedProps).toEqual({ warningFrom: 20, alarmFrom: 25 });
     expect(receivedOptions.warningColor).toBe(theme.colors.warning);
@@ -127,147 +179,219 @@ describe("SpeedRadialWidget", function () {
 
   it("does not fall back to fixed-decimal text when formatter returns raw passthrough", function () {
     let captured;
-    const mod = loadFresh("widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js");
-    mod.create({}, createComponentContextMock({
-      modules: {
-        PlaceholderNormalize: {
-          create() {
-            return {
-              normalize(text, defaultText) {
-                if (text == null) {
-                  return defaultText == null ? "---" : defaultText;
-                }
-                const value = String(text).trim();
-                return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
-              }
-            };
-          }
-        },
-        ValueMath: {
-          create() {
-            return {
-                formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
+    const mod = loadFresh(
+      "widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js",
+    );
+    mod.create(
+      {},
+      createComponentContextMock({
+        modules: {
+          PlaceholderNormalize: {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  const value = String(text).trim();
+                  return value === "NO DATA" || /^-+$/.test(value)
+                    ? defaultText == null
+                      ? "---"
+                      : defaultText
+                    : String(text);
+                },
+              };
+            },
+          },
+          ValueMath: {
+            create() {
+              return {
+                formatGaugeDisplay(
+                  raw,
+                  props,
+                  applyFormatter,
+                  normalize,
+                  defaultFormatter,
+                  defaultParameters,
+                ) {
                   const p = props || {};
-                  const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
+                  const defaultText = Object.prototype.hasOwnProperty.call(
+                    p,
+                    "default",
+                  )
                     ? p.default
                     : normalize(undefined, undefined);
                   const n = Number(raw);
                   if (!Number.isFinite(n)) {
                     return { num: NaN, text: defaultText };
                   }
-                  const formatter = Object.prototype.hasOwnProperty.call(p, "formatter") ? p.formatter : defaultFormatter;
-                  const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
-                    ? p.formatterParameters
-                    : defaultParameters;
-                  const formatted = normalize(String(applyFormatter(n, {
-                    formatter: formatter,
-                    formatterParameters: formatterParameters,
-                    default: defaultText
-                  })), defaultText);
-                  const match = String(formatted).match(/-?\d+(?:\.\d+)?/);
+                  const formatter = Object.prototype.hasOwnProperty.call(
+                    p,
+                    "formatter",
+                  )
+                    ? p.formatter
+                    : defaultFormatter;
+                  const formatterParameters =
+                    Object.prototype.hasOwnProperty.call(
+                      p,
+                      "formatterParameters",
+                    )
+                      ? p.formatterParameters
+                      : defaultParameters;
+                  const formatted = normalize(
+                    String(
+                      applyFormatter(n, {
+                        formatter: formatter,
+                        formatterParameters: formatterParameters,
+                        default: defaultText,
+                      }),
+                    ),
+                    defaultText,
+                  );
+                  const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
-                  return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+                  return Number.isFinite(num)
+                    ? { num: num, text: match[0] }
+                    : { num: NaN, text: defaultText };
                 },
                 extractNumberText(text) {
-                  const match = String(text).match(/-?\d+(?:\.\d+)?/);
+                  const match = String(text).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   return match ? match[0] : "";
                 },
               };
-          }
+            },
+          },
+          SemicircleRadialEngine: {
+            create() {
+              return {
+                createRenderer(cfg) {
+                  captured = cfg;
+                  return function () {};
+                },
+              };
+            },
+          },
         },
-        SemicircleRadialEngine: {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return function () {};
-              }
-            };
-          }
-        }
-      },
-      services: {
-        format: {
-          applyFormatter(value) {
-            return String(value);
-          }
-        }
-      }
-    }));
+        services: {
+          format: {
+            applyFormatter(value) {
+              return String(value);
+            },
+          },
+        },
+      }),
+    );
 
-    expect(captured.formatDisplay(6.44, {}, "kn")).toEqual({ num: 6.44, text: "6.44" });
+    expect(captured.formatDisplay(6.44, {}, "kn")).toEqual({
+      num: 6.44,
+      text: "6.44",
+    });
   });
 
   it("returns placeholder output for null speed values", function () {
     let captured;
     const applyFormatter = vi.fn((value) => String(value));
 
-    const mod = loadFresh("widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js");
-    mod.create({}, createComponentContextMock({
-      modules: {
-        PlaceholderNormalize: {
-          create() {
-            return {
-              normalize(text, defaultText) {
-                if (text == null) {
-                  return defaultText == null ? "---" : defaultText;
-                }
-                return String(text);
-              }
-            };
-          }
+    const mod = loadFresh(
+      "widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js",
+    );
+    mod.create(
+      {},
+      createComponentContextMock({
+        modules: {
+          PlaceholderNormalize: {
+            create() {
+              return {
+                normalize(text, defaultText) {
+                  if (text == null) {
+                    return defaultText == null ? "---" : defaultText;
+                  }
+                  return String(text);
+                },
+              };
+            },
+          },
+          ValueMath: {
+            create() {
+              return {
+                formatGaugeDisplay(
+                  raw,
+                  props,
+                  apply,
+                  normalize,
+                  defaultFormatter,
+                  defaultParameters,
+                ) {
+                  const p = props || {};
+                  const defaultText = Object.prototype.hasOwnProperty.call(
+                    p,
+                    "default",
+                  )
+                    ? p.default
+                    : normalize(undefined, undefined);
+                  if (raw == null) {
+                    return { num: NaN, text: defaultText };
+                  }
+                  const n = Number(raw);
+                  if (!Number.isFinite(n)) {
+                    return { num: NaN, text: defaultText };
+                  }
+                  const formatter = Object.prototype.hasOwnProperty.call(
+                    p,
+                    "formatter",
+                  )
+                    ? p.formatter
+                    : defaultFormatter;
+                  const formatterParameters =
+                    Object.prototype.hasOwnProperty.call(
+                      p,
+                      "formatterParameters",
+                    )
+                      ? p.formatterParameters
+                      : defaultParameters;
+                  const formatted = normalize(
+                    String(
+                      apply(n, {
+                        formatter: formatter,
+                        formatterParameters: formatterParameters,
+                        default: defaultText,
+                      }),
+                    ),
+                    defaultText,
+                  );
+                  const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
+                  const num = match ? Number(match[0]) : NaN;
+                  return Number.isFinite(num)
+                    ? { num: num, text: match[0] }
+                    : { num: NaN, text: defaultText };
+                },
+                resolveStandardTickSteps() {
+                  return { major: 10, minor: 2 };
+                },
+              };
+            },
+          },
+          SemicircleRadialEngine: {
+            create() {
+              return {
+                createRenderer(cfg) {
+                  captured = cfg;
+                  return function () {};
+                },
+              };
+            },
+          },
         },
-        ValueMath: {
-          create() {
-            return {
-              formatGaugeDisplay(raw, props, apply, normalize, defaultFormatter, defaultParameters) {
-                const p = props || {};
-                const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
-                  ? p.default
-                  : normalize(undefined, undefined);
-                if (raw == null) {
-                  return { num: NaN, text: defaultText };
-                }
-                const n = Number(raw);
-                if (!Number.isFinite(n)) {
-                  return { num: NaN, text: defaultText };
-                }
-                const formatter = Object.prototype.hasOwnProperty.call(p, "formatter") ? p.formatter : defaultFormatter;
-                const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
-                  ? p.formatterParameters
-                  : defaultParameters;
-                const formatted = normalize(String(apply(n, {
-                  formatter: formatter,
-                  formatterParameters: formatterParameters,
-                  default: defaultText
-                })), defaultText);
-                const match = String(formatted).match(/-?\d+(?:\.\d+)?/);
-                const num = match ? Number(match[0]) : NaN;
-                return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
-              },
-              resolveStandardTickSteps() {
-                return { major: 10, minor: 2 };
-              }
-            };
-          }
+        services: {
+          format: { applyFormatter },
         },
-        SemicircleRadialEngine: {
-          create() {
-            return {
-              createRenderer(cfg) {
-                captured = cfg;
-                return function () {};
-              }
-            };
-          }
-        }
-      },
-      services: {
-        format: { applyFormatter }
-      }
-    }));
+      }),
+    );
 
-    expect(captured.formatDisplay(null, {}, "kn")).toEqual({ num: NaN, text: "---" });
+    expect(captured.formatDisplay(null, {}, "kn")).toEqual({
+      num: NaN,
+      text: "---",
+    });
     expect(applyFormatter).not.toHaveBeenCalled();
   });
 });

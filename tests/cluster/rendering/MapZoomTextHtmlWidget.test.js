@@ -1,7 +1,9 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
-const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const {
+  createComponentContextMock,
+} = require("../../helpers/component-context-mock");
 
 describe("MapZoomTextHtmlWidget", function () {
   const MODULE_PATH_BY_ID = {
@@ -13,22 +15,27 @@ describe("MapZoomTextHtmlWidget", function () {
     RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
     TextLayoutPrimitives: "shared/widget-kits/text/TextLayoutPrimitives.js",
     TextLayoutComposite: "shared/widget-kits/text/TextLayoutComposite.js",
-    ResponsiveScaleProfile: "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+    ResponsiveScaleProfile:
+      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
     CanvasTextLayout: "shared/widget-kits/text/CanvasTextLayout.js",
     RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js",
     PlaceholderNormalize: "shared/widget-kits/format/PlaceholderNormalize.js",
-    PreparedPayloadModelCache: "shared/widget-kits/html/PreparedPayloadModelCache.js",
+    PreparedPayloadModelCache:
+      "shared/widget-kits/html/PreparedPayloadModelCache.js",
     StateScreenLabels: "shared/widget-kits/state/StateScreenLabels.js",
     StateScreenPrecedence: "shared/widget-kits/state/StateScreenPrecedence.js",
-    StateScreenInteraction: "shared/widget-kits/state/StateScreenInteraction.js",
+    StateScreenInteraction:
+      "shared/widget-kits/state/StateScreenInteraction.js",
     StateScreenTextFit: "shared/widget-kits/state/StateScreenTextFit.js",
-    StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js"
+    StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js",
   };
 
   function createRenderer(options) {
     const opts = options || {};
     const moduleCache = Object.create(null);
-    const applyFormatter = opts.applyFormatter || function (value, formatterOptions) {
+    const applyFormatter =
+      opts.applyFormatter ||
+      function (value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (value == null) {
           return cfg.default;
@@ -38,16 +45,22 @@ describe("MapZoomTextHtmlWidget", function () {
         }
         return String(value);
       };
-    const requirePluginRoot = opts.requirePluginRoot || function () {
+    const requirePluginRoot =
+      opts.requirePluginRoot ||
+      function () {
         if (!arguments[0] || typeof arguments[0].closest !== "function") {
           return null;
         }
         return arguments[0].closest(".widget, .DirectWidget");
       };
-    const getNightModeState = opts.getNightModeState || function () {
+    const getNightModeState =
+      opts.getNightModeState ||
+      function () {
         return false;
       };
-    const loadDep = opts.loadDep || function (id) {
+    const loadDep =
+      opts.loadDep ||
+      function (id) {
         const relPath = MODULE_PATH_BY_ID[id];
         if (!relPath) {
           throw new Error("unexpected module lookup: " + id);
@@ -70,31 +83,42 @@ describe("MapZoomTextHtmlWidget", function () {
           resolveForRoot() {
             return {
               surface: { fg: "#fff", bg: "#000", border: "#666" },
-              font: { family: "sans-serif", familyMono: "monospace", weight: 700, labelWeight: 700 },
-              colors: {}
+              font: {
+                family: "sans-serif",
+                familyMono: "monospace",
+                weight: 700,
+                labelWeight: 700,
+              },
+              colors: {},
             };
-          }
-        }
-      }
+          },
+        },
+      },
     });
-    return loadFresh("widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js").create({}, componentContext);
+    return loadFresh(
+      "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
+    ).create({}, componentContext);
   }
 
   function makeProps(overrides) {
-    return Object.assign({
-      caption: "ZOOM",
-      unit: "",
-      zoom: 12.2,
-      requiredZoom: 11.9,
-      default: "---"
-    }, overrides || {});
+    return Object.assign(
+      {
+        caption: "ZOOM",
+        unit: "",
+        zoom: 12.2,
+        requiredZoom: 11.9,
+        default: "---",
+      },
+      overrides || {},
+    );
   }
 
   function withSurfacePolicy(props, options) {
     const opts = options || {};
     const mode = opts.mode === "passive" ? "passive" : "dispatch";
     const checkAutoZoom = opts.checkAutoZoom || vi.fn(() => true);
-    const orientation = opts.orientation === "vertical" ? "vertical" : "default";
+    const orientation =
+      opts.orientation === "vertical" ? "vertical" : "default";
     const pageId = opts.pageId || "navpage";
 
     return Object.assign({}, props || {}, {
@@ -104,10 +128,10 @@ describe("MapZoomTextHtmlWidget", function () {
         interaction: { mode },
         actions: {
           map: {
-            checkAutoZoom
-          }
-        }
-      }
+            checkAutoZoom,
+          },
+        },
+      },
     });
   }
 
@@ -127,13 +151,13 @@ describe("MapZoomTextHtmlWidget", function () {
 
     mountEl.getBoundingClientRect = vi.fn(() => ({
       width: shellSize.width,
-      height: shellSize.height
+      height: shellSize.height,
     }));
 
     const committed = rendererSpec.createCommittedRenderer({
       hostContext,
       mountEl,
-      shadowRoot: null
+      shadowRoot: null,
     });
 
     function payload(nextProps, revision, layoutChanged) {
@@ -147,7 +171,7 @@ describe("MapZoomTextHtmlWidget", function () {
         shellRect: { width: shellSize.width, height: shellSize.height },
         hostContext,
         layoutChanged: layoutChanged === true,
-        relayoutPass: 0
+        relayoutPass: 0,
       };
     }
 
@@ -165,7 +189,7 @@ describe("MapZoomTextHtmlWidget", function () {
       },
       html() {
         return mountEl.innerHTML;
-      }
+      },
     };
   }
 
@@ -181,7 +205,7 @@ describe("MapZoomTextHtmlWidget", function () {
     const checkAutoZoom = vi.fn(() => true);
     const mounted = mountCommitted(
       renderer,
-      withSurfacePolicy(makeProps(), { mode: "dispatch", checkAutoZoom })
+      withSurfacePolicy(makeProps(), { mode: "dispatch", checkAutoZoom }),
     );
 
     const html = mounted.html();
@@ -191,7 +215,9 @@ describe("MapZoomTextHtmlWidget", function () {
     expect(html).toContain("dyni-map-zoom-open-hotspot");
 
     const wrapper = mounted.mountEl.querySelector(".dyni-map-zoom-html");
-    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    wrapper.dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true }),
+    );
     expect(checkAutoZoom).toHaveBeenCalledTimes(1);
   });
 
@@ -200,14 +226,19 @@ describe("MapZoomTextHtmlWidget", function () {
     const checkAutoZoom = vi.fn(() => true);
     const mounted = mountCommitted(
       renderer,
-      withSurfacePolicy(makeProps({ editing: true }), { mode: "dispatch", checkAutoZoom })
+      withSurfacePolicy(makeProps({ editing: true }), {
+        mode: "dispatch",
+        checkAutoZoom,
+      }),
     );
 
     const html = mounted.html();
     expect(html).toContain("dyni-map-zoom-open-passive");
 
     const wrapper = mounted.mountEl.querySelector(".dyni-map-zoom-html");
-    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    wrapper.dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true }),
+    );
     expect(checkAutoZoom).not.toHaveBeenCalled();
   });
 
@@ -216,7 +247,10 @@ describe("MapZoomTextHtmlWidget", function () {
     const checkAutoZoom = vi.fn(() => true);
     const mounted = mountCommitted(
       renderer,
-      withSurfacePolicy(makeProps({ disconnect: true }), { mode: "dispatch", checkAutoZoom })
+      withSurfacePolicy(makeProps({ disconnect: true }), {
+        mode: "dispatch",
+        checkAutoZoom,
+      }),
     );
 
     expect(mounted.html()).toContain("dyni-state-disconnected");
@@ -225,385 +259,10 @@ describe("MapZoomTextHtmlWidget", function () {
     expect(mounted.html()).not.toContain("dyni-map-zoom-open-hotspot");
 
     const wrapper = mounted.mountEl.querySelector(".dyni-map-zoom-html");
-    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    wrapper.dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true }),
+    );
     expect(checkAutoZoom).not.toHaveBeenCalled();
   });
 
-  it("normalizes placeholder formatter output to the shared default token", function () {
-    const renderer = createRenderer({
-      applyFormatter(value, formatterOptions) {
-        const cfg = formatterOptions || {};
-        if (cfg.formatter === "formatDecimalOpt") {
-          return "NO DATA";
-        }
-        return value == null ? cfg.default : String(value);
-      }
-    });
-    const mounted = mountCommitted(
-      renderer,
-      withSurfacePolicy(makeProps({ zoom: 12.2, requiredZoom: 11.9 }), { mode: "dispatch" })
-    );
-
-    expect(mounted.html()).toContain("---");
-    expect(mounted.html()).not.toContain("NO DATA");
-  });
-
-  it("renders stable digits with tabular value classes and padded numbers", function () {
-    const renderer = createRenderer({
-      applyFormatter(value, formatterOptions) {
-        const cfg = formatterOptions || {};
-        if (value == null) {
-          return cfg.default;
-        }
-        return String(value);
-      }
-    });
-    const mounted = mountCommitted(
-      renderer,
-      withSurfacePolicy(makeProps({ stableDigits: true, zoom: 7.2, requiredZoom: 6.5 }), { mode: "dispatch" })
-    );
-
-    expect(mounted.html()).toContain("dyni-map-zoom-value dyni-tabular");
-    expect(mounted.html()).toContain("dyni-map-zoom-required dyni-tabular");
-    expect(mounted.html()).toContain("07.2");
-    expect(mounted.html()).toContain("(06.5)");
-  });
-
-  it("keeps default ratio-mode selection when ratio thresholds are null/blank", function () {
-    const renderer = createRenderer();
-    const baseProps = withSurfacePolicy(makeProps({
-      ratioThresholdNormal: undefined,
-      ratioThresholdFlat: undefined
-    }), { mode: "dispatch" });
-    const nullProps = withSurfacePolicy(makeProps({
-      ratioThresholdNormal: null,
-      ratioThresholdFlat: null
-    }), { mode: "dispatch" });
-    const blankProps = withSurfacePolicy(makeProps({
-      ratioThresholdNormal: "   ",
-      ratioThresholdFlat: ""
-    }), { mode: "dispatch" });
-
-    const baseline = mountCommitted(renderer, baseProps).html();
-    const nullHtml = mountCommitted(renderer, nullProps).html();
-    const blankHtml = mountCommitted(renderer, blankProps).html();
-
-    expect(baseline).toContain("dyni-map-zoom-mode-normal");
-    expect(nullHtml).toContain("dyni-map-zoom-mode-normal");
-    expect(blankHtml).toContain("dyni-map-zoom-mode-normal");
-  });
-
-  it("always consults MapZoomHtmlFit when a shell rect exists", function () {
-    const fitCompute = vi.fn(function () {
-      return {
-        captionStyle: "font-size:12px;",
-        valueStyle: "font-size:20px;",
-        unitStyle: "font-size:10px;",
-        requiredStyle: "font-size:8px;"
-      };
-    });
-    const moduleCache = Object.create(null);
-    const renderer = createRenderer({
-      loadDep(id) {
-        if (id === "MapZoomHtmlFit") {
-          return { create: () => ({ compute: fitCompute }) };
-        }
-        const relPath = MODULE_PATH_BY_ID[id];
-        if (!relPath) {
-          throw new Error("unexpected module lookup: " + id);
-        }
-        if (!moduleCache[id]) {
-          moduleCache[id] = loadFresh(relPath);
-        }
-        return moduleCache[id];
-      }
-    });
-    const hostContext = {};
-    const committed = renderer.createCommittedRenderer({ hostContext, mountEl: null, shadowRoot: null });
-    const rootEl = document.createElement("div");
-    rootEl.className = "widget dyniplugin dyni-host-html";
-    const shellEl = document.createElement("div");
-    shellEl.className = "widgetData dyni-shell";
-    const mountEl = document.createElement("div");
-    mountEl.className = "dyni-surface-html-mount";
-    rootEl.appendChild(shellEl);
-    shellEl.appendChild(mountEl);
-    hostContext.__dyniHostCommitState = { rootEl, shellEl };
-
-    function payload(revision, layoutChanged) {
-      return {
-        props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
-        revision: revision,
-        rootEl: rootEl,
-        shellEl: shellEl,
-        mountEl: mountEl,
-        shadowRoot: null,
-        shellRect: { width: 320, height: 180 },
-        hostContext: hostContext,
-        layoutChanged: layoutChanged === true,
-        relayoutPass: 0
-      };
-    }
-
-    const initial = payload(1, true);
-    committed.mount(mountEl, initial);
-    expect(fitCompute).toHaveBeenCalledTimes(1);
-
-    const stableUpdate = payload(2, false);
-    committed.update(stableUpdate);
-    expect(fitCompute).toHaveBeenCalledTimes(2);
-  });
-
-  it("resolves ratio modes and required row correctly", function () {
-    const renderer = createRenderer();
-    const highMounted = mountCommitted(
-      renderer,
-      withSurfacePolicy(makeProps({ unit: "x" }), { mode: "dispatch" }),
-      { shellSize: { width: 90, height: 200 } }
-    );
-    const flatMounted = mountCommitted(
-      renderer,
-      withSurfacePolicy(makeProps({ unit: "x" }), { mode: "dispatch" }),
-      { shellSize: { width: 460, height: 100 } }
-    );
-    const requiredMounted = mountCommitted(
-      renderer,
-      withSurfacePolicy(makeProps({ zoom: 12.2, requiredZoom: 0, captionUnitScale: 1.1 }), { mode: "dispatch" })
-    );
-
-    expect(highMounted.html()).toContain("dyni-map-zoom-mode-high");
-    expect(flatMounted.html()).toContain("dyni-map-zoom-mode-flat");
-    expect(requiredMounted.html()).toContain('class="dyni-map-zoom-required"');
-    expect(requiredMounted.html()).toContain("(Z:0)");
-    expect(requiredMounted.html()).toContain("--dyni-map-zoom-sec-scale:1.1;");
-  });
-
-  it("keeps null and blank zoom inputs missing instead of coercing them to zero", function () {
-    const renderer = createRenderer();
-    const mounted = mountCommitted(
-      renderer,
-      withSurfacePolicy(makeProps({
-        zoom: null,
-        requiredZoom: "   "
-      }), { mode: "dispatch" })
-    );
-
-    expect(mounted.html()).toContain("---");
-    expect(mounted.html()).not.toContain("Z:0");
-    expect(mounted.html()).not.toContain("(Z:0)");
-  });
-
-  it("uses default caption-unit scale for null and blank values and keeps numeric-string clamping", function () {
-    const renderer = createRenderer();
-    const missingValues = [null, undefined, "", "   "];
-
-    missingValues.forEach(function (rawScale) {
-      const mounted = mountCommitted(
-        renderer,
-        withSurfacePolicy(makeProps({
-          captionUnitScale: rawScale
-        }), { mode: "dispatch" })
-      );
-      expect(mounted.html()).toContain("--dyni-map-zoom-sec-scale:0.8;");
-      expect(mounted.html()).not.toContain("--dyni-map-zoom-sec-scale:0.5;");
-    });
-
-    const numericStringMounted = mountCommitted(
-      renderer,
-      withSurfacePolicy(makeProps({
-        captionUnitScale: "1.2"
-      }), { mode: "dispatch" })
-    );
-    expect(numericStringMounted.html()).toContain("--dyni-map-zoom-sec-scale:1.2;");
-
-    const maxClampMounted = mountCommitted(
-      renderer,
-      withSurfacePolicy(makeProps({
-        captionUnitScale: "9"
-      }), { mode: "dispatch" })
-    );
-    expect(maxClampMounted.html()).toContain("--dyni-map-zoom-sec-scale:1.5;");
-  });
-
-  it("escapes content and fails closed without default", function () {
-    const renderer = createRenderer({
-      applyFormatter: function () {
-        return '<span class="unsafe">x</span>';
-      }
-    });
-    const mounted = mountCommitted(
-      renderer,
-      withSurfacePolicy(makeProps({
-        caption: "<ZOOM>",
-        unit: '"deg"',
-        zoom: 12.1,
-        requiredZoom: 11.7
-      }), { mode: "dispatch" })
-    );
-
-    const html = mounted.html();
-    expect(html).toContain("&lt;ZOOM&gt;");
-    expect(html).toContain('"deg"');
-    expect(html).toContain('&lt;span class="unsafe"&gt;x&lt;/span&gt;');
-
-    const committed = renderer.createCommittedRenderer({ hostContext: {}, mountEl: null, shadowRoot: null });
-    const mountEl = document.createElement("div");
-    expect(function () {
-      committed.mount(mountEl, {
-        props: { caption: "ZOOM" },
-        revision: 1,
-        rootEl: document.createElement("div"),
-        shellEl: document.createElement("div"),
-        mountEl,
-        shadowRoot: null,
-        shellRect: { width: 320, height: 180 },
-        hostContext: {},
-        layoutChanged: true,
-        relayoutPass: 0
-      });
-    }).toThrow("props.default is required");
-  });
-
-  it("updates layout signature when layout-relevant data changes", function () {
-    const renderer = createRenderer();
-    const committed = renderer.createCommittedRenderer({ hostContext: {}, mountEl: null, shadowRoot: null });
-
-    const base = committed.layoutSignature({
-      props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
-      shellRect: { width: 300, height: 100 }
-    });
-    const captionChanged = committed.layoutSignature({
-      props: withSurfacePolicy(makeProps({ caption: "ZOOM EXT" }), { mode: "dispatch" }),
-      shellRect: { width: 300, height: 100 }
-    });
-    const stableDigitsChanged = committed.layoutSignature({
-      props: withSurfacePolicy(makeProps({ stableDigits: true, zoom: 12.2, requiredZoom: 11.9 }), { mode: "dispatch" }),
-      shellRect: { width: 300, height: 100 }
-    });
-    const shapeChanged = committed.layoutSignature({
-      props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
-      shellRect: { width: 90, height: 200 }
-    });
-
-    expect(captionChanged).not.toBe(base);
-    expect(stableDigitsChanged).not.toBe(base);
-    expect(shapeChanged).not.toBe(base);
-  });
-
-  it("uses shadow-local css selectors", function () {
-    const cssPath = path.join(process.cwd(), "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css");
-    const css = fs.readFileSync(cssPath, "utf8");
-
-    expect(css).toContain(".dyni-html-root .dyni-map-zoom-html");
-    expect(css).not.toContain("#navpage .widgetContainer.vertical");
-    // Vertical mode must not self-expand beyond the committed surface box
-    expect(css).not.toMatch(/aspect-ratio.*2\s*\/\s*1/);
-    expect(css).not.toMatch(/min-height.*4\.8em/);
-  });
-
-  it("reuses prepared semantic model across layoutSignature and patchDom and invalidates on structural boundaries", function () {
-    const applyFormatter = vi.fn(function (value, formatterOptions) {
-      const cfg = formatterOptions || {};
-      if (value == null) {
-        return cfg.default;
-      }
-      if (cfg.formatter === "formatDecimalOpt") {
-        return "Z:" + String(value);
-      }
-      return String(value);
-    });
-    const renderer = createRenderer({ applyFormatter });
-    const hostContext = {};
-    const committed = renderer.createCommittedRenderer({ hostContext, mountEl: null, shadowRoot: null });
-    const rootEl = document.createElement("div");
-    rootEl.className = "widget dyniplugin dyni-host-html";
-    const shellEl = document.createElement("div");
-    shellEl.className = "widgetData dyni-shell";
-    const mountEl = document.createElement("div");
-    mountEl.className = "dyni-surface-html-mount";
-    rootEl.appendChild(shellEl);
-    shellEl.appendChild(mountEl);
-    hostContext.__dyniHostCommitState = { rootEl, shellEl };
-
-    function buildPayload(props, revision, shellRect, layoutChanged) {
-      return {
-        props,
-        revision,
-        rootEl,
-        shellEl,
-        mountEl,
-        shadowRoot: null,
-        shellRect,
-        hostContext,
-        layoutChanged: layoutChanged === true,
-        relayoutPass: 0
-      };
-    }
-
-    const propsA = withSurfacePolicy(makeProps(), { mode: "dispatch" });
-    const initial = buildPayload(propsA, 1, { width: 320, height: 180 }, true);
-    committed.layoutSignature(initial);
-    committed.mount(mountEl, initial);
-    expect(applyFormatter).toHaveBeenCalledTimes(2);
-
-    const revisionChanged = buildPayload(propsA, 2, { width: 320, height: 180 }, false);
-    committed.layoutSignature(revisionChanged);
-    committed.update(revisionChanged);
-    expect(applyFormatter).toHaveBeenCalledTimes(4);
-
-    const propsIdentityChanged = buildPayload(withSurfacePolicy(makeProps(), { mode: "dispatch" }), 2, { width: 320, height: 180 }, false);
-    committed.layoutSignature(propsIdentityChanged);
-    committed.update(propsIdentityChanged);
-    expect(applyFormatter).toHaveBeenCalledTimes(6);
-
-    const shellSizeChanged = buildPayload(propsIdentityChanged.props, 2, { width: 321, height: 180 }, true);
-    committed.layoutSignature(shellSizeChanged);
-    committed.update(shellSizeChanged);
-    expect(applyFormatter).toHaveBeenCalledTimes(8);
-  });
-
-  it("clears prepared semantic model state on detach and destroy", function () {
-    const applyFormatter = vi.fn(function (value, formatterOptions) {
-      const cfg = formatterOptions || {};
-      return value == null ? cfg.default : String(value);
-    });
-    const renderer = createRenderer({ applyFormatter });
-    const hostContext = {};
-    const committed = renderer.createCommittedRenderer({ hostContext, mountEl: null, shadowRoot: null });
-    const rootEl = document.createElement("div");
-    rootEl.className = "widget dyniplugin dyni-host-html";
-    const shellEl = document.createElement("div");
-    shellEl.className = "widgetData dyni-shell";
-    const mountEl = document.createElement("div");
-    mountEl.className = "dyni-surface-html-mount";
-    rootEl.appendChild(shellEl);
-    shellEl.appendChild(mountEl);
-    hostContext.__dyniHostCommitState = { rootEl, shellEl };
-
-    const payload = {
-      props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
-      revision: 5,
-      rootEl,
-      shellEl,
-      mountEl,
-      shadowRoot: null,
-      shellRect: { width: 320, height: 180 },
-      hostContext,
-      layoutChanged: true,
-      relayoutPass: 0
-    };
-
-    committed.layoutSignature(payload);
-    committed.mount(mountEl, payload);
-    expect(applyFormatter).toHaveBeenCalledTimes(2);
-
-    committed.detach("test");
-    committed.layoutSignature(payload);
-    expect(applyFormatter).toHaveBeenCalledTimes(4);
-
-    committed.mount(mountEl, payload);
-    committed.destroy();
-    committed.layoutSignature(payload);
-    expect(applyFormatter).toHaveBeenCalledTimes(6);
-  });
 });

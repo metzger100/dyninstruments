@@ -49,7 +49,9 @@ describe("ValueMath", function () {
     expect(value.trimText("  hi  ")).toBe("hi");
     expect(value.trimText(null)).toBe("");
     expect(value.ensureObject(obj, "Thing")).toBe(obj);
-    expect(function () { value.ensureObject(null, "Thing"); }).toThrow("Thing must be an object");
+    expect(function () {
+      value.ensureObject(null, "Thing");
+    }).toThrow("Thing must be an object");
   });
 
   it("exposes canonical object/text/number helper utilities", function () {
@@ -82,7 +84,7 @@ describe("ValueMath", function () {
 
     expect(value.keyToText("abc")).toBe("abc");
     expect(value.keyToText(42)).toBe("42");
-    expect(value.keyToText({ a: 1 })).toBe("{\"a\":1}");
+    expect(value.keyToText({ a: 1 })).toBe('{"a":1}');
     expect(value.keyToText(null)).toBe("null");
 
     expect(value.appendUnit("12", " kn", "---")).toBe("12 kn");
@@ -92,28 +94,66 @@ describe("ValueMath", function () {
 
   it("formats gauge display nulls as placeholders before numeric coercion", function () {
     const value = createValueMath();
-    const applyFormatter = vi.fn(function (raw) { return String(raw) + " kn"; });
+    const applyFormatter = vi.fn(function (raw) {
+      return String(raw) + " kn";
+    });
     const normalize = vi.fn(function (text, defaultText) {
-      return text == null ? (defaultText || "---") : String(text);
+      return text == null ? defaultText || "---" : String(text);
     });
 
-    expect(value.formatGaugeDisplay(null, {}, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
+    expect(
+      value.formatGaugeDisplay(
+        null,
+        {},
+        applyFormatter,
+        normalize,
+        "formatSpeed",
+        ["kn"],
+      ),
+    ).toEqual({
       num: NaN,
-      text: "---"
+      text: "---",
     });
-    expect(value.formatGaugeDisplay("", {}, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
+    expect(
+      value.formatGaugeDisplay(
+        "",
+        {},
+        applyFormatter,
+        normalize,
+        "formatSpeed",
+        ["kn"],
+      ),
+    ).toEqual({
       num: NaN,
-      text: "---"
+      text: "---",
     });
-    expect(value.formatGaugeDisplay("   ", {}, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
+    expect(
+      value.formatGaugeDisplay(
+        "   ",
+        {},
+        applyFormatter,
+        normalize,
+        "formatSpeed",
+        ["kn"],
+      ),
+    ).toEqual({
       num: NaN,
-      text: "---"
+      text: "---",
     });
     expect(applyFormatter).not.toHaveBeenCalled();
 
-    expect(value.formatGaugeDisplay(4.2, {}, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
+    expect(
+      value.formatGaugeDisplay(
+        4.2,
+        {},
+        applyFormatter,
+        normalize,
+        "formatSpeed",
+        ["kn"],
+      ),
+    ).toEqual({
       num: 4.2,
-      text: "4.2"
+      text: "4.2",
     });
   });
 
@@ -134,9 +174,14 @@ describe("ValueMath", function () {
     const value = createValueMath();
 
     expect(value.resolveStandardTickSteps(6)).toEqual({ major: 1, minor: 0.5 });
-    expect(value.resolveTemperatureTickSteps(20)).toEqual({ major: 2, minor: 1 });
+    expect(value.resolveTemperatureTickSteps(20)).toEqual({
+      major: 2,
+      minor: 1,
+    });
     expect(value.resolveVoltageTickSteps(12)).toEqual({ major: 2, minor: 0.5 });
-    expect(value.resolveStandardTickSteps(6)).toEqual(value.resolveStandardTickSteps(6));
+    expect(value.resolveStandardTickSteps(6)).toEqual(
+      value.resolveStandardTickSteps(6),
+    );
     expect(value.valueToAngle).toBeUndefined();
     expect(value.angleToValue).toBeUndefined();
     expect(value.sectorAngles).toBeUndefined();
