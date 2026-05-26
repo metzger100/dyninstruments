@@ -324,14 +324,14 @@ tiny();
     expect(out).toContain("fallback");
   });
 
-  it("does not flag used fallback variables or named function expressions", function () {
+  it("does not flag used candidate variables or named function expressions", function () {
     const cwd = createWorkspace({
       "widgets/example.js": `
 (function () {
   "use strict";
-  const fallbackValue = Number(7);
-  const num = Number.isFinite(fallbackValue) ? fallbackValue : 0;
-  const render = function fallbackStackTrace() {
+  const candidateValue = Number(7);
+  const num = Number.isFinite(candidateValue) ? candidateValue : 0;
+  const render = function renderStackTrace() {
     return num;
   };
   render();
