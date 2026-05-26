@@ -95,6 +95,8 @@ Scoped tokens by family:
 | Wind/layline | `--dyni-layline-stb` | `#82b683` | — |
 | Wind/layline | `--dyni-layline-port` | `#ff7a76` | — |
 
+Regatta input vars are kebab-case only (`--dyni-regatta-bar-*`).
+
 Family geometry factors (advanced):
 
 | Family | Input var | Default |

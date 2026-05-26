@@ -280,36 +280,12 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.colors.regatta.barWarning).toBe("#123abc");
   });
 
-  it("resolves deprecated regatta alias input var", function () {
-    const cssVars = {
-      "--dyni-regatta-barWarning": "#654321",
-    };
-    const context = setupContext({
-      console: { warn: vi.fn() },
-      getComputedStyle() {
-        return {
-          getPropertyValue(name) {
-            return hasOwn.call(cssVars, name) ? cssVars[name] : "";
-          },
-        };
-      },
-    });
-    const rootEl = createPluginRootElement();
-    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
-
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
-
-    expect(resolved.colors.regatta.barWarning).toBe("#654321");
-  });
-
-  it("prefers kebab-case regatta input var over deprecated alias", function () {
+  it("ignores removed camelCase regatta alias input var", function () {
     const cssVars = {
       "--dyni-regatta-bar-warning": "#aabbcc",
       "--dyni-regatta-barWarning": "#ddeeff",
     };
     const context = setupContext({
-      console: { warn: vi.fn() },
       getComputedStyle() {
         return {
           getPropertyValue(name) {

@@ -93,7 +93,6 @@
       }));
 
       addInputVar(inputVars, seenInputVars, tokenDef && tokenDef.inputVar);
-      addInputVar(inputVars, seenInputVars, tokenDef && tokenDef.deprecatedInputVar);
     }
 
     return Object.freeze({
@@ -113,27 +112,10 @@
     return { hasValue: true, value: raw };
   }
 
-  function logDeprecationWarning(oldVar, newVar, warnedDeprecations) {
-    if (warnedDeprecations.has(oldVar)) {
-      return;
-    }
-    warnedDeprecations.add(oldVar);
-    if (root.console && typeof root.console.warn === "function") {
-      root.console.warn("DyniPlugin: CSS variable " + oldVar + " is deprecated. Use " + newVar + " instead.");
-    }
-  }
-
-  function readTokenInputOverride(style, tokenDef, inputReader, warnedDeprecations) {
+  function readTokenInputOverride(style, tokenDef, inputReader) {
     const raw = inputReader(style, tokenDef.inputVar);
     if (raw) {
       return parseOverride(raw, tokenDef);
-    }
-    if (tokenDef.deprecatedInputVar) {
-      const deprecatedRaw = inputReader(style, tokenDef.deprecatedInputVar);
-      if (deprecatedRaw) {
-        logDeprecationWarning(tokenDef.deprecatedInputVar, tokenDef.inputVar, warnedDeprecations);
-        return parseOverride(deprecatedRaw, tokenDef);
-      }
     }
     return { hasValue: false, value: tokenDef.default };
   }
@@ -205,7 +187,6 @@
   runtime.createThemeResolver = function createThemeResolver(themeModel, options) {
     const opts = toObject(options);
     const model = themeModel;
-    const warnedDeprecations = new Set();
     let themeMetadata = null;
     let rootResolutionCache = new WeakMap();
 
@@ -266,13 +247,12 @@
         style: style,
         mode: snapshot.mode,
         presetMode: model.getPresetMode(snapshot.presetName, snapshot.mode),
-        presetBase: model.getPresetBase(snapshot.presetName),
-        warnedDeprecations: warnedDeprecations
+        presetBase: model.getPresetBase(snapshot.presetName)
       };
     }
 
     function resolveTokenValue(tokenDef, pathSegments, parentPathSegments, context) {
-      const rootOverride = readTokenInputOverride(context.style, tokenDef, context.inputReader, context.warnedDeprecations);
+      const rootOverride = readTokenInputOverride(context.style, tokenDef, context.inputReader);
       if (rootOverride.hasValue) {
         return rootOverride.value;
       }

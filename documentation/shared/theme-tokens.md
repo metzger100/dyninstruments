@@ -173,16 +173,6 @@ Input variable naming follows these rules:
 - String tokens omit type words: `--dyni-font`, not `--dyni-font-family`.
 - Scoped tokens are family-prefixed: `--dyni-ais-*`, `--dyni-alarm-widget-*`, `--dyni-regatta-*`, `--dyni-radial-*`, `--dyni-linear-*`.
 
-## Deprecated Aliases
-
-Regatta input variables were renamed to kebab-case. Old camelCase names still resolve as deprecated aliases and log a deprecation warning when used.
-
-| New canonical input var | Deprecated alias |
-|---|---|
-| `--dyni-regatta-bar-warning` | `--dyni-regatta-barWarning` |
-| `--dyni-regatta-bar-critical` | `--dyni-regatta-barCritical` |
-| `--dyni-regatta-bar-default` | `--dyni-regatta-barDefault` |
-
 ### Surface Border Fallback Contract
 
 - `--dyni-border` is optional.
@@ -232,7 +222,7 @@ Preset normalization:
 
 Per token path, resolver precedence is:
 
-1. explicit root CSS input override (canonical input var; if unset and a deprecated alias exists, the alias is checked here)
+1. explicit root CSS input override (canonical input var)
 2. active preset mode override
 3. active preset base override
 4. token mode default (`defaultByMode[mode]`)

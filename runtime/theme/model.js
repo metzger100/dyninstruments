@@ -24,7 +24,7 @@
     "parentCascade"
   ]);
 
-  function defineToken(path, inputVar, type, defaultValue, defaultByMode, outputVar, defaultFrom, deprecatedInputVar) {
+  function defineToken(path, inputVar, type, defaultValue, defaultByMode, outputVar, defaultFrom) {
     return {
       path: path,
       inputVar: inputVar,
@@ -32,8 +32,7 @@
       default: defaultValue,
       defaultByMode: defaultByMode || undefined,
       outputVar: outputVar || undefined,
-      defaultFrom: defaultFrom || undefined,
-      deprecatedInputVar: deprecatedInputVar || undefined
+      defaultFrom: defaultFrom || undefined
     };
   }
 
@@ -69,9 +68,7 @@
       "color",
       "#e7a834",
       { night: "rgba(231, 168, 52, 0.60)" },
-      "--dyni-theme-regatta-bar-warning",
-      undefined,
-      "--dyni-regatta-barWarning"
+      "--dyni-theme-regatta-bar-warning"
     ),
     defineToken(
       "colors.regatta.barCritical",
@@ -80,8 +77,7 @@
       undefined,
       undefined,
       "--dyni-theme-regatta-bar-critical",
-      "colors.alarm",
-      "--dyni-regatta-barCritical"
+      "colors.alarm"
     ),
     defineToken(
       "colors.regatta.barDefault",
@@ -90,8 +86,7 @@
       undefined,
       undefined,
       "--dyni-theme-regatta-bar-default",
-      "colors.info",
-      "--dyni-regatta-barDefault"
+      "colors.info"
     ),
 
     defineToken("strokeWeight", "--dyni-stroke-weight", "number", 1.0),
