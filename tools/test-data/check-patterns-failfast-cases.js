@@ -234,7 +234,7 @@ module.exports = [
     },
     {
       rule: "premature-legacy-support",
-      severity: "warn",
+      severity: "block",
       rel: "shared/example.js",
       positive: `
 (function () {

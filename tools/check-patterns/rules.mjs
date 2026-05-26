@@ -342,7 +342,7 @@ export const RULES = [
   },
   {
     name: "premature-legacy-support",
-    severity: "warn",
+    severity: "block",
     scope: {
       include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
       exclude: ["tests/**", "tools/**"]

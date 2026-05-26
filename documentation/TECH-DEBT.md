@@ -37,6 +37,7 @@
 | TD-026 | 2026-04-19 | Completed Phase 9 state-screen and placeholder cleanup: placeholder normalization now flows through `PlaceholderNormalize`, state-screen precedence checks are enforced by `pickFirst([...])` call-site contracts, and the updated widget dependency/test/docs surface was revalidated with `check:core` plus coverage. |
 | TD-027 | 2026-04-29 | Completed Phase 2 vocabulary cleanup: renamed the StableDigits plain-text field from `fallback` to `plain` across the formatting, layout, widget, and test chain; removed the warn-tier legacy-support backlog; and resynced the scorecards to the live zero-warning state. |
 | TD-028 | 2026-04-29 | Completed smell-enforcement cleanup: `mapper-output-complexity` returned to zero warnings, so the backlog note was retired and the quality/debt scorecards now reflect the zero-drift state. |
+| TD-029 | 2026-05-26 | Promoted `premature-legacy-support` from warn to block after repeated zero-warning runs. Updated `check-patterns` rule severity, failfast rule fixtures, and smell-prevention severity docs so speculative legacy/compatibility paths now fail-closed in `check:all`. |
 
 ## Rules
 
