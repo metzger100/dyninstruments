@@ -1,33 +1,34 @@
 # Quality Scorecard
 
-**Last updated:** 2026-05-02
+**Last updated:** 2026-05-26
 
 ## Layer Health
 
 | Layer | Files | Headers | Size OK | Tests | Duplicates | Grade |
 |---|---:|---|---|---|---|---|
-| runtime/ | 13 | all | check (1 warn, 0 violations) | core + coverage | none | B |
-| config/ | 29 | all | check (3 warns, 0 violations) | core + coverage | none | B |
-| cluster/ | 24 | all | check (3 warns, 0 violations) | core + coverage | none | B |
-| shared/ | 84 | all | check (17 warns, 0 violations) | core + coverage | none | B |
+| runtime/ | 26 | all | all | core + coverage | none | B |
+| config/ | 41 | all | all | core + coverage | none | B |
+| cluster/ | 16 | all | all | core + coverage | none | B |
+| shared/ | 98 | all | all | core + coverage | none | B |
 | widgets/radial/ | 7 | all | all | core + coverage | none | A |
-| widgets/text/ | 10 | all | check (5 warns, 0 violations) | core + coverage | none | B |
+| widgets/text/ | 12 | all | all | core + coverage | none | B |
 | widgets/linear/ | 7 | all | all | core + coverage | none | A |
+| tests/ | 395 | n/a | all | core + coverage | none | A |
 
 Notes:
-- `Size OK = check` means no `>400` violations but at least one `>=300` warning.
+- `Size OK = all` means zero file-size violations (`>400`) in that layer.
 - Strict grading is applied: unresolved medium/high drift prevents an `A`.
 - Smell prevention gate is fail-closed (see `documentation/conventions/smell-prevention.md`).
-- Validation run (`2026-05-02`): `npm run check:core` passed; `npm run test:coverage:check` also passed; `perf:check` failed on `center_display_text` and remains an open gate item outside this cleanup.
-- `check:patterns` summary (`2026-05-02`): `checkedFiles=459`, `failures=0`, `warnings=0`. `premature-legacy-support`, `css-js-default-duplication`, and `mapper-output-complexity` are all at `0`.
-- `check:filesize` summary (`2026-05-02`): `warnings=29`, `violations=0`, `onelinerWarnings=0`.
-- Coverage summary (`coverage/coverage-summary.json`, `2026-05-02`): lines/statements `94%`, functions `93.24%`, branches `74.59%`.
+- Validation run (`2026-05-26`): `npm run check:all` passed, including `perf:check` (`violations=0`).
+- `check:patterns` summary (`2026-05-26`): `checkedFiles=761`, `failures=0`, `warnings=0`.
+- `check:filesize` summary (`2026-05-26`): `warnings=N/A (removed)`, `violations=0`, `onelinerFindings=0`.
+- Coverage summary (`2026-05-26`): lines/statements `93.92%`, functions `94.47%`, branches `76.16%`.
 
 ## Known Drift Patterns
 
 | Pattern | Severity | Files | Status |
 |---|---|---|---|
-| File-size hotspot growth near threshold | MED | Current warning-tier files include `runtime/surface/CanvasDomSurfaceAdapter.js`, `runtime/surface/ClusterSurfacePolicy.js`, `runtime/surface/HtmlSurfaceController.js`, `config/clusters/default.js`, `config/clusters/nav.js`, `config/clusters/vessel.js`, `runtime/TemporaryHostActionBridge.js`, the theme runtime module, `shared/widget-kits/linear/LinearGaugeEngine.js`, `shared/widget-kits/linear/LinearGaugeLayout.js`, `shared/widget-kits/nav/ActiveRouteHtmlFit.js`, `shared/widget-kits/nav/AisTargetHtmlFit.js`, `shared/widget-kits/nav/AisTargetLayoutGeometry.js`, `shared/widget-kits/nav/EditRouteLayout.js`, `shared/widget-kits/nav/EditRouteRenderModel.js`, `shared/widget-kits/nav/MapZoomHtmlFit.js`, `shared/widget-kits/nav/RoutePointsHtmlFit.js`, `shared/widget-kits/nav/RoutePointsLayout.js`, `shared/widget-kits/nav/RoutePointsRenderModel.js`, `shared/widget-kits/radial/FullCircleRadialTextLayout.js`, `shared/widget-kits/radial/RadialValueMath.js`, `shared/widget-kits/radial/SemicircleRadialTextLayout.js`, `shared/widget-kits/text/TextLayoutComposite.js`, `shared/widget-kits/text/TextTileLayout.js`, `shared/widget-kits/vessel/AlarmHtmlFit.js`, `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`, `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`, `widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js`, `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js`, and `widgets/text/XteDisplayWidget/XteDisplayWidget.js` | ⚠ Active (`check:filesize` warnings: 29, violations: 0) |
+| File-size warning-tier drift | RESOLVED | N/A | ✅ Warning-tier tracking removed; enforcement is fail-closed pass/fail at 400 lines with `violations=0` and `onelinerFindings=0` (`2026-05-26`). |
 
 ## Model Selection Log
 
@@ -51,6 +52,7 @@ Notes:
 | RoutePoints Phase 5 documentation closeout | GPT-5 Codex | Good | Added `documentation/widgets/route-points.md`, updated architecture/index/guide touchpoints plus debt/roadmap tracking, and revalidated April 2, 2026 with `docs:check` + full `check:all`. |
 | EditRoute Phase 5 documentation closeout | GPT-5 Codex | Good | Added `documentation/widgets/edit-route.md`, updated architecture/index/roadmap coverage docs, refreshed quality/debt tracking, and revalidated April 3, 2026 with full `check:all`. |
 | Phase 2 vocabulary cleanup and scorecard resync | GPT-5 Codex | Good | Renamed the StableDigits plain-text vocabulary across source, tests, and widgets; cleared the premature legacy-support backlog; and resynced the live quality/debt/roadmap docs to the zero-warning state. |
+| PLAN32 Phase 5 quality gate update | GPT-5 Codex | Good | Removed warning-tier wording from quality tracking, added tests-layer visibility, and resynced scorecard metrics to the May 26, 2026 `check:all` run (`violations=0`, `onelinerFindings=0`). |
 
 Append new rows when model choice materially affects outcome.
 
