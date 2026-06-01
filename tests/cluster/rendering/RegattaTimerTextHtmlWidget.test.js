@@ -6,11 +6,14 @@ const {
   makeProps,
   withSurfacePolicy,
   createMountedRenderer,
+  installFakeTimerHooks,
 } = require("./RegattaTimerTextHtmlWidget.harness.js");
 const {
   createScriptContext,
   runIifeScript,
 } = require("../../helpers/eval-iife");
+
+installFakeTimerHooks();
 
 describe("RegattaTimerTextHtmlWidget", function () {
   it("resolves route metadata, preload assets, and inert pre-commit shell for regattaTimer", function () {

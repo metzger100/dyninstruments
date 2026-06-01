@@ -6,7 +6,10 @@ const {
   makeProps,
   withSurfacePolicy,
   createMountedRenderer,
+  installFakeTimerHooks,
 } = require("./RegattaTimerTextHtmlWidget.harness.js");
+
+installFakeTimerHooks();
 
 describe("RegattaTimerTextHtmlWidget", function () {
   it("updates mode selection from ratio thresholds and toggles progress bar visibility", function () {

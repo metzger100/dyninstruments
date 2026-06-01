@@ -283,14 +283,16 @@ const {
     };
   }
 
-  beforeEach(function () {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-04-01T12:00:00.000Z"));
-  });
+  function installFakeTimerHooks() {
+    beforeEach(function () {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-04-01T12:00:00.000Z"));
+    });
 
-  afterEach(function () {
-    vi.useRealTimers();
-  });
+    afterEach(function () {
+      vi.useRealTimers();
+    });
+  }
 
 module.exports = {
   parseStyle,
@@ -300,4 +302,5 @@ module.exports = {
   makeProps,
   withSurfacePolicy,
   createMountedRenderer,
+  installFakeTimerHooks,
 };
