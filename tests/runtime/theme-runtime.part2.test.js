@@ -280,7 +280,7 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.colors.regatta.barWarning).toBe("#123abc");
   });
 
-  it("ignores removed camelCase regatta alias input var", function () {
+  it("prefers kebab-case regatta input var over deprecated alias", function () {
     const cssVars = {
       "--dyni-regatta-bar-warning": "#aabbcc",
       "--dyni-regatta-barWarning": "#ddeeff",

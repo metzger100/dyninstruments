@@ -66,7 +66,7 @@ describe("runtime/theme-runtime.js", function () {
     return undefined;
   }
 
-  it("ignores removed camelCase regatta alias input var", function () {
+  it("resolves deprecated camelCase regatta alias input var with one warning", function () {
     const cssVars = {
       "--dyni-regatta-barWarning": "#654321",
     };
@@ -86,9 +86,13 @@ describe("runtime/theme-runtime.js", function () {
 
     const resolved =
       context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const secondRootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.tokens.resolveForRoot(secondRootEl);
 
-    expect(resolved.colors.regatta.barWarning).toBe("#e7a834");
-    expect(warn).not.toHaveBeenCalled();
+    expect(resolved.colors.regatta.barWarning).toBe("#654321");
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain("--dyni-regatta-barWarning");
+    expect(warn.mock.calls[0][0]).toContain("--dyni-regatta-bar-warning");
   });
 
   it("resolves darkmode preset surface and semantic colors", function () {

@@ -93,6 +93,7 @@
       }));
 
       addInputVar(inputVars, seenInputVars, tokenDef && tokenDef.inputVar);
+      addInputVar(inputVars, seenInputVars, tokenDef && tokenDef.deprecatedInputVar);
     }
 
     return Object.freeze({
@@ -112,10 +113,29 @@
     return { hasValue: true, value: raw };
   }
 
-  function readTokenInputOverride(style, tokenDef, inputReader) {
+  function logDeprecationWarning(oldVar, newVar, warnedDeprecations) {
+    if (warnedDeprecations.has(oldVar)) {
+      return;
+    }
+    warnedDeprecations.add(oldVar);
+    if (root.console && typeof root.console.warn === "function") {
+      root.console.warn("DyniPlugin: CSS variable " + oldVar + " is deprecated. Use " + newVar + " instead.");
+    }
+  }
+
+  function readTokenInputOverride(style, tokenDef, inputReader, warnedDeprecations) {
     const raw = inputReader(style, tokenDef.inputVar);
     if (raw) {
       return parseOverride(raw, tokenDef);
+    }
+    // dyni-lint-disable-next-line premature-legacy-support -- Regatta camelCase CSS aliases remain supported for existing user.css files.
+    const deprecatedAliasInputVar = tokenDef.deprecatedInputVar;
+    if (deprecatedAliasInputVar) {
+      const aliasRaw = inputReader(style, deprecatedAliasInputVar);
+      if (aliasRaw) {
+        logDeprecationWarning(deprecatedAliasInputVar, tokenDef.inputVar, warnedDeprecations);
+        return parseOverride(aliasRaw, tokenDef);
+      }
     }
     return { hasValue: false, value: tokenDef.default };
   }
@@ -187,6 +207,7 @@
   runtime.createThemeResolver = function createThemeResolver(themeModel, options) {
     const opts = toObject(options);
     const model = themeModel;
+    const warnedDeprecations = new Set();
     let themeMetadata = null;
     let rootResolutionCache = new WeakMap();
 
@@ -247,12 +268,13 @@
         style: style,
         mode: snapshot.mode,
         presetMode: model.getPresetMode(snapshot.presetName, snapshot.mode),
-        presetBase: model.getPresetBase(snapshot.presetName)
+        presetBase: model.getPresetBase(snapshot.presetName),
+        warnedDeprecations: warnedDeprecations
       };
     }
 
     function resolveTokenValue(tokenDef, pathSegments, parentPathSegments, context) {
-      const rootOverride = readTokenInputOverride(context.style, tokenDef, context.inputReader);
+      const rootOverride = readTokenInputOverride(context.style, tokenDef, context.inputReader, context.warnedDeprecations);
       if (rootOverride.hasValue) {
         return rootOverride.value;
       }

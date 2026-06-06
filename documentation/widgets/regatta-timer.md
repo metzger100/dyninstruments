@@ -82,6 +82,7 @@ Presets:
 - `default`, `darkmode`, and `highcontrast` define base/night overrides in `runtime/theme/model.js`.
 - `barCritical` cascades from global `--dyni-alarm` when `--dyni-regatta-bar-critical` is not explicitly set.
 - `barDefault` cascades from global `--dyni-info` when `--dyni-regatta-bar-default` is not explicitly set.
+- Deprecated input aliases still resolve with warning: `--dyni-regatta-barWarning`, `--dyni-regatta-barCritical`, and `--dyni-regatta-barDefault`.
 
 ## Editable Parameters
 

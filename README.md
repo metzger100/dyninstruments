@@ -96,7 +96,7 @@ Scoped tokens by family:
 | Wind/layline | `--dyni-layline-stb` | `#82b683` | — |
 | Wind/layline | `--dyni-layline-port` | `#ff7a76` | — |
 
-Regatta input vars are kebab-case only (`--dyni-regatta-bar-*`).
+Regatta input vars should use kebab-case (`--dyni-regatta-bar-*`). Existing camelCase aliases still resolve with a deprecation warning.
 
 Family geometry factors (advanced):
 

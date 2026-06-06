@@ -24,7 +24,8 @@
     "parentCascade"
   ]);
 
-  function defineToken(path, inputVar, type, defaultValue, defaultByMode, outputVar, defaultFrom) {
+  // dyni-lint-disable-next-line premature-legacy-support -- Regatta camelCase CSS aliases remain supported for existing user.css files.
+  function defineToken(path, inputVar, type, defaultValue, defaultByMode, outputVar, defaultFrom, deprecatedInputVar) {
     return {
       path: path,
       inputVar: inputVar,
@@ -32,7 +33,8 @@
       default: defaultValue,
       defaultByMode: defaultByMode || undefined,
       outputVar: outputVar || undefined,
-      defaultFrom: defaultFrom || undefined
+      defaultFrom: defaultFrom || undefined,
+      deprecatedInputVar: deprecatedInputVar || undefined
     };
   }
 
@@ -68,7 +70,9 @@
       "color",
       "#e7a834",
       { night: "rgba(231, 168, 52, 0.60)" },
-      "--dyni-theme-regatta-bar-warning"
+      "--dyni-theme-regatta-bar-warning",
+      undefined,
+      "--dyni-regatta-barWarning"
     ),
     defineToken(
       "colors.regatta.barCritical",
@@ -77,7 +81,8 @@
       undefined,
       undefined,
       "--dyni-theme-regatta-bar-critical",
-      "colors.alarm"
+      "colors.alarm",
+      "--dyni-regatta-barCritical"
     ),
     defineToken(
       "colors.regatta.barDefault",
@@ -86,7 +91,8 @@
       undefined,
       undefined,
       "--dyni-theme-regatta-bar-default",
-      "colors.info"
+      "colors.info",
+      "--dyni-regatta-barDefault"
     ),
 
     defineToken("strokeWeight", "--dyni-stroke-weight", "number", 1.0),
