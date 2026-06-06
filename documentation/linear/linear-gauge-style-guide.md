@@ -33,7 +33,7 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 | Profile | Typical kinds | `axisMode` | Domain source | Formatter baseline | Sector model |
 |---|---|---|---|---|---|
 | Speed linear | `sogLinear`, `stwLinear` | `range` | Editable `min/max` | `formatSpeed` | High-end warning/alarm; selector token drives speed conversion |
-| Depth linear | `depthLinear` | `range` | Editable `min/max` | `formatDistance` | Low-end warning/alarm; selector token drives distance conversion |
+| Depth linear | `depthLinear` | `range` | Editable `min/max`; store source via `depthKey`, default below keel | `formatDistance` | Low-end warning/alarm; selector token drives distance conversion |
 | Temperature linear | `tempLinear` | `range` | Editable `min/max` | `formatTemperature` | Optional high-end warning/alarm; selector token drives temperature conversion |
 | Voltage linear | `voltageLinear` | `range` | Editable `min/max` | `formatDecimal` | Low-end warning/alarm |
 | Wind angle linear | `angleTrueLinear`, `angleApparentLinear` | `centered180` | Fixed `-180..180` | Angle formatter contract | Mirrored layline sectors (optional) |

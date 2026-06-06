@@ -39,6 +39,7 @@ Bundled layouts are stored in:
 4. Set scale/range values for gauge kinds as needed.
 5. Enable warning/alarm sectors on supported gauges.
 6. Override SignalK data paths with `KEY` fields when you need custom store keys.
+   Depth widgets default to depth below keel; use `Depth store path` to select below transducer, below surface/waterline, or another AvNav store key.
 
 ## Theming
 

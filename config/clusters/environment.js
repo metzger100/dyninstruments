@@ -9,18 +9,19 @@
   const ns = root.DyniPlugin;
   const config = ns.config;
   const shared = config.shared;
+  const DEFAULT_DEPTH_KEY = shared.environmentDefaultDepthKey;
 
   config.clusters.push({
     widget: "ClusterWidget",
     def: {
       name: "dyni_Environment_Instruments",
-      description: "Depth below transducer, temperature, or SignalK pressure",
+      description: "Depth, temperature, or SignalK pressure",
       caption: "",
       unit: "",
       default: "---",
       cluster: "environment",
       storeKeys: {
-        depth: "nav.gps.depthBelowTransducer",
+        depth: DEFAULT_DEPTH_KEY,
         temp: "nav.gps.waterTemp"
       },
       editableParameters: shared.buildEnvironmentEditableParameters(),
@@ -46,6 +47,15 @@
             const sk = { ...out.storeKeys };
             delete sk.value;
             out.storeKeys = sk;
+          }
+        }
+
+        if (kind === "depth" || kind === "depthLinear" || kind === "depthRadial") {
+          if (typeof out.depthKey === "string" && out.depthKey.trim()) {
+            out.storeKeys = { ...out.storeKeys, depth: out.depthKey.trim() };
+          }
+          else {
+            out.storeKeys = { ...out.storeKeys, depth: DEFAULT_DEPTH_KEY };
           }
         }
 

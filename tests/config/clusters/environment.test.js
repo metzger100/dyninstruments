@@ -26,11 +26,21 @@ describe("config/clusters/environment.js", function () {
   it("registers environment cluster with expected keys", function () {
     const def = loadEnvDef();
     expect(def.name).toBe("dyni_Environment_Instruments");
-    expect(def.storeKeys.depth).toBe("nav.gps.depthBelowTransducer");
+    expect(def.description).toBe("Depth, temperature, or SignalK pressure");
+    expect(def.storeKeys.depth).toBe("nav.gps.depthBelowKeel");
     expect(def.editableParameters.kind.default).toBe("depth");
     expect(def.editableParameters.kind.name).toBe("Instrument");
     const kinds = def.editableParameters.kind.list.map((entry) => entry.value);
     expect(kinds).toEqual(expect.arrayContaining(["depthLinear", "tempLinear"]));
+    expect(def.editableParameters.kind.list[0].name).toBe("Depth");
+    expect(def.editableParameters.depthKey.name).toBe("Depth store path");
+    expect(def.editableParameters.depthKey.type).toBe("KEY");
+    expect(def.editableParameters.depthKey.default).toBe("nav.gps.depthBelowKeel");
+    expect(def.editableParameters.depthKey.condition).toEqual([
+      { kind: "depth" },
+      { kind: "depthLinear" },
+      { kind: "depthRadial" }
+    ]);
     expect(def.editableParameters.depthLinearRatioThresholdNormal.internal).toBe(true);
     expect(def.editableParameters.tempRadialRatioThresholdFlat.internal).toBe(true);
     expect(def.editableParameters.captionUnitScale.internal).not.toBe(true);
@@ -45,6 +55,9 @@ describe("config/clusters/environment.js", function () {
     expect(def.editableParameters.captionUnitScale.name).toBe("Caption/Unit size");
     expect(def.editableParameters.formatUnit_depth.default).toBe("m");
     expect(def.editableParameters.unit_depth_m.default).toBe("m");
+    expect(def.editableParameters.caption_depth.default).toBe("DBK");
+    expect(def.editableParameters.caption_depthLinear.default).toBe("DBK");
+    expect(def.editableParameters.caption_depthRadial.default).toBe("DBK");
     expect(def.editableParameters.formatUnit_temp.default).toBe("celsius");
     expect(def.editableParameters.unit_temp_celsius.default).toBe("\u00b0C");
     expect(def.editableParameters.formatUnit_pressure.default).toBe("hpa");
@@ -72,7 +85,7 @@ describe("config/clusters/environment.js", function () {
   it("exposes the generated environment editable schema", function () {
     const def = loadEnvDef();
     const keys = Object.keys(def.editableParameters);
-    expect(keys.slice(0, 3)).toEqual(["kind", "tempKey", "value"]);
+    expect(keys.slice(0, 4)).toEqual(["kind", "depthKey", "tempKey", "value"]);
     expect(keys).toContain("depthLinearMinValue_nm");
     expect(keys).toContain("depthRadialAlarmFrom_ft");
     expect(def.editableParameters.depthLinearMaxValue_nm.default).toBe(0.016);
@@ -114,6 +127,26 @@ describe("config/clusters/environment.js", function () {
     const out = def.updateFunction({ kind: "temp", storeKeys: { value: "x", temp: "t" } });
     expect(out.storeKeys.value).toBeUndefined();
     expect(out.storeKeys.temp).toBe("nav.gps.waterTemp");
+  });
+
+  it("sets depth source from depthKey or defaults to depth below keel", function () {
+    const def = loadEnvDef();
+
+    const text = def.updateFunction({ kind: "depth", depthKey: " nav.gps.depthBelowWaterline " });
+    expect(text.storeKeys.depth).toBe("nav.gps.depthBelowWaterline");
+
+    const linear = def.updateFunction({ kind: "depthLinear", depthKey: "nav.gps.depthBelowTransducer" });
+    expect(linear.storeKeys.depth).toBe("nav.gps.depthBelowTransducer");
+
+    const radial = def.updateFunction({ kind: "depthRadial", depthKey: " nav.gps.depthBelowKeel " });
+    expect(radial.storeKeys.depth).toBe("nav.gps.depthBelowKeel");
+
+    const fallback = def.updateFunction({
+      kind: "depth",
+      depthKey: "  ",
+      storeKeys: { depth: "old.depth.path" }
+    });
+    expect(fallback.storeKeys.depth).toBe("nav.gps.depthBelowKeel");
   });
 
   it("sets temperature source from tempKey or defaults to waterTemp", function () {

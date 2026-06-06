@@ -12,13 +12,16 @@
   const opt = shared.opt;
   const ENV_KIND = shared.kindMaps.ENV_KIND;
   const envBindings = shared.unitFormatFamilies.metricBindings;
+  const DEFAULT_DEPTH_KEY = "nav.gps.depthBelowKeel";
+
+  shared.environmentDefaultDepthKey = DEFAULT_DEPTH_KEY;
 
   shared.buildEnvironmentBaseEditableParameters = function () {
     return {
       kind: {
         type: "SELECT",
         list: [
-          opt("Depth below transducer", "depth"),
+          opt("Depth", "depth"),
           opt("Depth gauge (linear)", "depthLinear"),
           opt("Depth gauge (radial)", "depthRadial"),
           opt("Temperature", "temp"),
@@ -28,6 +31,12 @@
         ],
         default: "depth",
         name: "Instrument"
+      },
+      depthKey: {
+        type: "KEY",
+        default: DEFAULT_DEPTH_KEY,
+        name: "Depth store path",
+        condition: [{ kind: "depth" }, { kind: "depthLinear" }, { kind: "depthRadial" }]
       },
       // Temperature source (for BOTH numeric + radial); empty -> default waterTemp
       tempKey: {

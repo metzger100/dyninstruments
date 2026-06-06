@@ -35,9 +35,9 @@
       stwRadial: { cap: "STW" }
     },
     ENV_KIND: {
-      depth: { cap: "DPT" },
-      depthLinear: { cap: "DPT" },
-      depthRadial: { cap: "DPT" },
+      depth: { cap: "DBK" },
+      depthLinear: { cap: "DBK" },
+      depthRadial: { cap: "DBK" },
       temp: { cap: "TEMP" },
       tempLinear: { cap: "TEMP" },
       tempRadial: { cap: "TEMP" },

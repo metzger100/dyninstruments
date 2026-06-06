@@ -86,6 +86,7 @@ Each wrapper defines:
 - Low-end sectors
 - Tick profile: `resolveStandardSemicircleTickSteps`
 - Formatter path: `formatDistance` with a mapper-resolved distance token
+- Store source: shared environment `depthKey` KEY selector; default `nav.gps.depthBelowKeel`
 - Config-backed range defaults: `0..30`
 - Wrapper defaults/bindings: display unit `m`, depth ratio props
 

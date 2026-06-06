@@ -71,7 +71,8 @@ Shows a browser for currently available AvNav store keys. The render function re
 value: { type: "KEY", default: "" }
 ```
 
-Recommended editor captions for `KEY` parameters should describe the AvNav store-path override directly, for example `Temperature store path` or `Voltage store path`.
+Recommended editor captions for `KEY` parameters should describe the AvNav store-path override directly, for example `Depth store path`, `Temperature store path`, or `Voltage store path`.
+Environment depth kinds use `depthKey` with default `nav.gps.depthBelowKeel`; clearing it restores that below-keel default.
 
 ### COLOR Details
 
