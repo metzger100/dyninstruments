@@ -42,6 +42,8 @@ npm run check:all
 - `npm run test:coverage:check`
 - `npm run perf:check`
 
+For the full command graph and checker ownership map, see [../conventions/quality-gates.md](../conventions/quality-gates.md).
+
 `check:core` includes:
 
 - `node tools/check-docs.mjs`
@@ -127,6 +129,7 @@ Non-zero exit means docs are not consistent.
 ## Related
 
 - [../TABLEOFCONTENTS.md](../TABLEOFCONTENTS.md)
+- [../conventions/quality-gates.md](../conventions/quality-gates.md)
 - [exec-plan-authoring.md](exec-plan-authoring.md)
 - [../architecture/component-system.md](../architecture/component-system.md)
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md)

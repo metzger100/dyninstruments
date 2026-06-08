@@ -4,10 +4,12 @@ import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
 import { pathToFileURL } from "node:url";
+import { RULES as PATTERN_RULES } from "./check-patterns/rules.mjs";
 
 let ROOT = process.cwd();
 
 const RULES = [
+  { name: "smell-catalog-coverage", run: runSmellCatalogCoverageRule },
   { name: "theme-cache-invalidation", run: runThemeCacheInvalidationRule },
   { name: "dynamic-storekey-clears-on-empty", run: runDynamicStorekeyClearsRule },
   { name: "falsy-default-preservation", run: runFalsyDefaultPreservationRule },
@@ -64,6 +66,37 @@ export function runSmellContractsCli(argv = process.argv.slice(2)) {
     print: true
   });
   process.exit(findings.length ? 1 : 0);
+}
+
+function runSmellCatalogCoverageRule() {
+  const out = [];
+  const rel = "documentation/conventions/smell-prevention.md";
+  if (!exists(rel)) {
+    out.push(makeFinding(rel, 1, "smell-catalog-coverage", "Smell prevention documentation is missing."));
+    return out;
+  }
+
+  const text = readFile(rel);
+  const catalog = extractMarkdownSection(text, "Smell Catalog");
+  if (!catalog.text) {
+    out.push(makeFinding(rel, 1, "smell-catalog-coverage", "Missing ## Smell Catalog section."));
+    return out;
+  }
+
+  const names = new Set();
+  PATTERN_RULES.forEach((rule) => names.add(rule.name));
+  RULES.forEach((rule) => names.add(rule.name));
+
+  Array.from(names).sort().forEach((name) => {
+    if (catalog.text.includes("`" + name + "`")) return;
+    out.push(makeFinding(
+      rel,
+      catalog.line,
+      "smell-catalog-coverage",
+      "Missing smell catalog entry for rule '" + name + "'."
+    ));
+  });
+  return out;
 }
 
 function runThemeCacheInvalidationRule() {
@@ -1089,6 +1122,25 @@ function makeFinding(file, line, rule, detail) {
 
 function compareFindings(a, b) {
   return a.file.localeCompare(b.file) || a.line - b.line;
+}
+
+function extractMarkdownSection(text, heading) {
+  const headingRe = new RegExp("^## " + escapeRegex(heading) + "\\s*$", "m");
+  const match = headingRe.exec(text);
+  if (!match) return { text: "", line: 1 };
+
+  const start = match.index + match[0].length;
+  const rest = text.slice(start);
+  const nextHeading = /\n##\s+/.exec(rest);
+  const end = nextHeading ? start + nextHeading.index : text.length;
+  return {
+    text: text.slice(start, end),
+    line: lineFromIndex(text, match.index)
+  };
+}
+
+function escapeRegex(value) {
+  return String(value).replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
 }
 
 function collectSourceFiles(roots) {

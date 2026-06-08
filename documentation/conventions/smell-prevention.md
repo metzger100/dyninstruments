@@ -13,14 +13,24 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook); w
 |---|---|---|---|---|
 | Theme cache drift | Token cache never invalidated after theme preset mutation | Cache-owning modules expose explicit invalidation APIs and callers invoke them on mutation | `check-smell-contracts` (`theme-cache-invalidation`) | block |
 | Dynamic key stale state | `storeKeys.value` remains when dynamic key field is cleared | Clear stale dynamic store keys when key input is empty | `check-smell-contracts` (`dynamic-storekey-clears-on-empty`) | block |
+| Smell catalog coverage drift | A live `check-patterns` or `check-smell-contracts` rule is absent from this catalog | Add every executable smell rule ID to a catalog row, not only the executable index | `check-smell-contracts` (`smell-catalog-coverage`) | block |
 | Absolute user-home path leak | Repository content includes machine-local absolute paths such as `/home/<user>/...` or `/Users/<user>/...` | Keep repository paths project-relative or placeholder/redacted (`/path/to/...`, `/home/<user>/...`) | `check-patterns` (`absolute-user-home-path`) | block |
 | Removed theme/surface architecture resurrection | Reintroducing removed paths such as `ThemePresets`, `data-dyni-theme`, `applyThemePreset*`, `namedHandlers`, `catchAll`, `triggerResize`, inline `onclick="..."`, or legacy `invalidateTheme()` hooks | Keep commit-driven runtime/surface architecture; use direct listener ownership and runtime-owned theme apply/policy boundaries | `check-patterns` (`removed-theme-surface-architecture`) | block |
 | Deleted PLAN20 owner module resurrection | Reintroducing deleted owner-module files such as `cluster/rendering/ClusterRendererRouter.js`, `runtime/helpers.js`, `shared/theme/ThemeResolver.js`, or the other retired PLAN20 paths | Keep the deleted owner modules absent from disk and out of the registry, even if they are not referenced by `config.components` | `check-dependencies` (`forbidden-owner-module-path`) | block |
 | Legacy theme CSS input consumer | Migrated CSS consumes raw input vars (`--dyni-font-weight`, `--dyni-label-weight`, `--dyni-border-day`, `--dyni-border-night`) | Consume migrated output vars (`--dyni-theme-*`) for migrated values | `check-patterns` (`legacy-theme-css-input-consumer`) | block |
+| Global `isFinite` drift | Runtime/source code calls bare `isFinite(...)` | Use `Number.isFinite(...)` for explicit numeric checks | `check-patterns` (`global-isfinite`) | block |
+| Direct AvNav global access | Widget/shared/config code reads `window.avnav` or `avnav.api` directly | Use `componentContext` services and runtime-owned API boundaries | `check-patterns` (`forbidden-globals`) | block |
+| Legacy component loader API | Code calls removed loader helpers such as `runtime.createHelpers`, `runtime.createComponentContext`, `Helpers.getModule`, or `componentContext.components.get` | Use `componentContext.components.require(...)` and runtime-owned services | `check-patterns` (`legacy-component-loader-api`) | block |
+| Runtime service reach-through | Registered component code reaches directly into runtime services | Use `componentContext.*` service views inside registered components | `check-patterns` (`runtime-service-reach-through`) | block |
+| Empty catch | `catch (...) {}` silently swallows errors | Re-throw, handle explicitly, or use the centralized boundary that owns fallback behavior | `check-patterns` (`empty-catch`) | block |
 | Falsy default clobbering | `x.default || "---"` | Preserve explicit falsy defaults using property-presence/nullish semantics | `check-patterns` (`default-truthy-fallback`) + `check-smell-contracts` (`falsy-default-preservation`) | block |
 | Redundant internal fallback | Renderer/local code re-applies fallback for props/defaults already guaranteed by mapper/editable contracts (or wraps `componentContext.format.applyFormatter` default with the same fallback again) | Trust internal contracts for guaranteed props/defaults; keep fallbacks only for external/runtime uncertainty (AvNav/browser APIs) | `check-patterns` (`redundant-internal-fallback`) | block |
 | Invalid lint suppression | Inline `dyni-lint-disable-*` directive is malformed or references unknown rule | Suppress only the named rule and always include a short reason | `check-patterns` (`invalid-lint-suppression`) | block |
 | Catch fallback without suppression | Non-rethrow `catch` silently degrades behavior without explicit exception | Re-throw by default; keep intentional fallback catches only with rule-specific suppression | `check-patterns` (`catch-fallback-without-suppression`) | warn |
+| Console in widget-owned code | Non-runtime source calls `console.log`, `console.warn`, or `console.error` | Keep direct logging in runtime/plugin boundaries only | `check-patterns` (`console-in-widgets`) | block |
+| Task marker without owner | A task/debt marker lacks owner/date metadata | Use an owner plus date before the description | `check-patterns` (`todo-without-owner`) | block |
+| Unused fallback symbol | A declared symbol containing `fallback` is never referenced | Remove stale fallback leftovers or wire the active path explicitly | `check-patterns` (`unused-fallback`) | block |
+| Dead code | Unreferenced helper function or constant boolean branch remains after refactor | Remove stale code or make the path reachable through a real contract | `check-patterns` (`dead-code`) | block |
 | Internal hook fallback | Shared/widget code normalizes or fallbacks internal hook/spec results (`normalize*`, `cfg.*(...) || ...`) | Keep defaults at the boundary and trust internal hook contracts | `check-patterns` (`internal-hook-fallback`) | block |
 | Redundant null/type guard | Internal code repeatedly sanitizes already-normalized values (`String(x == null ? "" : x)`, `Array.isArray(x) ? x : []`, `isFiniteNumber(x) ? ... : ...`) | Remove redundant guards and trust mapper/runtime/theme contracts | `check-patterns` (`redundant-null-type-guard`) | block |
 | Hardcoded runtime default | Runtime/widget/shared code embeds fallback literals or object defaults already owned elsewhere | Use declarative config/theme defaults or boundary-owned placeholders | `check-patterns` (`hardcoded-runtime-default`) | block |
@@ -35,8 +45,10 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook); w
 | CSS/JS default duplication | JS repeats CSS/theme token defaults (`getComputedStyle`, `defaultValue`, `--dyni-*`) | Keep visual/token defaults in CSS or theme resolver boundary only | `check-patterns` (`css-js-default-duplication`) | warn |
 | Premature legacy support | Code adds speculative compat/legacy/fallback naming or multi-source compatibility branches | Remove speculative compatibility paths until a live boundary requires them | `check-patterns` (`premature-legacy-support`) | block |
 | Canonical helper redefinition | `function toObject(v) { return v && typeof v === "object" ? v : {}; }` defined in widget/shared code | Use canonical shared helper exports; do not redefine canonical helper names outside owner modules | `check-patterns` (`canonical-helper-redefinition`) | block |
+| Canonical helper catalog drift | Shared helper owner modules are missing expected canonical APIs | Keep canonical helper exports complete and owned by their documented modules | `check-smell-contracts` (`canonical-helper-completeness`) | block |
 | Paranoid module-member fallback (`|| function`) | `valueMath.toOptionalFiniteNumber || function (v) { ... }` | Trust internal module contracts and keep direct member access only | `check-patterns` (`premature-legacy-support`) | block |
 | Paranoid cross-member fallback (`|| X.memberB`) | `valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber` | Trust internal module contracts and keep direct member access only | `check-patterns` (`premature-legacy-support`) | block |
+| Editable threshold exposure drift | Ratio/threshold editable specs omit `internal: true` | Mark runtime-only ratio/threshold knobs internal so defaults apply without host-editor exposure | `check-patterns` (`editable-threshold-missing-internal`) | warn |
 | Formatter boundary NaN leak | `applyFormatter("")` reaches formatter and returns `NaN` text | Guard empty-string formatter inputs and keep placeholder sentinel normalization | `check-smell-contracts` (`formatter-boundary-empty-string`, `placeholder-contract`) | block |
 | Inconsistent absent-numeric sentinel | `warningEnabled ? num(x) : NaN` for optional values | Use `undefined` as the absent optional numeric sentinel | documentation + code review | warn |
 | Widget re-normalization of mapper props | `toOptionalFiniteNumber(p.warningFrom)` when mapper already emits `number | undefined` | Trust mapper boundary normalization for `rendererProps` | documentation + code review | warn |
@@ -62,6 +74,18 @@ Blocking checks must pass before push (`npm run check:all` via pre-push hook); w
 - Push blocker: `.githooks/pre-push` -> `npm run check:all`
 - `check:filesize` runs fail-closed with `--oneliner=block` (used by `check:core`/`check:all`)
 - Optional exploratory variant: `npm run check:filesize:warn`
+- Full command graph: [quality-gates.md](quality-gates.md)
+
+## Executable Rule Index
+
+`check-patterns` rule IDs:
+`invalid-lint-suppression`, `removed-theme-surface-architecture`, `legacy-theme-css-input-consumer`, `absolute-user-home-path`, `global-isfinite`, `duplicate-functions`, `duplicate-block-clones`, `forbidden-globals`, `legacy-component-loader-api`, `runtime-service-reach-through`, `empty-catch`, `catch-fallback-without-suppression`, `console-in-widgets`, `todo-without-owner`, `unused-fallback`, `dead-code`, `default-truthy-fallback`, `redundant-internal-fallback`, `internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `widget-renderer-default-duplication`, `engine-layout-default-drift`, `canvas-api-typeof-guard`, `try-finally-canvas-drawing`, `framework-method-typeof-guard`, `inline-config-default-duplication`, `css-js-default-duplication`, `premature-legacy-support`, `canonical-helper-redefinition`, `editable-threshold-missing-internal`, `formatter-availability-heuristic`, `renderer-numeric-coercion-without-boundary-contract`, `responsive-layout-hard-floor`, `responsive-profile-ownership`, `mapper-logic-leakage`, `cluster-renderer-cluster-prefix`, `mapper-output-complexity`.
+
+`check-smell-contracts` rule IDs:
+`smell-catalog-coverage`, `theme-cache-invalidation`, `dynamic-storekey-clears-on-empty`, `falsy-default-preservation`, `formatter-boundary-empty-string`, `mapper-output-no-nan`, `text-layout-hotspot-budget`, `coordinate-formatter-no-raw-equality-fallback`, `placeholder-contract`, `canonical-helper-completeness`, `dash-literal-contract`, `state-screen-precedence-contract`.
+
+`check-file-size` smell-adjacent rule IDs:
+`file-size`, `file-size-oneliner`, `oneliner=dense`, `oneliner=long-packed`, `oneliner=chained-ternary`, `oneliner=collapsed-block`, `oneliner=collapsed-literal`, `oneliner=single-line-body`.
 
 ## Suppression Syntax
 
@@ -89,6 +113,7 @@ Remediation steps for each smell class: [smell-fix-playbooks.md](smell-fix-playb
 ## Related
 
 - [coding-standards.md](coding-standards.md)
+- [quality-gates.md](quality-gates.md)
 - [smell-fix-playbooks.md](smell-fix-playbooks.md)
 - [../guides/documentation-maintenance.md](../guides/documentation-maintenance.md)
 - [../guides/add-new-html-kind.md](../guides/add-new-html-kind.md)

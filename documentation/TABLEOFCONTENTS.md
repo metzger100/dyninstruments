@@ -37,6 +37,7 @@
 
 - **Coding standards (UMD template, mapper boundaries, archetypes, shared utilities)** → [conventions/coding-standards.md](conventions/coding-standards.md)
 - **Smell catalog, enforcement matrix, suppression syntax** → [conventions/smell-prevention.md](conventions/smell-prevention.md)
+- **Quality gate command graph and checker ownership** → [conventions/quality-gates.md](conventions/quality-gates.md)
 - **Smell remediation playbooks** → [conventions/smell-fix-playbooks.md](conventions/smell-fix-playbooks.md)
 - **Canvas layer caching conventions and shared cache facade** → [conventions/canvas-layer-caching.md](conventions/canvas-layer-caching.md), [shared/canvas-layer-cache.md](shared/canvas-layer-cache.md)
 - **Responsive compaction + GeometryScale factor scaling** → [shared/responsive-scale-profile.md](shared/responsive-scale-profile.md)
