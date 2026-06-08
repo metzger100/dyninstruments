@@ -27,7 +27,6 @@ npm run check:all
    For perf-gate changes, include `npm run perf:run` and `npm run perf:check`.
 
 9. Fix all failures and review all warnings before finishing
-10. For warn-only smell rollouts, record the warning backlog and promotion criteria in `documentation/TECH-DEBT.md`
 
 ## Quality and Regression Commands
 
@@ -86,12 +85,6 @@ Blocking findings fail the gate; warning findings are non-blocking advisories.
 This includes fail-closed cross-file clone detection (`duplicate-functions`, `duplicate-block-clones`), block-mode atomicity/fail-fast rules (`internal-hook-fallback`, `redundant-null-type-guard`, `hardcoded-runtime-default`, `widget-renderer-default-duplication`, `engine-layout-default-drift`, `canvas-api-typeof-guard`, `try-finally-canvas-drawing`, `framework-method-typeof-guard`, `inline-config-default-duplication`), fail-closed repository hygiene rules (`absolute-user-home-path`), mixed-severity mapper complexity checks (`mapper-output-complexity`: warn at `9..12`, block at `>12`), remaining warn-only rollout rules (`catch-fallback-without-suppression`, `css-js-default-duplication`, `premature-legacy-support`, `editable-threshold-missing-internal`), plus blocking suppression validation (`invalid-lint-suppression`).
 Responsive ownership checks are part of the same gate: `responsive-profile-ownership` and `responsive-layout-hard-floor` both block new drift.
 
-For cleanup sessions tracked by garbage-collection baseline markers:
-
-- `npm run gc:status` at the start
-- complete mandatory commit-by-commit review in [garbage-collection.md#manual-commit-audit-required](garbage-collection.md#manual-commit-audit-required)
-- `npm run gc:update-baseline` at the end, only after audit + cleanup loop + strict checks are complete
-
 ## Touchpoint Matrix
 
 | Change Type | Minimum Docs to Update |
@@ -106,7 +99,7 @@ For cleanup sessions tracked by garbage-collection baseline markers:
 | Installation/packaging/release workflow changes (`plugin.json`, release scripts, install steps) | `documentation/guides/release-workflow.md`, `README.md` (installation/update instructions) |
 | User configuration surface changes (editable params, defaults, unit selectors, key selectors, cluster options) | relevant `documentation/avnav-api/*` and widget docs, `README.md` (Configuration section) |
 | Requirements/platform support changes | `documentation/core-principles.md` or relevant architecture docs, `README.md` (Requirements section) |
-| Development workflow changes (`package.json`, `vitest.config.js`, `tools/*`, `.githooks/*`) | `documentation/guides/documentation-maintenance.md`, `documentation/guides/garbage-collection.md`, `documentation/guides/performance-gate.md`, `README.md` (Development section), `AGENTS.md`, `CLAUDE.md` |
+| Development workflow changes (`package.json`, `vitest.config.js`, `tools/*`, `.githooks/*`) | `documentation/guides/documentation-maintenance.md`, `documentation/guides/performance-gate.md`, `README.md` (Development section), `AGENTS.md`, `CLAUDE.md` |
 | New documentation file | `documentation/TABLEOFCONTENTS.md` |
 
 ## Validation

@@ -7,9 +7,7 @@ const ROOT = process.cwd();
 const DOC_ROOT = path.join(ROOT, "documentation");
 const WARN_MODE = process.argv.includes("--warn");
 const EXCLUDED = new Set([
-  "documentation/TABLEOFCONTENTS.md",
-  "documentation/QUALITY.md",
-  "documentation/TECH-DEBT.md"
+  "documentation/TABLEOFCONTENTS.md"
 ]);
 const FORMAT_REF = "documentation/conventions/documentation-format.md";
 

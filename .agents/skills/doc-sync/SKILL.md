@@ -1,13 +1,13 @@
 ---
 name: doc-sync
-description: Ensures documentation stays synchronized with code changes, applies the touchpoint matrix, enforces the documentation format, and updates tracking files.
+description: Ensures documentation stays synchronized with code changes, applies the touchpoint matrix, and enforces the documentation format.
 ---
 
 # Skill: doc-sync
 
 ## Description
 
-Ensures documentation stays synchronized with code changes. Applies the touchpoint matrix from `documentation-maintenance.md`, enforces the documentation format from `documentation-format.md`, and updates tracking files (`TABLEOFCONTENTS.md`, `QUALITY.md`, `TECH-DEBT.md`).
+Ensures documentation stays synchronized with code changes. Applies the touchpoint matrix from `documentation-maintenance.md` and enforces the documentation format from `documentation-format.md`.
 
 ## When to Use
 
@@ -31,7 +31,7 @@ For each changed file, determine the minimum documentation updates required:
 | Changes in registration/lifecycle flow (`runtime/init.js`, `runtime/widget-registrar.js`) | `documentation/avnav-api/plugin-lifecycle.md`, `documentation/architecture/component-system.md` |
 | Changes in helper services or `componentContext.format.applyFormatter` contract | `documentation/shared/helpers.md` |
 | CSS/theming changes (`plugin.css`) | `documentation/shared/css-theming.md` |
-| Test setup or quality rule changes (tools, config, hooks) | `documentation/guides/documentation-maintenance.md`, `documentation/guides/garbage-collection.md`, `README.md`, `AGENTS.md`, `CLAUDE.md` |
+| Test setup or quality rule changes (tools, config, hooks) | `documentation/guides/documentation-maintenance.md`, `README.md`, `AGENTS.md`, `CLAUDE.md` |
 | New documentation file | `documentation/TABLEOFCONTENTS.md` |
 | New/changed mapper | Relevant cluster-widget-system.md section |
 | New/changed shared utility | `documentation/conventions/coding-standards.md` §Shared Utilities |
@@ -99,23 +99,11 @@ If you created a new documentation file:
 
 **Reachability rule:** Every new doc must be linked from at least one other doc that is itself reachable from `AGENTS.md`. The easiest way is adding an entry to `TABLEOFCONTENTS.md`.
 
-### Step 6: Update Tracking Files (When Applicable)
-
-**QUALITY.md** — Update when:
-- Layer file counts change (new or removed files)
-- Test counts change
-- Check output summaries change (warnings, violations)
-- A cleanup task was completed
-
-**TECH-DEBT.md** — Update when:
-- A new drift, inconsistency, or missing enforcement is discovered (add Active item)
-- A debt item was resolved (move to Completed with date and resolution summary)
-- A smell rule severity changes
+### Step 6: Update Root Agent Instructions (When Applicable)
 
 **AGENTS.md / CLAUDE.md** — Update when:
 - Architecture guidance changes
 - New file map entries are needed
-- New known issues are discovered
 - After updating either, run `node tools/sync-ai-instructions.mjs --from=agents` (or `--from=claude`) to keep them synchronized
 
 ### Step 7: Validate
@@ -145,4 +133,3 @@ Non-zero exit means docs are not consistent. Fix all failures before proceeding.
 - ❌ Using more than 1-2 examples per concept
 - ❌ Leaving empty sections in docs
 - ❌ Updating AGENTS.md without syncing to CLAUDE.md (or vice versa)
-- ❌ Completing a cleanup task without updating QUALITY.md and TECH-DEBT.md

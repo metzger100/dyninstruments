@@ -282,7 +282,7 @@ const compatValue = oldApi ? oldApi.get() : newApi.get();
 ### After Scanning
 
 1. Fix all BLOCK-severity findings before committing.
-2. For WARN-severity findings, either fix or track in `documentation/TECH-DEBT.md`.
+2. For WARN-severity findings, either fix them or document the follow-up in the active task or execution plan.
 3. Run `node tools/check-patterns.mjs` to verify mechanically.
 4. Run `npm run check:all` as the final gate.
 

@@ -126,17 +126,10 @@ Task: Add new BarometerGauge
 - [ ] Updated `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js` when adding or changing a kind with new user-visible visuals/layout behavior.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
 - [ ] Ran `npm run check:all` — no failures; required final gate (`check:core` plus coverage threshold enforcement plus `perf:check`).
-- [ ] For cleanup sessions, ran `npm run gc:status` first and `npm run gc:update-baseline` last.
 
 ---
 
-## 6. Known Issues
-
-Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
-
----
-
-## 7. Smell Prevention & Fail-Closed Rules
+## 6. Smell Prevention & Fail-Closed Rules
 
 - Mandatory on every task: follow `documentation/conventions/coding-standards.md` and `documentation/conventions/smell-prevention.md` as binding rules.
 - Required completion gate: `npm run check:all` (`check:core` + `test:coverage:check` + `perf:check`).
@@ -145,7 +138,7 @@ Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 
 ---
 
-## 8. Code Hygiene Rules for AI Agents
+## 7. Code Hygiene Rules for AI Agents
 
 ### Before creating any helper function
 
@@ -172,7 +165,7 @@ Known issues and tech debt: [TECH-DEBT.md](documentation/TECH-DEBT.md)
 
 ---
 
-## 9. User-Facing README Sync Rule (Fail-Closed)
+## 8. User-Facing README Sync Rule (Fail-Closed)
 
 `README.md` is mandatory documentation when user-facing behavior changes. Do not treat it as optional.
 
@@ -188,7 +181,7 @@ Update `README.md` in the same task whenever changes affect any of:
 
 For execution plans, include explicit README deliverables and exit conditions for these categories.
 
-## 10. Fail-Closed Fixture/Test Sync Rules
+## 9. Fail-Closed Fixture/Test Sync Rules
 
 When changing user-facing theming or user-visible kind visuals, update the related fixtures/tests in the same task:
 

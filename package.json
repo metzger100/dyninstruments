@@ -18,8 +18,6 @@
     "check:naming": "node tools/check-naming.mjs",
     "check:patterns": "node tools/check-patterns.mjs",
     "check:smells": "node tools/check-patterns.mjs && node tools/check-smell-contracts.mjs",
-    "gc:status": "node tools/gc-baseline.mjs --status",
-    "gc:update-baseline": "node tools/gc-baseline.mjs --update-head",
     "hooks:install": "node tools/install-hooks.mjs",
     "hooks:doctor": "node tools/check-hooks.mjs",
     "check:core": "npm run check:smells && node tools/check-docs.mjs && node tools/check-doc-format.mjs --warn && node tools/check-doc-reachability.mjs && npm run ai:check && npm run check:filesize && node tools/check-headers.mjs && node tools/check-dependencies.mjs && node tools/check-umd.mjs && node tools/check-naming.mjs",

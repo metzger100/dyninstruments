@@ -79,8 +79,8 @@ Allowed inline exceptions:
 ## Severity Model
 
 - `block`: must pass locally before push.
-- `warn`: allowed only for exploratory or rollout rules not yet promoted; promotion target and rationale must be tracked in `documentation/TECH-DEBT.md`.
-- Promotion rule for warn-only rollout checks: each rule moves to `block` only after its repo warning count reaches zero and the zero-warning state is recorded in `TECH-DEBT.md`.
+- `warn`: allowed only for exploratory or rollout rules not yet promoted; warning backlogs should be fixed or documented in the active task or execution plan.
+- Promotion rule for warn-only rollout checks: each rule moves to `block` only after its repo warning count reaches zero and the zero-warning state is verified by the checker output.
 
 ## Fix Playbooks
 

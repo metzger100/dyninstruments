@@ -206,8 +206,8 @@ Structure as phased steps with explicit dependencies:
 #### NB. Update `documentation/TABLEOFCONTENTS.md`
 {Entries to add}
 
-#### NC. Update tracking files
-{QUALITY.md, TECH-DEBT.md updates if applicable}
+#### NC. Update related guidance
+{README.md, AGENTS.md, CLAUDE.md, or other workflow docs if applicable}
 
 ---
 ```

@@ -163,7 +163,7 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 1. Keep each direct `translate()` return object literal under 9 top-level props when feasible.
 2. If one `kind` requires renderer-specific configuration beyond this threshold, move those props into a dedicated renderer wrapper/adapter contract.
 3. Use the renderer decision rule as the default architecture gate: [../guides/add-new-cluster.md#renderer-decision-rule](../guides/add-new-cluster.md#renderer-decision-rule).
-4. Treat `>12` as fail-closed and refactor immediately; treat `9..12` as warning debt and track planned cleanup/promotion in `TECH-DEBT.md`.
+4. Treat `>12` as fail-closed and refactor immediately; treat `9..12` as warning debt and fix it or document the cleanup plan in the active task or execution plan.
 
 ### Renderer naming drift
 
@@ -220,4 +220,3 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 - [smell-prevention.md](smell-prevention.md)
 - [coding-standards.md](coding-standards.md)
 - [../guides/documentation-maintenance.md](../guides/documentation-maintenance.md)
-- [../guides/garbage-collection.md](../guides/garbage-collection.md)

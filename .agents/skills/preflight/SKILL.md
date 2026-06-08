@@ -35,11 +35,10 @@ Determine which category the task falls into:
 | New text renderer | "text widget", "numeric display", "three-value" |
 | New HTML kind | "HTML widget", "native HTML", "interactive", "list", "route points" |
 | New cluster | "new cluster", entirely new instrument group |
-| Refactor / cleanup | "refactor", "cleanup", "extract", "consolidate", "tech debt" |
+| Refactor / cleanup | "refactor", "cleanup", "extract", "consolidate" |
 | Documentation | "docs", "document", "update docs", "sync docs" |
 | Bug fix | "fix", "broken", "regression", "failing" |
 | Plan creation | "plan", "design", "architecture plan", "exec-plan" |
-| Garbage collection | "gc", "garbage collection", "audit", "baseline" |
 
 ### Step 3: Route to Task-Specific Docs
 
@@ -77,9 +76,8 @@ Based on the category, read ONLY the additional docs listed below. Never read al
 - `documentation/architecture/component-system.md`
 
 **Refactor / cleanup:**
-- `documentation/guides/garbage-collection.md`
-- `documentation/TECH-DEBT.md`
-- `documentation/QUALITY.md`
+- `documentation/conventions/shared-helpers.md`
+- `documentation/guides/documentation-maintenance.md`
 
 **Documentation:**
 - `documentation/guides/documentation-maintenance.md`
@@ -94,11 +92,6 @@ Based on the category, read ONLY the additional docs listed below. Never read al
 - `ARCHITECTURE.md`
 - The relevant guide for the widget archetype
 - Existing plans in `exec-plans/completed/` (read structure only, not full content)
-
-**Garbage collection:**
-- `documentation/guides/garbage-collection.md`
-- `documentation/QUALITY.md`
-- `documentation/TECH-DEBT.md`
 
 ### Step 4: Produce Context Summary
 
