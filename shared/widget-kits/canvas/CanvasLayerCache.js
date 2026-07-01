@@ -129,11 +129,29 @@
         }
       }
 
+      function blitLayer(targetCtx, layerName) {
+        if (!targetCtx || typeof targetCtx.drawImage !== "function") {
+          return;
+        }
+        const layer = layers[String(layerName || "")];
+        if (!layer || !layer.canvas) {
+          return;
+        }
+        const outW = Math.max(1, drawW || bufferW);
+        const outH = Math.max(1, drawH || bufferH);
+        targetCtx.drawImage(layer.canvas, 0, 0, layer.canvas.width, layer.canvas.height, 0, 0, outW, outH);
+      }
+
       function invalidate() {
         dirty = true;
       }
 
-      return { ensureLayer: ensureLayer, blit: blit, invalidate: invalidate };
+      return {
+        ensureLayer: ensureLayer,
+        blit: blit,
+        blitLayer: blitLayer,
+        invalidate: invalidate
+      };
     }
 
     return { id: "CanvasLayerCache", createLayerCache: createLayerCache };

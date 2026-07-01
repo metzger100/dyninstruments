@@ -36,6 +36,8 @@ Canonical semantic color inputs:
 - --dyni-alarm-widget-bg
 - --dyni-alarm-widget-fg
 - --dyni-alarm-widget-strip
+- --dyni-layline-stb
+- --dyni-layline-port
 - --dyni-ais-warning
 - --dyni-ais-nearest
 - --dyni-ais-tracking
@@ -55,7 +57,7 @@ Border-specific rule:
 Scoped cascade rule:
 
 - Scoped inputs can inherit from global semantic tokens when unset.
-- Example: `--dyni-ais-warning` cascades from `--dyni-alarm`, `--dyni-alarm-widget-strip` and `--dyni-ais-nearest` cascade from `--dyni-ok`, and `--dyni-regatta-bar-default` cascades from `--dyni-info`.
+- Example: `--dyni-pointer` cascades from `--dyni-info`, `--dyni-layline-stb` cascades from `--dyni-ok`, and `--dyni-layline-port` cascades from `--dyni-alarm`.
 - Scoped explicit inputs still win over the inherited cascade.
 
 ## Output Variables
@@ -118,6 +120,7 @@ Natural shell sizing must not be forced by shared shell CSS. Inner mount/surface
 
 ## Related
 
+- color-system.md
 - theme-tokens.md
 - ../architecture/runtime-lifecycle.md
 - ../architecture/html-renderer-lifecycle.md

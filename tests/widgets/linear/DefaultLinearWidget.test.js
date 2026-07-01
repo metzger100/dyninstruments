@@ -175,8 +175,8 @@ describe("DefaultLinearWidget", function () {
     const h = createHarness();
     const theme = {
       colors: {
-        warning: "#e7c66a",
-        alarm: "#FA584A",
+        warning: "#e0a92e",
+        alarm: "#d9534a",
       },
     };
 
@@ -244,9 +244,9 @@ describe("DefaultLinearWidget", function () {
     );
 
     expect(fallbackSectors).toEqual([
-      { from: 0, to: 10, color: "#FA584A" },
-      { from: 75, to: 90, color: "#e7c66a" },
-      { from: 90, to: 100, color: "#FA584A" },
+      { from: 0, to: 10, color: "#d9534a" },
+      { from: 75, to: 90, color: "#e0a92e" },
+      { from: 90, to: 100, color: "#d9534a" },
     ]);
   });
 
@@ -254,8 +254,8 @@ describe("DefaultLinearWidget", function () {
     const h = createHarness();
     const theme = {
       colors: {
-        warning: "#e7c66a",
-        alarm: "#FA584A",
+        warning: "#e0a92e",
+        alarm: "#d9534a",
       },
     };
     const missingValues = [null, undefined, "", "   "];
@@ -288,6 +288,6 @@ describe("DefaultLinearWidget", function () {
         h.valueMath,
         theme,
       ),
-    ).toEqual([{ from: 75, to: 100, color: "#e7c66a" }]);
+    ).toEqual([{ from: 75, to: 100, color: "#e0a92e" }]);
   });
 });

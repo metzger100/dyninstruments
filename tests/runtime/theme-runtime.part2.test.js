@@ -86,19 +86,17 @@ describe("runtime/theme-runtime.js", function () {
       context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.colors.alarm).toBe("rgba(250, 88, 74, 0.60)");
-    expect(resolved.colors.alarmWidget.bg).toBe("rgba(199, 58, 50, 0.60)");
+    expect(resolved.colors.alarmWidget.bg).toBe("rgba(250, 88, 74, 0.60)");
     expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
     expect(resolved.colors.alarmWidget.strip).toBe("rgba(112, 243, 175, 0.60)");
 
     expect(resolved.colors.ais.warning).toBe("rgba(250, 88, 74, 0.60)");
     expect(resolved.colors.ais.nearest).toBe("rgba(112, 243, 175, 0.60)");
-    expect(resolved.colors.ais.tracking).toBe("rgba(248, 166, 1, 0.60)");
-    expect(resolved.colors.ais.normal).toBe("rgba(235, 235, 85, 0.60)");
-    expect(resolved.colors.regatta.barWarning).toBe("rgba(231, 168, 52, 0.60)");
+    expect(resolved.colors.ais.tracking).toBe("#8b6914");
+    expect(resolved.colors.ais.normal).toBe("rgba(112, 243, 175, 0.60)");
+    expect(resolved.colors.regatta.barWarning).toBe("#8b6914");
     expect(resolved.colors.regatta.barCritical).toBe("rgba(250, 88, 74, 0.60)");
-    expect(resolved.colors.regatta.barDefault).toBe(
-      "rgba(112, 176, 243, 0.60)",
-    );
+    expect(resolved.colors.regatta.barDefault).toBe("#cc2222");
   });
 
   it("resolves colors.ok and colors.info in default night mode", function () {
@@ -121,10 +119,10 @@ describe("runtime/theme-runtime.js", function () {
       context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.colors.ok).toBe("rgba(112, 243, 175, 0.60)");
-    expect(resolved.colors.info).toBe("rgba(112, 176, 243, 0.60)");
+    expect(resolved.colors.info).toBe("#cc2222");
   });
 
-  it("resolves colors.ok and colors.info highcontrast base overrides", function () {
+  it("resolves colors.ok and colors.info highcontrast base values", function () {
     const context = setupContext({
       getComputedStyle() {
         return {
@@ -142,8 +140,8 @@ describe("runtime/theme-runtime.js", function () {
     const resolved =
       context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
-    expect(resolved.colors.ok).toBe("#00AA66");
-    expect(resolved.colors.info).toBe("#00AAFF");
+    expect(resolved.colors.ok).toBe("#008f5a");
+    expect(resolved.colors.info).toBe("#0057ff");
   });
 
   it("cascades scoped semantic tokens from global parents by default", function () {
@@ -163,9 +161,14 @@ describe("runtime/theme-runtime.js", function () {
       context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
     expect(dayResolved.colors.ais.warning).toBe(dayResolved.colors.alarm);
     expect(dayResolved.colors.ais.nearest).toBe(dayResolved.colors.ok);
+    expect(dayResolved.colors.info).toBe(dayResolved.colors.pointer);
+    expect(dayResolved.colors.laylineStb).toBe(dayResolved.colors.ok);
+    expect(dayResolved.colors.laylinePort).toBe(dayResolved.colors.alarm);
     expect(dayResolved.colors.alarmWidget.strip).toBe(dayResolved.colors.ok);
     expect(dayResolved.colors.regatta.barDefault).toBe(dayResolved.colors.info);
-    expect(dayResolved.colors.alarmWidget.bg).toBe("#C73A32");
+    expect(dayResolved.colors.alarmWidget.bg).toBe(dayResolved.colors.alarm);
+    expect(dayResolved.colors.ais.tracking).toBe(dayResolved.colors.warning);
+    expect(dayResolved.colors.ais.normal).toBe(dayResolved.colors.ok);
 
     context.DyniPlugin.runtime.dom.getNightModeState = function () {
       return true;
@@ -174,6 +177,9 @@ describe("runtime/theme-runtime.js", function () {
       context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
     expect(nightResolved.colors.ais.warning).toBe(nightResolved.colors.alarm);
     expect(nightResolved.colors.ais.nearest).toBe(nightResolved.colors.ok);
+    expect(nightResolved.colors.info).toBe(nightResolved.colors.pointer);
+    expect(nightResolved.colors.laylineStb).toBe(nightResolved.colors.ok);
+    expect(nightResolved.colors.laylinePort).toBe(nightResolved.colors.alarm);
     expect(nightResolved.colors.alarmWidget.strip).toBe(
       nightResolved.colors.ok,
     );
@@ -200,14 +206,17 @@ describe("runtime/theme-runtime.js", function () {
     const resolved =
       context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
-    expect(resolved.colors.alarm).toBe("#FF3300");
-    expect(resolved.colors.ais.warning).toBe("#FF3300");
+    expect(resolved.colors.alarm).toBe("#ff3b2f");
+    expect(resolved.colors.laylineStb).toBe("#008f5a");
+    expect(resolved.colors.laylinePort).toBe("#ff3b2f");
+    expect(resolved.colors.ais.warning).toBe("#ff3b2f");
     expect(resolved.colors.ais.warning).toBe(resolved.colors.alarm);
   });
 
   it("applies global root overrides to all cascaded scoped tokens", function () {
     const cssVars = {
       "--dyni-alarm": "#00ff00",
+      "--dyni-warning": "#778899",
       "--dyni-ok": "#112233",
       "--dyni-info": "#445566",
     };
@@ -231,8 +240,10 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.colors.ais.nearest).toBe("#112233");
     expect(resolved.colors.alarmWidget.strip).toBe("#112233");
     expect(resolved.colors.regatta.barDefault).toBe("#445566");
-    expect(resolved.colors.alarmWidget.bg).toBe("#C73A32");
-    expect(resolved.colors.regatta.barWarning).toBe("#e7a834");
+    expect(resolved.colors.alarmWidget.bg).toBe("#00ff00");
+    expect(resolved.colors.ais.tracking).toBe("#778899");
+    expect(resolved.colors.ais.normal).toBe("#112233");
+    expect(resolved.colors.regatta.barWarning).toBe("#778899");
   });
 
   it("uses scoped override over parent cascade for ais.warning", function () {

@@ -82,9 +82,9 @@ const {
         fg: "#fff",
       },
       colors: {
-        pointer: "#ff2b2b",
-        laylineStb: "#82b683",
-        laylinePort: "#ff7a76",
+        pointer: "#3366cc",
+        laylineStb: "#2e9e6b",
+        laylinePort: "#d9534a",
       },
       radial: {
         ticks: {

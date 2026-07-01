@@ -61,12 +61,12 @@ Ownership:
 
 | Element | Theme token | Default | Usage |
 |---|---|---|---|
-| Warning sector | `tokens.colors.warning` | `#e7c66a` | Matte yellow |
-| Alarm sector | `tokens.colors.alarm` | `#FA584A` | Matte red |
-| Pointer | `tokens.colors.pointer` | `#ff2b2b` | Red triangle |
+| Warning sector | `tokens.colors.warning` | `#e0a92e` | Amber caution band |
+| Alarm sector | `tokens.colors.alarm` | `#d9534a` | Soft alarm red |
+| Pointer | `tokens.colors.pointer` | inherits `colors.info` (`#3366cc`) | Blue live-value triangle |
 | Text/ticks/arc stroke | `tokens.surface.fg` | CSS-resolved | Foreground |
-| Layline starboard (WindRadialWidget) | `tokens.colors.laylineStb` | `#82b683` | Starboard tack |
-| Layline port (WindRadialWidget) | `tokens.colors.laylinePort` | `#ff7a76` | Port tack |
+| Layline starboard (WindRadialWidget) | `tokens.colors.laylineStb` | inherits `colors.ok` (`#2e9e6b`) | Starboard tack |
+| Layline port (WindRadialWidget) | `tokens.colors.laylinePort` | inherits `colors.alarm` (`#d9534a`) | Port tack |
 
 Theme defaults are provided by `runtime.theme` and can be overridden via CSS variables.
 
@@ -83,6 +83,11 @@ draw.drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, {
 ```
 
 Pointer color is passed directly via `fillStyle` from `tokens.colors.pointer`.
+
+Pointer z-order matches the full-circle dial: the static background is split into a `back` cache layer (sectors + arc ring) and a `front` cache layer (ticks + value labels). The live pointer is drawn between them (`back` → pointer → `front`), so it sits over the ring/sectors but behind ticks and labels.
+
+`SemicircleRadialLayout` reserves bottom clearance (`POINTER_BOTTOM_CLEARANCE_FACTOR`) below the arc so the pointer at the horizontal extremes does not clip the bottom border with default pointer width. The reserve is fixed for the default pointer; wider user-configured pointers may clip.
+
 Pointer depth and side thickness are scaled in the layout owner from the semicircle radius using shared weights:
 
 ```text
@@ -204,7 +209,8 @@ Text fit contract for semicircle gauges:
 
 Semicircle gauges follow the shared cache convention through `CanvasLayerCache`.
 
-- Cache static background elements (ring/arc, ticks, static label assets).
+- Cache static background across two layers: `back` (sectors + arc/ring) and `front` (ticks + static label assets).
+- Composite with `blitLayer("back")` → live pointer → `blitLayer("front")`.
 - Keep dynamic elements uncached (live pointer/value text, state-screen overlays).
 - Build keys from geometry + style/theme tokens + typography + label signatures.
 - Exclude live data values and per-frame marker/pointer positions from keys.

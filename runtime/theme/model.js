@@ -39,8 +39,8 @@
   }
 
   const TOKEN_DEFS = Object.freeze([
-    defineToken("surface.fg", "--dyni-fg", "color", "black", { night: "rgba(252, 11, 11, 0.60)" }, "--dyni-theme-surface-fg"),
-    defineToken("surface.bg", "--dyni-bg", "color", "white", { night: "black" }, "--dyni-theme-surface-bg"),
+    defineToken("surface.fg", "--dyni-fg", "color", "#000000", { night: "rgba(252, 11, 11, 0.60)" }, "--dyni-theme-surface-fg"),
+    defineToken("surface.bg", "--dyni-bg", "color", "#ffffff", { night: "black" }, "--dyni-theme-surface-bg"),
     defineToken("surface.border", "--dyni-border", "color", undefined, undefined, "--dyni-theme-surface-border"),
     // dyni-lint-disable-next-line css-js-default-duplication -- Theme model owns the canonical font-family default token mapping.
     defineToken("font.family", "--dyni-font", "string", DEFAULT_FONT_STACK, undefined, "--dyni-theme-font-family"),
@@ -50,28 +50,28 @@
     defineToken("opacity.caption", "--dyni-caption-opacity", "number", 1.0, undefined, "--dyni-theme-opacity-caption"),
     defineToken("opacity.unit", "--dyni-unit-opacity", "number", 1.0, undefined, "--dyni-theme-opacity-unit"),
 
-    defineToken("colors.pointer", "--dyni-pointer", "color", "#ff2b2b", { night: "#cc2222" }),
-    defineToken("colors.warning", "--dyni-warning", "color", "#e7c66a", { night: "#8b6914" }),
-    defineToken("colors.alarm", "--dyni-alarm", "color", "#FA584A", { night: "rgba(250, 88, 74, 0.60)" }),
-    defineToken("colors.ok", "--dyni-ok", "color", "#70F3AF", { night: "rgba(112, 243, 175, 0.60)" }),
-    defineToken("colors.info", "--dyni-info", "color", "#70B0F3", { night: "rgba(112, 176, 243, 0.60)" }),
-    defineToken("colors.alarmWidget.bg", "--dyni-alarm-widget-bg", "color", "#C73A32", { night: "rgba(199, 58, 50, 0.60)" }),
+    defineToken("colors.info", "--dyni-info", "color", "#3366cc", { night: "#cc2222" }),
+    defineToken("colors.pointer", "--dyni-pointer", "color", undefined, undefined, undefined, "colors.info"),
+    defineToken("colors.warning", "--dyni-warning", "color", "#e0a92e", { night: "#8b6914" }),
+    defineToken("colors.alarm", "--dyni-alarm", "color", "#d9534a", { night: "rgba(250, 88, 74, 0.60)" }),
+    defineToken("colors.ok", "--dyni-ok", "color", "#2e9e6b", { night: "rgba(112, 243, 175, 0.60)" }),
+    defineToken("colors.alarmWidget.bg", "--dyni-alarm-widget-bg", "color", undefined, undefined, undefined, "colors.alarm"),
     defineToken("colors.alarmWidget.fg", "--dyni-alarm-widget-fg", "color", "#ffffff", { night: "#ffffff" }),
     defineToken("colors.alarmWidget.strip", "--dyni-alarm-widget-strip", "color", undefined, undefined, undefined, "colors.ok"),
-    defineToken("colors.laylineStb", "--dyni-layline-stb", "color", "#82b683", { night: "#3d6b3d" }),
-    defineToken("colors.laylinePort", "--dyni-layline-port", "color", "#ff7a76", { night: "#8b3333" }),
+    defineToken("colors.laylineStb", "--dyni-layline-stb", "color", undefined, undefined, undefined, "colors.ok"),
+    defineToken("colors.laylinePort", "--dyni-layline-port", "color", undefined, undefined, undefined, "colors.alarm"),
     defineToken("colors.ais.warning", "--dyni-ais-warning", "color", undefined, undefined, undefined, "colors.alarm"),
     defineToken("colors.ais.nearest", "--dyni-ais-nearest", "color", undefined, undefined, undefined, "colors.ok"),
-    defineToken("colors.ais.tracking", "--dyni-ais-tracking", "color", "#f8a601", { night: "rgba(248, 166, 1, 0.60)" }),
-    defineToken("colors.ais.normal", "--dyni-ais-normal", "color", "#EBEB55", { night: "rgba(235, 235, 85, 0.60)" }),
+    defineToken("colors.ais.tracking", "--dyni-ais-tracking", "color", undefined, undefined, undefined, "colors.warning"),
+    defineToken("colors.ais.normal", "--dyni-ais-normal", "color", undefined, undefined, undefined, "colors.ok"),
     defineToken(
       "colors.regatta.barWarning",
       "--dyni-regatta-bar-warning",
       "color",
-      "#e7a834",
-      { night: "rgba(231, 168, 52, 0.60)" },
-      "--dyni-theme-regatta-bar-warning",
       undefined,
+      undefined,
+      "--dyni-theme-regatta-bar-warning",
+      "colors.warning",
       "--dyni-regatta-barWarning"
     ),
     defineToken(
@@ -95,9 +95,9 @@
       "--dyni-regatta-barDefault"
     ),
 
-    defineToken("strokeWeight", "--dyni-stroke-weight", "number", 1.0),
-    defineToken("pointerDepthWeight", "--dyni-pointer-depth-weight", "number", 1.0),
-    defineToken("pointerSideWeight", "--dyni-pointer-side-weight", "number", 1.0),
+    defineToken("strokeWeight", "--dyni-stroke-weight", "number", 1.28),
+    defineToken("pointerDepthWeight", "--dyni-pointer-depth-weight", "number", 1.15),
+    defineToken("pointerSideWeight", "--dyni-pointer-side-weight", "number", 2.0),
 
     defineToken("radial.ticks.majorLenFactor", "--dyni-radial-tick-major-len-factor", "number", 0.087),
     defineToken("radial.ticks.majorWidthFactor", "--dyni-radial-tick-major-width-factor", "number", 0.022),
@@ -136,23 +136,12 @@
           bg: "black"
         },
         colors: {
-          pointer: "#cc2222",
+          info: "#cc2222",
           warning: "#8b6914",
           alarm: "rgba(250, 88, 74, 0.60)",
           ok: "rgba(112, 243, 175, 0.60)",
-          info: "rgba(112, 176, 243, 0.60)",
           alarmWidget: {
-            bg: "rgba(199, 58, 50, 0.60)",
             fg: "#ffffff"
-          },
-          laylineStb: "#3d6b3d",
-          laylinePort: "#8b3333",
-          ais: {
-            tracking: "rgba(248, 166, 1, 0.60)",
-            normal: "rgba(235, 235, 85, 0.60)"
-          },
-          regatta: {
-            barWarning: "rgba(231, 168, 52, 0.60)"
           }
         }
       }
@@ -167,9 +156,9 @@
     },
     bold: {
       base: {
-        strokeWeight: 1.32,
-        pointerDepthWeight: 1.0,
-        pointerSideWeight: 1.54
+        strokeWeight: 2.2,
+        pointerDepthWeight: 1.8,
+        pointerSideWeight: 2.3
       }
     },
     darkmode: {
@@ -180,23 +169,12 @@
           border: "#ffffff"
         },
         colors: {
-          pointer: "#ff2b2b",
-          warning: "#e7c66a",
-          alarm: "#FA584A",
-          ok: "#70F3AF",
-          info: "#70B0F3",
+          info: "#5aa2ff",
+          warning: "#ffd24a",
+          alarm: "#ff6b5c",
+          ok: "#5fd68b",
           alarmWidget: {
-            bg: "#C73A32",
             fg: "#ffffff"
-          },
-          laylineStb: "#82b683",
-          laylinePort: "#ff7a76",
-          ais: {
-            tracking: "#f8a601",
-            normal: "#EBEB55"
-          },
-          regatta: {
-            barWarning: "#e7a834"
           }
         }
       },
@@ -207,23 +185,12 @@
           border: "rgba(252, 11, 11, 0.60)"
         },
         colors: {
-          pointer: "#cc2222",
+          info: "#cc2222",
           warning: "#8b6914",
           alarm: "rgba(250, 88, 74, 0.60)",
           ok: "rgba(112, 243, 175, 0.60)",
-          info: "rgba(112, 176, 243, 0.60)",
           alarmWidget: {
-            bg: "rgba(199, 58, 50, 0.60)",
             fg: "#ffffff"
-          },
-          laylineStb: "#3d6b3d",
-          laylinePort: "#8b3333",
-          ais: {
-            tracking: "rgba(248, 166, 1, 0.60)",
-            normal: "rgba(235, 235, 85, 0.60)"
-          },
-          regatta: {
-            barWarning: "rgba(231, 168, 52, 0.60)"
           }
         }
       }
@@ -231,44 +198,26 @@
     highcontrast: {
       base: {
         strokeWeight: 1.32,
-        pointerDepthWeight: 1.0,
-        pointerSideWeight: 1.4,
+        pointerDepthWeight: 1.15,
+        pointerSideWeight: 2.15,
         colors: {
-          pointer: "#ff0000",
-          warning: "#ffcc00",
-          alarm: "#FF3300",
-          ok: "#00AA66",
-          info: "#00AAFF",
+          info: "#0057ff",
+          warning: "#ffd200",
+          alarm: "#ff3b2f",
+          ok: "#008f5a",
           alarmWidget: {
-            bg: "#CC2A1F",
             fg: "#ffffff"
-          },
-          ais: {
-            tracking: "#CC6600",
-            normal: "#8A7300"
-          },
-          regatta: {
-            barWarning: "#ffcc00"
           }
         }
       },
       night: {
         colors: {
-          pointer: "#cc2222",
+          info: "#cc2222",
           warning: "#8b6914",
           alarm: "rgba(250, 88, 74, 0.60)",
           ok: "rgba(112, 243, 175, 0.60)",
-          info: "rgba(112, 176, 243, 0.60)",
           alarmWidget: {
-            bg: "rgba(199, 58, 50, 0.60)",
             fg: "#ffffff"
-          },
-          ais: {
-            tracking: "rgba(248, 166, 1, 0.60)",
-            normal: "rgba(235, 235, 85, 0.60)"
-          },
-          regatta: {
-            barWarning: "rgba(231, 168, 52, 0.60)"
           }
         }
       }

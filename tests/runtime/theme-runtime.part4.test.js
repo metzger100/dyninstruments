@@ -100,13 +100,13 @@ describe("runtime/theme-runtime.js", function () {
     context.DyniPlugin.runtime.theme.applyToRoot(rootEl);
 
     expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-bar-warning")).toBe(
-      "#e7a834",
+      "#e0a92e",
     );
     expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-bar-critical")).toBe(
-      "#FA584A",
+      "#d9534a",
     );
     expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-bar-default")).toBe(
-      "#70B0F3",
+      "#3366cc",
     );
   });
 

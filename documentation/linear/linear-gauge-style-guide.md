@@ -43,6 +43,8 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 
 - Track stays centered in a dedicated scale box.
 - Sector bands render above the scale line so the track stroke remains visible.
+- Pointer z-order matches the full-circle dial: the static background is split into a `back` cache layer (track + sectors) and a `front` cache layer (ticks + labels), with the live pointer/marker drawn between them (`back` → pointer → `front`). The pointer sits over track/sectors but behind ticks and labels.
+- The value scale ends (`scaleX0`/`scaleX1`) reserve symmetric pointer edge clearance so the pointer at the extreme values does not clip the left/right border with default pointer width; wider user-configured pointers may clip.
 - Tick lengths/widths use `tokens.linear.ticks.*Factor` plus `tokens.strokeWeight`.
 - Pointer triangle uses `tokens.linear.pointer.sideFactor`, `tokens.linear.pointer.depthFactor`, `tokens.pointerSideWeight`, `tokens.pointerDepthWeight`, and `tokens.colors.pointer`.
 - Waypoint/course markers use layout-based default sizing independent from rendered track thickness, end at the scale line, render as flat rectangular bars instead of rounded caps, and default to `floor(markerSizeBase * 0.45)` long by `floor(markerSizeBase * 0.2)` wide when no explicit override is supplied.

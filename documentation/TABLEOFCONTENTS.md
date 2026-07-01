@@ -93,6 +93,7 @@
 ## Styling & Theming
 
 - **CSS theming contract (vars, day/night, font stack, borders)** → [shared/css-theming.md](shared/css-theming.md)
+- **Role-based color palette and preset intent** → [shared/color-system.md](shared/color-system.md)
 - **Theme token resolver (preset system, runtime integration, geometry weights, testing hooks)** → [shared/theme-tokens.md](shared/theme-tokens.md)
 - **Bundled Roboto/Roboto Mono assets and offline font-loading contract** → [shared/bundled-fonts.md](shared/bundled-fonts.md)
 - **HTML widget visual style contract** → [shared/html-widget-visual-style-guide.md](shared/html-widget-visual-style-guide.md)

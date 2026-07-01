@@ -24,24 +24,24 @@
   --dyni-warning: #f2b134;
   --dyni-alarm: #ff4d6d;
   --dyni-ok: #3bd88f;
-  --dyni-info: #4d9fff;
+  --dyni-info: #00a8ff;
   --dyni-alarm-widget-bg: #c91f2f;
   --dyni-alarm-widget-fg: #fff7f2;
-  --dyni-alarm-widget-strip: #32c8ff;
-  --dyni-layline-stb: #27c97b;
-  --dyni-layline-port: #ff8a1f;
-  --dyni-ais-warning: #f06d00;
-  --dyni-ais-nearest: #0086ff;
+  --dyni-alarm-widget-strip: #3bd88f;
+  --dyni-layline-stb: #3bd88f;
+  --dyni-layline-port: #ff4d6d;
+  --dyni-ais-warning: #ff4d6d;
+  --dyni-ais-nearest: #3bd88f;
   --dyni-ais-tracking: #53c16d;
   --dyni-ais-normal: #607b95;
-  --dyni-regatta-bar-warning: #f7b252;
-  --dyni-regatta-bar-critical: #ff4f60;
-  --dyni-regatta-bar-default: #4da8ff;
+  --dyni-regatta-bar-warning: #f2b134;
+  --dyni-regatta-bar-critical: #ff4d6d;
+  --dyni-regatta-bar-default: #00a8ff;
 
   /* Shared geometry */
-  --dyni-stroke-weight: 1.28;
-  --dyni-pointer-depth-weight: 1.15;
-  --dyni-pointer-side-weight: 0.82;
+  --dyni-stroke-weight: 1.6;
+  --dyni-pointer-depth-weight: 1.35;
+  --dyni-pointer-side-weight: 2.4;
 
   /* Radial geometry */
   --dyni-radial-tick-major-len-factor: 0.16;

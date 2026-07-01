@@ -23,8 +23,10 @@
   - offscreen layer missing/recreated
   - layer buffer size changed
 - Blit behavior:
-  - draws layers in `spec.layers` order
+  - `blit(targetCtx)` draws all layers in `spec.layers` order
+  - `blitLayer(targetCtx, layerName)` draws a single named layer (no-op for unknown/absent layer)
   - uses 9-argument `drawImage` scaling from offscreen buffer size to last ensured draw size
+  - use `blitLayer` when live per-frame content (for example a gauge pointer) must be composited between cached layers
 
 ## API/Interfaces
 
@@ -37,7 +39,9 @@ cache.ensureLayer(canvas, key, function (layerCtx, layerName, layerCanvas) {
   // draw static background content for this named layer
 });
 
-cache.blit(targetCtx);
+cache.blitLayer(targetCtx, "back");
+// draw live pointer here
+cache.blitLayer(targetCtx, "front");
 cache.invalidate();
 ```
 
@@ -45,6 +49,7 @@ Returned `cache` object:
 
 - `ensureLayer(canvas, key, rebuildFn)`
 - `blit(targetCtx)`
+- `blitLayer(targetCtx, layerName)`
 - `invalidate()`
 
 ## Related

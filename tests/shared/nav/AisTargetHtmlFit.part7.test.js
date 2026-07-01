@@ -68,10 +68,10 @@ describe("AisTargetHtmlFit", function () {
     const themeTokens = {
       colors: {
         ais: {
-          warning: "#FA584A",
-          nearest: "#70F3AF",
-          tracking: "#f8a601",
-          normal: "#EBEB55",
+          warning: "#d9534a",
+          nearest: "#2e9e6b",
+          tracking: "#e0a92e",
+          normal: "#2e9e6b",
         },
       },
       font: {

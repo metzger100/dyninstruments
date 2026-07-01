@@ -93,17 +93,17 @@ const rendererHelpers = require("./AlarmTextHtmlWidget.renderers.js");
               : "padding:2px;",
           accentStyle:
             model.showStrip === true
-              ? "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#70F3AF;"
+              ? "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#2e9e6b;"
               : "",
           activeBackgroundStyle:
             model.showActiveBackground === true
-              ? "background-color:#C73A32;"
+              ? "background-color:#d9534a;"
               : "",
           activeForegroundStyle:
             model.state === "active" ? "color:#ffffff;" : "",
           idleStripStyle:
             model.showStrip === true
-              ? "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#70F3AF;"
+              ? "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#2e9e6b;"
               : "",
           showStrip: model.showStrip === true,
           showActiveBackground: model.showActiveBackground === true,
@@ -156,9 +156,9 @@ const rendererHelpers = require("./AlarmTextHtmlWidget.renderers.js");
         return {
           colors: {
             alarmWidget: {
-              bg: "#C73A32",
+              bg: "#d9534a",
               fg: "#ffffff",
-              strip: "#70F3AF",
+              strip: "#2e9e6b",
             },
           },
           font: {

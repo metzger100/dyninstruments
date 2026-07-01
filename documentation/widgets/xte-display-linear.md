@@ -123,7 +123,7 @@ When `hideTextualMetrics === true`, layout returns gauge-focused rectangles (no 
 
 ## Caching
 
-`CanvasLayerCache` owns one static `back` layer for track, ticks, and end labels.
+`CanvasLayerCache` owns two static layers: `back` (track) and `front` (ticks + end labels), composited via `blitLayer()` with the live pointer drawn between them (`back` → pointer → `front`), matching the shared gauge z-order.
 
 Static cache key fields:
 

@@ -14,15 +14,10 @@
   const hasOwn = Object.prototype.hasOwnProperty;
 
   function create() {
-    function drawStaticLayer(layerCtx, state, ticks, showEndLabels, sectors, labelFormatter) {
+    function drawStaticBack(layerCtx, state, sectors) {
       const layout = state.layout;
-      const theme = state.theme;
       const primitives = state.primitives;
-      const textLayout = state.textLayout;
-      const math = state.math;
       const mapValueToX = state.mapValueToX;
-      const majorStyle = { lineWidth: layout.majorTickWidth, strokeStyle: state.color };
-      const minorStyle = { lineWidth: layout.minorTickWidth, strokeStyle: state.color };
 
       primitives.drawTrack(layerCtx, state.layout.scaleX0, state.layout.scaleX1, state.layout.trackY, {
         lineWidth: layout.trackLineWidth,
@@ -40,6 +35,16 @@
         if (!Number.isFinite(x0) || !Number.isFinite(x1) || Math.abs(x1 - x0) <= 1) continue;
         primitives.drawBand(layerCtx, x0, x1, state.sectorBandY, state.trackThickness, { fillStyle: sector.color });
       }
+    }
+
+    function drawStaticFront(layerCtx, state, ticks, showEndLabels, labelFormatter) {
+      const layout = state.layout;
+      const primitives = state.primitives;
+      const textLayout = state.textLayout;
+      const math = state.math;
+      const mapValueToX = state.mapValueToX;
+      const majorStyle = { lineWidth: layout.majorTickWidth, strokeStyle: state.color };
+      const minorStyle = { lineWidth: layout.minorTickWidth, strokeStyle: state.color };
 
       for (let i = 0; i < ticks.minor.length; i++) {
         const x = mapValueToX(ticks.minor[i], true);
@@ -95,7 +100,8 @@
 
     return {
       id: "LinearGaugeEngineDrawing",
-      drawStaticLayer: drawStaticLayer,
+      drawStaticBack: drawStaticBack,
+      drawStaticFront: drawStaticFront,
       drawPointerAtValue: drawPointerAtValue,
       drawMarkerAtValue: drawMarkerAtValue
     };

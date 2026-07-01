@@ -73,13 +73,14 @@ Audio engine details:
 
 | Token path | Output var | Default | Night default |
 |---|---|---|---|
-| `colors.regatta.barWarning` | `--dyni-theme-regatta-bar-warning` | `#e7a834` | `rgba(231, 168, 52, 0.60)` |
-| `colors.regatta.barCritical` | `--dyni-theme-regatta-bar-critical` | `#FA584A` | `rgba(250, 88, 74, 0.60)` |
-| `colors.regatta.barDefault` | `--dyni-theme-regatta-bar-default` | `#70B0F3` | `rgba(112, 176, 243, 0.60)` |
+| `colors.regatta.barWarning` | `--dyni-theme-regatta-bar-warning` | `#e0a92e` | `#8b6914` |
+| `colors.regatta.barCritical` | `--dyni-theme-regatta-bar-critical` | `#d9534a` | `rgba(250, 88, 74, 0.60)` |
+| `colors.regatta.barDefault` | `--dyni-theme-regatta-bar-default` | `#3366cc` | `#cc2222` |
 
 Presets:
 
 - `default`, `darkmode`, and `highcontrast` define base/night overrides in `runtime/theme/model.js`.
+- `barWarning` cascades from global `--dyni-warning` when `--dyni-regatta-bar-warning` is not explicitly set.
 - `barCritical` cascades from global `--dyni-alarm` when `--dyni-regatta-bar-critical` is not explicitly set.
 - `barDefault` cascades from global `--dyni-info` when `--dyni-regatta-bar-default` is not explicitly set.
 - Deprecated input aliases still resolve with warning: `--dyni-regatta-barWarning`, `--dyni-regatta-barCritical`, and `--dyni-regatta-barDefault`.

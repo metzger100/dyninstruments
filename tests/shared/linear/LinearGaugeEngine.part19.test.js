@@ -73,10 +73,9 @@ describe("LinearGaugeEngine", function () {
         },
       );
 
-      const fillTextCalls = (
-        (layerContexts[0] && layerContexts[0].calls) ||
-        []
-      ).filter((entry) => entry.name === "fillText");
+      const fillTextCalls = layerContexts
+        .flatMap((lc) => (lc && lc.calls) || [])
+        .filter((entry) => entry.name === "fillText");
       const ys = fillTextCalls.map((entry) => entry.args[2]);
       expect(ys.length).toBeGreaterThan(0);
       return Math.min.apply(null, ys);

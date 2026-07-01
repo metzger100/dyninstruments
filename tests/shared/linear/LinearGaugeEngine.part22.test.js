@@ -8,7 +8,7 @@ describe("LinearGaugeEngine", function () {
   it("keeps default pointer width independent from linear pointer depthFactor", function () {
     const shortHarness = createHarness({
       theme: {
-        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#FA584A" },
+        colors: { pointer: "#3366cc", warning: "#e0a92e", alarm: "#d9534a" },
         radial: {
           ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
           pointer: { widthFactor: 1, lengthFactor: 2 },
@@ -32,7 +32,7 @@ describe("LinearGaugeEngine", function () {
     });
     const longHarness = createHarness({
       theme: {
-        colors: { pointer: "#ff2b2b", warning: "#e7c66a", alarm: "#FA584A" },
+        colors: { pointer: "#3366cc", warning: "#e0a92e", alarm: "#d9534a" },
         radial: {
           ticks: { majorLen: 9, majorWidth: 2, minorLen: 5, minorWidth: 1 },
           pointer: { widthFactor: 1, lengthFactor: 2 },

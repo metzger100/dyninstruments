@@ -46,9 +46,9 @@ WindRadialWidget: {
 | Element | Draw Function | Parameters |
 |---|---|---|
 | Ring | `draw.drawRing` | full circle |
-| Layline starboard | `draw.drawAnnularSector` | `windRadialLayMin..windRadialLayMax`, `tokens.colors.laylineStb` (default `#82b683`) |
-| Layline port | `draw.drawAnnularSector` | `-windRadialLayMax..-windRadialLayMin`, `tokens.colors.laylinePort` (default `#ff7a76`) |
-| Wind pointer | `draw.drawPointerAtRim` | long pointer at `angle`, with layout-owned `needleDepth` and `fillStyle: tokens.colors.pointer` (default `#ff2b2b`) |
+| Layline starboard | `draw.drawAnnularSector` | `windRadialLayMin..windRadialLayMax`, `tokens.colors.laylineStb` (inherits `colors.ok`, default `#2e9e6b`) |
+| Layline port | `draw.drawAnnularSector` | `-windRadialLayMax..-windRadialLayMin`, `tokens.colors.laylinePort` (inherits `colors.alarm`, default `#d9534a`) |
+| Wind pointer | `draw.drawPointerAtRim` | long pointer at `angle`, with layout-owned `needleDepth` and `fillStyle: tokens.colors.pointer` (inherits `colors.info`, default `#3366cc`) |
 | Ticks | `draw.drawTicks` | `-180..180`, major 30, minor 10 |
 | Labels | `draw.drawLabels` | `-180..180`, step 30, endpoints filtered, with layout-owned `radiusOffset` / `fontPx` |
 

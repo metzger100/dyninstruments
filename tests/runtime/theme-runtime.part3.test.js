@@ -117,24 +117,24 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.surface.bg).toBe("#000000");
     expect(resolved.surface.border).toBe("#ffffff");
 
-    expect(resolved.colors.pointer).toBe("#ff2b2b");
-    expect(resolved.colors.warning).toBe("#e7c66a");
-    expect(resolved.colors.alarm).toBe("#FA584A");
+    expect(resolved.colors.pointer).toBe("#5aa2ff");
+    expect(resolved.colors.warning).toBe("#ffd24a");
+    expect(resolved.colors.alarm).toBe("#ff6b5c");
 
-    expect(resolved.colors.alarmWidget.bg).toBe("#C73A32");
+    expect(resolved.colors.alarmWidget.bg).toBe("#ff6b5c");
     expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
-    expect(resolved.colors.alarmWidget.strip).toBe("#70F3AF");
+    expect(resolved.colors.alarmWidget.strip).toBe("#5fd68b");
 
-    expect(resolved.colors.laylineStb).toBe("#82b683");
-    expect(resolved.colors.laylinePort).toBe("#ff7a76");
+    expect(resolved.colors.laylineStb).toBe("#5fd68b");
+    expect(resolved.colors.laylinePort).toBe("#ff6b5c");
 
-    expect(resolved.colors.ais.warning).toBe("#FA584A");
-    expect(resolved.colors.ais.nearest).toBe("#70F3AF");
-    expect(resolved.colors.ais.tracking).toBe("#f8a601");
-    expect(resolved.colors.ais.normal).toBe("#EBEB55");
-    expect(resolved.colors.regatta.barWarning).toBe("#e7a834");
-    expect(resolved.colors.regatta.barCritical).toBe("#FA584A");
-    expect(resolved.colors.regatta.barDefault).toBe("#70B0F3");
+    expect(resolved.colors.ais.warning).toBe("#ff6b5c");
+    expect(resolved.colors.ais.nearest).toBe("#5fd68b");
+    expect(resolved.colors.ais.tracking).toBe("#ffd24a");
+    expect(resolved.colors.ais.normal).toBe("#5fd68b");
+    expect(resolved.colors.regatta.barWarning).toBe("#ffd24a");
+    expect(resolved.colors.regatta.barCritical).toBe("#ff6b5c");
+    expect(resolved.colors.regatta.barDefault).toBe("#5aa2ff");
   });
 
   it("resolves darkmode preset to night-mode palette when AvNav night mode is active", function () {
@@ -163,19 +163,17 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.surface.border).toBe("rgba(252, 11, 11, 0.60)");
 
     expect(resolved.colors.alarm).toBe("rgba(250, 88, 74, 0.60)");
-    expect(resolved.colors.alarmWidget.bg).toBe("rgba(199, 58, 50, 0.60)");
+    expect(resolved.colors.alarmWidget.bg).toBe("rgba(250, 88, 74, 0.60)");
     expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
     expect(resolved.colors.alarmWidget.strip).toBe("rgba(112, 243, 175, 0.60)");
 
     expect(resolved.colors.ais.warning).toBe("rgba(250, 88, 74, 0.60)");
     expect(resolved.colors.ais.nearest).toBe("rgba(112, 243, 175, 0.60)");
-    expect(resolved.colors.ais.tracking).toBe("rgba(248, 166, 1, 0.60)");
-    expect(resolved.colors.ais.normal).toBe("rgba(235, 235, 85, 0.60)");
-    expect(resolved.colors.regatta.barWarning).toBe("rgba(231, 168, 52, 0.60)");
+    expect(resolved.colors.ais.tracking).toBe("#8b6914");
+    expect(resolved.colors.ais.normal).toBe("rgba(112, 243, 175, 0.60)");
+    expect(resolved.colors.regatta.barWarning).toBe("#8b6914");
     expect(resolved.colors.regatta.barCritical).toBe("rgba(250, 88, 74, 0.60)");
-    expect(resolved.colors.regatta.barDefault).toBe(
-      "rgba(112, 176, 243, 0.60)",
-    );
+    expect(resolved.colors.regatta.barDefault).toBe("#cc2222");
   });
 
   it("resolves highcontrast preset to night-mode semantic colors when AvNav night mode is active", function () {
@@ -202,19 +200,17 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.colors.pointer).toBe("#cc2222");
     expect(resolved.colors.warning).toBe("#8b6914");
     expect(resolved.colors.alarm).toBe("rgba(250, 88, 74, 0.60)");
-    expect(resolved.colors.alarmWidget.bg).toBe("rgba(199, 58, 50, 0.60)");
+    expect(resolved.colors.alarmWidget.bg).toBe("rgba(250, 88, 74, 0.60)");
     expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
     expect(resolved.colors.alarmWidget.strip).toBe("rgba(112, 243, 175, 0.60)");
 
     expect(resolved.colors.ais.warning).toBe("rgba(250, 88, 74, 0.60)");
     expect(resolved.colors.ais.nearest).toBe("rgba(112, 243, 175, 0.60)");
-    expect(resolved.colors.ais.tracking).toBe("rgba(248, 166, 1, 0.60)");
-    expect(resolved.colors.ais.normal).toBe("rgba(235, 235, 85, 0.60)");
-    expect(resolved.colors.regatta.barWarning).toBe("rgba(231, 168, 52, 0.60)");
+    expect(resolved.colors.ais.tracking).toBe("#8b6914");
+    expect(resolved.colors.ais.normal).toBe("rgba(112, 243, 175, 0.60)");
+    expect(resolved.colors.regatta.barWarning).toBe("#8b6914");
     expect(resolved.colors.regatta.barCritical).toBe("rgba(250, 88, 74, 0.60)");
-    expect(resolved.colors.regatta.barDefault).toBe(
-      "rgba(112, 176, 243, 0.60)",
-    );
+    expect(resolved.colors.regatta.barDefault).toBe("#cc2222");
   });
 
   it("resolves opacity.caption to default 1.0", function () {

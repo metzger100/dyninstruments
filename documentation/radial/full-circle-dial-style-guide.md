@@ -58,9 +58,9 @@ Tick lengths come from the layout owner via `GeometryScale` and shared weights:
 
 | Element | Theme token | CSS variable | Default |
 |---|---|---|---|
-| Pointer fill | `tokens.colors.pointer` | `--dyni-pointer` | `#ff2b2b` |
-| Layline starboard | `tokens.colors.laylineStb` | `--dyni-layline-stb` | `#82b683` |
-| Layline port | `tokens.colors.laylinePort` | `--dyni-layline-port` | `#ff7a76` |
+| Pointer fill | `tokens.colors.pointer` | `--dyni-pointer` | inherits `colors.info` (`#3366cc`) |
+| Layline starboard | `tokens.colors.laylineStb` | `--dyni-layline-stb` | inherits `colors.ok` (`#2e9e6b`) |
+| Layline port | `tokens.colors.laylinePort` | `--dyni-layline-port` | inherits `colors.alarm` (`#d9534a`) |
 | Ring stroke | resolved text color | `tokens.surface.fg` | runtime CSS-derived |
 | Tick stroke | resolved text color | `tokens.surface.fg` | runtime CSS-derived |
 | Label text | resolved text color | `tokens.surface.fg` | runtime CSS-derived |

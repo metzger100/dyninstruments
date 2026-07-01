@@ -91,7 +91,7 @@
           }
           return { num: numericRaw, text: String(rawValue) };
         };
-      const layerCache = layerCacheApi.createLayerCache({ layers: ["base"] });
+      const layerCache = layerCacheApi.createLayerCache({ layers: ["back", "front"] });
 
       return function renderCanvas(canvas, props) {
         const p = props || {};
@@ -279,15 +279,19 @@
           widget: typeof cfg.buildStaticKey === "function" ? cfg.buildStaticKey(state, p) : null
         });
 
-        layerCache.ensureLayer(canvas, staticKey, function (layerCtx) {
+        layerCache.ensureLayer(canvas, staticKey, function (layerCtx, layerName) {
           layerCtx.setTransform(1, 0, 0, 1, 0, 0);
           layerCtx.clearRect(0, 0, canvas.width, canvas.height);
           layerCtx.setTransform(canvas.width / Math.max(1, W), 0, 0, canvas.height / Math.max(1, H), 0, 0);
           layerCtx.fillStyle = color;
           layerCtx.strokeStyle = color;
-          drawing.drawStaticLayer(layerCtx, state, ticks, showEndLabels, sectors, tickLabelFormatter);
+          if (layerName === "back") {
+            drawing.drawStaticBack(layerCtx, state, sectors);
+            return;
+          }
+          drawing.drawStaticFront(layerCtx, state, ticks, showEndLabels, tickLabelFormatter);
         });
-        layerCache.blit(ctx);
+        layerCache.blitLayer(ctx, "back");
 
         const drawApi = {
           drawDefaultPointer: function (opts) {
@@ -335,6 +339,8 @@
         let drawResult = null;
         if (typeof cfg.drawFrame === "function") drawResult = cfg.drawFrame(state, p, displayState, Object.assign({}, hookApi, drawApi));
         else drawApi.drawDefaultPointer();
+
+        layerCache.blitLayer(ctx, "front");
 
         const modeRenderer = cfg.drawMode && cfg.drawMode[state.mode];
         let modeResult = null;

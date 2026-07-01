@@ -73,6 +73,7 @@ const {
             return cache.ensureLayer(canvas, key, rebuildFn);
           },
           blit: cache.blit,
+          blitLayer: cache.blitLayer,
           invalidate: cache.invalidate,
         };
       },

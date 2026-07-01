@@ -128,7 +128,7 @@
           return [];
         };
       const fitCache = textLayout.createFitCache();
-      const layerCache = layerCacheApi.createLayerCache({ layers: ["base"] });
+      const layerCache = layerCacheApi.createLayerCache({ layers: ["back", "front"] });
       let memoLayout = null;
 
       return function renderCanvas(canvas, props) {
@@ -255,29 +255,32 @@
           : NaN;
         const easedAngle = springMotion.resolve(canvas, angleNow, p.easing !== false, Date.now());
 
-        layerCache.ensureLayer(canvas, staticKey, function (layerCtx) {
+        layerCache.ensureLayer(canvas, staticKey, function (layerCtx, layerName) {
           const dpr = Math.max(1, canvas.width / Math.max(1, W));
           layerCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
           layerCtx.clearRect(0, 0, W, H);
           layerCtx.fillStyle = paint.color;
           layerCtx.strokeStyle = paint.color;
 
-          for (let i = 0; i < sectorList.length; i += 1) {
-            const sector = sectorList[i];
-            if (!sector || !value.isFiniteNumber(sector.a0) || !value.isFiniteNumber(sector.a1)) {
-              continue;
+          if (layerName === "back") {
+            for (let i = 0; i < sectorList.length; i += 1) {
+              const sector = sectorList[i];
+              if (!sector || !value.isFiniteNumber(sector.a0) || !value.isFiniteNumber(sector.a1)) {
+                continue;
+              }
+              draw.drawAnnularSector(layerCtx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, {
+                startDeg: sector.a0,
+                endDeg: sector.a1,
+                thickness: layout.geom.ringW,
+                fillStyle: sector.color
+              });
             }
-            draw.drawAnnularSector(layerCtx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, {
-              startDeg: sector.a0,
-              endDeg: sector.a1,
-              thickness: layout.geom.ringW,
-              fillStyle: sector.color
-            });
-          }
 
-          draw.drawArcRing(layerCtx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, arc.startDeg, arc.endDeg, {
-            lineWidth: layout.geom.arcLineWidth
-          });
+            draw.drawArcRing(layerCtx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, arc.startDeg, arc.endDeg, {
+              lineWidth: layout.geom.arcLineWidth
+            });
+            return;
+          }
 
           draw.drawTicksFromAngles(layerCtx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, ticks, {
             major: { len: layout.geom.majorTickLen, width: layout.geom.majorTickWidth },
@@ -297,7 +300,7 @@
             labelWeight
           );
         });
-        layerCache.blit(ctx);
+        layerCache.blitLayer(ctx, "back");
 
         if (value.isFiniteNumber(easedAngle)) {
           draw.drawPointerAtRim(ctx, layout.geom.cx, layout.geom.cy, layout.geom.rOuter, easedAngle, {
@@ -307,6 +310,8 @@
             variant: "long"
           });
         }
+
+        layerCache.blitLayer(ctx, "front");
 
         if (!hideTextualMetrics) {
           textLayout.drawModeText({

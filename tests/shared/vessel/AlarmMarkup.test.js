@@ -42,10 +42,10 @@ describe("AlarmMarkup", function () {
       captionStyle: "font-size:10px;",
       valueStyle: "font-size:14px;",
       shellStyle: "padding:2px 2px 2px 21px;",
-      accentStyle: "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#70F3AF;",
+      accentStyle: "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#2e9e6b;",
       activeBackgroundStyle: "",
       activeForegroundStyle: "",
-      idleStripStyle: "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#70F3AF;"
+      idleStripStyle: "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#2e9e6b;"
     }, overrides || {});
   }
 
@@ -55,15 +55,15 @@ describe("AlarmMarkup", function () {
       model: makeModel(),
       fit: makeFit({
         mode: "high",
-        activeBackgroundStyle: "background-color:#C73A32;",
+        activeBackgroundStyle: "background-color:#d9534a;",
         activeForegroundStyle: "color:#ffffff;"
       }),
       htmlUtils: createHtmlUtils()
     });
     const root = parseHtml(html).querySelector(".dyni-alarm-html");
 
-    expect(html).toContain('style="padding:2px 2px 2px 21px;background-color:#C73A32;color:#ffffff;"');
-    expect(html).toContain('class="dyni-alarm-state-accent" style="left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#70F3AF;"');
+    expect(html).toContain('style="padding:2px 2px 2px 21px;background-color:#d9534a;color:#ffffff;"');
+    expect(html).toContain('class="dyni-alarm-state-accent" style="left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#2e9e6b;"');
     expect(html).not.toContain("dyni-alarm-shell");
     expect(root.children).toHaveLength(3);
     expect(root.children[0].className).toContain("dyni-alarm-state-accent");

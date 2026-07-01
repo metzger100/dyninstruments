@@ -103,7 +103,7 @@ describe("CompassRadialWidget", function () {
         fg: "#fff",
       },
       colors: {
-        pointer: "#ff2b2b",
+        pointer: "#3366cc",
       },
       radial: {
         ticks: {

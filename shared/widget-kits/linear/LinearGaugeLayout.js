@@ -32,6 +32,12 @@
   const NORMAL_SCALE_HEIGHT_RATIO = 0.50;
   const NORMAL_TRACK_Y_RATIO = 0.34;
   const NORMAL_INLINE_HEIGHT_RATIO = 0.42;
+  // Horizontal clearance kept between the value scale ends and the content edges so the
+  // pointer at the extreme values (base half-width ~= linear.pointer.sideFactor *
+  // pointerSideWeight / 2 of the track primary dimension, i.e. ~0.12 for the shipped
+  // presets) does not clip the left/right border. Fixed on purpose so wider
+  // user-configured pointers are allowed to clip rather than shrinking the scale.
+  const POINTER_EDGE_CLEARANCE_FACTOR = 0.14;
   const RESPONSIVE_SCALES = {
     textFillScale: 1.18
   };
@@ -326,6 +332,11 @@
 
       const trackBox = modeLayout.trackBox;
       const primaryDim = Math.max(1, Math.min(trackBox.w, trackBox.h));
+      const pointerEdgeClearance = Math.max(1, Math.ceil(primaryDim * POINTER_EDGE_CLEARANCE_FACTOR));
+      const clearedX0 = Math.max(modeLayout.scaleX0, contentRect.x + pointerEdgeClearance);
+      const clearedX1 = Math.min(modeLayout.scaleX1, right - pointerEdgeClearance);
+      const scaleX0 = clearedX0 < clearedX1 ? clearedX0 : modeLayout.scaleX0;
+      const scaleX1 = clearedX0 < clearedX1 ? clearedX1 : modeLayout.scaleX1;
       const linearTheme = theme.linear;
       const strokeWeight = clampNumber(theme.strokeWeight, 0, Number.MAX_SAFE_INTEGER, 1);
       const pointerDepthWeight = clampNumber(theme.pointerDepthWeight, 0, Number.MAX_SAFE_INTEGER, 1);
@@ -357,8 +368,8 @@
         normalVariant: normalVariant,
         highVariant: highVariant,
         primaryDim: primaryDim,
-        scaleX0: modeLayout.scaleX0,
-        scaleX1: modeLayout.scaleX1,
+        scaleX0: scaleX0,
+        scaleX1: scaleX1,
         trackY: modeLayout.trackY,
         trackBox: trackBox,
         trackLineWidth: trackLineWidth,

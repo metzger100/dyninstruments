@@ -125,7 +125,7 @@ describe("AisTargetMarkup", function () {
         nameStyle: "font-size:13px;",
         frontStyle: "font-size:11px;",
         placeholderStyle: "font-size:12px;",
-        accentStyle: "background-color:#FA584A;",
+        accentStyle: "background-color:#d9534a;",
         metrics: {
           dst: {
             captionStyle: "font-size:8px;",
@@ -234,7 +234,7 @@ describe("AisTargetMarkup", function () {
       'style="height:auto;aspect-ratio:7/8;min-height:8em;padding:4px 4px 4px 21px;"',
     );
     expect(html).toContain(
-      'class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:14px;background-color:#FA584A;"',
+      'class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:14px;background-color:#d9534a;"',
     );
     expect(html).toContain(
       'class="dyni-ais-target-identity" style="grid-template-rows:minmax(0,12px) minmax(0,10px);"',

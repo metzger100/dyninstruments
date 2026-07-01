@@ -56,13 +56,14 @@ Theming uses a two-level hierarchy:
 
 - Global tokens define shared visual semantics for surface, typography, opacity, and core colors.
 - Scoped tokens specialize widget families and can cascade from a global parent when no scoped override is set.
+- The role palette is documented in `documentation/shared/color-system.md`.
 
 Global tokens:
 
 | Category | Input var | Default |
 |---|---|---|
-| Surface | `--dyni-fg` | `black` |
-| Surface | `--dyni-bg` | `white` |
+| Surface | `--dyni-fg` | `#000000` |
+| Surface | `--dyni-bg` | `#ffffff` |
 | Surface | `--dyni-border` | Optional. If omitted, border follows resolved `surface.fg`; if set, explicit value wins. |
 | Typography | `--dyni-font` | `"Roboto","Inter","SF Pro Text",-apple-system,"Segoe UI","Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"` |
 | Typography | `--dyni-font-mono` | `"Roboto Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace` |
@@ -70,31 +71,31 @@ Global tokens:
 | Typography | `--dyni-label-weight` | `700` |
 | Opacity | `--dyni-caption-opacity` | `1.0` |
 | Opacity | `--dyni-unit-opacity` | `1.0` |
-| Semantic color | `--dyni-pointer` | `#ff2b2b` |
-| Semantic color | `--dyni-warning` | `#e7c66a` |
-| Semantic color | `--dyni-alarm` | `#FA584A` |
-| Semantic color | `--dyni-ok` | `#70F3AF` |
-| Semantic color | `--dyni-info` | `#70B0F3` |
-| Geometry weight | `--dyni-stroke-weight` | `1.0` |
-| Geometry weight | `--dyni-pointer-depth-weight` | `1.0` |
-| Geometry weight | `--dyni-pointer-side-weight` | `1.0` |
+| Semantic color | `--dyni-info` | `#3366cc` |
+| Semantic color | `--dyni-warning` | `#e0a92e` |
+| Semantic color | `--dyni-alarm` | `#d9534a` |
+| Semantic color | `--dyni-ok` | `#2e9e6b` |
+| Geometry weight | `--dyni-stroke-weight` | `1.28` |
+| Geometry weight | `--dyni-pointer-depth-weight` | `1.15` |
+| Geometry weight | `--dyni-pointer-side-weight` | `2.0` |
 
 Scoped tokens by family:
 
 | Family | Input var | Default | Cascades from |
 |---|---|---|---|
-| Alarm widget | `--dyni-alarm-widget-bg` | `#C73A32` | — |
+| Pointer | `--dyni-pointer` | inherits global when unset | `--dyni-info` |
+| Alarm widget | `--dyni-alarm-widget-bg` | inherits global when unset | `--dyni-alarm` |
 | Alarm widget | `--dyni-alarm-widget-fg` | `#ffffff` | — |
 | Alarm widget | `--dyni-alarm-widget-strip` | inherits global when unset | `--dyni-ok` |
 | AIS | `--dyni-ais-warning` | inherits global when unset | `--dyni-alarm` |
 | AIS | `--dyni-ais-nearest` | inherits global when unset | `--dyni-ok` |
-| AIS | `--dyni-ais-tracking` | `#f8a601` | — |
-| AIS | `--dyni-ais-normal` | `#EBEB55` | — |
-| Regatta | `--dyni-regatta-bar-warning` | `#e7a834` | — |
+| AIS | `--dyni-ais-tracking` | inherits global when unset | `--dyni-warning` |
+| AIS | `--dyni-ais-normal` | inherits global when unset | `--dyni-ok` |
+| Regatta | `--dyni-regatta-bar-warning` | inherits global when unset | `--dyni-warning` |
 | Regatta | `--dyni-regatta-bar-critical` | inherits global when unset | `--dyni-alarm` |
 | Regatta | `--dyni-regatta-bar-default` | inherits global when unset | `--dyni-info` |
-| Wind/layline | `--dyni-layline-stb` | `#82b683` | — |
-| Wind/layline | `--dyni-layline-port` | `#ff7a76` | — |
+| Wind/layline | `--dyni-layline-stb` | inherits global when unset | `--dyni-ok` |
+| Wind/layline | `--dyni-layline-port` | inherits global when unset | `--dyni-alarm` |
 
 Regatta input vars should use kebab-case (`--dyni-regatta-bar-*`). Existing camelCase aliases still resolve with a deprecation warning.
 
@@ -137,13 +138,13 @@ Example day + night override:
 .widget.dyniplugin {
   --dyni-fg: white;
   --dyni-bg: black;
-  --dyni-pointer: #ff2b2b;
+  --dyni-info: #3366cc;
 }
 
 .nightMode .widget.dyniplugin {
   --dyni-fg: rgba(252, 11, 11, 0.60);
   --dyni-bg: black;
-  --dyni-pointer: #cc2222;
+  --dyni-info: #cc2222;
 }
 ```
 

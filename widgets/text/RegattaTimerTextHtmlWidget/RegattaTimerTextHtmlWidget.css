@@ -113,28 +113,28 @@
   left: 0;
   height: 0;
   border-radius: 0;
-  background: var(--dyni-theme-regatta-bar-default, #70B0F3);
+  background: var(--dyni-theme-regatta-bar-default, #3366cc);
   transition: width 140ms linear;
   pointer-events: none;
   z-index: 1;
 }
 
 .dyni-html-root .dyni-regatta-color-warning .dyni-regatta-time {
-  color: var(--dyni-theme-regatta-bar-warning, #e7a834);
+  color: var(--dyni-theme-regatta-bar-warning, #e0a92e);
 }
 
 .dyni-html-root .dyni-regatta-color-critical .dyni-regatta-time {
-  color: var(--dyni-theme-regatta-bar-critical, #FA584A);
+  color: var(--dyni-theme-regatta-bar-critical, #d9534a);
 }
 
 .dyni-html-root .dyni-regatta-color-warning .dyni-regatta-bar {
-  background: var(--dyni-theme-regatta-bar-warning, #e7a834);
+  background: var(--dyni-theme-regatta-bar-warning, #e0a92e);
 }
 
 .dyni-html-root .dyni-regatta-color-critical .dyni-regatta-bar {
-  background: var(--dyni-theme-regatta-bar-critical, #FA584A);
+  background: var(--dyni-theme-regatta-bar-critical, #d9534a);
 }
 
 .dyni-html-root .dyni-regatta-color-normal .dyni-regatta-bar {
-  background: var(--dyni-theme-regatta-bar-default, #70B0F3);
+  background: var(--dyni-theme-regatta-bar-default, #3366cc);
 }

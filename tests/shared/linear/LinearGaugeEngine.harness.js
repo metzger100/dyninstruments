@@ -36,9 +36,9 @@ const {
       pointerDepthWeight: 1,
       pointerSideWeight: 1,
       colors: {
-        pointer: "#ff2b2b",
-        warning: "#e7c66a",
-        alarm: "#FA584A",
+        pointer: "#3366cc",
+        warning: "#e0a92e",
+        alarm: "#d9534a",
       },
       radial: {
         ticks: {

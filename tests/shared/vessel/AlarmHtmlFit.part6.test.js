@@ -163,9 +163,9 @@ describe("AlarmHtmlFit", function () {
     const themeTokens = {
       colors: {
         alarmWidget: {
-          bg: "#C73A32",
+          bg: "#d9534a",
           fg: "#ffffff",
-          strip: "#70F3AF",
+          strip: "#2e9e6b",
         },
       },
       font: {

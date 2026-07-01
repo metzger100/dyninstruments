@@ -68,10 +68,10 @@ describe("AisTargetHtmlFit", function () {
     const themeTokens = {
       colors: {
         ais: {
-          warning: "#FA584A",
-          nearest: "#70F3AF",
-          tracking: "#f8a601",
-          normal: "#EBEB55",
+          warning: "#d9534a",
+          nearest: "#2e9e6b",
+          tracking: "#e0a92e",
+          normal: "#2e9e6b",
         },
       },
       font: {
@@ -218,7 +218,7 @@ describe("AisTargetHtmlFit", function () {
       expectStyleFormat(out.metrics[id].unitStyle);
       expect(extractPx(out.metrics[id].valueStyle)).toBeGreaterThan(3);
     });
-    expect(out.accentStyle).toBe("background-color:#70F3AF;");
+    expect(out.accentStyle).toBe("background-color:#2e9e6b;");
   });
 
   it("uses mono family for metric value measurement when stableDigits is enabled", function () {

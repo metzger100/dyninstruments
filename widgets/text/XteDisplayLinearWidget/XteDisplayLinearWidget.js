@@ -27,7 +27,7 @@
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
-    const staticLayer = cacheFactory.createLayerCache({ layers: ["back"] });
+    const staticLayer = cacheFactory.createLayerCache({ layers: ["back", "front"] });
 
     function resolveStateKind(props) {
       const display = props && typeof props.display === "object" ? props.display : null;
@@ -137,8 +137,11 @@
       ctx.restore();
     }
 
-    function drawStaticLayer(ctx, geom, ticks, xteScale, color) {
+    function drawTrackLayer(ctx, geom, color) {
       primitives.drawTrack(ctx, geom.x0, geom.x1, geom.trackY, { lineWidth: geom.trackLineWidth, strokeStyle: color });
+    }
+
+    function drawTicksLayer(ctx, geom, ticks, xteScale, color) {
       const minorStyle = { lineWidth: geom.minorTickWidth, strokeStyle: color };
       const majorStyle = { lineWidth: geom.majorTickWidth, strokeStyle: color };
       for (let i = 0; i < ticks.minor.length; i++) {
@@ -232,17 +235,18 @@
       };
 
       staticLayer.ensureLayer(canvas, staticKey, function (layerCtx, layerName, layerCanvas) {
-        if (layerName !== "back") {
-          return;
-        }
         const scaleX = layerCanvas.width / Math.max(1, W);
         const scaleY = layerCanvas.height / Math.max(1, H);
         layerCtx.setTransform(scaleX, 0, 0, scaleY, 0, 0);
         layerCtx.clearRect(0, 0, W, H);
-        drawStaticLayer(layerCtx, geom, ticks, xteScale, theme.surface.fg);
+        if (layerName === "back") {
+          drawTrackLayer(layerCtx, geom, theme.surface.fg);
+          return;
+        }
+        drawTicksLayer(layerCtx, geom, ticks, xteScale, theme.surface.fg);
         drawEndLabels(layerCtx, theme, geom, ticks, showEndLabels, family, labelWeight);
       });
-      staticLayer.blit(ctx);
+      staticLayer.blitLayer(ctx, "back");
 
       const xteRaw = display ? display.xte : undefined;
       const xteHasValue = toolkit.value.isFiniteNumber(xteRaw);
@@ -260,6 +264,8 @@
         const pointerX = gaugeMath.mapValueToX(resolvedRatio * xteScale, -xteScale, xteScale, geom.x0, geom.x1, true);
         if (Number.isFinite(pointerX)) drawPointerUpward(ctx, Math.round(pointerX), geom, overflow ? theme.colors.alarm : theme.colors.pointer);
       }
+
+      staticLayer.blitLayer(ctx, "front");
 
       if (hideTextualMetrics) {
         if (xteHasValue && springMotion.isActive(canvas)) {

@@ -17,7 +17,7 @@ describe("LinearGaugeEngine", function () {
         showEndLabels: "showEndLabels",
       },
       buildSectors() {
-        return [{ from: 5, to: 15, color: "#e7c66a" }];
+        return [{ from: 5, to: 15, color: "#e0a92e" }];
       },
     });
 

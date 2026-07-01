@@ -133,9 +133,9 @@ const {
               },
               colors: {
                 regatta: {
-                  barWarning: "#e7a834",
-                  barCritical: "#FA584A",
-                  barDefault: "#70B0F3",
+                  barWarning: "#e0a92e",
+                  barCritical: "#d9534a",
+                  barDefault: "#3366cc",
                 },
               },
             };

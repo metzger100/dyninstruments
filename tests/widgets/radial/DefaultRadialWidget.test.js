@@ -211,8 +211,8 @@ describe("DefaultRadialWidget", function () {
     };
     const theme = {
       colors: {
-        warning: "#e7c66a",
-        alarm: "#FA584A",
+        warning: "#e0a92e",
+        alarm: "#d9534a",
       },
     };
 
@@ -280,9 +280,9 @@ describe("DefaultRadialWidget", function () {
     );
 
     expect(fallbackSectors).toEqual([
-      { a0: 0, a1: 10, color: "#FA584A" },
-      { a0: 75, a1: 90, color: "#e7c66a" },
-      { a0: 90, a1: 100, color: "#FA584A" },
+      { a0: 0, a1: 10, color: "#d9534a" },
+      { a0: 75, a1: 90, color: "#e0a92e" },
+      { a0: 90, a1: 100, color: "#d9534a" },
     ]);
   });
 
@@ -299,8 +299,8 @@ describe("DefaultRadialWidget", function () {
     };
     const theme = {
       colors: {
-        warning: "#e7c66a",
-        alarm: "#FA584A",
+        warning: "#e0a92e",
+        alarm: "#d9534a",
       },
     };
     const missingValues = [null, undefined, "", "   "];
@@ -333,6 +333,6 @@ describe("DefaultRadialWidget", function () {
         valueUtils,
         theme,
       ),
-    ).toEqual([{ a0: 75, a1: 100, color: "#e7c66a" }]);
+    ).toEqual([{ a0: 75, a1: 100, color: "#e0a92e" }]);
   });
 });

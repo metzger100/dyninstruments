@@ -16,6 +16,12 @@
   const STRUCTURAL_RATIO_THRESHOLD_FLAT = 3.0;
   const PAD_RATIO = 0.04;
   const GAP_RATIO = 0.03;
+  // Bottom clearance reserved below the arc so the value pointer at the horizontal
+  // extremes (base half-width ~= radial.pointer.sideFactor * pointerSideWeight / 2 of R,
+  // i.e. ~0.11 * R for the shipped presets) does not clip the bottom border. Fixed on
+  // purpose so wider user-configured pointers are allowed to clip rather than shrinking
+  // the gauge.
+  const POINTER_BOTTOM_CLEARANCE_FACTOR = 0.13;
   const NORMAL_EXTRA_FACTOR = 0.06;
   const NORMAL_INNER_MARGIN_FACTOR = 0.04;
   const NORMAL_HEIGHT_MAX_FACTOR = 0.92;
@@ -29,9 +35,12 @@
   function computeGeometry(width, height, pad, theme, gs) {
     const availableWidth = Math.max(1, width - pad * 2);
     const availableHeight = Math.max(1, height - pad * 2);
-    const primaryDim = Math.max(1, Math.floor(Math.min(availableWidth * 0.5, availableHeight)));
+    const provisionalDim = Math.max(1, Math.floor(Math.min(availableWidth * 0.5, availableHeight)));
+    const pointerBottomClearance = Math.max(1, Math.ceil(provisionalDim * POINTER_BOTTOM_CLEARANCE_FACTOR));
+    const semicircleHeight = Math.max(1, availableHeight - pointerBottomClearance);
+    const primaryDim = Math.max(1, Math.floor(Math.min(availableWidth * 0.5, semicircleHeight)));
     const gaugeLeft = pad + Math.floor((availableWidth - primaryDim * 2) * 0.5);
-    const gaugeTop = pad + Math.floor((availableHeight - primaryDim) * 0.5);
+    const gaugeTop = pad + Math.floor((availableHeight - primaryDim - pointerBottomClearance) * 0.5);
     const radialTheme = theme.radial;
     const ringTheme = radialTheme.ring;
     const ticksTheme = radialTheme.ticks;

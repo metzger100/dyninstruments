@@ -48,10 +48,10 @@ Expected preset floors (derived from existing weights, no new theme tokens):
 
 | Preset | strokeWeight | strokeFloor | extentFloor |
 |---|---:|---:|---:|
-| slim | 0.67 | 1 | 2 |
-| default | 1.0 | 2 | 3 |
-| bold | 1.4 | 3 | 4 |
-| highcontrast | 1.35 | 3 | 4 |
+| slim | 0.66 | 1 | 2 |
+| default | 1.28 | 3 | 4 |
+| bold | 2.2 | 4 | 5 |
+| highcontrast | 1.32 | 3 | 4 |
 
 Runtime API:
 

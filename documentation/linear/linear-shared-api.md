@@ -206,8 +206,10 @@ const renderCanvas = engine.createRenderer({
 
 ## Runtime Behavior
 
-- Static cached layer: track, sectors, ticks, labels.
+- Static cached layers: `back` (track + sectors) and `front` (ticks + labels), composited via `CanvasLayerCache.blitLayer()`.
 - Dynamic per frame: pointer plus caption/value/unit text when textual metrics are shown.
+- Z-order matches the full-circle dial: `back` → live pointer/marker (`drawFrame`) → `front` → text. The pointer sits over the track/sectors but behind ticks and labels.
+- `LinearGaugeLayout` reserves symmetric pointer edge clearance (`POINTER_EDGE_CLEARANCE_FACTOR`) between the value scale ends (`scaleX0`/`scaleX1`) and the content edges so the pointer at the extreme values does not clip the left/right border with default pointer width; wider user-configured pointers may clip.
 - `disconnect === true` short-circuits normal drawing and renders the shared canvas state-screen (`GPS Lost`) on a cleared canvas.
 - Cache key excludes live values and includes geometry/theme/tick/sector signatures.
 - `showEndLabels` defaults to false unless mapper sets it true.

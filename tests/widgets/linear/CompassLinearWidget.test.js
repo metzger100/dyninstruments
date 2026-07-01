@@ -143,7 +143,7 @@ describe("CompassLinearWidget", function () {
       canvas: {},
       nowMs: 16,
       theme: {
-        colors: { pointer: "#ff2b2b" },
+        colors: { pointer: "#3366cc" },
       },
     };
 
@@ -161,7 +161,7 @@ describe("CompassLinearWidget", function () {
       nowMs: 16,
     });
     expect(api.drawMarkerAtValue).toHaveBeenNthCalledWith(1, 470, {
-      strokeStyle: "#ff2b2b",
+      strokeStyle: "#3366cc",
     });
     expect(firstResult).toEqual({ wantsFollowUpFrame: true });
 
@@ -179,7 +179,7 @@ describe("CompassLinearWidget", function () {
       nowMs: 32,
     });
     expect(api.drawMarkerAtValue).toHaveBeenNthCalledWith(2, -60, {
-      strokeStyle: "#ff2b2b",
+      strokeStyle: "#3366cc",
     });
     expect(secondResult).toBeUndefined();
   });
@@ -256,7 +256,7 @@ describe("CompassLinearWidget", function () {
       canvas: {},
       nowMs: 48,
       theme: {
-        colors: { pointer: "#ff2b2b" },
+        colors: { pointer: "#3366cc" },
       },
     };
 

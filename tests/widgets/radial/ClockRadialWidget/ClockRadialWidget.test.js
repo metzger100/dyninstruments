@@ -34,7 +34,7 @@ function makeMockState(ctx, overrides) {
       spriteRadius: 75,
     },
     theme: {
-      colors: { pointer: "#ff2b2b" },
+      colors: { pointer: "#3366cc" },
       surface: { fg: "#000" },
     },
     angle: {

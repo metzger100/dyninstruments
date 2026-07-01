@@ -86,7 +86,7 @@ describe("LinearGaugeEngine", function () {
           len: 9,
           strokeStyle: "#00ff00",
         });
-        api.drawMarkerAtValue(75, { strokeStyle: "#ff2b2b" });
+        api.drawMarkerAtValue(75, { strokeStyle: "#3366cc" });
       },
       drawMode: {
         normal(state, props, display, api) {
@@ -121,7 +121,7 @@ describe("LinearGaugeEngine", function () {
       return entry.opts && entry.opts.strokeStyle === "#00ff00";
     });
     const defaultMarker = harness.calls.ticks.find(function (entry) {
-      return entry.opts && entry.opts.strokeStyle === "#ff2b2b";
+      return entry.opts && entry.opts.strokeStyle === "#3366cc";
     });
     expect(explicitMarker).toEqual(
       expect.objectContaining({
@@ -136,7 +136,7 @@ describe("LinearGaugeEngine", function () {
       expect.objectContaining({
         opts: expect.objectContaining({
           lineCap: "butt",
-          strokeStyle: "#ff2b2b",
+          strokeStyle: "#3366cc",
         }),
       }),
     );
@@ -168,10 +168,9 @@ describe("LinearGaugeEngine", function () {
     expect(harness.calls.drawValueUnitWithFit).toBe(0);
     expect(harness.calls.drawInlineCapValUnit).toBe(0);
 
-    const fillTextCalls = (
-      (layerContexts[0] && layerContexts[0].calls) ||
-      []
-    ).filter((entry) => entry.name === "fillText");
+    const fillTextCalls = layerContexts
+      .flatMap((lc) => (lc && lc.calls) || [])
+      .filter((entry) => entry.name === "fillText");
     const labels = fillTextCalls.map((entry) => entry.args[0]);
     expect(labels).toContain("L0");
   });

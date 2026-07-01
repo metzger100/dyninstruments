@@ -125,7 +125,7 @@ describe("AisTargetMarkup", function () {
         nameStyle: "font-size:13px;",
         frontStyle: "font-size:11px;",
         placeholderStyle: "font-size:12px;",
-        accentStyle: "background-color:#FA584A;",
+        accentStyle: "background-color:#d9534a;",
         metrics: {
           dst: {
             captionStyle: "font-size:8px;",

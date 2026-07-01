@@ -37,8 +37,8 @@ Cascade behavior:
 
 | Path | Input var | Type | Default | Night | Output var |
 |---|---|---|---|---|---|
-| `surface.fg` | `--dyni-fg` | color | `black` | `rgba(252, 11, 11, 0.60)` | `--dyni-theme-surface-fg` |
-| `surface.bg` | `--dyni-bg` | color | `white` | `black` | `--dyni-theme-surface-bg` |
+| `surface.fg` | `--dyni-fg` | color | `#000000` | `rgba(252, 11, 11, 0.60)` | `--dyni-theme-surface-fg` |
+| `surface.bg` | `--dyni-bg` | color | `#ffffff` | `black` | `--dyni-theme-surface-bg` |
 | `surface.border` | `--dyni-border` | color | *(derives from resolved `surface.fg` when unset)* | *(derives from resolved `surface.fg` when unset)* | `--dyni-theme-surface-border` |
 | `font.family` | `--dyni-font` | string | default font stack | — | `--dyni-theme-font-family` |
 | `font.familyMono` | `--dyni-font-mono` | string | default mono font stack | — | `--dyni-theme-font-family-mono` |
@@ -46,36 +46,36 @@ Cascade behavior:
 | `font.labelWeight` | `--dyni-label-weight` | number | `700` | — | `--dyni-theme-font-label-weight` |
 | `opacity.caption` | `--dyni-caption-opacity` | number | `1.0` | — | `--dyni-theme-opacity-caption` |
 | `opacity.unit` | `--dyni-unit-opacity` | number | `1.0` | — | `--dyni-theme-opacity-unit` |
-| `colors.pointer` | `--dyni-pointer` | color | `#ff2b2b` | `#cc2222` | — |
-| `colors.warning` | `--dyni-warning` | color | `#e7c66a` | `#8b6914` | — |
-| `colors.alarm` | `--dyni-alarm` | color | `#FA584A` | `rgba(250, 88, 74, 0.60)` | — |
-| `colors.ok` | `--dyni-ok` | color | `#70F3AF` | `rgba(112, 243, 175, 0.60)` | — |
-| `colors.info` | `--dyni-info` | color | `#70B0F3` | `rgba(112, 176, 243, 0.60)` | — |
-| `strokeWeight` | `--dyni-stroke-weight` | number | `1.0` | — | — |
-| `pointerDepthWeight` | `--dyni-pointer-depth-weight` | number | `1.0` | — | — |
-| `pointerSideWeight` | `--dyni-pointer-side-weight` | number | `1.0` | — | — |
+| `colors.info` | `--dyni-info` | color | `#3366cc` | `#cc2222` | — |
+| `colors.warning` | `--dyni-warning` | color | `#e0a92e` | `#8b6914` | — |
+| `colors.alarm` | `--dyni-alarm` | color | `#d9534a` | `rgba(250, 88, 74, 0.60)` | — |
+| `colors.ok` | `--dyni-ok` | color | `#2e9e6b` | `rgba(112, 243, 175, 0.60)` | — |
+| `strokeWeight` | `--dyni-stroke-weight` | number | `1.28` | — | — |
+| `pointerDepthWeight` | `--dyni-pointer-depth-weight` | number | `1.15` | — | — |
+| `pointerSideWeight` | `--dyni-pointer-side-weight` | number | `2.0` | — | — |
 
 ### Tier 2: Scoped Tokens with Cascade Parent
 
 | Path | Input var | Cascade parent (`defaultFrom`) | Output var |
 |---|---|---|---|
+| `colors.pointer` | `--dyni-pointer` | `colors.info` | — |
+| `colors.regatta.barDefault` | `--dyni-regatta-bar-default` | `colors.info` | `--dyni-theme-regatta-bar-default` |
+| `colors.ais.tracking` | `--dyni-ais-tracking` | `colors.warning` | — |
+| `colors.regatta.barWarning` | `--dyni-regatta-bar-warning` | `colors.warning` | `--dyni-theme-regatta-bar-warning` |
+| `colors.alarmWidget.bg` | `--dyni-alarm-widget-bg` | `colors.alarm` | — |
+| `colors.laylinePort` | `--dyni-layline-port` | `colors.alarm` | — |
 | `colors.ais.warning` | `--dyni-ais-warning` | `colors.alarm` | — |
 | `colors.regatta.barCritical` | `--dyni-regatta-bar-critical` | `colors.alarm` | `--dyni-theme-regatta-bar-critical` |
-| `colors.ais.nearest` | `--dyni-ais-nearest` | `colors.ok` | — |
 | `colors.alarmWidget.strip` | `--dyni-alarm-widget-strip` | `colors.ok` | — |
-| `colors.regatta.barDefault` | `--dyni-regatta-bar-default` | `colors.info` | `--dyni-theme-regatta-bar-default` |
+| `colors.laylineStb` | `--dyni-layline-stb` | `colors.ok` | — |
+| `colors.ais.nearest` | `--dyni-ais-nearest` | `colors.ok` | — |
+| `colors.ais.normal` | `--dyni-ais-normal` | `colors.ok` | — |
 
 ### Tier 2: Scoped Tokens with Independent Defaults
 
 | Path | Input var | Default | Night | Output var |
 |---|---|---|---|---|
-| `colors.alarmWidget.bg` | `--dyni-alarm-widget-bg` | `#C73A32` | `rgba(199, 58, 50, 0.60)` | — |
 | `colors.alarmWidget.fg` | `--dyni-alarm-widget-fg` | `#ffffff` | `#ffffff` | — |
-| `colors.ais.tracking` | `--dyni-ais-tracking` | `#f8a601` | `rgba(248, 166, 1, 0.60)` | — |
-| `colors.ais.normal` | `--dyni-ais-normal` | `#EBEB55` | `rgba(235, 235, 85, 0.60)` | — |
-| `colors.regatta.barWarning` | `--dyni-regatta-bar-warning` | `#e7a834` | `rgba(231, 168, 52, 0.60)` | `--dyni-theme-regatta-bar-warning` |
-| `colors.laylineStb` | `--dyni-layline-stb` | `#82b683` | `#3d6b3d` | — |
-| `colors.laylinePort` | `--dyni-layline-port` | `#ff7a76` | `#8b3333` | — |
 
 ### Family-Scoped Geometry Tokens (Unchanged)
 
@@ -120,6 +120,8 @@ Cascade behavior:
 - `colors.alarm`
 - `colors.ok`
 - `colors.info`
+- `colors.laylineStb`
+- `colors.laylinePort`
 - `colors.alarmWidget.bg`
 - `colors.alarmWidget.fg`
 - `colors.alarmWidget.strip`
@@ -215,7 +217,8 @@ Supported preset families:
 - darkmode
 - highcontrast
 
-`darkmode` is the built-in high-readability black/white surface preset (`surface.bg=#000000`, `surface.fg=#ffffff`, `surface.border=#ffffff`) with tuned warning/alarm, layline, AIS, and regatta accents for dark surfaces.
+`darkmode` is the built-in high-readability black/white surface preset (`surface.bg=#000000`, `surface.fg=#ffffff`, `surface.border=#ffffff`) with saturated warning/alarm, OK, AIS, and regatta accents for dark surfaces.
+`highcontrast` raises pointer, sector, OK/alarm, AIS, and regatta separation for bright daylight.
 
 Mode axis:
 
@@ -247,13 +250,13 @@ Example:
 .widget.dyniplugin {
   --dyni-fg: white;
   --dyni-bg: black;
-  --dyni-pointer: #ff2b2b;
+  --dyni-info: #3366cc;
 }
 
 .nightMode .widget.dyniplugin {
   --dyni-fg: rgba(252, 11, 11, 0.60);
   --dyni-bg: black;
-  --dyni-pointer: #cc2222;
+  --dyni-info: #cc2222;
 }
 ```
 
@@ -289,5 +292,6 @@ Resolver-owned `--dyni-theme-*` output vars are excluded from snapshot identity.
 ## Related
 
 - css-theming.md
+- color-system.md
 - ../architecture/runtime-lifecycle.md
 - ../architecture/component-system.md

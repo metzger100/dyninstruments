@@ -147,7 +147,7 @@
         },
         defaultLinearAlarmLowColor: {
           type: "COLOR",
-          default: "#FA584A",
+          default: "#d9534a",
           name: "Alarm color",
           condition: { kind: "linearGauge", defaultLinearAlarmLowEnabled: true }
         },
@@ -164,7 +164,7 @@
         },
         defaultLinearWarningLowColor: {
           type: "COLOR",
-          default: "#e7c66a",
+          default: "#e0a92e",
           name: "Warning color",
           condition: { kind: "linearGauge", defaultLinearWarningLowEnabled: true }
         },
@@ -181,7 +181,7 @@
         },
         defaultLinearWarningHighColor: {
           type: "COLOR",
-          default: "#e7c66a",
+          default: "#e0a92e",
           name: "Warning color",
           condition: { kind: "linearGauge", defaultLinearWarningHighEnabled: true }
         },
@@ -198,7 +198,7 @@
         },
         defaultLinearAlarmHighColor: {
           type: "COLOR",
-          default: "#FA584A",
+          default: "#d9534a",
           name: "Alarm color",
           condition: { kind: "linearGauge", defaultLinearAlarmHighEnabled: true }
         },
@@ -254,7 +254,7 @@
         },
         defaultRadialAlarmLowColor: {
           type: "COLOR",
-          default: "#FA584A",
+          default: "#d9534a",
           name: "Alarm color",
           condition: { kind: "radialGauge", defaultRadialAlarmLowEnabled: true }
         },
@@ -271,7 +271,7 @@
         },
         defaultRadialWarningLowColor: {
           type: "COLOR",
-          default: "#e7c66a",
+          default: "#e0a92e",
           name: "Warning color",
           condition: { kind: "radialGauge", defaultRadialWarningLowEnabled: true }
         },
@@ -288,7 +288,7 @@
         },
         defaultRadialWarningHighColor: {
           type: "COLOR",
-          default: "#e7c66a",
+          default: "#e0a92e",
           name: "Warning color",
           condition: { kind: "radialGauge", defaultRadialWarningHighEnabled: true }
         },
@@ -305,7 +305,7 @@
         },
         defaultRadialAlarmHighColor: {
           type: "COLOR",
-          default: "#FA584A",
+          default: "#d9534a",
           name: "Alarm color",
           condition: { kind: "radialGauge", defaultRadialAlarmHighEnabled: true }
         },

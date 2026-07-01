@@ -170,10 +170,10 @@ describe("runtime/theme-runtime.js", function () {
 
     const resolved = context.DyniPlugin.runtime.theme.applyToRoot(rootEl);
 
-    expect(resolved.surface.fg).toBe("black");
-    expect(resolved.surface.border).toBe("black");
+    expect(resolved.surface.fg).toBe("#000000");
+    expect(resolved.surface.border).toBe("#000000");
     expect(getAppliedOutput(rootEl, "--dyni-theme-surface-border")).toBe(
-      "black",
+      "#000000",
     );
   });
 
@@ -271,18 +271,18 @@ describe("runtime/theme-runtime.js", function () {
     const resolved =
       context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
-    expect(resolved.colors.alarm).toBe("#FF3300");
-    expect(resolved.colors.alarmWidget.bg).toBe("#CC2A1F");
+    expect(resolved.colors.alarm).toBe("#ff3b2f");
+    expect(resolved.colors.alarmWidget.bg).toBe("#ff3b2f");
     expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
-    expect(resolved.colors.alarmWidget.strip).toBe("#00AA66");
+    expect(resolved.colors.alarmWidget.strip).toBe("#008f5a");
 
-    expect(resolved.colors.ais.warning).toBe("#FF3300");
-    expect(resolved.colors.ais.nearest).toBe("#00AA66");
-    expect(resolved.colors.ais.tracking).toBe("#CC6600");
-    expect(resolved.colors.ais.normal).toBe("#8A7300");
-    expect(resolved.colors.regatta.barWarning).toBe("#ffcc00");
-    expect(resolved.colors.regatta.barCritical).toBe("#FF3300");
-    expect(resolved.colors.regatta.barDefault).toBe("#00AAFF");
+    expect(resolved.colors.ais.warning).toBe("#ff3b2f");
+    expect(resolved.colors.ais.nearest).toBe("#008f5a");
+    expect(resolved.colors.ais.tracking).toBe("#ffd200");
+    expect(resolved.colors.ais.normal).toBe("#008f5a");
+    expect(resolved.colors.regatta.barWarning).toBe("#ffd200");
+    expect(resolved.colors.regatta.barCritical).toBe("#ff3b2f");
+    expect(resolved.colors.regatta.barDefault).toBe("#0057ff");
   });
 
   it("resolves default preset alarm and alarm widget colors in day mode", function () {
@@ -301,13 +301,13 @@ describe("runtime/theme-runtime.js", function () {
     const resolved =
       context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
-    expect(resolved.colors.alarm).toBe("#FA584A");
-    expect(resolved.colors.alarmWidget.bg).toBe("#C73A32");
+    expect(resolved.colors.alarm).toBe("#d9534a");
+    expect(resolved.colors.alarmWidget.bg).toBe("#d9534a");
     expect(resolved.colors.alarmWidget.fg).toBe("#ffffff");
-    expect(resolved.colors.alarmWidget.strip).toBe("#70F3AF");
-    expect(resolved.colors.regatta.barWarning).toBe("#e7a834");
-    expect(resolved.colors.regatta.barCritical).toBe("#FA584A");
-    expect(resolved.colors.regatta.barDefault).toBe("#70B0F3");
+    expect(resolved.colors.alarmWidget.strip).toBe("#2e9e6b");
+    expect(resolved.colors.regatta.barWarning).toBe("#e0a92e");
+    expect(resolved.colors.regatta.barCritical).toBe("#d9534a");
+    expect(resolved.colors.regatta.barDefault).toBe("#3366cc");
   });
 
   it("resolves colors.ok and colors.info in default day mode", function () {
@@ -326,8 +326,8 @@ describe("runtime/theme-runtime.js", function () {
     const resolved =
       context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
-    expect(resolved.colors.ok).toBe("#70F3AF");
-    expect(resolved.colors.info).toBe("#70B0F3");
+    expect(resolved.colors.ok).toBe("#2e9e6b");
+    expect(resolved.colors.info).toBe("#3366cc");
   });
 
 });

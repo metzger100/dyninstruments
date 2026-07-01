@@ -138,18 +138,22 @@ describe("LinearGaugeLayout", function () {
       expect(out.trackY).toBe(out.contentRect.y + Math.floor(out.contentRect.h / 2));
     });
 
-    expect(flat.scaleX0).toBe(flat.contentRect.x);
-    expect(flat.scaleX1).toBe(flat.contentRect.x + flat.contentRect.w);
+    // Edge-touching modes reserve symmetric pointer clearance so the pointer at the
+    // extreme values does not clip the left/right border, while the geometry trackBox
+    // still spans the full content rect.
+    expect(flat.scaleX0).toBeGreaterThan(flat.contentRect.x);
+    expect(flat.scaleX1).toBeLessThan(flat.contentRect.x + flat.contentRect.w);
+    expect(flat.contentRect.x + flat.contentRect.w - flat.scaleX1).toBe(flat.scaleX0 - flat.contentRect.x);
     expect(flat.trackBox.w).toBe(flat.contentRect.w);
     expect(flat.trackBox.h).toBe(flat.contentRect.h);
 
     expect(normal.scaleX0).toBeGreaterThan(normal.contentRect.x);
     expect(normal.scaleX1).toBeLessThan(normal.contentRect.x + normal.contentRect.w);
-    expect(normal.trackBox.w).toBe(normal.scaleX1 - normal.scaleX0);
     expect(normal.trackBox.h).toBe(normal.contentRect.h);
 
-    expect(high.scaleX0).toBe(high.contentRect.x);
-    expect(high.scaleX1).toBe(high.contentRect.x + high.contentRect.w);
+    expect(high.scaleX0).toBeGreaterThan(high.contentRect.x);
+    expect(high.scaleX1).toBeLessThan(high.contentRect.x + high.contentRect.w);
+    expect(high.contentRect.x + high.contentRect.w - high.scaleX1).toBe(high.scaleX0 - high.contentRect.x);
     expect(high.trackBox.w).toBe(high.contentRect.w);
     expect(high.trackBox.h).toBe(high.contentRect.h);
   });

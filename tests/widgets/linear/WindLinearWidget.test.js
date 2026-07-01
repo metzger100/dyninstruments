@@ -134,15 +134,15 @@ describe("WindLinearWidget", function () {
       },
       {
         colors: {
-          laylinePort: "#ff7a76",
-          laylineStb: "#82b683",
+          laylinePort: "#d9534a",
+          laylineStb: "#2e9e6b",
         },
       },
     );
 
     expect(sectors).toEqual([
-      { from: -45, to: -25, color: "#ff7a76" },
-      { from: 25, to: 45, color: "#82b683" },
+      { from: -45, to: -25, color: "#d9534a" },
+      { from: 25, to: 45, color: "#2e9e6b" },
     ]);
 
     expect(
@@ -162,8 +162,8 @@ describe("WindLinearWidget", function () {
         },
         {
           colors: {
-            laylinePort: "#ff7a76",
-            laylineStb: "#82b683",
+            laylinePort: "#d9534a",
+            laylineStb: "#2e9e6b",
           },
         },
       ),

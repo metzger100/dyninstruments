@@ -75,7 +75,7 @@ describe("CompassLinearWidget", function () {
       canvas: {},
       nowMs: 48,
       theme: {
-        colors: { pointer: "#ff2b2b" },
+        colors: { pointer: "#3366cc" },
       },
     };
 

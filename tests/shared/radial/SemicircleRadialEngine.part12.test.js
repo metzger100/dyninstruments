@@ -19,7 +19,7 @@ describe("SemicircleRadialEngine", function () {
             theme: {
               resolveForRoot() {
                 return makeThemeDefaults({
-                  colors: { pointer: "#ff2b2b" },
+                  colors: { pointer: "#3366cc" },
                   font: { labelWeight: 650 },
                 });
               },

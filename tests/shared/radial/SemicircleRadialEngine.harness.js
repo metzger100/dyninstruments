@@ -75,11 +75,11 @@ const {
       surface: Object.assign({ fg: "#fff" }, extra.surface || {}),
       colors: Object.assign(
         {
-          pointer: "#ff2b2b",
-          warning: "#e7c66a",
-          alarm: "#FA584A",
-          laylineStb: "#82b683",
-          laylinePort: "#ff7a76",
+          pointer: "#3366cc",
+          warning: "#e0a92e",
+          alarm: "#d9534a",
+          laylineStb: "#2e9e6b",
+          laylinePort: "#d9534a",
         },
         extra.colors || {},
       ),
@@ -188,12 +188,18 @@ const {
         CanvasLayerCache: {
           create() {
             return {
-              createLayerCache() {
+              createLayerCache(spec) {
+                const layers = spec && Array.isArray(spec.layers) && spec.layers.length
+                  ? spec.layers
+                  : ["layer"];
                 return {
                   ensureLayer(canvas, _key, rebuild) {
-                    rebuild(canvas.getContext("2d"), "base", canvas);
+                    for (let i = 0; i < layers.length; i += 1) {
+                      rebuild(canvas.getContext("2d"), layers[i], canvas);
+                    }
                   },
                   blit() {},
+                  blitLayer() {},
                 };
               },
             };

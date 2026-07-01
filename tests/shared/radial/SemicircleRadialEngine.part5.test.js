@@ -14,7 +14,7 @@ describe("SemicircleRadialEngine", function () {
       {
         a0: 20,
         a1: 40,
-        color: "#e7c66a",
+        color: "#e0a92e",
       },
     ]);
     const canvas = createMockCanvas({

@@ -163,9 +163,9 @@ describe("AlarmHtmlFit", function () {
     const themeTokens = {
       colors: {
         alarmWidget: {
-          bg: "#C73A32",
+          bg: "#d9534a",
           fg: "#ffffff",
-          strip: "#70F3AF",
+          strip: "#2e9e6b",
         },
       },
       font: {
@@ -338,10 +338,10 @@ describe("AlarmHtmlFit", function () {
     });
 
     expect(h.themeApi.resolveForRoot).toHaveBeenCalledWith(h.targetEl);
-    expect(active.activeBackgroundStyle).toBe("background-color:#C73A32;");
+    expect(active.activeBackgroundStyle).toBe("background-color:#d9534a;");
     expect(active.activeForegroundStyle).toBe("color:#ffffff;");
     expect(idle.shellStyle).toContain("padding:");
-    expect(idle.accentStyle).toContain("background-color:#70F3AF;");
+    expect(idle.accentStyle).toContain("background-color:#2e9e6b;");
     expect(idle.idleStripStyle).toBe(idle.accentStyle);
   });
 
