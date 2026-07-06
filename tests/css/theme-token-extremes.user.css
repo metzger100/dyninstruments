@@ -37,6 +37,7 @@
   --dyni-regatta-bar-warning: #f2b134;
   --dyni-regatta-bar-critical: #ff4d6d;
   --dyni-regatta-bar-default: #00a8ff;
+  --dyni-regatta-button-stroke-weight: 2.1;
 
   /* Shared geometry */
   --dyni-stroke-weight: 1.6;

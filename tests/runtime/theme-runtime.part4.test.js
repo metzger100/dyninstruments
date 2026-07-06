@@ -154,4 +154,29 @@ describe("runtime/theme-runtime.js", function () {
     expect(resolved.opacity.caption).toBe(1);
     expect(resolved.opacity.unit).toBe(1);
   });
+
+  it("regatta button stroke weight inherits and overrides global stroke weight", function () {
+    const cssVars = { "--dyni-stroke-weight": "1.7" };
+    const context = setupContext({
+      getComputedStyle() {
+        return {
+          getPropertyValue(name) {
+            return hasOwn.call(cssVars, name) ? cssVars[name] : "";
+          },
+        };
+      },
+    });
+    const rootEl = createPluginRootElement();
+    context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
+
+    const inherited =
+      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    expect(inherited.regatta.buttonStrokeWeight).toBe(1.7);
+
+    cssVars["--dyni-regatta-button-stroke-weight"] = "2.4";
+    const overrideRootEl = createPluginRootElement();
+    const overridden =
+      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(overrideRootEl);
+    expect(overridden.regatta.buttonStrokeWeight).toBe(2.4);
+  });
 });

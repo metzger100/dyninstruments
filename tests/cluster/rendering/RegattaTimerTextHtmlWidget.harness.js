@@ -81,6 +81,7 @@ const {
       RegattaTimerHtmlFit: loadFresh(
         "shared/widget-kits/vessel/RegattaTimerHtmlFit.js",
       ),
+      GeometryScale: loadFresh("shared/widget-kits/layout/GeometryScale.js"),
       HtmlMeasureUtils: {
         create() {
           return {
@@ -131,6 +132,8 @@ const {
                 weight: 700,
                 labelWeight: 700,
               },
+              strokeWeight: 1.28,
+              regatta: { buttonStrokeWeight: 1.28 },
               colors: {
                 regatta: {
                   barWarning: "#e0a92e",

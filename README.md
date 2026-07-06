@@ -94,6 +94,7 @@ Scoped tokens by family:
 | Regatta | `--dyni-regatta-bar-warning` | inherits global when unset | `--dyni-warning` |
 | Regatta | `--dyni-regatta-bar-critical` | inherits global when unset | `--dyni-alarm` |
 | Regatta | `--dyni-regatta-bar-default` | inherits global when unset | `--dyni-info` |
+| Regatta outline | `--dyni-regatta-button-stroke-weight` | inherits global when unset | `--dyni-stroke-weight` |
 | Wind/layline | `--dyni-layline-stb` | inherits global when unset | `--dyni-ok` |
 | Wind/layline | `--dyni-layline-port` | inherits global when unset | `--dyni-alarm` |
 

@@ -76,7 +76,9 @@
   line-height: 1;
   user-select: none;
   font-weight: var(--dyni-theme-font-label-weight, 700);
-  border: 1px solid var(--dyni-theme-surface-border, currentColor);
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--dyni-theme-surface-border, currentColor);
   color: inherit;
   box-sizing: border-box;
   min-width: 0;

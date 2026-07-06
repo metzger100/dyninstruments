@@ -26,7 +26,7 @@ Canonical shared inputs for migrated surface/typography tokens:
 - --dyni-font-weight
 - --dyni-label-weight
 
-Canonical semantic color inputs:
+Canonical semantic and scoped inputs:
 
 - --dyni-pointer
 - --dyni-warning
@@ -45,6 +45,7 @@ Canonical semantic color inputs:
 - --dyni-regatta-bar-warning
 - --dyni-regatta-bar-critical
 - --dyni-regatta-bar-default
+- --dyni-regatta-button-stroke-weight
 
 Raw --dyni-* inputs are input-only. They are not consumed by migrated renderer CSS directly.
 
@@ -57,7 +58,7 @@ Border-specific rule:
 Scoped cascade rule:
 
 - Scoped inputs can inherit from global semantic tokens when unset.
-- Example: `--dyni-pointer` cascades from `--dyni-info`, `--dyni-layline-stb` cascades from `--dyni-ok`, and `--dyni-layline-port` cascades from `--dyni-alarm`.
+- Example: `--dyni-pointer` cascades from `--dyni-info`, `--dyni-layline-stb` cascades from `--dyni-ok`, and `--dyni-regatta-button-stroke-weight` cascades from `--dyni-stroke-weight`.
 - Scoped explicit inputs still win over the inherited cascade.
 
 ## Output Variables

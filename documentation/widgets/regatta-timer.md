@@ -29,6 +29,7 @@ Bundled layout integration:
   - actions: `.dyni-regatta-btn-*` with `data-dyni-action` (`regatta-start`, `regatta-sync`, `regatta-reset`)
 - Core layout constants from fit owner (`shared/widget-kits/vessel/RegattaTimerHtmlFit.js`):
   - `BAR_HEIGHT_FROM_WIDGET_HEIGHT_RATIO = 0.03`
+  - Button outline width is computed from `GeometryScale.scaleStroke(minSide, 0.026, strokeWeight, 1)` and capped to 18% of the smaller button side.
   - high mode share: display `0.68`, controls `0.32`
   - normal mode share: display `0.62`, controls `0.38`
   - flat mode share: display `1.0`, controls `1.0`
@@ -83,6 +84,7 @@ Presets:
 - `barWarning` cascades from global `--dyni-warning` when `--dyni-regatta-bar-warning` is not explicitly set.
 - `barCritical` cascades from global `--dyni-alarm` when `--dyni-regatta-bar-critical` is not explicitly set.
 - `barDefault` cascades from global `--dyni-info` when `--dyni-regatta-bar-default` is not explicitly set.
+- Button outline width uses `--dyni-regatta-button-stroke-weight`, which inherits from `--dyni-stroke-weight` when unset.
 - Deprecated input aliases still resolve with warning: `--dyni-regatta-barWarning`, `--dyni-regatta-barCritical`, and `--dyni-regatta-barDefault`.
 
 ## Editable Parameters

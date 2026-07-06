@@ -2,7 +2,11 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RegattaTimerHtmlFit", function () {
-  function createFit() {
+  function createFit(options) {
+    const opts = options || {};
+    const strokeWeight = Object.prototype.hasOwnProperty.call(opts, "strokeWeight")
+      ? opts.strokeWeight
+      : 1.28;
     const measureCtx = {
       font: "700 12px sans-serif",
       measureText(text) {
@@ -14,6 +18,7 @@ describe("RegattaTimerHtmlFit", function () {
     const componentContext = createComponentContextMock({
       modules: {
         HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+        GeometryScale: loadFresh("shared/widget-kits/layout/GeometryScale.js"),
         HtmlMeasureUtils: {
           create() {
             return {
@@ -41,7 +46,11 @@ describe("RegattaTimerHtmlFit", function () {
       services: {
         themeTokens: {
           resolveForRoot: vi.fn(function () {
-            return { font: { family: "sans-serif", weight: 700, labelWeight: 700 } };
+            return {
+              font: { family: "sans-serif", weight: 700, labelWeight: 700 },
+              strokeWeight: strokeWeight,
+              regatta: { buttonStrokeWeight: strokeWeight }
+            };
           })
         },
         dom: {
@@ -101,7 +110,39 @@ describe("RegattaTimerHtmlFit", function () {
     expect(out).toBeTruthy();
     expect(readPx(out.timerStyle, "font-size")).toBeGreaterThan(0);
     expect(readPx(out.buttonStyle, "height")).toBeGreaterThan(0);
+    expect(readPx(out.buttonStyle, "border-width")).toBeGreaterThanOrEqual(4);
+    expect(readPx(out.buttonStyle, "border-width")).toBeLessThanOrEqual(5);
+    expect(readPx(out.buttonStyle, "font-size")).toBeGreaterThan(0);
     expect(readPx(out.barStyle, "height")).toBeGreaterThan(0);
+  });
+
+  it("scales button border from stroke weight and available button space", function () {
+    const fit = createFit();
+    const normal = computeFit(fit, {
+      model: makeModel({ phase: "idle" }),
+      shellRect: { width: 320, height: 160 },
+      mode: "normal",
+      hostContext: {}
+    });
+    const tiny = computeFit(fit, {
+      model: makeModel({ phase: "idle" }),
+      shellRect: { width: 72, height: 36 },
+      mode: "normal",
+      hostContext: {}
+    });
+    const bold = computeFit(createFit({ strokeWeight: 2.2 }), {
+      model: makeModel({ phase: "idle" }),
+      shellRect: { width: 320, height: 160 },
+      mode: "normal",
+      hostContext: {}
+    });
+
+    expect(readPx(tiny.buttonStyle, "border-width")).toBeLessThan(
+      readPx(normal.buttonStyle, "border-width")
+    );
+    expect(readPx(bold.buttonStyle, "border-width")).toBeGreaterThan(
+      readPx(normal.buttonStyle, "border-width")
+    );
   });
 
   it("scales timer font down on tighter geometry", function () {

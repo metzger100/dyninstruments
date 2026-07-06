@@ -142,6 +142,7 @@ describe("config/components.js", function () {
       "GeometryScale",
       "ValueMath",
     ]);
+    expect(components.RegattaTimerHtmlFit.deps).toContain("GeometryScale");
     expect(components.PositionCoordinateWidget.deps).toContain("ValueMath");
   });
 

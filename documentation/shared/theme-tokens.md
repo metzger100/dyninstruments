@@ -70,6 +70,7 @@ Cascade behavior:
 | `colors.laylineStb` | `--dyni-layline-stb` | `colors.ok` | — |
 | `colors.ais.nearest` | `--dyni-ais-nearest` | `colors.ok` | — |
 | `colors.ais.normal` | `--dyni-ais-normal` | `colors.ok` | — |
+| `regatta.buttonStrokeWeight` | `--dyni-regatta-button-stroke-weight` | `strokeWeight` | — |
 
 ### Tier 2: Scoped Tokens with Independent Defaults
 
@@ -132,6 +133,7 @@ Cascade behavior:
 - `colors.regatta.barWarning`
 - `colors.regatta.barCritical`
 - `colors.regatta.barDefault`
+- `regatta.buttonStrokeWeight`
 
 ## Public Input Variables
 
@@ -161,6 +163,7 @@ Cascade behavior:
 - `--dyni-regatta-bar-warning`
 - `--dyni-regatta-bar-critical`
 - `--dyni-regatta-bar-default`
+- `--dyni-regatta-button-stroke-weight`
 - `--dyni-stroke-weight`
 - `--dyni-pointer-depth-weight`
 - `--dyni-pointer-side-weight`

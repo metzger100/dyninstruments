@@ -228,6 +228,7 @@
       deps: [
         "HtmlWidgetUtils",
         "ValueMath",
+        "GeometryScale",
         "RegattaTimerPhase",
         "HtmlMeasureUtils",
         "TextLayoutEngine"

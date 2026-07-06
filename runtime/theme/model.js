@@ -98,6 +98,15 @@
     defineToken("strokeWeight", "--dyni-stroke-weight", "number", 1.28),
     defineToken("pointerDepthWeight", "--dyni-pointer-depth-weight", "number", 1.15),
     defineToken("pointerSideWeight", "--dyni-pointer-side-weight", "number", 2.0),
+    defineToken(
+      "regatta.buttonStrokeWeight",
+      "--dyni-regatta-button-stroke-weight",
+      "number",
+      undefined,
+      undefined,
+      undefined,
+      "strokeWeight"
+    ),
 
     defineToken("radial.ticks.majorLenFactor", "--dyni-radial-tick-major-len-factor", "number", 0.087),
     defineToken("radial.ticks.majorWidthFactor", "--dyni-radial-tick-major-width-factor", "number", 0.022),

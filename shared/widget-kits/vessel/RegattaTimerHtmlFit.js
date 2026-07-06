@@ -1,7 +1,7 @@
 /**
  * Module: RegattaTimerHtmlFit - Responsive style-fit owner for regatta timer HTML layout
  * Documentation: documentation/widgets/regatta-timer.md
- * Depends: HtmlWidgetUtils, ValueMath, RegattaTimerPhase, HtmlMeasureUtils, TextLayoutEngine, componentContext.theme.tokens, componentContext.dom
+ * Depends: HtmlWidgetUtils, ValueMath, GeometryScale, RegattaTimerPhase, HtmlMeasureUtils, TextLayoutEngine, componentContext.theme.tokens, componentContext.dom
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -68,7 +68,18 @@
     return { display: 0.62, controls: 0.38 };
   }
 
-  function buildSignature(width, height, mode, phase, displayTime, stableDigitsEnabled, family, valueWeight, labelWeight) {
+  function buildSignature(
+    width,
+    height,
+    mode,
+    phase,
+    displayTime,
+    stableDigitsEnabled,
+    family,
+    valueWeight,
+    labelWeight,
+    strokeWeight
+  ) {
     return JSON.stringify([
       width,
       height,
@@ -78,13 +89,15 @@
       stableDigitsEnabled === true,
       family || "",
       valueWeight,
-      labelWeight
+      labelWeight,
+      strokeWeight
     ]);
   }
 
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const valueMath = componentContext.components.require("ValueMath");
+    const geometryScale = componentContext.components.require("GeometryScale");
     const phaseApi = componentContext.components.require("RegattaTimerPhase");
     const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const textLayout = componentContext.components.require("TextLayoutEngine");
@@ -114,6 +127,7 @@
       const family = font.family;
       const valueWeight = font.weight;
       const labelWeight = font.labelWeight;
+      const strokeWeight = theme.regatta.buttonStrokeWeight;
       const monoFamily = font.familyMono || family;
       const ctx = htmlMeasureUtils.resolveMeasureContext(cfg.hostContext, cfg.targetEl);
       if (!ctx || typeof ctx.measureText !== "function") {
@@ -127,7 +141,18 @@
       const displayTime = model.displayTime == null ? "00:00" : String(model.displayTime);
       const stableDigitsEnabled = cfg.stableDigitsEnabled === true;
       const cache = resolveRegattaCacheEntry(cfg.hostContext);
-      const signature = buildSignature(width, height, mode, phase, displayTime, stableDigitsEnabled, family, valueWeight, labelWeight);
+      const signature = buildSignature(
+        width,
+        height,
+        mode,
+        phase,
+        displayTime,
+        stableDigitsEnabled,
+        family,
+        valueWeight,
+        labelWeight,
+        strokeWeight
+      );
       if (cache && cache.signature === signature && cache.result) {
         return cache.result;
       }
@@ -170,8 +195,20 @@
       const visibleLabels = resolveVisibleLabels(phase);
       const buttonPadY = Math.max(0, Math.floor(buttonHeight * 0.12));
       const buttonPadX = Math.max(0, Math.floor(Math.min(buttonWidth * 0.08, buttonHeight * 0.35)));
-      const buttonInnerHeight = Math.max(1, buttonHeight - (buttonPadY * 2));
-      const buttonInnerWidth = Math.max(1, buttonWidth - (buttonPadX * 2));
+      const buttonBorderBase = geometryScale.scaleStroke(minSide, 0.026, strokeWeight, 1);
+      const buttonBorderCap = Math.max(
+        1,
+        Math.floor(Math.min(buttonWidth, buttonHeight) * 0.18)
+      );
+      const buttonBorderWidth = Math.min(buttonBorderBase, buttonBorderCap);
+      const buttonInnerHeight = Math.max(
+        1,
+        buttonHeight - (buttonPadY * 2) - (buttonBorderWidth * 2)
+      );
+      const buttonInnerWidth = Math.max(
+        1,
+        buttonWidth - (buttonPadX * 2) - (buttonBorderWidth * 2)
+      );
       const longestLabel = visibleLabels.reduce(function (longest, label) {
         return label.length > longest.length ? label : longest;
       }, "");
@@ -223,6 +260,7 @@
           + "height:" + buttonHeight + "px;"
           + "max-height:" + buttonHeight + "px;"
           + "min-height:0;"
+          + "border-width:" + buttonBorderWidth + "px;"
           + "font-size:" + buttonFontPx + "px;"
           + "padding:" + buttonPadY + "px " + buttonPadX + "px;",
         startButtonStyle: "",
