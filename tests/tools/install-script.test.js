@@ -6,6 +6,16 @@ const { spawnSync } = require("node:child_process");
 const ROOT_DIR = process.cwd();
 const SCRIPT_PATH = path.join(ROOT_DIR, "install.sh");
 
+function childEnv(overrides = {}) {
+  return {
+    ...process.env,
+    LANG: "C",
+    LANGUAGE: "C",
+    LC_ALL: "C",
+    ...overrides
+  };
+}
+
 function writeFile(rootDir, relPath, content) {
   const absPath = path.join(rootDir, relPath);
   fs.mkdirSync(path.dirname(absPath), { recursive: true });
@@ -22,6 +32,7 @@ function createZip(sourceRoot, zipPath, topDir) {
   ];
   const pythonResult = spawnSync("python3", pythonArgs, {
     cwd: sourceRoot,
+    env: childEnv(),
     encoding: "utf8"
   });
   if (pythonResult.status === 0) return;
@@ -34,6 +45,7 @@ function createZip(sourceRoot, zipPath, topDir) {
   ];
   const zipResult = spawnSync("zip", zipArgs, {
     cwd: sourceRoot,
+    env: childEnv(),
     encoding: "utf8"
   });
   if (zipResult.status !== 0) {
@@ -54,11 +66,10 @@ function createPluginZip(rootDir, name, jsContent) {
 function runInstaller(args, options = {}) {
   return spawnSync("bash", [SCRIPT_PATH, ...args], {
     cwd: ROOT_DIR,
-    env: {
-      ...process.env,
+    env: childEnv({
       HOME: options.home || os.tmpdir(),
       PATH: options.path || process.env.PATH
-    },
+    }),
     encoding: "utf8"
   });
 }
@@ -69,6 +80,7 @@ describe("install.sh", function () {
       "-n",
       SCRIPT_PATH
     ], {
+      env: childEnv(),
       encoding: "utf8"
     });
 
