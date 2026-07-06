@@ -77,8 +77,8 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 
 | Cluster | Editable key field | Store field affected | Active kind(s) | Behavior |
 |---|---|---|---|---|
-| `environment` | `depthKey` | `depth` | `depth`, `depthLinear`, `depthRadial` | non-empty override is used; empty falls back to `nav.gps.depthBelowKeel`; AvNav surface depth is `nav.gps.depthBelowWaterline` |
-| `environment` | `tempKey` | `temp` | `temp`, `tempLinear`, `tempRadial` | non-empty override is used; empty falls back to `nav.gps.waterTemp` |
+| `environment` | `depthKey` | `depth` | `depth`, `depthLinear`, `depthRadial` | selected path is read as live `depthKey` and aliased to `depth`; empty falls back to `nav.gps.depthBelowKeel`; AvNav surface depth is `nav.gps.depthBelowWaterline` |
+| `environment` | `tempKey` | `temp` | `temp`, `tempLinear`, `tempRadial` | selected path is read as live `tempKey` and aliased to `temp`; empty falls back to `nav.gps.waterTemp` |
 | `environment` | `value` | `value` | `pressure` | non-empty key stored for pressure source; removed when not pressure |
 | `vessel` | `value` | `value` | `voltage`, `voltageLinear`, `voltageRadial` | non-empty key stored for voltage source; removed for other kinds |
 | `vessel` | `pitchKey` | `pitch` | `pitch` | non-empty override is used; empty falls back to default pitch key |

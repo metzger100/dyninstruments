@@ -332,14 +332,6 @@
       ],
       "m1": [
         {
-          "kind": "hdtLinear",
-          "compassLinearTickMajor": 45,
-          "compassLinearTickMinor": 15,
-          "compassLinearShowEndLabels": true,
-          "name": "dyni_CourseHeading_Instruments",
-          "weight": 1
-        },
-        {
           "name": "dyni_CourseHeading_Instruments",
           "weight": 1,
           "kind": "cog",
@@ -695,6 +687,12 @@
           "leadingZero": true
         },
         {
+          "name": "dyni_CourseHeading_Instruments",
+          "kind": "brg",
+          "leadingZero": true,
+          "dragId": 0
+        },
+        {
           "name": "dyni_Speed_Instruments",
           "kind": "sog"
         },
@@ -703,6 +701,11 @@
           "kind": "vmg",
           "formatUnit_vmg": "kn",
           "unit_vmg_kn": "kn"
+        },
+        {
+          "kind": "timeStatus",
+          "hideSeconds": true,
+          "name": "dyni_Vessel_Instruments"
         }
       ]
     },

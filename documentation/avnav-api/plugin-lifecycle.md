@@ -24,6 +24,8 @@ Common callbacks:
 - committed HTML and canvas rendering happens after host commit through surface controllers
 - theme outputs are applied to committed root before session reconcile
 - dyninstruments HTML interaction uses committed direct DOM listeners, not host inline handler translation
+- `updateFunction(values)` receives live store values, not editable config props; configured props such as `kind` are available on the host `this` object in AvNav's widget call path.
+- `KEY` editables store selected paths in `storeKeys.<parameterName>`; if `<parameterName>` is an alias such as `depthKey`, `updateFunction` must copy the live value to the mapper prop, for example `depth`.
 
 ## Related
 

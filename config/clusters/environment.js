@@ -10,6 +10,7 @@
   const config = ns.config;
   const shared = config.shared;
   const DEFAULT_DEPTH_KEY = shared.environmentDefaultDepthKey;
+  const hasOwn = Object.prototype.hasOwnProperty;
 
   config.clusters.push({
     widget: "ClusterWidget",
@@ -27,7 +28,8 @@
       editableParameters: shared.buildEnvironmentEditableParameters(),
       updateFunction: function (values) {
         const out = values ? { ...values } : {};
-        const kind = (values && values.kind) || "depth";
+        const source = this && typeof this === "object" ? this : {};
+        const kind = (values && values.kind) || source.kind || "depth";
 
         if (!out.storeKeys) out.storeKeys = {};
 
@@ -51,6 +53,10 @@
         }
 
         if (kind === "depth" || kind === "depthLinear" || kind === "depthRadial") {
+          if (hasOwn.call(out, "depthKey")) {
+            out.depth = out.depthKey;
+          }
+
           if (typeof out.depthKey === "string" && out.depthKey.trim()) {
             out.storeKeys = { ...out.storeKeys, depth: out.depthKey.trim() };
           }
@@ -61,6 +67,10 @@
 
         // temperature dynamic key (for selecting different temperature sources)
         if (kind === "temp" || kind === "tempLinear" || kind === "tempRadial") {
+          if (hasOwn.call(out, "tempKey")) {
+            out.temp = out.tempKey;
+          }
+
           if (typeof out.tempKey === "string" && out.tempKey.trim()) {
             out.storeKeys = { ...out.storeKeys, temp: out.tempKey.trim() };
           }

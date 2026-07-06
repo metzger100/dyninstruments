@@ -149,6 +149,39 @@ describe("config/clusters/environment.js", function () {
     expect(fallback.storeKeys.depth).toBe("nav.gps.depthBelowKeel");
   });
 
+  it("uses live depthKey values for custom depth store paths at runtime", function () {
+    const def = loadEnvDef();
+
+    const text = def.updateFunction.call({ kind: "depth" }, {
+      depth: undefined,
+      depthKey: 4.2
+    });
+    expect(text.depth).toBe(4.2);
+
+    const linear = def.updateFunction.call({ kind: "depthLinear" }, {
+      depth: undefined,
+      depthKey: 5.1
+    });
+    expect(linear.depth).toBe(5.1);
+
+    const radial = def.updateFunction.call({ kind: "depthRadial" }, {
+      depth: undefined,
+      depthKey: 6.3
+    });
+    expect(radial.depth).toBe(6.3);
+  });
+
+  it("keeps missing selected depth keys missing instead of falling back to keel", function () {
+    const def = loadEnvDef();
+
+    const out = def.updateFunction.call({ kind: "depthRadial" }, {
+      depth: 3.8,
+      depthKey: undefined
+    });
+
+    expect(out.depth).toBeUndefined();
+  });
+
   it("sets temperature source from tempKey or defaults to waterTemp", function () {
     const def = loadEnvDef();
 
@@ -160,5 +193,16 @@ describe("config/clusters/environment.js", function () {
 
     const fallback = def.updateFunction({ kind: "temp", tempKey: "" });
     expect(fallback.storeKeys.temp).toBe("nav.gps.waterTemp");
+  });
+
+  it("uses live tempKey values for custom temperature store paths at runtime", function () {
+    const def = loadEnvDef();
+
+    const out = def.updateFunction.call({ kind: "tempLinear" }, {
+      temp: undefined,
+      tempKey: 21.5
+    });
+
+    expect(out.temp).toBe(21.5);
   });
 });

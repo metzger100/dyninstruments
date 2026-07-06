@@ -65,7 +65,8 @@ minValue: { type: "FLOAT", min: 0, max: 100, step: 0.5, default: 0 }
 
 ### KEY Details
 
-Shows a browser for currently available AvNav store keys. The render function receives the **store value** (not the key path). In dyninstruments, KEY params require `updateFunction` to set storeKeys dynamically — see [plugin-lifecycle.md](plugin-lifecycle.md).
+Shows a browser for currently available AvNav store keys. AvNav stores the selected path in `storeKeys.<parameterName>`.
+The render/update path receives the **store value** under `<parameterName>`, not the selected path string.
 
 ```javascript
 value: { type: "KEY", default: "" }
@@ -73,6 +74,7 @@ value: { type: "KEY", default: "" }
 
 Recommended editor captions for `KEY` parameters should describe the AvNav store-path override directly, for example `Depth store path`, `Temperature store path`, or `Voltage store path`.
 Environment depth kinds use `depthKey` with default `nav.gps.depthBelowKeel`; clearing it restores that below-keel default.
+Alias selectors such as `depthKey` and `tempKey` must copy the live `<parameterName>` value onto the mapper-owned prop (`depth`, `temp`) in `updateFunction`; they cannot rewrite `storeKeys` during render.
 
 ### COLOR Details
 
