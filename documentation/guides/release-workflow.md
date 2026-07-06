@@ -15,6 +15,8 @@ Releases are created locally and committed into the repository first. GitHub Rel
 - Release artifacts written to `releases/`:
   - `releases/dyninstruments-X.Y.Z.zip`
   - `releases/dyninstruments-X.Y.Z.md`
+- Public installer contract: `install.sh` expects the GitHub Release asset name `dyninstruments-X.Y.Z.zip`.
+- If release asset naming changes, update `install.sh` and the README installation command in the same release.
 
 ## Prerequisites
 

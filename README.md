@@ -18,13 +18,36 @@
 
 ## Installation
 
+Linux AvNav servers can install or update from the latest GitHub Release with:
+
+```bash
+bash <(curl -sSL https://raw.githubusercontent.com/metzger100/dyninstruments/main/install.sh)
+```
+
+The installer targets AvNav user plugins by default. It detects existing user plugin installs, AvNav service data directories, and documented Linux defaults before writing files. For custom setups, pass the AvNav data directory or the final plugin directory:
+
+```bash
+bash <(curl -sSL https://raw.githubusercontent.com/metzger100/dyninstruments/main/install.sh) --data-dir <AVNAV_DATA_DIR>
+bash <(curl -sSL https://raw.githubusercontent.com/metzger100/dyninstruments/main/install.sh) --plugin-dir <AVNAV_PLUGIN_DIR>/dyninstruments
+```
+
+Pinned release example:
+
+```bash
+bash <(curl -sSL https://raw.githubusercontent.com/metzger100/dyninstruments/main/install.sh) --version 3.6.0
+```
+
+Manual install:
+
 1. Download the latest release zip from GitHub Releases (or from `releases/` in this repository).
-2. Extract it into your AvNav plugin directory so you get `.../plugins/dyninstruments/`.
+2. Extract it into your AvNav plugin directory so you get `<AVNAV_PLUGIN_DIR>/dyninstruments/`.
 3. Restart AvNav.
 4. Optional: open AvNav's layout selector and choose one of the bundled layouts:
    - `Dyni Motorboat`
    - `Dyni Sailboat`
 5. Open the AvNav layout editor for further customization. Widgets are listed under `dyninstruments` (`dyni_*_Instruments`).
+
+AvNav documents user plugins under the data directory's `plugins` folder and system plugins under `/usr/lib/avnav/plugins`. Use the installer `--system` option only when you intentionally want a system plugin install.
 
 Bundled layouts are stored in:
 - `layouts/dyni-motorboat.json`
