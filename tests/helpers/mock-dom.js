@@ -2,6 +2,8 @@ function createDomHarness(options) {
   const opts = options || {};
   const failScriptIds = new Set(opts.failScriptIds || []);
   const failLinkIds = new Set(opts.failLinkIds || []);
+  const shouldFailScript = typeof opts.shouldFailScript === "function" ? opts.shouldFailScript : null;
+  const shouldFailLink = typeof opts.shouldFailLink === "function" ? opts.shouldFailLink : null;
   const onScriptAppended = typeof opts.onScriptAppended === "function" ? opts.onScriptAppended : null;
   const onLinkAppended = typeof opts.onLinkAppended === "function" ? opts.onLinkAppended : null;
 
@@ -38,6 +40,11 @@ function createDomHarness(options) {
       },
       hasAttribute(name) {
         return attrs.has(String(name));
+      },
+      remove() {
+        if (this.parentNode && typeof this.parentNode.removeChild === "function") {
+          this.parentNode.removeChild(this);
+        }
       }
     };
 
@@ -47,6 +54,7 @@ function createDomHarness(options) {
   const head = {
     appendChild(node) {
       if (node && node.id) elementsById.set(node.id, node);
+      if (node) node.parentNode = head;
 
       if (node && node.tagName === "SCRIPT") {
         appendedScripts.push(node);
@@ -54,7 +62,7 @@ function createDomHarness(options) {
           onScriptAppended(node);
         }
         schedule(function () {
-          if (failScriptIds.has(node.id)) {
+          if (failScriptIds.has(node.id) || (shouldFailScript && shouldFailScript(node))) {
             if (typeof node.onerror === "function") node.onerror(new Error("script load failed: " + node.id));
             return;
           }
@@ -68,7 +76,7 @@ function createDomHarness(options) {
           onLinkAppended(node);
         }
         schedule(function () {
-          if (failLinkIds.has(node.id)) {
+          if (failLinkIds.has(node.id) || (shouldFailLink && shouldFailLink(node))) {
             if (typeof node.onerror === "function") node.onerror(new Error("css load failed: " + node.id));
             return;
           }
@@ -76,6 +84,13 @@ function createDomHarness(options) {
         });
       }
 
+      return node;
+    },
+    removeChild(node) {
+      if (node && node.id && elementsById.get(node.id) === node) {
+        elementsById.delete(node.id);
+      }
+      if (node) node.parentNode = null;
       return node;
     }
   };

@@ -2,6 +2,7 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 const bootstrapCore = require("../../runtime/plugin-bootstrap-core.js");
+const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 const { createDomHarness } = require("../helpers/mock-dom");
 
 async function importPluginModule() {
@@ -33,13 +34,58 @@ function withBootstrapGlobals(overrides, fn) {
     });
 }
 
+function createModuleApi(baseUrl) {
+  return {
+    getBaseUrl: vi.fn(() => baseUrl),
+    registerWidget: vi.fn(),
+    log: vi.fn(),
+  };
+}
+
+function installActualInitRuntime(windowRef, documentRef) {
+  const context = createScriptContext({
+    window: windowRef,
+    document: documentRef,
+    DyniPlugin: windowRef.DyniPlugin,
+    avnav: undefined,
+  });
+
+  runIifeScript("runtime/namespace.js", context);
+  runIifeScript("runtime/widget-registrar.js", context);
+  runIifeScript("runtime/init.js", context);
+}
+
+function installInitMocks(ns) {
+  ns.runtime.theme = {
+    configure: vi.fn(),
+    applyToRoot: vi.fn(),
+    resolveStartupPresetName: vi.fn(() => "default"),
+  };
+  ns.runtime.createTemporaryHostActionBridge = vi.fn(() => ({
+    getHostActions: vi.fn(() => ({})),
+    destroy: vi.fn(),
+  }));
+  ns.runtime.clusterShellRenderer = {
+    normalizeRouteFrame: vi.fn(),
+    renderRouteShell: vi.fn(),
+  };
+  ns.runtime.createComponentLoader = vi.fn(() => ({
+    uniqueComponents: () => ["ClusterWidget"],
+    loadComponent: () => Promise.resolve({}),
+    createInstance: () => ({
+      id: "ClusterWidget",
+      renderHtml: () => "",
+    }),
+  }));
+  ns.runtime.defaultsFromEditableParams = vi.fn(() => ({}));
+  ns.runtime.editableParamsForRegistration = vi.fn(() => ({}));
+}
+
 describe("plugin.mjs bootstrap", function () {
   it("accepts AvNav API, uses api.getBaseUrl(), and reaches runtime.runInit", async function () {
     const dom = createDomHarness();
     const runInit = vi.fn(() => Promise.resolve());
-    const api = {
-      getBaseUrl: vi.fn(() => "http://host/plugins/dyninstruments-modern///")
-    };
+    const api = createModuleApi("http://host/plugins/dyninstruments-modern///");
 
     await withBootstrapGlobals({
       document: dom.document,
@@ -62,9 +108,7 @@ describe("plugin.mjs bootstrap", function () {
   it("stores the provided module API at window.DyniPlugin.avnavApi", async function () {
     const dom = createDomHarness();
     const runInit = vi.fn(() => Promise.resolve());
-    const api = {
-      getBaseUrl: () => "http://host/plugins/dyninstruments-module/"
-    };
+    const api = createModuleApi("http://host/plugins/dyninstruments-module/");
 
     let capturedNs;
     await withBootstrapGlobals({
@@ -92,9 +136,7 @@ describe("plugin.mjs bootstrap", function () {
       failScriptIds: [bundleId]
     });
     const runInit = vi.fn(() => Promise.resolve());
-    const api = {
-      getBaseUrl: () => baseUrl
-    };
+    const api = createModuleApi(baseUrl);
 
     const bootstrapManifest = ["runtime/namespace.js", "runtime/init.js"];
 
@@ -135,13 +177,13 @@ describe("plugin.mjs bootstrap", function () {
       const mod = await importPluginModule();
 
       await mod.default({
-        getBaseUrl: () => "http://host/plugins/dyninstruments/__1111111/"
+        ...createModuleApi("http://host/plugins/dyninstruments/__1111111/")
       });
       await mod.default({
-        getBaseUrl: () => "http://host/plugins/dyninstruments/__1111111/"
+        ...createModuleApi("http://host/plugins/dyninstruments/__1111111/")
       });
       await mod.default({
-        getBaseUrl: () => "http://host/plugins/dyninstruments/__2222222/"
+        ...createModuleApi("http://host/plugins/dyninstruments/__2222222/")
       });
     });
 
@@ -173,13 +215,13 @@ describe("plugin.mjs bootstrap", function () {
       const mod = await importPluginModule();
 
       await mod.default({
-        getBaseUrl: () => "http://host/plugins/dyninstruments/__1111111/"
+        ...createModuleApi("http://host/plugins/dyninstruments/__1111111/")
       });
       await mod.default({
-        getBaseUrl: () => "http://host/plugins/dyninstruments/__1111111/"
+        ...createModuleApi("http://host/plugins/dyninstruments/__1111111/")
       });
       await mod.default({
-        getBaseUrl: () => "http://host/plugins/dyninstruments/__2222222/"
+        ...createModuleApi("http://host/plugins/dyninstruments/__2222222/")
       });
     });
 
@@ -189,5 +231,103 @@ describe("plugin.mjs bootstrap", function () {
     expect(coreScripts[0].src).toBe("http://host/plugins/dyninstruments/__1111111/runtime/plugin-bootstrap-core.js");
     expect(coreScripts[1].src).toBe("http://host/plugins/dyninstruments/__2222222/runtime/plugin-bootstrap-core.js");
     expect(runInit).toHaveBeenCalledTimes(3);
+  });
+
+  it("retries bootstrap-core loading after a failed module script request", async function () {
+    let coreAppendCount = 0;
+    let contextWindow;
+    const dom = createDomHarness({
+      shouldFailScript(node) {
+        return node.src.endsWith("/runtime/plugin-bootstrap-core.js") &&
+          coreAppendCount === 1;
+      },
+      onScriptAppended(node) {
+        if (node.src.endsWith("/runtime/plugin-bootstrap-core.js")) {
+          coreAppendCount += 1;
+          if (coreAppendCount > 1) {
+            contextWindow.DyniPluginBootstrapCore = bootstrapCore;
+          }
+        }
+      },
+    });
+    const runInit = vi.fn(() => Promise.resolve());
+    const api = createModuleApi("http://host/plugins/dyninstruments/");
+
+    await withBootstrapGlobals({
+      document: dom.document,
+      window: {
+        DyniPluginBootstrapCore: undefined,
+        DyniPlugin: { runtime: { runInit } },
+      },
+    }, async function () {
+      contextWindow = global.window;
+      const mod = await importPluginModule();
+
+      await expect(mod.default(api)).rejects.toThrow("script load failed");
+      await mod.default(api);
+    });
+
+    const coreScripts = dom.appendedScripts.filter((item) => (
+      item.src.endsWith("/runtime/plugin-bootstrap-core.js")
+    ));
+    expect(coreScripts).toHaveLength(2);
+    expect(runInit).toHaveBeenCalledOnce();
+  });
+
+  it("registers widgets again after module shutdown and reload with a new API generation", async function () {
+    const dom = createDomHarness();
+    const firstApi = createModuleApi("http://host/plugins/dyninstruments/__1111111/");
+    const secondApi = createModuleApi("http://host/plugins/dyninstruments/__2222222/");
+
+    await withBootstrapGlobals({
+      document: dom.document,
+      window: {
+        DyniPluginBootstrapCore: bootstrapCore,
+        DyniPlugin: {
+          runtime: {},
+          state: {},
+          config: {
+            shared: {},
+            clusters: [],
+            components: { ClusterWidget: {} },
+            widgetDefinitions: [
+              { widget: "ClusterWidget", def: { name: "dyni_reload_test" } }
+            ],
+          },
+        },
+      },
+    }, async function () {
+      installInitMocks(global.window.DyniPlugin);
+      installActualInitRuntime(global.window, dom.document);
+
+      const mod = await importPluginModule();
+      const firstShutdown = await mod.default(firstApi);
+      if (typeof firstShutdown === "function") {
+        firstShutdown(firstApi);
+      }
+      await mod.default(secondApi);
+    });
+
+    expect(firstApi.registerWidget).toHaveBeenCalledTimes(1);
+    expect(secondApi.registerWidget).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails before loading scripts when required ApiV2 methods are missing", async function () {
+    const dom = createDomHarness();
+
+    await withBootstrapGlobals({
+      document: dom.document,
+      window: {
+        DyniPluginBootstrapCore: bootstrapCore,
+        DyniPlugin: { runtime: {} },
+      },
+    }, async function () {
+      const mod = await importPluginModule();
+      await expect(mod.default({
+        getBaseUrl: () => "http://host/plugins/dyninstruments/"
+      })).rejects.toThrow("api.registerWidget");
+    });
+
+    expect(dom.appendedScripts).toHaveLength(0);
   });
 });

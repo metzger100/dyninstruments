@@ -9,30 +9,17 @@
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const createAssetPreloader = runtime.createAssetPreloader;
+  const runtimeLoadScriptOnce = runtime.loadScriptOnce;
+  const runtimeLoadCssOnce = runtime.loadCssOnce;
 
   if (typeof createAssetPreloader !== "function") {
     throw new Error("dyninstruments: runtime.createAssetPreloader missing before runtime/component-loader.js load");
   }
-
-  function loadCssOnce(id, href) {
-    if (!href) {
-      return Promise.resolve();
-    }
-    if (document.getElementById(id)) {
-      return Promise.resolve();
-    }
-
-    return new Promise(function (res, rej) {
-      const linkEl = document.createElement("link");
-      linkEl.id = id;
-      linkEl.rel = "stylesheet";
-      linkEl.href = href;
-      linkEl.onload = function () {
-        res();
-      };
-      linkEl.onerror = rej;
-      document.head.appendChild(linkEl);
-    });
+  if (typeof runtimeLoadScriptOnce !== "function") {
+    throw new Error("dyninstruments: runtime.loadScriptOnce missing before runtime/component-loader.js load");
+  }
+  if (typeof runtimeLoadCssOnce !== "function") {
+    throw new Error("dyninstruments: runtime.loadCssOnce missing before runtime/component-loader.js load");
   }
 
   const assetPreloader = createAssetPreloader(ns.baseUrl);
@@ -107,7 +94,6 @@
   }
 
   function createComponentLoader(components) {
-    const runtimeLoadScriptOnce = runtime.loadScriptOnce;
     const registry = components;
     const loadCache = new Map();
     const loadedComponents = Object.create(null);
@@ -145,7 +131,7 @@
       const promise = Promise.all(deps.map(loadComponent))
         .then(function () {
           return Promise.all([
-            loadCssOnce("dyni-css-" + id, componentDef.css),
+            runtimeLoadCssOnce("dyni-css-" + id, componentDef.css),
             runtimeLoadScriptOnce("dyni-js-" + id, componentDef.js)
           ]);
         })
@@ -279,6 +265,5 @@
     };
   }
 
-  runtime.loadCssOnce = loadCssOnce;
   runtime.createComponentLoader = createComponentLoader;
 }(this));

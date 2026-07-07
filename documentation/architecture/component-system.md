@@ -63,6 +63,7 @@ In the runtime service lane, theme internals stay inside `runtime.theme`; compon
 Global CSS:
 
 - plugin.css remains global and is linked in document head
+- component loader CSS requests use the bootstrap-provided scoped loader so module timestamp reloads do not reuse a stale link id from an older AvNav API generation
 
 Committed HTML CSS:
 
@@ -80,8 +81,8 @@ Runtime assets:
 ## Loader Flow
 
 1. resolve dependencies recursively
-2. load CSS when component declares css
-3. load JS script once
+2. load CSS when component declares css through `runtime.loadCssOnce`
+3. load JS script once through `runtime.loadScriptOnce`
 4. preload declared assets, if any
 5. validate API shape
 6. cache resolved component promise

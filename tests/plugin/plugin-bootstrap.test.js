@@ -19,6 +19,13 @@ function loadBootstrapManifest() {
 describe("plugin.js bootstrap", function () {
   const BOOTSTRAP_MANIFEST = loadBootstrapManifest();
 
+  function createHostApi() {
+    return {
+      registerWidget: vi.fn(),
+      log: vi.fn(),
+    };
+  }
+
   it("loads bootstrap-manifest first, then listed scripts in order, then calls runtime.runInit", async function () {
     const dom = createDomHarness({
       failScriptIds: ["dyni-internal-legacy-bootstrap-bundle-js"]
@@ -28,9 +35,9 @@ describe("plugin.js bootstrap", function () {
     const context = createScriptContext({
       document: dom.document,
       AVNAV_BASE_URL: "http://host/plugins/dyninstruments///",
-      avnav: { api: {} },
+      avnav: { api: createHostApi() },
       window: {
-        avnav: { api: {} },
+        avnav: { api: createHostApi() },
         DyniPluginBootstrapCore: bootstrapCore,
         DyniPlugin: {
           config: { bootstrapManifest: BOOTSTRAP_MANIFEST },
@@ -58,7 +65,7 @@ describe("plugin.js bootstrap", function () {
       failScriptIds: ["dyni-internal-legacy-bootstrap-bundle-js"]
     });
     const runInit = vi.fn(() => Promise.resolve());
-    const hostApi = { log: vi.fn(), registerWidget: vi.fn() };
+    const hostApi = createHostApi();
 
     const context = createScriptContext({
       document: dom.document,
@@ -88,9 +95,9 @@ describe("plugin.js bootstrap", function () {
     const context = createScriptContext({
       document: dom.document,
       AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
-      avnav: { api: {} },
+      avnav: { api: createHostApi() },
       window: {
-        avnav: { api: {} },
+        avnav: { api: createHostApi() },
         DyniPluginBootstrapCore: bootstrapCore,
         DyniPlugin: {
           runtime: { runInit }
@@ -117,9 +124,9 @@ describe("plugin.js bootstrap", function () {
     const context = createScriptContext({
       document: dom.document,
       AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
-      avnav: { api: {} },
+      avnav: { api: createHostApi() },
       window: {
-        avnav: { api: {} },
+        avnav: { api: createHostApi() },
         DyniPluginBootstrapCore: bootstrapCore,
         DyniPlugin: {
           config: { bootstrapManifest: BOOTSTRAP_MANIFEST },
@@ -142,8 +149,8 @@ describe("plugin.js bootstrap", function () {
     const dom = createDomHarness();
     const context = createScriptContext({
       document: dom.document,
-      avnav: { api: {} },
-      window: { avnav: { api: {} } }
+      avnav: { api: createHostApi() },
+      window: { avnav: { api: createHostApi() } }
     });
 
     expect(function () {
@@ -182,9 +189,9 @@ describe("plugin.js bootstrap", function () {
       document: dom.document,
       console: { error: err },
       AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
-      avnav: { api: {} },
+      avnav: { api: createHostApi() },
       window: {
-        avnav: { api: {} },
+        avnav: { api: createHostApi() },
         DyniPluginBootstrapCore: bootstrapCore
       }
     });
@@ -211,9 +218,9 @@ describe("plugin.js bootstrap", function () {
     context = createScriptContext({
       document: dom.document,
       AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
-      avnav: { api: {} },
+      avnav: { api: createHostApi() },
       window: {
-        avnav: { api: {} },
+        avnav: { api: createHostApi() },
         DyniPlugin: {
           config: { bootstrapManifest: BOOTSTRAP_MANIFEST },
           runtime: { runInit }

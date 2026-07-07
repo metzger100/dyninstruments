@@ -11,6 +11,12 @@ function normalizeBaseUrl(baseUrl) {
   return baseUrl.replace(/\/+$/, "") + "/";
 }
 
+function requireApiMethod(api, methodName) {
+  if (!api || typeof api[methodName] !== "function") {
+    throw new Error(`dyninstruments: plugin.mjs requires api.${methodName}()`);
+  }
+}
+
 function hashText(value) {
   let hash = 2166136261;
   const text = String(value || "");
@@ -32,9 +38,25 @@ function loadScriptOnce(scriptId, src) {
     scriptEl.async = true;
     scriptEl.src = src;
     scriptEl.onload = () => resolve();
-    scriptEl.onerror = reject;
+    scriptEl.onerror = (error) => {
+      removeElement(scriptEl);
+      reject(error);
+    };
     document.head.appendChild(scriptEl);
   });
+}
+
+function removeElement(element) {
+  if (!element) {
+    return;
+  }
+  if (element.parentNode && typeof element.parentNode.removeChild === "function") {
+    element.parentNode.removeChild(element);
+    return;
+  }
+  if (typeof element.remove === "function") {
+    element.remove();
+  }
 }
 
 async function ensureBootstrapCore(baseUrl) {
@@ -68,9 +90,9 @@ async function ensureBootstrapCore(baseUrl) {
 }
 
 export default async function initDyniPlugin(api) {
-  if (!api || typeof api.getBaseUrl !== "function") {
-    throw new Error("dyninstruments: plugin.mjs requires an AvNav API object with getBaseUrl()");
-  }
+  requireApiMethod(api, "getBaseUrl");
+  requireApiMethod(api, "registerWidget");
+  requireApiMethod(api, "log");
 
   const baseUrl = normalizeBaseUrl(api.getBaseUrl());
   const core = await ensureBootstrapCore(baseUrl);

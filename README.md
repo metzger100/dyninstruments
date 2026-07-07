@@ -54,6 +54,17 @@ Bundled layouts are stored in:
 - `layouts/dyni-sailboat.json`
 - registered through root `plugin.json`
 
+## AvNav compatibility
+
+dyninstruments ships all current AvNav plugin surfaces:
+
+- `plugin.js` is the conservative legacy entrypoint for older AvNav versions.
+- `plugin.mjs` is the modern entrypoint used by current/future AvNav versions when available.
+- `plugin.json` is declarative metadata for bundled layouts and does not duplicate widget runtime registration.
+- `plugin.css` is loaded by AvNav as the plugin-wide stylesheet.
+
+On AvNav versions that load `plugin.mjs` first, `plugin.js` is not used as an in-browser fallback. Module startup treats each AvNav API/timestamp invocation as a fresh generation, registers widgets against that API, and returns a shutdown function so AvNav reloads can clear generation-bound state.
+
 ## Configuration
 
 1. Add a `dyni_*_Instruments` widget in the AvNav layout editor.

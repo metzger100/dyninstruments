@@ -24,6 +24,12 @@
     return AVNAV_BASE_URL.replace(/\/+$/, "") + "/";
   }
 
+  function hasRequiredHostApi(hostApi) {
+    return hostApi &&
+      typeof hostApi.registerWidget === "function" &&
+      typeof hostApi.log === "function";
+  }
+
   function loadScriptOnce(scriptId, src) {
     if (document.getElementById(scriptId)) {
       return Promise.resolve();
@@ -37,9 +43,25 @@
       scriptEl.onload = function () {
         resolve();
       };
-      scriptEl.onerror = reject;
+      scriptEl.onerror = function (error) {
+        removeElement(scriptEl);
+        reject(error);
+      };
       document.head.appendChild(scriptEl);
     });
+  }
+
+  function removeElement(element) {
+    if (!element) {
+      return;
+    }
+    if (element.parentNode && typeof element.parentNode.removeChild === "function") {
+      element.parentNode.removeChild(element);
+      return;
+    }
+    if (typeof element.remove === "function") {
+      element.remove();
+    }
   }
 
   function ensureBootstrapCore(baseUrl) {
@@ -58,8 +80,8 @@
   }
 
   var hostApi = resolveHostApi();
-  if (!hostApi) {
-    console.error("dyninstruments: avnav.api missing");
+  if (!hasRequiredHostApi(hostApi)) {
+    console.error("dyninstruments: avnav.api missing required registerWidget/log methods");
     return;
   }
 

@@ -265,6 +265,59 @@ describe("runtime/init.js", function () {
     expect(err).toHaveBeenCalled();
   });
 
+  it("can retry registration after component loading fails", async function () {
+    let shouldFail = true;
+    const themeRuntime = createThemeRuntimeMock();
+    const shellRenderer = createShellRendererMock();
+    const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
+    const registerWidget = vi.fn();
+    const context = createScriptContext({
+      avnav: {
+        api: {
+          registerWidget: vi.fn(),
+          log: vi.fn(),
+        },
+      },
+      DyniPlugin: {
+        avnavApi: {
+          registerWidget: vi.fn(),
+          log: vi.fn(),
+        },
+        runtime: {
+          theme: themeRuntime,
+          createTemporaryHostActionBridge,
+          clusterShellRenderer: shellRenderer,
+          createComponentLoader: vi.fn(() => ({
+            uniqueComponents: () => ["A"],
+            loadComponent: () => shouldFail
+              ? Promise.reject(new Error("load failed"))
+              : Promise.resolve({}),
+            createInstance: () => ({}),
+          })),
+          registerWidget,
+        },
+        state: {},
+        config: {
+          shared: {},
+          clusters: [],
+          components: { A: {} },
+          widgetDefinitions: [{ widget: "A", def: { name: "dyni_test" } }],
+        },
+      },
+    });
+
+    loadInitRuntime(context);
+    await expect(context.DyniPlugin.runtime.runInit()).rejects.toThrow(
+      "load failed",
+    );
+
+    shouldFail = false;
+    await expect(context.DyniPlugin.runtime.runInit()).resolves.toEqual(
+      expect.any(Function),
+    );
+    expect(registerWidget).toHaveBeenCalledOnce();
+  });
+
   it("returns resolved promise and logs when avnav api is missing", async function () {
     const err = vi.fn();
     const context = createScriptContext({

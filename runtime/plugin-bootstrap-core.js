@@ -17,6 +17,7 @@
   var SCRIPT_ID_PREFIX = "dyni-internal";
   var BOOTSTRAP_MANIFEST_PATH = "config/bootstrap-manifest.js";
   var BOOTSTRAP_BUNDLE_PATH = "bootstrap-bundle.js";
+  var startupSequence = 0;
 
   function normalizeBaseUrl(baseUrl) {
     if (typeof baseUrl !== "string" || baseUrl.trim() === "") {
@@ -63,6 +64,13 @@
     return "legacy";
   }
 
+  function resolveEntrypoint(options) {
+    if (options && options.entrypoint === "module") {
+      return "module";
+    }
+    return "legacy";
+  }
+
   function makeScriptId(relativePath, scope) {
     return [
       SCRIPT_ID_PREFIX,
@@ -84,19 +92,62 @@
       scriptEl.onload = function () {
         resolve();
       };
-      scriptEl.onerror = reject;
+      scriptEl.onerror = function (error) {
+        removeElement(scriptEl);
+        reject(error);
+      };
       documentRef.head.appendChild(scriptEl);
     });
   }
 
-  function prepareNamespace(rootRef, baseUrl, hostApi, loadScriptOnce) {
+  function removeElement(element) {
+    if (!element) {
+      return;
+    }
+    if (element.parentNode && typeof element.parentNode.removeChild === "function") {
+      element.parentNode.removeChild(element);
+      return;
+    }
+    if (typeof element.remove === "function") {
+      element.remove();
+    }
+  }
+
+  function loadCssOnceById(documentRef, cssId, href) {
+    if (!href) {
+      return Promise.resolve();
+    }
+    if (documentRef.getElementById(cssId)) {
+      return Promise.resolve();
+    }
+
+    return new Promise(function (resolve, reject) {
+      var linkEl = documentRef.createElement("link");
+      linkEl.id = cssId;
+      linkEl.rel = "stylesheet";
+      linkEl.href = href;
+      linkEl.onload = function () {
+        resolve();
+      };
+      linkEl.onerror = function (error) {
+        removeElement(linkEl);
+        reject(error);
+      };
+      documentRef.head.appendChild(linkEl);
+    });
+  }
+
+  function prepareNamespace(rootRef, baseUrl, hostApi, loadScriptOnce, loadCssOnce, generation) {
     var win = rootRef.window || rootRef;
     var ns = win.DyniPlugin = win.DyniPlugin || {};
     ns.baseUrl = baseUrl;
     ns.avnavApi = hostApi;
     ns.config = ns.config || {};
     ns.runtime = ns.runtime || {};
+    ns.state = ns.state || {};
+    ns.startupGeneration = generation;
     ns.runtime.loadScriptOnce = loadScriptOnce;
+    ns.runtime.loadCssOnce = loadCssOnce;
     return ns;
   }
 
@@ -139,18 +190,40 @@
 
     var baseUrl = normalizeBaseUrl(opts.baseUrl);
     var scope = resolveScriptScope(opts, baseUrl);
-    var loadScriptOnce = function (scriptId, src) {
+    startupSequence += 1;
+
+    var generation = {
+      id: scope + "-" + startupSequence,
+      entrypoint: resolveEntrypoint(opts),
+      baseUrl: baseUrl,
+      hostApi: opts.hostApi || null
+    };
+
+    var loadScriptOnceByScopedId = function (scriptId, src) {
+      return loadScriptOnceById(documentRef, makeScriptId(scriptId, scope), src);
+    };
+    var loadCssOnceByScopedId = function (cssId, href) {
+      return loadCssOnceById(documentRef, makeScriptId(cssId, scope), href);
+    };
+    var loadScriptById = function (scriptId, src) {
       return loadScriptOnceById(documentRef, scriptId, src);
     };
 
     var rootRef = opts.root || (typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : {}));
-    var ns = prepareNamespace(rootRef, baseUrl, opts.hostApi || null, loadScriptOnce);
+    var ns = prepareNamespace(
+      rootRef,
+      baseUrl,
+      opts.hostApi || null,
+      loadScriptOnceByScopedId,
+      loadCssOnceByScopedId,
+      generation
+    );
 
-    return loadScriptOnce(makeScriptId(BOOTSTRAP_BUNDLE_PATH, scope), baseUrl + BOOTSTRAP_BUNDLE_PATH)
+    return loadScriptById(makeScriptId(BOOTSTRAP_BUNDLE_PATH, scope), baseUrl + BOOTSTRAP_BUNDLE_PATH)
       .then(function () {
         return runInit(ns);
       }, function () {
-        return loadBootstrapManifest(ns, documentRef, baseUrl, scope, logger, loadScriptOnce)
+        return loadBootstrapManifest(ns, documentRef, baseUrl, scope, logger, loadScriptById)
           .then(function () {
             return runInit(ns);
           });
@@ -166,6 +239,7 @@
     makeScriptId: makeScriptId,
     resolveGenerationDiscriminator: resolveGenerationDiscriminator,
     resolveScriptScope: resolveScriptScope,
+    resolveEntrypoint: resolveEntrypoint,
     normalizeBaseUrl: normalizeBaseUrl
   };
 }));

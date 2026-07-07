@@ -214,6 +214,7 @@ describe("config/components.js", function () {
         baseUrl: "http://host/plugins/dyninstruments/",
         runtime: {
           loadScriptOnce: vi.fn(() => Promise.resolve()),
+          loadCssOnce: vi.fn(() => Promise.resolve()),
         },
         state: {},
         config: {
