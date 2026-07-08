@@ -14,7 +14,8 @@
 | Anchor | Anchor watch circle |
 | Vessel | Alarms, regatta timer, position coordinates, center display, three-value text |
 
-<img width="1919" height="933" alt="image" src="https://github.com/user-attachments/assets/ac61d16d-027c-47f8-844b-b68103746221" />
+<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-07-08 20-29-00" src="https://github.com/user-attachments/assets/6be666cf-df3c-4832-9ba3-265f5497e152" />
+<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-07-08 20-28-44" src="https://github.com/user-attachments/assets/097ad058-a6ca-43f8-b2bf-6879a877ef5d" />
 
 ## Installation
 
