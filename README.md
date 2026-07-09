@@ -2,6 +2,8 @@
 
 `dyninstruments` is an [AvNav](https://github.com/wellenvogel/avnav) plugin that adds readable, configurable marine instrument widgets for navigation, wind, environment, alarms, and route handling.
 
+<img width="1920" height="1080" alt="Bildschirmfoto vom 2026-07-09 21-41-43" src="https://github.com/user-attachments/assets/565746cc-cc50-405e-b3fe-d542e2ae7506" />
+
 ## What you get
 
 | Cluster | Includes |
