@@ -70,6 +70,8 @@
   box-sizing: border-box;
   position: relative;
   border: 1px solid var(--dyni-theme-surface-border);
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Host shell and surfaces fill the widget area on the renderHtml host path. */
@@ -114,6 +116,7 @@
 
 .widgetContainer.horizontal .widget.dyniplugin.horizontal {
   width: 7em;
+  min-width: 7em;
 }
 
 /* Semantic state-screen wrappers for shared empty/disconnected states. */
