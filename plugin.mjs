@@ -3,6 +3,11 @@
  * Documentation: documentation/architecture/runtime-lifecycle.md
  */
 
+/** @typedef {DyniAvnavApi & { getBaseUrl: () => string, registerWidget: (definition: Record<string, unknown>, editable: Record<string, unknown>) => void, log: (...args: unknown[]) => void }} DyniModuleApi */
+/** @typedef {{ lastBaseUrl: string, loadedCoreIds: Record<string, boolean> }} DyniModuleBootstrapCoreState */
+/** @typedef {DyniPluginNamespace & { moduleBootstrapCoreState?: DyniModuleBootstrapCoreState }} DyniModulePluginNamespace */
+
+/** @param {string} baseUrl @returns {string} */
 function normalizeBaseUrl(baseUrl) {
   if (typeof baseUrl !== "string" || baseUrl.trim() === "") {
     throw new Error("dyninstruments: api.getBaseUrl() returned an invalid plugin base URL");
@@ -10,12 +15,14 @@ function normalizeBaseUrl(baseUrl) {
   return baseUrl.replace(/\/+$/, "") + "/";
 }
 
+/** @param {DyniModuleApi | null | undefined} api @param {keyof DyniModuleApi} methodName */
 function requireApiMethod(api, methodName) {
   if (!api || typeof api[methodName] !== "function") {
     throw new Error(`dyninstruments: plugin.mjs requires api.${methodName}()`);
   }
 }
 
+/** @param {unknown} value @returns {string} */
 function hashText(value) {
   let hash = 2166136261;
   const text = String(value || "");
@@ -26,12 +33,13 @@ function hashText(value) {
   return (hash >>> 0).toString(36);
 }
 
+/** @param {string} scriptId @param {string} src @returns {Promise<void>} */
 function loadScriptOnce(scriptId, src) {
   if (document.getElementById(scriptId)) {
     return Promise.resolve();
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise((/** @type {() => void} */ resolve, /** @type {(reason?: unknown) => void} */ reject) => {
     const scriptEl = document.createElement("script");
     scriptEl.id = scriptId;
     scriptEl.async = true;
@@ -45,6 +53,7 @@ function loadScriptOnce(scriptId, src) {
   });
 }
 
+/** @param {Element | null | undefined} element */
 function removeElement(element) {
   if (!element) {
     return;
@@ -58,8 +67,9 @@ function removeElement(element) {
   }
 }
 
+/** @param {string} baseUrl @returns {Promise<DyniBootstrapCoreApi>} */
 async function ensureBootstrapCore(baseUrl) {
-  const ns = window.DyniPlugin = window.DyniPlugin || {};
+  const ns = /** @type {DyniModulePluginNamespace} */ (window.DyniPlugin = window.DyniPlugin || {});
   const state = ns.moduleBootstrapCoreState = ns.moduleBootstrapCoreState || {
     lastBaseUrl: "",
     loadedCoreIds: {}
@@ -88,6 +98,7 @@ async function ensureBootstrapCore(baseUrl) {
   return window.DyniPluginBootstrapCore;
 }
 
+/** @param {DyniModuleApi} api @returns {Promise<(() => void) | undefined>} */
 export default async function initDyniPlugin(api) {
   requireApiMethod(api, "getBaseUrl");
   requireApiMethod(api, "registerWidget");

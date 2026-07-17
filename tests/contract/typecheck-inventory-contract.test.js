@@ -8,6 +8,7 @@ describe("TypeScript checkJs inventory", function () {
   it("covers every shipped production JavaScript file and no test/tool fixture", function () {
     const expected = new Set([
       "plugin.js",
+      "plugin.mjs",
       ...collectJavaScriptFiles("config"),
       ...collectJavaScriptFiles("runtime"),
       ...collectJavaScriptFiles("cluster"),
@@ -16,11 +17,11 @@ describe("TypeScript checkJs inventory", function () {
       "vitest.config.js"
     ]);
     const listed = new Set(config.files.filter(function (file) {
-      return file.endsWith(".js");
+      return file.endsWith(".js") || file.endsWith(".mjs");
     }));
 
     expect(listed).toEqual(expected);
-    expect(listed.size).toBe(212);
+    expect(listed.size).toBe(213);
   });
 
   it("keeps the six ambient declaration files in the strict project", function () {

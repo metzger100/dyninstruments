@@ -20,6 +20,7 @@
     "types/radial-kit.d.ts",
     "config/cluster-routes.js",
     "config/bootstrap-manifest.js",
+    "plugin.mjs",
     "config/clusters/anchor.js",
     "config/clusters/environment.js",
     "config/clusters/course-heading.js",
