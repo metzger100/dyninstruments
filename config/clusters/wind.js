@@ -1,14 +1,16 @@
 /**
- * Module: DyniPlugin Wind Cluster - Wind numeric and dial widget config
+ * @file DyniPlugin Wind Cluster - Wind numeric and dial widget config
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/unit-editable-utils.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {DyniPluginSharedConfig & { makePerKindCaptionParams: (map: DyniPerKindTextParameterMap) => DyniEditableParameters, makePerKindTextParams: (map: DyniPerKindTextParameterMap) => DyniEditableParameters, makeUnitAwareTextParams: (map: DyniPerKindTextParameterMap, bindings: Readonly<Record<string, DyniUnitFormatBinding>>) => DyniEditableParameters, opt: (name: unknown, value: unknown) => DyniEditableOption, kindMaps: Record<string, DyniPerKindTextParameterMap>, unitFormatFamilies: DyniUnitFormatCatalog }} DyniWindSharedConfig */
+  /** @typedef {{ DyniPlugin: DyniPluginNamespace & { config: DyniPluginConfig & { clusters: DyniWidgetDefinition[] } } }} DyniWindRoot */
+
+  const ns = /** @type {DyniWindRoot} */ (/** @type {unknown} */ (root)).DyniPlugin;
   const config = ns.config;
-  const shared = config.shared;
+  const shared = /** @type {DyniWindSharedConfig} */ (config.shared);
 
   const makePerKindCaptionParams = shared.makePerKindCaptionParams;
   const makePerKindTextParams = shared.makePerKindTextParams;

@@ -1,7 +1,6 @@
 /**
- * Module: EditRouteLayoutMath - Numeric guards for edit-route layout calculations
+ * @file EditRouteLayoutMath - Numeric guards for edit-route layout calculations
  * Documentation: documentation/widgets/edit-route.md
- * Depends: ValueMath, LayoutRectMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,10 +11,18 @@
 }(this, function () {
   "use strict";
 
+  /** @type {DyniValueMathApi["toFiniteNumber"]} */
   let toFiniteNumber;
+  /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */
   let toOptionalFiniteNumber;
+  /** @type {DyniValueMathApi["clampNumber"]} */
   let clampNumber;
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniEditRouteLayoutMathApi}
+   */
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
     const rectApi = componentContext.components.require("LayoutRectMath");

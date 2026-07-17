@@ -29,7 +29,6 @@ describe("runtime/SurfaceSessionController.js", function () {
       }
     });
 
-    runIifeScript("runtime/PerfSpanHelper.js", context);
     runIifeScript("runtime/SurfaceSessionController.js", context);
     return context.DyniPlugin.runtime.createSurfaceSessionController;
   }
@@ -229,47 +228,6 @@ describe("runtime/SurfaceSessionController.js", function () {
     expect(session.isCurrentRevision(7)).toBe(true);
     expect(session.isCurrentRevision(6)).toBe(false);
     expect(session.isCurrentRevision(8)).toBe(false);
-  });
-
-  it("emits reconcileSession lifecycle spans when perf hooks are installed", function () {
-    const spans = [];
-    const createSurfaceSessionController = loadFactory({
-      __DYNI_PERF_HOOKS__: {
-        startSpan(name, tags) {
-          return { name, tags: tags || null };
-        },
-        endSpan(token, tags) {
-          spans.push({
-            name: token && token.name,
-            tags: {
-              ...(token && token.tags ? token.tags : {}),
-              ...(tags && typeof tags === "object" ? tags : {})
-            }
-          });
-        }
-      }
-    });
-    const htmlController = createControllerMock("html");
-    const surfaces = createSurfacesMock({
-      html: htmlController
-    });
-    const session = createSurfaceSessionController({
-      surfaces: surfaces
-    });
-
-    session.reconcileSession(createPayload({
-      revision: 1,
-      props: { value: 1 }
-    }));
-    session.reconcileSession(createPayload({
-      revision: 2,
-      props: { value: 2 }
-    }));
-
-    const reconcileSpans = spans.filter((entry) => entry.name === "SurfaceSessionController.reconcileSession");
-    expect(reconcileSpans).toHaveLength(2);
-    expect(reconcileSpans[0].tags.surface).toBe("html");
-    expect(reconcileSpans[1].tags.revision).toBe(2);
   });
 
   it("destroy tears down active controller and is idempotent", function () {

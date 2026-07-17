@@ -1,7 +1,6 @@
 /**
- * Module: WindLinearWidget - Linear wind gauge with angle pointer, layline sectors, and dual angle/speed text
+ * @file WindLinearWidget - Linear wind gauge with angle pointer, layline sectors, and dual angle/speed text
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, ValueMath, StableDigits, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,8 +10,11 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {DyniLinearGaugeProps & { angleUnit?: unknown, speedUnit?: unknown, angleCaption?: unknown, speedCaption?: unknown, speed?: unknown, leadingZero?: boolean, captionUnitScale?: unknown, stableDigits?: boolean, windLinearLayEnabled?: boolean, windLinearLayMin?: number, windLinearLayMax?: number, formatter?: unknown, formatterParameters?: unknown, default?: unknown }} DyniWindLinearProps */
+  /** @typedef {{ num: number, text: unknown, secScale: number, left: DyniLinearMetricDisplay, right: DyniLinearMetricDisplay }} DyniWindLinearDisplay */
   const hasOwn = Object.prototype.hasOwnProperty;
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const engine = componentContext.components.require("LinearGaugeEngine");
     const valueMath = componentContext.components.require("ValueMath");
@@ -20,6 +22,7 @@
     const stableDigits = componentContext.components.require("StableDigits");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
+    /** @param {DyniRect} box @param {number} gapPx @returns {{ left: DyniRect, right: DyniRect }} */
     function splitHorizontal(box, gapPx) {
       const gap = Math.max(0, Math.floor(gapPx));
       const width = Math.max(0, box.w - gap);
@@ -30,6 +33,7 @@
       return { left: left, right: right };
     }
 
+    /** @param {unknown} rawSpeed @param {DyniWindLinearProps} props @param {unknown} speedUnit @param {string} defaultText @returns {string} */
     function resolveSpeedText(rawSpeed, props, speedUnit, defaultText) {
       if (rawSpeed == null || (typeof rawSpeed === "string" && rawSpeed.trim() === "")) {
         return defaultText;
@@ -52,10 +56,11 @@
       return trimmed || defaultText;
     }
 
+    /** @param {unknown} rawAngle @param {DyniWindLinearProps} props @returns {DyniWindLinearDisplay} */
     function windDisplay(rawAngle, props) {
       const p = props || {};
       const defaultText = hasOwn.call(p, "default")
-        ? p.default
+        ? placeholderNormalize.normalize(p.default, undefined)
         : placeholderNormalize.normalize(undefined, undefined);
       const angle = toOptionalFiniteNumber(rawAngle);
       const angleText = typeof angle === "number"
@@ -97,6 +102,7 @@
       };
     }
 
+    /** @param {DyniLinearGaugeDrawingState} state @param {DyniCanvasTextLayoutApi} textApi @param {DyniLinearGaugeTextLayoutApi} textLayoutApi @param {DyniLinearMetricDisplay} left @param {DyniLinearMetricDisplay} right @param {DyniRect | null | undefined} captionBox @param {DyniRect | null | undefined} valueBox @param {unknown} secScale @param {unknown} leftAlign @param {unknown} rightAlign */
     function drawDualRows(state, textApi, textLayoutApi, left, right, captionBox, valueBox, secScale, leftAlign, rightAlign) {
       if (!captionBox || !valueBox) {
         return;
@@ -110,6 +116,7 @@
       textLayoutApi.drawValueUnitRow(state, textApi, right.value, right.unit, valueCols.right, secScale, rightAlign);
     }
 
+    /** @param {DyniLinearGaugeDrawingState} state @param {DyniCanvasTextLayoutApi} textApi @param {DyniLinearGaugeTextLayoutApi} textLayoutApi @param {DyniLinearMetricDisplay} metric @param {DyniRect | null | undefined} box @param {unknown} secScale */
     function drawMetricInline(state, textApi, textLayoutApi, metric, box, secScale) {
       if (!metric || !box) {
         return;
@@ -117,6 +124,7 @@
       textLayoutApi.drawInlineRow(state, textApi, metric.caption, metric.value, metric.unit, box, secScale);
     }
 
+    /** @param {DyniWindLinearProps} props @param {number} minV @param {number} maxV @param {DyniLinearRange} axis @param {DyniValueMathApi} valueApi @param {DyniLinearGaugeTheme} theme @returns {DyniLinearColoredRange[]} */
     function buildSectors(props, minV, maxV, axis, valueApi, theme) {
       const p = props || {};
       if (p.windLinearLayEnabled === false) {

@@ -1,12 +1,14 @@
 /**
- * Module: plugin.js - Legacy Dyni bootstrap adapter
+ * @file plugin.js - Legacy Dyni bootstrap adapter
  * Documentation: documentation/architecture/runtime-lifecycle.md
- * Depends: runtime/plugin-bootstrap-core.js
  */
 /* global avnav */
 (function () {
   "use strict";
 
+  /** @typedef {DyniAvnavApi & { registerWidget: (definition: Record<string, unknown>, editable: Record<string, unknown>) => void, log: (...args: unknown[]) => void }} DyniRequiredHostApi */
+
+  /** @returns {DyniAvnavApi | null} */
   function resolveHostApi() {
     if (typeof avnav !== "undefined" && avnav && avnav.api) {
       return avnav.api;
@@ -17,6 +19,7 @@
     return null;
   }
 
+  /** @returns {string} */
   function resolveBaseUrl() {
     if (typeof AVNAV_BASE_URL !== "string" || !AVNAV_BASE_URL) {
       throw new Error("AVNAV_BASE_URL is missing - AvNav must provide this global for plugins.");
@@ -24,19 +27,21 @@
     return AVNAV_BASE_URL.replace(/\/+$/, "") + "/";
   }
 
+  /** @param {DyniAvnavApi | null | undefined} hostApi @returns {hostApi is DyniRequiredHostApi} */
   function hasRequiredHostApi(hostApi) {
-    return hostApi &&
+    return !!(hostApi &&
       typeof hostApi.registerWidget === "function" &&
-      typeof hostApi.log === "function";
+      typeof hostApi.log === "function");
   }
 
+  /** @param {string} scriptId @param {string} src @returns {Promise<void>} */
   function loadScriptOnce(scriptId, src) {
     if (document.getElementById(scriptId)) {
       return Promise.resolve();
     }
 
     return new Promise(function (resolve, reject) {
-      var scriptEl = document.createElement("script");
+      var scriptEl = /** @type {HTMLScriptElement} */ (document.createElement("script"));
       scriptEl.id = scriptId;
       scriptEl.async = true;
       scriptEl.src = src;
@@ -51,6 +56,7 @@
     });
   }
 
+  /** @param {Element | null | undefined} element */
   function removeElement(element) {
     if (!element) {
       return;
@@ -64,6 +70,7 @@
     }
   }
 
+  /** @param {string} baseUrl @returns {Promise<DyniBootstrapCoreApi>} */
   function ensureBootstrapCore(baseUrl) {
     if (window.DyniPluginBootstrapCore) {
       return Promise.resolve(window.DyniPluginBootstrapCore);

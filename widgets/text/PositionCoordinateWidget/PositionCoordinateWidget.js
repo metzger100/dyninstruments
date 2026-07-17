@@ -1,7 +1,6 @@
 /**
- * Module: PositionCoordinateWidget - Stacked latitude/longitude renderer for nav position kinds
+ * @file PositionCoordinateWidget - Stacked latitude/longitude renderer for nav position kinds
  * Documentation: documentation/widgets/position-coordinates.md
- * Depends: componentContext.theme.tokens, TextLayoutEngine, ValueMath, PlaceholderNormalize, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay, componentContext.format.applyFormatter, componentContext.canvas.setupCanvas, componentContext.dom.requirePluginRoot
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,6 +10,8 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {{ resolveForRoot(rootEl: unknown): { font: { family: string, familyMono?: string, weight: unknown, labelWeight: unknown }, surface: { fg: string }, opacity?: { caption?: unknown, unit?: unknown } } }} DyniPositionCoordinateThemeResolver */
+  /** @typedef {DyniComponentContext & { theme: { tokens: DyniPositionCoordinateThemeResolver }, canvas: DyniCanvasHostApi }} DyniPositionCoordinateWidgetContext */
 
   const DISPLAY_VARIANT_POSITION = "position";
   const DISPLAY_VARIANT_DATE_TIME = "dateTime";
@@ -19,6 +20,7 @@
   const STATUS_BAD = "\ud83d\udd34";
   const TIME_STATUS_SCALE_LIMIT = 0.82;
 
+  /** @param {unknown} value @returns {string} */
   function normalizeDisplayVariant(value) {
     if (value === DISPLAY_VARIANT_DATE_TIME || value === DISPLAY_VARIANT_TIME_STATUS) {
       return value;
@@ -26,12 +28,14 @@
     return DISPLAY_VARIANT_POSITION;
   }
 
+  /** @param {unknown} value @param {boolean} rawMode @param {DyniValueMathApi["toOptionalFiniteNumber"]} toOptionalFiniteNumber */
   function readCoordinatePair(value, rawMode, toOptionalFiniteNumber) {
     if (!value || typeof value !== "object") {
       return null;
     }
-    const lonRaw = Array.isArray(value) ? value[0] : value.lon;
-    const latRaw = Array.isArray(value) ? value[1] : value.lat;
+    const point = /** @type {{ lat?: unknown, lon?: unknown }} */ (value);
+    const lonRaw = Array.isArray(value) ? value[0] : point.lon;
+    const latRaw = Array.isArray(value) ? value[1] : point.lat;
     if (Array.isArray(value) && value.length < 2) {
       return null;
     }
@@ -43,6 +47,7 @@
     return Number.isFinite(lat) && Number.isFinite(lon) ? { lat: lat, lon: lon } : null;
   }
 
+  /** @param {unknown} value @returns {boolean} */
   function isGpsValid(value) {
     if (value === true) {
       return true;
@@ -63,10 +68,12 @@
     return !!value;
   }
 
+  /** @param {unknown} raw @returns {string} */
   function statusCircleFormatter(raw) {
     return isGpsValid(raw) ? STATUS_OK : STATUS_BAD;
   }
 
+  /** @param {DyniWidgetValues} props @returns {DyniWidgetValues} */
   function resolveVariantProps(props) {
     const p = props || {};
     const displayVariant = normalizeDisplayVariant(p.displayVariant);
@@ -97,6 +104,7 @@
     return p;
   }
 
+  /** @param {DyniWidgetValues} props @param {"lat" | "lon"} axis */
   function pickAxisFormatter(props, axis) {
     const p = props || {};
     const suffix = axis === "lat" ? "Lat" : "Lon";
@@ -112,6 +120,7 @@
       appendAxisParam: !hasOverride
     };
   }
+  /** @param {unknown} rawValue @param {"lat" | "lon"} axis @param {string} defaultText @param {DyniWidgetValues} props @param {DyniComponentContext} componentContext @param {DyniPlaceholderNormalizeApi} placeholderNormalize @param {DyniValueMathApi["toOptionalFiniteNumber"]} toOptionalFiniteNumber */
   function formatAxisValue(rawValue, axis, defaultText, props, componentContext, placeholderNormalize, toOptionalFiniteNumber) {
     const rawMode = props && props.coordinateRawValues === true;
     if (rawMode) {
@@ -134,19 +143,23 @@
     }));
     return placeholderNormalize.normalize(out, defaultText);
   }
+  /** @param {string} text @returns {boolean} */
   function isTimeStatusMarker(text) {
     const normalized = String(text).trim();
     return normalized === STATUS_OK || normalized === STATUS_BAD;
   }
+  /** @param {unknown} metrics @returns {number | null} */
   function readActualTextHeight(metrics) {
-    const ascent = Number(metrics && metrics.actualBoundingBoxAscent);
-    const descent = Number(metrics && metrics.actualBoundingBoxDescent);
+    const textMetrics = /** @type {Partial<TextMetrics> | null} */ (metrics && typeof metrics === "object" ? metrics : null);
+    const ascent = Number(textMetrics && textMetrics.actualBoundingBoxAscent);
+    const descent = Number(textMetrics && textMetrics.actualBoundingBoxDescent);
     const total = ascent + descent;
     if (!Number.isFinite(ascent) || !Number.isFinite(descent) || !(total > 0)) {
       return null;
     }
     return total;
   }
+  /** @param {unknown} def @param {DyniPositionCoordinateWidgetContext} componentContext */
   function create(def, componentContext) {
     const theme = componentContext.theme.tokens;
     const text = componentContext.components.require("TextLayoutEngine");
@@ -157,6 +170,7 @@
     const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
     const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
     const fitCache = text.createFitCache(["flat", "stacked"]);
+    /** @param {HTMLCanvasElement} canvas @param {DyniWidgetValues} props */
     function renderCanvas(canvas, props) {
       const p = resolveVariantProps(props);
       const setup = componentContext.canvas.setupCanvas(canvas);
@@ -248,7 +262,7 @@
             family: family,
             valueWeight: valueWeight,
             labelWeight: labelWeight,
-            extraValueCheck: function (meta) {
+            extraValueCheck: /** @param {{ maxH: number, valueMetrics: unknown, valuePx: number }} meta */ function (meta) {
               if (!statusEmoji) {
                 return true;
               }
@@ -309,7 +323,7 @@
             family: family,
             valueWeight: valueWeight,
             labelWeight: labelWeight,
-            topRowExtraCheck: function (meta) {
+            topRowExtraCheck: /** @param {{ maxH: number, metrics: unknown, px: number }} meta */ function (meta) {
               if (!topStatusEmoji) {
                 return true;
               }

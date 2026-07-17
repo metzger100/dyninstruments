@@ -1,7 +1,6 @@
 /**
- * Module: ActiveRouteLayout - Responsive layout rectangles for the ActiveRoute text renderer
+ * @file ActiveRouteLayout - Responsive layout rectangles for the ActiveRoute text renderer
  * Documentation: documentation/widgets/active-route.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, LayoutSizingHelpers, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -28,21 +27,23 @@
   const HIGH_NAME_MAX_RATIO = 0.28;
   const NORMAL_NAME_MIN_RATIO = 0.24;
   const NORMAL_NAME_MAX_RATIO = 0.4;
-  let makeRect = null;
   const RESPONSIVE_SCALES = {
     textFillScale: 1.18,
     flatNameShareScale: 0.84,
     highNameBandScale: 0.88,
     normalNameBandScale: 0.9
   };
-  let clampNumber;
-
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniActiveRouteLayoutApi}
+   */
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
     const sizingHelpers = componentContext.components.require("LayoutSizingHelpers");
-    clampNumber = componentContext.components.require("ValueMath").clampNumber;
-    makeRect = rectApi.makeRect;
+    const clampNumber = componentContext.components.require("ValueMath").clampNumber;
+    const makeRect = rectApi.makeRect;
     const createContentRect = sizingHelpers.createInsetContentRectFactory(makeRect, "padX", "innerY");
     const computeMetricTileSpacing = sizingHelpers.createMetricTileSpacingFactory(
       profileApi,
@@ -50,6 +51,11 @@
       METRIC_TILE_CAPTION_RATIO
     );
 
+    /**
+     * @param {unknown} W
+     * @param {unknown} H
+     * @returns {DyniActiveRouteInsets}
+     */
     function computeInsets(W, H) {
       const responsive = profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
       return {
@@ -61,6 +67,10 @@
       };
     }
 
+    /**
+     * @param {DyniActiveRouteLayoutArgs | undefined} args
+     * @returns {DyniActiveRouteLayoutResult}
+     */
     function computeLayout(args) {
       const cfg = args || {};
       const contentRect = cfg.contentRect || makeRect(0, 0, 0, 0);
@@ -77,15 +87,17 @@
         Math.max(contentRect.w, contentRect.h),
         profileApi.computeInsetPx(responsive, NAME_PAD_X_RATIO, 1)
       )));
-      const mode = cfg.mode === "high" || cfg.mode === "flat" ? cfg.mode : "normal";
+      const mode = /** @type {DyniActiveRouteLayoutMode} */ (
+        cfg.mode === "high" || cfg.mode === "flat" ? cfg.mode : "normal"
+      );
       const isApproaching = cfg.isApproaching === true;
       const layout = {
         mode: mode,
         gap: gap,
         namePadX: namePadX,
         responsive: responsive,
-        nameRect: null,
-        metricRects: Object.create(null)
+        nameRect: makeRect(0, 0, 0, 0),
+        metricRects: /** @type {DyniActiveRouteMetricRects} */ (Object.create(null))
       };
 
       if (mode === "flat") {

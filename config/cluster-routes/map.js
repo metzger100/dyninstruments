@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Cluster Routes Map - Route metadata for map kinds
+ * @file DyniPlugin Cluster Routes Map - Route metadata for map kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: config/cluster-routes.js
  */
 (function (root) {
   "use strict";

@@ -1,7 +1,6 @@
 /**
- * Module: CanvasTextFitting - Generic canvas text measurement and fitting
+ * @file CanvasTextFitting - Generic canvas text measurement and fitting
  * Documentation: documentation/conventions/shared-helpers.md
- * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -18,31 +17,51 @@
   const FONT_STATE_KEY = "__dyniRadialTextFontState";
   const WIDTH_CACHE_KEY = "__dyniRadialTextWidthCache";
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniCanvasTextFittingApi}
+   */
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
     const clampPositive = valueMath.clampPositive;
 
+    /** @param {unknown} ctx @returns {Record<string, number> | null} */
     function resolveWidthCache(ctx) {
       if (!ctx || (typeof ctx !== "object" && typeof ctx !== "function")) {
         return null;
       }
-      if (!ctx[WIDTH_CACHE_KEY] || typeof ctx[WIDTH_CACHE_KEY] !== "object") {
-        ctx[WIDTH_CACHE_KEY] = Object.create(null);
+      const store = /** @type {DyniAugmentedCanvas} */ (ctx);
+      if (!store[WIDTH_CACHE_KEY] || typeof store[WIDTH_CACHE_KEY] !== "object") {
+        store[WIDTH_CACHE_KEY] = Object.create(null);
       }
-      return ctx[WIDTH_CACHE_KEY];
+      return /** @type {Record<string, number>} */ (store[WIDTH_CACHE_KEY]);
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {unknown} px
+     * @param {unknown} weight
+     * @param {unknown} family
+     * @returns {number}
+     */
     function setFont(ctx, px, weight, family) {
       const size = Math.max(MIN_FONT_PX, Number(px) || 0);
       const fontWeight = Number.isFinite(Number(weight)) ? Math.floor(Number(weight)) : 700;
-      const fontValue = fontWeight + " " + size + "px " + (family || "sans-serif");
-      if (ctx[FONT_STATE_KEY] !== fontValue || ctx.font !== fontValue) {
+      const fontValue = fontWeight + " " + size + "px " + /** @type {string} */ (family || "sans-serif");
+      const state = /** @type {DyniAugmentedCanvas} */ (/** @type {unknown} */ (ctx));
+      if (state[FONT_STATE_KEY] !== fontValue || ctx.font !== fontValue) {
         ctx.font = fontValue;
-        ctx[FONT_STATE_KEY] = fontValue;
+        state[FONT_STATE_KEY] = fontValue;
       }
       return size;
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {unknown} text
+     * @returns {number}
+     */
     function measureTextWidth(ctx, text) {
       const content = String(text || "");
       const widthCache = resolveWidthCache(ctx);
@@ -57,6 +76,15 @@
       return width;
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {unknown} text
+     * @param {unknown} maxW
+     * @param {unknown} maxH
+     * @param {unknown} family
+     * @param {unknown} weight
+     * @returns {number}
+     */
     function fitTextPx(ctx, text, maxW, maxH, family, weight) {
       const ceilingPx = clampPositive(maxH, MIN_FONT_PX);
       const widthLimit = Math.max(0, Number(maxW) || 0);
@@ -78,11 +106,34 @@
       return Math.min(ceilingPx, Math.max(MIN_FONT_PX, ceilingPx * ratio));
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {unknown} text
+     * @param {unknown} basePx
+     * @param {unknown} maxW
+     * @param {unknown} maxH
+     * @param {unknown} family
+     * @param {unknown} weight
+     * @returns {number}
+     */
     function fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, weight) {
       const ceilingPx = Math.min(clampPositive(basePx, MIN_FONT_PX), clampPositive(maxH, MIN_FONT_PX));
       return fitTextPx(ctx, text, maxW, ceilingPx, family, weight);
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {unknown} family
+     * @param {unknown} value
+     * @param {unknown} unit
+     * @param {unknown} w
+     * @param {unknown} h
+     * @param {unknown} secScale
+     * @param {unknown} valueWeight
+     * @param {unknown} labelWeight
+     * @param {unknown} [textOptions]
+     * @returns {DyniValueUnitFitResult}
+     */
     function measureValueUnitFit(ctx, family, value, unit, w, h, secScale, valueWeight, labelWeight, textOptions) {
       if (!value) {
         return { vPx: 0, uPx: 0, gap: 0, total: 0 };
@@ -94,7 +145,9 @@
       const hasUnit = !!unit;
       const ratio = Number(secScale);
       const scale = Number.isFinite(ratio) ? ratio : 0.8;
-      const opts = textOptions && typeof textOptions === "object" ? textOptions : null;
+      const opts = textOptions && typeof textOptions === "object"
+        ? /** @type {{ useMono?: unknown, monoFamily?: unknown }} */ (textOptions)
+        : null;
       const valueFamily = opts && opts.useMono === true
         ? (opts.monoFamily || family)
         : family;
@@ -103,6 +156,7 @@
         return { vPx: MIN_FONT_PX, uPx: hasUnit ? MIN_FONT_PX : 0, gap: 0, total: 0 };
       }
 
+      /** @param {number} vPx @param {number} uPx @param {number} gap @returns {number} */
       function totalWidth(vPx, uPx, gap) {
         setFont(ctx, vPx, valueWeight, valueFamily);
         const valueW = measureTextWidth(ctx, value);
@@ -137,6 +191,19 @@
       return { vPx: vPx, uPx: uPx, gap: gap, total: total };
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {unknown} family
+     * @param {unknown} caption
+     * @param {unknown} value
+     * @param {unknown} unit
+     * @param {unknown} maxW
+     * @param {unknown} maxH
+     * @param {unknown} secScale
+     * @param {unknown} valueWeight
+     * @param {unknown} labelWeight
+     * @returns {DyniInlineCapValUnitFitResult}
+     */
     function fitInlineCapValUnit(ctx, family, caption, value, unit, maxW, maxH, secScale, valueWeight, labelWeight) {
       if (!value) {
         return { cPx: 0, vPx: 0, uPx: 0, g1: 0, g2: 0, total: 0 };
@@ -160,6 +227,10 @@
         };
       }
 
+      /**
+       * @param {number} cPx @param {number} vPx @param {number} uPx
+       * @param {number} g1 @param {number} g2 @returns {number}
+       */
       function totalWidth(cPx, vPx, uPx, g1, g2) {
         let total = 0;
         if (hasCaption) {

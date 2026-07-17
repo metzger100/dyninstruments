@@ -1,7 +1,6 @@
 /**
- * Module: RadialCanvasPrimitives - Shared low-level canvas drawing primitives for gauges
+ * @file RadialCanvasPrimitives - Shared low-level canvas drawing primitives for gauges
  * Documentation: documentation/radial/gauge-shared-api.md
- * Depends: RadialAngleMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,25 +13,44 @@
   const hasOwn = Object.prototype.hasOwnProperty;
   const POINTER_TIP_INSET_FACTOR = 0.013;
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniRadialCanvasPrimitivesApi}
+   */
   function create(def, componentContext) {
     const angle = componentContext.components.require("RadialAngleMath");
     const toCanvas = angle.degToCanvasRad;
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {() => void} fn
+     * @param {DyniCtxStyle} [style]
+     * @returns {void}
+     */
     function withCtx(ctx, fn, style) {
       ctx.save();
       if (style) {
         if (style.alpha != null) ctx.globalAlpha = Number(style.alpha);
-        if (style.strokeStyle != null) ctx.strokeStyle = style.strokeStyle;
-        if (style.fillStyle != null) ctx.fillStyle = style.fillStyle;
-        if (style.lineWidth != null) ctx.lineWidth = style.lineWidth;
-        if (style.lineCap != null) ctx.lineCap = style.lineCap;
-        if (style.lineJoin != null) ctx.lineJoin = style.lineJoin;
+        if (style.strokeStyle != null) ctx.strokeStyle = /** @type {string} */ (style.strokeStyle);
+        if (style.fillStyle != null) ctx.fillStyle = /** @type {string} */ (style.fillStyle);
+        if (style.lineWidth != null) ctx.lineWidth = /** @type {number} */ (style.lineWidth);
+        if (style.lineCap != null) ctx.lineCap = /** @type {CanvasLineCap} */ (style.lineCap);
+        if (style.lineJoin != null) ctx.lineJoin = /** @type {CanvasLineJoin} */ (style.lineJoin);
         if (Array.isArray(style.dash)) ctx.setLineDash(style.dash);
       }
       fn();
       ctx.restore();
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} cx
+     * @param {number} cy
+     * @param {number} r
+     * @param {DyniRadialDrawOptions} [opts]
+     * @returns {void}
+     */
     function drawRing(ctx, cx, cy, r, opts) {
       opts = opts || {};
       withCtx(ctx, function () {
@@ -47,6 +65,16 @@
       });
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} cx
+     * @param {number} cy
+     * @param {number} r
+     * @param {unknown} startDeg
+     * @param {unknown} endDeg
+     * @param {DyniRadialDrawOptions} [opts]
+     * @returns {void}
+     */
     function drawArcRing(ctx, cx, cy, r, startDeg, endDeg, opts) {
       opts = opts || {};
       const rotationDeg = hasOwn.call(opts, "rotationDeg") ? Number(opts.rotationDeg) : 0;
@@ -65,6 +93,14 @@
       });
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} cx
+     * @param {number} cy
+     * @param {number} rOuter
+     * @param {DyniRadialDrawOptions} [opts]
+     * @returns {void}
+     */
     function drawAnnularSector(ctx, cx, cy, rOuter, opts) {
       opts = opts || {};
       const startDeg = Number(opts.startDeg);
@@ -101,6 +137,15 @@
       });
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} cx
+     * @param {number} cy
+     * @param {number} r
+     * @param {unknown} angleDeg
+     * @param {DyniRadialDrawOptions} [opts]
+     * @returns {void}
+     */
     function drawArrow(ctx, cx, cy, r, angleDeg, opts) {
       opts = opts || {};
       const rot = hasOwn.call(opts, "rotationDeg") ? Number(opts.rotationDeg) : 0;
@@ -141,6 +186,15 @@
       });
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} cx
+     * @param {number} cy
+     * @param {number} rOuter
+     * @param {unknown} angleDeg
+     * @param {DyniRadialDrawOptions} [opts]
+     * @returns {void}
+     */
     function drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, opts) {
       opts = opts || {};
       const rot = hasOwn.call(opts, "rotationDeg") ? Number(opts.rotationDeg) : 0;
@@ -178,6 +232,15 @@
       });
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} cx
+     * @param {number} cy
+     * @param {number} rOuter
+     * @param {unknown} angleDeg
+     * @param {DyniRadialDrawOptions} [opts]
+     * @returns {void}
+     */
     function drawRimMarker(ctx, cx, cy, rOuter, angleDeg, opts) {
       opts = opts || {};
       const rot = hasOwn.call(opts, "rotationDeg") ? Number(opts.rotationDeg) : 0;

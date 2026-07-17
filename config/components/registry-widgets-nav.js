@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Widgets Registry Nav - Nav and route widget component definitions
+ * @file DyniPlugin Widgets Registry Nav - Nav and route widget component definitions
  * Documentation: documentation/architecture/component-system.md
- * Depends: window.DyniPlugin.baseUrl, window.DyniPlugin.config.shared
  */
 (function (root) {
   "use strict";
@@ -173,6 +172,13 @@
       ]
   };
 
+  w.MapZoomMarkup = {
+      js: BASE + "shared/widget-kits/nav/MapZoomMarkup.js",
+      css: undefined,
+      globalKey: "DyniMapZoomMarkup",
+      deps: ["HtmlWidgetUtils", "StateScreenLabels", "StateScreenMarkup"]
+  };
+
   w.MapZoomTextHtmlWidget = {
       js: BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
       css: undefined,
@@ -182,14 +188,14 @@
         "MapZoomHtmlFit",
         "HtmlWidgetUtils",
         "HtmlWidgetLifecycle",
+        "MapZoomMarkup",
         "ValueMath",
         "PlaceholderNormalize",
         "PreparedPayloadModelCache",
         "StableDigits",
         "StateScreenLabels",
         "StateScreenPrecedence",
-        "StateScreenInteraction",
-        "StateScreenMarkup"
+        "StateScreenInteraction"
       ]
   };
 

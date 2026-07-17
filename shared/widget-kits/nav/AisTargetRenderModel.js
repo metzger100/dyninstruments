@@ -1,7 +1,6 @@
 /**
- * Module: AisTargetRenderModel - Pure normalization and display-model owner for AIS target HTML renderer
+ * @file AisTargetRenderModel - Pure normalization and display-model owner for AIS target HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: AisTargetLayout, HtmlWidgetUtils, ValueMath, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, UnitAwareFormatter
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,23 +11,42 @@
 }(this, function () {
   "use strict";
 
+  /** @type {DyniAisTargetMetricId[]} */
   const METRIC_ORDER = ["dst", "cpa", "tcpa", "brg"];
+  /** @type {DyniAisTargetMetricVisibility} */
   const DATA_METRIC_VISIBILITY = { dst: true, cpa: true, tcpa: true, brg: true };
 
+  /** @type {DyniValueMathApi["toObject"]} */
   let toObject;
+  /** @type {DyniValueMathApi["toText"]} */
   let toText;
+  /** @type {DyniValueMathApi["textLength"]} */
   let textLength;
 
+  /**
+   * @param {unknown} shellRect
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @returns {DyniAisTargetShellSize}
+   */
   function toSafeSizeRect(shellRect, htmlUtils) {
-    const rect = shellRect && typeof shellRect === "object" ? shellRect : null;
+    const rect = shellRect && typeof shellRect === "object"
+      ? /** @type {Record<string, unknown>} */ (shellRect)
+      : null;
     return {
       width: Math.max(1, Math.round(htmlUtils.toFiniteNumber(rect && rect.width) || 1)),
       height: Math.max(1, Math.round(htmlUtils.toFiniteNumber(rect && rect.height) || 1))
     };
   }
 
+  /**
+   * @param {DyniAisTargetFormatterArgs | undefined} args
+   * @param {DyniComponentContext} componentContext
+   * @param {DyniPlaceholderNormalizeApi} placeholderNormalize
+   * @returns {string}
+   */
   function formatWithFormatter(args, componentContext, placeholderNormalize) {
     const cfg = args || {};
+    /** @type {Parameters<DyniFormatService["applyFormatter"]>[1]} */
     const options = {
       formatter: cfg.formatter,
       formatterParameters: cfg.formatterParameters
@@ -40,6 +58,11 @@
     return placeholderNormalize.normalize(text, cfg.defaultText);
   }
 
+  /**
+   * @param {DyniAisTargetStateArgs | undefined} args
+   * @param {DyniStateScreenPrecedenceApi} stateScreenPrecedence
+   * @returns {string}
+   */
   function resolveStateKind(args, stateScreenPrecedence) {
     const cfg = args || {};
     const domain = toObject(cfg.domain);
@@ -57,17 +80,26 @@
     ]);
   }
 
+  /**
+   * @param {DyniAisTargetInteractionArgs | undefined} args
+   * @param {DyniStateScreenInteractionApi} stateScreenInteraction
+   * @returns {string}
+   */
   function resolveAisInteractionState(args, stateScreenInteraction) {
     const cfg = args || {};
     const baseInteraction = cfg.isEditingMode === true
       ? "passive"
       : (cfg.canDispatch ? "dispatch" : "passive");
-    return stateScreenInteraction.resolveInteraction({
+    return toText(stateScreenInteraction.resolveInteraction({
       kind: cfg.kind,
       baseInteraction: baseInteraction
-    });
+    }));
   }
 
+  /**
+   * @param {Partial<DyniAisTargetRenderModel> | undefined} model
+   * @returns {Array<string | number>}
+   */
   function buildAisTargetSignatureParts(model) {
     const m = model || {};
     const parts = [
@@ -106,6 +138,11 @@
     return parts;
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniAisTargetRenderModelApi}
+   */
   function create(def, componentContext) {
     const layoutApi = componentContext.components.require("AisTargetLayout");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
@@ -121,6 +158,12 @@
     textLength = valueMath.textLength;
     const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
+    /**
+     * @param {unknown} rawText
+     * @param {unknown} minWidth
+     * @param {boolean} stableDigitsEnabled
+     * @returns {DyniAisTargetNormalizedMetricValue}
+     */
     function normalizeStableMetricValue(rawText, minWidth, stableDigitsEnabled) {
       if (stableDigitsEnabled !== true) {
         return {
@@ -138,6 +181,10 @@
       };
     }
 
+    /**
+     * @param {DyniAisTargetBuildModelArgs | undefined} args
+     * @returns {DyniAisTargetRenderModel}
+     */
     function buildModel(args) {
       const cfg = args || {};
       const props = toObject(cfg.props);
@@ -150,7 +197,7 @@
       const defaultText = htmlUtils.resolveDefaultText(props);
       const isEditingMode = htmlUtils.isEditingMode(props);
       const surfacePolicy = props.surfacePolicy && typeof props.surfacePolicy === "object"
-        ? props.surfacePolicy
+        ? /** @type {Record<string, unknown>} */ (props.surfacePolicy)
         : null;
       const kind = resolveStateKind({
         domain: domain,
@@ -257,6 +304,7 @@
         wrapperClasses.push("dyni-ais-target-vertical");
       }
 
+      /** @type {DyniAisTargetRenderModel} */
       const model = {
         kind: kind,
         stateLabel: kind === "data" ? "" : (stateScreenLabels.LABELS[kind] || ""),
@@ -281,7 +329,8 @@
         visibleMetricIds: visibleMetricIds,
         colorRole: colorRole,
         hasAccent: hasAccent,
-        wrapperClasses: wrapperClasses
+        wrapperClasses: wrapperClasses,
+        resizeSignatureParts: []
       };
 
       model.resizeSignatureParts = buildAisTargetSignatureParts(model);

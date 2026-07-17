@@ -167,6 +167,9 @@ function createRenderModelContext() {
       else if (id === "AisTargetLayoutGeometry") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
       }
+      else if (id === "AisTargetLayoutGeometryStyles") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js");
+      }
       else if (id === "AisTargetLayoutMath") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
       }
@@ -218,6 +221,7 @@ function createRenderModelContext() {
     "AisTargetLayout",
     "AisTargetLayoutSizing",
     "AisTargetLayoutGeometry",
+    "AisTargetLayoutGeometryStyles",
     "AisTargetLayoutMath",
     "HtmlWidgetUtils",
     "UnitAwareFormatter",

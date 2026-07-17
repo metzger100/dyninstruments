@@ -1,7 +1,6 @@
 /**
- * Module: AlarmHtmlFit - Text-fit and token-style owner for vessel alarm HTML
+ * @file AlarmHtmlFit - Text-fit and token-style owner for vessel alarm HTML
  * Documentation: documentation/widgets/alarm.md
- * Depends: componentContext.theme.tokens, TextLayoutEngine, AlarmHtmlFitChrome, HtmlWidgetUtils, HtmlMeasureUtils, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -15,12 +14,18 @@
   const SECONDARY_SCALE = 0.8;
   const CONTENT_PAD_X_RATIO = 0.03;
   const FIT_CACHE_KEY = "__dyniAlarmHtmlFitCache";
+  /** @type {DyniValueMathApi["toObject"]} */
   let toObject;
 
+  /** @param {number} width @param {number} height @returns {number} */
   function computeContentPadX(width, height) {
     return Math.max(2, Math.floor(Math.min(width, height) * CONTENT_PAD_X_RATIO));
   }
 
+  /**
+   * @param {DyniAlarmResolvedTheme | null | undefined} theme
+   * @returns {DyniAlarmThemeTokens}
+   */
   function resolveThemeColors(theme) {
     const colors = theme && theme.colors && typeof theme.colors === "object" ? theme.colors : null;
     const alarmWidget = colors && colors.alarmWidget && typeof colors.alarmWidget === "object"
@@ -33,8 +38,14 @@
     };
   }
 
+  /**
+   * @param {DyniAlarmModeFitArgs | null | undefined} args
+   * @param {DyniTextLayoutEngineApi} textLayout
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @returns {DyniAlarmModeFit}
+   */
   function computeModeFit(args, textLayout, htmlUtils) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniAlarmModeFitArgs} */ (args || {});
     const mode = cfg.mode;
     const model = cfg.model;
     const width = Math.max(1, Math.round(cfg.width));
@@ -124,18 +135,31 @@
     };
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniAlarmHtmlFitApi}
+   */
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const textLayout = componentContext.components.require("TextLayoutEngine");
-    const themeResolver = componentContext.theme.tokens;
+    const themeResolver = /** @type {DyniAlarmThemeResolver} */ (
+      /** @type {unknown} */ (componentContext.theme && componentContext.theme.tokens)
+    );
     const chromeApi = componentContext.components.require("AlarmHtmlFitChrome");
     toObject = componentContext.components.require("ValueMath").toObject;
 
+    /**
+     * @param {DyniAlarmHtmlFitComputeArgs | null | undefined} args
+     * @returns {DyniAlarmHtmlFitResult | null}
+     */
     function compute(args) {
       const cfg = args || {};
-      const model = toObject(cfg.model);
-      const shellRect = cfg.shellRect && typeof cfg.shellRect === "object" ? cfg.shellRect : null;
+      const model = /** @type {DyniAlarmFitModel} */ (toObject(cfg.model));
+      const shellRect = cfg.shellRect && typeof cfg.shellRect === "object"
+        ? /** @type {DyniAlarmShellRect} */ (cfg.shellRect)
+        : null;
       const targetEl = cfg.targetEl || cfg.rootEl || null;
       if (!model || !shellRect || !targetEl) {
         return null;
@@ -183,7 +207,7 @@
         fontMetricsEpoch: cfg.fontMetricsEpoch
       });
       if (fitCache && fitCache.signature === signature && fitCache.result) {
-        return fitCache.result;
+        return /** @type {DyniAlarmHtmlFitResult} */ (fitCache.result);
       }
 
       const modeFit = computeModeFit({
@@ -202,7 +226,7 @@
       const chrome = layout.contentRect.chrome;
       const shellStyle = chromeApi.buildShellStyle(chrome);
       const accentStyle = chromeApi.buildAccentStyle(model, chrome, tokens);
-      const result = {
+      const result = /** @type {DyniAlarmHtmlFitResult} */ ({
         mode: layout.mode,
         captionPx: modeFit.captionPx,
         valuePx: modeFit.valuePx,
@@ -218,7 +242,7 @@
         valueSingleLine: true,
         interactionState: model.interactionState || "passive",
         state: model.state || "idle"
-      };
+      });
 
       if (fitCache) {
         fitCache.signature = signature;

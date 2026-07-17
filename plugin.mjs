@@ -1,7 +1,6 @@
 /**
- * Module: plugin.mjs - Modern AvNav module bootstrap adapter
+ * @file plugin.mjs - Modern AvNav module bootstrap adapter
  * Documentation: documentation/architecture/runtime-lifecycle.md
- * Depends: runtime/plugin-bootstrap-core.js
  */
 
 function normalizeBaseUrl(baseUrl) {

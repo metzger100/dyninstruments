@@ -1,7 +1,6 @@
 /**
- * Module: AisTargetHtmlFit - Text-fit and accent-style owner for AIS target HTML renderer
+ * @file AisTargetHtmlFit - Text-fit and accent-style owner for AIS target HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, AisTargetLayout, HtmlWidgetUtils, HtmlMeasureUtils, ValueMath, TextFitMath, NavModeRatio
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -16,8 +15,17 @@
   const FRONT_MAX_PX_RATIO = { flat: 0.52, normal: 0.78, high: 0.75 };
   const METRIC_VALUE_MAX_PX_RATIO = 0.9;
   const METRIC_SECONDARY_TO_VALUE_RATIO = 0.8;
+  /** @type {DyniValueMathApi["toObject"]} */
   let toObject;
+  /** @type {DyniValueMathApi["toText"]} */
   let toText;
+
+  /**
+   * @param {DyniComponentContext} componentContext
+   * @param {DyniAisTargetThemeResolver} themeApi
+   * @param {unknown} targetEl
+   * @returns {DyniAisTargetTypography}
+   */
   function resolveThemeTypography(componentContext, themeApi, targetEl) {
     const rootEl = componentContext.dom.requirePluginRoot(targetEl);
     const tokens = themeApi.resolveForRoot(rootEl);
@@ -27,8 +35,16 @@
       monoFamily: tokens.font.familyMono || tokens.font.family
     };
   }
+
+  /**
+   * @param {DyniAisTargetMetricValueFitArgs | undefined} args
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @param {DyniTextTileLayoutApi} tileLayout
+   * @param {DyniHtmlMeasureUtilsApi} htmlMeasureUtils
+   * @returns {DyniAisTargetMetricValueFit}
+  */
   function selectMetricValueFit(args, htmlUtils, tileLayout, htmlMeasureUtils) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniAisTargetMetricValueFitArgs} */ (args || {});
     const valueText = toText(cfg.valueText);
     const plainText = cfg.plainText == null ? valueText : toText(cfg.plainText);
     const valueFit = htmlMeasureUtils.measurePx({
@@ -58,11 +74,17 @@
     }, htmlUtils, tileLayout);
     return { valueText: plainText, valuePx: plainFit && plainFit.px ? plainFit.px : 0 };
   }
+
+  /**
+   * @param {Partial<DyniAisTargetRenderModel> | null | undefined} model
+   * @param {DyniAisTargetThemeTokens | undefined} tokens
+   * @returns {string}
+   */
   function resolveAccentStyle(model, tokens) {
     if (!model || model.hasAccent !== true) {
       return "";
     }
-    const colorRole = model.colorRole;
+    const colorRole = toText(model.colorRole);
     const aisTokens = tokens && tokens.colors && tokens.colors.ais ? tokens.colors.ais : null;
     const color = aisTokens && typeof aisTokens[colorRole] === "string"
       ? aisTokens[colorRole].trim()
@@ -72,6 +94,8 @@
     }
     return "background-color:" + color + ";";
   }
+
+  /** @param {DyniAisTargetLayoutMode} mode @returns {number} */
   function resolveFrontRatio(mode) {
     if (mode === "flat") {
       return FRONT_MAX_PX_RATIO.flat;
@@ -81,8 +105,12 @@
     }
     return FRONT_MAX_PX_RATIO.normal;
   }
+
+  /** @param {unknown} box @returns {DyniAisTargetStackedMetricRects | null} */
   function resolveStackedMetricBox(box) {
-    const tile = box && typeof box === "object" ? box : null;
+    const tile = box && typeof box === "object"
+      ? /** @type {Partial<DyniAisTargetStackedMetricRects>} */ (box)
+      : null;
     if (!tile || !tile.captionRect || !tile.valueRect || !tile.unitRect) {
       return null;
     }
@@ -92,8 +120,12 @@
       unitRect: tile.unitRect
     };
   }
+
+  /** @param {unknown} box @returns {DyniAisTargetInlineMetricRects | null} */
   function resolveInlineMetricBox(box) {
-    const tile = box && typeof box === "object" ? box : null;
+    const tile = box && typeof box === "object"
+      ? /** @type {Partial<DyniAisTargetInlineMetricRects>} */ (box)
+      : null;
     if (!tile || !tile.labelRect || !tile.valueRect || !tile.unitRect) {
       return null;
     }
@@ -104,8 +136,16 @@
       unitRect: tile.unitRect
     };
   }
+
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniAisTargetHtmlFitApi}
+   */
   function create(def, componentContext) {
-    const theme = componentContext.theme.tokens;
+    const theme = /** @type {DyniAisTargetThemeResolver} */ (/** @type {unknown} */ (
+      componentContext.theme && componentContext.theme.tokens
+    ));
     const textApi = componentContext.components.require("CanvasTextLayout");
     const tileLayout = componentContext.components.require("TextTileLayout");
     const layoutApi = componentContext.components.require("AisTargetLayout");
@@ -116,6 +156,10 @@
     const modeRatio = componentContext.components.require("NavModeRatio");
     toObject = valueMath.toObject;
     toText = valueMath.toText;
+    /**
+     * @param {DyniAisTargetHtmlFitArgs | undefined} args
+     * @returns {DyniAisTargetMarkupFit | null}
+     */
     function compute(args) {
       const cfg = args || {};
       const model = cfg.model || null;
@@ -147,6 +191,7 @@
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       const textFillScale = layout.responsive && layout.responsive.textFillScale;
+      /** @type {DyniAisTargetMarkupFit} */
       const out = {
         nameStyle: "",
         frontStyle: "",

@@ -1,7 +1,6 @@
 /**
- * Module: SemicircleRadialTextLayout - Shared text layout helper for semicircle radial gauges
+ * @file SemicircleRadialTextLayout - Shared text layout helper for semicircle radial gauges
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: RadialTextLayout state API from SemicircleRadialEngine, TextLayoutScaleHelpers, TextLayoutEngine, HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,19 +11,35 @@
 }(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
+  /** @type {DyniTextLayoutScaleHelpersApi} */
   let scaleHelpersApi;
+  /** @type {DyniTextLayoutScaleHelpersApi["scaleTextCeiling"]} */
   let scaleTextCeilingFromHelpers;
+  /** @type {DyniHtmlWidgetUtilsApi["buildTextOptions"]} */
   let buildTextOptionsFromHtmlUtils;
+  /** @type {DyniTextLayoutEngineApi["createFitCache"]} */
   let createFitCache;
+  /** @type {DyniTextLayoutEngineApi["makeFitCacheKey"]} */
   let makeFitCacheKey;
+  /** @type {DyniTextLayoutEngineApi["readFitCache"]} */
   let readFitCache;
+  /** @type {DyniTextLayoutEngineApi["writeFitCache"]} */
   let writeFitCache;
 
+  /** @param {unknown} value @returns {number} */
   function normalizeSecondaryScale(value) {
     const n = Number(value);
     return Number.isFinite(n) ? Math.max(0.3, Math.min(3.0, n)) : 0.8;
   }
 
+  /**
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {unknown} text
+   * @param {unknown} fontPx
+   * @param {unknown} weight
+   * @param {unknown} family
+   * @returns {number}
+   */
   function measureWidthClass(ctx, text, fontPx, weight, family) {
     if (!text) {
       return 0;
@@ -39,6 +54,7 @@
     return Math.round(width);
   }
 
+  /** @param {DyniSemicircleRenderState} state @param {DyniSemicircleDisplay} display @param {unknown} valueWidthClass */
   function buildCommonFitKey(state, display, valueWidthClass) {
     return {
       W: state.W,
@@ -55,6 +71,7 @@
     };
   }
 
+  /** @param {DyniSemicircleRenderState} state @param {DyniSemicircleDisplay} display @param {number} boxW @param {number} blockH @returns {DyniBlockSizes} */
   function computeThreeRowsSizes(state, display, boxW, blockH) {
     const text = state.text;
     const secScale = normalizeSecondaryScale(display.secScale);
@@ -84,6 +101,7 @@
     };
   }
 
+  /** @param {DyniSemicircleDisplay} display @param {DyniBlockSizes} sizes @param {number} boxW @param {number} blockH */
   function scoreThreeRowsCandidate(display, sizes, boxW, blockH) {
     const valuePx = Math.max(0, Number(sizes && sizes.vPx) || 0);
     const captionPx = display.caption
@@ -97,6 +115,7 @@
     return (minLegibility * 1000000) + (avgLegibility * 10000) + (boxW * 10) + blockH;
   }
 
+  /** @param {DyniSemicircleRenderState} state @param {DyniSemicircleDisplay} display @param {DyniFitCache} fitCache */
   function drawFlatText(state, display, fitCache) {
     const text = state.text;
     const boxes = state.layout.flat;
@@ -122,7 +141,7 @@
       gaugeTop: state.geom.gaugeTop,
       radius: state.geom.R
     });
-    const fit = readFitCache(fitCache, "flat", key) || writeFitCache(
+    const fit = /** @type {DyniValueUnitFitResult} */ (readFitCache(fitCache, "flat", key) || writeFitCache(
       fitCache,
       "flat",
       key,
@@ -137,10 +156,10 @@
         state.valueWeight,
         state.labelWeight
       )
-    );
-    const scaledFit = fit
+    ));
+    const scaledFit = /** @type {DyniValueUnitFitResult} */ (fit
       ? scaleHelpersApi.scaleValueUnitFit(state, display.valueText, display.unit, fit, boxes.bottomBox.h)
-      : fit;
+      : fit);
     const captionBasePx = Math.max(1, Math.floor(scaledFit.vPx * normalizeSecondaryScale(display.secScale)));
     const captionMaxPx = scaleTextCeilingFromHelpers(captionBasePx, boxes.topBox.h, state.textFillScale);
 
@@ -174,6 +193,7 @@
     );
   }
 
+  /** @param {DyniSemicircleRenderState} state @param {DyniSemicircleDisplay} display @param {DyniFitCache} fitCache */
   function drawHighText(state, display, fitCache) {
     const text = state.text;
     const box = state.layout.high && state.layout.high.bandBox;
@@ -194,7 +214,7 @@
       boxH: box.h,
       bandY: box.y
     });
-    const fit = readFitCache(fitCache, "high", key) || writeFitCache(
+    const fit = /** @type {DyniInlineCapValUnitFitResult} */ (readFitCache(fitCache, "high", key) || writeFitCache(
       fitCache,
       "high",
       key,
@@ -210,10 +230,10 @@
         state.valueWeight,
         state.labelWeight
       )
-    );
-    const scaledFit = fit
+    ));
+    const scaledFit = /** @type {DyniInlineCapValUnitFitResult} */ (fit
       ? scaleHelpersApi.scaleInlineFit(state, display.caption, display.valueText, display.unit, fit, box.h)
-      : fit;
+      : fit);
     if (scaledFit && fit && hasOwn.call(fit, "total")) {
       scaledFit.total = fit.total;
     }
@@ -235,6 +255,7 @@
     );
   }
 
+  /** @param {DyniSemicircleRenderState} state @param {DyniSemicircleDisplay} display @param {DyniFitCache} fitCache */
   function drawNormalText(state, display, fitCache) {
     const text = state.text;
     const normal = state.layout.normal;
@@ -262,8 +283,11 @@
       ringW: state.geom.ringW,
       radius: state.geom.R
     });
-    let layout = readFitCache(fitCache, "normal", key);
+    let layout = /** @type {{ blockH: number, boxW: number, sizes: DyniBlockSizes } | undefined} */ (
+      readFitCache(fitCache, "normal", key)
+    );
     if (!layout) {
+      /** @type {{ blockH: number, boxW: number, score: number, sizes: DyniBlockSizes } | null} */
       let best = null;
       const secScale = normalizeSecondaryScale(display.secScale);
       for (let mh = normal.mhMax; mh >= normal.mhMin; mh -= 1) {
@@ -292,11 +316,11 @@
 
       const blockH = best ? best.blockH : Math.max(1, Math.floor(normal.rSafe * 0.75));
       const boxW = best ? best.boxW : Math.max(1, Math.floor(normal.rSafe * 1.6));
-      layout = writeFitCache(fitCache, "normal", key, {
+      layout = /** @type {{ blockH: number, boxW: number, sizes: DyniBlockSizes }} */ (writeFitCache(fitCache, "normal", key, {
         blockH: blockH,
         boxW: boxW,
         sizes: best && best.sizes ? best.sizes : computeThreeRowsSizes(state, display, boxW, blockH)
-      });
+      }));
     }
 
     text.drawThreeRowsBlock(
@@ -318,6 +342,7 @@
     );
   }
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniSemicircleRadialTextLayoutApi} */
   function create(def, componentContext) {
     const scaleHelpers = componentContext.components.require("TextLayoutScaleHelpers");
     const textLayoutEngine = componentContext.components.require("TextLayoutEngine");
@@ -329,6 +354,12 @@
     scaleHelpersApi = scaleHelpers;
     scaleTextCeilingFromHelpers = scaleHelpers.scaleTextCeiling;
     buildTextOptionsFromHtmlUtils = htmlUtils.buildTextOptions;
+    /**
+     * @param {DyniSemicircleRenderState} state
+     * @param {DyniSemicircleDisplay} display
+     * @param {DyniFitCache} fitCache
+     * @returns {void}
+     */
     function drawModeText(state, display, fitCache) {
       if (display && display.hideTextualMetrics === true) {
         return;

@@ -1,7 +1,6 @@
 /**
- * Module: StateScreenCanvasOverlay - Shared canvas label primitive for semantic state-screens
+ * @file StateScreenCanvasOverlay - Shared canvas label primitive for semantic state-screens
  * Documentation: documentation/shared/state-screens.md
- * Depends: StateScreenLabels, CanvasTextFitting
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,7 @@
 }(this, function () {
   "use strict";
 
+  /** @returns {boolean} */
   function isDevMode() {
     return !!(
       typeof process !== "undefined" &&
@@ -21,11 +21,25 @@
     );
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniStateScreenCanvasOverlayApi}
+   */
   function create(def, componentContext) {
     const labels = componentContext.components.require("StateScreenLabels");
     const fitting = componentContext.components.require("CanvasTextFitting");
     const setFont = fitting.setFont;
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {string} labelText
+     * @param {number} W
+     * @param {number} H
+     * @param {unknown} weight
+     * @param {unknown} family
+     * @returns {number}
+     */
     function resolveFontPx(ctx, labelText, W, H, weight, family) {
       const maxWidth = Math.max(1, Math.floor(W * 0.8));
       const maxHeight = Math.max(1, Math.floor(Math.min(W, H) * 0.8));
@@ -42,8 +56,9 @@
       return px;
     }
 
+    /** @param {unknown} args @returns {void} */
     function drawStateScreen(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniStateScreenDrawArgs} */ (args || {});
       const kind = cfg.kind;
       const ctx = cfg.ctx;
 
@@ -63,7 +78,9 @@
       const color = typeof cfg.color === "string" && cfg.color
         ? cfg.color
         : (typeof ctx.fillStyle === "string" && ctx.fillStyle ? ctx.fillStyle : "");
-      const labelText = typeof cfg.label === "string" ? cfg.label : (labels.LABELS[kind] || "");
+      const labelText = typeof cfg.label === "string"
+        ? cfg.label
+        : (labels.LABELS[/** @type {string} */ (kind)] || "");
       const px = resolveFontPx(ctx, labelText, W, H, cfg.labelWeight, cfg.family);
 
       ctx.save();

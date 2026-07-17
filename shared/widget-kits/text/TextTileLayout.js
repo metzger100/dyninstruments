@@ -1,7 +1,6 @@
 /**
- * Module: TextTileLayout - Shared fitted single-line and caption/value/unit tile helpers
+ * @file TextTileLayout - Shared fitted single-line and caption/value/unit tile helpers
  * Documentation: documentation/widgets/active-route.md
- * Depends: ValueMath, TextLayoutScaleHelpers
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,14 +13,18 @@
 
   const hasOwn = Object.prototype.hasOwnProperty;
   const CONTEXT_CACHE_KEY = "__dyniTextTileLayoutCache";
+  /** @type {DyniValueMathApi["toFiniteNumber"]} */
   let toFiniteNumber;
+  /** @type {DyniTextLayoutScaleHelpersApi["resolveOpacity"]} */
   let resolveOpacity;
 
+  /** @param {unknown} value @param {number} defaultValue @returns {number} */
   function toNumberOrDefault(value, defaultValue) {
     const n = toFiniteNumber(value);
     return typeof n === "number" ? n : defaultValue;
   }
 
+  /** @param {unknown} basePx @param {unknown} maxPx @param {unknown} textFillScale @returns {number} */
   function resolveScaledMaxPx(basePx, maxPx, textFillScale) {
     const safeBase = Math.max(1, Math.floor(toNumberOrDefault(basePx, 1)));
     const safeMax = Math.max(1, Math.floor(toNumberOrDefault(maxPx, safeBase)));
@@ -29,23 +32,41 @@
     return Math.min(safeMax, Math.max(1, Math.floor(safeBase * scale)));
   }
 
+  /** @param {unknown} ctx @returns {DyniContextTileCache | null} */
   function resolveContextCache(ctx) {
     if (!ctx || (typeof ctx !== "object" && typeof ctx !== "function")) {
       return null;
     }
-    if (!ctx[CONTEXT_CACHE_KEY] || typeof ctx[CONTEXT_CACHE_KEY] !== "object") {
-      ctx[CONTEXT_CACHE_KEY] = {
+    const store = /** @type {DyniAugmentedCanvas} */ (ctx);
+    if (!store[CONTEXT_CACHE_KEY] || typeof store[CONTEXT_CACHE_KEY] !== "object") {
+      store[CONTEXT_CACHE_KEY] = {
         metricTiles: Object.create(null),
         fittedLines: Object.create(null)
       };
     }
-    return ctx[CONTEXT_CACHE_KEY];
+    return /** @type {DyniContextTileCache} */ (store[CONTEXT_CACHE_KEY]);
   }
 
+  /**
+   * @param {DyniCanvasTextLayoutApi} textApi
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {unknown} text
+   * @returns {number}
+   */
   function measureWidth(textApi, ctx, text) {
     return textApi.measureTextWidth(ctx, text);
   }
 
+  /**
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {DyniCanvasTextLayoutApi} textApi
+   * @param {unknown} text
+   * @param {unknown} px
+   * @param {number} maxW
+   * @param {unknown} family
+   * @param {unknown} weight
+   * @returns {string}
+   */
   function trimToWidth(ctx, textApi, text, px, maxW, family, weight) {
     let out = typeof text === "string" ? text : String(text);
     if (!out) {
@@ -58,8 +79,9 @@
     return out;
   }
 
+  /** @param {unknown} rect @param {unknown} padX @returns {DyniRect} */
   function resolveMetricTextRect(rect, padX) {
-    const safeRect = rect || {};
+    const safeRect = /** @type {{ x?: unknown, y?: unknown, w?: unknown, h?: unknown }} */ (rect || {});
     const safePad = Math.max(0, Math.floor(toNumberOrDefault(padX, 0)));
     const width = Math.max(1, (Number(safeRect.w) || 0) - safePad * 2);
     return {
@@ -75,6 +97,12 @@
   // of the value-row height as a safe visual margin.
   const VALUE_ROW_SAFE_RATIO = 0.85;
 
+  /**
+   * @param {unknown} totalHeight
+   * @param {number} captionHeightRatio
+   * @param {unknown} captionHeightPx
+   * @returns {{ capH: number, valueH: number }}
+   */
   function resolveMetricHeights(totalHeight, captionHeightRatio, captionHeightPx) {
     const safeHeight = Math.max(1, Math.floor(Number(totalHeight) || 0));
     const defaultCaptionHeight = Math.max(1, Math.floor(safeHeight * captionHeightRatio));
@@ -99,12 +127,13 @@
     };
   }
 
+  /** @param {DyniTextArgs} cfg @returns {string} */
   function buildMetricTileSignature(cfg) {
-    const rect = cfg && cfg.rect ? cfg.rect : {};
-    const metric = cfg && cfg.metric ? cfg.metric : {};
+    const rect = /** @type {Record<string, unknown>} */ (cfg && cfg.rect ? cfg.rect : {});
+    const metric = /** @type {Record<string, unknown>} */ (cfg && cfg.metric ? cfg.metric : {});
     const family = cfg && cfg.family;
     const valueTextOptions = cfg && cfg.valueTextOptions && typeof cfg.valueTextOptions === "object"
-      ? cfg.valueTextOptions
+      ? /** @type {{ useMono?: unknown, monoFamily?: unknown }} */ (cfg.valueTextOptions)
       : null;
     const captionMaxPx = Number(cfg && cfg.captionMaxPx);
     const valueMaxPx = Number(cfg && cfg.valueMaxPx);
@@ -132,6 +161,7 @@
     ]);
   }
 
+  /** @param {DyniTextArgs} cfg @returns {string} */
   function buildFittedLineSignature(cfg) {
     const family = cfg && cfg.family;
     return JSON.stringify([
@@ -145,14 +175,20 @@
     ]);
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniTextTileLayoutApi}
+   */
   function create(def, componentContext) {
     toFiniteNumber = componentContext.components.require("ValueMath").toFiniteNumber;
     resolveOpacity = componentContext.components.require("TextLayoutScaleHelpers").resolveOpacity;
+    /** @param {unknown} args @returns {unknown} */
     function measureMetricTile(args) {
-      const cfg = args || {};
-      const textApi = cfg.textApi;
-      const metric = cfg.metric;
-      const rect = cfg.rect;
+      const cfg = /** @type {DyniTextArgs} */ (args || {});
+      const textApi = /** @type {DyniCanvasTextLayoutApi} */ (cfg.textApi);
+      const metric = /** @type {{ caption?: unknown, value?: unknown, unit?: unknown }} */ (cfg.metric);
+      const rect = /** @type {{ x?: unknown, y?: unknown, w?: unknown, h?: unknown }} */ (cfg.rect);
       const captionHeightRatio = toNumberOrDefault(cfg.captionHeightRatio, 0.34);
       const textFillScale = toNumberOrDefault(cfg.textFillScale, 1);
       if (!metric || !rect) {
@@ -198,15 +234,16 @@
       return measurement;
     }
 
+    /** @param {unknown} args @returns {unknown} */
     function drawMetricTile(args) {
-      const cfg = args || {};
-      const metric = cfg.metric;
-      const rect = cfg.rect;
+      const cfg = /** @type {DyniTextArgs} */ (args || {});
+      const metric = /** @type {{ caption?: unknown, value?: unknown, unit?: unknown }} */ (cfg.metric);
+      const rect = /** @type {DyniRect} */ (cfg.rect);
       if (!(rect.w > 0) || !(rect.h > 0)) {
         return null;
       }
-      const textApi = cfg.textApi;
-      const measurement = cfg.measurement || measureMetricTile(cfg);
+      const textApi = /** @type {DyniCanvasTextLayoutApi} */ (cfg.textApi);
+      const measurement = /** @type {DyniMetricTileMeasurement} */ (cfg.measurement || measureMetricTile(cfg));
       if (!metric || !measurement) {
         return null;
       }
@@ -214,7 +251,7 @@
         captionOpacity: resolveOpacity(cfg.captionOpacity),
         unitOpacity: resolveOpacity(cfg.unitOpacity)
       };
-      cfg.ctx.fillStyle = cfg.color;
+      cfg.ctx.fillStyle = /** @type {string} */ (cfg.color);
       textApi.drawCaptionMax(
         cfg.ctx,
         cfg.family,
@@ -246,9 +283,10 @@
       return measurement;
     }
 
+    /** @param {unknown} args @returns {unknown} */
     function measureFittedLine(args) {
-      const cfg = args || {};
-      const textApi = cfg.textApi;
+      const cfg = /** @type {DyniTextArgs} */ (args || {});
+      const textApi = /** @type {DyniCanvasTextLayoutApi} */ (cfg.textApi);
       const contextCache = resolveContextCache(cfg.ctx);
       const fittedLineSignature = contextCache ? buildFittedLineSignature(cfg) : "";
       if (contextCache && hasOwn.call(contextCache.fittedLines, fittedLineSignature)) {
@@ -278,14 +316,15 @@
       return fit;
     }
 
+    /** @param {unknown} args @returns {unknown} */
     function drawFittedLine(args) {
-      const cfg = args || {};
-      const rect = cfg.rect;
+      const cfg = /** @type {DyniTextArgs} */ (args || {});
+      const rect = /** @type {DyniRect} */ (cfg.rect);
       if (!(rect.w > 0) || !(rect.h > 0)) {
         return null;
       }
-      const textApi = cfg.textApi;
-      const fit = cfg.fit || measureFittedLine({
+      const textApi = /** @type {DyniCanvasTextLayoutApi} */ (cfg.textApi);
+      const fit = /** @type {{ px?: unknown, text: string }} */ (cfg.fit || measureFittedLine({
         textApi: textApi,
         ctx: cfg.ctx,
         text: cfg.text,
@@ -295,13 +334,13 @@
         textFillScale: cfg.textFillScale,
         family: cfg.family,
         weight: cfg.weight
-      });
+      }));
       cfg.ctx.save();
       if (typeof cfg.alpha === "number") {
         cfg.ctx.globalAlpha = cfg.alpha;
       }
       if (cfg.color) {
-        cfg.ctx.fillStyle = cfg.color;
+        cfg.ctx.fillStyle = /** @type {string} */ (cfg.color);
       }
       textApi.setFont(cfg.ctx, fit.px, cfg.weight, cfg.family);
       cfg.ctx.textBaseline = "middle";

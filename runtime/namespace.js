@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Namespace - Internal namespace container
+ * @file DyniPlugin Namespace - Internal namespace container
  * Documentation: documentation/architecture/component-system.md
- * Depends: none
  */
 (function (root) {
   "use strict";
@@ -13,6 +12,7 @@
   ns.config.shared = ns.config.shared || {};
   ns.config.clusters = ns.config.clusters || [];
 
+  /** @param {unknown} rootRef @returns {unknown} */
   runtime.getAvnavApi = runtime.getAvnavApi || function (rootRef) {
     if (ns.avnavApi) {
       return ns.avnavApi;

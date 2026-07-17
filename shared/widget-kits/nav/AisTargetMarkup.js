@@ -1,7 +1,6 @@
 /**
- * Module: AisTargetMarkup - Pure HTML assembly owner for AIS target renderer output
+ * @file AisTargetMarkup - Pure HTML assembly owner for AIS target renderer output
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: StateScreenMarkup, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,16 +11,22 @@
 }(this, function () {
   "use strict";
 
+  /** @type {DyniValueMathApi["toObject"]} */
   let toObject;
+  /** @type {DyniValueMathApi["toText"]} */
   let toText;
 
+  /**
+   * @param {DyniAisTargetMetricRenderArgs} args
+   * @returns {string}
+   */
   function renderMetric(args) {
-    const cfg = args || {};
+    const cfg = args;
     const metricId = cfg.metricId;
     const mode = cfg.mode;
-    const metric = toObject(cfg.metric);
-    const metricFit = toObject(cfg.metricFit);
-    const metricGeometry = toObject(cfg.metricGeometry);
+    const metric = /** @type {DyniAisTargetMetricText} */ (toObject(cfg.metric));
+    const metricFit = /** @type {DyniAisTargetMetricFit} */ (toObject(cfg.metricFit));
+    const metricGeometry = /** @type {DyniAisTargetMetricGeometry} */ (toObject(cfg.metricGeometry));
     const htmlUtils = cfg.htmlUtils;
     const stableDigitsEnabled = cfg.stableDigitsEnabled === true;
     const valueClass = stableDigitsEnabled ? " dyni-tabular" : "";
@@ -76,12 +81,18 @@
       + "</div>";
   }
 
+  /**
+   * @param {DyniAisTargetMarkupModel} model
+   * @param {DyniAisTargetMarkupFit} fit
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @returns {string}
+   */
   function renderDataBody(model, fit, htmlUtils) {
     const metricIds = model.visibleMetricIds;
-    const metrics = toObject(model.metrics);
-    const metricFits = toObject(fit.metrics);
-    const geometry = toObject(model.inlineGeometry);
-    const metricGeometry = toObject(geometry.metricStyles);
+    const metrics = model.metrics;
+    const metricFits = fit.metrics;
+    const geometry = model.inlineGeometry;
+    const metricGeometry = geometry.metricStyles;
 
     const identityHtml = ""
       + '<div class="dyni-ais-target-identity"'
@@ -122,19 +133,28 @@
       + "</div>";
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniAisTargetMarkupApi}
+   */
   function create(def, componentContext) {
     const stateScreenMarkup = componentContext.components.require("StateScreenMarkup");
     const valueMath = componentContext.components.require("ValueMath");
     toObject = valueMath.toObject;
     toText = valueMath.toText;
 
+    /**
+     * @param {DyniAisTargetMarkupRenderArgs} args
+     * @returns {string}
+     */
     function render(args) {
-      const cfg = args || {};
-      const model = toObject(cfg.model);
-      const fit = toObject(cfg.fit);
+      const cfg = args;
+      const model = cfg.model;
+      const fit = cfg.fit;
       const htmlUtils = cfg.htmlUtils;
       const wrapperClasses = model.wrapperClasses;
-      const geometry = toObject(model.inlineGeometry);
+      const geometry = model.inlineGeometry;
       if (model.kind && model.kind !== "data") {
         return stateScreenMarkup.renderStateScreen({
           kind: model.kind,

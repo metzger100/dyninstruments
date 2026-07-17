@@ -80,7 +80,6 @@ function installComponentContextRuntime(runtime) {
       resolveForRoot: vi.fn(() => ({})),
     },
   };
-  runtime.perf = { startSpan: vi.fn(() => null), endSpan: vi.fn() };
   runtime.format = { applyFormatter: vi.fn((v) => String(v)) };
   runtime.canvas = { setupCanvas: vi.fn() };
   runtime.dom = {

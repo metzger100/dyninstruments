@@ -1,12 +1,11 @@
 /**
- * Module: DyniPlugin Html Surface Runtime - Committed html-surface lifecycle owner
+ * @file DyniPlugin Html Surface Runtime - Committed html-surface lifecycle owner
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: runtime.perf, runtime.theme
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  const ns = /** @type {DyniPluginNamespace & { runtime: DyniHtmlRuntime }} */ (root.DyniPlugin);
   const runtime = ns.runtime;
 
   const SURFACE_ID = "html";
@@ -32,6 +31,7 @@
     "}"
   ].join("\n");
 
+  /** @param {string} methodName @param {DyniHtmlSurfacePayload} payload */
   function ensurePayload(methodName, payload) {
     if (!payload || typeof payload !== "object") {
       throw new Error("HtmlSurfaceController: " + methodName + "() requires a payload object");
@@ -50,12 +50,14 @@
     }
   }
 
+  /** @param {string} methodName @param {unknown} hostContext */
   function ensureHostContext(methodName, hostContext) {
     if (!hostContext || typeof hostContext !== "object") {
       throw new Error("HtmlSurfaceController: " + methodName + "() requires hostContext object");
     }
   }
 
+  /** @param {string} methodName @param {DyniHtmlSurfaceRendererSpec | null} rendererSpec */
   function ensureRendererSpec(methodName, rendererSpec) {
     if (!rendererSpec || typeof rendererSpec !== "object") {
       throw new Error("HtmlSurfaceController: " + methodName + "() requires rendererSpec object");
@@ -65,6 +67,7 @@
     }
   }
 
+  /** @param {string} methodName @param {DyniHtmlSurfaceRendererInstance} instance */
   function ensureRendererInstance(methodName, instance) {
     if (!instance || typeof instance !== "object") {
       throw new Error("HtmlSurfaceController: " + methodName + "() renderer factory must return an object instance");
@@ -72,12 +75,16 @@
     const methods = ["mount", "update", "postPatch", "detach", "destroy"];
     for (let i = 0; i < methods.length; i += 1) {
       const method = methods[i];
-      if (typeof instance[method] !== "function") {
-        throw new Error("HtmlSurfaceController: " + methodName + "() committed renderer must implement " + method + "()");
+      const dynamicInstance = /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (instance));
+      if (typeof dynamicInstance[method] !== "function") {
+        throw new Error(
+          "HtmlSurfaceController: " + methodName + "() committed renderer must implement " + method + "()"
+        );
       }
     }
   }
 
+  /** @param {unknown} signature @param {string} methodName @returns {string} */
   function normalizeSignature(signature, methodName) {
     if (signature == null) {
       return "null";
@@ -89,6 +96,7 @@
     throw new Error("HtmlSurfaceController: " + methodName + "() layoutSignature() must return primitive signature");
   }
 
+  /** @param {DyniHtmlSurfaceRendererInstance} rendererInstance @param {DyniHtmlSurfacePayload} rendererPayload @param {string} methodName @returns {string} */
   function resolveLayoutSignature(rendererInstance, rendererPayload, methodName) {
     if (typeof rendererInstance.layoutSignature !== "function") {
       return "none";
@@ -96,6 +104,7 @@
     return normalizeSignature(rendererInstance.layoutSignature(rendererPayload), methodName);
   }
 
+  /** @param {HTMLElement} shellEl @returns {HTMLElement} */
   function ensureMountHost(shellEl) {
     if (!shellEl || typeof shellEl.querySelector !== "function") {
       throw new Error("HtmlSurfaceController: shell element does not support querySelector()");
@@ -104,9 +113,10 @@
     if (!mountEl) {
       throw new Error("HtmlSurfaceController: shell is missing ." + MOUNT_CLASS + " mount host");
     }
-    return mountEl;
+    return /** @type {HTMLElement} */ (mountEl);
   }
 
+  /** @param {HTMLElement} mountEl @returns {ShadowRoot} */
   function ensureShadowRoot(mountEl) {
     if (mountEl.shadowRoot) {
       return mountEl.shadowRoot;
@@ -117,6 +127,7 @@
     return mountEl.attachShadow({ mode: "open" });
   }
 
+  /** @param {HTMLElement} mountEl @param {Record<string, unknown> | null | undefined} route @returns {DyniHtmlShellRect | null} */
   function measureShellRect(mountEl, route) {
     if (!mountEl || typeof mountEl.getBoundingClientRect !== "function") {
       return null;
@@ -124,7 +135,11 @@
     const rect = mountEl.getBoundingClientRect();
     const width = Number(rect && rect.width);
     const height = Number(rect && rect.height);
-    const shellSizingKind = route && route.shellSizing ? route.shellSizing.kind : null;
+    const shellSizing =
+      route && route.shellSizing && typeof route.shellSizing === "object"
+        ? /** @type {Record<string, unknown>} */ (route.shellSizing)
+        : null;
+    const shellSizingKind = shellSizing ? shellSizing.kind : null;
 
     if (shellSizingKind === "natural") {
       if (!(width > 0)) {
@@ -145,6 +160,7 @@
     };
   }
 
+  /** @param {DyniHtmlSurfaceState} state @param {DyniHtmlSurfacePayload} payload @param {boolean} layoutChanged @param {number} relayoutPass @returns {DyniHtmlSurfacePayload} */
   function createRendererPayload(state, payload, layoutChanged, relayoutPass) {
     return {
       props: payload.props,
@@ -154,7 +170,7 @@
       mountEl: state.mountEl,
       shadowRoot: state.shadowRoot,
       route: payload.route || null,
-      shellRect: measureShellRect(state.mountEl, payload.route),
+      shellRect: state.mountEl ? measureShellRect(state.mountEl, payload.route) : null,
       hostContext: state.hostContext,
       layoutChanged: layoutChanged === true,
       relayoutPass: relayoutPass || 0,
@@ -162,13 +178,16 @@
     };
   }
 
+  /** @param {unknown} result @returns {boolean} */
   function shouldRelayout(result) {
     if (result === true) {
       return true;
     }
-    return !!(result && typeof result === "object" && result.relayout === true);
+    const resultRecord = result && typeof result === "object" ? /** @type {Record<string, unknown>} */ (result) : null;
+    return !!(resultRecord && resultRecord.relayout === true);
   }
 
+  /** @param {DyniThemeRuntime | null} themeRuntime @param {string} url @returns {string} */
   function ensureShadowCssCached(themeRuntime, url) {
     if (!themeRuntime || typeof themeRuntime.getShadowCssText !== "function") {
       throw new Error("HtmlSurfaceController: runtime.theme.getShadowCssText() is required for shadow CSS injection");
@@ -180,8 +199,9 @@
     return cssText;
   }
 
+  /** @param {ShadowRoot} shadowRoot */
   function injectBaseShadowStyle(shadowRoot) {
-    const selector = 'style[' + BASE_SHADOW_STYLE_ATTR + '="' + BASE_SHADOW_STYLE_ID + '"]';
+    const selector = "style[" + BASE_SHADOW_STYLE_ATTR + '="' + BASE_SHADOW_STYLE_ID + '"]';
     if (typeof shadowRoot.querySelector === "function" && shadowRoot.querySelector(selector)) {
       return;
     }
@@ -191,6 +211,7 @@
     shadowRoot.appendChild(styleEl);
   }
 
+  /** @param {ShadowRoot} shadowRoot @param {string[]} shadowCssUrls @param {DyniThemeRuntime | null} themeRuntime */
   function injectShadowStyles(shadowRoot, shadowCssUrls, themeRuntime) {
     if (!Array.isArray(shadowCssUrls) || !shadowCssUrls.length) {
       return;
@@ -200,7 +221,7 @@
       if (typeof url !== "string" || !url) {
         continue;
       }
-      const selector = 'style[data-dyni-shadow-css="' + url.replace(/"/g, "\\\"") + '"]';
+      const selector = 'style[data-dyni-shadow-css="' + url.replace(new RegExp('"', "g"), '\\"') + '"]';
       if (typeof shadowRoot.querySelector === "function" && shadowRoot.querySelector(selector)) {
         continue;
       }
@@ -212,14 +233,15 @@
     }
   }
 
+  /** @returns {DyniSurfaceControllerFactory} */
   function createHtmlSurfaceController() {
-    const perf = runtime.perf;
     const runtimeApi = runtime;
     const themeRuntime = runtimeApi && runtimeApi.theme ? runtimeApi.theme : null;
 
+    /** @param {DyniHtmlSurfaceOptions} options */
     function createSurfaceController(options) {
-      const opts = options || {};
-      const rendererSpec = opts.rendererSpec || null;
+      const opts = /** @type {DyniHtmlSurfaceOptions} */ (options || {});
+      const rendererSpec = /** @type {DyniHtmlSurfaceRendererSpec} */ (opts.rendererSpec);
       const hostContext = Object.prototype.hasOwnProperty.call(opts, "hostContext") ? opts.hostContext : null;
       const shadowCssUrls = Array.isArray(opts.shadowCssUrls) ? opts.shadowCssUrls.slice() : [];
 
@@ -230,7 +252,7 @@
       let destroyed = false;
       let lastLayoutSignature = "none";
 
-      const state = {
+      const state = /** @type {DyniHtmlSurfaceState} */ ({
         hostContext: hostContext,
         shellEl: null,
         mountEl: null,
@@ -239,8 +261,9 @@
         latestPayload: null,
         fontMetricsEpoch: 0,
         fontMetricsRefreshToken: 0
-      };
+      });
 
+      /** @param {DyniHtmlSurfacePayload} payload @param {DyniHtmlSurfacePayload} rendererPayload */
       function runPostPatch(payload, rendererPayload) {
         if (!state.renderer) {
           return;
@@ -267,31 +290,30 @@
 
         const refreshToken = state.fontMetricsRefreshToken + 1;
         state.fontMetricsRefreshToken = refreshToken;
-        fonts.ready.then(function () {
-          if (destroyed || !attached || refreshToken !== state.fontMetricsRefreshToken) {
-            return;
-          }
-          if (!state.renderer || !state.mountEl || !state.latestPayload) {
-            return;
-          }
-          state.fontMetricsEpoch += 1;
-          const latestPayload = state.latestPayload;
-          const rendererPayload = createRendererPayload(state, latestPayload, false, 0);
-          state.renderer.update(rendererPayload);
-          runPostPatch(latestPayload, rendererPayload);
-        }, function () {});
+        fonts.ready.then(
+          function () {
+            if (destroyed || !attached || refreshToken !== state.fontMetricsRefreshToken) {
+              return;
+            }
+            if (!state.renderer || !state.mountEl || !state.latestPayload) {
+              return;
+            }
+            state.fontMetricsEpoch += 1;
+            const latestPayload = state.latestPayload;
+            const rendererPayload = createRendererPayload(state, latestPayload, false, 0);
+            state.renderer.update(rendererPayload);
+            runPostPatch(latestPayload, rendererPayload);
+          },
+          function () {}
+        );
       }
 
+      /** @param {DyniHtmlSurfacePayload} payload */
       function attach(payload) {
-        const span = perf.startSpan("HtmlSurfaceController.attach", {
-          rendererId: rendererSpec.id || "unknown",
-          revision: payload && payload.revision
-        });
         if (destroyed) {
           throw new Error("HtmlSurfaceController: attach() after destroy()");
         }
         ensurePayload("attach", payload);
-        try {
           state.mountEl = ensureMountHost(payload.shellEl);
           state.shadowRoot = ensureShadowRoot(state.mountEl);
           state.shellEl = payload.shellEl;
@@ -314,20 +336,10 @@
           scheduleFontMetricsRefresh();
 
           attached = true;
-        }
-        finally {
-          perf.endSpan(span, {
-            rendererId: rendererSpec.id || "unknown",
-            revision: payload && payload.revision
-          });
-        }
       }
 
+      /** @param {DyniHtmlSurfacePayload} payload */
       function update(payload) {
-        const span = perf.startSpan("HtmlSurfaceController.update", {
-          rendererId: rendererSpec.id || "unknown",
-          revision: payload && payload.revision
-        });
         ensurePayload("update", payload);
         if (!attached || !state.renderer) {
           throw new Error("HtmlSurfaceController: update() requires an attached surface");
@@ -335,7 +347,6 @@
         if (payload.shellEl !== state.shellEl) {
           throw new Error("HtmlSurfaceController: update() received a different shellEl; remount required");
         }
-        try {
           const signaturePayload = createRendererPayload(state, payload, false, 0);
           const nextLayoutSignature = resolveLayoutSignature(state.renderer, signaturePayload, "update");
           const layoutChanged = nextLayoutSignature !== lastLayoutSignature;
@@ -351,15 +362,9 @@
             changed: true,
             layoutChanged: layoutChanged
           };
-        }
-        finally {
-          perf.endSpan(span, {
-            rendererId: rendererSpec.id || "unknown",
-            revision: payload && payload.revision
-          });
-        }
       }
 
+      /** @param {string} reason */
       function detach(reason) {
         if (!state.renderer) {
           attached = false;
@@ -404,4 +409,4 @@
   }
 
   runtime._createHtmlSurfaceController = createHtmlSurfaceController;
-}(this));
+})(this);

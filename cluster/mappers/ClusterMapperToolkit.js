@@ -1,7 +1,6 @@
 /**
- * Module: ClusterMapperToolkit - Shared caption/unit/output helpers for cluster mappers
+ * @file ClusterMapperToolkit - Shared caption/unit/output helpers for cluster mappers
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: RadialAngleMath, ValueMath
  */
 
 (function (root, factory) {
@@ -12,9 +11,16 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {(raw: unknown) => string} DyniAngleFormatter */
+  /** @typedef {{ cap: (key: string) => unknown, unit: (key: string) => unknown, formatUnit: (metricKey: string, familyId: string) => string, unitText: (metricKey: string, familyId: string, selectedUnitToken: string) => string, unitNumber: (baseKey: string, selectedUnitToken: string) => number | undefined, out: (value: unknown, caption: unknown, unit: unknown, formatter: unknown, formatterParameters: unknown) => Record<string, unknown>, num: DyniValueMathApi["toOptionalFiniteNumber"], makeAngleFormatter: (isDirection: boolean, leadingZero: boolean, defaultText: string) => DyniAngleFormatter }} DyniClusterMapperToolkitInstance */
+  /** @typedef {{ out: (value: unknown, caption: unknown, unit: unknown, formatter: unknown, formatterParameters: unknown) => Record<string, unknown>, num: DyniValueMathApi["toOptionalFiniteNumber"], makeAngleFormatter: (isDirection: boolean, leadingZero: boolean, defaultText: string) => DyniAngleFormatter, createToolkit: (props?: DyniMapperProps) => DyniClusterMapperToolkitInstance }} DyniClusterMapperToolkitApi */
+
+  /** @type {DyniValueMathApi["toFiniteNumber"]} */
   let toFiniteNumber;
+  /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */
   let toOptionalFiniteNumber;
 
+  /** @this {unknown} @returns {typeof globalThis} */
   function getGlobalRoot() {
     if (typeof globalThis !== "undefined") {
       return globalThis;
@@ -22,9 +28,10 @@
     if (typeof window !== "undefined") {
       return window;
     }
-    return this;
+    return /** @type {typeof globalThis} */ (this);
   }
 
+  /** @param {boolean} isDirection @param {boolean} leadingZero @param {string} defaultText @param {DyniRadialAngleMathApi} angleMath @param {DyniValueMathApi["toOptionalFiniteNumber"]} parseNumber @returns {DyniAngleFormatter} */
   function makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath, parseNumber) {
     return function (raw) {
       const n = parseNumber(raw);
@@ -48,6 +55,7 @@
     };
   }
 
+  /** @param {unknown} v @param {unknown} cap @param {unknown} unit @param {unknown} formatter @param {unknown} formatterParameters @returns {Record<string, unknown>} */
   function out(v, cap, unit, formatter, formatterParameters) {
     const o = {};
     if (typeof v !== "undefined") o.value = v;
@@ -58,9 +66,12 @@
     return o;
   }
 
+  /** @returns {DyniUnitFormatCatalog | null} */
   function getSharedCatalog() {
     const root = getGlobalRoot();
-    const shared = root && root.DyniPlugin && root.DyniPlugin.config && root.DyniPlugin.config.shared;
+    const rootRecord = /** @type {Record<string, unknown>} */ (root);
+    const plugin = /** @type {Partial<DyniPluginNamespace> | undefined} */ (rootRecord.DyniPlugin);
+    const shared = plugin && plugin.config && plugin.config.shared;
     const catalog = shared && shared.unitFormatFamilies;
     if (!catalog || typeof catalog !== "object" || !catalog.families || !catalog.metricBindings) {
       return null;
@@ -68,8 +79,10 @@
     return catalog;
   }
 
+  /** @param {DyniMapperProps | undefined} props @param {DyniRadialAngleMathApi} angleMath @param {DyniUnitFormatCatalog | null} catalog @returns {DyniClusterMapperToolkitInstance} */
   function createToolkit(props, angleMath, catalog) {
-    const p = props || {};
+    const p = /** @type {DyniMapperProps} */ (props || {});
+    /** @param {string} metricKey @returns {{ binding: DyniUnitFormatBinding, family: DyniUnitFormatFamily }} */
     function resolveBinding(metricKey) {
       if (!catalog) {
         throw new Error("dyninstruments: shared/unit-format-families.js must load before unit-aware mapper resolution");
@@ -85,6 +98,7 @@
       return { binding: binding, family: family };
     }
 
+    /** @param {string} metricKey @param {string} familyId @returns {string} */
     function resolveToken(metricKey, familyId) {
       const resolved = resolveBinding(metricKey);
       if (resolved.binding.family !== familyId) {
@@ -102,15 +116,19 @@
     }
 
     return {
+      /** @param {string} k @returns {unknown} */
       cap: function (k) {
         return p["caption_" + k];
       },
+      /** @param {string} k @returns {unknown} */
       unit: function (k) {
         return p["unit_" + k];
       },
+      /** @param {string} metricKey @param {string} familyId @returns {string} */
       formatUnit: function (metricKey, familyId) {
         return resolveToken(metricKey, familyId);
       },
+      /** @param {string} metricKey @param {string} familyId @param {string} selectedUnitToken @returns {string} */
       unitText: function (metricKey, familyId, selectedUnitToken) {
         const resolved = resolveBinding(metricKey);
         if (resolved.binding.family !== familyId) {
@@ -128,6 +146,7 @@
         }
         return resolved.family.labels[token] || token;
       },
+      /** @param {string} baseKey @param {string} selectedUnitToken @returns {number | undefined} */
       unitNumber: function (baseKey, selectedUnitToken) {
         const key = baseKey + "_" + selectedUnitToken;
         if (!Object.prototype.hasOwnProperty.call(p, key)) {
@@ -137,12 +156,14 @@
       },
       out: out,
       num: toOptionalFiniteNumber,
+      /** @param {boolean} isDirection @param {boolean} leadingZero @param {string} defaultText @returns {DyniAngleFormatter} */
       makeAngleFormatter: function (isDirection, leadingZero, defaultText) {
         return makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath, toOptionalFiniteNumber);
       }
     };
   }
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniClusterMapperToolkitApi} */
   function create(def, componentContext) {
     const angleMath = componentContext.components.require("RadialAngleMath");
     const valueMath = componentContext.components.require("ValueMath");
@@ -153,9 +174,11 @@
     return {
       out: out,
       num: toOptionalFiniteNumber,
+      /** @param {boolean} isDirection @param {boolean} leadingZero @param {string} defaultText @returns {DyniAngleFormatter} */
       makeAngleFormatter: function (isDirection, leadingZero, defaultText) {
         return makeAngleFormatter(isDirection, leadingZero, defaultText, angleMath, toOptionalFiniteNumber);
       },
+      /** @param {DyniMapperProps | undefined} props @returns {DyniClusterMapperToolkitInstance} */
       createToolkit: function (props) {
         return createToolkit(props, angleMath, catalog);
       }

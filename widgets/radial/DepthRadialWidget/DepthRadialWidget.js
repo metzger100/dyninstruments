@@ -1,7 +1,6 @@
 /**
- * Module: DepthRadialWidget - Semicircle depth gauge with low-end warning/alarm sectors
+ * @file DepthRadialWidget - Semicircle depth gauge with low-end warning/alarm sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleRadialEngine, ValueMath, DepthDisplayFormatter, PlaceholderNormalize, UnitAwareFormatter
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,13 +11,14 @@
 }(this, function () {
   "use strict";
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const renderer = componentContext.components.require("SemicircleRadialEngine");
     const valueMath = componentContext.components.require("ValueMath");
     const depthDisplayFormatter = componentContext.components.require("DepthDisplayFormatter");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     const unitFormatter = componentContext.components.require("UnitAwareFormatter");
-    const formatDisplay = depthDisplayFormatter.createFormatDisplay(unitFormatter, placeholderNormalize);
+    const formatDisplay = depthDisplayFormatter.createCanvasFormatDisplay(unitFormatter, placeholderNormalize);
 
     const renderCanvas = renderer.createRenderer({
       rawValueKey: "depth",

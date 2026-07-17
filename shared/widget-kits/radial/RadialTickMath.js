@@ -1,7 +1,6 @@
 /**
- * Module: RadialTickMath - Shared tick sweep and major/minor angle generation
+ * @file RadialTickMath - Shared tick sweep and major/minor angle generation
  * Documentation: documentation/radial/gauge-shared-api.md
- * Depends: RadialAngleMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,10 +12,20 @@
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniRadialTickMathApi}
+   */
   function create(def, componentContext) {
     const angleMath = componentContext.components.require("RadialAngleMath");
     const mod = angleMath.mod;
 
+    /**
+     * @param {unknown} startDeg
+     * @param {unknown} endDeg
+     * @returns {DyniRadialSweepInfo}
+     */
     function computeSweep(startDeg, endDeg) {
       let s = Number(startDeg);
       let e = Number(endDeg);
@@ -31,6 +40,13 @@
       return { s, e, sweep, dir };
     }
 
+    /**
+     * @param {number} curr
+     * @param {number} end
+     * @param {unknown} dir
+     * @param {boolean} includeEnd
+     * @returns {boolean}
+     */
     function isBeyondEnd(curr, end, dir, includeEnd) {
       const direction = Number(dir) >= 0 ? 1 : -1;
       if (direction > 0) {
@@ -39,6 +55,10 @@
       return includeEnd ? (curr < end) : (curr <= end);
     }
 
+    /**
+     * @param {DyniRadialTickOptions} [opts]
+     * @returns {DyniRadialTickAngles}
+     */
     function buildTickAngles(opts) {
       opts = opts || {};
       const startDeg = Number(hasOwn.call(opts, "startDeg") ? opts.startDeg : 0);
@@ -56,6 +76,7 @@
       const majors = [];
       const minors = [];
 
+      /** @param {number} a @returns {boolean} */
       function isMajorAngle(a) {
         if (majorMode === "relative") {
           return mod(Math.round(a - s), stepMajor) === 0;

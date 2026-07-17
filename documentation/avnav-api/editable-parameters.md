@@ -183,6 +183,17 @@ const WIND_KIND = {
 ```
 
 ClusterWidget resolves via `p['caption_' + kindName]` and `p['unit_' + kindName]`.
+Kinds that intentionally render no caption/unit may override the generated
+fields with `false` after the spread. Treat those entries as editor-hide
+shorthands, not as typed parameter specs.
+
+```javascript
+{
+  ...makePerKindTextParams(KIND_MAP),
+  caption_regattaTimer: false,
+  unit_regattaTimer: false
+}
+```
 
 ### Per-Unit Selector Pattern (dyninstruments-internal)
 

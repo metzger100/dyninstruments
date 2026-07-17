@@ -32,7 +32,6 @@ describe("runtime/component-loader.js createInstance", function () {
         defName: def.name,
         dep: componentContext.components.require("Dep"),
         theme: componentContext.theme.tokens.resolveForRoot({}),
-        perf: componentContext.perf,
         format: componentContext.format,
         canvas: componentContext.canvas,
         dom: componentContext.dom,
@@ -54,7 +53,6 @@ describe("runtime/component-loader.js createInstance", function () {
     expect(first).not.toBe(second);
     expect(first.dep).not.toBe(second.dep);
     expect(first.theme).toEqual({ token: true });
-    expect(first.perf).toBe(runtime.perf);
     expect(first.format).toBe(runtime.format);
     expect(first.canvas).toBe(runtime.canvas);
     expect(first.dom).toBe(runtime.dom);

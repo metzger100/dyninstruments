@@ -1,16 +1,16 @@
 /**
- * Module: DyniPlugin Vessel Voltage Editables - Voltage gauge editable parameter fragments
+ * @file DyniPlugin Vessel Voltage Editables - Voltage gauge editable parameter fragments
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
-  const shared = ns.config.shared;
+  const shared = /** @type {DyniPluginSharedConfig} */ (ns.config.shared);
 
+  /** @returns {DyniEditableParameters} */
   shared.buildVesselVoltageGaugeParams = function () {
-    return {
+    return /** @type {DyniEditableParameters} */ ({
       voltageLinearMinValue: {
         type: "FLOAT", min: 0, max: 60, step: 0.1, default: 7.0,
         name: "Min voltage",
@@ -61,6 +61,6 @@
         name: "Show min/max labels",
         condition: { kind: "voltageRadial" }
       }
-    };
+    });
   };
 }(this));

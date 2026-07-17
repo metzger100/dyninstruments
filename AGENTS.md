@@ -37,7 +37,8 @@ If guidance conflicts, precedence is:
 - **No ES modules, no import/export** - Must use IIFE or UMD wrappers
 - **HiDPI** - `componentContext.canvas.setupCanvas()` handles devicePixelRatio scaling
 - **Plugin runtime is browser-only** - No server-side runtime code
-- **Testing stack available** - Vitest + jsdom for regression and coverage checks
+- **Testing stack available** - Vitest configured projects for Node/jsdom tests, with native V8 coverage thresholds; required local/CI gates must not require an external browser binary or driver
+- **Development toolchain** - Use Node 26 with npm 12.0.1; run `npm run setup` to install the lockfile and provision the checksum-verified actionlint cache before gates
 
 ---
 
@@ -125,16 +126,21 @@ Task: Add new BarometerGauge
 - [ ] Updated `tests/css/theme-token-extremes.user.css` when theme tokens/input vars/default theming behavior changes.
 - [ ] Updated `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js` when adding or changing a kind with new user-visible visuals/layout behavior.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
-- [ ] Ran `npm run check:all` — no failures; required final gate (`check:core` plus coverage threshold enforcement plus `perf:check`).
+- [ ] Ran `npm run check:all` — no failures; required final gate (`check:core` plus native coverage threshold enforcement).
+- [ ] For releases, pushed only a locally created annotated tag; the tag workflow reruns `check:all` before publishing committed artifacts.
+- [ ] Completed the documented manual AvNav validation before release: plugin load, representative radial/linear/HTML widgets, day/night switch, and route/AIS interactions.
 
 ---
 
 ## 6. Smell Prevention & Fail-Closed Rules
 
 - Mandatory on every task: follow `documentation/conventions/coding-standards.md` and `documentation/conventions/smell-prevention.md` as binding rules.
-- Required completion gate: `npm run check:all` (`check:core` + `test:coverage:check` + `perf:check`).
+- Required completion gate: `npm run check:all` (`check:core` + `test:coverage:check`).
+- `check:core` includes `check:standard` (scoped Prettier, ESLint, Stylelint, actionlint, jscpd), `typecheck`, `package:check`, `test:focus:check`, and `docs:check` before the remaining project-specific gates.
+- `test:coverage:check` runs native Vitest/V8 global and critical-area thresholds.
+- `test:split` runs the Vitest configured split: `unit-node`, `contract`, and `unit-dom` projects.
 - Full smell catalog, enforcement matrix, and suppression syntax: [documentation/conventions/smell-prevention.md](documentation/conventions/smell-prevention.md).
-- Fail-fast / keep-it-simple is mandatory. Details: [documentation/conventions/coding-standards.md](documentation/conventions/coding-standards.md#fail-fast-keep-it-simple).
+- Fail-fast / keep-it-simple is mandatory. Details: [documentation/conventions/coding-standards.md](documentation/conventions/coding-standards.md#fail-fast--keep-it-simple).
 
 ---
 

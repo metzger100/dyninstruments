@@ -1,7 +1,6 @@
 /**
- * Module: DefaultMapper - Cluster translation for self-configurable default instrument kinds
+ * @file DefaultMapper - Cluster translation for self-configurable default instrument kinds
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: routeContext.toolkit
  */
 
 (function (root, factory) {
@@ -14,8 +13,9 @@
   "use strict";
 
   function create() {
+    /** @param {DyniMapperProps|null|undefined} props @param {DyniMapperRouteContext} routeContext @returns {Record<string, unknown>} */
     function translate(props, routeContext) {
-      const p = props || {};
+      const p = /** @type {DyniMapperProps} */ (props || {});
       const toolkit = routeContext.toolkit;
       const cap = toolkit.cap;
       const unit = toolkit.unit;
@@ -27,7 +27,7 @@
       }
 
       if (p.kind === "linearGauge") {
-        const rendererProps = {
+        const rendererProps = /** @type {Record<string, unknown>} */ ({
           defaultLinearRatioThresholdNormal: num(p.defaultLinearRatioThresholdNormal),
           defaultLinearRatioThresholdFlat: num(p.defaultLinearRatioThresholdFlat),
           defaultLinearMinValue: num(p.defaultLinearMinValue),
@@ -51,13 +51,13 @@
           stableDigits: !!p.stableDigits,
           easing: !!p.easing,
           defaultLinearHideTextualMetrics: !!p.defaultLinearHideTextualMetrics
-        };
-        const translated = {
+        });
+        const translated = /** @type {Record<string, unknown>} */ ({
           value: p.value,
           caption: cap("linearGauge"),
           unit: unit("linearGauge"),
           rendererProps: rendererProps
-        };
+        });
         if (typeof p.formatter !== "undefined") {
           translated.formatter = p.formatter;
         }
@@ -68,7 +68,7 @@
       }
 
       if (p.kind === "radialGauge") {
-        const rendererProps = {
+        const rendererProps = /** @type {Record<string, unknown>} */ ({
           defaultRadialRatioThresholdNormal: num(p.defaultRadialRatioThresholdNormal),
           defaultRadialRatioThresholdFlat: num(p.defaultRadialRatioThresholdFlat),
           defaultRadialMinValue: num(p.defaultRadialMinValue),
@@ -92,13 +92,13 @@
           stableDigits: !!p.stableDigits,
           easing: !!p.easing,
           defaultRadialHideTextualMetrics: !!p.defaultRadialHideTextualMetrics
-        };
-        const translated = {
+        });
+        const translated = /** @type {Record<string, unknown>} */ ({
           value: p.value,
           caption: cap("radialGauge"),
           unit: unit("radialGauge"),
           rendererProps: rendererProps
-        };
+        });
         if (typeof p.formatter !== "undefined") {
           translated.formatter = p.formatter;
         }

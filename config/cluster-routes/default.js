@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Cluster Routes Default - Route metadata for default kinds
+ * @file DyniPlugin Cluster Routes Default - Route metadata for default kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: config/cluster-routes.js
  */
 (function (root) {
   "use strict";

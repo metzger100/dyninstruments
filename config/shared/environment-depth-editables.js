@@ -1,18 +1,21 @@
 /**
- * Module: DyniPlugin Environment Depth Editables - Depth gauge editables
+ * @file DyniPlugin Environment Depth Editables - Depth gauge editables
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/unit-editable-utils.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
-  const shared = ns.config.shared;
+  /** @typedef {{ baseKey: string, displayName: string, tokens: Record<string, { min: number, max: number, step: number, default: number }>, condition?: unknown }} DyniEnvironmentFloatSpec */
+  /** @typedef {DyniPluginSharedConfig & { unitFormatFamilies: DyniUnitFormatCatalog, makePerUnitFloatParams: (metricKey: string, binding: DyniUnitFormatBinding, kindDef: DyniEditableCondition, fieldSpec: DyniEnvironmentFloatSpec) => DyniEditableParameters }} DyniEnvironmentDepthShared */
+
+  const ns = /** @type {DyniPluginNamespace} */ (/** @type {unknown} */ (root.DyniPlugin));
+  const shared = /** @type {DyniEnvironmentDepthShared} */ (ns.config.shared);
   const depthBindings = shared.unitFormatFamilies.metricBindings;
   const depthLinearBinding = depthBindings.depthLinear;
   const depthRadialBinding = depthBindings.depthRadial;
   const DEPTH_LINEAR_KIND = { kind: "depthLinear" };
   const DEPTH_RADIAL_KIND = { kind: "depthRadial" };
+  /** @type {Record<string, { min: number, max: number, step: number }>} */
   const DEPTH_UNIT_RANGES = {
     nm: { min: 0, max: 0.016, step: 0.001 },
     m: { min: 0, max: 200, step: 0.5 },
@@ -21,7 +24,9 @@
     yd: { min: 0, max: 200, step: 1 }
   };
 
+  /** @param {Record<string, number>} defaults @returns {Record<string, { min: number, max: number, step: number, default: number }>} */
   function buildTokenSpecs(defaults) {
+    /** @type {Record<string, { min: number, max: number, step: number, default: number }>} */
     const out = {};
     Object.keys(DEPTH_UNIT_RANGES).forEach(function (token) {
       out[token] = Object.assign({ default: defaults[token] }, DEPTH_UNIT_RANGES[token]);
@@ -29,6 +34,7 @@
     return out;
   }
 
+  /** @returns {DyniEditableParameters} */
   shared.buildEnvironmentDepthEditableParameters = function () {
     const linearMin = shared.makePerUnitFloatParams("depthLinear", depthLinearBinding, DEPTH_LINEAR_KIND, {
       baseKey: "depthLinearMinValue",

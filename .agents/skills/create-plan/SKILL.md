@@ -226,7 +226,7 @@ Structure as phased steps with explicit dependencies:
 - [ ] All new files under 400 lines
 - [ ] No smell-prevention violations
 - [ ] Documentation complete and linked from TABLEOFCONTENTS.md
-- [ ] `npm run check:all` passes (check:core + coverage + perf)
+- [ ] `npm run check:all` passes (`check:core` + native coverage thresholds)
 ```
 
 ### Step 9: Save the Plan

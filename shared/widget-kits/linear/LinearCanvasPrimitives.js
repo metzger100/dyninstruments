@@ -1,7 +1,6 @@
 /**
- * Module: LinearCanvasPrimitives - Shared low-level canvas drawing primitives for linear gauges
+ * @file LinearCanvasPrimitives - Shared low-level canvas drawing primitives for linear gauges
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: CanvasRenderingContext2D
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,31 +12,44 @@
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
+  /**
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {DyniLinearDrawOptions | undefined} style
+   * @returns {void}
+   */
   function applyStyle(ctx, style) {
     const s = style || {};
     if (typeof s.alpha !== "undefined") {
       ctx.globalAlpha = Number(s.alpha);
     }
     if (typeof s.strokeStyle !== "undefined") {
-      ctx.strokeStyle = s.strokeStyle;
+      ctx.strokeStyle = /** @type {string} */ (s.strokeStyle);
     }
     if (typeof s.fillStyle !== "undefined") {
-      ctx.fillStyle = s.fillStyle;
+      ctx.fillStyle = /** @type {string} */ (s.fillStyle);
     }
     if (typeof s.lineWidth !== "undefined") {
-      ctx.lineWidth = s.lineWidth;
+      ctx.lineWidth = /** @type {number} */ (s.lineWidth);
     }
     if (typeof s.lineCap !== "undefined") {
-      ctx.lineCap = s.lineCap;
+      ctx.lineCap = /** @type {CanvasLineCap} */ (s.lineCap);
     }
     if (typeof s.lineJoin !== "undefined") {
-      ctx.lineJoin = s.lineJoin;
+      ctx.lineJoin = /** @type {CanvasLineJoin} */ (s.lineJoin);
     }
     if (Array.isArray(s.dash)) {
       ctx.setLineDash(s.dash);
     }
   }
 
+  /**
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {number} x0
+   * @param {number} x1
+   * @param {number} y
+   * @param {DyniLinearDrawOptions} [opts]
+   * @returns {void}
+   */
   function drawTrack(ctx, x0, x1, y, opts) {
     const p = opts || {};
     ctx.save();
@@ -55,6 +67,15 @@
     ctx.restore();
   }
 
+  /**
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {number} x0
+   * @param {number} x1
+   * @param {number} y
+   * @param {unknown} thickness
+   * @param {DyniLinearDrawOptions} [opts]
+   * @returns {void}
+   */
   function drawBand(ctx, x0, x1, y, thickness, opts) {
     const p = opts || {};
     const left = Math.min(x0, x1);
@@ -80,6 +101,14 @@
     ctx.restore();
   }
 
+  /**
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {number} x
+   * @param {number} y
+   * @param {unknown} len
+   * @param {DyniLinearDrawOptions} [opts]
+   * @returns {void}
+   */
   function drawTick(ctx, x, y, len, opts) {
     const p = opts || {};
     const length = Math.max(1, Number(len) || 1);
@@ -97,6 +126,13 @@
     ctx.restore();
   }
 
+  /**
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {number} x
+   * @param {number} y
+   * @param {DyniLinearDrawOptions} [opts]
+   * @returns {void}
+   */
   function drawPointer(ctx, x, y, opts) {
     const p = opts || {};
     const depth = Math.max(1, Math.floor(Number(p.depth) || 8));
@@ -115,6 +151,7 @@
     ctx.restore();
   }
 
+  /** @returns {DyniLinearCanvasPrimitivesApi} */
   function create() {
     return {
       id: "LinearCanvasPrimitives",

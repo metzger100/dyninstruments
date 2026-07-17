@@ -1,7 +1,6 @@
 /**
- * Module: RegattaTimerMarkup - Pure HTML assembly owner for regatta timer renderer output
+ * @file RegattaTimerMarkup - Pure HTML assembly owner for regatta timer renderer output
  * Documentation: documentation/widgets/regatta-timer.md
- * Depends: HtmlWidgetUtils, RegattaTimerPhase
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,6 +13,7 @@
 
   const DEFAULT_DURATION_MINUTES = 5;
 
+  /** @param {unknown} mode @returns {"flat" | "high" | "normal"} */
   function normalizeMode(mode) {
     if (mode === "high" || mode === "flat") {
       return mode;
@@ -21,6 +21,7 @@
     return "normal";
   }
 
+  /** @param {unknown} colorPhase @returns {"critical" | "normal" | "warning"} */
   function normalizeColorPhase(colorPhase) {
     if (colorPhase === "warning" || colorPhase === "critical") {
       return colorPhase;
@@ -28,10 +29,12 @@
     return "normal";
   }
 
+  /** @param {unknown} interactionState @returns {"dispatch" | "passive"} */
   function normalizeInteractionState(interactionState) {
     return interactionState === "dispatch" ? "dispatch" : "passive";
   }
 
+  /** @param {unknown} rawMinutes @returns {number} */
   function toDurationMs(rawMinutes) {
     const minutes = Number(rawMinutes);
     if (!Number.isFinite(minutes) || minutes <= 0) {
@@ -40,6 +43,12 @@
     return Math.round(minutes * 60 * 1000);
   }
 
+  /**
+   * @param {DyniRegattaTimerMarkupModel} model
+   * @param {DyniRegattaTimerMarkupConfig} config
+   * @param {DyniRegattaTimerPhaseApi} phaseApi
+   * @returns {string}
+   */
   function toBarPercent(model, config, phaseApi) {
     const phase = phaseApi.normalize(model.phase);
     if (phase === "elapsed") {
@@ -59,9 +68,15 @@
     return String(Math.max(0, Math.min(100, percent)));
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniRegattaTimerMarkupApi}
+   */
   function create(def, componentContext) {
     const phaseApi = componentContext.components.require("RegattaTimerPhase");
 
+    /** @param {DyniRegattaTimerMarkupOptions} options @returns {string} */
     function render(options) {
       if (!options || typeof options !== "object") {
         throw new Error("RegattaTimerMarkup.render requires options object");

@@ -1,7 +1,6 @@
 /**
- * Module: MapZoomHtmlFit - Per-element text fitting for map zoom HTML renderer
+ * @file MapZoomHtmlFit - Per-element text fitting for map zoom HTML renderer
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: componentContext.dom.requirePluginRoot, TextLayoutEngine, HtmlWidgetUtils, HtmlMeasureUtils, ValueMath, componentContext.theme.tokens
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -20,14 +19,25 @@
     requiredStyle: ""
   });
   const SECONDARY_DEFAULT_SCALE = 0.8;
+  /** @type {DyniValueMathApi["hasText"]} */
   let hasText;
 
+  /**
+   * @param {unknown} value
+   * @param {number} defaultNumber
+   * @returns {number}
+   */
   function numberOr(value, defaultNumber) {
     return typeof value === "number" ? value : defaultNumber;
   }
 
+  /**
+   * @param {DyniMapZoomHeightEstimateArgs | undefined} args
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @returns {number}
+   */
   function estimateMainUsedHeight(args, htmlUtils) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniMapZoomHeightEstimateArgs} */ (args || {});
     const fit = cfg.fit;
     if (!fit || typeof fit !== "object") {
       return 0;
@@ -55,8 +65,12 @@
     return Math.max(valueSafe, secondarySafe);
   }
 
+  /**
+   * @param {DyniMapZoomMainFitArgs | undefined} args
+   * @returns {DyniMapZoomMainFitState}
+   */
   function toMainFitState(args) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniMapZoomMainFitArgs} */ (args || {});
     const text = cfg.textApi;
     if (cfg.mode === "high") {
       const fitHigh = text.fitThreeRowBlock({
@@ -132,8 +146,12 @@
     };
   }
 
+  /**
+   * @param {DyniMapZoomCleanFitArgs | undefined} args
+   * @returns {boolean}
+   */
   function isTextCleanFit(args) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniMapZoomCleanFitArgs} */ (args || {});
     if (!hasText(cfg.text) || !(cfg.px > 0)) {
       return false;
     }
@@ -150,8 +168,13 @@
     return numberOr(fit && fit.width, 0) <= Math.max(1, Math.floor(cfg.maxW)) + 0.01;
   }
 
+  /**
+   * @param {DyniMapZoomRequiredFitArgs | undefined} args
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @returns {DyniMapZoomRequiredFit}
+   */
   function fitRequiredPx(args, htmlUtils) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniMapZoomRequiredFitArgs} */ (args || {});
     if (!hasText(cfg.requiredText)) {
       return { px: 0 };
     }
@@ -180,8 +203,12 @@
     };
   }
 
+  /**
+   * @param {DyniMapZoomSignatureArgs | undefined} args
+   * @returns {string}
+   */
   function buildFitSignature(args) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniMapZoomSignatureArgs} */ (args || {});
     const model = cfg.model;
     if (!model || typeof model !== "object") {
       return "";
@@ -206,16 +233,27 @@
     ]);
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniMapZoomHtmlFitApi}
+   */
   function create(def, componentContext) {
     const textApi = componentContext.components.require("TextLayoutEngine");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const valueMath = componentContext.components.require("ValueMath");
-    const themeApi = componentContext.theme.tokens;
+    const themeApi = /** @type {DyniMapZoomThemeResolver} */ (
+      /** @type {{ theme: { tokens: DyniMapZoomThemeResolver } }} */ (/** @type {unknown} */ (componentContext)).theme.tokens
+    );
     hasText = valueMath.hasText;
 
+    /**
+     * @param {DyniMapZoomHtmlFitArgs | undefined} args
+     * @returns {DyniMapZoomHtmlFitResult}
+     */
     function compute(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniMapZoomHtmlFitArgs} */ (args || {});
       const model = cfg.model;
       const hostContext = cfg.hostContext ? cfg.hostContext : null;
       if (!model || typeof model !== "object") {
@@ -247,7 +285,9 @@
       const innerY = Math.max(1, Math.floor(responsiveInsets.innerY));
       const gapPx = Math.max(1, Math.floor(responsiveInsets.gapBase));
       const secScaleRaw = htmlUtils.toFiniteNumber(model.captionUnitScale);
-      const secScale = secScaleRaw > 0 ? secScaleRaw : SECONDARY_DEFAULT_SCALE;
+      const secScale = typeof secScaleRaw === "number" && secScaleRaw > 0
+        ? secScaleRaw
+        : SECONDARY_DEFAULT_SCALE;
       const mode = typeof model.mode === "string" && model.mode.length
         ? model.mode
         : "normal";
@@ -264,7 +304,7 @@
         model: model
       });
       if (fitCache && fitCache.signature === fitSignature && fitCache.result) {
-        return fitCache.result;
+        return /** @type {DyniMapZoomHtmlFitResult} */ (fitCache.result);
       }
 
       const mainFitArgs = {

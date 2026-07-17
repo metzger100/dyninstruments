@@ -14,6 +14,7 @@ const DEFAULT_MODULE_PATHS = {
   RadialTickMath: "shared/widget-kits/radial/RadialTickMath.js",
   RadialCanvasPrimitives: "shared/widget-kits/radial/RadialCanvasPrimitives.js",
   RadialFrameRenderer: "shared/widget-kits/radial/RadialFrameRenderer.js",
+  HtmlDomPatchUtils: "shared/widget-kits/html/HtmlDomPatchUtils.js",
   HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
   StateScreenLabels: "shared/widget-kits/state/StateScreenLabels.js",
   StateScreenTextFit: "shared/widget-kits/state/StateScreenTextFit.js",

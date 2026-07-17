@@ -1,7 +1,6 @@
 /**
- * Module: RoutePointsRenderModel - Pure normalization and display model owner for route-points HTML renderer
+ * @file RoutePointsRenderModel - Pure normalization and display model owner for route-points HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: CenterDisplayMath, RoutePointsHtmlFit, RoutePointsLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -9,46 +8,64 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRoutePointsRenderModel = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
-  let toFiniteNumber;
-  let toObject;
-  let toSafeInteger;
-  let toOptionalFiniteNumber;
+  /** @typedef {Record<string, unknown> & { points?: DyniRoutePointRecord[] }} DyniRouteRecord */
+  /** @typedef {Record<string, unknown>} DyniRoutePointRecord */
+  /** @typedef {{ idx: number, name: string, lat?: number, lon?: number, routeName: string, selected: boolean, course?: number, distance?: number }} DyniRoutePointSnapshot */
+  /** @typedef {{ props?: unknown, shellRect?: DyniHtmlShellRect | null, isVerticalCommitted?: boolean, scrollbarGutterPx?: unknown, viewportHeight?: unknown }} DyniRoutePointsBuildArgs */
+  /** @typedef {DyniRoutePointsLayoutResult & { mode: "flat" | "high" | "normal", rowPolicy?: DyniRoutePointsRowPolicy, contentRect: DyniRect, headerRect?: DyniRect | null, listRect?: DyniRect, headerLayout?: unknown, rows?: unknown[] }} DyniRoutePointsModelLayout */
+  /** @typedef {{ resolveMode: (args?: unknown) => "flat" | "high" | "normal", computeNaturalHeight: (args?: unknown) => { cappedHeight: number }, computeInsets: (W: unknown, H: unknown) => Record<string, unknown>, createContentRect: (W: unknown, H: unknown, insets: Record<string, unknown>) => DyniRect, computeLayout: (args?: unknown) => DyniRoutePointsModelLayout, computeInlineGeometry: (args?: unknown) => DyniRoutePointsInlineGeometry }} DyniRoutePointsLayoutService */
 
+  /** @type {DyniValueMathApi["toFiniteNumber"]} */
+  let toFiniteNumber = /** @type {DyniValueMathApi["toFiniteNumber"]} */ (/** @type {unknown} */ (null));
+  /** @type {DyniValueMathApi["toObject"]} */
+  let toObject = /** @type {DyniValueMathApi["toObject"]} */ (/** @type {unknown} */ (null));
+  /** @type {DyniValueMathApi["toSafeInteger"]} */
+  let toSafeInteger = /** @type {DyniValueMathApi["toSafeInteger"]} */ (/** @type {unknown} */ (null));
+  /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */
+  let toOptionalFiniteNumber = /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */ (
+    /** @type {unknown} */ (null)
+  );
+
+  /** @param {unknown} value @param {number} defaultValue @returns {number} */
   function toSafeOptionalInteger(value, defaultValue) {
     const n = toOptionalFiniteNumber(value);
-    if (!Number.isFinite(n)) {
+    if (typeof n !== "number" || !Number.isFinite(n)) {
       return defaultValue;
     }
     return Math.floor(n);
   }
 
+  /** @param {unknown} routeValue @returns {DyniRouteRecord | null} */
   function toRoute(routeValue) {
-    const route = routeValue && typeof routeValue === "object" ? routeValue : null;
+    const route = routeValue && typeof routeValue === "object" ? /** @type {DyniRouteRecord} */ (routeValue) : null;
     if (!route || !Array.isArray(route.points)) {
       return null;
     }
     return route;
   }
 
+  /** @param {unknown} pointValue @returns {DyniRoutePointRecord} */
   function toPoint(pointValue) {
-    return pointValue && typeof pointValue === "object" ? pointValue : {};
+    return pointValue && typeof pointValue === "object" ? /** @type {DyniRoutePointRecord} */ (pointValue) : {};
   }
 
-  const PLACEHOLDER_VALUE = "--"; /* dyni-lint-disable-line hardcoded-runtime-default -- RoutePoints segment info contract requires a fixed placeholder token. */
+  const PLACEHOLDER_VALUE =
+    "--"; /* dyni-lint-disable-line hardcoded-runtime-default -- RoutePoints segment info contract requires a fixed placeholder token. */
 
+  /** @param {DyniRoutePointRecord | null} point @returns {boolean} */
   function hasFiniteCoordinates(point) {
     if (!point || typeof point !== "object") {
       return false;
     }
     return (
-      typeof toOptionalFiniteNumber(point.lat) === "number" &&
-      typeof toOptionalFiniteNumber(point.lon) === "number"
+      typeof toOptionalFiniteNumber(point.lat) === "number" && typeof toOptionalFiniteNumber(point.lon) === "number"
     );
   }
 
+  /** @param {DyniRoutePointsRenderModel | Partial<DyniRoutePointsRenderModel>} model @returns {Array<string | number>} */
   function buildRoutePointsSignatureParts(model) {
     const m = model || {};
     const shellWidth = toSafeInteger(m.shellWidth, 0);
@@ -108,6 +125,7 @@
     ];
   }
 
+  /** @param {string[]} parts @param {string} label @param {unknown} value */
   function appendIdentityPart(parts, label, value) {
     if (value == null) {
       return;
@@ -118,6 +136,7 @@
     }
   }
 
+  /** @param {string[]} parts @param {string} label @param {unknown} value */
   function appendCoordinatePart(parts, label, value) {
     const n = toOptionalFiniteNumber(value);
     if (typeof n !== "number") {
@@ -126,9 +145,10 @@
     parts.push(label + ":" + n.toFixed(6));
   }
 
+  /** @param {DyniRoutePointRecord} point @param {number} rowIndex @returns {string} */
   function buildPointIdentityKey(point, rowIndex) {
     const p = toPoint(point);
-    const parts = [];
+    const parts = /** @type {string[]} */ ([]);
     appendIdentityPart(parts, "id", p.id);
     appendIdentityPart(parts, "uid", p.uid);
     appendIdentityPart(parts, "uuid", p.uuid);
@@ -144,19 +164,20 @@
     return parts.join("|");
   }
 
+  /** @param {DyniRoutePointRecord} point @param {number} rowIndex @param {string} routeName @param {boolean} selected @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {DyniRoutePointSnapshot} */
   function buildPointSnapshot(point, rowIndex, routeName, selected, htmlUtils) {
     const p = toPoint(point);
     const idxRaw = toOptionalFiniteNumber(p.idx);
     const courseRaw = toOptionalFiniteNumber(p.course);
     const distanceRaw = toOptionalFiniteNumber(p.distance);
-    const snapshot = {
-      idx: Number.isInteger(idxRaw) && idxRaw >= 0 ? idxRaw : rowIndex,
+    const snapshot = /** @type {DyniRoutePointSnapshot} */ ({
+      idx: typeof idxRaw === "number" && Number.isInteger(idxRaw) && idxRaw >= 0 ? idxRaw : rowIndex,
       name: htmlUtils.trimText(p.name),
       lat: toOptionalFiniteNumber(p.lat),
       lon: toOptionalFiniteNumber(p.lon),
       routeName: routeName,
       selected: selected === true
-    };
+    });
 
     if (typeof courseRaw === "number") {
       snapshot.course = courseRaw;
@@ -168,10 +189,13 @@
     return snapshot;
   }
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const routePointsHtmlFit = componentContext.components.require("RoutePointsHtmlFit");
     const centerMath = componentContext.components.require("CenterDisplayMath");
-    const layoutApi = componentContext.components.require("RoutePointsLayout");
+    const layoutApi = /** @type {DyniRoutePointsLayoutService} */ (
+      /** @type {unknown} */ (componentContext.components.require("RoutePointsLayout"))
+    );
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const navInteractionPolicy = componentContext.components.require("NavInteractionPolicy");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
@@ -185,6 +209,7 @@
     toSafeInteger = valueMath.toSafeInteger;
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
+    /** @param {Record<string, unknown>} props @param {DyniRouteRecord | null} route @returns {string} */
     function resolveStateKind(props, route) {
       return stateScreenPrecedence.pickFirst([
         { kind: "disconnected", when: props.disconnect === true },
@@ -193,8 +218,9 @@
       ]);
     }
 
+    /** @param {DyniRoutePointsBuildArgs | undefined} args @returns {DyniRoutePointsRenderModel} */
     function buildModel(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniRoutePointsBuildArgs} */ (args || {});
       const props = toObject(cfg.props);
       const domain = toObject(props.domain);
       const layout = toObject(props.layout);
@@ -204,7 +230,7 @@
       const route = toRoute(domain.route);
       const kind = resolveStateKind(props, route);
       const hasRoute = kind === "data" && !!route;
-      const points = hasRoute ? route.points : [];
+      const points = hasRoute ? /** @type {DyniRoutePointRecord[]} */ (route.points) : [];
       const pointCount = points.length;
 
       const shellRect = cfg.shellRect && typeof cfg.shellRect === "object" ? cfg.shellRect : null;
@@ -217,9 +243,7 @@
       const stableDigitsEnabled = props.stableDigits === true;
       const selectedIndex = toSafeOptionalInteger(domain.selectedIndex, -1);
       const hasValidSelection = selectedIndex >= 0 && selectedIndex < pointCount;
-      const activeKey = hasValidSelection
-        ? buildPointIdentityKey(points[selectedIndex], selectedIndex)
-        : null;
+      const activeKey = hasValidSelection ? buildPointIdentityKey(points[selectedIndex], selectedIndex) : null;
       const defaultText = Object.prototype.hasOwnProperty.call(props, "default")
         ? String(props.default)
         : placeholderNormalize.normalize(undefined, undefined);
@@ -229,16 +253,16 @@
       const formatDistanceUnit = htmlUtils.trimText(formatUnits.distance);
       const courseUnit = htmlUtils.trimText(formatting.courseUnit);
       const waypointsText = htmlUtils.trimText(formatting.waypointsText);
-      const routeNameText = hasRoute
-        ? htmlUtils.trimText(domain.routeName)
-        : "";
-      const stateLabel = kind === "data" ? "" : (stateScreenLabels.LABELS[kind] || "");
+      const routeNameText = hasRoute ? htmlUtils.trimText(domain.routeName) : "";
+      const stateLabel = kind === "data" ? "" : stateScreenLabels.LABELS[kind] || "";
       const isActiveRoute = domain.isActiveRoute === true;
       const baseInteraction = navInteractionPolicy.canDispatchWhenNotEditing(props) ? "dispatch" : "passive";
-      const interactionState = stateScreenInteraction.resolveInteraction({
-        kind: kind,
-        baseInteraction: baseInteraction
-      });
+      const interactionState = /** @type {string} */ (
+        stateScreenInteraction.resolveInteraction({
+          kind: kind,
+          baseInteraction: baseInteraction
+        })
+      );
       const canActivate = interactionState === "dispatch";
 
       const resolvedMode = layoutApi.resolveMode({
@@ -251,11 +275,11 @@
 
       const naturalHeight = isVerticalContainer
         ? layoutApi.computeNaturalHeight({
-          W: shellWidth,
-          pointCount: pointCount,
-          showHeader: showHeader,
-          viewportHeight: toFiniteNumber(cfg.viewportHeight)
-        })
+            W: shellWidth,
+            pointCount: pointCount,
+            showHeader: showHeader,
+            viewportHeight: toFiniteNumber(cfg.viewportHeight)
+          })
         : null;
 
       const effectiveShellHeight = naturalHeight
@@ -313,59 +337,53 @@
           index: i,
           ordinalText: String(i + 1),
           nameText: nameText,
-      infoText: infoText.valueText,
-      infoPlainText: infoText.plainValueText,
+          infoText: infoText.valueText,
+          infoPlainText: infoText.plainValueText,
           selected: i === selectedIndex,
-          pointSnapshot: buildPointSnapshot(
-            currentPoint,
-            i,
-            routeNameText,
-            i === selectedIndex,
-            htmlUtils
-          )
+          pointSnapshot: buildPointSnapshot(currentPoint, i, routeNameText, i === selectedIndex, htmlUtils)
         });
       }
 
-      const model = {
-        kind: kind,
-        stateLabel: stateLabel,
-        interactionState: interactionState,
-        mode: layoutOutput.mode,
-        showHeader: showHeader,
-        hasRoute: hasRoute,
-        routeNameText: routeNameText,
-        metaText: hasRoute && waypointsText
-          ? String(pointCount) + " " + waypointsText
-          : (hasRoute ? String(pointCount) : ""),
-        waypointsText: waypointsText,
-        courseUnit: courseUnit,
-        units: {
-          distance: distanceUnit
-        },
-        formatUnits: {
-          distance: formatDistanceUnit
-        },
-        showLatLon: showLatLon,
-        useRhumbLine: useRhumbLine,
-        isVerticalContainer: isVerticalContainer,
-        naturalHeight: naturalHeight,
-        layoutShellHeight: effectiveShellHeight,
-        inlineGeometry: inlineGeometry,
-        showOrdinal: showOrdinal,
-        points: rows,
-        pointCount: pointCount,
-        selectedIndex: selectedIndex,
-        activeWaypointKey: activeKey,
-        hasValidSelection: hasValidSelection,
-        canActivateRoutePoint: canActivate,
-        isActiveRoute: isActiveRoute,
-        stableDigitsEnabled: stableDigitsEnabled,
-        scrollbarGutterPx: scrollbarGutterPx,
-        shellWidth: shellWidth,
-        shellHeight: shellHeight,
-        ratioThresholdNormal: layout.ratioThresholdNormal,
-        ratioThresholdFlat: layout.ratioThresholdFlat
-      };
+      const model = /** @type {DyniRoutePointsRenderModel} */ (
+        /** @type {unknown} */ ({
+          kind: kind,
+          stateLabel: stateLabel,
+          interactionState: interactionState,
+          mode: layoutOutput.mode,
+          showHeader: showHeader,
+          hasRoute: hasRoute,
+          routeNameText: routeNameText,
+          metaText: hasRoute ? [String(pointCount), waypointsText].filter(Boolean).join(" ") : "",
+          waypointsText: waypointsText,
+          courseUnit: courseUnit,
+          units: {
+            distance: distanceUnit
+          },
+          formatUnits: {
+            distance: formatDistanceUnit
+          },
+          showLatLon: showLatLon,
+          useRhumbLine: useRhumbLine,
+          isVerticalContainer: isVerticalContainer,
+          naturalHeight: naturalHeight,
+          layoutShellHeight: effectiveShellHeight,
+          inlineGeometry: inlineGeometry,
+          showOrdinal: showOrdinal,
+          points: rows,
+          pointCount: pointCount,
+          selectedIndex: selectedIndex,
+          activeWaypointKey: activeKey,
+          hasValidSelection: hasValidSelection,
+          canActivateRoutePoint: canActivate,
+          isActiveRoute: isActiveRoute,
+          stableDigitsEnabled: stableDigitsEnabled,
+          scrollbarGutterPx: scrollbarGutterPx,
+          shellWidth: shellWidth,
+          shellHeight: shellHeight,
+          ratioThresholdNormal: layout.ratioThresholdNormal,
+          ratioThresholdFlat: layout.ratioThresholdFlat
+        })
+      );
 
       model.resizeSignatureParts = buildRoutePointsSignatureParts(model);
       return model;
@@ -375,11 +393,12 @@
       id: "RoutePointsRenderModel",
       buildModel: buildModel,
       buildResizeSignatureParts: buildRoutePointsSignatureParts,
-      canActivateRoutePoint: function (args) {
-        return navInteractionPolicy.canDispatchWhenNotEditing(args && args.props);
+      canActivateRoutePoint: /** @param {unknown} args */ function (args) {
+        const input = args && typeof args === "object" ? /** @type {Record<string, unknown>} */ (args) : null;
+        return navInteractionPolicy.canDispatchWhenNotEditing(input && input.props);
       }
     };
   }
 
   return { id: "RoutePointsRenderModel", create: create };
-}));
+});

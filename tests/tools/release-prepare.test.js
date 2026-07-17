@@ -1,16 +1,52 @@
 describe("release-prepare", function () {
+  it("parses help and rejects unknown arguments without repository reads", async function () {
+    const { parseReleasePrepareArgs, runReleasePrepare } = await import("../../tools/release-prepare.mjs");
+
+    expect(parseReleasePrepareArgs(["--help"])).toEqual({ help: true, unknown: [] });
+    expect(runReleasePrepare(["--help"])).toEqual(expect.objectContaining({ help: expect.stringContaining("Usage") }));
+    expect(() => runReleasePrepare(["--unknown"])).toThrow(/unknown argument/);
+  });
+
+  it("fails closed for every tracked, untracked, and renamed path", async function () {
+    const { ensureCleanReleasePreparation } = await import("../../tools/release-prepare.mjs");
+
+    expect(() =>
+      ensureCleanReleasePreparation(() => " M plugin.js\0?? new-file.js\0R  releases/new.js\0old.js\0")
+    ).toThrow(/plugin.js/);
+    expect(() => ensureCleanReleasePreparation(() => "R  releases/new.js\0old.js\0")).toThrow(/old.js/);
+    expect(() => ensureCleanReleasePreparation(() => "R  new.js\0releases/old.js\0")).toThrow(/new.js/);
+    expect(() => ensureCleanReleasePreparation(() => " M releases/dyninstruments-1.2.3.md\0")).toThrow(
+      /dyninstruments-1\.2\.3\.md/
+    );
+    expect(() => ensureCleanReleasePreparation(() => "R  releases/new.md\0releases/old.md\0")).toThrow(
+      /releases\/new\.md/
+    );
+    expect(() => ensureCleanReleasePreparation(() => "")).not.toThrow();
+  });
+
+  it("allows only explicitly named dirty paths", async function () {
+    const { getUnexpectedDirtyPaths } = await import("../../tools/release-git.mjs");
+    const status =
+      [
+        "?? releases/dyninstruments-1.2.3.md",
+        " M releases/dyninstruments-1.2.3.zip",
+        " M releases/dyninstruments-1.2.2.md",
+        "?? releases/arbitrary.txt"
+      ].join("\0") + "\0";
+
+    expect(getUnexpectedDirtyPaths(() => status, ["./releases/dyninstruments-1.2.3.md"])).toEqual([
+      "releases/dyninstruments-1.2.3.zip",
+      "releases/dyninstruments-1.2.2.md",
+      "releases/arbitrary.txt"
+    ]);
+  });
+
   it("builds JSON payload with commit/file summary and semver review support", async function () {
     const { buildReleasePreparePayload } = await import("../../tools/release-prepare.mjs");
 
     const responses = new Map([
-      [
-        "describe --tags --abbrev=0 --match v*",
-        "v0.3.0\n"
-      ],
-      [
-        "log -1 --format=%cs v0.3.0",
-        "2025-06-15\n"
-      ],
+      ["describe --tags --abbrev=0 --match v*", "v0.3.0\n"],
+      ["log -1 --format=%cs v0.3.0", "2025-06-15\n"],
       [
         "log --reverse --oneline v0.3.0..HEAD",
         [
@@ -131,11 +167,13 @@ describe("release-prepare", function () {
           throw new Error("no tag");
         }
         if (key === "log --reverse --oneline --root") {
-          return [
-            "a1b2c3d feat: add route summary",
-            "d4e5f6a fix: clamp stale state",
-            "0f1e2d3 BREAKING: rename the runtime shell"
-          ].join("\n") + "\n";
+          return (
+            [
+              "a1b2c3d feat: add route summary",
+              "d4e5f6a fix: clamp stale state",
+              "0f1e2d3 BREAKING: rename the runtime shell"
+            ].join("\n") + "\n"
+          );
         }
         if (key === "diff --name-status --find-renames --root HEAD") {
           return "M\twidgets/example.js\n";

@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Cluster Registry - Cluster mapper/renderer/router component definitions
+ * @file DyniPlugin Cluster Registry - Cluster mapper/renderer/router component definitions
  * Documentation: documentation/architecture/component-system.md
- * Depends: window.DyniPlugin.baseUrl, window.DyniPlugin.config.shared
  */
 (function (root) {
   "use strict";

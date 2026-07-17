@@ -1,7 +1,6 @@
 /**
- * Module: RoutePointsLayout - Responsive geometry owner for the route-points HTML renderer
+ * @file RoutePointsLayout - Responsive geometry owner for the route-points HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, RoutePointsLayoutSizing, RoutePointsRowGeometry
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -9,8 +8,12 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRoutePointsLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
+
+  /** @typedef {{ mode?: string, W?: unknown, H?: unknown, ratioThresholdNormal?: unknown, ratioThresholdFlat?: unknown, isVerticalContainer?: boolean, verticalAnchorWidth?: unknown, contentRect?: DyniRect, responsive?: DyniResponsiveScaleProfile, pointCount?: unknown, showHeader?: boolean, trailingGutterPx?: unknown }} DyniRoutePointsLayoutArgs */
+  /** @typedef {{ mode: "flat" | "high" | "normal", showHeader: boolean, isVerticalContainer: boolean, pointCount: number, rowHeight: number, rowGap: number, headerGap: number, rowPadding: number, rowPolicy: DyniRoutePointsRowPolicy, trailingGutterPx: number, responsive: DyniResponsiveScaleProfile, contentRect: DyniRect, headerRect: DyniRect | null, headerLayout: { routeNameRect: DyniRect, metaRect: DyniRect } | null, listRect: DyniRect, listContentHeight: number, rowRects: DyniRect[], rows: DyniRoutePointsRowCells[] }} DyniRoutePointsLayoutOutput */
+  /** @typedef {{ layout?: DyniRoutePointsLayoutOutput, W?: unknown, H?: unknown, pointCount?: unknown, showHeader?: boolean, viewportHeight?: unknown }} DyniRoutePointsLayoutExtraArgs */
 
   const PAD_X_RATIO = 0.03;
   const INNER_Y_RATIO = 0.02;
@@ -36,6 +39,7 @@
     flatHeadPanelScale: 0.84
   };
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
@@ -46,8 +50,9 @@
     const toCount = sizingApi.toCount;
     const toSizeStyle = sizingApi.toSizeStyle;
 
+    /** @param {DyniRoutePointsLayoutArgs | undefined} args @returns {"flat" | "high" | "normal"} */
     function resolveMode(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniRoutePointsLayoutArgs} */ (args || {});
       if (cfg.isVerticalContainer === true) {
         return "high";
       }
@@ -68,16 +73,16 @@
       return "normal";
     }
 
+    /** @param {string} mode @returns {number} */
     function resolveRowHeightMultiplier(mode) {
       return mode === "high" ? HIGH_MODE_ROW_HEIGHT_MULTIPLIER : 1;
     }
 
+    /** @param {unknown} W @param {unknown} H @param {boolean} isVerticalContainer @param {string} mode @returns {number} */
     function computeRowHeight(W, H, isVerticalContainer, mode) {
       const isVertical = isVerticalContainer === true;
       const safeW = Math.max(1, Math.floor(clampNumber(W, 1, Number.MAX_SAFE_INTEGER, 1)));
-      const safeH = isVertical
-        ? safeW
-        : Math.max(1, Math.floor(clampNumber(H, 1, Number.MAX_SAFE_INTEGER, safeW)));
+      const safeH = isVertical ? safeW : Math.max(1, Math.floor(clampNumber(H, 1, Number.MAX_SAFE_INTEGER, safeW)));
       const profile = profileApi.computeProfile(safeW, safeH, { scales: RESPONSIVE_SCALES });
       const minClamp = isVertical ? ROW_HEIGHT_MIN_PX_VERTICAL : ROW_HEIGHT_MIN_PX;
       const maxClamp = isVertical ? ROW_HEIGHT_MAX_PX_VERTICAL : ROW_HEIGHT_MAX_PX;
@@ -90,6 +95,7 @@
       return Math.max(minClamp, Math.min(scaledMaxClamp, Math.floor(baseRowHeight * multiplier)));
     }
 
+    /** @param {unknown} W @param {unknown} H @returns {{ padX: number, innerY: number, gap: number, responsive: DyniResponsiveScaleProfile }} */
     function computeInsets(W, H) {
       const safeW = Math.max(1, Math.floor(clampNumber(W, 1, Number.MAX_SAFE_INTEGER, 1)));
       const safeH = Math.max(1, Math.floor(clampNumber(H, 1, Number.MAX_SAFE_INTEGER, 1)));
@@ -102,6 +108,7 @@
       };
     }
 
+    /** @param {unknown} W @param {unknown} H @param {{ padX: number, innerY: number }} [insets] @returns {DyniRect} */
     function createContentRect(W, H, insets) {
       const ins = insets || computeInsets(W, H);
       return makeRect(
@@ -112,6 +119,7 @@
       );
     }
 
+    /** @param {DyniRect | null} headerRect @param {string} mode @returns {{ routeNameRect: DyniRect, metaRect: DyniRect } | null} */
     function computeHeaderLayout(headerRect, mode) {
       if (!headerRect) {
         return null;
@@ -133,13 +141,15 @@
       };
     }
 
+    /** @param {DyniRoutePointsLayoutArgs | undefined} args @returns {DyniRoutePointsLayoutOutput} */
     function computeLayout(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniRoutePointsLayoutArgs} */ (args || {});
       const contentRect = cfg.contentRect || makeRect(0, 0, 0, 0);
       const showHeader = cfg.showHeader !== false;
       const isVerticalContainer = cfg.isVerticalContainer === true;
       const pointCount = toCount(cfg.pointCount);
-      const responsive = cfg.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
+      const responsive =
+        cfg.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
       const mode = resolveMode({
         mode: cfg.mode,
         W: contentRect.w,
@@ -155,7 +165,10 @@
       const rowGap = Math.max(1, Math.floor(rowHeight * ROW_GAP_RATIO));
       const headerGap = Math.max(1, Math.floor(rowHeight * HEADER_GAP_RATIO));
       const rowPadding = Math.max(1, Math.floor(rowHeight * ROW_PADDING_RATIO));
-      const trailingGutterPx = Math.max(0, Math.floor(clampNumber(cfg.trailingGutterPx, 0, Number.MAX_SAFE_INTEGER, 0)));
+      const trailingGutterPx = Math.max(
+        0,
+        Math.floor(clampNumber(cfg.trailingGutterPx, 0, Number.MAX_SAFE_INTEGER, 0))
+      );
       const rowPolicy = rowGeometryApi.resolveRowPolicy({
         mode: mode,
         isVerticalContainer: isVerticalContainer
@@ -199,20 +212,22 @@
         }
       }
 
-      const rowRects = [];
-      const rows = [];
+      const rowRects = /** @type {DyniRect[]} */ ([]);
+      const rows = /** @type {DyniRoutePointsRowCells[]} */ ([]);
       let rowY = listRect.y;
       for (let i = 0; i < pointCount; i += 1) {
         const rowRect = makeRect(listRect.x, rowY, listRect.w, rowHeight);
         rowRects.push(rowRect);
-        rows.push(rowGeometryApi.buildRowCells({
-          rowRect: rowRect,
-          mode: mode,
-          rowPadding: rowPadding,
-          rowGap: rowGap,
-          trailingGutterPx: trailingGutterPx,
-          policy: rowPolicy
-        }));
+        rows.push(
+          rowGeometryApi.buildRowCells({
+            rowRect: rowRect,
+            mode: mode,
+            rowPadding: rowPadding,
+            rowGap: rowGap,
+            trailingGutterPx: trailingGutterPx,
+            policy: rowPolicy
+          })
+        );
         rowY += rowHeight + rowGap;
       }
 
@@ -241,8 +256,9 @@
       };
     }
 
+    /** @param {DyniRoutePointsLayoutExtraArgs | undefined} args */
     function computeInlineGeometry(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniRoutePointsLayoutExtraArgs} */ (args || {});
       const layout = cfg.layout || computeLayout(cfg);
       const showOrdinal = layout.rowPolicy ? layout.rowPolicy.showOrdinal === true : true;
       const wrapperStyle =
@@ -257,10 +273,10 @@
 
       const header = layout.headerRect
         ? {
-          style: toSizeStyle(layout.headerRect),
-          routeNameStyle: toSizeStyle(layout.headerLayout && layout.headerLayout.routeNameRect),
-          metaStyle: toSizeStyle(layout.headerLayout && layout.headerLayout.metaRect)
-        }
+            style: toSizeStyle(layout.headerRect),
+            routeNameStyle: toSizeStyle(layout.headerLayout && layout.headerLayout.routeNameRect),
+            metaStyle: toSizeStyle(layout.headerLayout && layout.headerLayout.metaRect)
+          }
         : null;
 
       return {
@@ -273,7 +289,8 @@
         header: header,
         list: {
           style: toSizeStyle(layout.listRect),
-          contentStyle: "min-height:" + Math.max(0, layout.listContentHeight) + "px;gap:" + Math.max(0, layout.rowGap) + "px;"
+          contentStyle:
+            "min-height:" + Math.max(0, layout.listContentHeight) + "px;gap:" + Math.max(0, layout.rowGap) + "px;"
         },
         rows: layout.rows.map(function (row) {
           const rowShowOrdinal = row.showOrdinal !== false && showOrdinal;
@@ -301,8 +318,9 @@
       };
     }
 
+    /** @param {DyniRoutePointsLayoutExtraArgs | undefined} args */
     function computeNaturalHeight(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniRoutePointsLayoutExtraArgs} */ (args || {});
       const width = Math.max(1, Math.floor(clampNumber(cfg.W, 1, Number.MAX_SAFE_INTEGER, 1)));
       const pointCount = toCount(cfg.pointCount);
       const showHeader = cfg.showHeader !== false;
@@ -311,12 +329,12 @@
       const headerGap = showHeader ? Math.max(1, Math.floor(rowHeight * HEADER_GAP_RATIO)) : 0;
       const headerHeight = showHeader
         ? sizingApi.computeHeaderHeight({
-          mode: "high",
-          rowHeight: rowHeight,
-          existingHeaderHeight: Math.max(1, Math.floor(rowHeight * HEADER_HEIGHT_SHARE_HIGH)),
-          isVerticalContainer: true,
-          contentWidth: width
-        })
+            mode: "high",
+            rowHeight: rowHeight,
+            existingHeaderHeight: Math.max(1, Math.floor(rowHeight * HEADER_HEIGHT_SHARE_HIGH)),
+            isVerticalContainer: true,
+            contentWidth: width
+          })
         : 0;
       const insets = computeInsets(width, width);
       const outerPaddingY = Math.max(0, insets.innerY * 2);
@@ -326,9 +344,8 @@
         0,
         Math.floor(clampNumber(cfg.viewportHeight, 0, Number.MAX_SAFE_INTEGER, sizingApi.resolveWindowViewportHeight()))
       );
-      const capHeight = viewportHeight > 0
-        ? Math.max(0, Math.floor(viewportHeight * MAX_VIEWPORT_HEIGHT_RATIO))
-        : naturalHeight;
+      const capHeight =
+        viewportHeight > 0 ? Math.max(0, Math.floor(viewportHeight * MAX_VIEWPORT_HEIGHT_RATIO)) : naturalHeight;
       const cappedHeight = Math.max(0, Math.min(naturalHeight, capHeight));
       const listViewportHeight = Math.max(0, cappedHeight - outerPaddingY - headerHeight - headerGap);
 
@@ -360,8 +377,10 @@
         HEADER_HEIGHT_SHARE_NORMAL: HEADER_HEIGHT_SHARE_NORMAL,
         HEADER_HEIGHT_FLOOR_ROWS_NORMAL: sizingApi.constants.HEADER_HEIGHT_FLOOR_ROWS_NORMAL,
         HEADER_HEIGHT_FLOOR_ROWS_HIGH: sizingApi.constants.HEADER_HEIGHT_FLOOR_ROWS_HIGH,
-        HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_NORMAL: sizingApi.constants.HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_NORMAL,
-        HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_HIGH: sizingApi.constants.HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_HIGH,
+        HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_NORMAL:
+          sizingApi.constants.HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_NORMAL,
+        HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_HIGH:
+          sizingApi.constants.HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_HIGH,
         HEADER_NARROW_VERTICAL_WIDTH_TO_ROW_RATIO: sizingApi.constants.HEADER_NARROW_VERTICAL_WIDTH_TO_ROW_RATIO,
         HEAD_PANEL_WIDTH_RATIO_FLAT: HEAD_PANEL_WIDTH_RATIO_FLAT,
         ROW_GAP_RATIO: ROW_GAP_RATIO,
@@ -387,4 +406,4 @@
   }
 
   return { id: "RoutePointsLayout", create: create };
-}));
+});

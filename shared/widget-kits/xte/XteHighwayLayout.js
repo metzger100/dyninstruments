@@ -1,7 +1,6 @@
 /**
- * Module: XteHighwayLayout - Responsive layout rectangles for the XTE highway renderer
+ * @file XteHighwayLayout - Responsive layout rectangles for the XTE highway renderer
  * Documentation: documentation/widgets/xte-display.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, LayoutSizingHelpers, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -39,7 +38,8 @@
   const HIGH_TOP_MAX_RATIO = 0.18;
   const HIGH_HIGHWAY_MIN_RATIO = 0.6;
   const HIGH_HIGHWAY_MAX_RATIO = 0.74;
-  let makeRect = null;
+  /** @type {DyniLayoutRectMathApi["makeRect"]} */
+  let makeRect;
   const RESPONSIVE_SCALES = {
     textFillScale: 1.18,
     flatHighwayShareScale: 0.92,
@@ -49,8 +49,15 @@
     highTopShareScale: 0.84,
     highHighwayShareScale: 0.97
   };
+  /** @type {DyniValueMathApi["clampNumber"]} */
   let clampNumber;
 
+  /**
+   * @param {DyniRect} rect
+   * @param {number} gap
+   * @param {number} columns
+   * @returns {DyniRect[]}
+   */
   function splitColumns(rect, gap, columns) {
     const safeGap = Math.max(0, Math.floor(gap));
     const count = Math.max(1, Math.floor(columns));
@@ -63,6 +70,11 @@
     return out;
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniXteHighwayLayoutApi}
+   */
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
@@ -75,10 +87,17 @@
       METRIC_TILE_CAPTION_RATIO
     );
 
+    /**
+     * @param {unknown} W
+     * @param {unknown} H
+     * @param {unknown} thresholdNormal
+     * @param {unknown} thresholdFlat
+     * @returns {DyniXteMode}
+     */
     function computeMode(W, H, thresholdNormal, thresholdFlat) {
       const ratio = (Number(W) || 0) / Math.max(1, Number(H) || 0);
-      const normal = Number.isFinite(thresholdNormal) ? thresholdNormal : 0.85;
-      const flat = Number.isFinite(thresholdFlat) ? thresholdFlat : 2.3;
+      const normal = Number.isFinite(thresholdNormal) ? /** @type {number} */ (thresholdNormal) : 0.85;
+      const flat = Number.isFinite(thresholdFlat) ? /** @type {number} */ (thresholdFlat) : 2.3;
       if (ratio < normal) {
         return "high";
       }
@@ -88,6 +107,7 @@
       return "normal";
     }
 
+    /** @param {unknown} W @param {unknown} H @returns {DyniXteHighwayInsets} */
     function computeInsets(W, H) {
       const responsive = profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
       return {
@@ -97,6 +117,7 @@
       };
     }
 
+    /** @param {number} W @param {number} H @param {{ pad: number }} insets @returns {DyniRect} */
     function createContentRect(W, H, insets) {
       return makeRect(
         insets.pad,
@@ -106,8 +127,9 @@
       );
     }
 
+    /** @param {unknown} args @returns {DyniXteHighwayLayoutResult} */
     function computeLayout(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniXteLayoutArgs} */ (args || {});
       const contentRect = cfg.contentRect || makeRect(0, 0, 0, 0);
       const responsive = cfg.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
       const gap = Math.max(0, Math.floor(clampNumber(

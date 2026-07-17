@@ -1,7 +1,6 @@
 /**
- * Module: NavModeRatio - Shared mode-aware ratio resolver for nav HTML fit helpers
+ * @file NavModeRatio - Shared mode-aware ratio resolver for nav HTML fit helpers
  * Documentation: documentation/widgets/ais-target.md
- * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,11 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {unknown} mode
+   * @param {DyniNavRatios} ratios
+   * @returns {unknown}
+   */
   function resolve(mode, ratios) {
     if (mode === "flat") {
       return ratios.flat;
@@ -22,6 +26,7 @@
     return ratios.normal;
   }
 
+  /** @returns {DyniNavModeRatioApi} */
   function create() {
     return {
       id: "NavModeRatio",

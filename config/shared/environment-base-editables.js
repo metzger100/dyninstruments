@@ -1,14 +1,15 @@
 /**
- * Module: DyniPlugin Environment Base Editables - Shared environment editable fragments
+ * @file DyniPlugin Environment Base Editables - Shared environment editable fragments
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/unit-editable-utils.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {DyniPluginSharedConfig & { kindMaps: Record<string, DyniPerKindTextParameterMap>, unitFormatFamilies: DyniUnitFormatCatalog, environmentDefaultDepthKey?: string, opt: (name: unknown, value: unknown) => DyniEditableOption, makePerKindCaptionParams: (map: DyniPerKindTextParameterMap) => DyniEditableParameters, makeUnitAwareTextParams: (map: DyniPerKindTextParameterMap, bindings: Readonly<Record<string, DyniUnitFormatBinding>>) => DyniEditableParameters }} DyniEnvironmentBaseShared */
+
+  const ns = /** @type {DyniPluginNamespace} */ (/** @type {unknown} */ (root.DyniPlugin));
   const config = ns.config;
-  const shared = config.shared;
+  const shared = /** @type {DyniEnvironmentBaseShared} */ (config.shared);
   const opt = shared.opt;
   const ENV_KIND = shared.kindMaps.ENV_KIND;
   const envBindings = shared.unitFormatFamilies.metricBindings;
@@ -16,6 +17,7 @@
 
   shared.environmentDefaultDepthKey = DEFAULT_DEPTH_KEY;
 
+  /** @returns {DyniEditableParameters} */
   shared.buildEnvironmentBaseEditableParameters = function () {
     return {
       kind: {
@@ -56,6 +58,7 @@
     };
   };
 
+  /** @returns {DyniEditableParameters} */
   shared.buildEnvironmentModeEditableParameters = function () {
     return {
       easing: {
@@ -96,6 +99,7 @@
     };
   };
 
+  /** @returns {DyniEditableParameters} */
   shared.buildEnvironmentSharedScaleEditableParameters = function () {
     return {
       // Shared scale (numeric + radial)
@@ -126,6 +130,7 @@
     };
   };
 
+  /** @returns {DyniEditableParameters} */
   shared.buildEnvironmentPerKindEditableParameters = function () {
     return Object.assign(
       {},
@@ -134,6 +139,7 @@
     );
   };
 
+  /** @returns {DyniEditableParameters} */
   shared.buildEnvironmentThresholdEditableParameters = function () {
     return {
       // ThreeValueTextWidget thresholds (numeric kinds)

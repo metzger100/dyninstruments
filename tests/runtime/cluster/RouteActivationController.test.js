@@ -109,10 +109,6 @@ describe("runtime/cluster/RouteActivationController.js", function () {
         surfaces: {
           materializeSurfacePolicyProps: materializeSurfacePolicyProps,
         },
-        perf: {
-          startSpan: vi.fn(() => null),
-          endSpan: vi.fn(),
-        },
       },
       config: {
         shared: {},

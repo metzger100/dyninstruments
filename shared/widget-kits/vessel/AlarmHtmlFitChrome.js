@@ -1,7 +1,6 @@
 /**
- * Module: AlarmHtmlFitChrome - Shell chrome and cache-signature helpers for vessel alarm HTML
+ * @file AlarmHtmlFitChrome - Shell chrome and cache-signature helpers for vessel alarm HTML
  * Documentation: documentation/widgets/alarm.md
- * Depends: HtmlWidgetUtils, AisTargetLayoutSizing, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,8 +11,15 @@
 }(this, function () {
   "use strict";
 
+  /** @type {DyniValueMathApi["toObject"]} */
   let toObject;
 
+  /**
+   * @param {DyniAlarmChromeModel} model
+   * @param {DyniAlarmShellRect} shellRect
+   * @param {DyniAisTargetLayoutSizingApi} chromeApi
+   * @returns {DyniAlarmChromeBox}
+   */
   function resolveShellChrome(model, shellRect, chromeApi) {
     const aisChrome = chromeApi.resolveVisualChrome({
       W: shellRect.width,
@@ -46,10 +52,18 @@
     };
   }
 
+  /**
+   * @param {unknown} shellRect
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @returns {DyniAlarmShellRect | null}
+   */
   function resolveRoundedShellRect(shellRect, htmlUtils) {
-    const width = htmlUtils.toFiniteNumber(shellRect && shellRect.width);
-    const height = htmlUtils.toFiniteNumber(shellRect && shellRect.height);
-    if (!(width > 0) || !(height > 0)) {
+    const rect = /** @type {{ width?: unknown, height?: unknown }} */ (
+      shellRect && typeof shellRect === "object" ? shellRect : {}
+    );
+    const width = htmlUtils.toFiniteNumber(rect.width);
+    const height = htmlUtils.toFiniteNumber(rect.height);
+    if (typeof width !== "number" || typeof height !== "number" || !(width > 0) || !(height > 0)) {
       return null;
     }
     return {
@@ -58,6 +72,11 @@
     };
   }
 
+  /**
+   * @param {DyniAlarmShellRect} shellRect
+   * @param {DyniAlarmChromeBox} chrome
+   * @returns {DyniAlarmContentRect}
+   */
   function resolveContentRect(shellRect, chrome) {
     const width = Math.max(1, Math.round(shellRect.width) - chrome.left - chrome.right);
     const height = Math.max(1, Math.round(shellRect.height) - chrome.top - chrome.bottom);
@@ -68,17 +87,23 @@
     };
   }
 
+  /**
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @param {DyniAlarmChromeModel} model
+   * @param {DyniAlarmContentRect} contentRect
+   * @returns {"flat" | "high" | "normal" | null}
+   */
   function resolveMode(htmlUtils, model, contentRect) {
     const width = htmlUtils.toFiniteNumber(contentRect && contentRect.width);
     const height = htmlUtils.toFiniteNumber(contentRect && contentRect.height);
-    if (!(width > 0) || !(height > 0)) {
+    if (typeof width !== "number" || typeof height !== "number" || !(width > 0) || !(height > 0)) {
       return null;
     }
     const ratio = width / height;
     const normalThreshold = htmlUtils.toFiniteNumber(model.ratioThresholdNormal);
     const flatThreshold = htmlUtils.toFiniteNumber(model.ratioThresholdFlat);
-    const resolvedNormalThreshold = normalThreshold > 0 ? normalThreshold : 1.0;
-    const resolvedFlatThreshold = flatThreshold > 0 ? flatThreshold : 3.0;
+    const resolvedNormalThreshold = typeof normalThreshold === "number" && normalThreshold > 0 ? normalThreshold : 1.0;
+    const resolvedFlatThreshold = typeof flatThreshold === "number" && flatThreshold > 0 ? flatThreshold : 3.0;
     if (ratio < resolvedNormalThreshold) {
       return "high";
     }
@@ -88,9 +113,15 @@
     return "normal";
   }
 
+  /**
+   * @param {DyniAlarmHtmlFitChromeResolveArgs | undefined} args
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @param {DyniAisTargetLayoutSizingApi} chromeApi
+   * @returns {DyniAlarmHtmlFitLayout | null}
+   */
   function resolveLayout(args, htmlUtils, chromeApi) {
     const cfg = args || {};
-    const model = toObject(cfg.model);
+    const model = /** @type {DyniAlarmChromeModel} */ (/** @type {unknown} */ (toObject(cfg.model)));
     const roundedShellRect = resolveRoundedShellRect(cfg.shellRect, htmlUtils);
     if (!roundedShellRect) {
       return null;
@@ -108,12 +139,24 @@
     };
   }
 
+  /**
+   * @param {DyniAlarmChromeBox} chrome
+   * @returns {string}
+   */
   function buildShellStyle(chrome) {
     return "padding:" + chrome.top + "px " + chrome.right + "px " + chrome.bottom + "px " + chrome.left + "px;";
   }
 
+  /**
+   * @param {unknown} model
+   * @param {DyniAlarmChromeBox} chrome
+   * @param {DyniAlarmThemeTokens} tokens
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @returns {string}
+   */
   function buildAccentStyle(model, chrome, tokens, htmlUtils) {
-    if (!model || model.showStrip !== true) {
+    const m = /** @type {DyniAlarmChromeModel} */ (/** @type {unknown} */ (toObject(model)));
+    if (m.showStrip !== true) {
       return "";
     }
     return "left:" + chrome.stripLeft + "px;"
@@ -124,10 +167,16 @@
       + htmlUtils.toStyleText("background-color", tokens.strip);
   }
 
+  /**
+   * @param {DyniAlarmHtmlFitChromeSignatureArgs | undefined} args
+   * @returns {string}
+   */
   function buildSignature(args) {
     const cfg = args || {};
-    const model = toObject(cfg.model);
-    const chrome = cfg.chrome && typeof cfg.chrome === "object" ? cfg.chrome : {};
+    const model = /** @type {DyniAlarmChromeModel} */ (/** @type {unknown} */ (toObject(cfg.model)));
+    const chrome = /** @type {Partial<DyniAlarmChromeBox>} */ (
+      cfg.chrome && typeof cfg.chrome === "object" ? cfg.chrome : {}
+    );
     return JSON.stringify([
       cfg.mode,
       cfg.width,
@@ -166,12 +215,18 @@
     ]);
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniAlarmHtmlFitChromeApi}
+   */
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const aisSizingApi = componentContext.components.require("AisTargetLayoutSizing");
     toObject = componentContext.components.require("ValueMath").toObject;
 
     return {
+      id: "AlarmHtmlFitChrome",
       resolveLayout: function (args) {
         return resolveLayout(args, htmlUtils, aisSizingApi);
       },

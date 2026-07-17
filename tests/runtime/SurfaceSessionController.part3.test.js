@@ -29,7 +29,6 @@ describe("runtime/SurfaceSessionController.js", function () {
       }
     });
 
-    runIifeScript("runtime/PerfSpanHelper.js", context);
     runIifeScript("runtime/SurfaceSessionController.js", context);
     return context.DyniPlugin.runtime.createSurfaceSessionController;
   }

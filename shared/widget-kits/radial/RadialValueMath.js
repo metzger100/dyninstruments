@@ -1,7 +1,6 @@
 /**
- * Module: RadialValueMath - Radial geometry helpers plus ValueMath compatibility exports
+ * @file RadialValueMath - Radial geometry helpers plus ValueMath compatibility exports
  * Documentation: documentation/radial/gauge-shared-api.md
- * Depends: RadialAngleMath, ValueMath, RadialSectorMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,11 +11,23 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   */
   function create(def, componentContext) {
     const angle = componentContext.components.require("RadialAngleMath");
     const value = componentContext.components.require("ValueMath");
     const sectorMath = componentContext.components.require("RadialSectorMath");
 
+    /**
+     * @param {unknown} angleDeg
+     * @param {unknown} minV
+     * @param {unknown} maxV
+     * @param {DyniArc} arc
+     * @param {boolean | undefined} doClamp
+     * @returns {number}
+     */
     function angleToValue(angleDeg, minV, maxV, arc, doClamp) {
       const opts = {
         min: Number(minV),
@@ -28,8 +39,18 @@
       return angle.angleToValue(angleDeg, opts);
     }
 
+    /**
+     * @param {number} minV
+     * @param {number} maxV
+     * @param {unknown} majorStep
+     * @param {unknown} minorStep
+     * @param {DyniArc} arc
+     * @returns {DyniRadialTickAngles}
+     */
     function buildValueTickAngles(minV, maxV, majorStep, minorStep, arc) {
+      /** @type {number[]} */
       const majors = [];
+      /** @type {number[]} */
       const minors = [];
       const startDeg = Number(arc && arc.startDeg);
       const endDeg = Number(arc && arc.endDeg);

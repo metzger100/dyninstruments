@@ -1,7 +1,6 @@
 /**
- * Module: CenterDisplayRenderModel - Display-state builder for center-display canvas renderer
+ * @file CenterDisplayRenderModel - Display-state builder for center-display canvas renderer
  * Documentation: documentation/widgets/center-display.md
- * Depends: StableDigits, UnitAwareFormatter, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,11 +13,17 @@
 
   const DEGREE_UNIT = "\u00b0";
 
+  /** @type {DyniValueMathApi["trimText"]} */
   let trimText;
+  /** @type {DyniValueMathApi["appendUnit"]} */
   let appendUnit;
 
+  /**
+   * @param {unknown} args
+   * @returns {DyniCenterDisplayMeasurementHints}
+   */
   function computeMeasurementHints(args) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniCenterDisplayMeasurementHintArgs} */ (/** @type {unknown} */ (args || {}));
     const rows = cfg.rows;
     const measureTextWidth = cfg.measureTextWidth;
     const computeResponsiveLineMaxPx = cfg.computeResponsiveLineMaxPx;
@@ -104,6 +109,11 @@
     };
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniCenterDisplayRenderModelApi}
+   */
   function create(def, componentContext) {
     const stableDigits = componentContext.components.require("StableDigits");
     const unitFormatter = componentContext.components.require("UnitAwareFormatter");
@@ -111,21 +121,30 @@
     trimText = valueMath.trimText;
     appendUnit = valueMath.appendUnit;
 
+    /** @param {DyniLatLon | null} point @param {"lat" | "lon"} axis @param {string} defaultText @returns {string} */
     function formatCoordinate(point, axis, defaultText) {
       const raw = point && axis === "lat" ? point.lat : point && point.lon;
       return unitFormatter.formatWithToken(raw, "formatLonLatsDecimal", axis, defaultText);
     }
 
+    /** @param {unknown} value @param {string} defaultText @returns {string} */
     function formatCourse(value, defaultText) {
       return unitFormatter.formatWithToken(value, "formatDirection", undefined, defaultText);
     }
 
+    /** @param {unknown} value @param {unknown} formatUnit @param {string} defaultText @returns {string} */
     function formatDistance(value, formatUnit, defaultText) {
       return unitFormatter.formatDistance(value, formatUnit, defaultText);
     }
 
+    /**
+     * @param {unknown} props
+     * @param {DyniCenterDisplayMathApi} math
+     * @param {string} defaultText
+     * @returns {DyniCenterDisplayState}
+     */
     function buildDisplayState(props, math, defaultText) {
-      const p = props || {};
+      const p = /** @type {DyniCenterDisplayProps} */ (/** @type {unknown} */ (props || {}));
       const stableDigitsEnabled = p.stableDigits === true;
       const display = (p.display && typeof p.display === "object") ? p.display : {};
       const captions = (p.captions && typeof p.captions === "object") ? p.captions : {};

@@ -1,38 +1,47 @@
 /**
- * Module: DyniPlugin Cluster Shell Renderer - Startup-safe route-frame normalization and shell markup
+ * @file DyniPlugin Cluster Shell Renderer - Startup-safe route-frame normalization and shell markup
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ValueMath
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
-  const runtime = ns.runtime;
-  const valueMath = root.DyniComponents.DyniValueMath.create();
+  const runtime = /** @type {DyniRuntimeNamespace} */ (ns.runtime);
+  const components = /** @type {Record<string, { create(): DyniValueMathApi }>} */ (root.DyniComponents);
+  const valueMath = components.DyniValueMath.create();
   const CANVAS_INNER_HTML = '<div class="dyni-surface-canvas"><div class="dyni-surface-canvas-mount"></div></div>';
   const HTML_INNER_HTML = '<div class="dyni-surface-html"><div class="dyni-surface-html-mount" data-dyni-html-mount="1"></div></div>';
   const trimText = valueMath.trimText;
 
-  function resolveCluster(rawProps, def) {
-    const props = rawProps && typeof rawProps === "object" ? rawProps : {};
+  /** @param {unknown} rawProps @param {unknown} def @param {unknown} clusterRoutes @returns {string} */
+  function resolveCluster(rawProps, def, clusterRoutes) {
+    const props = /** @type {DyniMapperProps} */ (
+      rawProps && typeof rawProps === "object" ? rawProps : {}
+    );
     const cluster = trimText(props.cluster);
     if (cluster) {
       return cluster;
     }
-    return trimText(def && def.cluster);
+    const definition = /** @type {DyniMapperProps} */ (def && typeof def === "object" ? def : {});
+    return trimText(definition.cluster);
   }
 
+  /** @param {unknown} rawProps @returns {string} */
   function resolveKind(rawProps) {
-    const props = rawProps && typeof rawProps === "object" ? rawProps : {};
+    const props = /** @type {DyniMapperProps} */ (
+      rawProps && typeof rawProps === "object" ? rawProps : {}
+    );
     return trimText(props.kind);
   }
 
+  /** @param {DyniRouteFrame|null|undefined} routeFrame @returns {boolean} */
   function isVerticalShell(routeFrame) {
     return !!(routeFrame &&
       routeFrame.__dyniRawProps &&
       routeFrame.__dyniRawProps.mode === "vertical");
   }
 
+  /** @param {unknown} instanceId @param {DyniClusterShellHostContext|null|undefined} hostContext @returns {string} */
   function resolveInstanceId(instanceId, hostContext) {
     const direct = trimText(instanceId);
     if (direct) {
@@ -44,6 +53,7 @@
     return "";
   }
 
+  /** @param {unknown} surface @returns {string} */
   function resolveInnerHtml(surface) {
     if (surface === "canvas-dom") {
       return CANVAS_INNER_HTML;
@@ -54,6 +64,7 @@
     return '<div class="dyni-shell-mount" data-dyni-shell-mount="1"></div>';
   }
 
+  /** @param {DyniClusterRoute|null|undefined} routeMeta @param {DyniRouteFrame|null|undefined} routeFrame @returns {string} */
   function resolveShellStyle(routeMeta, routeFrame) {
     if (!routeMeta || !routeMeta.shellSizing || !isVerticalShell(routeFrame)) {
       return "";
@@ -64,10 +75,12 @@
     return "";
   }
 
-  runtime.clusterShellRenderer = {
+  runtime.clusterShellRenderer = /** @type {DyniClusterShellRendererApi} */ ({
     normalizeRouteFrame: function (rawProps, def, clusterRoutes) {
-      const source = rawProps && typeof rawProps === "object" ? rawProps : {};
-      const routeFrame = Object.assign({}, source);
+      const source = /** @type {DyniMapperProps} */ (
+        rawProps && typeof rawProps === "object" ? rawProps : {}
+      );
+      const routeFrame = /** @type {DyniRouteFrame} */ (Object.assign({}, source));
       const cluster = resolveCluster(source, def, clusterRoutes);
       const kind = resolveKind(source);
 
@@ -79,7 +92,9 @@
       return routeFrame;
     },
     renderRouteShell: function (routeFrame, routeMeta, instanceId, hostContext) {
-      const frame = routeFrame && typeof routeFrame === "object" ? routeFrame : {};
+      const frame = /** @type {DyniRouteFrame} */ (
+        routeFrame && typeof routeFrame === "object" ? routeFrame : {}
+      );
       const routeId = trimText(frame.__dyniRouteId);
       const surface = routeMeta && typeof routeMeta.surface === "string" ? routeMeta.surface : "unknown";
       const clusterToken = trimText(frame.cluster)
@@ -137,5 +152,5 @@
         + shellStyle
         + '>' + shellInner + "</div>";
     }
-  };
+  });
 }(this));

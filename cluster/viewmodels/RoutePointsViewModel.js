@@ -1,7 +1,6 @@
 /**
- * Module: RoutePointsViewModel - Shared domain normalization for nav route-points kind
+ * @file RoutePointsViewModel - Shared domain normalization for nav route-points kind
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ValueMath
  */
 
 (function (root, factory) {
@@ -13,11 +12,16 @@
 }(this, function () {
   "use strict";
 
+  /** @type {DyniValueMathApi["isObject"]} */
   let isObject;
+  /** @type {DyniValueMathApi["trimText"]} */
   let trimText;
+  /** @type {DyniValueMathApi["toFiniteNumber"]} */
   let toFiniteNumber;
+  /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */
   let toOptionalFiniteNumber;
 
+  /** @param {unknown} rawPoint @param {number} index */
   function normalizePoint(rawPoint, index) {
     const point = isObject(rawPoint) ? rawPoint : {};
     const name = trimText(point.name);
@@ -29,6 +33,7 @@
     };
   }
 
+  /** @param {unknown} rawRoute */
   function normalizeRoute(rawRoute) {
     if (!isObject(rawRoute) || !Array.isArray(rawRoute.points)) {
       return null;
@@ -43,6 +48,7 @@
     };
   }
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
     isObject = valueMath.isObject;
@@ -50,8 +56,9 @@
     toFiniteNumber = valueMath.toFiniteNumber;
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
+    /** @param {DyniMapperProps|null|undefined} props @param {DyniViewModelToolkit|null|undefined} toolkit @returns {Record<string, unknown>} */
     function build(props, toolkit) {
-      const p = props || {};
+      const p = /** @type {DyniMapperProps} */ (props || {});
       const num = (toolkit && toolkit.num) || toFiniteNumber;
       const selectedIndex = (
         p.editingIndex == null || (typeof p.editingIndex === "string" && p.editingIndex.trim() === "")

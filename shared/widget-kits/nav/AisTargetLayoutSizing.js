@@ -1,7 +1,6 @@
 /**
- * Module: AisTargetLayoutSizing - Shell sizing and strip chrome helpers for AIS target HTML summary rendering
+ * @file AisTargetLayoutSizing - Shell sizing and strip chrome helpers for AIS target HTML summary rendering
  * Documentation: documentation/widgets/ais-target.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, AisTargetLayoutMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,7 @@
 }(this, function () {
   "use strict";
 
+  /** @type {DyniAisTargetMetricId[]} */
   const METRIC_ORDER = ["dst", "cpa", "tcpa", "brg"];
   const DEFAULT_SHELL_PAD_X_RATIO = 0.026;
   const DEFAULT_SHELL_PAD_Y_RATIO = 0.021;
@@ -47,6 +47,12 @@
     highIdentityScale: 0.9
   };
 
+  /**
+   * @param {number} shellWidth
+   * @param {boolean} hasAccent
+   * @param {DyniValueMathApi["clampNumber"]} clampNumber
+   * @returns {DyniAisTargetAccentChrome}
+   */
   function resolveAccentChrome(shellWidth, hasAccent, clampNumber) {
     if (hasAccent !== true) {
       return { accentWidth: 0, accentGap: 0, accentReserve: 0 };
@@ -63,12 +69,21 @@
     };
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniAisTargetLayoutSizingApi}
+   */
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const makeRect = componentContext.components.require("LayoutRectMath").makeRect;
     const layoutMath = componentContext.components.require("AisTargetLayoutMath");
     const clampNumber = layoutMath.clampNumber;
 
+    /**
+     * @param {DyniAisTargetVerticalShellProfileArgs | undefined} args
+     * @returns {DyniAisTargetVerticalShellProfile}
+     */
     function computeVerticalShellProfile(args) {
       const cfg = args || {};
       const width = Math.max(1, Math.floor(clampNumber(cfg.W, 1, Number.MAX_SAFE_INTEGER, 1)));
@@ -104,6 +119,10 @@
       };
     }
 
+    /**
+     * @param {DyniAisTargetModeArgs | undefined} args
+     * @returns {DyniAisTargetLayoutMode}
+     */
     function resolveMode(args) {
       const cfg = args || {};
       if (cfg.isVerticalCommitted === true) {
@@ -130,6 +149,14 @@
       return "normal";
     }
 
+    /**
+     * @param {unknown} W
+     * @param {unknown} H
+     * @param {boolean} isVerticalCommitted
+     * @param {DyniAisTargetLayoutMode} mode
+     * @param {boolean} hasAccent
+     * @returns {DyniAisTargetInsets}
+     */
     function computeInsets(W, H, isVerticalCommitted, mode, hasAccent) {
       const safeW = Math.max(1, Math.floor(clampNumber(W, 1, Number.MAX_SAFE_INTEGER, 1)));
       const safeH = Math.max(1, Math.floor(clampNumber(H, 1, Number.MAX_SAFE_INTEGER, 1)));
@@ -166,6 +193,12 @@
       };
     }
 
+    /**
+     * @param {unknown} W
+     * @param {unknown} H
+     * @param {DyniAisTargetInsets | undefined} insets
+     * @returns {DyniRect}
+     */
     function createContentRect(W, H, insets) {
       const ins = insets || computeInsets(W, H, false, "normal", false);
       const leftPad = ins.padX + Math.max(0, ins.accentReserve || 0);
@@ -177,6 +210,10 @@
       );
     }
 
+    /**
+     * @param {DyniAisTargetVisualChromeArgs | undefined} args
+     * @returns {DyniAisTargetVisualChrome}
+     */
     function resolveVisualChrome(args) {
       const cfg = args || {};
       const shellWidth = Math.max(1, Math.floor(clampNumber(cfg.W, 1, Number.MAX_SAFE_INTEGER, 1)));
@@ -232,6 +269,10 @@
       };
     }
 
+    /**
+     * @param {unknown} renderState
+     * @returns {DyniAisTargetMetricVisibility}
+     */
     function resolveMetricVisibility(renderState) {
       if (renderState !== "data") {
         return { dst: false, cpa: false, tcpa: false, brg: false };
@@ -239,6 +280,10 @@
       return { dst: true, cpa: true, tcpa: true, brg: true };
     }
 
+    /**
+     * @param {unknown} renderState
+     * @returns {DyniAisTargetMetricId[]}
+     */
     function resolveMetricOrder(renderState) {
       return renderState === "data" ? METRIC_ORDER.slice() : [];
     }

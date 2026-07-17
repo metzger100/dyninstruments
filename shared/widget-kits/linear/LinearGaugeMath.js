@@ -1,7 +1,6 @@
 /**
- * Module: LinearGaugeMath - Shared value mapping and tick helpers for linear gauges
+ * @file LinearGaugeMath - Shared value mapping and tick helpers for linear gauges
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,16 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {number} value
+   * @param {number} minV
+   * @param {number} maxV
+   * @param {number} x0
+   * @param {number} x1
+   * @param {boolean | undefined} doClamp
+   * @param {(value: unknown, lo: unknown, hi: unknown) => number} clampFn
+   * @returns {number}
+   */
   function mapValueToX(value, minV, maxV, x0, x1, doClamp, clampFn) {
     const denom = maxV - minV;
     if (
@@ -31,6 +40,11 @@
     return x0 + (x1 - x0) * ratio;
   }
 
+  /**
+   * @param {string} axisMode
+   * @param {DyniLinearRange} range
+   * @returns {DyniLinearRange}
+   */
   function resolveAxisDomain(axisMode, range) {
     if (axisMode === "centered180") {
       return { min: -180, max: 180 };
@@ -41,10 +55,19 @@
     return { min: range.min, max: range.max };
   }
 
+  /**
+   * @param {number} minV
+   * @param {number} maxV
+   * @param {unknown} majorStepRaw
+   * @param {unknown} minorStepRaw
+   * @returns {DyniLinearTicks}
+   */
   function buildTicks(minV, maxV, majorStepRaw, minorStepRaw) {
     const majorStep = Math.abs(Number(majorStepRaw));
     const minorStep = Math.abs(Number(minorStepRaw));
+    /** @type {number[]} */
     const majorTicks = [];
+    /** @type {number[]} */
     const minorTicks = [];
     if (!Number.isFinite(minV) || !Number.isFinite(maxV) || maxV <= minV || !Number.isFinite(majorStep) || majorStep <= 0) {
       return { major: majorTicks, minor: minorTicks };
@@ -87,6 +110,7 @@
     return { major: majorTicks, minor: minorTicks };
   }
 
+  /** @param {number} v @returns {string} */
   function formatTickLabel(v) {
     if (!Number.isFinite(v)) {
       return "";
@@ -97,6 +121,10 @@
     return String(Math.round(v * 1000) / 1000);
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   */
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
 
@@ -104,6 +132,7 @@
       id: "LinearGaugeMath",
       keyToText: valueMath.keyToText,
       clamp: valueMath.clamp,
+      /** @param {number} value @param {number} minV @param {number} maxV @param {number} x0 @param {number} x1 @param {boolean | undefined} doClamp @returns {number} */
       mapValueToX: function (value, minV, maxV, x0, x1, doClamp) {
         return mapValueToX(value, minV, maxV, x0, x1, doClamp, valueMath.clamp);
       },

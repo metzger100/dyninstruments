@@ -140,12 +140,6 @@ function createRuntimeHarness(options) {
       createController: vi.fn(),
       materializeSurfacePolicyProps: vi.fn()
     },
-    perf: {
-      startSpan: vi.fn(function () {
-        return {};
-      }),
-      endSpan: vi.fn()
-    }
   };
 
   globalThis.DyniPlugin = {

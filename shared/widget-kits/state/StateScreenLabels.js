@@ -1,7 +1,6 @@
 /**
- * Module: StateScreenLabels - Canonical semantic state-screen kinds and labels
+ * @file StateScreenLabels - Canonical semantic state-screen kinds and labels
  * Documentation: documentation/shared/state-screens.md
- * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -28,6 +27,7 @@
     noAis: "No AIS"
   });
 
+  /** @returns {DyniStateScreenLabelsApi} */
   function create() {
     return {
       id: "StateScreenLabels",

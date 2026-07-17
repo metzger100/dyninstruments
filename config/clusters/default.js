@@ -1,14 +1,17 @@
 /**
- * Module: DyniPlugin Default Cluster - Self-configurable default instrument config
+ * @file DyniPlugin Default Cluster - Self-configurable default instrument config
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {Record<string, unknown> & { value?: unknown, storeKeys?: Record<string, unknown> }} DyniDefaultValues */
+  /** @typedef {DyniPluginSharedConfig & { makePerKindTextParams: (map: DyniPerKindTextParameterMap) => DyniEditableParameters, opt: (name: unknown, value: unknown) => DyniEditableOption, kindMaps: Record<string, DyniPerKindTextParameterMap> }} DyniDefaultSharedConfig */
+  /** @typedef {{ DyniPlugin: DyniPluginNamespace & { config: DyniPluginConfig & { clusters: DyniWidgetDefinition[] } } }} DyniDefaultRoot */
+
+  const ns = /** @type {DyniDefaultRoot} */ (/** @type {unknown} */ (root)).DyniPlugin;
   const config = ns.config;
-  const shared = config.shared;
+  const shared = /** @type {DyniDefaultSharedConfig} */ (config.shared);
 
   const makePerKindTextParams = shared.makePerKindTextParams;
   const opt = shared.opt;
@@ -312,8 +315,9 @@
 
         ...makePerKindTextParams(DEFAULT_KIND)
       },
+      /** @param {DyniDefaultValues | null | undefined} values @returns {DyniDefaultValues} */
       updateFunction: function (values) {
-        const out = values ? { ...values } : {};
+        const out = /** @type {DyniDefaultValues} */ (values ? { ...values } : {});
 
         if (!out.storeKeys) out.storeKeys = {};
 

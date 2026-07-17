@@ -1,7 +1,6 @@
 /**
- * Module: RoutePointsHtmlFit - Per-cell text-fit owner for route-points HTML renderer
+ * @file RoutePointsHtmlFit - Per-cell text-fit owner for route-points HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, RoutePointsLayout, HtmlWidgetUtils, HtmlMeasureUtils, RoutePointsInfoText, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -17,10 +16,18 @@
     normal: 0.66,
     high: 0.56
   };
+  /** @type {DyniValueMathApi["toText"]} */
   let toText;
 
+  /**
+   * @param {DyniRoutePointsInfoFitArgs | undefined} args
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @param {DyniHtmlMeasureUtilsApi} htmlMeasureUtils
+   * @param {DyniTextTileLayoutApi} tileLayout
+   * @returns {DyniRoutePointsInfoFit}
+   */
   function selectInfoText(args, htmlUtils, htmlMeasureUtils, tileLayout) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniRoutePointsInfoFitArgs} */ (args || {});
     const valueText = toText(cfg.valueText);
     const plainText = cfg.plainText == null ? valueText : toText(cfg.plainText);
     const valueFit = htmlMeasureUtils.measurePx({
@@ -49,17 +56,19 @@
     return { text: plainText, px: plainFit && plainFit.px ? plainFit.px : 0 };
   }
 
+  /** @param {DyniRoutePointsHtmlFitModel} model @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {number} */
   function toPointCount(model, htmlUtils) {
     if (Array.isArray(model.points)) {
       return model.points.length;
     }
     const count = htmlUtils.toFiniteNumber(model.pointCount);
-    if (!(count > 0)) {
+    if (typeof count !== "number" || !(count > 0)) {
       return 0;
     }
     return Math.floor(count);
   }
 
+  /** @param {DyniRoutePointsHtmlFitModel} model @param {number} pointCount @returns {DyniRoutePointsHeaderTexts} */
   function toHeaderTexts(model, pointCount) {
     const routeName = toText(model.routeNameText != null ? model.routeNameText : model.routeName);
     let metaText = toText(model.metaText);
@@ -72,6 +81,7 @@
     };
   }
 
+  /** @param {unknown} points @param {number} index @returns {DyniRoutePointsRowTexts} */
   function toRowTexts(points, index) {
     const source = Array.isArray(points) ? points[index] : null;
     const point = source && typeof source === "object" ? source : {};
@@ -83,8 +93,9 @@
     };
   }
 
+  /** @param {DyniRoutePointsFitEnvironmentArgs | undefined} args @returns {DyniRoutePointsFitEnvironment | null} */
   function resolveEnvironment(args) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniRoutePointsFitEnvironmentArgs} */ (args || {});
     const componentContext = cfg.componentContext;
     const theme = cfg.theme;
     const targetEl = cfg.targetEl;
@@ -103,8 +114,11 @@
     };
   }
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniRoutePointsHtmlFitApi} */
   function create(def, componentContext) {
-    const theme = componentContext.theme.tokens;
+    const theme = /** @type {DyniRoutePointsThemeResolver} */ (/** @type {unknown} */ (
+      componentContext.theme && componentContext.theme.tokens
+    ));
     const radialText = componentContext.components.require("CanvasTextLayout");
     const tileLayout = componentContext.components.require("TextTileLayout");
     const layoutApi = componentContext.components.require("RoutePointsLayout");
@@ -113,8 +127,9 @@
     const routePointsInfoText = componentContext.components.require("RoutePointsInfoText");
     toText = componentContext.components.require("ValueMath").toText;
 
+    /** @param {DyniRoutePointsHtmlFitArgs | undefined} args @returns {DyniRoutePointsHtmlFitResult | null} */
     function compute(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniRoutePointsHtmlFitArgs} */ (args || {});
       const model = cfg.model || null;
       const shellRect = cfg.shellRect || null;
       const targetEl = cfg.targetEl || null;
@@ -184,6 +199,7 @@
         };
       }
 
+      /** @type {DyniRoutePointsHtmlFitRow[]} */
       const rowFits = [];
       for (let i = 0; i < layout.rows.length; i += 1) {
         const row = layout.rows[i];
@@ -262,13 +278,15 @@
       return { headerFit: headerFit, rowFits: rowFits, emptyStyle: emptyStyle };
     }
 
+    /** @type {DyniRoutePointsHtmlFitApi} */
     const spec = {
       id: "RoutePointsHtmlFit",
-      compute: compute
+      compute: compute,
+      buildRowInfoText: routePointsInfoText.buildRowInfoText
     };
-    spec.buildRowInfoText = routePointsInfoText.buildRowInfoText;
     return spec;
   }
 
+  /** @type {DyniRoutePointsHtmlFitModule} */
   return { id: "RoutePointsHtmlFit", create: create };
 }));

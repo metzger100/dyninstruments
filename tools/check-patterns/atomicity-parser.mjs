@@ -132,7 +132,7 @@ export function readDefaultRatioMap(file) {
   let data;
   try {
     data = getFileData(file);
-  } catch (err) {
+  } catch {
     return null;
   }
   const match = /\bconst\s+DEFAULT_RATIO_DEFAULTS\s*=\s*\{/.exec(data.maskedText);
@@ -176,7 +176,7 @@ export function readConstLiteral(file, constantName) {
   let data;
   try {
     data = getFileData(file);
-  } catch (err) {
+  } catch {
     return null;
   }
   const detect = new RegExp(`\\bconst\\s+${escapeRegex(constantName)}\\s*=`, "g");

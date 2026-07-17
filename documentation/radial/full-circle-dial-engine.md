@@ -26,7 +26,7 @@
 - `ResponsiveScaleProfile` owns the base compact curve.
 - `FullCircleRadialLayout` maps that curve into full-circle insets, slot bounds, label metrics, and compact geometry spacing.
 - `GeometryScale` turns the radius primary dimension into ring, tick, and pointer pixels.
-- `FullCircleRadialEngine`, `FullCircleRadialTextLayout`, and wrapper `drawFrame` / `drawMode` callbacks consume `state.layout`, `state.responsive`, `state.textFillScale`, and `state.compactGeometryScale`.
+- `FullCircleRadialEngine`, `FullCircleRadialTextLayout`, and wrapper `drawFrame` / `drawMode` callbacks consume `state.layout`, `state.responsive`, and `state.textFillScale`; compact geometry stays layout-owned as `state.layout.compactGeometryScale`.
 - Wrapper widgets must not import `ResponsiveScaleProfile` directly or add a second compact curve via widget-local responsive hard floors.
 
 ## API/Interfaces
@@ -57,7 +57,7 @@ const renderCanvas = engine.createRenderer(spec);
 - `ctx`, `canvas`, `W`, `H`, `mode`
 - `theme`, `family`, `color`, `valueWeight`, `labelWeight`
 - `pad`, `gap`, `ratio`
-- `layout`, `responsive`, `textFillScale`, `compactGeometryScale`
+- `layout`, `responsive`, `textFillScale`; use `layout.compactGeometryScale` for compact text/layout spacing
 - `geom` (`cx`, `cy`, `rOuter`, `ringW`, `needleDepth`, `fixedPointerDepth`, `markerLen`, `markerWidth`, strips)
 - `labels` (`radiusOffset`, `fontPx`, `spriteRadius`)
 - `slots` (`leftTop`, `leftBottom`, `rightTop`, `rightBottom`, `top`, `bottom`)

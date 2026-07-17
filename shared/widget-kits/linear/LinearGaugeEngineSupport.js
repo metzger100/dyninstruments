@@ -1,7 +1,6 @@
 /**
- * Module: LinearGaugeEngineSupport - Shared normalization helpers for linear gauge engine state
+ * @file LinearGaugeEngineSupport - Shared normalization helpers for linear gauge engine state
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,12 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {Pick<DyniLinearGaugeMathApi, "keyToText">} math
+   * @param {DyniLinearGaugeDrawingState} state
+   * @param {DyniLinearGaugeStaticKeyOptions} [options]
+   * @returns {string | undefined}
+   */
   function buildStaticKey(math, state, options) {
     const opts = options || {};
     return math.keyToText({
@@ -47,6 +52,11 @@
     });
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniLinearGaugeEngineSupportApi}
+   */
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
 

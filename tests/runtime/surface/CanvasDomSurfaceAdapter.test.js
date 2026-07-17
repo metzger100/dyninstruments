@@ -20,7 +20,6 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
     );
 
     runIifeScript("runtime/namespace.js", context);
-    runIifeScript("runtime/PerfSpanHelper.js", context);
     runIifeScript("runtime/surface/CanvasDomSurfaceAdapter.js", context);
     return context;
   }
@@ -293,45 +292,6 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
     h.controller.update(h.payload({ value: 8, caption: "SPD" }, 3));
     expect(h.frameQueue).toHaveLength(0);
     expect(h.rendererSpec.renderCanvas).not.toHaveBeenCalled();
-  });
-
-  it("emits schedulePaint and renderer spans when perf hooks are active", function () {
-    const spans = [];
-    const h = createHarness();
-    const previousHooks = h.context.__DYNI_PERF_HOOKS__;
-    h.context.__DYNI_PERF_HOOKS__ = {
-      startSpan(name, tags) {
-        return { name, tags: tags || null };
-      },
-      endSpan(token, tags) {
-        spans.push({
-          name: token && token.name,
-          tags: {
-            ...(token && token.tags ? token.tags : {}),
-            ...(tags && typeof tags === "object" ? tags : {}),
-          },
-        });
-      },
-    };
-
-    try {
-      h.controller.attach(
-        h.payload({ value: 5, cluster: "speed", kind: "sogRadial" }, 1),
-      );
-      h.runNextFrame();
-
-      expect(
-        spans.some(
-          (entry) =>
-            entry.name === "CanvasDomSurfaceAdapter.schedulePaint->paintNow",
-        ),
-      ).toBe(true);
-      expect(
-        spans.some((entry) => entry.name === "Renderer.renderCanvas"),
-      ).toBe(true);
-    } finally {
-      h.context.__DYNI_PERF_HOOKS__ = previousHooks;
-    }
   });
 
   it("schedules follow-up frames after clearRenderFlags when the renderer asks for them", function () {

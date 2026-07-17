@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Shared Foundation Registry Format - Shared format and display component definitions
+ * @file DyniPlugin Shared Foundation Registry Format - Shared format and display component definitions
  * Documentation: documentation/architecture/component-system.md
- * Depends: window.DyniPlugin.baseUrl, window.DyniPlugin.config.shared
  */
 (function (root) {
   "use strict";

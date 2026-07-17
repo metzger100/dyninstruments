@@ -1,7 +1,6 @@
 /**
- * Module: RoutePointsDomEffects - Committed-DOM side effects owner for route-points renderer
+ * @file RoutePointsDomEffects - Committed-DOM side effects owner for route-points renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: HtmlWidgetUtils, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,25 +12,33 @@
   "use strict";
 
   const EFFECT_STATE_KEY = "__dyniRoutePointsDomEffects";
+  /** @type {Record<string, boolean>} */
   const ALLOWED_REVEAL_REASONS = {
     mount: true,
     "active-change": true
   };
-  let htmlUtils = null;
-  let toSafeInteger = null;
+  /** @type {DyniHtmlWidgetUtilsApi} */
+  let htmlUtils;
+  /** @type {DyniValueMathApi["toSafeInteger"]} */
+  let toSafeInteger;
 
+  /** @param {unknown} node @returns {boolean} */
   function isConnectedNode(node) {
     if (!node || typeof node !== "object") {
       return false;
     }
-    if (typeof node.isConnected === "boolean") {
-      return node.isConnected;
+    const element = /** @type {{ isConnected?: unknown }} */ (node);
+    if (typeof element.isConnected === "boolean") {
+      return element.isConnected;
     }
     return true;
   }
 
+  /** @param {unknown} hostContext @returns {DyniRoutePointsDomEffectState | null} */
   function getEffectState(hostContext) {
-    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
+    const ctx = hostContext && typeof hostContext === "object"
+      ? /** @type {Record<string, DyniRoutePointsDomEffectState>} */ (hostContext)
+      : null;
     if (!ctx) {
       return null;
     }
@@ -47,6 +54,7 @@
     return ctx[EFFECT_STATE_KEY];
   }
 
+  /** @param {DyniRoutePointsDomEffectState | null | undefined} state */
   function clearPending(state) {
     if (!state || state.timerHandle == null) {
       return;
@@ -55,6 +63,7 @@
     state.timerHandle = null;
   }
 
+  /** @param {DyniRoutePointsDomElement | null | undefined} element @param {number} defaultValue @returns {number} */
   function toElementHeight(element, defaultValue) {
     if (!element) {
       return defaultValue;
@@ -77,6 +86,7 @@
     return defaultValue;
   }
 
+  /** @param {DyniRoutePointsDomElement | null | undefined} element @param {DyniRoutePointsDomElement | null | undefined} listEl @returns {number} */
   function toOffsetTop(element, listEl) {
     const offsetTop = Number(element && element.offsetTop);
     if (Number.isFinite(offsetTop)) {
@@ -96,19 +106,23 @@
     return 0;
   }
 
+  /** @param {unknown} targetEl @returns {boolean} */
   function isVerticalContainer(targetEl) {
-    if (!targetEl || typeof targetEl.closest !== "function") {
+    const element = /** @type {DyniRoutePointsDomElement | null} */ (targetEl);
+    if (!element || typeof element.closest !== "function") {
       return false;
     }
-    return !!targetEl.closest(".widgetContainer.vertical");
+    return !!element.closest(".widgetContainer.vertical");
   }
 
+  /** @param {unknown} targetEl @returns {number} */
   function measureListScrollbarGutter(targetEl) {
-    if (!targetEl) {
+    const element = /** @type {DyniRoutePointsDomElement | null} */ (targetEl);
+    if (!element) {
       return 0;
     }
-    const listEl = typeof targetEl.querySelector === "function"
-      ? targetEl.querySelector(".dyni-route-points-list")
+    const listEl = typeof element.querySelector === "function"
+      ? element.querySelector(".dyni-route-points-list")
       : null;
     if (!listEl) {
       return 0;
@@ -124,6 +138,7 @@
     return gutterPx > 0 ? gutterPx : 0;
   }
 
+  /** @param {DyniRoutePointsDomElement | null | undefined} listEl @param {unknown} selectedIndex @returns {boolean} */
   function ensureSelectedRowVisible(listEl, selectedIndex) {
     const index = toSafeInteger(selectedIndex, -1);
     if (!listEl || index < 0 || typeof listEl.querySelector !== "function") {
@@ -167,6 +182,7 @@
     return true;
   }
 
+  /** @param {unknown} reason @returns {DyniRoutePointsRevealReason | ""} */
   function normalizeRevealReason(reason) {
     const text = typeof reason === "string" ? reason.trim() : "";
     if (
@@ -182,6 +198,7 @@
     return "";
   }
 
+  /** @param {unknown} activeKey @param {number} selectedIndex @returns {string} */
   function normalizeActiveKey(activeKey, selectedIndex) {
     const text = activeKey == null ? "" : String(activeKey).trim();
     if (text) {
@@ -190,6 +207,7 @@
     return "idx:" + String(selectedIndex);
   }
 
+  /** @param {DyniRoutePointsDomEffectState} state @param {DyniRoutePointsRevealReason | ""} explicitReason @param {string} activeKey @returns {DyniRoutePointsRevealReason} */
   function resolveRevealReason(state, explicitReason, activeKey) {
     if (explicitReason) {
       return explicitReason;
@@ -203,6 +221,7 @@
     return "data-refresh";
   }
 
+  /** @param {DyniRoutePointsRevealReason} reason @param {DyniRoutePointsDomEffectState} state @param {string} activeKey @returns {boolean} */
   function shouldAutoReveal(reason, state, activeKey) {
     if (!ALLOWED_REVEAL_REASONS[reason]) {
       return false;
@@ -213,8 +232,9 @@
     return state.lastAutoScrolledActiveKey !== activeKey;
   }
 
+  /** @param {DyniRoutePointsRevealArgs | undefined} args @returns {boolean} */
   function maybeRevealActiveRow(args) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniRoutePointsRevealArgs} */ (args || {});
     const hostContext = cfg.hostContext;
     const state = getEffectState(hostContext);
     if (!state) {
@@ -256,11 +276,12 @@
       if (scheduledRoot && currentRoot && scheduledRoot !== currentRoot) {
         return;
       }
-      if (typeof currentRoot.querySelector !== "function") {
+      const rootEl = /** @type {DyniRoutePointsDomElement} */ (currentRoot);
+      if (typeof rootEl.querySelector !== "function") {
         return;
       }
 
-      const listEl = currentRoot.querySelector(".dyni-route-points-list");
+      const listEl = rootEl.querySelector(".dyni-route-points-list");
       ensureSelectedRowVisible(listEl, selectedIndex);
       state.hasInitialActiveReveal = true;
       state.lastAutoScrolledActiveKey = activeKey;
@@ -270,12 +291,14 @@
     return true;
   }
 
+  /** @param {DyniRoutePointsRevealArgs | undefined} args @returns {boolean} */
   function scheduleSelectedRowVisibility(args) {
     return maybeRevealActiveRow(args);
   }
 
+  /** @param {DyniRoutePointsCommittedEffectsArgs | undefined} args @returns {DyniRoutePointsCommittedEffects} */
   function applyCommittedEffects(args) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniRoutePointsCommittedEffectsArgs} */ (args || {});
     const targetEl = cfg.targetEl || htmlUtils.resolveHostCommitTarget(cfg.hostContext);
     if (!targetEl || !isConnectedNode(targetEl)) {
       return {
@@ -292,6 +315,7 @@
     };
   }
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniRoutePointsDomEffectsApi} */
   function create(def, componentContext) {
     htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     toSafeInteger = componentContext.components.require("ValueMath").toSafeInteger;
@@ -307,5 +331,6 @@
     };
   }
 
+  /** @type {DyniRoutePointsDomEffectsModule} */
   return { id: "RoutePointsDomEffects", create: create };
 }));

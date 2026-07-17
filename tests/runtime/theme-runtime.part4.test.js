@@ -179,4 +179,67 @@ describe("runtime/theme-runtime.js", function () {
       context.DyniPlugin.runtime.theme.tokens.resolveForRoot(overrideRootEl);
     expect(overridden.regatta.buttonStrokeWeight).toBe(2.4);
   });
+
+  it("resolver caches snapshots by canonical root state and invalidates on input changes", function () {
+    const inlineValues = { "--dyni-pointer": "#111111" };
+    const inlineStyle = {
+      getPropertyValue(name) {
+        return hasOwn.call(inlineValues, name) ? inlineValues[name] : "";
+      },
+      setProperty(name, value) {
+        inlineValues[String(name)] = String(value);
+      },
+    };
+    let computedStyleCalls = 0;
+    const context = setupContext({
+      getComputedStyle() {
+        computedStyleCalls += 1;
+        return inlineStyle;
+      },
+    });
+    const model = context.DyniPlugin.runtime.createThemeModel();
+    const resolver = context.DyniPlugin.runtime.createThemeResolver(model, {
+      getNightModeState() {
+        return false;
+      },
+      getActivePresetName() {
+        return "default";
+      },
+    });
+    const rootEl = createPluginRootElement();
+    rootEl.style = inlineStyle;
+
+    const first = resolver.resolveForRoot(rootEl);
+    const second = resolver.resolveForRoot(rootEl);
+    const firstOutputs = resolver.resolveOutputsForRoot(rootEl);
+    const secondOutputs = resolver.resolveOutputsForRoot(rootEl);
+    expect(second).toBe(first);
+    expect(secondOutputs).toBe(firstOutputs);
+    expect(first.colors.pointer).toBe("#111111");
+    expect(Object.isFrozen(first)).toBe(true);
+    expect(Object.isFrozen(first.colors)).toBe(true);
+    expect(Object.isFrozen(firstOutputs)).toBe(true);
+    expect(computedStyleCalls).toBe(2);
+
+    rootEl.style.setProperty("--dyni-pointer", "#222222");
+    const changed = resolver.resolveForRoot(rootEl);
+    expect(changed).not.toBe(first);
+    expect(changed.colors.pointer).toBe("#222222");
+
+    rootEl.style.setProperty("--dyni-theme-surface-fg", "#00ff00");
+    const outputChanged = resolver.resolveForRoot(rootEl);
+    expect(outputChanged).toBe(changed);
+
+    const secondResolver = context.DyniPlugin.runtime.createThemeResolver(model, {
+      getNightModeState() {
+        return false;
+      },
+      getActivePresetName() {
+        return "default";
+      },
+    });
+    const fresh = secondResolver.resolveForRoot(rootEl);
+    expect(fresh).not.toBe(changed);
+    expect(fresh.colors.pointer).toBe("#222222");
+  });
 });

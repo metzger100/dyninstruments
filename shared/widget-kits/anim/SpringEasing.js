@@ -1,7 +1,6 @@
 /**
- * Module: SpringEasing - Critically damped per-instance spring smoother
+ * @file SpringEasing - Critically damped per-instance spring smoother
  * Documentation: documentation/shared/spring-easing.md
- * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -17,6 +16,11 @@
   const DEFAULT_EPSILON = 1e-4;
   const DEFAULT_EPSILON_VELOCITY = 1e-4;
 
+  /**
+   * @param {number} delta
+   * @param {number} wrap
+   * @returns {number}
+   */
   function shortestDelta(delta, wrap) {
     const span = Math.abs(wrap);
     if (!Number.isFinite(span) || span <= 0) {
@@ -32,11 +36,22 @@
     return out;
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniSpringEasingApi}
+   */
   function create(def, componentContext) {
     const resolveFiniteNumber = componentContext.components.require("ValueMath").resolveFiniteNumber;
 
+    /**
+     * @param {DyniSpringSpec} [spec]
+     * @returns {DyniSpring}
+     */
     function createSpring(spec) {
-      const cfg = spec && typeof spec === "object" ? spec : {};
+      const cfg = /** @type {DyniSpringSpec} */ (
+        spec && typeof spec === "object" ? spec : {}
+      );
       const stiffness = Math.max(1e-6, resolveFiniteNumber(cfg.stiffness, DEFAULT_STIFFNESS));
       const damping = 2 * Math.sqrt(stiffness);
       const maxDtMs = Math.max(1, Math.floor(resolveFiniteNumber(cfg.maxDtMs, DEFAULT_MAX_DT_MS)));
@@ -47,9 +62,11 @@
       let current = 0;
       let target = 0;
       let velocity = 0;
+      /** @type {number | null} */
       let lastAdvanceMs = null;
       let initialized = false;
 
+      /** @param {number} value @returns {number} */
       function snap(value) {
         current = value;
         target = value;
@@ -59,6 +76,7 @@
         return current;
       }
 
+      /** @param {unknown} value @returns {number} */
       function setTarget(value) {
         const next = Number(value);
         if (!Number.isFinite(next)) {
@@ -71,6 +89,7 @@
         return target;
       }
 
+      /** @param {unknown} nowMs @returns {number} */
       function advance(nowMs) {
         const now = Number(nowMs);
         if (!Number.isFinite(now)) {
@@ -98,10 +117,12 @@
         return current;
       }
 
+      /** @returns {boolean} */
       function isSettled() {
         return Math.abs(target - current) < epsilon && Math.abs(velocity) < epsilonVelocity;
       }
 
+      /** @param {unknown} value @returns {number} */
       function reset(value) {
         const next = Number(value);
         if (!Number.isFinite(next)) {
@@ -118,15 +139,25 @@
       };
     }
 
+    /**
+     * @param {DyniSpringMotionSpec} [spec]
+     * @returns {DyniSpringMotion}
+     */
     function createMotion(spec) {
-      const cfg = spec && typeof spec === "object" ? spec : {};
-      const springSpec = cfg.spring && typeof cfg.spring === "object" ? cfg.spring : {};
+      const cfg = /** @type {DyniSpringMotionSpec} */ (
+        spec && typeof spec === "object" ? spec : {}
+      );
+      const springSpec = /** @type {DyniSpringSpec} */ (
+        cfg.spring && typeof cfg.spring === "object" ? cfg.spring : {}
+      );
       const motionSpringSpec = Object.assign({}, springSpec);
       if (Number.isFinite(Number(cfg.wrap)) && Number(cfg.wrap) > 0) {
         motionSpringSpec.wrap = cfg.wrap;
       }
+      /** @type {WeakMap<object, DyniSpringMotionState>} */
       const motionByCanvas = new WeakMap();
 
+      /** @param {object} canvas @returns {DyniSpringMotionState} */
       function getMotion(canvas) {
         let state = motionByCanvas.get(canvas);
         if (!state) {
@@ -139,6 +170,13 @@
         return state;
       }
 
+      /**
+       * @param {object} canvas
+       * @param {unknown} target
+       * @param {unknown} easingEnabled
+       * @param {unknown} nowMs
+       * @returns {number}
+       */
       function resolve(canvas, target, easingEnabled, nowMs) {
         const motion = getMotion(canvas);
         const finiteTarget = Number.isFinite(Number(target));
@@ -155,6 +193,7 @@
         return motion.spring.advance(nowMs);
       }
 
+      /** @param {object} canvas @returns {boolean} */
       function isActive(canvas) {
         const motion = motionByCanvas.get(canvas);
         return !!(motion && motion.ready && !motion.spring.isSettled());

@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dyninstruments.local/schemas/layout.schema.json",
+  "title": "Dyninstruments bundled layout",
+  "type": "object",
+  "required": ["description", "layoutVersion", "properties", "widgets"],
+  "additionalProperties": false,
+  "properties": {
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "layoutVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "properties": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "widgets": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^(navpage|editroutepage|gpspage[1-9][0-9]*)$"
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/pageSlots"
+      }
+    }
+  },
+  "definitions": {
+    "pageSlots": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/widgetEntry"
+        }
+      }
+    },
+    "widgetEntry": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^(dyni_[A-Za-z]+_Instruments|CombinedWidget)$"
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "weight": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "className": {
+          "type": "string",
+          "minLength": 1
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/widgetEntry"
+          }
+        }
+      },
+      "additionalProperties": {
+        "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "boolean" }, { "type": "array" }]
+      }
+    }
+  }
+}

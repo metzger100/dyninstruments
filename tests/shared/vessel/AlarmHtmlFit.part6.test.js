@@ -17,6 +17,9 @@ describe("AlarmHtmlFit", function () {
     const aisGeometry = loadFresh(
       "shared/widget-kits/nav/AisTargetLayoutGeometry.js",
     );
+    const aisGeometryStyles = loadFresh(
+      "shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js",
+    );
     const aisMath = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
     return loadFresh("shared/widget-kits/nav/AisTargetLayout.js").create(
       {},
@@ -26,6 +29,7 @@ describe("AlarmHtmlFit", function () {
           LayoutRectMath: layoutRectMath,
           AisTargetLayoutSizing: aisSizing,
           AisTargetLayoutGeometry: aisGeometry,
+          AisTargetLayoutGeometryStyles: aisGeometryStyles,
           AisTargetLayoutMath: aisMath,
         },
       }),

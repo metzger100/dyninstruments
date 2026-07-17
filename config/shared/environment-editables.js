@@ -1,14 +1,14 @@
 /**
- * Module: DyniPlugin Environment Cluster Editables - Shared editable parameter fragments
+ * @file DyniPlugin Environment Cluster Editables - Shared editable parameter fragments
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/environment-base-editables.js, config/shared/environment-depth-editables.js, config/shared/environment-temperature-editables.js
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
-  const shared = ns.config.shared;
+  const shared = /** @type {DyniPluginSharedConfig & DyniEnvironmentEditableBuilders} */ (ns.config.shared);
 
+  /** @returns {DyniEditableParameters} */
   shared.buildEnvironmentEditableParameters = function () {
     const base = shared.buildEnvironmentBaseEditableParameters();
     const depth = shared.buildEnvironmentDepthEditableParameters();

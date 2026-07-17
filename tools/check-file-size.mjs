@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { maskCommentsAndStrings } from "./check-patterns/shared.mjs";
 
 const MAX_ALLOWED_LINES = 400;
 const ONELINER_LONG_PACKED_LINE_THRESHOLD = 160;
@@ -224,7 +225,7 @@ function isBraceFreeGuardClauseLine(maskedTrimmedLine) {
   const statementStart = skipWhitespace(maskedTrimmedLine, conditionEnd + 1);
   if (maskedTrimmedLine[statementStart] === "{") return false;
 
-  let keywordEnd = -1;
+  let keywordEnd;
   if (matchesToken(maskedTrimmedLine, statementStart, "return")) {
     keywordEnd = statementStart + "return".length;
   }
@@ -851,90 +852,6 @@ function skipWhitespaceBackward(text, startIndex) {
 
 function isIdentifierChar(ch) {
   return /[A-Za-z0-9_$]/.test(ch || "");
-}
-
-function maskCommentsAndStrings(text) {
-  let out = "";
-  let i = 0;
-  let mode = "code";
-  let quote = "";
-
-  while (i < text.length) {
-    const ch = text[i];
-    const next = text[i + 1];
-
-    if (mode === "code") {
-      if (ch === "/" && next === "/") {
-        out += "  ";
-        i += 2;
-        mode = "line-comment";
-        continue;
-      }
-      if (ch === "/" && next === "*") {
-        out += "  ";
-        i += 2;
-        mode = "block-comment";
-        continue;
-      }
-      if (ch === "'" || ch === "\"" || ch === "`") {
-        out += " ";
-        i += 1;
-        mode = "string";
-        quote = ch;
-        continue;
-      }
-      out += ch;
-      i += 1;
-      continue;
-    }
-
-    if (mode === "line-comment") {
-      if (ch === "\n") {
-        out += "\n";
-        i += 1;
-        mode = "code";
-        continue;
-      }
-      out += " ";
-      i += 1;
-      continue;
-    }
-
-    if (mode === "block-comment") {
-      if (ch === "*" && next === "/") {
-        out += "  ";
-        i += 2;
-        mode = "code";
-        continue;
-      }
-      out += ch === "\n" ? "\n" : " ";
-      i += 1;
-      continue;
-    }
-
-    if (mode === "string") {
-      if (ch === "\\") {
-        out += " ";
-        i += 1;
-        if (i < text.length) {
-          out += text[i] === "\n" ? "\n" : " ";
-          i += 1;
-        }
-        continue;
-      }
-      if (ch === quote) {
-        out += " ";
-        i += 1;
-        mode = "code";
-        quote = "";
-        continue;
-      }
-      out += ch === "\n" ? "\n" : " ";
-      i += 1;
-    }
-  }
-
-  return out;
 }
 
 function toRelPath(root, absolutePath) {

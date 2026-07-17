@@ -1,7 +1,6 @@
 /**
- * Module: XteHighwayPrimitives - Shared geometry and drawing helpers for XTE highway visuals
+ * @file XteHighwayPrimitives - Shared geometry and drawing helpers for XTE highway visuals
  * Documentation: documentation/widgets/xte-display.md
- * Depends: CanvasRenderingContext2D, GeometryScale, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -20,19 +19,32 @@
   const BOAT_BEAM_RATIO = 0.62;
   const BOAT_LANE_DEPTH_LIMIT = 0.48;
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniXteHighwayPrimitivesApi}
+   */
   function create(def, componentContext) {
     const gs = componentContext.components.require("GeometryScale");
     const valueMath = componentContext.components.require("ValueMath");
     const clamp = valueMath.clamp;
     const lerp = valueMath.lerp;
 
+    /** @param {number} value @param {number} lineWidth @returns {number} */
     function snapCoord(value, lineWidth) {
       const width = Math.max(1, Math.round(Number.isFinite(lineWidth) ? lineWidth : 1));
       return Math.round(value) + (width % 2 ? 0.5 : 0);
     }
 
+    /**
+     * @param {DyniRect} rect
+     * @param {string} mode
+     * @param {unknown} primaryDim
+     * @param {DyniHighwayGeomOptions} [options]
+     * @returns {DyniHighwayGeom}
+     */
     function highwayGeometry(rect, mode, primaryDim, options) {
-      const opts = options || {};
+      const opts = /** @type {DyniHighwayGeomOptions} */ (options || {});
       const cx = rect.x + rect.w * 0.5;
       let topFactor = mode === "high" ? 0.18 : 0.3;
       if (opts.compactTop === true) {
@@ -58,6 +70,15 @@
       };
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} x1
+     * @param {number} y1
+     * @param {number} x2
+     * @param {number} y2
+     * @param {number} lineWidth
+     * @returns {void}
+     */
     function strokeSegment(ctx, x1, y1, x2, y2, lineWidth) {
       ctx.lineWidth = lineWidth;
       ctx.beginPath();
@@ -66,10 +87,27 @@
       ctx.stroke();
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} cx
+     * @param {number} y
+     * @param {number} half
+     * @param {number} lineWidth
+     * @returns {void}
+     */
     function strokeCrossbar(ctx, cx, y, half, lineWidth) {
       strokeSegment(ctx, cx - half, y, cx + half, y, lineWidth);
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {DyniHighwayGeom} geom
+     * @param {DyniHighwayColors} colors
+     * @param {string} mode
+     * @param {unknown} primaryDim
+     * @param {unknown} strokeWeight
+     * @returns {void}
+     */
     function drawStaticHighway(ctx, geom, colors, mode, primaryDim, strokeWeight) {
       const cx = geom.cx;
       const horizonY = geom.horizonY;
@@ -114,6 +152,14 @@
       ctx.restore();
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} markerX
+     * @param {number} markerY
+     * @param {number} markerLength
+     * @param {number} markerBeam
+     * @returns {void}
+     */
     function drawBoatMarker(ctx, markerX, markerY, markerLength, markerBeam) {
       const bowY = markerY - markerLength * 0.62;
       const shoulderY = markerY - markerLength * 0.2;
@@ -139,6 +185,17 @@
       ctx.fill();
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {DyniHighwayGeom} geom
+     * @param {DyniHighwayColors} colors
+     * @param {unknown} xteNormalized
+     * @param {unknown} overflow
+     * @param {unknown} primaryDim
+     * @param {unknown} strokeWeight
+     * @param {unknown} pointerDepthWeight
+     * @returns {void}
+     */
     function drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, primaryDim, strokeWeight, pointerDepthWeight) {
       const cx = geom.cx;
       const horizonY = geom.horizonY;
@@ -179,6 +236,14 @@
       ctx.restore();
     }
 
+    /**
+     * @param {string} mode
+     * @param {DyniXteWaypointLayout | null | undefined} layout
+     * @param {unknown} showWpName
+     * @param {unknown} name
+     * @param {DyniXteWaypointFit | null | undefined} fit
+     * @returns {boolean}
+     */
     function shouldShowWaypoint(mode, layout, showWpName, name, fit) {
       const rect = layout && layout.nameRect;
       const responsive = layout && layout.responsive;

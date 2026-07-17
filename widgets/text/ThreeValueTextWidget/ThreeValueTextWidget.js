@@ -1,7 +1,6 @@
 /**
- * Module: ThreeValueTextWidget - Responsive caption/value/unit numeric canvas renderer
+ * @file ThreeValueTextWidget - Responsive caption/value/unit numeric canvas renderer
  * Documentation: documentation/widgets/three-elements.md
- * Depends: componentContext.format.applyFormatter, componentContext.theme.tokens, TextLayoutEngine, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,7 +10,10 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {DyniComponentContext & { canvas: DyniCanvasHostApi, dom: DyniRadialHostDom, theme: { tokens: DyniGaugeThemeResolver } }} DyniThreeValueContext */
+  /** @typedef {Record<string, unknown> & DyniFormatterOptions & { stableDigits?: boolean, disconnect?: boolean, ratioThresholdNormal?: unknown, ratioThresholdFlat?: unknown, captionUnitScale?: unknown, caption?: unknown, unit?: unknown, value?: unknown }} DyniThreeValueProps */
 
+  /** @param {unknown} def @param {DyniThreeValueContext} componentContext @returns {DyniWidgetComponentSpec} */
   function create(def, componentContext) {
     const theme = componentContext.theme.tokens;
     const text = componentContext.components.require("TextLayoutEngine");
@@ -22,8 +24,9 @@
     const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
     const fitCache = text.createFitCache(["high", "normal", "flat"]);
 
+    /** @param {unknown} canvas @param {DyniThreeValueProps} props @returns {void} */
     function renderCanvas(canvas, props) {
-      const setup = componentContext.canvas.setupCanvas(canvas);
+      const setup = /** @type {DyniCanvasSurface} */ (componentContext.canvas.setupCanvas(canvas));
       const ctx = setup.ctx;
       const W = setup.W;
       const H = setup.H;
@@ -44,7 +47,7 @@
       const labelWeight = tokens.font.labelWeight;
       const captionOpacity = tokens.opacity && typeof tokens.opacity === "object" ? tokens.opacity.caption : undefined;
       const unitOpacity = tokens.opacity && typeof tokens.opacity === "object" ? tokens.opacity.unit : undefined;
-      ctx.fillStyle = color;
+      ctx.fillStyle = /** @type {string} */ (color);
       const stateKind = stateScreenPrecedence.pickFirst([
         { kind: "disconnected", when: props.disconnect === true },
         { kind: "data", when: true }

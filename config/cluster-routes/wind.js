@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Cluster Routes Wind - Route metadata for wind kinds
+ * @file DyniPlugin Cluster Routes Wind - Route metadata for wind kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: config/cluster-routes.js
  */
 (function (root) {
   "use strict";

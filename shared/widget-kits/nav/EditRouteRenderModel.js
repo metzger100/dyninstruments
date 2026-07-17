@@ -1,7 +1,6 @@
 /**
- * Module: EditRouteRenderModel - Pure normalization and display model owner for edit-route HTML renderer
+ * @file EditRouteRenderModel - Pure normalization and display model owner for edit-route HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: EditRouteLayout, HtmlWidgetUtils, NavInteractionPolicy, PlaceholderNormalize, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, UnitAwareFormatter, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,29 +11,43 @@
 }(this, function () {
   "use strict";
 
+  /** @type {DyniEditRouteMetricId[]} */
   const METRIC_IDS = ["pts", "dst", "rte", "rteEta"];
   const SOURCE_BADGE_TEXT = "LOCAL";
 
+  /** @type {DyniValueMathApi["toObject"]} */
   let toObject;
+  /** @type {DyniValueMathApi["toFiniteNumber"]} */
   let toFiniteNumber;
+  /** @type {DyniValueMathApi["toText"]} */
+  let toText;
 
+  /**
+   * @param {unknown} shellRect
+   * @returns {DyniEditRouteShellSize}
+   */
   function toShellSize(shellRect) {
-    const rect = shellRect && typeof shellRect === "object" ? shellRect : null;
+    const rect = shellRect && typeof shellRect === "object"
+      ? /** @type {Record<string, unknown>} */ (shellRect)
+      : null;
     return {
       width: Math.max(1, Math.round(toFiniteNumber(rect && rect.width) || 1)),
       height: Math.max(1, Math.round(toFiniteNumber(rect && rect.height) || 1))
     };
   }
 
+  /** @param {unknown} value @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {string} */
   function normalizeMetricLabel(value, htmlUtils) {
     const text = htmlUtils.trimText(value);
     return text ? text + ":" : "";
   }
 
+  /** @param {unknown} value @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {string} */
   function normalizeMetricUnit(value, htmlUtils) {
     return htmlUtils.trimText(value);
   }
 
+  /** @param {unknown} value @returns {string} */
   function toSignatureToken(value) {
     if (value == null) {
       return "";
@@ -42,7 +55,17 @@
     return encodeURIComponent(String(value));
   }
 
-  function callFormatter(value, formatter, formatterParameters, defaultText, componentContext) {
+  /**
+   * @param {unknown} value
+   * @param {unknown} formatter
+   * @param {unknown} formatterParameters
+   * @param {unknown} defaultText
+   * @param {DyniComponentContext} componentContext
+   * @param {DyniPlaceholderNormalizeApi} placeholderNormalize
+   * @returns {string}
+   */
+  function formatRouteMetric(value, formatter, formatterParameters, defaultText, componentContext, placeholderNormalize) {
+    /** @type {Parameters<DyniFormatService["applyFormatter"]>[1]} */
     const opts = {
       formatter: formatter,
       formatterParameters: formatterParameters
@@ -50,14 +73,14 @@
     if (typeof defaultText !== "undefined") {
       opts.default = defaultText;
     }
-    return componentContext.format.applyFormatter(value, opts);
-  }
-
-  function formatRouteMetric(value, formatter, formatterParameters, defaultText, componentContext, placeholderNormalize) {
-    const text = String(callFormatter(value, formatter, formatterParameters, defaultText, componentContext));
+    const text = String(componentContext.format.applyFormatter(value, opts));
     return placeholderNormalize.normalize(text, defaultText);
   }
 
+  /**
+   * @param {Partial<DyniEditRouteRenderModel> | undefined} model
+   * @returns {Array<string | number>}
+   */
   function buildEditRouteSignatureParts(model) {
     const m = model || {};
     const parts = [
@@ -84,8 +107,9 @@
 
     parts.push("N" + toSignatureToken(m.nameText));
 
-    for (let i = 0; i < m.visibleMetricIds.length; i += 1) {
-      const id = m.visibleMetricIds[i];
+    const visibleMetricIds = m.visibleMetricIds || METRIC_IDS;
+    for (let i = 0; i < visibleMetricIds.length; i += 1) {
+      const id = visibleMetricIds[i];
       const metric = m.metrics && m.metrics[id] ? m.metrics[id] : {};
       parts.push("L" + toSignatureToken(metric.labelText));
       parts.push("V" + toSignatureToken(metric.valueText));
@@ -103,6 +127,11 @@
     return parts;
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniEditRouteRenderModelApi}
+   */
   function create(def, componentContext) {
     const layoutApi = componentContext.components.require("EditRouteLayout");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
@@ -113,10 +142,16 @@
     const valueMath = componentContext.components.require("ValueMath");
     toObject = valueMath.toObject;
     toFiniteNumber = valueMath.toFiniteNumber;
+    toText = valueMath.toText;
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
 
+    /**
+     * @param {Record<string, unknown>} props
+     * @param {Record<string, unknown>} domain
+     * @returns {string}
+     */
     function resolveStateKind(props, domain) {
       return stateScreenPrecedence.pickFirst([
         { kind: "disconnected", when: props.disconnect === true },
@@ -125,6 +160,10 @@
       ]);
     }
 
+    /**
+     * @param {DyniEditRouteBuildModelArgs | undefined} args
+     * @returns {DyniEditRouteRenderModel}
+     */
     function buildModel(args) {
       const cfg = args || {};
       const props = toObject(cfg.props);
@@ -137,6 +176,11 @@
       const kind = resolveStateKind(props, domain);
       const hasRoute = kind === "data" && domain.hasRoute === true;
       const stableDigitsEnabled = props.stableDigits === true;
+      /**
+       * @param {string} rawText
+       * @param {number} minWidth
+       * @returns {DyniEditRouteNormalizedMetricValue}
+       */
       function buildMetricValueText(rawText, minWidth) {
         if (!stableDigitsEnabled) {
           return {
@@ -247,10 +291,10 @@
         return !!(layout.metricVisibility && layout.metricVisibility[id]);
       });
       const baseInteraction = navInteractionPolicy.canDispatchWhenNotEditing(props) ? "dispatch" : "passive";
-      const interactionState = stateScreenInteraction.resolveInteraction({
+      const interactionState = toText(stateScreenInteraction.resolveInteraction({
         kind: kind,
         baseInteraction: baseInteraction
-      });
+      }));
       const canOpenEditRoute = interactionState === "dispatch";
       const verticalWrapperStyle = layout.verticalShell && typeof layout.verticalShell.wrapperStyle === "string"
         ? layout.verticalShell.wrapperStyle.trim()
@@ -266,6 +310,7 @@
           ? (flatWrapperStyle.endsWith(";") ? flatWrapperStyle : flatWrapperStyle + ";")
           : "");
 
+      /** @type {DyniEditRouteRenderModel} */
       const model = {
         kind: kind,
         stateLabel: stateLabel,
@@ -281,8 +326,12 @@
         isVerticalCommitted: layout.isVerticalCommitted === true,
         shellWidth: shellSize.width,
         shellHeight: shellSize.height,
-        effectiveLayoutHeight: layout.verticalShell ? layout.verticalShell.effectiveLayoutHeight : shellSize.height,
-        layoutShellHeight: layout.verticalShell ? layout.verticalShell.effectiveLayoutHeight : shellSize.height,
+        effectiveLayoutHeight: layout.verticalShell && typeof layout.verticalShell.effectiveLayoutHeight === "number"
+          ? layout.verticalShell.effectiveLayoutHeight
+          : shellSize.height,
+        layoutShellHeight: layout.verticalShell && typeof layout.verticalShell.effectiveLayoutHeight === "number"
+          ? layout.verticalShell.effectiveLayoutHeight
+          : shellSize.height,
         ratioThresholdNormal: layoutConfig.ratioThresholdNormal,
         ratioThresholdFlat: layoutConfig.ratioThresholdFlat,
         nameText: nameText,
@@ -293,7 +342,8 @@
         flatMetricRows: layout.flatMetricRows || 0,
         flatMetricColumns: layout.flatMetricColumns || 0,
         metricsStyle: layout.mode === "flat" ? (layout.flatMetricsLayoutStyle || "") : "",
-        wrapperStyle: wrapperStyle
+        wrapperStyle: wrapperStyle,
+        resizeSignatureParts: []
       };
       model.resizeSignatureParts = buildEditRouteSignatureParts(model);
       return model;
@@ -303,16 +353,20 @@
       id: "EditRouteRenderModel",
       buildModel: buildModel,
       buildResizeSignatureParts: buildEditRouteSignatureParts,
+      /**
+       * @param {DyniEditRouteInteractionArgs | undefined} args
+       * @returns {boolean}
+       */
       canOpenEditRoute: function (args) {
         const cfg = args || {};
         const props = toObject(cfg.props);
         const domain = toObject(props.domain);
         const kind = resolveStateKind(props, domain);
         const baseInteraction = navInteractionPolicy.canDispatchWhenNotEditing(props) ? "dispatch" : "passive";
-        return stateScreenInteraction.resolveInteraction({
+        return toText(stateScreenInteraction.resolveInteraction({
           kind: kind,
           baseInteraction: baseInteraction
-        }) === "dispatch";
+        })) === "dispatch";
       }
     };
   }

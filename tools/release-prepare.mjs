@@ -1,16 +1,28 @@
 import { spawnSync } from "node:child_process";
 
 import { isRuntimePath } from "./release-zip-builder.mjs";
+import { getUnexpectedDirtyPaths } from "./release-git.mjs";
+
+const HELP = `Usage: npm run release:prepare
+
+Prints JSON release evidence from Git history and requires a clean worktree.
+No tracked or untracked worktree changes are allowed.
+
+Examples:
+  npm run release:prepare
+  npm run release:prepare -- --help`;
 
 export function buildReleasePreparePayload(options = {}) {
   const runGit = options.runGit || defaultRunGit;
   const pluginName = options.pluginName || "dyninstruments";
 
   const lastTag = readLatestTag(runGit);
-  const lastRelease = lastTag ? {
-    tag: lastTag,
-    date: readTagDate(runGit, lastTag)
-  } : null;
+  const lastRelease = lastTag
+    ? {
+        tag: lastTag,
+        date: readTagDate(runGit, lastTag)
+      }
+    : null;
 
   const commitLines = readCommits(runGit, lastTag);
   const changedFiles = readChangedFiles(runGit, lastTag);
@@ -57,16 +69,52 @@ export function buildReleasePreparePayload(options = {}) {
   };
 }
 
-export function main() {
-  const payload = buildReleasePreparePayload();
-  process.stdout.write(JSON.stringify(payload, null, 2) + "\n");
+export function parseReleasePrepareArgs(argv = []) {
+  const unknown = argv.filter((arg) => arg !== "--help" && arg !== "-h");
+  return {
+    help: argv.includes("--help") || argv.includes("-h"),
+    unknown
+  };
+}
+
+export function ensureCleanReleasePreparation(runGit) {
+  const dirtyPaths = getUnexpectedDirtyPaths(runGit);
+  if (dirtyPaths.length > 0) {
+    throw new Error(
+      "release:prepare aborted: working tree has release-relevant uncommitted changes:\n" +
+        dirtyPaths.map((filePath) => `- ${filePath}`).join("\n")
+    );
+  }
+}
+
+export function runReleasePrepare(argv = process.argv.slice(2), options = {}) {
+  const args = parseReleasePrepareArgs(argv);
+  if (args.help) return { help: HELP };
+  if (args.unknown.length > 0) {
+    throw new Error(`release:prepare: unknown argument '${args.unknown[0]}'\n\n${HELP}`);
+  }
+
+  const runGit = options.runGit || defaultRunGit;
+  ensureCleanReleasePreparation(runGit);
+  return buildReleasePreparePayload({ ...options, runGit });
+}
+
+export function main(argv = process.argv.slice(2)) {
+  try {
+    const result = runReleasePrepare(argv);
+    if (result.help) process.stdout.write(result.help + "\n");
+    else process.stdout.write(JSON.stringify(result, null, 2) + "\n");
+  } catch (error) {
+    console.error(error.message || String(error));
+    process.exit(1);
+  }
 }
 
 function readLatestTag(runGit) {
   try {
     const out = runGit(["describe", "--tags", "--abbrev=0", "--match", "v*"]).trim();
     return out || null;
-  } catch (_err) {
+  } catch {
     return null;
   }
 }
@@ -98,11 +146,7 @@ function readChangedFiles(runGit, lastTag) {
   const out = runGit(args).trim();
   if (!out) return [];
 
-  return out
-    .split(/\r?\n/)
-    .filter(Boolean)
-    .map(parseNameStatusLine)
-    .filter(Boolean);
+  return out.split(/\r?\n/).filter(Boolean).map(parseNameStatusLine).filter(Boolean);
 }
 
 function parseNameStatusLine(line) {
@@ -175,6 +219,4 @@ function defaultRunGit(args) {
   throw new Error(`git ${args.join(" ")} failed${detail ? `\n${detail}` : ""}`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
+if (import.meta.url === `file://${process.argv[1]}`) main();

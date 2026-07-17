@@ -1,14 +1,16 @@
 /**
- * Module: DyniPlugin CourseHeading Cluster - Course and heading widget config
+ * @file DyniPlugin CourseHeading Cluster - Course and heading widget config
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {DyniPluginSharedConfig & { makePerKindTextParams: (map: DyniPerKindTextParameterMap) => DyniEditableParameters, opt: (name: unknown, value: unknown) => DyniEditableOption, kindMaps: Record<string, DyniPerKindTextParameterMap> }} DyniCourseHeadingSharedConfig */
+  /** @typedef {{ DyniPlugin: DyniPluginNamespace & { config: DyniPluginConfig & { clusters: DyniWidgetDefinition[] } } }} DyniCourseHeadingRoot */
+
+  const ns = /** @type {DyniCourseHeadingRoot} */ (/** @type {unknown} */ (root)).DyniPlugin;
   const config = ns.config;
-  const shared = config.shared;
+  const shared = /** @type {DyniCourseHeadingSharedConfig} */ (config.shared);
 
   const makePerKindTextParams = shared.makePerKindTextParams;
   const opt = shared.opt;

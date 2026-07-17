@@ -1,7 +1,6 @@
 /**
- * Module: LinearGaugeLayout - Responsive geometry owner for linear gauge widgets
+ * @file LinearGaugeLayout - Responsive geometry owner for linear gauge widgets
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, GeometryScale, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -41,9 +40,12 @@
   const RESPONSIVE_SCALES = {
     textFillScale: 1.18
   };
-  let makeRect = null;
-  let clampNumber;
+  /** @type {DyniMakeRect} */
+  let makeRect = /** @type {DyniMakeRect} */ (/** @type {unknown} */ (null));
+  /** @type {DyniValueMathApi["clampNumber"]} */
+  let clampNumber = /** @type {DyniValueMathApi["clampNumber"]} */ (/** @type {unknown} */ (null));
 
+  /** @param {DyniLinearLayoutConfig} cfg @param {(W: unknown, H: unknown) => DyniLinearLayoutInsets} computeInsets @param {(W: unknown, H: unknown, insets: DyniLinearLayoutInsets) => DyniRect} createContentRect @returns {DyniRect} */
   function resolveContentRect(cfg, computeInsets, createContentRect) {
     if (cfg && cfg.contentRect) {
       return cfg.contentRect;
@@ -52,14 +54,17 @@
     return createContentRect(cfg && cfg.W, cfg && cfg.H, insets);
   }
 
+  /** @param {Record<string, unknown> | null | undefined} layoutConfig @returns {"stacked" | "inline"} */
   function resolveNormalVariant(layoutConfig) {
     return layoutConfig && layoutConfig.normalVariant === "stacked" ? "stacked" : "inline";
   }
 
+  /** @param {Record<string, unknown> | null | undefined} layoutConfig @returns {"split" | "stacked"} */
   function resolveHighVariant(layoutConfig) {
     return layoutConfig && layoutConfig.highVariant === "split" ? "split" : "stacked";
   }
 
+  /** @param {DyniRect} contentRect @param {number} right @param {number} gap @param {DyniResponsiveScaleProfile} responsive @param {DyniResponsiveScaleProfileApi} profileApi @returns {DyniLinearLayoutBlock} */
   function computeFlatLayout(contentRect, right, gap, responsive, profileApi) {
     const usableWidth = Math.max(1, contentRect.w - gap);
     const textW = Math.max(1, Math.floor(usableWidth * FLAT_TEXT_SHARE_RATIO));
@@ -87,6 +92,7 @@
     };
   }
 
+  /** @param {DyniRect} contentRect @param {number} bottom @param {number} gap @param {DyniResponsiveScaleProfile} responsive @param {DyniResponsiveScaleProfileApi} profileApi @returns {DyniLinearLayoutBlock} */
   function computeStackedLayout(contentRect, bottom, gap, responsive, profileApi) {
     const textGap = Math.max(1, Math.floor(gap * HIGH_TEXT_GAP_FACTOR));
     const availableHeight = Math.max(1, contentRect.h - textGap);
@@ -110,6 +116,7 @@
     };
   }
 
+  /** @param {DyniRect} contentRect @param {number} gap @returns {DyniLinearLayoutBlock} */
   function computeSplitHighLayout(contentRect, gap) {
     const textGap = Math.max(1, gap);
     const availableHeight = Math.max(1, contentRect.h - textGap * 2);
@@ -133,6 +140,7 @@
     };
   }
 
+  /** @param {DyniRect} contentRect @returns {DyniLinearLayoutBlock} */
   function computeGraphicsOnlyFlatLayout(contentRect) {
     return {
       scaleX0: contentRect.x,
@@ -149,6 +157,7 @@
     };
   }
 
+  /** @param {DyniRect} contentRect @param {number} right @returns {DyniLinearLayoutBlock} */
   function computeGraphicsOnlyNormalLayout(contentRect, right) {
     const inset = Math.max(1, Math.floor(contentRect.w * NORMAL_INSET_RATIO));
     const scaleX0 = contentRect.x + inset;
@@ -168,6 +177,7 @@
     };
   }
 
+  /** @param {DyniRect} contentRect @returns {DyniLinearLayoutBlock} */
   function computeGraphicsOnlyHighLayout(contentRect) {
     return {
       scaleX0: contentRect.x,
@@ -184,6 +194,7 @@
     };
   }
 
+  /** @param {DyniRect} contentRect @param {number} right @param {number} bottom @param {number} gap @param {DyniResponsiveScaleProfile} responsive @param {DyniResponsiveScaleProfileApi} profileApi @returns {DyniLinearLayoutBlock} */
   function computeInlineLayout(contentRect, right, bottom, gap, responsive, profileApi) {
     const inset = Math.max(1, Math.floor(contentRect.w * NORMAL_INSET_RATIO));
     const topMargin = Math.max(1, Math.floor(contentRect.h * NORMAL_TOP_MARGIN_RATIO));
@@ -216,6 +227,7 @@
     };
   }
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
@@ -223,6 +235,7 @@
     clampNumber = componentContext.components.require("ValueMath").clampNumber;
     makeRect = rectApi.makeRect;
 
+    /** @param {unknown} W @param {unknown} H @param {unknown} thresholdNormal @param {unknown} thresholdFlat @returns {"flat" | "high" | "normal"} */
     function computeMode(W, H, thresholdNormal, thresholdFlat) {
       const ratio = (Number(W) || 0) / Math.max(1, Number(H) || 0);
       const normal = clampNumber(
@@ -246,6 +259,7 @@
       return "normal";
     }
 
+    /** @param {unknown} W @param {unknown} H @returns {DyniLinearLayoutInsets} */
     function computeInsets(W, H) {
       const responsive = profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
       const pad = profileApi.computeInsetPx(responsive, PAD_RATIO, 1);
@@ -257,6 +271,7 @@
       };
     }
 
+    /** @param {unknown} W @param {unknown} H @param {DyniLinearLayoutInsets | null | undefined} insets @returns {DyniRect} */
     function createContentRect(W, H, insets) {
       const width = Math.max(1, Math.floor(Number(W) || 0));
       const height = Math.max(1, Math.floor(Number(H) || 0));
@@ -274,6 +289,7 @@
       );
     }
 
+    /** @param {DyniRect | null | undefined} captionBox @param {DyniRect | null | undefined} valueBox @param {unknown} secScale @returns {{ captionBox: DyniRect | null | undefined, valueBox: DyniRect | null | undefined }} */
     function splitCaptionValueRows(captionBox, valueBox, secScale) {
       if (!captionBox || !valueBox) {
         return { captionBox: captionBox, valueBox: valueBox };
@@ -297,8 +313,9 @@
       };
     }
 
+    /** @param {DyniLinearLayoutConfig | undefined} args */
     function computeLayout(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniLinearLayoutConfig} */ (args || {});
       const theme = cfg.theme;
       const contentRect = resolveContentRect(cfg, computeInsets, createContentRect);
       const responsive = cfg.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
@@ -354,10 +371,10 @@
       const labelBoost = mode === "high" ? 1.2 : (mode === "normal" ? 1.26 : 1.0);
       const labelFontPx = Math.max(1, Math.min(
         trackBox.h,
-        Math.floor(trackBox.h * clampNumber(linearTheme.labels.fontFactor, 0, Number.MAX_SAFE_INTEGER, 0.14) * labelBoost * responsive.textFillScale)
+        Math.floor(trackBox.h * clampNumber(linearTheme.labels.fontFactor, 0, Number.MAX_SAFE_INTEGER, 0.14) * labelBoost * (responsive.textFillScale || 1))
       ));
       const labelInsetPx = Math.max(1, Math.floor(
-        (labelFontPx * clampNumber(linearTheme.labels.insetFactor, 0, Number.MAX_SAFE_INTEGER, 1.8) * 0.2) / responsive.textFillScale
+        (labelFontPx * clampNumber(linearTheme.labels.insetFactor, 0, Number.MAX_SAFE_INTEGER, 1.8) * 0.2) / (responsive.textFillScale || 1)
       ));
 
       return {

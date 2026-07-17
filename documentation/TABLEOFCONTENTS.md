@@ -103,7 +103,6 @@
 
 - **Docs sync workflow, validation, and quality/regression commands** → [guides/documentation-maintenance.md](guides/documentation-maintenance.md)
 - **How do I write an effective execution plan?** → [guides/exec-plan-authoring.md](guides/exec-plan-authoring.md)
-- **Performance gate baseline contract** → [guides/performance-gate.md](guides/performance-gate.md)
 - **Local release workflow (`release:prepare` + `release:create`)** → [guides/release-workflow.md](guides/release-workflow.md)
 
 ## Feature-Specific Lookups

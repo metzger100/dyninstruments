@@ -1,14 +1,17 @@
 /**
- * Module: DyniPlugin Map Cluster - Map-focused instruments (center display, zoom action, AIS target summary)
+ * @file DyniPlugin Map Cluster - Map-focused instruments (center display, zoom action, AIS target summary)
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/unit-editable-utils.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {Record<string, unknown> & { kind?: unknown, lockPosition?: unknown, editing?: unknown, visible?: unknown }} DyniMapValues */
+  /** @typedef {DyniPluginSharedConfig & { makePerKindCaptionParams: (map: DyniPerKindTextParameterMap) => DyniEditableParameters, makePerKindTextParams: (map: DyniPerKindTextParameterMap) => DyniEditableParameters, makeUnitAwareTextParams: (map: DyniPerKindTextParameterMap, bindings: Readonly<Record<string, DyniUnitFormatBinding>>) => DyniEditableParameters, opt: (name: unknown, value: unknown) => DyniEditableOption, kindMaps: Record<string, DyniPerKindTextParameterMap>, unitFormatFamilies: DyniUnitFormatCatalog }} DyniMapSharedConfig */
+  /** @typedef {{ DyniPlugin: DyniPluginNamespace & { config: DyniPluginConfig & { clusters: DyniWidgetDefinition[] } } }} DyniMapRoot */
+
+  const ns = /** @type {DyniMapRoot} */ (/** @type {unknown} */ (root)).DyniPlugin;
   const config = ns.config;
-  const shared = config.shared;
+  const shared = /** @type {DyniMapSharedConfig} */ (config.shared);
 
   const makePerKindCaptionParams = shared.makePerKindCaptionParams;
   const makePerKindTextParams = shared.makePerKindTextParams;
@@ -102,8 +105,9 @@
         ...makeUnitAwareTextParams(MAP_UNIT_AWARE_KIND, mapBindings),
         ...makePerKindTextParams(MAP_TEXT_KIND)
       },
+      /** @param {DyniMapValues | null | undefined} values @returns {DyniMapValues} */
       updateFunction: function (values) {
-        const out = values ? { ...values } : {};
+        const out = /** @type {DyniMapValues} */ (values ? { ...values } : {});
         const kind = (values && values.kind) || "centerDisplay";
         if (kind === "centerDisplay") {
           out.visible = !(values && values.lockPosition) || !!(values && values.editing);

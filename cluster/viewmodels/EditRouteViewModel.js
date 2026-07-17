@@ -1,7 +1,6 @@
 /**
- * Module: EditRouteViewModel - Shared domain normalization for nav edit-route summary kind
+ * @file EditRouteViewModel - Shared domain normalization for nav edit-route summary kind
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: CenterDisplayMath, ValueMath
  */
 
 (function (root, factory) {
@@ -15,13 +14,23 @@
 
   const LOCAL_ROUTE_PREFIX = "local@";
 
+  /** @typedef {{ name?: unknown, points: unknown[], computeLength?: (fromIndex: number, useRhumbLine: boolean) => unknown } & Record<string, unknown>} DyniEditRouteSource */
+  /** @typedef {{ rawName: string, displayName: string, pointCount: number, totalDistance: number, isLocalRoute: boolean, isServerRoute: boolean, sourceRoute: DyniEditRouteSource }} DyniEditRouteSummary */
+  /** @typedef {{ editingRoute?: unknown, useRhumbLine?: unknown, activeName?: unknown, rteDistance?: unknown, rteEta?: unknown, hideSeconds?: unknown }} DyniEditRouteProps */
+  /** @typedef {{ route: DyniEditRouteSummary | null, hasRoute: boolean, isActiveRoute: boolean, remainingDistance: number | undefined, rteEta: unknown, hideSeconds: boolean }} DyniEditRouteViewModelOutput */
+  /** @typedef {{ id: "EditRouteViewModel", build: (props?: DyniEditRouteProps) => DyniEditRouteViewModelOutput }} DyniEditRouteViewModelApi */
+
+  /** @type {DyniValueMathApi["isObject"]} */
   let isObject;
+  /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */
   let toOptionalFiniteNumber;
 
+  /** @param {unknown} value @returns {string} */
   function toRawName(value) {
     return typeof value === "string" ? value : "";
   }
 
+  /** @param {string} rawName @returns {string} */
   function toDisplayName(rawName) {
     if (rawName.indexOf(LOCAL_ROUTE_PREFIX) === 0) {
       return rawName.slice(LOCAL_ROUTE_PREFIX.length);
@@ -29,10 +38,12 @@
     return rawName;
   }
 
+  /** @param {string} rawName @returns {boolean} */
   function isServerName(rawName) {
     return typeof rawName === "string" && rawName !== "" && rawName.indexOf(LOCAL_ROUTE_PREFIX) !== 0;
   }
 
+  /** @param {unknown} previousPoint @param {unknown} currentPoint @param {boolean} useRhumbLine @param {DyniCenterDisplayMathApi} centerMath @returns {number} */
   function computeLegDistance(previousPoint, currentPoint, useRhumbLine, centerMath) {
     const leg = centerMath.computeCourseDistance(previousPoint, currentPoint, useRhumbLine === true);
     if (!leg || typeof leg !== "object") {
@@ -42,6 +53,7 @@
     return typeof distance === "number" ? distance : 0;
   }
 
+  /** @param {unknown[]} points @param {boolean} useRhumbLine @param {DyniCenterDisplayMathApi} centerMath @returns {number} */
   function computeLegSumDistance(points, useRhumbLine, centerMath) {
     if (!Array.isArray(points) || points.length <= 1) {
       return 0;
@@ -54,10 +66,12 @@
     return totalDistance;
   }
 
+  /** @param {unknown} sourceRoute @param {unknown[]} points @param {boolean} useRhumbLine @param {DyniCenterDisplayMathApi} centerMath @returns {number} */
   function computeTotalDistance(sourceRoute, points, useRhumbLine, centerMath) {
     if (isObject(sourceRoute) && typeof sourceRoute.computeLength === "function") {
       try {
-        const computed = toOptionalFiniteNumber(sourceRoute.computeLength(0, useRhumbLine === true));
+        const computeLength = /** @type {(fromIndex: number, useRhumbLine: boolean) => unknown} */ (sourceRoute.computeLength);
+        const computed = toOptionalFiniteNumber(computeLength(0, useRhumbLine === true));
         if (typeof computed === "number") {
           return computed;
         }
@@ -73,37 +87,42 @@
     }
   }
 
+  /** @param {unknown} rawRoute @param {boolean} useRhumbLine @param {DyniCenterDisplayMathApi} centerMath @returns {DyniEditRouteSummary | null} */
   function normalizeRoute(rawRoute, useRhumbLine, centerMath) {
     if (!isObject(rawRoute) || !Array.isArray(rawRoute.points)) {
       return null;
     }
 
-    const rawName = toRawName(rawRoute.name);
+    const sourceRoute = /** @type {DyniEditRouteSource} */ (rawRoute);
+    const rawName = toRawName(sourceRoute.name);
     const isServerRoute = isServerName(rawName);
 
     return {
       rawName: rawName,
       displayName: toDisplayName(rawName),
-      pointCount: rawRoute.points.length,
-      totalDistance: computeTotalDistance(rawRoute, rawRoute.points, useRhumbLine, centerMath),
+      pointCount: sourceRoute.points.length,
+      totalDistance: computeTotalDistance(sourceRoute, sourceRoute.points, useRhumbLine, centerMath),
       isLocalRoute: !isServerRoute,
       isServerRoute: isServerRoute,
-      sourceRoute: rawRoute
+      sourceRoute: sourceRoute
     };
   }
 
+  /** @param {DyniEditRouteSummary | null} route @param {unknown} activeName @returns {boolean} */
   function isActiveRoute(route, activeName) {
     return !!route && typeof activeName === "string" && activeName !== "" && route.rawName === activeName;
   }
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniEditRouteViewModelApi} */
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
     isObject = valueMath.isObject;
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
     const centerMath = componentContext.components.require("CenterDisplayMath");
 
+    /** @param {DyniEditRouteProps | undefined} props @returns {DyniEditRouteViewModelOutput} */
     function build(props) {
-      const p = props || {};
+      const p = /** @type {DyniEditRouteProps} */ (props || {});
       const route = normalizeRoute(p.editingRoute, p.useRhumbLine === true, centerMath);
       const active = isActiveRoute(route, p.activeName);
 

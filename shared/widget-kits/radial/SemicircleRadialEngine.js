@@ -1,7 +1,6 @@
 /**
- * Module: SemicircleRadialEngine - Shared renderer for semicircle gauge widgets
+ * @file SemicircleRadialEngine - Shared renderer for semicircle gauge widgets
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: RadialToolkit, CanvasLayerCache, SemicircleRadialLayout, SemicircleRadialTextLayout, RadialSectorMath, RadialValueMath, SpringEasing, StableDigits, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,6 +12,11 @@
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniSemicircleRadialEngineApi}
+   */
   function create(def, componentContext) {
     const DEFAULT_ARC = { startDeg: 270, endDeg: 450 };
     // Engine-owned last-resort fallback for callers that omit threshold props.
@@ -38,14 +42,32 @@
     const angle = GU.angle;
     const draw = GU.draw;
 
+    /**
+     * @param {DyniRadialResolvedTheme} theme
+     * @param {CanvasRenderingContext2D} ctx
+     * @returns {{ family: unknown, color: unknown }}
+     */
     function setupTextPaint(theme, ctx) {
       const family = theme.font.family;
       const color = theme.surface.fg;
-      ctx.fillStyle = color;
-      ctx.strokeStyle = color;
+      ctx.fillStyle = /** @type {string} */ (color);
+      ctx.strokeStyle = /** @type {string} */ (color);
       return { family: family, color: color };
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {unknown} family
+     * @param {DyniSemicircleGeom} geom
+     * @param {DyniSemicircleLabels} labels
+     * @param {number} minV
+     * @param {number} maxV
+     * @param {unknown} majorStep
+     * @param {DyniArc} arc
+     * @param {unknown} showEndLabels
+     * @param {unknown} labelWeight
+     * @returns {void}
+     */
     function drawMajorValueLabels(ctx, family, geom, labels, minV, maxV, majorStep, arc, showEndLabels, labelWeight) {
       if (!Number.isFinite(minV) || !Number.isFinite(maxV) || maxV <= minV) {
         return;
@@ -56,6 +78,7 @@
       }
 
       const angles = [];
+      /** @type {Record<string, string>} */
       const labelsMap = {};
       const count = Math.max(1, Math.round((maxV - minV) / step));
       for (let i = 0; i <= count; i += 1) {
@@ -73,7 +96,7 @@
 
         const angleDeg = angle.valueToAngleFlat(tickValue, minV, maxV, arc, true);
         angles.push(angleDeg);
-        labelsMap[angleDeg] = value.formatMajorLabel(tickValue);
+      labelsMap[angleDeg] = value.formatMajorLabel(tickValue);
 
         if (value.isApprox(tickValue, maxV, 1e-6)) {
           break;
@@ -94,29 +117,35 @@
       });
     }
 
+    /**
+     * @param {DyniSemicircleRendererSpec} [spec]
+     * @returns {DyniRadialRenderCanvas}
+     */
     function createRenderer(spec) {
       const cfg = spec || {};
-      const arc = hasOwn.call(cfg, "arc") ? cfg.arc : DEFAULT_ARC;
-      const modeDefaults = hasOwn.call(cfg, "ratioDefaults") ? cfg.ratioDefaults : DEFAULT_RATIO_DEFAULTS;
-      const rangeDefaults = hasOwn.call(cfg, "rangeDefaults") ? cfg.rangeDefaults : DEFAULT_RANGE_DEFAULTS;
-      const rangeProps = hasOwn.call(cfg, "rangeProps") ? cfg.rangeProps : DEFAULT_RANGE_PROPS;
-      const tickProps = hasOwn.call(cfg, "tickProps") ? cfg.tickProps : DEFAULT_TICK_PROPS;
-      const ratioProps = hasOwn.call(cfg, "ratioProps") ? cfg.ratioProps : DEFAULT_RATIO_PROPS;
+      const arc = /** @type {DyniArc} */ (hasOwn.call(cfg, "arc") ? cfg.arc : DEFAULT_ARC);
+      const modeDefaults = /** @type {DyniSemicircleRatioDefaults} */ (hasOwn.call(cfg, "ratioDefaults") ? cfg.ratioDefaults : DEFAULT_RATIO_DEFAULTS);
+      const rangeDefaults = /** @type {DyniSemicircleRangeDefaults} */ (hasOwn.call(cfg, "rangeDefaults") ? cfg.rangeDefaults : DEFAULT_RANGE_DEFAULTS);
+      const rangeProps = /** @type {DyniSemicirclePropKeys} */ (hasOwn.call(cfg, "rangeProps") ? cfg.rangeProps : DEFAULT_RANGE_PROPS);
+      const tickProps = /** @type {DyniSemicircleTickPropKeys} */ (hasOwn.call(cfg, "tickProps") ? cfg.tickProps : DEFAULT_TICK_PROPS);
+      const ratioProps = /** @type {DyniSemicircleRatioPropKeys} */ (hasOwn.call(cfg, "ratioProps") ? cfg.ratioProps : DEFAULT_RATIO_PROPS);
       const hideTextualMetricsProp = typeof cfg.hideTextualMetricsProp === "string" && cfg.hideTextualMetricsProp
         ? cfg.hideTextualMetricsProp
         : null;
       const unitDefault = hasOwn.call(cfg, "unitDefault") ? cfg.unitDefault : "";
-      const formatDisplay = typeof cfg.formatDisplay === "function"
-        ? function (rawValue, props, unitText) {
-          return cfg.formatDisplay(rawValue, props, unitText, componentContext);
-        }
-        : function (rawValue) {
+      const customFormat = cfg.formatDisplay;
+      const rawValueKey = typeof cfg.rawValueKey === "string" ? cfg.rawValueKey : "";
+      const formatDisplay = typeof customFormat === "function"
+        ? /** @type {DyniSemicircleFormatDisplay} */ (function (rawValue, props, unitText) {
+          return customFormat(rawValue, props, unitText, componentContext);
+        })
+        : /** @type {DyniSemicircleFormatDisplay} */ (function (rawValue) {
           const numericRaw = value.toOptionalFiniteNumber(rawValue);
           if (typeof numericRaw !== "number") {
             return { num: NaN, text: "" };
           }
           return { num: numericRaw, text: String(rawValue) };
-        };
+        });
       const tickSteps = typeof cfg.tickSteps === "function"
         ? cfg.tickSteps
         : function () {
@@ -129,10 +158,16 @@
         };
       const fitCache = textLayout.createFitCache();
       const layerCache = layerCacheApi.createLayerCache({ layers: ["back", "front"] });
+      /** @type {DyniSemicircleMemoLayout | null} */
       let memoLayout = null;
 
+      /**
+       * @param {unknown} canvas
+       * @param {unknown} props
+       * @returns {DyniRadialRenderResult}
+       */
       return function renderCanvas(canvas, props) {
-        const p = props || {};
+        const p = /** @type {DyniSemicircleEngineProps} */ (props || {});
         const surface = GU.resolveSurface(canvas);
         if (!surface) {
           return;
@@ -142,7 +177,7 @@
         const W = surface.W;
         const H = surface.H;
         const rootEl = componentContext.dom.requirePluginRoot(canvas);
-        const theme = GU.theme.resolveForRoot(rootEl);
+        const theme = (/** @type {DyniGaugeThemeResolver} */ (/** @type {unknown} */ (GU.theme))).resolveForRoot(rootEl);
         const paint = setupTextPaint(theme, ctx);
         const labelWeight = theme.font.labelWeight;
         const stableDigitsEnabled = p.stableDigits === true;
@@ -196,7 +231,7 @@
         const color = paint.color;
         const caption = p.caption;
         const unit = hasOwn.call(p, "unit") ? p.unit : unitDefault;
-        const raw = (typeof p.value !== "undefined") ? p.value : p[cfg.rawValueKey];
+        const raw = (typeof p.value !== "undefined") ? p.value : p[rawValueKey];
         const display = formatDisplay(raw, p, unit);
         const range = value.normalizeRange(p[rangeProps.min], p[rangeProps.max], rangeDefaults.min, rangeDefaults.max);
         const valueRawText = display.text.trim() || p.default;
@@ -219,8 +254,8 @@
         const staticKey = JSON.stringify({
           W: W,
           H: H,
-          bufferW: canvas.width,
-          bufferH: canvas.height,
+          bufferW: /** @type {HTMLCanvasElement} */ (canvas).width,
+          bufferH: /** @type {HTMLCanvasElement} */ (canvas).height,
           cx: layout.geom.cx,
           cy: layout.geom.cy,
           rOuter: layout.geom.rOuter,
@@ -253,14 +288,14 @@
         const angleNow = Number.isFinite(clampedValue)
           ? angle.valueToAngleFlat(clampedValue, range.min, range.max, arc, true)
           : NaN;
-        const easedAngle = springMotion.resolve(canvas, angleNow, p.easing !== false, Date.now());
+        const easedAngle = springMotion.resolve(/** @type {object} */ (canvas), angleNow, p.easing !== false, Date.now());
 
         layerCache.ensureLayer(canvas, staticKey, function (layerCtx, layerName) {
-          const dpr = Math.max(1, canvas.width / Math.max(1, W));
+          const dpr = Math.max(1, /** @type {HTMLCanvasElement} */ (canvas).width / Math.max(1, W));
           layerCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
           layerCtx.clearRect(0, 0, W, H);
-          layerCtx.fillStyle = paint.color;
-          layerCtx.strokeStyle = paint.color;
+          layerCtx.fillStyle = /** @type {string} */ (paint.color);
+          layerCtx.strokeStyle = /** @type {string} */ (paint.color);
 
           if (layerName === "back") {
             for (let i = 0; i < sectorList.length; i += 1) {
@@ -338,7 +373,7 @@
           }, fitCache);
         }
 
-        if (springMotion.isActive(canvas)) {
+        if (springMotion.isActive(/** @type {object} */ (canvas))) {
           return { wantsFollowUpFrame: true };
         }
 

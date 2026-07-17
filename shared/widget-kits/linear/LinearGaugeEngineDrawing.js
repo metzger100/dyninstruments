@@ -1,7 +1,6 @@
 /**
- * Module: LinearGaugeEngineDrawing - Shared drawing helpers for linear gauge static layers and markers
+ * @file LinearGaugeEngineDrawing - Shared drawing helpers for linear gauge static layers and markers
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: LinearCanvasPrimitives
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,7 +12,14 @@
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
+  /** @returns {DyniLinearGaugeEngineDrawingApi} */
   function create() {
+    /**
+     * @param {CanvasRenderingContext2D} layerCtx
+     * @param {DyniLinearGaugeDrawingState} state
+     * @param {DyniLinearColoredRange[]} sectors
+     * @returns {void}
+     */
     function drawStaticBack(layerCtx, state, sectors) {
       const layout = state.layout;
       const primitives = state.primitives;
@@ -37,6 +43,14 @@
       }
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} layerCtx
+     * @param {DyniLinearGaugeDrawingState} state
+     * @param {DyniLinearTicks} ticks
+     * @param {unknown} showEndLabels
+     * @param {DyniLinearTickLabelFormatter | null} labelFormatter
+     * @returns {void}
+     */
     function drawStaticFront(layerCtx, state, ticks, showEndLabels, labelFormatter) {
       const layout = state.layout;
       const primitives = state.primitives;
@@ -58,6 +72,19 @@
       textLayout.drawTickLabels(layerCtx, state, ticks, showEndLabels, math, labelFormatter);
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {DyniLinearGaugeDrawingState} state
+     * @param {DyniLinearGaugeLayout} layout
+     * @param {DyniLinearGaugeTheme} theme
+     * @param {DyniLinearCanvasPrimitivesApi} primitives
+     * @param {DyniLinearMapValueToX} mapValueToX
+     * @param {unknown} markerValue
+     * @param {number} pointerDepthBase
+     * @param {number} markerSizeBase
+     * @param {DyniLinearDrawOptions} [opts]
+     * @returns {void}
+     */
     function drawPointerAtValue(ctx, state, layout, theme, primitives, mapValueToX, markerValue, pointerDepthBase, markerSizeBase, opts) {
       const pointerNum = Number(markerValue);
       if (!Number.isFinite(pointerNum)) {
@@ -68,17 +95,31 @@
         return;
       }
       const markerOpts = opts || {};
-      const basePointerSize = Number.isFinite(Number(markerOpts.depth)) ? Math.max(1, Math.floor(markerOpts.depth)) : Math.max(1, Math.floor(pointerDepthBase));
+      const optDepth = Number(markerOpts.depth);
+      const optSide = Number(markerOpts.side);
+      const basePointerSize = Number.isFinite(optDepth) ? Math.max(1, Math.floor(optDepth)) : Math.max(1, Math.floor(pointerDepthBase));
       const defaultSide = Number.isFinite(Number(layout.pointerSide))
         ? Math.max(1, Math.floor(layout.pointerSide / 2))
         : Math.max(1, Math.floor(basePointerSize / 2));
       primitives.drawPointer(ctx, Math.round(pointerX), layout.trackY - Math.floor(state.trackThickness / 2) - 1, {
         depth: basePointerSize,
-        side: Number.isFinite(Number(markerOpts.side)) ? Math.max(1, Math.floor(markerOpts.side)) : defaultSide,
+        side: Number.isFinite(optSide) ? Math.max(1, Math.floor(optSide)) : defaultSide,
         fillStyle: hasOwn.call(markerOpts, "fillStyle") ? markerOpts.fillStyle : theme.colors.pointer
       });
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {DyniLinearGaugeDrawingState} state
+     * @param {DyniLinearGaugeLayout} layout
+     * @param {DyniLinearGaugeTheme} theme
+     * @param {DyniLinearCanvasPrimitivesApi} primitives
+     * @param {DyniLinearMapValueToX} mapValueToX
+     * @param {unknown} markerValue
+     * @param {number} markerSizeBase
+     * @param {DyniLinearDrawOptions} [opts]
+     * @returns {void}
+     */
     function drawMarkerAtValue(ctx, state, layout, theme, primitives, mapValueToX, markerValue, markerSizeBase, opts) {
       const markerNum = Number(markerValue);
       if (!Number.isFinite(markerNum)) {
@@ -89,8 +130,10 @@
         return;
       }
       const markerOpts = opts || {};
-      const len = Number.isFinite(Number(markerOpts.len)) ? Math.max(1, markerOpts.len) : Math.max(1, Math.floor(markerSizeBase * 0.45));
-      const width = Number.isFinite(Number(markerOpts.lineWidth)) ? Math.max(1, markerOpts.lineWidth) : Math.max(1, Math.floor(markerSizeBase * 0.2));
+      const optLen = Number(markerOpts.len);
+      const optLineWidth = Number(markerOpts.lineWidth);
+      const len = Number.isFinite(optLen) ? Math.max(1, optLen) : Math.max(1, Math.floor(markerSizeBase * 0.45));
+      const width = Number.isFinite(optLineWidth) ? Math.max(1, optLineWidth) : Math.max(1, Math.floor(markerSizeBase * 0.2));
       primitives.drawTick(ctx, Math.round(markerX), layout.trackY + len, len, {
         lineWidth: width,
         lineCap: "butt",

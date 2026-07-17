@@ -1,14 +1,19 @@
 /**
- * Module: DyniPlugin Speed Cluster - Speed numeric and gauge widget config
+ * @file DyniPlugin Speed Cluster - Speed numeric and gauge widget config
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/unit-editable-utils.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {{ min: number, max: number, step: number }} DyniSpeedUnitRange */
+  /** @typedef {DyniSpeedUnitRange & { default: number, label: string, internal?: boolean }} DyniSpeedTokenSpec */
+  /** @typedef {{ condition?: Record<string, unknown>, internal?: boolean }} DyniSpeedFieldSpec */
+  /** @typedef {DyniPluginSharedConfig & { makePerKindCaptionParams: (map: DyniPerKindTextParameterMap) => DyniEditableParameters, makeUnitAwareTextParams: (map: DyniPerKindTextParameterMap, bindings: Readonly<Record<string, DyniUnitFormatBinding>>) => DyniEditableParameters, opt: (name: unknown, value: unknown) => DyniEditableOption, kindMaps: Record<string, DyniPerKindTextParameterMap>, unitFormatFamilies: DyniUnitFormatCatalog }} DyniSpeedSharedConfig */
+  /** @typedef {{ DyniPlugin: DyniPluginNamespace & { config: DyniPluginConfig & { clusters: DyniWidgetDefinition[] } } }} DyniSpeedRoot */
+
+  const ns = /** @type {DyniSpeedRoot} */ (/** @type {unknown} */ (root)).DyniPlugin;
   const config = ns.config;
-  const shared = config.shared;
+  const shared = /** @type {DyniSpeedSharedConfig} */ (config.shared);
 
   const makePerKindCaptionParams = shared.makePerKindCaptionParams;
   const makeUnitAwareTextParams = shared.makeUnitAwareTextParams;
@@ -17,18 +22,22 @@
   const speedBindings = shared.unitFormatFamilies.metricBindings;
   const SPEED_LINEAR_KIND_KEYS = ["sogLinear", "stwLinear"];
   const SPEED_RADIAL_KIND_KEYS = ["sogRadial", "stwRadial"];
+  /** @type {Record<string, DyniSpeedUnitRange>} */
   const SPEED_UNIT_RANGES = {
     kn: { min: 0, max: 200, step: 0.5 },
     ms: { min: 0, max: 100, step: 0.1 },
     kmh: { min: 0, max: 400, step: 1 }
   };
+  /** @type {Record<string, string>} */
   const SPEED_UNIT_LABELS = {
     kn: "kn",
     ms: "m/s",
     kmh: "km/h"
   };
 
+  /** @param {Record<string, number>} defaults @returns {Record<string, DyniSpeedTokenSpec>} */
   function buildTokenSpecs(defaults) {
+    /** @type {Record<string, DyniSpeedTokenSpec>} */
     const out = {};
     Object.keys(SPEED_UNIT_RANGES).forEach(function (token) {
       out[token] = Object.assign({
@@ -39,13 +48,16 @@
     return out;
   }
 
+  /** @param {string[]} kindKeys @param {string} baseKey @param {string} displayName @param {Record<string, number>} defaults @param {DyniSpeedFieldSpec | undefined} [fieldSpec] @returns {DyniEditableParameters} */
   function buildPerUnitFloatParams(kindKeys, baseKey, displayName, defaults, fieldSpec) {
     const spec = fieldSpec && typeof fieldSpec === "object" ? fieldSpec : {};
+    /** @type {DyniEditableParameters} */
     const out = {};
     const tokenSpecs = buildTokenSpecs(defaults);
 
     Object.keys(tokenSpecs).forEach(function (token) {
       const tokenSpec = tokenSpecs[token];
+      /** @type {DyniEditableParameterSpec} */
       const field = {
         type: "FLOAT",
         min: tokenSpec.min,

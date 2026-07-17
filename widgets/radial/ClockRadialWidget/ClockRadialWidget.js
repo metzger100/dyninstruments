@@ -1,7 +1,6 @@
 /**
- * Module: ClockRadialWidget - 12-hour analog clock with hour/minute/second hands
+ * @file ClockRadialWidget - 12-hour analog clock with hour/minute/second hands
  * Documentation: documentation/widgets/clock-gauge.md
- * Depends: FullCircleRadialEngine, GeometryScale
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,18 +10,23 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {{ hours: number, minutes: number, seconds: number }} DyniClockTime */
+  /** @typedef {{ hourAngle: number, minuteAngle: number, secondAngle: number }} DyniClockHandAngles */
   const HOUR_HAND_WIDTH_FACTOR = 0.075;
   const MINUTE_HAND_WIDTH_FACTOR = 0.053;
   const SECOND_HAND_WIDTH_FACTOR = 0.03;
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const engine = componentContext.components.require("FullCircleRadialEngine");
     const gs = componentContext.components.require("GeometryScale");
 
+    /** @param {unknown} rawValue @returns {DyniClockTime | null} */
     function parseTime(rawValue) {
       if (rawValue == null || rawValue === "") {
         return null;
       }
+      /** @type {Date | undefined} */
       var date;
       if (rawValue instanceof Date) {
         date = rawValue;
@@ -46,6 +50,7 @@
       return { hours: date.getHours(), minutes: date.getMinutes(), seconds: date.getSeconds() };
     }
 
+    /** @param {DyniClockTime} time @returns {DyniClockHandAngles} */
     function computeHandAngles(time) {
       return {
         hourAngle: (time.hours % 12) * 30 + time.minutes * 0.5,
@@ -54,19 +59,22 @@
       };
     }
 
+    /** @param {unknown} rawValue @returns {DyniClockHandAngles | null} */
     function resolveHands(rawValue) {
       var time = parseTime(rawValue);
       return time ? computeHandAngles(time) : null;
     }
 
+    /** @param {DyniFullCircleEngineState} state @param {number} angleDeg @param {number} length @param {number} width @param {unknown} style */
     function drawHand(state, angleDeg, length, width, style) {
       var ctx = state.ctx;
       var cx = state.geom.cx;
       var cy = state.geom.cy;
       var rad = state.angle.degToCanvasRad(angleDeg);
+      var strokeStyle = /** @type {string} */ (style);
       ctx.save();
       ctx.lineCap = "round";
-      ctx.strokeStyle = style;
+      ctx.strokeStyle = strokeStyle;
       ctx.lineWidth = width;
       ctx.beginPath();
       ctx.moveTo(cx, cy);
@@ -75,7 +83,8 @@
       ctx.restore();
     }
 
-    function buildStaticKey(state) {
+    /** @param {DyniFullCircleEngineState} state @param {Record<string, unknown>} props @returns {unknown} */
+    function buildStaticKey(state, props) {
       return {
         labelPx: state.labels.fontPx,
         labelRadius: state.labels.spriteRadius,
@@ -83,6 +92,7 @@
       };
     }
 
+    /** @param {CanvasRenderingContext2D} layerCtx @param {string} layerName @param {DyniFullCircleEngineState} state @param {Record<string, unknown>} props @param {DyniFullCircleRendererApi} api */
     function rebuildLayer(layerCtx, layerName, state, props, api) {
       if (layerName !== "face") {
         return;
@@ -100,13 +110,14 @@
       layerCtx.textAlign = "center";
       layerCtx.textBaseline = "middle";
       layerCtx.font = state.labelWeight + " " + state.labels.fontPx + "px " + state.family;
-      layerCtx.fillStyle = state.color;
+      layerCtx.fillStyle = /** @type {string} */ (state.color);
       for (var hour = 1; hour <= 12; hour++) {
         var rad = state.angle.degToCanvasRad(hour * 30);
         layerCtx.fillText(String(hour), cx + Math.cos(rad) * labelRadius, cy + Math.sin(rad) * labelRadius);
       }
     }
 
+    /** @param {DyniFullCircleEngineState} state @param {Record<string, unknown>} props @param {DyniFullCircleRendererApi} api @returns {DyniRadialRenderResult} */
     function drawFrame(state, props, api) {
       var hands = resolveHands(props.value);
       api.drawCachedLayer("face");
@@ -128,9 +139,10 @@
       ctx.save();
       ctx.beginPath();
       ctx.arc(state.geom.cx, state.geom.cy, Math.max(1, Math.floor(state.geom.rOuter * 0.03) || 1), 0, Math.PI * 2);
-      ctx.fillStyle = state.color;
+      ctx.fillStyle = /** @type {string} */ (state.color);
       ctx.fill();
       ctx.restore();
+      return;
     }
 
     var renderCanvas = engine.createRenderer({

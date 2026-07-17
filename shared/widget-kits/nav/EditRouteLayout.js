@@ -1,7 +1,6 @@
 /**
- * Module: EditRouteLayout - Responsive measurement geometry owner for the edit-route HTML renderer
+ * @file EditRouteLayout - Responsive measurement geometry owner for the edit-route HTML renderer
  * Documentation: documentation/widgets/edit-route.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, LayoutSizingHelpers, EditRouteLayoutMath, EditRouteLayoutGeometry, HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -59,7 +58,7 @@
     rteEta: false
   };
 
-  function create(def, componentContext) {
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */ function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
     const sizingHelpers = componentContext.components.require("LayoutSizingHelpers");
@@ -74,8 +73,8 @@
       METRIC_TILE_CAPTION_RATIO
     );
 
-    function computeVerticalShellProfile(args) {
-      const cfg = args || {};
+    /** @param {DyniEditRouteShellArgs | undefined} args */ function computeVerticalShellProfile(args) {
+      const cfg = /** @type {DyniEditRouteShellArgs} */ (args || {});
       const width = Math.max(1, Math.floor(mathApi.clampNumber(cfg.W, 1, Number.MAX_SAFE_INTEGER, 1)));
       const isVerticalCommitted = cfg.isVerticalCommitted === true;
       const hostHeight = Math.max(1, Math.floor(mathApi.clampNumber(cfg.H, 1, Number.MAX_SAFE_INTEGER, width)));
@@ -107,7 +106,7 @@
       };
     }
 
-    function computeInsets(W, H, options) {
+    /** @param {unknown} W @param {unknown} H @param {{ isVerticalCommitted?: boolean } | undefined} options @returns {DyniEditRouteInsets} */ function computeInsets(W, H, options) {
       const opts = options || {};
       const isVerticalCommitted = opts.isVerticalCommitted === true;
       const safeW = Math.max(1, Math.floor(mathApi.clampNumber(W, 1, Number.MAX_SAFE_INTEGER, 1)));
@@ -125,7 +124,7 @@
       };
     }
 
-    function createContentRect(W, H, insets) {
+    /** @param {unknown} W @param {unknown} H @param {DyniEditRouteInsets | undefined} insets @returns {DyniRect} */ function createContentRect(W, H, insets) {
       const ins = insets || computeInsets(W, H, {});
       return makeRect(
         ins.padX,
@@ -135,8 +134,8 @@
       );
     }
 
-    function resolveMode(args) {
-      const cfg = args || {};
+    /** @param {DyniEditRouteLayoutArgs | undefined} args @returns {DyniEditRouteLayoutMode} */ function resolveMode(args) {
+      const cfg = /** @type {DyniEditRouteLayoutArgs} */ (args || {});
       if (cfg.isVerticalCommitted === true) {
         return "high";
       }
@@ -159,7 +158,7 @@
       return "normal";
     }
 
-    function computeNameRects(nameBarRect, showSourceBadge, insets) {
+    /** @param {DyniRect} nameBarRect @param {boolean} showSourceBadge @param {DyniEditRouteInsets} insets */ function computeNameRects(nameBarRect, showSourceBadge, insets) {
       return geometryApi.computeNameRects({
         nameBarRect: nameBarRect,
         showSourceBadge: showSourceBadge,
@@ -170,7 +169,7 @@
       });
     }
 
-    function createMetricTile(tileRect, insets, responsive, options) {
+    /** @param {DyniRect} tileRect @param {DyniEditRouteInsets} insets @param {DyniResponsiveScaleProfile} responsive @param {Record<string, unknown> | undefined} options */ function createMetricTile(tileRect, insets, responsive, options) {
       const opts = options || {};
       const unitPlacement = Object.prototype.hasOwnProperty.call(opts, "unitPlacement")
         ? opts.unitPlacement
@@ -189,8 +188,8 @@
       });
     }
 
-    function buildFlatWrapperLayoutStyle(args) {
-      const cfg = args || {};
+    /** @param {DyniEditRouteWrapperArgs} args @returns {string} */ function buildFlatWrapperLayoutStyle(args) {
+      const cfg = args;
       const nameHeight = Math.max(1, Math.floor(mathApi.clampNumber(cfg.nameHeight, 1, Number.MAX_SAFE_INTEGER, 1)));
       const metricsHeight = Math.max(0, Math.floor(mathApi.clampNumber(cfg.metricsHeight, 0, Number.MAX_SAFE_INTEGER, 0)));
       const gapPx = Math.max(0, Math.floor(mathApi.clampNumber(cfg.gap, 0, Number.MAX_SAFE_INTEGER, 0)));
@@ -207,14 +206,14 @@
         + "padding:" + toPx(insets.innerY) + " " + toPx(insets.padX) + ";";
     }
 
-    function buildFlatMetricsLayoutStyle(rows, columns, gapPx) {
+    /** @param {number} rows @param {number} columns @param {number} gapPx @returns {string} */ function buildFlatMetricsLayoutStyle(rows, columns, gapPx) {
       return ""
         + "grid-template-columns:repeat(" + String(columns) + ",minmax(0,1fr));"
         + "grid-template-rows:repeat(" + String(rows) + ",minmax(0,1fr));"
         + "gap:" + toPx(gapPx) + ";";
     }
 
-    function createHighMetricRow(rowRect, insets, hasUnit) {
+    /** @param {DyniRect} rowRect @param {DyniEditRouteInsets} insets @param {boolean} hasUnit */ function createHighMetricRow(rowRect, insets, hasUnit) {
       return geometryApi.createHighMetricRow({
         rowRect: rowRect,
         insets: insets,
@@ -228,7 +227,7 @@
       });
     }
 
-    function computeFlatMetricsLayout(metricsRect, insets, responsive, out, metricHasUnit) {
+    /** @param {DyniRect} metricsRect @param {DyniEditRouteInsets} insets @param {DyniResponsiveScaleProfile} responsive @param {DyniEditRouteLayoutOutput} out @param {{ dst: boolean, rte: boolean }} metricHasUnit */ function computeFlatMetricsLayout(metricsRect, insets, responsive, out, metricHasUnit) {
       const singleRowTiles = rectApi.splitRow(metricsRect, insets.gap, 4, rectApi.makeRect);
       const minTileWidth = Math.max(1, FLAT_METRIC_MIN_TILE_WIDTH);
       const canUseTwoRows = metricsRect.h >= FLAT_TWO_ROW_MIN_METRICS_HEIGHT;
@@ -261,8 +260,8 @@
       });
     }
 
-    function computeLayout(args) {
-      const cfg = args || {};
+    /** @param {DyniEditRouteLayoutArgs | undefined} args @returns {DyniEditRouteLayoutOutput} */ function computeLayout(args) {
+      const cfg = /** @type {DyniEditRouteLayoutArgs} */ (args || {});
       const hasRoute = cfg.hasRoute === true;
       const isLocalRoute = cfg.isLocalRoute === true;
       const W = Math.max(1, Math.floor(mathApi.clampNumber(cfg.W, 1, Number.MAX_SAFE_INTEGER, 1)));
@@ -304,7 +303,7 @@
         rteEta: metricHasUnitConfig.rteEta === true
       };
 
-      const out = {
+      const out = /** @type {DyniEditRouteLayoutOutput} */ (/** @type {unknown} */ ({
         mode: mode,
         hasRoute: hasRoute,
         isLocalRoute: isLocalRoute,
@@ -322,7 +321,7 @@
         flatMetricColumns: 0,
         flatWrapperLayoutStyle: "",
         flatMetricsLayoutStyle: ""
-      };
+      }));
 
       if (!hasRoute) {
         out.nameBarRect = contentRect;

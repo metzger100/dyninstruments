@@ -1,16 +1,19 @@
 /**
- * Module: DyniPlugin Editable Defaults - Builds defaults from editable parameters
+ * @file DyniPlugin Editable Defaults - Builds defaults from editable parameters
  * Documentation: documentation/avnav-api/editable-parameters.md
- * Depends: none
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
-  const runtime = ns.runtime;
+  const runtime = /** @type {DyniRuntimeNamespace} */ (ns.runtime);
 
+  /**
+   * @param {DyniEditableParameters|null|undefined} editableParams
+   * @returns {Record<string, unknown>}
+   */
   function defaultsFromEditableParams(editableParams) {
-    const out = {};
+    const out = /** @type {Record<string, unknown>} */ ({});
     if (!editableParams) {
       return out;
     }
@@ -22,15 +25,20 @@
         typeof spec === "object" &&
         Object.prototype.hasOwnProperty.call(spec, "default")
       ) {
-        out[k] = spec.default;
+        const parameterSpec = /** @type {DyniEditableParameterSpec} */ (spec);
+        out[k] = parameterSpec.default;
       }
     });
 
     return out;
   }
 
+  /**
+   * @param {DyniEditableParameters|null|undefined} editableParams
+   * @returns {Record<string, unknown>}
+   */
   function editableParamsForRegistration(editableParams) {
-    const out = {};
+    const out = /** @type {Record<string, unknown>} */ ({});
     if (!editableParams) {
       return out;
     }
@@ -40,7 +48,7 @@
       if (
         spec &&
         typeof spec === "object" &&
-        spec.internal === true
+        /** @type {DyniEditableParameterSpec} */ (spec).internal === true
       ) {
         return;
       }

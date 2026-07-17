@@ -1,7 +1,6 @@
 /**
- * Module: DefaultLinearWidget - Default linear gauge wrapper for self-configurable instruments
+ * @file DefaultLinearWidget - Default linear gauge wrapper for self-configurable instruments
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, ValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,12 +10,15 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {DyniLinearGaugeProps & { defaultLinearAlarmLowEnabled?: boolean, defaultLinearWarningLowEnabled?: boolean, defaultLinearWarningHighEnabled?: boolean, defaultLinearAlarmHighEnabled?: boolean, defaultLinearAlarmLowAt?: number, defaultLinearWarningLowAt?: number, defaultLinearWarningHighAt?: number, defaultLinearAlarmHighAt?: number, defaultLinearAlarmLowColor?: unknown, defaultLinearWarningLowColor?: unknown, defaultLinearWarningHighColor?: unknown, defaultLinearAlarmHighColor?: unknown }} DyniDefaultLinearProps */
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const engine = componentContext.components.require("LinearGaugeEngine");
     const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
+    /** @param {DyniDefaultLinearProps} props @param {number} minV @param {number} maxV @param {DyniLinearRange} axis @param {DyniValueMathApi} valueApi @param {DyniLinearGaugeTheme} theme @returns {DyniLinearColoredRange[]} */
     function buildSectors(props, minV, maxV, axis, valueApi, theme) {
       const p = props || {};
       const sectors = [];

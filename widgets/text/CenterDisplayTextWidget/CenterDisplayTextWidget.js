@@ -1,7 +1,6 @@
 /**
- * Module: CenterDisplayTextWidget - Responsive center-position renderer for the nav cluster
+ * @file CenterDisplayTextWidget - Responsive center-position renderer for the nav cluster
  * Documentation: documentation/widgets/center-display.md
- * Depends: componentContext.theme.tokens, TextLayoutEngine, CanvasTextLayout, TextTileLayout, TextLayoutScaleHelpers, CenterDisplayLayout, CenterDisplayMath, CenterDisplayStateAdapter, CenterDisplayRenderModel
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,7 +10,11 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {{ resolveForRoot(rootEl: unknown): { font: { family: string, familyMono?: string, weight: unknown, labelWeight: unknown }, surface: { fg: string }, opacity?: { caption?: unknown, unit?: unknown } } }} DyniCenterDisplayThemeResolver */
+  /** @typedef {DyniComponentContext & { theme: { tokens: DyniCenterDisplayThemeResolver }, canvas: DyniCanvasHostApi }} DyniCenterDisplayWidgetContext */
+  /** @typedef {{ ctx: CanvasRenderingContext2D, radialText: DyniCanvasTextLayoutApi, tileLayout: DyniTextTileLayoutApi, textFillScale: number, captionOpacity: unknown, layoutApi: DyniCenterDisplayLayoutApi, responsive: DyniResponsiveScaleProfile, frameWidthCache: Record<string, number> }} DyniCenterDisplayRenderState */
   const hasOwn = Object.prototype.hasOwnProperty;
+  /** @param {CanvasRenderingContext2D} ctx @param {DyniCanvasTextLayoutApi} textApi @param {string} text @param {unknown} family @param {unknown} weight @param {unknown} px @param {Record<string, number>} frameWidthCache */
   function measureCachedTextWidth(ctx, textApi, text, family, weight, px, frameWidthCache) {
     textApi.setFont(ctx, Math.max(1, Math.floor(Number(px) || 0)), weight, family);
     const content = String(text || "");
@@ -25,9 +28,11 @@
     }
     return width;
   }
+  /** @param {DyniRect} rect @param {number} ratio @param {number} fillScale */
   function computeResponsiveLineMaxPx(rect, ratio, fillScale) {
     return Math.max(1, Math.floor(rect.h * ratio * fillScale));
   }
+  /** @param {DyniCenterDisplayLayoutResult} layout @param {number} textFillScale */
   function computeRelationValueMaxPx(layout, textFillScale) {
     const rowRects = layout.rowRects;
     let maxPx = 0;
@@ -40,6 +45,7 @@
     }
     return maxPx;
   }
+  /** @param {unknown} value @param {number} minShare @param {number} maxShare @returns {number | undefined} */
   function clampShare(value, minShare, maxShare) {
     const n = Number(value);
     if (!Number.isFinite(n)) {
@@ -47,10 +53,11 @@
     }
     return Math.max(minShare, Math.min(maxShare, n));
   }
+  /** @param {DyniCenterDisplayLayoutResult} layout @param {DyniCenterDisplayRenderState} state @param {DyniCenterDisplayState} displayState @param {unknown} labelFamily @param {unknown} valueFamily @param {unknown} valueWeight @param {unknown} labelWeight @param {string} color */
   function drawCenterPanel(layout, state, displayState, labelFamily, valueFamily, valueWeight, labelWeight, color) {
-    const textFillScale = layout.responsive.textFillScale;
+    const textFillScale = layout.responsive.textFillScale || 1;
     const relationValueMaxPx = computeRelationValueMaxPx(layout, textFillScale);
-    const latFit = state.tileLayout.measureFittedLine({
+    const latFit = /** @type {{ px: number, text: string }} */ (state.tileLayout.measureFittedLine({
       textApi: state.radialText,
       ctx: state.ctx,
       text: displayState.latText,
@@ -60,8 +67,8 @@
       textFillScale: textFillScale,
       family: valueFamily,
       weight: valueWeight
-    });
-    const lonFit = state.tileLayout.measureFittedLine({
+    }));
+    const lonFit = /** @type {{ px: number, text: string }} */ (state.tileLayout.measureFittedLine({
       textApi: state.radialText,
       ctx: state.ctx,
       text: displayState.lonText,
@@ -71,7 +78,7 @@
       textFillScale: textFillScale,
       family: valueFamily,
       weight: valueWeight
-    });
+    }));
     const coupledPx = Math.min(latFit.px, lonFit.px);
     const coupledLatFit = latFit.px === coupledPx ? latFit : { px: coupledPx, text: latFit.text };
     const coupledLonFit = lonFit.px === coupledPx ? lonFit : { px: coupledPx, text: lonFit.text };
@@ -114,6 +121,7 @@
       color: color
     });
   }
+  /** @param {DyniCenterDisplayStateRow} row @param {DyniRect} rect @param {DyniCenterDisplayRenderState} state @param {unknown} labelFamily @param {unknown} valueFamily @param {unknown} valueWeight @param {unknown} labelWeight */
   function computeRowLayout(row, rect, state, labelFamily, valueFamily, valueWeight, labelWeight) {
     const gap = state.layoutApi.computeRowValueGapPx(rect, state.responsive);
     const textFillScale = state.textFillScale;
@@ -175,6 +183,7 @@
       valueMaxPx: valueMaxPx
     };
   }
+  /** @param {DyniCenterDisplayLayoutResult} layout @param {DyniCenterDisplayStateRow[]} rows @param {DyniCenterDisplayRenderState} state @param {unknown} labelFamily @param {unknown} valueFamily @param {unknown} valueWeight @param {unknown} labelWeight @param {string} color */
   function drawRelationRows(layout, rows, state, labelFamily, valueFamily, valueWeight, labelWeight, color) {
     state.ctx.fillStyle = color;
     for (let i = 0; i < rows.length; i++) {
@@ -213,6 +222,7 @@
       });
     }
   }
+  /** @param {unknown} def @param {DyniCenterDisplayWidgetContext} componentContext */
   function create(def, componentContext) {
     const theme = componentContext.theme.tokens;
     const text = componentContext.components.require("TextLayoutEngine");
@@ -223,6 +233,7 @@
     const math = componentContext.components.require("CenterDisplayMath");
     const centerDisplayStateAdapter = componentContext.components.require("CenterDisplayStateAdapter");
     const centerDisplayRenderModel = componentContext.components.require("CenterDisplayRenderModel");
+    /** @param {HTMLCanvasElement} canvas @param {DyniWidgetValues} props */
     function renderCanvas(canvas, props) {
       const p = props || {};
       const setup = componentContext.canvas.setupCanvas(canvas);
@@ -267,8 +278,9 @@
         unitText: ""
       });
       const insets = layoutApi.computeInsets(W, H);
-      const contentRect = layoutApi.createContentRect(W, H, insets);
+      const contentRect = layoutApi.createContentRect(W, H, /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (insets)));
       const displayState = centerDisplayRenderModel.buildDisplayState(p, math, defaultText);
+      /** @type {Record<string, number>} */
       const frameWidthCache = Object.create(null);
       const hints = centerDisplayRenderModel.computeMeasurementHints({
         ctx: ctx,
@@ -305,7 +317,7 @@
         ctx: ctx,
         radialText: radialText,
         tileLayout: tileLayout,
-        textFillScale: layout.responsive.textFillScale,
+        textFillScale: layout.responsive.textFillScale || 1,
         captionOpacity: captionOpacity,
         layoutApi: layoutApi,
         responsive: layout.responsive,

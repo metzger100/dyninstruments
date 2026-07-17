@@ -1,12 +1,11 @@
 /**
- * Module: DyniPlugin HostCommitController - Deferred host commit scheduling for HTML shell mounting
+ * @file DyniPlugin HostCommitController - Deferred host commit scheduling for HTML shell mounting
  * Documentation: documentation/architecture/component-system.md
- * Depends: runtime/namespace.js, runtime/PerfSpanHelper.js, requestAnimationFrame, MutationObserver
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  const ns = /** @type {DyniPluginNamespace & { runtime: DyniHostRuntime }} */ (root.DyniPlugin);
   const runtime = ns.runtime;
   const hasOwn = Object.prototype.hasOwnProperty;
   const MAX_RAF_ATTEMPTS = 4;
@@ -14,11 +13,13 @@
 
   let instanceCounter = 0;
 
+  /** @param {string} prefix @returns {string} */
   function nextInstanceId(prefix) {
     instanceCounter += 1;
     return prefix + String(instanceCounter);
   }
 
+  /** @param {string} instanceId @returns {DyniHostCommitState} */
   function createState(instanceId) {
     return {
       instanceId: instanceId,
@@ -35,9 +36,9 @@
     };
   }
 
+  /** @param {DyniHostCommitControllerOptions} options @returns {DyniHostCommitControllerApi} */
   function createHostCommitController(options) {
-    const opts = options || {};
-    const perf = runtime && runtime.perf ? runtime.perf : null;
+    const opts = /** @type {DyniHostCommitControllerOptions} */ (options || {});
     const instancePrefix = (typeof opts.instancePrefix === "string" && opts.instancePrefix)
       ? opts.instancePrefix
       : "dyni-host-";
@@ -46,14 +47,14 @@
       ? opts.requestAnimationFrame
       : (typeof root.requestAnimationFrame === "function"
         ? root.requestAnimationFrame.bind(root)
-        : function (cb) {
+        : function (/** @type {() => void} */ cb) {
           return root.setTimeout(cb, 16);
         });
     const cancelFrame = typeof opts.cancelAnimationFrame === "function"
       ? opts.cancelAnimationFrame
       : (typeof root.cancelAnimationFrame === "function"
         ? root.cancelAnimationFrame.bind(root)
-        : function (handle) {
+        : function (/** @type {number} */ handle) {
           root.clearTimeout(handle);
         });
     const setTimer = typeof opts.setTimeout === "function"
@@ -66,23 +67,25 @@
       ? opts.MutationObserver
       : root.MutationObserver;
 
+    /** @type {DyniHostCommitState} */
     let state = createState(nextInstanceId(instancePrefix));
+    /** @type {DyniHostCommitState | null} */
     let stateSnapshot = null;
     let stateSnapshotDirty = true;
-    let pendingWaitSpanToken = null;
-
     function markStateSnapshotDirty() {
       stateSnapshotDirty = true;
     }
 
+    /** @param {keyof DyniHostCommitState} key @param {unknown} value */
     function setStateField(key, value) {
       if (state[key] === value) {
         return;
       }
-      state[key] = value;
+      /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (state))[key] = value;
       markStateSnapshotDirty();
     }
 
+    /** @returns {DyniHostCommitState} */
     function getState() {
       if (!stateSnapshotDirty && stateSnapshot) {
         return stateSnapshot;
@@ -134,15 +137,12 @@
       clearTimeoutHandle();
     }
 
-    function clearPendingState(tags) {
-      if (perf && pendingWaitSpanToken) {
-        perf.endSpan(pendingWaitSpanToken, tags || null);
-      }
-      pendingWaitSpanToken = null;
+    function clearPendingState() {
       setStateField("commitPending", false);
       setStateField("scheduledRevision", null);
     }
 
+    /** @returns {Element | null} */
     function resolveShellElement() {
       if (!doc || typeof doc.querySelector !== "function") {
         return null;
@@ -151,6 +151,7 @@
       return doc.querySelector(selector);
     }
 
+    /** @param {Element | null} shellEl @returns {Element | null} */
     function resolveRootElement(shellEl) {
       if (!shellEl || typeof shellEl.closest !== "function") {
         return null;
@@ -168,15 +169,11 @@
       return rootEl;
     }
 
-    function commitIfReady(targetRevision, callbacks, waitStage) {
+    /** @param {number} targetRevision @param {DyniHostCommitCallbacks} callbacks @returns {boolean} */
+    function commitIfReady(targetRevision, callbacks) {
       if (targetRevision !== state.renderRevision) {
         clearAsyncHandles();
-        clearPendingState({
-          status: "stale",
-          waitStage: waitStage || "stale",
-          revision: targetRevision,
-          instanceId: state.instanceId
-        });
+      clearPendingState();
         return true;
       }
 
@@ -194,12 +191,7 @@
       setStateField("shellEl", shellEl);
       setStateField("rootEl", rootEl);
       setStateField("mountedRevision", targetRevision);
-      clearPendingState({
-        status: "committed",
-        waitStage: waitStage || "unknown",
-        revision: targetRevision,
-        instanceId: state.instanceId
-      });
+      clearPendingState();
 
       if (callbacks && typeof callbacks.onCommit === "function") {
         callbacks.onCommit({
@@ -214,17 +206,18 @@
       return true;
     }
 
+    /** @param {number} targetRevision @param {DyniHostCommitCallbacks} callbacks */
     function installDeferredObservers(targetRevision, callbacks) {
       if (!MutationObserverCtor || typeof MutationObserverCtor !== "function") {
         setStateField("timeoutHandle", setTimer(function () {
-          commitIfReady(targetRevision, callbacks, "timeout");
+          commitIfReady(targetRevision, callbacks);
         }, 0));
         return;
       }
 
       if (!state.observer) {
         const observer = new MutationObserverCtor(function () {
-          commitIfReady(targetRevision, callbacks, "mutation-observer");
+          commitIfReady(targetRevision, callbacks);
         });
         setStateField("observer", observer);
         if (doc && doc.body) {
@@ -234,25 +227,21 @@
 
       if (state.timeoutHandle == null) {
         setStateField("timeoutHandle", setTimer(function () {
-          if (commitIfReady(targetRevision, callbacks, "observer-timeout")) {
+          if (commitIfReady(targetRevision, callbacks)) {
             return;
           }
           clearAsyncHandles();
-          clearPendingState({
-            status: "observer-timeout",
-            waitStage: "observer-timeout",
-            revision: targetRevision,
-            instanceId: state.instanceId
-          });
+          clearPendingState();
         }, OBSERVER_TIMEOUT_MS));
       }
     }
 
+    /** @param {number} targetRevision @param {DyniHostCommitCallbacks} callbacks @param {number} attempt */
     function scheduleRafAttempt(targetRevision, callbacks, attempt) {
       setStateField("rafHandle", requestFrame(function () {
         setStateField("rafHandle", null);
 
-        if (commitIfReady(targetRevision, callbacks, "raf-" + String(attempt))) {
+        if (commitIfReady(targetRevision, callbacks)) {
           return;
         }
 
@@ -267,23 +256,20 @@
 
     function initState() {
       clearAsyncHandles();
-      clearPendingState({
-        status: "reset",
-        waitStage: "reset",
-        revision: state.renderRevision,
-        instanceId: state.instanceId
-      });
+      clearPendingState();
       state = createState(nextInstanceId(instancePrefix));
       markStateSnapshotDirty();
       return getState();
     }
 
+    /** @param {unknown} props @returns {number} */
     function recordRender(props) {
       setStateField("lastProps", props);
       setStateField("renderRevision", state.renderRevision + 1);
       return state.renderRevision;
     }
 
+    /** @param {DyniHostCommitCallbacks} callbacks @returns {boolean} */
     function scheduleCommit(callbacks) {
       const targetRevision = state.renderRevision;
 
@@ -298,24 +284,13 @@
 
       setStateField("commitPending", true);
       setStateField("scheduledRevision", targetRevision);
-      pendingWaitSpanToken = perf
-        ? perf.startSpan("HostCommitController.scheduleCommit->onCommit", {
-          instanceId: state.instanceId,
-          revision: targetRevision
-        })
-        : null;
       scheduleRafAttempt(targetRevision, callbacks || {}, 1);
       return true;
     }
 
     function cleanup() {
       clearAsyncHandles();
-      clearPendingState({
-        status: "cleanup",
-        waitStage: "cleanup",
-        revision: state.renderRevision,
-        instanceId: state.instanceId
-      });
+      clearPendingState();
       setStateField("rootEl", null);
       setStateField("shellEl", null);
     }

@@ -8,26 +8,6 @@ const {
 } = require("./check-patterns.harness.js");
 
 describe("tools/check-patterns.mjs", function () {
-  it("blocks bare global isFinite in source files but allows Number.isFinite", function () {
-    const cwd = createWorkspace({
-      "widgets/example.js": `
-(function () {
-  "use strict";
-  const a = isFinite(12);
-  const b = Number.isFinite(12);
-  return a && b;
-}());
-`
-    });
-
-    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
-    const out = joinMessages(result.findings);
-
-    expect(result.summary.ok).toBe(false);
-    expect(out).toContain("[global-isfinite]");
-    expect(result.summary.byRule["global-isfinite"]).toBe(1);
-  });
-
   it("blocks truthy fallback on .default properties", function () {
     const cwd = createWorkspace({
       "runtime/example.js": `

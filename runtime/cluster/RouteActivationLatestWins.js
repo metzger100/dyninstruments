@@ -1,14 +1,20 @@
 /**
- * Module: DyniPlugin Route Activation Latest Wins - Pending activation state and cancellation handling
+ * @file DyniPlugin Route Activation Latest Wins - Pending activation state and cancellation handling
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: runtime/namespace.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
-  const runtime = ns.runtime;
+  /** @typedef {{ rendererId: string, surface: "html" | "canvas-dom" }} DyniLatestWinsRouteMeta */
+  /** @typedef {(value: unknown | PromiseLike<unknown>) => void} DyniLatestWinsResolve */
+  /** @typedef {(reason?: unknown) => void} DyniLatestWinsReject */
+  /** @typedef {{ routeId: string, latestSnapshot: unknown, latestRouteMeta: DyniLatestWinsRouteMeta, promise: Promise<unknown>, loadStarted: boolean, settled: boolean, resolve: (value: unknown) => void, reject: (error: unknown) => void }} DyniLatestWinsEntry */
+  /** @typedef {{ loader: { loadComponent: (id: string) => Promise<unknown> }, themeRuntime: { preloadShadowCssUrls: (urls: string[]) => Promise<unknown> }, resolveRouteRoots: (routeMeta: DyniLatestWinsRouteMeta) => string[], resolveShadowCssUrls: (rendererId: string) => string[], buildPayload: (snapshot: unknown, routeMeta: DyniLatestWinsRouteMeta) => unknown }} DyniLatestWinsDependencies */
 
+  const ns = /** @type {DyniPluginNamespace} */ (root.DyniPlugin);
+  const runtime = /** @type {DyniRuntimeNamespace} */ (ns.runtime);
+
+  /** @param {{ discardedActivation: unknown }} options */
   function createLatestWinsState(options) {
     const discardedActivation = options.discardedActivation;
     if (!discardedActivation) {
@@ -16,36 +22,48 @@
     }
 
     let destroyed = false;
+    /** @type {DyniLatestWinsEntry | null} */
     let currentEntry = null;
 
+    /** @returns {void} */
     function ensureNotDestroyed() {
       if (destroyed) {
         throw new Error("RouteActivationError: controller destroyed");
       }
     }
 
+    /** @returns {DyniLatestWinsEntry | null} */
     function getPendingEntry() {
       return currentEntry && !currentEntry.settled ? currentEntry : null;
     }
 
+    /** @param {DyniLatestWinsEntry} entry */
     function clearCurrentEntry(entry) {
       if (currentEntry === entry) {
         currentEntry = null;
       }
     }
 
+    /** @param {string} routeId @param {unknown} snapshot @param {DyniLatestWinsRouteMeta} routeMeta @returns {DyniLatestWinsEntry} */
     function createPendingEntry(routeId, snapshot, routeMeta) {
-      let resolveFn = null;
-      let rejectFn = null;
+      /** @type {DyniLatestWinsResolve} */
+      let resolveFn = function () {
+        throw new Error("RouteActivationLatestWins: activation promise resolver is unavailable");
+      };
+      /** @type {DyniLatestWinsReject} */
+      let rejectFn = function () {
+        throw new Error("RouteActivationLatestWins: activation promise rejecter is unavailable");
+      };
+      /** @type {DyniLatestWinsEntry} */
       const entry = {
         routeId: routeId,
         latestSnapshot: snapshot,
         latestRouteMeta: routeMeta,
-        promise: null,
+        promise: /** @type {Promise<unknown>} */ (/** @type {unknown} */ (null)),
         loadStarted: false,
         settled: false,
-        resolve: null,
-        reject: null
+        resolve: /** @type {(value: unknown) => void} */ (/** @type {unknown} */ (null)),
+        reject: /** @type {(error: unknown) => void} */ (/** @type {unknown} */ (null))
       };
 
       entry.promise = new Promise(function (resolve, reject) {
@@ -74,12 +92,14 @@
       return entry;
     }
 
+    /** @param {DyniLatestWinsEntry} entry @param {DyniLatestWinsDependencies} deps @returns {Promise<unknown>} */
     function activateCold(entry, deps) {
       if (entry.loadStarted) {
         return entry.promise;
       }
       entry.loadStarted = true;
 
+      /** @returns {Promise<unknown>} */
       function runLoadCycle() {
         if (destroyed) {
           entry.resolve(discardedActivation);
@@ -133,6 +153,7 @@
       return entry.promise;
     }
 
+    /** @returns {void} */
     function destroy() {
       if (destroyed) {
         return;
@@ -154,7 +175,7 @@
     };
   }
 
-  runtime.routeActivationLatestWins = Object.freeze({
+  /** @type {DyniRuntimeNamespace & Record<string, unknown>} */ (runtime).routeActivationLatestWins = Object.freeze({
     createLatestWinsState: createLatestWinsState
   });
 }(this));

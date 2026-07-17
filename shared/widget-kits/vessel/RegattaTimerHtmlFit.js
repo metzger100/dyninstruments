@@ -1,7 +1,6 @@
 /**
- * Module: RegattaTimerHtmlFit - Responsive style-fit owner for regatta timer HTML layout
+ * @file RegattaTimerHtmlFit - Responsive style-fit owner for regatta timer HTML layout
  * Documentation: documentation/widgets/regatta-timer.md
- * Depends: HtmlWidgetUtils, ValueMath, GeometryScale, RegattaTimerPhase, HtmlMeasureUtils, TextLayoutEngine, componentContext.theme.tokens, componentContext.dom
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -16,6 +15,7 @@
   const DEFAULT_MODE = "normal";
   const BAR_HEIGHT_FROM_WIDGET_HEIGHT_RATIO = 0.03;
 
+  /** @param {DyniRegattaPhase} phase @returns {string[]} */
   function resolveVisibleLabels(phase) {
     if (phase === "countdown") {
       return ["SYNC", "RESET"];
@@ -26,6 +26,7 @@
     return ["START"];
   }
 
+  /** @param {unknown} mode @returns {DyniRegattaTimerFitMode} */
   function normalizeMode(mode) {
     if (mode === "high" || mode === "flat") {
       return mode;
@@ -33,8 +34,11 @@
     return DEFAULT_MODE;
   }
 
+  /** @param {unknown} hostContext @returns {DyniRegattaTimerHtmlFitCache | null} */
   function resolveRegattaCacheEntry(hostContext) {
-    const owner = hostContext && typeof hostContext === "object" ? hostContext : null;
+    const owner = hostContext && typeof hostContext === "object"
+      ? /** @type {DyniRegattaTimerHtmlFitHostContext} */ (hostContext)
+      : null;
     if (!owner) {
       return null;
     }
@@ -47,17 +51,22 @@
     return cache;
   }
 
+  /** @param {unknown} hostContext */
   function clearCache(hostContext) {
-    const owner = hostContext && typeof hostContext === "object" ? hostContext : null;
+    const owner = hostContext && typeof hostContext === "object"
+      ? /** @type {DyniRegattaTimerHtmlFitHostContext} */ (hostContext)
+      : null;
     if (owner && Object.prototype.hasOwnProperty.call(owner, FIT_CACHE_KEY)) {
       delete owner[FIT_CACHE_KEY];
     }
   }
 
+  /** @param {number} ratio @param {number} baseLength @returns {number} */
   function scaledPx(ratio, baseLength) {
     return Math.max(1, Math.floor(baseLength * ratio));
   }
 
+  /** @param {DyniRegattaTimerFitMode} mode @returns {DyniRegattaTimerModeShares} */
   function computeModeShares(mode) {
     if (mode === "high") {
       return { display: 0.68, controls: 0.32 };
@@ -68,6 +77,19 @@
     return { display: 0.62, controls: 0.38 };
   }
 
+  /**
+   * @param {number} width
+   * @param {number} height
+   * @param {DyniRegattaTimerFitMode} mode
+   * @param {DyniRegattaPhase} phase
+   * @param {string} displayTime
+   * @param {boolean} stableDigitsEnabled
+   * @param {unknown} family
+   * @param {unknown} valueWeight
+   * @param {unknown} labelWeight
+   * @param {unknown} strokeWeight
+   * @returns {string}
+   */
   function buildSignature(
     width,
     height,
@@ -94,6 +116,11 @@
     ]);
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniRegattaTimerHtmlFitApi}
+   */
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const valueMath = componentContext.components.require("ValueMath");
@@ -101,12 +128,20 @@
     const phaseApi = componentContext.components.require("RegattaTimerPhase");
     const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const textLayout = componentContext.components.require("TextLayoutEngine");
-    const themeResolver = componentContext.theme.tokens;
-    const domApi = componentContext.dom;
+    const themeResolver = /** @type {DyniRegattaTimerThemeResolver} */ (
+      /** @type {{ theme: { tokens: DyniRegattaTimerThemeResolver } }} */ (/** @type {unknown} */ (componentContext)).theme.tokens
+    );
+    const domApi = /** @type {DyniRegattaTimerDomApi} */ (
+      /** @type {{ dom: DyniRegattaTimerDomApi }} */ (/** @type {unknown} */ (componentContext)).dom
+    );
 
+    /**
+     * @param {DyniRegattaTimerHtmlFitArgs | undefined} options
+     * @returns {DyniRegattaTimerHtmlFitResult | null}
+     */
     function compute(options) {
-      const cfg = options || {};
-      const model = valueMath.toObject(cfg.model);
+      const cfg = /** @type {DyniRegattaTimerHtmlFitArgs} */ (options || {});
+      const model = /** @type {DyniRegattaTimerHtmlFitModel} */ (valueMath.toObject(cfg.model));
       const targetEl = cfg.targetEl || null;
       if (!targetEl) {
         return null;
@@ -114,7 +149,7 @@
       const shellRect = valueMath.toObject(cfg.shellRect);
       const widthRaw = valueMath.toOptionalFiniteNumber(shellRect.width);
       const heightRaw = valueMath.toOptionalFiniteNumber(shellRect.height);
-      if (!(widthRaw > 0) || !(heightRaw > 0)) {
+      if (typeof widthRaw !== "number" || typeof heightRaw !== "number" || !(widthRaw > 0) || !(heightRaw > 0)) {
         return null;
       }
 

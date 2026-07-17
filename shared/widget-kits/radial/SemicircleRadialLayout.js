@@ -1,7 +1,6 @@
 /**
- * Module: SemicircleRadialLayout - Responsive geometry owner for semicircle radial gauges
+ * @file SemicircleRadialLayout - Responsive geometry owner for semicircle radial gauges
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, GeometryScale, TextLayoutScaleHelpers, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -29,9 +28,18 @@
   const RESPONSIVE_SCALES = {
     textFillScale: 1.18
   };
-  let makeRect = null;
+  let makeRect = /** @type {DyniMakeRect} */ (/** @type {unknown} */ (null));
+  /** @type {DyniValueMathApi["clampNumber"]} */
   let clampNumber;
 
+  /**
+   * @param {number} width
+   * @param {number} height
+   * @param {number} pad
+   * @param {DyniRadialResolvedTheme} theme
+   * @param {DyniGeometryScaleApi} gs
+   * @returns {DyniSemicircleGeom}
+   */
   function computeGeometry(width, height, pad, theme, gs) {
     const availableWidth = Math.max(1, width - pad * 2);
     const availableHeight = Math.max(1, height - pad * 2);
@@ -79,6 +87,11 @@
     };
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniSemicircleRadialLayoutApi}
+   */
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
@@ -87,6 +100,13 @@
     clampNumber = componentContext.components.require("ValueMath").clampNumber;
     makeRect = rectApi.makeRect;
 
+    /**
+     * @param {unknown} W
+     * @param {unknown} H
+     * @param {unknown} thresholdNormal
+     * @param {unknown} thresholdFlat
+     * @returns {"flat" | "high" | "normal"}
+     */
     function computeMode(W, H, thresholdNormal, thresholdFlat) {
       const width = Number(W) || 0;
       const height = Number(H) || 0;
@@ -109,6 +129,11 @@
       return ratio < normalThreshold ? "high" : "normal";
     }
 
+    /**
+     * @param {unknown} W
+     * @param {unknown} H
+     * @returns {DyniRadialInsets}
+     */
     function computeInsets(W, H) {
       const responsive = profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
       const pad = profileApi.computeInsetPx(responsive, PAD_RATIO, 1);
@@ -120,6 +145,10 @@
       };
     }
 
+    /**
+     * @param {DyniSemicircleLayoutArgs} [args]
+     * @returns {DyniSemicircleLayout}
+     */
     function computeLayout(args) {
       const cfg = args || {};
       const W = Math.max(1, Math.floor(Number(cfg.W) || 0));
@@ -128,7 +157,7 @@
       const responsive = cfg.responsive || insets.responsive || profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
       const textFillScale = scaleHelpers.resolveTextFillScale(responsive);
       const compactGeometryScale = scaleHelpers.resolveCompactGeometryScale(textFillScale);
-      const theme = cfg.theme;
+      const theme = /** @type {DyniRadialResolvedTheme} */ (cfg.theme);
       const radialTheme = theme.radial;
       const labelTheme = radialTheme.labels;
       const geom = computeGeometry(W, H, insets.pad, theme, gs);

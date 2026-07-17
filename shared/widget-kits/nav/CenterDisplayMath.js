@@ -1,7 +1,6 @@
 /**
- * Module: CenterDisplayMath - Position normalization and center-display leg math
+ * @file CenterDisplayMath - Position normalization and center-display leg math
  * Documentation: documentation/widgets/center-display.md
- * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,16 +13,20 @@
 
   const EARTH_RADIUS_M = 6371000;
 
+  /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */
   let toOptionalFiniteNumber;
 
+  /** @param {number} value @returns {number} */
   function toRadians(value) {
     return value * Math.PI / 180;
   }
 
+  /** @param {number} value @returns {number} */
   function toDegrees(value) {
     return value * 180 / Math.PI;
   }
 
+  /** @param {number} value @returns {number} */
   function wrapRadians(value) {
     if (value > Math.PI) {
       return value - Math.PI * 2;
@@ -34,13 +37,16 @@
     return value;
   }
 
+  /** @param {unknown} value @returns {DyniLatLon | null} */
   function normalizePoint(value) {
     if (!value || typeof value !== "object") {
       return null;
     }
-    const lonRaw = Array.isArray(value) ? value[0] : value.lon;
-    const latRaw = Array.isArray(value) ? value[1] : value.lat;
-    if (Array.isArray(value) && value.length < 2) {
+    const arr = Array.isArray(value) ? value : null;
+    const rec = /** @type {{ lon?: unknown, lat?: unknown }} */ (value);
+    const lonRaw = arr ? arr[0] : rec.lon;
+    const latRaw = arr ? arr[1] : rec.lat;
+    if (arr && arr.length < 2) {
       return null;
     }
     const lat = toOptionalFiniteNumber(latRaw);
@@ -51,6 +57,7 @@
     return { lat: lat, lon: lon };
   }
 
+  /** @param {DyniLatLon} src @param {DyniLatLon} dst @returns {DyniCourseDistance} */
   function computeGreatCircle(src, dst) {
     const phi1 = toRadians(src.lat);
     const phi2 = toRadians(dst.lat);
@@ -75,6 +82,7 @@
     };
   }
 
+  /** @param {DyniLatLon} src @param {DyniLatLon} dst @returns {DyniCourseDistance} */
   function computeRhumbLine(src, dst) {
     const phi1 = toRadians(src.lat);
     const phi2 = toRadians(dst.lat);
@@ -96,6 +104,12 @@
     };
   }
 
+  /**
+   * @param {unknown} srcValue
+   * @param {unknown} dstValue
+   * @param {unknown} useRhumbLine
+   * @returns {DyniCourseDistance | null}
+   */
   function computeCourseDistance(srcValue, dstValue, useRhumbLine) {
     const src = normalizePoint(srcValue);
     const dst = normalizePoint(dstValue);
@@ -105,13 +119,20 @@
     return useRhumbLine ? computeRhumbLine(src, dst) : computeGreatCircle(src, dst);
   }
 
+  /** @param {unknown} activeMeasure @returns {DyniLatLon | null} */
   function extractMeasureStart(activeMeasure) {
-    if (!activeMeasure || typeof activeMeasure.getPointAtIndex !== "function") {
+    const measure = /** @type {{ getPointAtIndex?: unknown }} */ (activeMeasure);
+    if (!measure || typeof measure.getPointAtIndex !== "function") {
       return null;
     }
-    return normalizePoint(activeMeasure.getPointAtIndex(0));
+    return normalizePoint(measure.getPointAtIndex(0));
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniCenterDisplayMathApi}
+   */
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;

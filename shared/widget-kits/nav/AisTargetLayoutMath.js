@@ -1,7 +1,6 @@
 /**
- * Module: AisTargetLayoutMath - Numeric guards and split helpers for AIS target layout
+ * @file AisTargetLayoutMath - Numeric guards and split helpers for AIS target layout
  * Documentation: documentation/widgets/ais-target.md
- * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,8 +11,18 @@
 }(this, function () {
   "use strict";
 
+  /** @type {DyniValueMathApi["clampNumber"]} */
   let clampNumber;
 
+  /**
+   * @param {unknown} contentHeight
+   * @param {unknown} identityGapPx
+   * @param {unknown} identityMetricsGapPx
+   * @param {unknown} nameShare
+   * @param {unknown} frontShare
+   * @param {unknown} frontMinHeight
+   * @returns {DyniAisIdentityBandHeights}
+   */
   function resolveIdentityBandHeights(contentHeight, identityGapPx, identityMetricsGapPx, nameShare, frontShare, frontMinHeight) {
     const safeContentHeight = Math.max(1, Math.floor(Number(contentHeight) || 1));
     const safeIdentityGap = Math.max(0, Math.floor(Number(identityGapPx) || 0));
@@ -34,6 +43,11 @@
     };
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniAisTargetLayoutMathApi}
+   */
   function create(def, componentContext) {
     clampNumber = componentContext.components.require("ValueMath").clampNumber;
     return {

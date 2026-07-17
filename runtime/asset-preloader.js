@@ -1,13 +1,13 @@
 /**
- * Module: DyniPlugin Asset Preloader - Preloads declared component assets and exposes runtime asset lookup
+ * @file DyniPlugin Asset Preloader - Preloads declared component assets and exposes runtime asset lookup
  * Documentation: documentation/architecture/asset-system.md
- * Depends: window.DyniPlugin.baseUrl, window.DyniPlugin.runtime
  */
 (function (root) {
   "use strict";
 
-  const runtime = root.DyniPlugin.runtime;
+  const runtime = /** @type {DyniRuntimeNamespace} */ (root.DyniPlugin.runtime);
 
+  /** @param {unknown} baseUrl @returns {DyniAssetPreloader} */
   function createAssetPreloader(baseUrl) {
     if (typeof baseUrl !== "string" || !baseUrl) {
       throw new Error("dyninstruments: baseUrl missing before runtime/asset-preloader.js load");
@@ -15,50 +15,62 @@
 
     const cache = new Map();
 
+    /** @param {string} relativePath @returns {string} */
     function resolveAssetUrl(relativePath) {
       return baseUrl + relativePath;
     }
 
+    /** @param {unknown} asset @returns {DyniAssetDeclaration} */
     function validateAssetDeclaration(asset) {
       if (!asset || typeof asset !== "object") {
         throw new Error("dyninstruments: asset declaration must be an object");
       }
+      const declaration = /** @type {Record<string, unknown>} */ (asset);
 
-      if (typeof asset.key !== "string" || !asset.key) {
+      if (typeof declaration.key !== "string" || !declaration.key) {
         throw new Error("dyninstruments: asset declaration missing key");
       }
 
-      if (typeof asset.path !== "string" || !asset.path) {
-        throw new Error("dyninstruments: asset declaration missing path for key " + asset.key);
+      if (typeof declaration.path !== "string" || !declaration.path) {
+        throw new Error("dyninstruments: asset declaration missing path for key " + declaration.key);
       }
 
-      if (typeof asset.type !== "string" || !asset.type) {
-        throw new Error("dyninstruments: asset declaration missing type for key " + asset.key);
+      if (typeof declaration.type !== "string" || !declaration.type) {
+        throw new Error("dyninstruments: asset declaration missing type for key " + declaration.key);
       }
 
-      if (asset.type !== "svg" && asset.type !== "image" && asset.type !== "audio" && asset.type !== "json" && asset.type !== "font") {
-        throw new Error("dyninstruments: unsupported asset type '" + asset.type + "' for key " + asset.key);
+      if (
+        declaration.type !== "svg" &&
+        declaration.type !== "image" &&
+        declaration.type !== "audio" &&
+        declaration.type !== "json" &&
+        declaration.type !== "font"
+      ) {
+        throw new Error("dyninstruments: unsupported asset type '" + declaration.type + "' for key " + declaration.key);
       }
 
-      return asset;
+      return /** @type {DyniAssetDeclaration} */ (asset);
     }
 
+    /** @param {unknown} response @param {string} url @param {DyniAssetType} type @returns {DyniAssetFetchResponse} */
     function checkResponseOk(response, url, type) {
       if (!response) {
         throw new Error("dyninstruments: empty response while loading " + type + " asset from " + url);
       }
+      const candidate = /** @type {Record<string, unknown>} */ (response);
 
-      if (typeof response.ok === "boolean" && !response.ok) {
+      if (typeof candidate.ok === "boolean" && !candidate.ok) {
         throw new Error("dyninstruments: failed to load " + type + " asset from " + url);
       }
 
-      if (typeof response.status === "number" && (response.status < 200 || response.status >= 300)) {
+      if (typeof candidate.status === "number" && (candidate.status < 200 || candidate.status >= 300)) {
         throw new Error("dyninstruments: failed to load " + type + " asset from " + url);
       }
 
-      return response;
+      return /** @type {DyniAssetFetchResponse} */ (response);
     }
 
+    /** @param {string} url @returns {Promise<unknown>} */
     function loadSvg(url) {
       const fetchFn = root.fetch;
       if (typeof fetchFn !== "function") {
@@ -71,6 +83,7 @@
         });
     }
 
+    /** @param {string} url @returns {Promise<unknown>} */
     function loadAudio(url) {
       const fetchFn = root.fetch;
       if (typeof fetchFn !== "function") {
@@ -83,6 +96,7 @@
         });
     }
 
+    /** @param {string} url @returns {Promise<unknown>} */
     function loadJson(url) {
       const fetchFn = root.fetch;
       if (typeof fetchFn !== "function") {
@@ -95,6 +109,7 @@
         });
     }
 
+    /** @param {string} url @returns {Promise<unknown>} */
     function loadImage(url) {
       const ImageCtor = root.Image;
       if (typeof ImageCtor !== "function") {
@@ -113,6 +128,7 @@
       });
     }
 
+    /** @param {string} url @param {string} key @returns {Promise<unknown>} */
     function loadFont(url, key) {
       const fetchFn = root.fetch;
       if (typeof fetchFn !== "function") {
@@ -129,7 +145,7 @@
             throw new Error("dyninstruments: FontFace is required to preload font assets");
           }
 
-          const face = new FontFaceCtor(key, buffer);
+          const face = new FontFaceCtor(key, /** @type {BufferSource} */ (buffer));
           const fonts = root.document && root.document.fonts;
           if (!fonts || typeof fonts.add !== "function") {
             throw new Error("dyninstruments: document.fonts.add is required to preload font assets");
@@ -140,6 +156,7 @@
         });
     }
 
+    /** @param {DyniAssetDeclaration} asset @returns {Promise<unknown>} */
     function loadAsset(asset) {
       const url = resolveAssetUrl(asset.path);
       switch (asset.type) {
@@ -158,6 +175,7 @@
       }
     }
 
+    /** @param {DyniAssetDeclaration} asset @returns {Promise<unknown>} */
     function preloadOne(asset) {
       const url = resolveAssetUrl(asset.path);
       if (cache.has(asset.key)) {
@@ -191,6 +209,7 @@
         });
     }
 
+    /** @param {unknown} assetDeclarations @returns {Promise<unknown[]>} */
     function preloadAssets(assetDeclarations) {
       if (!Array.isArray(assetDeclarations)) {
         throw new Error("dyninstruments: asset declarations must be an array");
@@ -201,6 +220,7 @@
       }));
     }
 
+    /** @param {string} key @returns {unknown} */
     function getAsset(key) {
       const record = cache.get(key);
       if (!record) {

@@ -1,15 +1,16 @@
 /**
- * Module: DyniPlugin TemporaryHostActionBridge - Temporary runtime facade for host-owned workflow dispatch
+ * @file DyniPlugin TemporaryHostActionBridge - Temporary runtime facade for host-owned workflow dispatch
  * Documentation: documentation/avnav-api/plugin-lifecycle.md
- * Depends: runtime.getAvnavApi(), DOM page roots, TemporaryHostActionBridgeDiscovery, ValueMath
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  const ns = /** @type {DyniPluginNamespace & { runtime: DyniTemporaryBridgeRuntime }} */ (root.DyniPlugin);
   const runtime = ns.runtime;
-  const valueMath = root.DyniComponents.DyniValueMath.create();
+  const valueMathModule = /** @type {{ create(): DyniValueMathApi }} */ (/** @type {unknown} */ (root.DyniComponents && root.DyniComponents.DyniValueMath));
+  const valueMath = valueMathModule.create();
 
+  /** @param {string} message @returns {Error} */
   function createBridgeError(message) {
     const error = new Error("TemporaryHostActionBridge: " + message);
     error.name = "TemporaryHostActionBridgeError";
@@ -18,74 +19,80 @@
 
   const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
+  /** @param {unknown} index @returns {number} */
   function normalizeRoutePointIndex(index) {
     const normalized = toOptionalFiniteNumber(index);
-    if (!Number.isInteger(normalized) || normalized < 0) {
+    if (typeof normalized !== "number" || !Number.isInteger(normalized) || normalized < 0) {
       throw createBridgeError("routePoints.activate requires a non-negative integer index");
     }
     return normalized;
   }
 
+  /** @param {unknown} payload @returns {{ index: number, pointSnapshot: Record<string, unknown> }} */
   function normalizeRoutePointActivationPayload(payload) {
     if (!payload || typeof payload !== "object") {
       throw createBridgeError("routePoints.activate requires payload { index, pointSnapshot }");
     }
-    if (!payload.pointSnapshot || typeof payload.pointSnapshot !== "object") {
+    const input = /** @type {Record<string, unknown>} */ (payload);
+    if (!input.pointSnapshot || typeof input.pointSnapshot !== "object") {
       throw createBridgeError("routePoints.activate requires pointSnapshot payload");
     }
     return {
-      index: normalizeRoutePointIndex(payload.index),
-      pointSnapshot: payload.pointSnapshot
+      index: normalizeRoutePointIndex(input.index),
+      pointSnapshot: /** @type {Record<string, unknown>} */ (input.pointSnapshot)
     };
   }
 
+  /** @param {unknown} pointSnapshot @returns {DyniTemporaryRoutePointSnapshot} */
   function buildEditRoutePointPayload(pointSnapshot) {
     if (!pointSnapshot || typeof pointSnapshot !== "object") {
       throw createBridgeError("routePoints.activate requires pointSnapshot on editroutepage");
     }
-    if (!Object.prototype.hasOwnProperty.call(pointSnapshot, "idx")) {
+    const input = /** @type {Record<string, unknown>} */ (pointSnapshot);
+    if (!Object.prototype.hasOwnProperty.call(input, "idx")) {
       throw createBridgeError("routePoints.activate requires pointSnapshot.idx on editroutepage");
     }
 
-    const idx = normalizeRoutePointIndex(pointSnapshot.idx);
-    const lat = toOptionalFiniteNumber(pointSnapshot.lat);
-    const lon = toOptionalFiniteNumber(pointSnapshot.lon);
+    const idx = normalizeRoutePointIndex(input.idx);
+    const lat = toOptionalFiniteNumber(input.lat);
+    const lon = toOptionalFiniteNumber(input.lon);
 
     if (typeof lat !== "number" || typeof lon !== "number") {
       throw createBridgeError("routePoints.activate requires finite pointSnapshot.lat/lon on editroutepage");
     }
 
-    if (!Object.prototype.hasOwnProperty.call(pointSnapshot, "routeName")) {
+    if (!Object.prototype.hasOwnProperty.call(input, "routeName")) {
       throw createBridgeError("routePoints.activate requires pointSnapshot.routeName on editroutepage");
     }
 
-    const hostPoint = {
+    const hostPoint = /** @type {DyniTemporaryRoutePointSnapshot} */ ({
       idx: idx,
-      name: pointSnapshot.name == null ? "" : String(pointSnapshot.name).trim(),
+      name: input.name == null ? "" : String(input.name).trim(),
       lat: lat,
       lon: lon,
-      routeName: pointSnapshot.routeName == null ? "" : String(pointSnapshot.routeName).trim()
-    };
+      routeName: input.routeName == null ? "" : String(input.routeName).trim()
+    });
 
-    if (Object.prototype.hasOwnProperty.call(pointSnapshot, "course")) {
-      const course = toOptionalFiniteNumber(pointSnapshot.course);
+    if (Object.prototype.hasOwnProperty.call(input, "course")) {
+      const course = toOptionalFiniteNumber(input.course);
       if (typeof course === "number") {
         hostPoint.course = course;
       }
     }
-    if (Object.prototype.hasOwnProperty.call(pointSnapshot, "distance")) {
-      const distance = toOptionalFiniteNumber(pointSnapshot.distance);
+    if (Object.prototype.hasOwnProperty.call(input, "distance")) {
+      const distance = toOptionalFiniteNumber(input.distance);
       if (typeof distance === "number") {
         hostPoint.distance = distance;
       }
     }
-    if (Object.prototype.hasOwnProperty.call(pointSnapshot, "selected")) {
-      hostPoint.selected = pointSnapshot.selected === true;
+    if (Object.prototype.hasOwnProperty.call(input, "selected")) {
+      hostPoint.selected = input.selected === true;
     }
 
     return hostPoint;
   }
 
+  /** @param {unknown} mmsi @returns {string} */
   function normalizeMmsi(mmsi) {
     if (typeof mmsi === "number" && Number.isFinite(mmsi)) {
       return String(Math.trunc(mmsi));
@@ -96,11 +103,15 @@
     throw createBridgeError("ais.showInfo requires a target mmsi");
   }
 
+  /** @param {unknown} rootRef */
   function create(rootRef) {
     const discovery = runtime.createTemporaryHostActionBridgeDiscovery(rootRef, createBridgeError);
     let destroyed = false;
+    /** @type {DyniTemporaryHostActions | null} */
     let cachedFacade = null;
+    /** @type {string | null} */
     let cachedCapabilitiesKey = null;
+    /** @type {DyniTemporaryCapabilities | null} */
     let cachedCapabilitiesSnapshot = null;
 
     function ensureActive() {
@@ -109,11 +120,13 @@
       }
     }
 
+    /** @returns {DyniTemporaryRoutePointsApi | null | undefined} */
     function getRoutePointsApi() {
-      const avnavApi = runtime.getAvnavApi(rootRef);
+      const avnavApi = /** @type {DyniTemporaryAvnavApi | null} */ (/** @type {unknown} */ (runtime.getAvnavApi(rootRef)));
       return avnavApi && avnavApi.routePoints;
     }
 
+    /** @param {DyniTemporaryCapabilities} snapshot @returns {DyniTemporaryCapabilities} */
     function freezeCapabilitiesSnapshot(snapshot) {
       if (!snapshot || typeof snapshot !== "object") {
         return snapshot;
@@ -136,6 +149,7 @@
       return Object.freeze(snapshot);
     }
 
+    /** @param {string} pageId @param {boolean} hasRoutePointsRelay @param {boolean} hasEditRouteParityDispatch @param {boolean} hasAlarmDispatch @returns {DyniTemporaryCapabilities} */
     function buildCapabilitiesSnapshot(pageId, hasRoutePointsRelay, hasEditRouteParityDispatch, hasAlarmDispatch) {
       return freezeCapabilitiesSnapshot({
         pageId: pageId,
@@ -162,6 +176,7 @@
       });
     }
 
+    /** @returns {DyniTemporaryCapabilities} */
     function resolveCapabilities() {
       const pageId = discovery.detectPageId();
       const routePointsApi = getRoutePointsApi();

@@ -1,7 +1,6 @@
 /**
- * Module: RoutePointsLayoutSizing - Shared numeric helpers and header/marker sizing policy for route-points layout
+ * @file RoutePointsLayoutSizing - Shared numeric helpers and header/marker sizing policy for route-points layout
  * Documentation: documentation/widgets/route-points.md
- * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -24,8 +23,10 @@
   const MARKER_CELL_PADDING_X_MIN_PX = 1;
   const MARKER_CELL_PADDING_X_MAX_PX = 8;
 
+  /** @type {DyniValueMathApi["clampNumber"]} */
   let clampNumber;
 
+  /** @param {unknown} value @returns {number} */
   function toCount(value) {
     // Internal row-count math intentionally collapses missing values to 0.
     const n = Number(value);
@@ -35,11 +36,13 @@
     return Math.max(0, Math.floor(n));
   }
 
+  /** @param {Pick<DyniRect, "w" | "h"> | null | undefined} rect @returns {string} */
   function toSizeStyle(rect) {
     const safeRect = rect || { w: 0, h: 0 };
     return "width:" + Math.max(0, safeRect.w) + "px;height:" + Math.max(0, safeRect.h) + "px;";
   }
 
+  /** @returns {number} */
   function resolveWindowViewportHeight() {
     if (typeof window !== "undefined" && Number.isFinite(window.innerHeight) && window.innerHeight > 0) {
       return Math.floor(window.innerHeight);
@@ -47,6 +50,7 @@
     return 0;
   }
 
+  /** @param {unknown} markerHeightPx @returns {number} */
   function computeMarkerDiameter(markerHeightPx) {
     const markerHeight = Math.max(
       1,
@@ -60,6 +64,7 @@
     return Math.max(1, Math.min(markerHeight, preferred));
   }
 
+  /** @param {unknown} markerDiameterPx @returns {number} */
   function computeMarkerCellPaddingX(markerDiameterPx) {
     const markerDiameter = Math.max(
       1,
@@ -72,6 +77,7 @@
     );
   }
 
+  /** @param {DyniRoutePointsMarkerCellWidthArgs | undefined} args @returns {number} */
   function computeMarkerCellWidth(args) {
     const cfg = args || {};
     const markerDiameter = Math.max(
@@ -87,6 +93,7 @@
     return Math.max(1, Math.min(compactWidth, maxWidth));
   }
 
+  /** @param {unknown} markerDiameterPx @returns {string} */
   function toMarkerDotStyle(markerDiameterPx) {
     const diameter = Math.max(
       1,
@@ -95,6 +102,7 @@
     return "width:" + diameter + "px;height:" + diameter + "px;";
   }
 
+  /** @param {unknown} mode @returns {number} */
   function resolveHeaderFloorRows(mode) {
     if (mode === "high") {
       return HEADER_HEIGHT_FLOOR_ROWS_HIGH;
@@ -102,6 +110,7 @@
     return HEADER_HEIGHT_FLOOR_ROWS_NORMAL;
   }
 
+  /** @param {unknown} mode @returns {number} */
   function resolveNarrowVerticalBoostRows(mode) {
     if (mode === "high") {
       return HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_HIGH;
@@ -109,6 +118,7 @@
     return HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_NORMAL;
   }
 
+  /** @param {DyniRoutePointsHeaderHeightArgs | undefined} args @returns {boolean} */
   function isNarrowVertical(args) {
     const cfg = args || {};
     if (cfg.isVerticalContainer !== true) {
@@ -122,6 +132,7 @@
     return contentWidth <= Math.floor(rowHeight * HEADER_NARROW_VERTICAL_WIDTH_TO_ROW_RATIO);
   }
 
+  /** @param {DyniRoutePointsHeaderHeightArgs | undefined} args @returns {number} */
   function computeHeaderHeight(args) {
     const cfg = args || {};
     const mode = cfg.mode;
@@ -146,6 +157,11 @@
     return Math.max(existingHeaderHeight, floorHeight);
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniRoutePointsLayoutSizingApi}
+   */
   function create(def, componentContext) {
     clampNumber = componentContext.components.require("ValueMath").clampNumber;
     return {

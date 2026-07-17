@@ -1,7 +1,6 @@
 /**
- * Module: TemperatureRadialWidget - Semicircle temperature gauge with high-end sectors
+ * @file TemperatureRadialWidget - Semicircle temperature gauge with high-end sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleRadialEngine, ValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,7 @@
 }(this, function () {
   "use strict";
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const renderer = componentContext.components.require("SemicircleRadialEngine");
     const valueMath = componentContext.components.require("ValueMath");
@@ -46,7 +46,7 @@
         );
         return Number.isFinite(formatted.num)
           ? { num: formatted.num, text: formatted.num.toFixed(1) }
-          : formatted;
+          : { num: formatted.num, text: placeholderNormalize.normalize(formatted.text, undefined) };
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
         const p = props || {};

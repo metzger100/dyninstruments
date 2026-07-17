@@ -1,7 +1,6 @@
 /**
- * Module: MapZoomTextHtmlWidget - Interactive HTML renderer for map zoom kind
+ * @file MapZoomTextHtmlWidget - Interactive HTML renderer for map zoom kind
  * Documentation: documentation/widgets/map-zoom.md
- * Depends: componentContext.format.applyFormatter, MapZoomHtmlFit, HtmlWidgetUtils, HtmlWidgetLifecycle, ValueMath, PlaceholderNormalize, PreparedPayloadModelCache, StableDigits, componentContext.theme.tokens, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -12,6 +11,8 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {DyniComponentContext & { theme: { tokens: DyniMapZoomThemeResolver } }} DyniMapZoomWidgetContext */
+  /** @typedef {{ props: DyniWidgetValues, shellRect?: DyniHtmlShellRect | null, rootEl?: HTMLElement | null }} DyniMapZoomWidgetPayload */
 
   const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.0;
   const DEFAULT_RATIO_THRESHOLD_FLAT = 3.0;
@@ -26,6 +27,7 @@
     zoomText: "", requiredText: ""
   };
 
+  /** @param {DyniWidgetValues} props @param {DyniHtmlShellRect | null} shellRect @param {DyniHtmlWidgetUtilsApi} htmlUtils */
   function resolveDisplayMode(props, shellRect, htmlUtils) {
     const p = props || {};
     return htmlUtils.resolveRatioModeForRect({
@@ -38,6 +40,7 @@
     });
   }
 
+  /** @param {string} baseMode @param {string} caption @param {string} unit */
   function resolveComposedMode(baseMode, caption, unit) {
     if (!caption) {
       return "flat";
@@ -48,21 +51,26 @@
     return baseMode;
   }
 
+  /** @param {unknown} props @param {DyniHtmlWidgetUtilsApi} htmlUtils */
   function dispatchCheckAutoZoom(props, htmlUtils) {
     const p = props || {};
     if (htmlUtils.isEditingMode(p)) {
       return false;
     }
     const policy = htmlUtils.resolveSurfacePolicy(p);
-    if (!policy || !policy.actions || !policy.actions.map || typeof policy.actions.map.checkAutoZoom !== "function") {
+    const actions = policy && policy.actions
+      ? /** @type {{ map?: { checkAutoZoom?: () => boolean } }} */ (policy.actions)
+      : null;
+    if (!actions || !actions.map || typeof actions.map.checkAutoZoom !== "function") {
       return false;
     }
     if (!htmlUtils.canDispatchSurfaceInteraction(p)) {
       return false;
     }
-    return policy.actions.map.checkAutoZoom() !== false;
+    return actions.map.checkAutoZoom() !== false;
   }
 
+  /** @param {unknown} value @param {DyniValueMathApi["toOptionalFiniteNumber"]} toOptionalFiniteNumber */
   function clampCaptionUnitScale(value, toOptionalFiniteNumber) {
     const scale = toOptionalFiniteNumber(value);
     if (typeof scale !== "number") {
@@ -71,6 +79,7 @@
     return Math.max(MIN_CAPTION_UNIT_SCALE, Math.min(MAX_CAPTION_UNIT_SCALE, scale));
   }
 
+  /** @param {unknown} value @param {string} defaultText @param {DyniComponentContext} componentContext @param {DyniPlaceholderNormalizeApi} placeholderNormalize */
   function formatZoom(value, defaultText, componentContext, placeholderNormalize) {
     const out = placeholderNormalize.normalize(String(componentContext.format.applyFormatter(value, {
       formatter: "formatDecimalOpt",
@@ -80,14 +89,16 @@
     return out.trim() ? out : defaultText;
   }
 
+  /** @param {unknown} props @returns {DyniWidgetValues} */
   function ensureProps(props) {
-    const p = props || {};
+    const p = /** @type {DyniWidgetValues} */ (props && typeof props === "object" ? props : {});
     if (!Object.prototype.hasOwnProperty.call(p, "default")) {
       throw new Error("MapZoomTextHtmlWidget: props.default is required");
     }
     return p;
   }
 
+  /** @param {DyniWidgetValues} props @param {DyniStateScreenPrecedenceApi} stateScreenPrecedence */
   function resolveStateKind(props, stateScreenPrecedence) {
     const p = props || {};
     return stateScreenPrecedence.pickFirst([
@@ -96,13 +107,17 @@
     ]);
   }
 
+  /** @param {unknown} props @param {unknown} shellRect @param {DyniComponentContext} componentContext @param {DyniHtmlWidgetUtilsApi} htmlUtils @param {DyniStateScreenLabelsApi} stateScreenLabels @param {DyniStateScreenPrecedenceApi} stateScreenPrecedence @param {DyniStateScreenInteractionApi} stateScreenInteraction @param {DyniStableDigitsApi} stableDigits @param {DyniValueMathApi["toOptionalFiniteNumber"]} toOptionalFiniteNumber @returns {DyniMapZoomRenderModel} */
   function buildModel(props, shellRect, componentContext, htmlUtils, stateScreenLabels,
     stateScreenPrecedence, stateScreenInteraction, stableDigits, toOptionalFiniteNumber) {
     const p = ensureProps(props);
+    const rect = shellRect && typeof shellRect === "object"
+      ? /** @type {DyniHtmlShellRect} */ (shellRect)
+      : null;
     const defaultText = String(p.default);
     const caption = htmlUtils.trimText(p.caption);
     const unit = htmlUtils.trimText(p.unit);
-    const ratioMode = resolveDisplayMode(p, shellRect, htmlUtils);
+    const ratioMode = resolveDisplayMode(p, rect, htmlUtils);
     const mode = resolveComposedMode(ratioMode, caption, unit);
     const kind = resolveStateKind(p, stateScreenPrecedence);
     const zoomNumber = toOptionalFiniteNumber(p.zoom);
@@ -126,14 +141,14 @@
     const showRequired = typeof requiredZoomNumber === "number" && requiredZoomNumber !== zoomNumber;
     const isEditing = htmlUtils.isEditingMode(p);
     const canDispatch = !isEditing && htmlUtils.canDispatchSurfaceInteraction(p);
-    const interactionState = stateScreenInteraction.resolveInteraction({
+    const interactionState = /** @type {string} */ (stateScreenInteraction.resolveInteraction({
       kind: kind,
       baseInteraction: canDispatch ? "dispatch" : "passive"
-    });
+    }));
     if (kind !== stateScreenLabels.KINDS.DATA) {
       return {
         kind: kind,
-        stateLabel: stateScreenLabels.LABELS[kind] || "",
+        stateLabel: String(stateScreenLabels.LABELS[kind] || ""),
         mode: mode,
         interactionState: interactionState,
         captionUnitScale: clampCaptionUnitScale(p.captionUnitScale, toOptionalFiniteNumber),
@@ -158,113 +173,40 @@
     };
   }
 
-  function buildTextClasses(baseClass, stableDigitsEnabled) {
-    const classes = [baseClass];
-    if (stableDigitsEnabled === true) {
-      classes.push("dyni-tabular");
-    }
-    return classes.join(" ");
-  }
-
-  function renderMainRows(model, htmlUtils) {
-    if (model.mode === "flat") {
-      return ""
-        + '<div class="dyni-map-zoom-main dyni-map-zoom-main-flat">'
-        + '<div class="dyni-map-zoom-inline-row">'
-        + '<span class="dyni-map-zoom-caption"' + htmlUtils.toStyleAttr(model.captionStyle) + ">" + htmlUtils.escapeHtml(model.caption) + "</span>"
-        + '<span class="' + buildTextClasses("dyni-map-zoom-value", model.stableDigitsEnabled) + '"' + htmlUtils.toStyleAttr(model.valueStyle) + ">" + htmlUtils.escapeHtml(model.zoomText) + "</span>"
-        + '<span class="dyni-map-zoom-unit"' + htmlUtils.toStyleAttr(model.unitStyle) + ">" + htmlUtils.escapeHtml(model.unit) + "</span>"
-        + "</div>"
-        + "</div>";
-    }
-    if (model.mode === "high") {
-      return ""
-        + '<div class="dyni-map-zoom-main dyni-map-zoom-main-high">'
-        + '<div class="dyni-map-zoom-caption-row">'
-        + '<span class="dyni-map-zoom-caption"' + htmlUtils.toStyleAttr(model.captionStyle) + ">" + htmlUtils.escapeHtml(model.caption) + "</span>"
-        + "</div>"
-        + '<div class="dyni-map-zoom-value-row">'
-        + '<span class="' + buildTextClasses("dyni-map-zoom-value", model.stableDigitsEnabled) + '"' + htmlUtils.toStyleAttr(model.valueStyle) + ">" + htmlUtils.escapeHtml(model.zoomText) + "</span>"
-        + "</div>"
-        + '<div class="dyni-map-zoom-unit-row">'
-        + '<span class="dyni-map-zoom-unit"' + htmlUtils.toStyleAttr(model.unitStyle) + ">" + htmlUtils.escapeHtml(model.unit) + "</span>"
-        + "</div>"
-        + "</div>";
-    }
-    return ""
-      + '<div class="dyni-map-zoom-main dyni-map-zoom-main-normal">'
-      + '<div class="dyni-map-zoom-value-row">'
-      + '<span class="' + buildTextClasses("dyni-map-zoom-value", model.stableDigitsEnabled) + '"' + htmlUtils.toStyleAttr(model.valueStyle) + ">" + htmlUtils.escapeHtml(model.zoomText) + "</span>"
-      + '<span class="dyni-map-zoom-unit"' + htmlUtils.toStyleAttr(model.unitStyle) + ">" + htmlUtils.escapeHtml(model.unit) + "</span>"
-      + "</div>"
-      + '<div class="dyni-map-zoom-caption-row">'
-      + '<span class="dyni-map-zoom-caption"' + htmlUtils.toStyleAttr(model.captionStyle) + ">" + htmlUtils.escapeHtml(model.caption) + "</span>"
-      + "</div>"
-      + "</div>";
-  }
-
-  function renderMarkup(model, shellRect, theme, htmlUtils, stateScreenLabels, stateScreenMarkup) {
-    const classes = [
-      "dyni-map-zoom-html",
-      "dyni-map-zoom-mode-" + model.mode,
-      model.interactionState === "dispatch"
-        ? "dyni-map-zoom-open-dispatch"
-        : "dyni-map-zoom-open-passive"
-    ];
-    if (model.showRequired) {
-      classes.push("dyni-map-zoom-has-required");
-    }
-    const scaleStyle = '--dyni-map-zoom-sec-scale:' + model.captionUnitScale + ";";
-    if (model.kind !== stateScreenLabels.KINDS.DATA) {
-      return stateScreenMarkup.renderStateScreen({
-        kind: model.kind,
-        label: model.stateLabel,
-        wrapperClasses: classes,
-        extraAttrs: 'data-dyni-action="map-zoom-check-auto" style="' + scaleStyle + '"',
-        htmlUtils: htmlUtils,
-        shellRect: shellRect,
-        fontFamily: theme.font.family, fontWeight: theme.font.labelWeight
-      });
-    }
-
-    const requiredHtml = model.showRequired
-      ? ('<div class="' + buildTextClasses("dyni-map-zoom-required", model.stableDigitsEnabled) + '"' + htmlUtils.toStyleAttr(model.requiredStyle) + ">" + htmlUtils.escapeHtml(model.requiredText) + "</div>")
-      : "";
-    const styleAttr = ' style="' + scaleStyle + '"';
-
-    return ""
-      + '<div class="' + classes.join(" ") + '"' + styleAttr + ' data-dyni-action="map-zoom-check-auto">'
-      + '<div class="dyni-map-zoom-open-hotspot"></div>'
-      + renderMainRows(model, htmlUtils)
-      + requiredHtml
-      + "</div>";
-  }
-
+  /** @param {unknown} def @param {DyniMapZoomWidgetContext} componentContext */
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("MapZoomHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const lifecycle = componentContext.components.require("HtmlWidgetLifecycle");
+    const markup = componentContext.components.require("MapZoomMarkup");
     const stableDigits = componentContext.components.require("StableDigits");
     const preparedPayloadModelCache = componentContext.components.require("PreparedPayloadModelCache");
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenInteraction = componentContext.components.require("StateScreenInteraction");
-    const stateScreenMarkup = componentContext.components.require("StateScreenMarkup");
     const themeResolver = componentContext.theme.tokens;
     const valueMath = componentContext.components.require("ValueMath");
     const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
     const textLength = valueMath.textLength;
 
+    /** @param {unknown} rendererContext */
     function translateFunction(rendererContext) {
-      const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
+      const context = /** @type {Record<string, unknown>} */ (rendererContext && typeof rendererContext === "object" ? rendererContext : {});
       const hostContext = context.hostContext || {};
 
+      /** @type {HTMLElement | null} */
       let mountEl = null;
+      /** @type {HTMLElement | null} */
       let rootEl = null;
+      /** @type {Element | null} */
       let wrapperEl = null;
+      /** @type {((ev: Event) => void) | null} */
       let clickHandler = null;
+      /** @type {DyniWidgetValues | null} */
       let lastProps = null;
+      /** @type {DyniMapZoomHtmlFitResult} */
       let lastFit = EMPTY_FIT;
+      /** @param {unknown} props @param {unknown} shellRect */
       const translate = function (props, shellRect) {
         return buildModel(props, shellRect, componentContext, htmlUtils, stateScreenLabels,
           stateScreenPrecedence, stateScreenInteraction, stableDigits, toOptionalFiniteNumber);
@@ -272,6 +214,7 @@
 
       const preparedPayload = preparedPayloadModelCache.createPreparedPayloadCache(translate);
 
+      /** @param {DyniMapZoomRenderModel} model */
       function bindDispatchListener(model) {
         if (wrapperEl && clickHandler) {
           wrapperEl.removeEventListener("click", clickHandler);
@@ -290,21 +233,22 @@
         wrapperEl.addEventListener("click", clickHandler);
       }
 
+      /** @param {DyniMapZoomWidgetPayload} payload */
       function patchDom(payload) {
         const prepared = preparedPayload.getPreparedPayload(payload);
         const shellRect = payload.shellRect || null;
         const theme = themeResolver.resolveForRoot(payload.rootEl);
-        const baseModel = prepared.model;
+        const baseModel = /** @type {DyniMapZoomRenderModel} */ (prepared.model);
         const fit = shellRect
           ? (htmlFit.compute({
-            model: baseModel,
+            model: /** @type {DyniMapZoomFitModel} */ (baseModel),
             hostContext: hostContext,
             targetEl: payload.rootEl,
             shellRect: shellRect
           }) || EMPTY_FIT)
           : lastFit;
 
-        const renderModel = {
+        const renderModel = /** @type {DyniMapZoomRenderModel} */ ({
           mode: baseModel.mode,
           kind: baseModel.kind,
           stateLabel: baseModel.stateLabel,
@@ -320,12 +264,17 @@
           valueStyle: fit.valueStyle,
           unitStyle: fit.unitStyle,
           requiredStyle: fit.requiredStyle
-        };
+        });
 
         htmlUtils.applyMirroredContext(rootEl, payload.props);
-        wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(renderModel, shellRect, theme, htmlUtils, stateScreenLabels, stateScreenMarkup));
+        wrapperEl = htmlUtils.patchInnerHtml(rootEl, markup.render({
+          model: renderModel,
+          shellRect: shellRect,
+          theme: theme,
+          htmlUtils: htmlUtils
+        }));
         lastFit = fit;
-        lastProps = prepared.props;
+        lastProps = /** @type {DyniWidgetValues} */ (prepared.props);
 
         bindDispatchListener(renderModel);
       }
@@ -338,6 +287,7 @@
         patchDom: patchDom
       });
 
+      /** @param {DyniMapZoomWidgetPayload} payload */
       function update(payload) {
         patchDom(payload);
       }
@@ -373,9 +323,10 @@
         detach();
       }
 
+      /** @param {DyniMapZoomWidgetPayload} payload */
       function layoutSignature(payload) {
         const prepared = preparedPayload.getPreparedPayload(payload);
-        const model = prepared.model;
+        const model = /** @type {DyniMapZoomRenderModel} */ (prepared.model);
         const shellRect = payload && payload.shellRect ? payload.shellRect : null;
         return [
           model.kind,

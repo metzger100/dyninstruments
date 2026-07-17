@@ -1,7 +1,6 @@
 /**
- * Module: EditRouteLayoutGeometry - Shared name/metric measurement box builders for edit-route layout
+ * @file EditRouteLayoutGeometry - Shared name/metric measurement box builders for edit-route layout
  * Documentation: documentation/widgets/edit-route.md
- * Depends: LayoutRectMath, EditRouteLayoutMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,12 +11,20 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniEditRouteLayoutGeometryApi}
+   */
   function create(def, componentContext) {
     const makeRect = componentContext.components.require("LayoutRectMath").makeRect;
     const mathApi = componentContext.components.require("EditRouteLayoutMath");
 
+    /** @param {unknown} insets @param {string} key @param {number} defaultValue @returns {number} */
     function resolveInsetValue(insets, key, defaultValue) {
-      const source = insets && typeof insets === "object" ? insets : null;
+      const source = /** @type {Record<string, unknown> | null} */ (
+        insets && typeof insets === "object" ? insets : null
+      );
       return Math.max(0, Math.floor(mathApi.clampNumber(
         source && Object.prototype.hasOwnProperty.call(source, key) ? source[key] : undefined,
         0,
@@ -26,6 +33,7 @@
       )));
     }
 
+    /** @param {DyniEditRouteNameRectArgs} [args] @returns {DyniEditRouteNameRects} */
     function computeNameRects(args) {
       const cfg = args || {};
       const nameBarRect = cfg.nameBarRect || makeRect(0, 0, 1, 1);
@@ -57,6 +65,10 @@
       };
     }
 
+    /**
+     * @param {DyniEditRouteInlineValueRectArgs} [args]
+     * @returns {{ valueTextRect: DyniRect, unitRect: DyniRect | null }}
+     */
     function computeInlineValueRects(args) {
       const cfg = args || {};
       const valueRect = cfg.valueRect || makeRect(0, 0, 1, 1);
@@ -89,6 +101,7 @@
       };
     }
 
+    /** @param {DyniEditRouteMetricTileArgs} [args] @returns {DyniEditRouteMetricTile} */
     function createMetricTile(args) {
       const cfg = args || {};
       const tileRect = cfg.tileRect || makeRect(0, 0, 1, 1);
@@ -117,11 +130,17 @@
       };
     }
 
+    /** @param {DyniEditRouteHighMetricRowArgs} [args] @returns {DyniEditRouteMetricTile} */
     function createHighMetricRow(args) {
       const cfg = args || {};
       const rowRect = cfg.rowRect || makeRect(0, 0, 1, 1);
       const gap = Math.max(1, resolveInsetValue(cfg.insets, "gap", 1));
-      const labelRatio = mathApi.clampNumber(cfg.labelRatio, cfg.labelMinRatio, cfg.labelMaxRatio, 0.34);
+      const labelRatio = mathApi.clampNumber(
+        cfg.labelRatio,
+        /** @type {number} */ (cfg.labelMinRatio),
+        /** @type {number} */ (cfg.labelMaxRatio),
+        0.34
+      );
       const usableWidth = Math.max(1, rowRect.w - gap);
       const labelWidth = Math.max(1, Math.floor(usableWidth * labelRatio));
       const valueWidth = Math.max(1, rowRect.w - labelWidth - gap);

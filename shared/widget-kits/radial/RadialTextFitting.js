@@ -1,7 +1,6 @@
 /**
- * Module: RadialTextFitting - Compatibility wrapper for generic canvas text fitting
+ * @file RadialTextFitting - Compatibility wrapper for generic canvas text fitting
  * Documentation: documentation/conventions/shared-helpers.md
- * Depends: CanvasTextFitting
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,11 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniCanvasTextFittingApi}
+   */
   function create(def, componentContext) {
     const api = componentContext.components.require("CanvasTextFitting");
     return Object.assign({}, api, { id: "RadialTextFitting" });

@@ -1,14 +1,15 @@
 /**
- * Module: DyniPlugin Kind Maps - Per-kind caption and unit defaults
+ * @file DyniPlugin Kind Maps - Per-kind caption and unit defaults
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: none
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {DyniPluginSharedConfig & { kindMaps: Record<string, DyniPerKindTextParameterMap> }} DyniKindDefaultsShared */
+
+  const ns = /** @type {DyniPluginNamespace} */ (/** @type {unknown} */ (root.DyniPlugin));
   const config = ns.config;
-  const shared = config.shared;
+  const shared = /** @type {DyniKindDefaultsShared} */ (config.shared);
 
   shared.kindMaps = {
     DEFAULT_KIND: {

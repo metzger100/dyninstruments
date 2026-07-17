@@ -1,7 +1,6 @@
 /**
- * Module: RoutePointsTextHtmlWidget - HTML renderer shell for nav route-points kind
+ * @file RoutePointsTextHtmlWidget - HTML renderer shell for nav route-points kind
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: RoutePointsHtmlFit, HtmlWidgetUtils, HtmlWidgetLifecycle, RoutePointsRenderModel, RoutePointsLayout, RoutePointsMarkup, RoutePointsDomEffects, componentContext.theme.tokens
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,9 +10,12 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {DyniComponentContext & { theme: { tokens: DyniRoutePointsThemeResolver } }} DyniRoutePointsWidgetContext */
+  /** @typedef {{ props: DyniWidgetValues, shellRect?: DyniHtmlShellRect | null, rootEl?: HTMLElement | null, layoutChanged?: boolean }} DyniRoutePointsWidgetPayload */
 
+  /** @param {Event} ev @returns {number} */
   function resolveEventIndex(ev) {
-    const target = ev && ev.target;
+    const target = /** @type {Element | null} */ (ev && ev.target);
     if (!target || typeof target.closest !== "function") {
       return -1;
     }
@@ -28,6 +30,7 @@
     return parsed;
   }
 
+  /** @param {DyniRoutePointsRenderModel} model @param {number} pointIndex */
   function resolvePointSnapshot(model, pointIndex) {
     const points = model.points;
     for (let i = 0; i < points.length; i += 1) {
@@ -39,6 +42,7 @@
     return null;
   }
 
+  /** @param {unknown} def @param {DyniRoutePointsWidgetContext} componentContext */
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("RoutePointsHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
@@ -49,11 +53,13 @@
     const domEffects = componentContext.components.require("RoutePointsDomEffects");
     const themeResolver = componentContext.theme.tokens;
 
+    /** @param {unknown} props @param {DyniHtmlShellRect | null} shellRect @param {number} scrollbarGutterPx @returns {DyniRoutePointsRenderModel} */
     function buildModel(props, shellRect, scrollbarGutterPx) {
-      const surfacePolicy = htmlUtils.resolveSurfacePolicy(props);
-      const viewportHeight = props && props.viewportHeight;
+      const p = /** @type {DyniWidgetValues} */ (props && typeof props === "object" ? props : {});
+      const surfacePolicy = htmlUtils.resolveSurfacePolicy(p);
+      const viewportHeight = p.viewportHeight;
       return renderModel.buildModel({
-        props: props,
+        props: p,
         shellRect: shellRect,
         isVerticalCommitted: !!(surfacePolicy && surfacePolicy.containerOrientation === "vertical"),
         scrollbarGutterPx: scrollbarGutterPx,
@@ -61,19 +67,28 @@
       });
     }
 
+    /** @param {unknown} rendererContext */
     function createCommittedRenderer(rendererContext) {
-      const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
+      const context = /** @type {Record<string, unknown>} */ (rendererContext && typeof rendererContext === "object" ? rendererContext : {});
       const hostContext = context.hostContext || {};
 
+      /** @type {HTMLElement | null} */
       let mountEl = null;
+      /** @type {HTMLElement | null} */
       let rootEl = null;
+      /** @type {Element | null} */
       let wrapperEl = null;
+      /** @type {((ev: Event) => void) | null} */
       let clickHandler = null;
+      /** @type {DyniWidgetValues | null} */
       let lastProps = null;
+      /** @type {DyniRoutePointsRenderModel | null} */
       let lastModel = null;
-      let lastFit = { headerFit: null, rowFits: [] };
+    /** @type {DyniRoutePointsHtmlFitResult} */
+      let lastFit = { headerFit: null, rowFits: [], emptyStyle: "" };
       let scrollbarGutterPx = 0;
 
+      /** @param {DyniRoutePointsRenderModel} model */
       function bindDispatchListener(model) {
         if (wrapperEl && clickHandler) {
           wrapperEl.removeEventListener("click", clickHandler);
@@ -94,32 +109,42 @@
           }
 
           const policy = htmlUtils.resolveSurfacePolicy(lastProps);
-          const routePointActions = policy && policy.actions ? policy.actions.routePoints : null;
+          const actions = policy && policy.actions
+            ? /** @type {{ routePoints?: { activate?: (args: unknown) => void } }} */ (policy.actions)
+            : null;
+          const routePointActions = actions ? actions.routePoints : null;
           if (!routePointActions || typeof routePointActions.activate !== "function") {
             return;
           }
           routePointActions.activate({
             index: pointIndex,
-            pointSnapshot: resolvePointSnapshot(lastModel, pointIndex)
+            pointSnapshot: lastModel ? resolvePointSnapshot(lastModel, pointIndex) : null
           });
         };
 
         wrapperEl.addEventListener("click", clickHandler);
       }
 
+      /** @param {DyniRoutePointsWidgetPayload} payload */
       function patchDom(payload) {
         const shellRect = payload.shellRect || null;
         const theme = themeResolver.resolveForRoot(payload.rootEl);
         const model = buildModel(payload.props, shellRect, scrollbarGutterPx);
         const shouldComputeFit = model.kind === "data" && (payload.layoutChanged || !lastFit);
-        const fit = shouldComputeFit
-          ? (htmlFit.compute({
+        const computedFit = shouldComputeFit
+          ? htmlFit.compute({
             model: model,
             hostContext: hostContext,
             targetEl: payload.rootEl,
             shellRect: shellRect
-          }) || { headerFit: null, rowFits: [] })
-          : lastFit;
+          }) : null;
+        const rawFit = computedFit || lastFit;
+        const fit = rawFit
+          ? {
+            headerFit: rawFit.headerFit || { routeNameStyle: "", metaStyle: "" },
+            rowFits: rawFit.rowFits
+          }
+          : { headerFit: { routeNameStyle: "", metaStyle: "" }, rowFits: [] };
 
         htmlUtils.applyMirroredContext(rootEl, payload.props);
         wrapperEl = htmlUtils.patchInnerHtml(rootEl, markup.render({
@@ -133,7 +158,7 @@
         }));
         lastProps = payload.props;
         lastModel = model;
-        lastFit = fit;
+        lastFit = rawFit;
 
         bindDispatchListener(model);
       }
@@ -146,6 +171,7 @@
         patchDom: patchDom
       });
 
+      /** @param {DyniRoutePointsWidgetPayload} payload */
       function update(payload) {
         patchDom(payload);
       }
@@ -179,7 +205,7 @@
         wrapperEl = null;
         lastProps = null;
         lastModel = null;
-        lastFit = { headerFit: null, rowFits: [] };
+        lastFit = { headerFit: null, rowFits: [], emptyStyle: "" };
         scrollbarGutterPx = 0;
         if (rootEl && rootEl.parentNode) {
           rootEl.parentNode.removeChild(rootEl);
@@ -192,6 +218,7 @@
         detach();
       }
 
+      /** @param {DyniRoutePointsWidgetPayload} payload */
       function layoutSignature(payload) {
         const model = buildModel(
           payload && payload.props ? payload.props : {},

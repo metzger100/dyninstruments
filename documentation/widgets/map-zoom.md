@@ -22,6 +22,15 @@ MapZoomTextHtmlWidget renders map zoom state as a committed HTML surface.
 - passive mode: no action listener
 - wrapper click suppression is applied only in dispatch mode
 
+## Ownership Contract
+
+- `shared/widget-kits/nav/MapZoomMarkup.js` owns disconnected/data markup
+  assembly and state-screen HTML.
+- `MapZoomTextHtmlWidget` owns prepared-model reuse, lifecycle, interaction,
+  layout signatures, and post-patch fitting.
+- `HtmlDomPatchUtils.patchInnerHtml()` owns root markup replacement; markup and
+  widget modules do not duplicate DOM patch logic.
+
 ## Layout Contract
 
 - shellRect drives text fitting and layout mode decisions

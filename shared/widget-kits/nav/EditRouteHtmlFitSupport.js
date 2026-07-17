@@ -1,7 +1,6 @@
 /**
- * Module: EditRouteHtmlFitSupport - Shared fit helpers for edit-route HTML metrics and labels
+ * @file EditRouteHtmlFitSupport - Shared fit helpers for edit-route HTML metrics and labels
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: HtmlMeasureUtils, HtmlWidgetUtils, ValueMath, NavModeRatio
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -17,10 +16,18 @@
     normal: 0.66,
     high: 0.56
   };
+  /** @type {DyniValueMathApi["toText"]} */
   let toText;
 
+  /**
+   * @param {DyniEditRouteMetricModel | null | undefined} model
+   * @param {string} id
+   * @returns {DyniEditRouteMetricEntry}
+   */
   function toMetricEntry(model, id) {
-    const m = model && typeof model === "object" ? model : {};
+    const m = model && typeof model === "object"
+      ? model
+      : /** @type {DyniEditRouteMetricModel} */ ({});
     const groups = [m.metrics, m.metricTexts];
     for (let i = 0; i < groups.length; i += 1) {
       const group = groups[i];
@@ -35,6 +42,11 @@
     return {};
   }
 
+  /**
+   * @param {DyniEditRouteMetricModel | null | undefined} model
+   * @param {string} id
+   * @returns {string}
+   */
   function resolveMetricLabel(model, id) {
     const entry = toMetricEntry(model, id);
     if (entry.labelText != null) {
@@ -52,6 +64,11 @@
     return "";
   }
 
+  /**
+   * @param {DyniEditRouteMetricModel | null | undefined} model
+   * @param {string} id
+   * @returns {string}
+   */
   function resolveMetricValue(model, id) {
     const entry = toMetricEntry(model, id);
     if (entry.valueText != null) {
@@ -69,6 +86,11 @@
     return "";
   }
 
+  /**
+   * @param {DyniEditRouteMetricModel | null | undefined} model
+   * @param {string} id
+   * @returns {string}
+   */
   function resolveMetricPlainValue(model, id) {
     const entry = toMetricEntry(model, id);
     if (entry.plainValueText != null) {
@@ -86,6 +108,11 @@
     return resolveMetricValue(model, id);
   }
 
+  /**
+   * @param {DyniEditRouteMetricModel | null | undefined} model
+   * @param {string} id
+   * @returns {string}
+   */
   function resolveMetricUnit(model, id) {
     const entry = toMetricEntry(model, id);
     if (entry.unitText != null) {
@@ -103,8 +130,12 @@
     return "";
   }
 
+  /**
+   * @param {DyniEditRouteMeasureLineArgs | null | undefined} args
+   * @returns {DyniEditRouteLineFit | null}
+   */
   function measureLineFit(args) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniEditRouteMeasureLineArgs} */ (args || {});
     const rect = cfg.rect;
     if (!cfg.text) {
       return null;
@@ -112,11 +143,11 @@
     if (!rect || !(rect.w > 0) || !(rect.h > 0)) {
       return null;
     }
-    const explicitMaxPx = cfg.htmlUtils.toFiniteNumber(cfg.maxPx);
-    const ratio = cfg.htmlUtils.toFiniteNumber(cfg.maxPxRatio);
+    const explicitMaxPx = /** @type {number} */ (cfg.htmlUtils.toFiniteNumber(cfg.maxPx));
+    const ratio = /** @type {number} */ (cfg.htmlUtils.toFiniteNumber(cfg.maxPxRatio));
     const ratioMaxPx = Math.max(1, Math.floor(rect.h * (ratio > 0 ? ratio : 1)));
     const requestedMaxPx = explicitMaxPx > 0 ? explicitMaxPx : ratioMaxPx;
-    return cfg.tileLayout.measureFittedLine({
+    return /** @type {DyniEditRouteLineFit | null} */ (cfg.tileLayout.measureFittedLine({
       textApi: cfg.textApi,
       ctx: cfg.ctx,
       text: cfg.text,
@@ -126,9 +157,14 @@
       textFillScale: cfg.textFillScale,
       family: cfg.family,
       weight: cfg.weight
-    });
+    }));
   }
 
+  /**
+   * @param {DyniEditRouteLineFit | null | undefined} lineFit
+   * @param {unknown} sourceText
+   * @returns {boolean}
+   */
   function isLineTrimmed(lineFit, sourceText) {
     if (!lineFit || typeof lineFit !== "object") {
       return false;
@@ -139,8 +175,12 @@
     return String(lineFit.text) !== toText(sourceText);
   }
 
+  /**
+   * @param {DyniEditRouteMetricValueSelectArgs | null | undefined} args
+   * @returns {DyniEditRouteMetricValueSelection}
+   */
   function selectMetricValue(args) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniEditRouteMetricValueSelectArgs} */ (args || {});
     const primaryText = toText(cfg.primaryText);
     const plainText = toText(cfg.plainText);
     const primaryFit = measureLineFit({
@@ -182,26 +222,50 @@
     };
   }
 
+  /**
+   * @param {DyniEditRouteLineFit | null | undefined} lineFit
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @returns {number}
+   */
   function resolveMetricPx(lineFit, htmlUtils) {
     return htmlUtils.toFiniteNumber(lineFit && lineFit.px) || 0;
   }
 
+  /**
+   * @param {DyniEditRouteMeasureLineArgs | null | undefined} args
+   * @param {DyniHtmlMeasureUtilsApi} htmlMeasureUtils
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @param {DyniTextTileLayoutApi} tileLayout
+   * @returns {string}
+   */
   function measureEditRouteStyle(args, htmlMeasureUtils, htmlUtils, tileLayout) {
     return htmlMeasureUtils.measureStyle(args, htmlUtils, tileLayout);
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniEditRouteHtmlFitSupportApi}
+   */
   function create(def, componentContext) {
     const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const modeRatio = componentContext.components.require("NavModeRatio");
     toText = componentContext.components.require("ValueMath").toText;
 
+    /** @param {DyniEditRouteMeasureLineArgs | null | undefined} args @returns {number} */
     function measureEditRoutePx(args) {
       return htmlUtils.toFiniteNumber((measureLineFit(args) || {}).px) || 0;
     }
 
+    /** @param {DyniEditRouteMeasureLineArgs | null | undefined} args @returns {string} */
     function measureEditRouteStyleForArgs(args) {
-      return measureEditRouteStyle(args, htmlMeasureUtils, htmlUtils, args && args.tileLayout);
+      return measureEditRouteStyle(
+        args,
+        htmlMeasureUtils,
+        htmlUtils,
+        /** @type {DyniTextTileLayoutApi} */ (args && args.tileLayout)
+      );
     }
 
     return {

@@ -1,7 +1,6 @@
 /**
- * Module: RadialAngleMath - Shared angle conversion and value/angle mapping helpers
+ * @file RadialAngleMath - Shared angle conversion and value/angle mapping helpers
  * Documentation: documentation/radial/gauge-shared-api.md
- * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -14,11 +13,16 @@
   const hasOwn = Object.prototype.hasOwnProperty;
 
   function create() {
+    /** @param {number} deg @returns {number} */
     function degToRad(deg) { return (deg * Math.PI) / 180; }
+
+    /** @param {number} rad @returns {number} */
     function radToDeg(rad) { return (rad * 180) / Math.PI; }
 
+    /** @param {number} n @param {number} m @returns {number} */
     function mod(n, m) { return ((n % m) + m) % m; }
 
+    /** @param {number} deg @returns {number} */
     function norm360(deg) {
       if (!Number.isFinite(deg)) {
         return deg;
@@ -26,6 +30,7 @@
       return mod(deg, 360);
     }
 
+    /** @param {number} deg @returns {number} */
     function norm180(deg) {
       if (!Number.isFinite(deg)) {
         return deg;
@@ -35,6 +40,12 @@
       return r;
     }
 
+    /**
+     * @param {unknown} deg
+     * @param {DyniAngleConfig | undefined} cfg
+     * @param {unknown} rotationDeg
+     * @returns {number}
+     */
     function degToCanvasRad(deg, cfg, rotationDeg) {
       cfg = cfg || {};
       const zeroDegAt = hasOwn.call(cfg, "zeroDegAt") ? cfg.zeroDegAt : "north";
@@ -49,6 +60,11 @@
       return degToRad(norm360(signed + shift));
     }
 
+    /**
+     * @param {unknown} value
+     * @param {DyniAngleOptions | undefined} opts
+     * @returns {number}
+     */
     function valueToAngle(value, opts) {
       opts = opts || {};
       const min = Number(opts.min);
@@ -72,6 +88,14 @@
       return startDeg + (endDeg - startDeg) * t;
     }
 
+    /**
+     * @param {unknown} rawValue
+     * @param {unknown} minV
+     * @param {unknown} maxV
+     * @param {DyniArc | undefined} arc
+     * @param {boolean | undefined} doClamp
+     * @returns {number}
+     */
     function valueToAngleFlat(rawValue, minV, maxV, arc, doClamp) {
       return valueToAngle(rawValue, {
         min: Number(minV),
@@ -82,6 +106,11 @@
       });
     }
 
+    /**
+     * @param {unknown} angleDeg
+     * @param {DyniAngleOptions | undefined} opts
+     * @returns {number}
+     */
     function angleToValue(angleDeg, opts) {
       opts = opts || {};
       const min = Number(opts.min);
@@ -108,6 +137,12 @@
       return v;
     }
 
+    /**
+     * @param {unknown} v0
+     * @param {unknown} v1
+     * @param {DyniAngleOptions | undefined} opts
+     * @returns {DyniAngleRange}
+     */
     function valueRangeToAngleRange(v0, v1, opts) {
       const a0 = valueToAngle(v0, opts);
       const a1 = valueToAngle(v1, opts);

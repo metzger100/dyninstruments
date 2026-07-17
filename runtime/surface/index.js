@@ -1,13 +1,12 @@
 /**
- * Module: DyniPlugin Surface Runtime Index - Runtime-owned surface policy and controller infrastructure
+ * @file DyniPlugin Surface Runtime Index - Runtime-owned surface policy and controller infrastructure
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: runtime/surface/ClusterSurfacePolicy.js, runtime/surface/CanvasDomSurfaceAdapter.js, runtime/surface/HtmlSurfaceController.js
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
-  const runtime = ns.runtime;
+  const runtime = /** @type {DyniRuntimeNamespace} */ (ns.runtime);
 
   if (typeof runtime._createClusterSurfacePolicy !== "function") {
     throw new Error("dyninstruments: runtime._createClusterSurfacePolicy missing before runtime/surface/index.js load");
@@ -19,12 +18,13 @@
     throw new Error("dyninstruments: runtime._createHtmlSurfaceController missing before runtime/surface/index.js load");
   }
 
-  const policy = runtime._createClusterSurfacePolicy();
-  const canvasDom = runtime._createCanvasDomSurfaceAdapter();
-  const html = runtime._createHtmlSurfaceController();
+  const policy = /** @type {DyniSurfacePolicy} */ (runtime._createClusterSurfacePolicy());
+  const canvasDom = /** @type {DyniSurfaceControllerFactory} */ (runtime._createCanvasDomSurfaceAdapter());
+  const html = /** @type {DyniSurfaceControllerFactory} */ (runtime._createHtmlSurfaceController());
 
+  /** @param {DyniSurfaceControllerOptions|null|undefined} options @returns {unknown} */
   function createController(options) {
-    const opts = options || {};
+    const opts = /** @type {DyniSurfaceControllerOptions} */ (options || {});
     const surface = opts.surface;
     if (surface === "canvas-dom") {
       return canvasDom.createSurfaceController(opts);
@@ -35,8 +35,12 @@
     throw new Error("runtime.surfaces.createController: unsupported surface '" + String(surface) + "'");
   }
 
+  /**
+   * @param {DyniSurfaceControllerOptions|null|undefined} options
+   * @returns {Record<string, unknown>}
+   */
   function materializeSurfacePolicyProps(options) {
-    const opts = options || {};
+    const opts = /** @type {DyniSurfaceControllerOptions} */ (options || {});
     const hostContext = Object.prototype.hasOwnProperty.call(opts, "hostContext") ? opts.hostContext : null;
     const rendererId = typeof opts.rendererId === "string" ? opts.rendererId : "";
     const props = opts.props;
@@ -44,16 +48,17 @@
       throw new Error("runtime.surfaces.materializeSurfacePolicyProps: props object is required");
     }
 
-    const routeState = {
+    const routeState = /** @type {DyniSurfacePolicyRouteState} */ ({
       route: {
         rendererId: rendererId
       },
-      props: props
-    };
+      props: /** @type {Record<string, unknown>} */ (props)
+    });
 
     return policy.resolveRouteStateWithPolicy(routeState, hostContext).props;
   }
 
+  /** @returns {string} */
   function getCommonShadowCssUrl() {
     if (typeof ns.baseUrl !== "string" || !ns.baseUrl) {
       throw new Error("runtime.surfaces.getCommonShadowCssUrl: baseUrl is required");
@@ -61,9 +66,9 @@
     return ns.baseUrl + "shared/html/HtmlShadowCommon.css";
   }
 
-  runtime.surfaces = Object.freeze({
+  runtime.surfaces = /** @type {DyniSurfaceRuntimeApi} */ (Object.freeze({
     createController: createController,
     materializeSurfacePolicyProps: materializeSurfacePolicyProps,
     getCommonShadowCssUrl: getCommonShadowCssUrl
-  });
+  }));
 }(this));

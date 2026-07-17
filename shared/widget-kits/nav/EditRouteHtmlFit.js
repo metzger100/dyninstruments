@@ -1,7 +1,6 @@
 /**
- * Module: EditRouteHtmlFit - Per-box text-fit owner for edit-route HTML renderer
+ * @file EditRouteHtmlFit - Per-box text-fit owner for edit-route HTML renderer
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, EditRouteLayout, HtmlWidgetUtils, HtmlMeasureUtils, TextFitMath, EditRouteHtmlFitSupport, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -15,10 +14,18 @@
   const SOURCE_BADGE_MAX_PX_RATIO = 0.7;
   const METRIC_VALUE_MAX_PX_RATIO = 0.9;
   const METRIC_SECONDARY_TO_VALUE_RATIO = 0.8;
+  /** @type {DyniEditRouteMetricId[]} */
   const METRIC_IDS = ["pts", "dst", "rte", "rteEta"];
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniEditRouteHtmlFitApi}
+   */
   function create(def, componentContext) {
-    const theme = componentContext.theme.tokens;
+    const theme = /** @type {DyniEditRouteThemeResolver} */ (/** @type {unknown} */ (
+      componentContext.theme && componentContext.theme.tokens
+    ));
     const textApi = componentContext.components.require("CanvasTextLayout");
     const tileLayout = componentContext.components.require("TextTileLayout");
     const layoutApi = componentContext.components.require("EditRouteLayout");
@@ -28,8 +35,12 @@
     const fitSupport = componentContext.components.require("EditRouteHtmlFitSupport");
     const toText = componentContext.components.require("ValueMath").toText;
 
+    /**
+     * @param {DyniEditRouteHtmlFitArgs | undefined} args
+     * @returns {DyniEditRouteMarkupFit | null}
+     */
     function compute(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniEditRouteHtmlFitArgs} */ (args || {});
       const model = cfg.model || null;
       const shellRect = cfg.shellRect || null;
       const targetEl = cfg.targetEl || null;
@@ -40,7 +51,7 @@
       const rootEl = componentContext.dom.requirePluginRoot(targetEl);
       const tokens = theme.resolveForRoot(rootEl);
       const family = tokens.font.family;
-      const valueFamily = htmlUtils.resolveMetricValueFamily(model, tokens);
+      const valueFamily = /** @type {string} */ (htmlUtils.resolveMetricValueFamily(model, tokens));
       const measureCtx = htmlMeasureUtils.resolveMeasureContext(cfg.hostContext, targetEl);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return null;
@@ -50,9 +61,9 @@
       const shellHeight = Math.max(1, Math.round(shellRect.height));
       const explicitLayoutHeight = htmlUtils.toFiniteNumber(model.layoutShellHeight);
       const verticalHeight = htmlUtils.toFiniteNumber(model.effectiveLayoutHeight);
-      const layoutHeight = explicitLayoutHeight > 0
+      const layoutHeight = typeof explicitLayoutHeight === "number" && explicitLayoutHeight > 0
         ? explicitLayoutHeight
-        : (verticalHeight > 0 ? verticalHeight : shellHeight);
+        : (typeof verticalHeight === "number" && verticalHeight > 0 ? verticalHeight : shellHeight);
 
       const layout = layoutApi.computeLayout({
         W: shellWidth,
@@ -75,6 +86,7 @@
           monoFamily: tokens.font.familyMono || family
         }
         : null;
+      /** @type {DyniEditRouteComputedFit} */
       const fitOut = {
         nameTextStyle: fitSupport.measureEditRouteStyle({
           rect: layout.nameTextRect,
@@ -182,7 +194,7 @@
           continue;
         }
 
-        const primaryMeasurement = tileLayout.measureMetricTile({
+        const primaryMeasurement = /** @type {DyniMetricTileMeasurement} */ (tileLayout.measureMetricTile({
           textApi: textApi,
           ctx: measureCtx,
           metric: {
@@ -201,8 +213,8 @@
           padX: spacing.padX,
           captionHeightPx: spacing.captionHeightPx,
           valueTextOptions: valueTextOptions
-        });
-        const primaryClipped = !!(primaryMeasurement && primaryMeasurement.fit && primaryMeasurement.fit.total > primaryMeasurement.textW + 0.01);
+        }));
+        const primaryClipped = primaryMeasurement.fit.total > primaryMeasurement.textW + 0.01;
         const usePlain = model.stableDigitsEnabled === true &&
           primaryClipped &&
           typeof plainValueText === "string" &&
@@ -223,7 +235,7 @@
             unit: unitText
           };
         const measurement = usePlain
-          ? tileLayout.measureMetricTile({
+          ? /** @type {DyniMetricTileMeasurement} */ (tileLayout.measureMetricTile({
             textApi: textApi,
             ctx: measureCtx,
             metric: activeMetric,
@@ -236,28 +248,28 @@
             padX: spacing.padX,
             captionHeightPx: spacing.captionHeightPx,
             valueTextOptions: valueTextOptions
-          })
+          }))
           : primaryMeasurement;
         const captionText = labelText;
         const captionFit = captionText
-          ? tileLayout.measureFittedLine({
+          ? /** @type {DyniFittedLineMeasurement} */ (tileLayout.measureFittedLine({
             textApi: textApi,
             ctx: measureCtx,
             text: captionText,
-            maxW: measurement ? measurement.textW : 1,
-            maxH: measurement ? measurement.capH : 1,
-            maxPx: measurement ? measurement.capMaxPx : 1,
+            maxW: measurement.textW,
+            maxH: measurement.capH,
+            maxPx: measurement.capMaxPx,
             textFillScale: layout.responsive.textFillScale,
             family: family,
             weight: labelWeight
-          })
+          }))
           : null;
 
         fitOut.metrics[id] = {
           labelStyle: htmlMeasureUtils.toStyle(captionFit && captionFit.px, htmlUtils),
           valueRowStyle: "",
-          valueStyle: htmlMeasureUtils.toStyle(measurement && measurement.fit ? measurement.fit.vPx : 0, htmlUtils),
-          unitStyle: unitText ? htmlMeasureUtils.toStyle(measurement && measurement.fit ? measurement.fit.uPx : 0, htmlUtils) : ""
+          valueStyle: htmlMeasureUtils.toStyle(measurement.fit.vPx, htmlUtils),
+          unitStyle: unitText ? htmlMeasureUtils.toStyle(measurement.fit.uPx, htmlUtils) : ""
         };
         fitOut.metricValues[id] = usePlain ? plainValueText : valueText;
       }
@@ -271,5 +283,6 @@
     };
   }
 
+  /** @type {DyniEditRouteHtmlFitModule} */
   return { id: "EditRouteHtmlFit", create: create };
 }));

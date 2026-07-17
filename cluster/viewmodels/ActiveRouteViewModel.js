@@ -1,7 +1,6 @@
 /**
- * Module: ActiveRouteViewModel - Shared domain normalization for active-route kinds
+ * @file ActiveRouteViewModel - Shared domain normalization for active-route kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ValueMath
  */
 
 (function (root, factory) {
@@ -13,16 +12,20 @@
 }(this, function () {
   "use strict";
 
+  /** @type {DyniValueMathApi["trimText"]} */
   let trimText;
+  /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */
   let toOptionalFiniteNumber;
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
     trimText = valueMath.trimText;
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
+    /** @param {DyniMapperProps|null|undefined} props @param {DyniActiveRouteViewModelToolkit} toolkit @returns {Record<string, unknown>} */
     function build(props, toolkit) {
-      const p = props || {};
+      const p = /** @type {DyniMapperProps} */ (props || {});
       const cap = toolkit.cap;
       const unit = toolkit.unit;
       const num = toolkit.num || toOptionalFiniteNumber;

@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Shared Foundation Registry State - Shared state, DOM, caching, and animation component definitions
+ * @file DyniPlugin Shared Foundation Registry State - Shared state, DOM, caching, and animation component definitions
  * Documentation: documentation/architecture/component-system.md
- * Depends: window.DyniPlugin.baseUrl, window.DyniPlugin.config.shared
  */
 (function (root) {
   "use strict";
@@ -57,11 +56,18 @@
     deps: ["StateScreenLabels", "CanvasTextFitting"]
   };
 
+  sf.HtmlDomPatchUtils = {
+    js: BASE + "shared/widget-kits/html/HtmlDomPatchUtils.js",
+    css: undefined,
+    globalKey: "DyniHtmlDomPatchUtils",
+    deps: []
+  };
+
   sf.HtmlWidgetUtils = {
     js: BASE + "shared/widget-kits/html/HtmlWidgetUtils.js",
     css: undefined,
     globalKey: "DyniHtmlWidgetUtils",
-    deps: ["ValueMath"]
+    deps: ["ValueMath", "HtmlDomPatchUtils"]
   };
 
   sf.PreparedPayloadModelCache = {

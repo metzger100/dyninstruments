@@ -1,17 +1,21 @@
 /**
- * Module: DyniPlugin Format Runtime - Runtime formatter dispatch service
+ * @file DyniPlugin Format Runtime - Runtime formatter dispatch service
  * Documentation: documentation/shared/helpers.md
- * Depends: runtime.getAvnavApi().formatter
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
-  const runtime = ns.runtime;
+  const runtime = /** @type {DyniRuntimeNamespace & { getAvnavApi(rootRef: unknown): unknown }} */ (ns.runtime);
   const hasOwn = Object.prototype.hasOwnProperty;
 
+  /**
+   * @param {unknown} raw
+   * @param {DyniFormatterOptions|null|undefined} props
+   * @returns {unknown}
+   */
   function applyFormatter(raw, props) {
-    const p = props || {};
+    const p = /** @type {DyniFormatterOptions} */ (props || {});
     if (raw == null || Number.isNaN(raw)) {
       if (hasOwn.call(p, "default")) {
         return p.default;
@@ -28,20 +32,24 @@
     }
 
     const fpRaw = p.formatterParameters;
-    const fp = Array.isArray(fpRaw) ? fpRaw
-      : (typeof fpRaw === "string" ? fpRaw.split(",") : []);
-    const avnavApi = runtime.getAvnavApi(root);
+    const fp = /** @type {unknown[]} */ (Array.isArray(fpRaw) ? fpRaw
+      : (typeof fpRaw === "string" ? fpRaw.split(",") : []));
+    const formatterArgs = /** @type {[unknown, ...unknown[]]} */ ([raw].concat(fp));
+    const avnavApi = /** @type {DyniAvnavApi|null} */ (runtime.getAvnavApi(root));
     try {
       if (typeof p.formatter === "function") {
-        return p.formatter.apply(null, [raw].concat(fp));
+        const formatter = /** @type {DyniFormatterCallback} */ (p.formatter);
+        return formatter.apply(null, formatterArgs);
       }
       if (
         typeof p.formatter === "string" &&
         avnavApi &&
-        avnavApi.formatter &&
-        typeof avnavApi.formatter[p.formatter] === "function"
+        avnavApi.formatter
       ) {
-        return avnavApi.formatter[p.formatter].apply(avnavApi.formatter, [raw].concat(fp));
+        const formatter = avnavApi.formatter[p.formatter];
+        if (typeof formatter === "function") {
+          return formatter.apply(avnavApi.formatter, formatterArgs);
+        }
       }
     }
     // dyni-lint-disable-next-line catch-fallback-without-suppression -- Formatter dispatch is an external AvNav/custom boundary; documented fallback behavior must remain centralized here.

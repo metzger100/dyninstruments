@@ -302,9 +302,16 @@ describe("plugin.mjs bootstrap", function () {
 
       const mod = await importPluginModule();
       const firstShutdown = await mod.default(firstApi);
-      if (typeof firstShutdown === "function") {
-        firstShutdown(firstApi);
-      }
+      expect(firstShutdown).toEqual(expect.any(Function));
+      firstShutdown();
+      expect(global.window.DyniPlugin.state).toMatchObject({
+        hostActionBridge: null,
+        initStarted: false,
+        initPromise: null,
+        initGenerationId: null
+      });
+      expect(global.window.DyniPlugin.runtime.hostActions).toBeNull();
+      expect(global.window.DyniPlugin.runtime.componentLoader).toBeNull();
       await mod.default(secondApi);
     });
 

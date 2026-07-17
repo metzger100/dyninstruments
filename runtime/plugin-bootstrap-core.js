@@ -1,9 +1,8 @@
 /**
- * Module: PluginBootstrapCore - Shared startup orchestration for plugin.js and plugin.mjs
+ * @file PluginBootstrapCore - Shared startup orchestration for plugin.js and plugin.mjs
  * Documentation: documentation/architecture/runtime-lifecycle.md
- * Depends: window.DyniPlugin
  */
-(function (root, factory) {
+(function (/** @type {DyniBootstrapRoot} */ root, factory) {
   if (typeof define === "function" && define.amd) {
     define([], factory);
   } else if (typeof module === "object" && module.exports) {
@@ -11,7 +10,7 @@
   } else {
     root.DyniPluginBootstrapCore = factory();
   }
-}(typeof globalThis !== "undefined" ? globalThis : this, function () {
+}(/** @type {DyniBootstrapRoot} */ (typeof globalThis !== "undefined" ? globalThis : this), function () {
   "use strict";
 
   var SCRIPT_ID_PREFIX = "dyni-internal";
@@ -19,6 +18,7 @@
   var BOOTSTRAP_BUNDLE_PATH = "bootstrap-bundle.js";
   var startupSequence = 0;
 
+  /** @param {unknown} baseUrl @returns {string} */
   function normalizeBaseUrl(baseUrl) {
     if (typeof baseUrl !== "string" || baseUrl.trim() === "") {
       throw new Error("dyninstruments: bootstrap base URL is missing");
@@ -26,6 +26,7 @@
     return baseUrl.replace(/\/+$/, "") + "/";
   }
 
+  /** @param {unknown} value @returns {string} */
   function sanitizeIdToken(value) {
     return String(value || "")
       .replace(/[^a-z0-9]+/gi, "-")
@@ -33,6 +34,7 @@
       .toLowerCase() || "x";
   }
 
+  /** @param {unknown} value @returns {string} */
   function hashText(value) {
     var hash = 2166136261;
     var text = String(value || "");
@@ -44,6 +46,7 @@
     return (hash >>> 0).toString(36);
   }
 
+  /** @param {unknown} baseUrl @returns {string} */
   function resolveGenerationDiscriminator(baseUrl) {
     var normalized = normalizeBaseUrl(baseUrl);
     var match = normalized.match(/\/__([^/]+)\/$/);
@@ -53,6 +56,7 @@
     return "base-" + hashText(normalized);
   }
 
+  /** @param {DyniBootstrapOptions | undefined} options @param {string} baseUrl @returns {string} */
   function resolveScriptScope(options, baseUrl) {
     var explicitScope = options && typeof options.scriptIdScope === "string" ? options.scriptIdScope.trim() : "";
     if (explicitScope) {
@@ -64,6 +68,7 @@
     return "legacy";
   }
 
+  /** @param {DyniBootstrapOptions | undefined} options @returns {"legacy" | "module"} */
   function resolveEntrypoint(options) {
     if (options && options.entrypoint === "module") {
       return "module";
@@ -71,6 +76,7 @@
     return "legacy";
   }
 
+  /** @param {unknown} relativePath @param {unknown} scope @returns {string} */
   function makeScriptId(relativePath, scope) {
     return [
       SCRIPT_ID_PREFIX,
@@ -79,12 +85,13 @@
     ].join("-");
   }
 
+  /** @param {Document} documentRef @param {string} scriptId @param {string} src @returns {Promise<void>} */
   function loadScriptOnceById(documentRef, scriptId, src) {
     if (documentRef.getElementById(scriptId)) {
       return Promise.resolve();
     }
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (/** @type {() => void} */ resolve, /** @type {(reason?: unknown) => void} */ reject) {
       var scriptEl = documentRef.createElement("script");
       scriptEl.id = scriptId;
       scriptEl.async = true;
@@ -100,6 +107,7 @@
     });
   }
 
+  /** @param {Element | null | undefined} element */
   function removeElement(element) {
     if (!element) {
       return;
@@ -113,6 +121,7 @@
     }
   }
 
+  /** @param {Document} documentRef @param {string} cssId @param {string} href @returns {Promise<void>} */
   function loadCssOnceById(documentRef, cssId, href) {
     if (!href) {
       return Promise.resolve();
@@ -121,7 +130,7 @@
       return Promise.resolve();
     }
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (/** @type {() => void} */ resolve, /** @type {(reason?: unknown) => void} */ reject) {
       var linkEl = documentRef.createElement("link");
       linkEl.id = cssId;
       linkEl.rel = "stylesheet";
@@ -137,9 +146,19 @@
     });
   }
 
+  /**
+   * @param {DyniBootstrapRoot} rootRef
+   * @param {string} baseUrl
+   * @param {unknown} hostApi
+   * @param {DyniBootstrapLoader} loadScriptOnce
+   * @param {DyniBootstrapLoader} loadCssOnce
+   * @param {DyniBootstrapGeneration} generation
+   * @returns {DyniBootstrapNamespace}
+   */
   function prepareNamespace(rootRef, baseUrl, hostApi, loadScriptOnce, loadCssOnce, generation) {
     var win = rootRef.window || rootRef;
-    var ns = win.DyniPlugin = win.DyniPlugin || {};
+    var ns = /** @type {DyniBootstrapNamespace} */ (win.DyniPlugin || {});
+    win.DyniPlugin = ns;
     ns.baseUrl = baseUrl;
     ns.avnavApi = hostApi;
     ns.config = ns.config || {};
@@ -151,6 +170,15 @@
     return ns;
   }
 
+  /**
+   * @param {DyniBootstrapNamespace} ns
+   * @param {Document} documentRef
+   * @param {string} baseUrl
+   * @param {string} scope
+   * @param {DyniBootstrapLogger} logger
+   * @param {DyniBootstrapLoader} loadScriptOnce
+   * @returns {Promise<void>}
+   */
   function loadBootstrapManifest(ns, documentRef, baseUrl, scope, logger, loadScriptOnce) {
     return loadScriptOnce(makeScriptId(BOOTSTRAP_MANIFEST_PATH, scope), baseUrl + BOOTSTRAP_MANIFEST_PATH)
       .catch(function (error) {
@@ -172,26 +200,31 @@
       });
   }
 
+  /** @param {DyniBootstrapNamespace} ns @returns {Promise<(() => void) | undefined>} */
   function runInit(ns) {
-    if (!ns.runtime || typeof ns.runtime.runInit !== "function") {
+    var init = ns.runtime.runInit;
+    if (typeof init !== "function") {
       throw new Error("dyninstruments: runtime.runInit missing");
     }
-    return ns.runtime.runInit();
+    return init();
   }
 
+  /** @param {DyniBootstrapOptions | undefined} options @returns {Promise<(() => void) | undefined>} */
   function start(options) {
-    var opts = options || {};
+    var opts = /** @type {DyniBootstrapOptions} */ (options || {});
     var documentRef = opts.document || (typeof document !== "undefined" ? document : null);
-    var logger = opts.logger || (typeof console !== "undefined" ? console : { error: function () {} });
+    var logger = /** @type {DyniBootstrapLogger} */ (opts.logger || (typeof console !== "undefined" ? console : { error: function () {} }));
 
     if (!documentRef || !documentRef.head) {
       throw new Error("dyninstruments: document.head missing");
     }
+    var activeDocument = /** @type {Document} */ (documentRef);
 
     var baseUrl = normalizeBaseUrl(opts.baseUrl);
     var scope = resolveScriptScope(opts, baseUrl);
     startupSequence += 1;
 
+    /** @type {DyniBootstrapGeneration} */
     var generation = {
       id: scope + "-" + startupSequence,
       entrypoint: resolveEntrypoint(opts),
@@ -199,17 +232,23 @@
       hostApi: opts.hostApi || null
     };
 
+    /** @type {DyniBootstrapLoader} */
     var loadScriptOnceByScopedId = function (scriptId, src) {
-      return loadScriptOnceById(documentRef, makeScriptId(scriptId, scope), src);
+      return loadScriptOnceById(activeDocument, makeScriptId(scriptId, scope), src);
     };
+    /** @type {DyniBootstrapLoader} */
     var loadCssOnceByScopedId = function (cssId, href) {
-      return loadCssOnceById(documentRef, makeScriptId(cssId, scope), href);
+      return loadCssOnceById(activeDocument, makeScriptId(cssId, scope), href);
     };
+    /** @type {DyniBootstrapLoader} */
     var loadScriptById = function (scriptId, src) {
-      return loadScriptOnceById(documentRef, scriptId, src);
+      return loadScriptOnceById(activeDocument, scriptId, src);
     };
 
-    var rootRef = opts.root || (typeof window !== "undefined" ? window : (typeof globalThis !== "undefined" ? globalThis : {}));
+    var globalRoot = typeof window !== "undefined"
+      ? window
+      : (typeof globalThis !== "undefined" ? globalThis : {});
+    var rootRef = /** @type {DyniBootstrapRoot} */ (opts.root || globalRoot);
     var ns = prepareNamespace(
       rootRef,
       baseUrl,
@@ -223,7 +262,7 @@
       .then(function () {
         return runInit(ns);
       }, function () {
-        return loadBootstrapManifest(ns, documentRef, baseUrl, scope, logger, loadScriptById)
+        return loadBootstrapManifest(ns, activeDocument, baseUrl, scope, logger, loadScriptById)
           .then(function () {
             return runInit(ns);
           });
@@ -231,6 +270,7 @@
       // dyni-lint-disable-next-line catch-fallback-without-suppression -- Top-level bootstrap should log startup failures without turning them into unhandled browser promise rejections.
       .catch(function (error) {
         logger.error("dyninstruments bootstrap failed:", error);
+        return undefined;
       });
   }
 

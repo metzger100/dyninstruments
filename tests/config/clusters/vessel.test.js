@@ -169,6 +169,7 @@ describe("config/clusters/vessel.js", function () {
     const def = loadVesselDef();
     const out = def.updateFunction({ kind: "voltageLinear", value: " ", storeKeys: { value: "old.path" } });
     expect(out.storeKeys.value).toBeUndefined();
+    expect(Object.prototype.hasOwnProperty.call(out.storeKeys, "value")).toBe(false);
   });
 
   it("removes dynamic value store key when non-voltage kind is active", function () {

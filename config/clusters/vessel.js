@@ -1,12 +1,11 @@
 /**
- * Module: DyniPlugin Vessel Cluster - Vessel metrics widget config (voltage + alarm + clock/time)
+ * @file DyniPlugin Vessel Cluster - Vessel metrics widget config (voltage + alarm + clock/time)
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/vessel-voltage-editables.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  const ns = /** @type {DyniVesselClusterRoot} */ (/** @type {unknown} */ (root)).DyniPlugin;
   const config = ns.config;
   const shared = config.shared;
 
@@ -328,8 +327,9 @@
         }
       },
 
+      /** @this {DyniClusterConfigValues} @param {DyniClusterConfigValues | null | undefined} values @returns {DyniClusterConfigValues} */
       updateFunction: function (values) {
-        const out = values ? { ...values } : {};
+        const out = /** @type {DyniClusterConfigValues} */ (values ? { ...values } : {});
         const kind = (values && values.kind) || "voltage";
 
         if (!out.storeKeys) out.storeKeys = {};
@@ -337,17 +337,17 @@
         // attach selected SK path into storeKeys.value (required!)
         if (kind === "voltage" || kind === "voltageLinear" || kind === "voltageRadial") {
           if (typeof out.value === "string" && out.value.trim()) {
-            out.storeKeys = { ...out.storeKeys, value: out.value.trim() };
+            out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), value: out.value.trim() };
           }
           else if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
-            const sk = { ...out.storeKeys };
+            const sk = { .../** @type {Record<string, unknown>} */ (out.storeKeys) };
             delete sk.value;
             out.storeKeys = sk;
           }
         }
         else {
           if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
-            const sk = { ...out.storeKeys };
+            const sk = { .../** @type {Record<string, unknown>} */ (out.storeKeys) };
             delete sk.value;
             out.storeKeys = sk;
           }
@@ -355,19 +355,19 @@
 
         if (kind === "pitch") {
           if (typeof out.pitchKey === "string" && out.pitchKey.trim()) {
-            out.storeKeys = { ...out.storeKeys, pitch: out.pitchKey.trim() };
+            out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), pitch: out.pitchKey.trim() };
           }
           else {
-            out.storeKeys = { ...out.storeKeys, pitch: DEFAULT_PITCH_KEY };
+            out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), pitch: DEFAULT_PITCH_KEY };
           }
         }
 
         if (kind === "roll") {
           if (typeof out.rollKey === "string" && out.rollKey.trim()) {
-            out.storeKeys = { ...out.storeKeys, roll: out.rollKey.trim() };
+            out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), roll: out.rollKey.trim() };
           }
           else {
-            out.storeKeys = { ...out.storeKeys, roll: DEFAULT_ROLL_KEY };
+            out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), roll: DEFAULT_ROLL_KEY };
           }
         }
 

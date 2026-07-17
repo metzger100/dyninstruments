@@ -1,7 +1,6 @@
 /**
- * Module: EditRouteTextHtmlWidget - HTML renderer shell for nav edit-route summary kind
+ * @file EditRouteTextHtmlWidget - HTML renderer shell for nav edit-route summary kind
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: EditRouteHtmlFit, HtmlWidgetUtils, HtmlWidgetLifecycle, EditRouteRenderModel, EditRouteMarkup, componentContext.theme.tokens
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,7 +10,10 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {DyniComponentContext & { theme: { tokens: DyniEditRouteThemeResolver } }} DyniEditRouteWidgetContext */
+  /** @typedef {{ props: DyniWidgetValues, shellRect?: DyniHtmlShellRect | null, rootEl?: HTMLElement | null, layoutChanged?: boolean }} DyniEditRouteWidgetPayload */
 
+  /** @param {unknown} def @param {DyniEditRouteWidgetContext} componentContext */
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("EditRouteHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
@@ -20,6 +22,7 @@
     const markup = componentContext.components.require("EditRouteMarkup");
     const themeResolver = componentContext.theme.tokens;
 
+    /** @param {unknown} props @param {unknown} shellRect @returns {DyniEditRouteRenderModel} */
     function buildModel(props, shellRect) {
       const surfacePolicy = htmlUtils.resolveSurfacePolicy(props);
       const vertical = !!(surfacePolicy && surfacePolicy.containerOrientation === "vertical");
@@ -30,21 +33,30 @@
       });
     }
 
+    /** @param {unknown} rendererContext */
     function createCommittedRenderer(rendererContext) {
-      const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
-      const hostContext = context.hostContext || {};
+      const context = /** @type {Record<string, unknown>} */ (rendererContext && typeof rendererContext === "object" ? rendererContext : {});
+      const hostContext = context.hostContext;
 
+      /** @type {HTMLElement | null} */
       let mountEl = null;
+      /** @type {HTMLElement | null} */
       let rootEl = null;
+      /** @type {HTMLElement | null} */
+      /** @type {Element | null} */
       let wrapperEl = null;
+      /** @type {((ev: Event) => void) | null} */
       let clickHandler = null;
+      /** @type {DyniWidgetValues | null} */
       let lastProps = null;
+      /** @type {DyniEditRouteMarkupFit} */
       let lastFit = {
         nameTextStyle: "",
         sourceBadgeStyle: "",
         metrics: Object.create(null)
       };
 
+      /** @param {DyniEditRouteRenderModel} model */
       function bindDispatchListener(model) {
         if (wrapperEl && clickHandler) {
           wrapperEl.removeEventListener("click", clickHandler);
@@ -59,7 +71,10 @@
           ev.preventDefault();
           ev.stopPropagation();
           const policy = htmlUtils.resolveSurfacePolicy(lastProps);
-          const routeEditorActions = policy && policy.actions ? policy.actions.routeEditor : null;
+          const actions = policy && typeof policy.actions === "object" && policy.actions
+            ? /** @type {{ routeEditor?: { openEditRoute?: () => void } }} */ (policy.actions)
+            : null;
+          const routeEditorActions = actions ? actions.routeEditor : null;
           if (!routeEditorActions || typeof routeEditorActions.openEditRoute !== "function") {
             return;
           }
@@ -68,6 +83,7 @@
         wrapperEl.addEventListener("click", clickHandler);
       }
 
+      /** @param {DyniEditRouteWidgetPayload} payload */
       function patchDom(payload) {
         const shellRect = payload.shellRect || null;
         const theme = themeResolver.resolveForRoot(payload.rootEl);
@@ -109,6 +125,7 @@
         patchDom: patchDom
       });
 
+      /** @param {DyniEditRouteWidgetPayload} payload */
       function update(payload) {
         patchDom(payload);
       }

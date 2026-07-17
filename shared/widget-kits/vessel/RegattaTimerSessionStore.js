@@ -1,7 +1,6 @@
 /**
- * Module: RegattaTimerSessionStore - Session persistence for regatta timer across renderer remounts
+ * @file RegattaTimerSessionStore - Session persistence for regatta timer across renderer remounts
  * Documentation: documentation/widgets/regatta-timer.md
- * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,27 +12,40 @@
   "use strict";
 
   const HOST_SESSION_KEY = "__dyniRegattaTimerSession";
+  /** @type {Record<string, { snapshot: DyniRegattaTimerSessionSnapshot, updatedAt: number }>} */
   const SESSION_REGISTRY = Object.create(null);
 
+  /** @param {unknown} phase @returns {boolean} */
   function isActivePhase(phase) {
     return phase === "countdown" || phase === "elapsed";
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniRegattaTimerSessionStoreApi}
+   */
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
     const toObject = valueMath.toObject;
 
+    /** @param {unknown} rawValue @returns {string} */
     function textOrEmpty(rawValue) {
       return rawValue == null ? "" : String(rawValue);
     }
 
+    /** @param {unknown} payload @returns {string} */
     function resolveRouteIdFromPayload(payload) {
-      const source = payload && typeof payload === "object" ? payload : null;
+      const source = /** @type {Record<string, unknown> | null} */ (
+        payload && typeof payload === "object" ? payload : null
+      );
       if (source && typeof source.routeId === "string" && source.routeId) {
         return source.routeId;
       }
 
-      const shellEl = source && source.shellEl && typeof source.shellEl === "object" ? source.shellEl : null;
+      const shellEl = /** @type {{ getAttribute?: unknown } | null} */ (
+        source && source.shellEl && typeof source.shellEl === "object" ? source.shellEl : null
+      );
       if (!shellEl || typeof shellEl.getAttribute !== "function") {
         return "";
       }
@@ -42,6 +54,7 @@
       return typeof routeAttr === "string" ? routeAttr : "";
     }
 
+    /** @param {unknown} props @param {unknown} lastRouteId @returns {string} */
     function resolveSessionKey(props, lastRouteId) {
       const p = toObject(props);
       if (typeof p.regattaTimerSessionKey === "string" && p.regattaTimerSessionKey) {
@@ -58,27 +71,37 @@
       return [pageId, routeId, cluster, kind].join("|");
     }
 
+    /** @param {unknown} options @returns {DyniRegattaTimerSessionStore} */
     function createSessionStore(options) {
-      const opts = options && typeof options === "object" ? options : {};
-      const hostContext = opts.hostContext && typeof opts.hostContext === "object" ? opts.hostContext : null;
+      const opts = toObject(options);
+      const hostContext = /** @type {DyniRegattaTimerHostContext | null} */ (
+        opts.hostContext && typeof opts.hostContext === "object" ? opts.hostContext : null
+      );
       let sessionKey = "";
       let lastRouteId = "";
 
+      /** @returns {DyniRegattaTimerSessionSnapshot | null} */
       function readHostSnapshot() {
         if (!hostContext) {
           return null;
         }
         const snapshot = hostContext[HOST_SESSION_KEY];
-        return snapshot && typeof snapshot === "object" ? snapshot : null;
+        return /** @type {DyniRegattaTimerSessionSnapshot | null} */ (
+          snapshot && typeof snapshot === "object" ? snapshot : null
+        );
       }
 
+      /** @param {unknown} snapshot @returns {void} */
       function writeHostSnapshot(snapshot) {
         if (!hostContext) {
           return;
         }
-        hostContext[HOST_SESSION_KEY] = snapshot && typeof snapshot === "object" ? snapshot : null;
+        hostContext[HOST_SESSION_KEY] = /** @type {DyniRegattaTimerSessionSnapshot | null} */ (
+          snapshot && typeof snapshot === "object" ? snapshot : null
+        );
       }
 
+      /** @returns {void} */
       function clearHostSnapshot() {
         if (!hostContext || !Object.prototype.hasOwnProperty.call(hostContext, HOST_SESSION_KEY)) {
           return;
@@ -86,6 +109,7 @@
         delete hostContext[HOST_SESSION_KEY];
       }
 
+      /** @returns {DyniRegattaTimerSessionSnapshot | null} */
       function readRegistrySnapshot() {
         if (!sessionKey) {
           return null;
@@ -103,6 +127,7 @@
         return entry.snapshot;
       }
 
+      /** @param {unknown} props @param {unknown} payload @returns {void} */
       function syncIdentity(props, payload) {
         const routeId = resolveRouteIdFromPayload(payload);
         if (routeId) {
@@ -111,12 +136,16 @@
         sessionKey = resolveSessionKey(props, lastRouteId);
       }
 
+      /** @returns {DyniRegattaTimerSessionSnapshot | null} */
       function readStoredSnapshot() {
         return readRegistrySnapshot() || readHostSnapshot();
       }
 
+      /** @param {unknown} snapshot @returns {void} */
       function persistSnapshot(snapshot) {
-        const snap = snapshot && typeof snapshot === "object" ? snapshot : null;
+        const snap = /** @type {DyniRegattaTimerSessionSnapshot | null} */ (
+          snapshot && typeof snapshot === "object" ? snapshot : null
+        );
         if (!snap) {
           return;
         }
@@ -137,6 +166,7 @@
         delete SESSION_REGISTRY[sessionKey];
       }
 
+      /** @returns {void} */
       function clearStoredSnapshot() {
         clearHostSnapshot();
         if (sessionKey) {

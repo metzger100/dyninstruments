@@ -1,7 +1,6 @@
 /**
- * Module: AlarmTextHtmlWidget - Native HTML renderer for vessel alarm status/control tile
+ * @file AlarmTextHtmlWidget - Native HTML renderer for vessel alarm status/control tile
  * Documentation: documentation/widgets/alarm.md
- * Depends: AlarmHtmlFit, HtmlWidgetUtils, AlarmRenderModel, AlarmMarkup, ValueMath
  */
 
 (function (root, factory) {
@@ -12,11 +11,14 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {{ props?: unknown, shellRect?: DyniAlarmShellRect | null, rootEl?: HTMLElement | null, fontMetricsEpoch?: number }} DyniAlarmWidgetPayload */
 
   const ROOT_CLASS_NAME = "dyni-alarm-root";
 
+  /** @type {DyniValueMathApi["toObject"]} */
   let toObject;
 
+  /** @param {DyniAlarmHtmlFitLayout | null} layout @param {DyniAlarmShellRect | null} shellRect @returns {{ width: number, height: number }} */
   function resolveLayoutBasisRect(layout, shellRect) {
     const rect = layout && layout.contentRect ? layout.contentRect : shellRect;
     if (!rect) {
@@ -28,6 +30,7 @@
     };
   }
 
+  /** @param {DyniAlarmHtmlFitApi} htmlFit @param {DyniAlarmRenderModel} model @param {DyniAlarmShellRect | null} shellRect @returns {DyniAlarmHtmlFitLayout | null} */
   function resolveAlarmLayout(htmlFit, model, shellRect) {
     if (!shellRect || typeof htmlFit.resolveLayout !== "function") {
       return null;
@@ -38,6 +41,7 @@
     });
   }
 
+  /** @returns {DyniAlarmHtmlFitResult} */
   function buildBaselineFit() {
     return {
       mode: "normal",
@@ -58,6 +62,7 @@
     };
   }
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("AlarmHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
@@ -65,6 +70,7 @@
     const markup = componentContext.components.require("AlarmMarkup");
     toObject = componentContext.components.require("ValueMath").toObject;
 
+    /** @param {DyniWidgetValues} props @param {DyniAlarmShellRect | null} shellRect @returns {DyniAlarmRenderModel} */
     function buildModel(props, shellRect) {
       return renderModel.buildModel({
         props: props,
@@ -73,13 +79,17 @@
       });
     }
 
+    /** @param {unknown} rendererContext @returns {Record<string, unknown>} */
     function createCommittedRenderer(rendererContext) {
-      const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
+      const context = /** @type {Record<string, unknown>} */ (rendererContext && typeof rendererContext === "object" ? rendererContext : {});
       const hostContext = context.hostContext || {};
       const baselineFit = buildBaselineFit();
 
+      /** @type {HTMLElement | null} */
       let rootEl = null;
+      /** @type {((ev: MouseEvent) => void) | null} */
       let clickHandler = null;
+      /** @type {DyniWidgetValues | null} */
       let lastProps = null;
       let lastFit = baselineFit;
 
@@ -110,6 +120,7 @@
         }
       }
 
+      /** @param {DyniAlarmRenderModel} model */
       function bindClickHandler(model) {
         removeClickHandler();
         if (!rootEl || !model || model.interactionState !== "dispatch") {
@@ -119,7 +130,10 @@
           ev.preventDefault();
           ev.stopPropagation();
           const policy = htmlUtils.resolveSurfacePolicy(lastProps);
-          const alarmActions = policy && policy.actions ? policy.actions.alarm : null;
+          const actions = policy && typeof policy.actions === "object" && policy.actions
+            ? /** @type {{ alarm?: { stopAll?: () => void } }} */ (policy.actions)
+            : null;
+          const alarmActions = actions ? actions.alarm : null;
           if (!alarmActions || typeof alarmActions.stopAll !== "function") {
             return;
           }
@@ -128,6 +142,7 @@
         rootEl.addEventListener("click", clickHandler);
       }
 
+      /** @param {DyniAlarmWidgetPayload} payload */
       function patchDom(payload) {
         if (!rootEl || !payload) {
           return;
@@ -156,6 +171,7 @@
         bindClickHandler(model);
       }
 
+      /** @param {HTMLElement} mountHostEl @param {DyniAlarmWidgetPayload} payload */
       function mount(mountHostEl, payload) {
         removeRoot();
         if (!mountHostEl || !mountHostEl.ownerDocument || typeof mountHostEl.appendChild !== "function") {
@@ -167,6 +183,7 @@
         patchDom(payload || {});
       }
 
+      /** @param {DyniAlarmWidgetPayload} payload */
       function update(payload) {
         patchDom(payload || {});
       }
@@ -183,6 +200,7 @@
         removeRoot();
       }
 
+      /** @param {DyniAlarmWidgetPayload} payload @returns {string} */
       function layoutSignature(payload) {
         const props = toObject(payload && payload.props);
         const shellRect = payload && payload.shellRect ? payload.shellRect : null;

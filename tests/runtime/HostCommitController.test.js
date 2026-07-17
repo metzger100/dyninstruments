@@ -21,8 +21,6 @@ describe("runtime/HostCommitController.js", function () {
 
   function createHarness() {
     let shell = null;
-    const spans = [];
-
     const rafQueue = [];
     const canceledRafs = [];
     let rafId = 0;
@@ -89,20 +87,6 @@ describe("runtime/HostCommitController.js", function () {
       setTimeout: setTimeoutStub,
       clearTimeout: clearTimeoutStub,
       MutationObserver: MutationObserverStub,
-      __DYNI_PERF_HOOKS__: {
-        startSpan(name, tags) {
-          return { name, tags: tags || null };
-        },
-        endSpan(token, tags) {
-          spans.push({
-            name: token && token.name,
-            tags: {
-              ...(token && token.tags ? token.tags : {}),
-              ...(tags && typeof tags === "object" ? tags : {})
-            }
-          });
-        }
-      },
       DyniPlugin: {
         runtime: {},
         state: {},
@@ -110,7 +94,6 @@ describe("runtime/HostCommitController.js", function () {
       }
     });
 
-    runIifeScript("runtime/PerfSpanHelper.js", context);
     runIifeScript("runtime/HostCommitController.js", context);
 
     function runNextRaf() {
@@ -151,7 +134,6 @@ describe("runtime/HostCommitController.js", function () {
       timeoutQueue,
       clearedTimeouts,
       observerInstances,
-      spans,
       runNextRaf,
       runNextTimeout,
       triggerObserver

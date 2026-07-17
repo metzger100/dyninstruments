@@ -1,7 +1,6 @@
 /**
- * Module: TextLayoutPrimitives - Low-level text fit and inline draw helpers
+ * @file TextLayoutPrimitives - Low-level text fit and inline draw helpers
  * Documentation: documentation/shared/text-layout-engine.md
- * Depends: CanvasTextLayout
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,15 +11,29 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniTextLayoutPrimitivesApi}
+   */
   function create(def, componentContext) {
     const text = componentContext.components.require("CanvasTextLayout");
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {unknown} px
+     * @param {unknown} weight
+     * @param {unknown} family
+     * @param {unknown} [options]
+     * @returns {void}
+     */
     function primitiveSetFont(ctx, px, weight, family, options) {
       text.setFont(ctx, px, weight, text.resolveFamily(family, options));
     }
 
+    /** @param {unknown} args @returns {DyniFitSingleLineResult} */
     function fitSingleLineBinary(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniTextArgs} */ (args || {});
       const ctx = cfg.ctx;
       const textValue = String(cfg.text);
       const maxW = Math.max(1, Number(cfg.maxW) || 0);
@@ -71,9 +84,10 @@
       };
     }
 
+    /** @param {unknown} args @returns {DyniFitMultiRowResult} */
     function fitMultiRowBinary(args) {
-      const cfg = args || {};
-      const rows = cfg.rows;
+      const cfg = /** @type {DyniTextArgs} */ (args || {});
+      const rows = /** @type {unknown[]} */ (cfg.rows);
       const ctx = cfg.ctx;
       const maxW = Math.max(1, Number(cfg.maxW) || 0);
       const maxH = Math.max(1, Number(cfg.maxH) || 0);
@@ -91,6 +105,7 @@
       let lo = minPx;
       let hi = maxPx;
       let bestPx = minPx;
+      /** @type {number[]} */
       let bestWidths = [];
 
       for (let i = 0; i < steps; i++) {
@@ -130,8 +145,9 @@
       return { px: bestPx, widths: bestWidths };
     }
 
+    /** @param {unknown} args @returns {DyniFitValueUnitRowResult} */
     function fitValueUnitRow(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniTextArgs} */ (args || {});
       const ctx = cfg.ctx;
       const valueText = String(cfg.valueText);
       const unitText = String(cfg.unitText);
@@ -180,8 +196,9 @@
     // of the row height as a safe visual margin.
     const ROW_SAFE_RATIO = 0.85;
 
+    /** @param {unknown} args @returns {DyniInlineTripletFit} */
     function fitInlineTriplet(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniTextArgs} */ (args || {});
       const ctx = cfg.ctx;
       const captionText = String(cfg.captionText);
       const valueText = String(cfg.valueText);
@@ -256,10 +273,11 @@
       };
     }
 
+    /** @param {unknown} args @returns {void} */
     function drawInlineTriplet(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniTextArgs} */ (args || {});
       const ctx = cfg.ctx;
-      const fit = cfg.fit;
+      const fit = /** @type {DyniInlineTripletFit} */ (cfg.fit);
       const captionText = String(cfg.captionText);
       const valueText = String(cfg.valueText);
       const unitText = String(cfg.unitText);

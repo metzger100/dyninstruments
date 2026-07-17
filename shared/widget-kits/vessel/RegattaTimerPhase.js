@@ -1,7 +1,6 @@
 /**
- * Module: RegattaTimerPhase - Shared phase normalization for regatta timer modules
+ * @file RegattaTimerPhase - Shared phase normalization for regatta timer modules
  * Documentation: documentation/widgets/regatta-timer.md
- * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,7 @@
 }(this, function () {
   "use strict";
 
+  /** @param {unknown} phase @returns {DyniRegattaPhase} */
   function normalize(phase) {
     if (phase === "countdown" || phase === "elapsed") {
       return phase;
@@ -19,6 +19,7 @@
     return "idle";
   }
 
+  /** @returns {DyniRegattaTimerPhaseApi} */
   function create() {
     return {
       id: "RegattaTimerPhase",

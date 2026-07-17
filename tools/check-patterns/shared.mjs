@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const SKIP_DIRS = new Set([".git", "node_modules", "coverage"]);
+const SKIP_DIRS = new Set([".git", "node_modules", "coverage", "artifacts"]);
 const EXTERNAL_FACTOR_CONTEXT_HINTS = [
   "root.avnav",
   "avnav.api",

@@ -1,24 +1,29 @@
 /**
- * Module: DyniPlugin Environment Temperature Editables - Temperature gauge editables
+ * @file DyniPlugin Environment Temperature Editables - Temperature gauge editables
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/unit-editable-utils.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
-  const shared = ns.config.shared;
+  /** @typedef {{ baseKey: string, displayName: string, tokens: Record<string, { min: number, max: number, step: number, default: number }>, condition?: unknown }} DyniEnvironmentTemperatureFloatSpec */
+  /** @typedef {DyniPluginSharedConfig & { unitFormatFamilies: DyniUnitFormatCatalog, makePerUnitFloatParams: (metricKey: string, binding: DyniUnitFormatBinding, kindDef: DyniEditableCondition, fieldSpec: DyniEnvironmentTemperatureFloatSpec) => DyniEditableParameters }} DyniEnvironmentTemperatureShared */
+
+  const ns = /** @type {DyniPluginNamespace} */ (/** @type {unknown} */ (root.DyniPlugin));
+  const shared = /** @type {DyniEnvironmentTemperatureShared} */ (ns.config.shared);
   const tempBindings = shared.unitFormatFamilies.metricBindings;
   const tempLinearBinding = tempBindings.tempLinear;
   const tempRadialBinding = tempBindings.tempRadial;
   const TEMP_LINEAR_KIND = { kind: "tempLinear" };
   const TEMP_RADIAL_KIND = { kind: "tempRadial" };
+  /** @type {Record<string, { min: number, max: number, step: number }>} */
   const TEMP_UNIT_RANGES = {
     celsius: { min: -50, max: 200, step: 0.5 },
     kelvin: { min: 223.15, max: 473.15, step: 0.5 }
   };
 
+  /** @param {Record<string, number>} defaults @returns {Record<string, { min: number, max: number, step: number, default: number }>} */
   function buildTokenSpecs(defaults) {
+    /** @type {Record<string, { min: number, max: number, step: number, default: number }>} */
     const out = {};
     Object.keys(TEMP_UNIT_RANGES).forEach(function (token) {
       out[token] = Object.assign({ default: defaults[token] }, TEMP_UNIT_RANGES[token]);
@@ -26,6 +31,7 @@
     return out;
   }
 
+  /** @returns {DyniEditableParameters} */
   shared.buildEnvironmentTemperatureEditableParameters = function () {
     const linearMin = shared.makePerUnitFloatParams("tempLinear", tempLinearBinding, TEMP_LINEAR_KIND, {
       baseKey: "tempLinearMinValue",

@@ -76,6 +76,15 @@ describe("AisTargetViewModel", function () {
     expect(mmsiFallback.nameOrMmsi).toBe("333444555");
   });
 
+  it("falls back to mmsi when malformed names are not strings", function () {
+    const vm = createViewModel();
+    const out = vm.build({
+      target: { type: 21, name: 42, shipname: 7, mmsi: 333444555 }
+    });
+
+    expect(out.nameOrMmsi).toBe("333444555");
+  });
+
   it("derives front text and initial from cpa/passFront rules", function () {
     const vm = createViewModel();
 

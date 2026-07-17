@@ -28,7 +28,7 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
 3. Respect responsive ownership:
    - `FullCircleRadialLayout` already consumes `ResponsiveScaleProfile` and owns compact insets, dial geometry, slot bounds, and compact geometry scales.
    - `GeometryScale` already handles the factor-to-pixel conversion from the dial radius.
-   - Wrapper callbacks consume `state.layout`, `state.responsive`, `state.textFillScale`, and `state.compactGeometryScale` for text/layout only.
+   - Wrapper callbacks consume `state.layout`, `state.responsive`, and `state.textFillScale`; use `state.layout.compactGeometryScale` for compact text/layout spacing.
    - Do not import `ResponsiveScaleProfile` directly and do not add widget-local user-visible responsive `Math.max(...)` / `clamp(...)` floors.
 4. Add widget-specific display strategy only:
    - single-value display object (compass-style), or

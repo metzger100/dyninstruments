@@ -1,7 +1,6 @@
 /**
- * Module: FullCircleRadialEngine - Shared renderer pipeline for full-circle dial widgets
+ * @file FullCircleRadialEngine - Shared renderer pipeline for full-circle dial widgets
  * Documentation: documentation/radial/full-circle-dial-engine.md
- * Depends: RadialToolkit, CanvasLayerCache, FullCircleRadialLayout, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -17,12 +16,14 @@
   const DEFAULT_RATIO_DEFAULTS = { normal: 0.8, flat: 2.2 };
   const DEFAULT_LAYOUT = {};
 
+  /** @param {unknown} value @returns {string} */
   function fullCircleKeyToText(value) {
     if (typeof value === "string") {
       return value;
     }
     return JSON.stringify(value);
   }
+  /** @param {unknown} raw @returns {string[]} */
   function fullCircleNormalizeLayers(raw) {
     const source = Array.isArray(raw) ? raw : null;
     if (!source || !source.length) {
@@ -41,6 +42,11 @@
     return out.length ? out : ["layer"];
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniFullCircleRadialEngineApi}
+   */
   function create(def, componentContext) {
     const GU = componentContext.components.require("RadialToolkit");
     const layerCacheApi = componentContext.components.require("CanvasLayerCache");
@@ -53,22 +59,41 @@
     const value = GU.value;
     const angle = GU.angle;
 
+    /**
+     * @param {DyniFullCircleRendererSpec | undefined} spec
+     * @returns {DyniRadialRenderCanvas}
+     */
     const fullCircleCreateRenderer = function (spec) {
       const cfg = spec || {};
-      const ratioProps = hasOwn.call(cfg, "ratioProps") ? cfg.ratioProps : DEFAULT_RATIO_PROPS;
-      const ratioDefaults = hasOwn.call(cfg, "ratioDefaults") ? cfg.ratioDefaults : DEFAULT_RATIO_DEFAULTS;
+      const ratioProps = /** @type {{ normal: string, flat: string }} */ (
+        hasOwn.call(cfg, "ratioProps") ? cfg.ratioProps : DEFAULT_RATIO_PROPS
+      );
+      const ratioDefaults = /** @type {{ normal: number, flat: number }} */ (
+        hasOwn.call(cfg, "ratioDefaults") ? cfg.ratioDefaults : DEFAULT_RATIO_DEFAULTS
+      );
       const hideTextualMetricsProp = typeof cfg.hideTextualMetricsProp === "string" && cfg.hideTextualMetricsProp
         ? cfg.hideTextualMetricsProp
         : null;
       const layers = fullCircleNormalizeLayers(cfg.cacheLayers);
       const layerCache = layerCacheApi.createLayerCache({ layers: layers });
+      /** @type {Record<string, HTMLCanvasElement>} */
       const layerCanvases = Object.create(null);
+      /** @type {Record<string, unknown>} */
       const cacheMeta = Object.create(null);
-      const layoutCfg = hasOwn.call(cfg, "layout") ? cfg.layout : DEFAULT_LAYOUT;
+      const layoutCfg = /** @type {DyniRadialConfigMap} */ (
+        hasOwn.call(cfg, "layout") ? cfg.layout : DEFAULT_LAYOUT
+      );
 
+      /**
+       * @param {unknown} canvas
+       * @param {unknown} props
+       * @returns {{ wantsFollowUpFrame: boolean } | undefined}
+       */
       return function renderCanvas(canvas, props) {
-        const p = props || {};
-        const setup = componentContext.canvas.setupCanvas(canvas);
+        const p = /** @type {Record<string, unknown>} */ (props || {});
+        const setup = /** @type {DyniCanvasSurface} */ (
+          (/** @type {DyniCanvasHostApi} */ (componentContext.canvas)).setupCanvas(canvas)
+        );
         const ctx = setup.ctx;
         const W = setup.W;
         const H = setup.H;
@@ -77,7 +102,7 @@
         }
 
         const rootEl = componentContext.dom.requirePluginRoot(canvas);
-        const theme = GU.theme.resolveForRoot(rootEl);
+        const theme = (/** @type {DyniGaugeThemeResolver} */ (/** @type {unknown} */ (GU.theme))).resolveForRoot(rootEl);
         const valueWeight = theme.font.weight;
         const labelWeight = theme.font.labelWeight;
         const family = p.stableDigits === true
@@ -100,8 +125,8 @@
           });
           return;
         }
-        ctx.fillStyle = color;
-        ctx.strokeStyle = color;
+        ctx.fillStyle = /** @type {string} */ (color);
+        ctx.strokeStyle = /** @type {string} */ (color);
 
         const ratio = W / Math.max(1, H);
         const tNormal = value.isFiniteNumber(p[ratioProps.normal]) ? p[ratioProps.normal] : ratioDefaults.normal;
@@ -119,8 +144,9 @@
         });
         const geom = layout.geom;
         const slots = layout.slots;
-        const bufferW = Math.max(1, Math.round(canvas.width || W));
-        const bufferH = Math.max(1, Math.round(canvas.height || H));
+        const canvasEl = /** @type {HTMLCanvasElement} */ (canvas);
+        const bufferW = Math.max(1, Math.round(canvasEl.width || W));
+        const bufferH = Math.max(1, Math.round(canvasEl.height || H));
         const dpr = Math.max(1, bufferW / Math.max(1, W));
 
         const state = {
@@ -149,7 +175,8 @@
           draw: draw,
           text: text,
           value: value,
-          angle: angle
+          angle: angle,
+          staticKey: ""
         };
 
         const staticKey = {
@@ -184,14 +211,16 @@
         state.staticKey = fullCircleKeyToText(staticKey);
 
         const api = {
+          /** @param {CanvasRenderingContext2D} [targetCtx] @returns {void} */
           drawFullCircleRing(targetCtx) {
-            const target = targetCtx || state.ctx;
+            const target = /** @type {CanvasRenderingContext2D} */ (targetCtx || state.ctx);
             draw.drawRing(target, state.geom.cx, state.geom.cy, state.geom.rOuter, {
               lineWidth: state.geom.arcLineWidth
             });
           },
+          /** @param {CanvasRenderingContext2D} [targetCtx] @param {DyniRadialDrawOptions} [opts] @returns {void} */
           drawFullCircleTicks(targetCtx, opts) {
-            const target = targetCtx || state.ctx;
+            const target = /** @type {CanvasRenderingContext2D} */ (targetCtx || state.ctx);
             const options = opts || {};
             draw.drawTicks(target, state.geom.cx, state.geom.cy, state.geom.rOuter, {
               rotationDeg: value.resolveFiniteNumber(options.rotationDeg, 0),
@@ -210,14 +239,21 @@
               }
             });
           },
+          /**
+           * @param {CanvasRenderingContext2D} [targetCtx]
+           * @param {unknown} [angleDeg]
+           * @param {DyniRadialDrawOptions} [opts]
+           * @returns {void}
+           */
           drawFixedPointer(targetCtx, angleDeg, opts) {
-            const target = targetCtx || state.ctx;
+            const target = /** @type {CanvasRenderingContext2D} */ (targetCtx || state.ctx);
             draw.drawPointerAtRim(target, state.geom.cx, state.geom.cy, state.geom.rOuter, value.resolveFiniteNumber(angleDeg, 0), {
               depth: state.geom.fixedPointerDepth,
               halfWidth: Math.max(1, Math.floor(state.geom.pointerSide / 2)),
               fillStyle: (opts && opts.fillStyle) || state.theme.colors.pointer
             });
           },
+          /** @param {unknown} layerName @param {DyniRadialDrawOptions} [opts] @returns {void} */
           drawCachedLayer(layerName, opts) {
             const name = String(layerName || layers[0]);
             const layer = layerCanvases[name];
@@ -225,7 +261,7 @@
               return;
             }
             const options = opts || {};
-            const target = options.ctx || state.ctx;
+            const target = /** @type {CanvasRenderingContext2D} */ (options.ctx || state.ctx);
             const rotationDeg = Number(options.rotationDeg);
             if (Number.isFinite(rotationDeg) && rotationDeg !== 0) {
               target.save();
@@ -238,9 +274,11 @@
             }
             target.drawImage(layer, 0, 0, layer.width, layer.height, 0, 0, state.W, state.H);
           },
+          /** @param {unknown} key @returns {unknown} */
           getCacheMeta(key) {
             return cacheMeta[String(key || "")];
           },
+          /** @param {unknown} key @param {unknown} metaValue @returns {unknown} */
           setCacheMeta(key, metaValue) {
             cacheMeta[String(key || "")] = metaValue;
             return metaValue;
@@ -252,9 +290,9 @@
             layerCanvases[layerName] = layerCanvas;
             layerCtx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
             layerCtx.clearRect(0, 0, state.W, state.H);
-            layerCtx.fillStyle = state.color;
-            layerCtx.strokeStyle = state.color;
-            cfg.rebuildLayer(layerCtx, layerName, state, p, api);
+            layerCtx.fillStyle = /** @type {string} */ (state.color);
+            layerCtx.strokeStyle = /** @type {string} */ (state.color);
+            (/** @type {Function} */ (cfg.rebuildLayer))(layerCtx, layerName, state, p, api);
           });
         }
 
@@ -266,7 +304,9 @@
           api.drawCachedLayer(layers[0]);
         }
 
-        const drawMode = hasOwn.call(cfg, "drawMode") ? cfg.drawMode : null;
+        const drawMode = /** @type {Record<string, unknown> | null} */ (
+          hasOwn.call(cfg, "drawMode") ? cfg.drawMode : null
+        );
         const modeRenderer = drawMode && drawMode[state.mode];
         let modeResult = null;
         if (!hideTextualMetrics && typeof modeRenderer === "function") {

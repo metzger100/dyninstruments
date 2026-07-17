@@ -36,6 +36,9 @@ describe("AisTargetRenderModel", function () {
       AisTargetLayoutGeometry: loadFresh(
         "shared/widget-kits/nav/AisTargetLayoutGeometry.js",
       ),
+      AisTargetLayoutGeometryStyles: loadFresh(
+        "shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js",
+      ),
       AisTargetLayoutMath: loadFresh(
         "shared/widget-kits/nav/AisTargetLayoutMath.js",
       ),

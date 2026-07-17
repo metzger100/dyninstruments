@@ -1,7 +1,6 @@
 /**
- * Module: RoutePointsMarkup - Pure HTML assembly owner for route-points renderer output
+ * @file RoutePointsMarkup - Pure HTML assembly owner for route-points renderer output
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: StateScreenMarkup, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,9 +11,16 @@
 }(this, function () {
   "use strict";
 
-  let toObject;
+  /** @type {DyniValueMathApi["toText"]} */
   let toText;
 
+  /**
+   * @param {DyniRoutePointsMarkupModel} model
+   * @param {DyniRoutePointsInlineGeometry} geometry
+   * @param {DyniRoutePointsMarkupFit} fit
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @returns {string}
+   */
   function renderHeader(model, geometry, fit, htmlUtils) {
     if (model.showHeader !== true || model.hasRoute !== true) {
       return "";
@@ -23,7 +29,7 @@
       return "";
     }
 
-    const headerFit = toObject(fit.headerFit);
+    const headerFit = fit.headerFit;
 
     return ""
       + '<div class="dyni-route-points-header"' + htmlUtils.toStyleAttr(geometry.header.style) + ">"
@@ -44,6 +50,14 @@
       + "</div>";
   }
 
+  /**
+   * @param {DyniRoutePointsMarkupModel} model
+   * @param {DyniRoutePointsInlineGeometry} geometry
+   * @param {DyniRoutePointsMarkupFit} fit
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @param {unknown} coordinatesTabular
+   * @returns {string}
+   */
   function renderRows(model, geometry, fit, htmlUtils, coordinatesTabular) {
     const rows = model.points;
     const rowGeometry = geometry.rows;
@@ -52,9 +66,9 @@
     let html = "";
 
     for (let i = 0; i < rows.length; i += 1) {
-      const row = toObject(rows[i]);
-      const geom = toObject(rowGeometry[i]);
-      const rowFit = toObject(rowFits[i]);
+      const row = rows[i];
+      const geom = rowGeometry[i];
+      const rowFit = rowFits[i];
       const rowClasses = ["dyni-route-points-row"];
       const markerClasses = ["dyni-route-points-marker"];
 
@@ -120,19 +134,27 @@
     return html;
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniRoutePointsMarkupApi}
+   */
   function create(def, componentContext) {
     const stateScreenMarkup = componentContext.components.require("StateScreenMarkup");
     const valueMath = componentContext.components.require("ValueMath");
-    toObject = valueMath.toObject;
     toText = valueMath.toText;
 
+    /**
+     * @param {DyniRoutePointsMarkupRenderArgs} args
+     * @returns {string}
+     */
     function render(args) {
-      const cfg = args || {};
-      const model = toObject(cfg.model);
-      const fit = toObject(cfg.fit);
+      const cfg = args;
+      const model = cfg.model;
+      const fit = cfg.fit;
       const htmlUtils = cfg.htmlUtils;
       const coordinatesTabular = cfg.coordinatesTabular !== false;
-      const geometry = toObject(model.inlineGeometry);
+      const geometry = model.inlineGeometry;
       const interactionState = model.interactionState === "dispatch" ? "dispatch" : "passive";
       const wrapperClasses = [
         "dyni-route-points-html",

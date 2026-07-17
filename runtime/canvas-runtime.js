@@ -1,17 +1,20 @@
 /**
- * Module: DyniPlugin Canvas Runtime - HiDPI canvas setup service
+ * @file DyniPlugin Canvas Runtime - HiDPI canvas setup service
  * Documentation: documentation/shared/helpers.md
- * Depends: browser Canvas 2D
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
-  const runtime = ns.runtime;
+  const runtime = /** @type {DyniRuntimeNamespace} */ (ns.runtime);
   const layoutByCanvas = new WeakMap();
 
+  /** @param {HTMLCanvasElement} canvas @returns {DyniCanvasSurface} */
   function setupCanvas(canvas) {
     const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error("dyninstruments: runtime.canvas.setupCanvas() requires a 2D canvas context");
+    }
     const dpr = root.devicePixelRatio || 1;
 
     const clientWidth = canvas.clientWidth;

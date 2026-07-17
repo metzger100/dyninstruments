@@ -8,6 +8,18 @@ function writeFile(rootDir, relPath, content) {
   fs.writeFileSync(absPath, content);
 }
 
+const DEV_TOOLING_FILES = [
+  ".markdownlint-cli2.jsonc",
+  ".pre-commit-config.yaml",
+  ".prettierignore",
+  ".prettierrc.json",
+  ".stylelintrc.json",
+  "eslint.config.mjs",
+  "jscpd.config.json",
+  "tsconfig.checkjs.json",
+  "vitest.config.js"
+];
+
 describe("release-zip-builder", function () {
   it("builds a sorted runtime-only manifest for the current repository", async function () {
     const { buildReleaseManifest, isRuntimePath } = await import("../../tools/release-zip-builder.mjs");
@@ -31,16 +43,32 @@ describe("release-zip-builder", function () {
     expect(manifest).toContain("layouts/dyni-sailboat.json");
     expect(manifest.some((filePath) => filePath.startsWith("assets/fonts/"))).toBe(true);
 
+    const pluginConfig = JSON.parse(fs.readFileSync(path.join(process.cwd(), "plugin.json"), "utf8"));
+    pluginConfig.layouts.forEach(function (layoutDef) {
+      expect(manifest).toContain(layoutDef.file);
+    });
+
     expect(manifest.some((filePath) => filePath.startsWith("tests/"))).toBe(false);
     expect(manifest.some((filePath) => filePath.startsWith("tools/"))).toBe(false);
     expect(manifest.some((filePath) => filePath.startsWith("documentation/"))).toBe(false);
     expect(manifest.some((filePath) => filePath.startsWith("exec-plans/"))).toBe(false);
+    expect(manifest.some((filePath) => filePath.startsWith("schemas/"))).toBe(false);
+    expect(manifest.some((filePath) => filePath.startsWith(".github/"))).toBe(false);
+    expect(manifest.some((filePath) => filePath.startsWith("types/"))).toBe(false);
+    expect(manifest).not.toContain("package.json");
+    expect(manifest).not.toContain("package-lock.json");
+    DEV_TOOLING_FILES.forEach(function (filePath) {
+      expect(manifest).not.toContain(filePath);
+    });
 
     expect(isRuntimePath("runtime/init.js")).toBe(true);
     expect(isRuntimePath("plugin.json")).toBe(true);
     expect(isRuntimePath("layouts/dyni-motorboat.json")).toBe(true);
-    expect(isRuntimePath("tools/perf-run.mjs")).toBe(false);
+    expect(isRuntimePath("tools/retired-quality-tool.mjs")).toBe(false);
     expect(isRuntimePath("tests/tools/release-zip-builder.test.js")).toBe(false);
+    expect(isRuntimePath("node_modules/vitest/index.js")).toBe(false);
+    expect(isRuntimePath(".pre-commit-config.yaml")).toBe(false);
+    expect(isRuntimePath("tsconfig.checkjs.json")).toBe(false);
   });
 
   describe("buildBootstrapBundleContent", function () {

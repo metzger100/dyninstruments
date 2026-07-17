@@ -1,18 +1,22 @@
 /**
- * Module: DyniPlugin Unit Editable Utils - Shared generators for formatter-token and unit-label editables
+ * @file DyniPlugin Unit Editable Utils - Shared generators for formatter-token and unit-label editables
  * Documentation: documentation/architecture/component-system.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, shared/unit-format-families.js, ValueMath
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {{ min: number, max: number, step: number, default: number, internal?: boolean }} DyniUnitFloatTokenSpec */
+  /** @typedef {{ baseKey?: unknown, key?: unknown, displayName?: unknown, name?: unknown, condition?: unknown, internal?: boolean, tokens?: Record<string, DyniUnitFloatTokenSpec>, perToken?: Record<string, DyniUnitFloatTokenSpec> }} DyniUnitFloatFieldSpec */
+  /** @typedef {{ kind: unknown }} DyniUnitConditionItem */
+  /** @typedef {DyniPluginSharedConfig & { kindMaps: Record<string, DyniPerKindTextParameterMap>, unitFormatFamilies: DyniUnitFormatCatalog, makeKindCondition: (kind: unknown, fallbackKind: string) => DyniEditableCondition, makeFormatUnitSelectParam: (metricKey: string, binding: DyniUnitFormatBinding, kindDef?: DyniPerKindTextParameterDescriptor) => DyniEditableParameters, makePerUnitStringParams: (metricKey: string, binding: DyniUnitFormatBinding, kindDef?: DyniPerKindTextParameterDescriptor) => DyniEditableParameters, makePerUnitFloatParams: (metricKey: string, binding: DyniUnitFormatBinding, kindDef: DyniPerKindTextParameterDescriptor | undefined, fieldSpec: DyniUnitFloatFieldSpec) => DyniEditableParameters }} DyniUnitEditableShared */
+
+  const ns = /** @type {DyniPluginNamespace} */ (/** @type {unknown} */ (root.DyniPlugin));
   const config = ns.config;
-  const shared = config.shared = config.shared || {};
+  const shared = /** @type {DyniUnitEditableShared} */ (config.shared = config.shared || {});
   const makeKindCondition = shared.makeKindCondition;
   const kindMaps = shared.kindMaps;
   const catalog = shared.unitFormatFamilies;
-  const valueMathModule = root.DyniComponents && root.DyniComponents.DyniValueMath;
+  const valueMathModule = /** @type {{ create?: () => DyniValueMathApi } | undefined} */ (root.DyniComponents && root.DyniComponents.DyniValueMath);
   if (!valueMathModule || typeof valueMathModule.create !== "function") {
     throw new Error("dyninstruments: shared/widget-kits/value/ValueMath.js must load before config/shared/unit-editable-utils.js");
   }
@@ -30,13 +34,15 @@
     throw new Error("dyninstruments: shared/unit-format-families.js must load before config/shared/unit-editable-utils.js");
   }
 
+  /** @param {unknown} condition @returns {DyniUnitConditionItem[]} */
   function toConditionList(condition) {
     if (!condition) {
       return [];
     }
-    return Array.isArray(condition) ? condition : [condition];
+    return Array.isArray(condition) ? /** @type {DyniUnitConditionItem[]} */ (condition) : [/** @type {DyniUnitConditionItem} */ (condition)];
   }
 
+  /** @param {unknown} baseCondition @param {unknown} extraCondition @returns {DyniEditableCondition | undefined} */
   function mergeConditions(baseCondition, extraCondition) {
     const baseList = toConditionList(baseCondition);
     const extraList = toConditionList(extraCondition);
@@ -45,21 +51,23 @@
       return undefined;
     }
     if (!baseList.length) {
-      return extraList.length === 1 ? extraList[0] : extraList.slice();
+      return extraList.length === 1 ? /** @type {DyniEditableCondition} */ (extraList[0]) : extraList.slice();
     }
     if (!extraList.length) {
-      return baseList.length === 1 ? baseList[0] : baseList.slice();
+      return baseList.length === 1 ? /** @type {DyniEditableCondition} */ (baseList[0]) : baseList.slice();
     }
 
+    /** @type {DyniUnitConditionItem[]} */
     const merged = [];
     baseList.forEach(function (base) {
       extraList.forEach(function (extra) {
         merged.push(Object.assign({}, base, extra));
       });
     });
-    return merged.length === 1 ? merged[0] : merged;
+    return merged.length === 1 ? /** @type {DyniEditableCondition} */ (merged[0]) : merged;
   }
 
+  /** @param {DyniPerKindTextParameterDescriptor | undefined} kindDef @param {string} fallbackKind @returns {DyniEditableCondition} */
   function resolveKindCondition(kindDef, fallbackKind) {
     if (kindDef && Object.prototype.hasOwnProperty.call(kindDef, "kind")) {
       return makeKindCondition(kindDef.kind, fallbackKind);
@@ -67,6 +75,7 @@
     return makeKindCondition(undefined, fallbackKind);
   }
 
+  /** @param {DyniUnitFormatBinding} binding @param {string} metricKey @returns {DyniUnitFormatFamily} */
   function getFamily(binding, metricKey) {
     const familyId = binding && binding.family;
     const family = catalog.families[familyId];
@@ -80,6 +89,7 @@
     return family;
   }
 
+  /** @param {string} metricKey @param {Readonly<Record<string, DyniUnitFormatBinding>> | undefined} bindings @returns {DyniUnitFormatBinding} */
   function getBinding(metricKey, bindings) {
     const source = bindings && typeof bindings === "object" ? bindings : catalog.metricBindings;
     const binding = source[metricKey] || catalog.metricBindings[metricKey];
@@ -89,7 +99,9 @@
     return binding;
   }
 
+  /** @param {DyniPerKindTextParameterMap} kindMap @returns {DyniEditableParameters} */
   function makePerKindCaptionParams(kindMap) {
+    /** @type {DyniEditableParameters} */
     const out = {};
     Object.keys(kindMap || {}).forEach(function (metricKey) {
       const def = kindMap[metricKey] || {};
@@ -103,6 +115,7 @@
     return out;
   }
 
+  /** @param {string} metricKey @param {DyniUnitFormatBinding} binding @param {DyniPerKindTextParameterDescriptor | undefined} kindDef @returns {DyniEditableParameters} */
   function makeFormatUnitSelectParam(metricKey, binding, kindDef) {
     const family = getFamily(binding, metricKey);
     return {
@@ -116,8 +129,10 @@
     };
   }
 
+  /** @param {string} metricKey @param {DyniUnitFormatBinding} binding @param {DyniPerKindTextParameterDescriptor | undefined} kindDef @returns {DyniEditableParameters} */
   function makePerUnitStringParams(metricKey, binding, kindDef) {
     const family = getFamily(binding, metricKey);
+    /** @type {DyniEditableParameters} */
     const out = {};
     family.tokens.forEach(function (token) {
       const label = family.labels[token];
@@ -133,7 +148,9 @@
     return out;
   }
 
+  /** @param {DyniPerKindTextParameterMap} kindMap @param {Readonly<Record<string, DyniUnitFormatBinding>>} bindings @returns {DyniEditableParameters} */
   function makeUnitAwareTextParams(kindMap, bindings) {
+    /** @type {DyniEditableParameters} */
     const out = {};
     Object.keys(kindMap || {}).forEach(function (metricKey) {
       const def = kindMap[metricKey] || {};
@@ -144,6 +161,7 @@
     return out;
   }
 
+  /** @param {DyniUnitFloatFieldSpec | undefined} fieldSpec @param {string} token @returns {DyniUnitFloatTokenSpec} */
   function resolveFloatTokenSpec(fieldSpec, token) {
     const specDef = fieldSpec || {};
     const tokenSpecs = specDef.tokens || specDef.perToken || {};
@@ -155,6 +173,7 @@
     return spec;
   }
 
+  /** @param {string} metricKey @param {DyniUnitFormatBinding} binding @param {DyniPerKindTextParameterDescriptor | undefined} kindDef @param {DyniUnitFloatFieldSpec} fieldSpec @returns {DyniEditableParameters} */
   function makePerUnitFloatParams(metricKey, binding, kindDef, fieldSpec) {
     const family = getFamily(binding, metricKey);
     const specDef = fieldSpec || {};
@@ -164,12 +183,13 @@
     }
 
     const baseDisplayName = toText(specDef.displayName || specDef.name || baseKey);
+    /** @type {DyniEditableParameters} */
     const out = {};
 
     family.tokens.forEach(function (token) {
       const tokenSpec = resolveFloatTokenSpec(specDef, token);
       const label = family.labels[token];
-      const field = {
+      const field = /** @type {DyniEditableParameterSpec} */ ({
         type: "FLOAT",
         min: tokenSpec.min,
         max: tokenSpec.max,
@@ -179,7 +199,7 @@
         condition: mergeConditions(resolveKindCondition(kindDef, metricKey), mergeConditions(specDef.condition, {
           ["formatUnit_" + metricKey]: token
         }))
-      };
+      });
 
       if (specDef.internal === true || tokenSpec.internal === true) {
         field.internal = true;

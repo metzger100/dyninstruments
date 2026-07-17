@@ -1,7 +1,6 @@
 /**
- * Module: CanvasLayerCache - Shared offscreen canvas layer cache with explicit invalidation
+ * @file CanvasLayerCache - Shared offscreen canvas layer cache with explicit invalidation
  * Documentation: documentation/shared/canvas-layer-cache.md
- * Depends: Canvas ownerDocument.createElement("canvas"), CanvasRenderingContext2D, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,16 +11,23 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniCanvasLayerCacheApi}
+   */
   function create(def, componentContext) {
     const keyToText = componentContext.components.require("ValueMath").keyToText;
 
+    /** @param {unknown} spec @returns {string[]} */
     function normalizeLayers(spec) {
-      const source = spec && Array.isArray(spec.layers) ? spec.layers : null;
+      const specObj = /** @type {{ layers?: unknown } | null | undefined} */ (spec);
+      const source = specObj && Array.isArray(specObj.layers) ? specObj.layers : null;
       if (!source || !source.length) {
         return ["layer"];
       }
       const out = [];
-      const seen = Object.create(null);
+      const seen = /** @type {Record<string, boolean>} */ (Object.create(null));
       for (let i = 0; i < source.length; i++) {
         const name = String(source[i] || "");
         if (!name || seen[name]) {
@@ -33,11 +39,18 @@
       return out.length ? out : ["layer"];
     }
 
+    /**
+     * @param {unknown} canvas
+     * @param {number} width
+     * @param {number} height
+     * @returns {DyniCanvasLayerCacheLayer | null}
+     */
     function createLayer(canvas, width, height) {
-      if (!canvas || !canvas.ownerDocument || typeof canvas.ownerDocument.createElement !== "function") {
+      const canvasEl = /** @type {HTMLCanvasElement | null | undefined} */ (canvas);
+      if (!canvasEl || !canvasEl.ownerDocument || typeof canvasEl.ownerDocument.createElement !== "function") {
         return null;
       }
-      const layerCanvas = canvas.ownerDocument.createElement("canvas");
+      const layerCanvas = canvasEl.ownerDocument.createElement("canvas");
       layerCanvas.width = width;
       layerCanvas.height = height;
       const layerCtx = layerCanvas.getContext("2d");
@@ -47,11 +60,18 @@
       return { canvas: layerCanvas, ctx: layerCtx };
     }
 
+    /**
+     * @param {unknown} canvas
+     * @param {number} defaultWidth
+     * @param {number} defaultHeight
+     * @returns {DyniCanvasLayerDrawSize}
+     */
     function resolveDrawSize(canvas, defaultWidth, defaultHeight) {
-      let W = Number(canvas && canvas.clientWidth);
-      let H = Number(canvas && canvas.clientHeight);
-      if ((!Number.isFinite(W) || W <= 0 || !Number.isFinite(H) || H <= 0) && canvas && typeof canvas.getBoundingClientRect === "function") {
-        const rect = canvas.getBoundingClientRect();
+      const canvasEl = /** @type {HTMLCanvasElement | null | undefined} */ (canvas);
+      let W = Number(canvasEl && canvasEl.clientWidth);
+      let H = Number(canvasEl && canvasEl.clientHeight);
+      if ((!Number.isFinite(W) || W <= 0 || !Number.isFinite(H) || H <= 0) && canvasEl && typeof canvasEl.getBoundingClientRect === "function") {
+        const rect = canvasEl.getBoundingClientRect();
         W = Number(rect && rect.width);
         H = Number(rect && rect.height);
       }
@@ -64,9 +84,11 @@
       return { W: Math.max(1, Math.round(W)), H: Math.max(1, Math.round(H)) };
     }
 
+    /** @param {unknown} spec @returns {DyniCanvasLayerCacheInstance} */
     function createLayerCache(spec) {
       const layerNames = normalizeLayers(spec);
-      const layers = Object.create(null);
+      const layers = /** @type {Record<string, DyniCanvasLayerCacheLayer | null | undefined>} */ (Object.create(null));
+      /** @type {string | null | undefined} */
       let lastKey = null;
       let dirty = true;
       let drawW = 0;
@@ -74,13 +96,15 @@
       let bufferW = 0;
       let bufferH = 0;
 
+      /** @param {unknown} canvas @param {unknown} key @param {unknown} rebuildFn @returns {void} */
       function ensureLayer(canvas, key, rebuildFn) {
         if (!canvas || typeof rebuildFn !== "function") {
           return;
         }
-        const nextBufferW = Math.max(1, Math.round(Number(canvas.width) || 0));
-        const nextBufferH = Math.max(1, Math.round(Number(canvas.height) || 0));
-        const drawSize = resolveDrawSize(canvas, nextBufferW, nextBufferH);
+        const canvasEl = /** @type {HTMLCanvasElement} */ (canvas);
+        const nextBufferW = Math.max(1, Math.round(Number(canvasEl.width) || 0));
+        const nextBufferH = Math.max(1, Math.round(Number(canvasEl.height) || 0));
+        const drawSize = resolveDrawSize(canvasEl, nextBufferW, nextBufferH);
         const keyText = keyToText(key);
         const keyChanged = keyText !== lastKey;
         let rebuiltAny = false;
@@ -96,7 +120,7 @@
           const needsRecreate = !existing || !existing.canvas || !existing.ctx ||
             existing.canvas.width !== nextBufferW || existing.canvas.height !== nextBufferH;
           if (needsRecreate) {
-            layers[layerName] = createLayer(canvas, nextBufferW, nextBufferH);
+            layers[layerName] = createLayer(canvasEl, nextBufferW, nextBufferH);
           }
           const layer = layers[layerName];
           if (!layer || !layer.ctx) {
@@ -114,8 +138,10 @@
         }
       }
 
+      /** @param {unknown} targetCtx @returns {void} */
       function blit(targetCtx) {
-        if (!targetCtx || typeof targetCtx.drawImage !== "function") {
+        const ctx = /** @type {CanvasRenderingContext2D | null | undefined} */ (targetCtx);
+        if (!ctx || typeof ctx.drawImage !== "function") {
           return;
         }
         const outW = Math.max(1, drawW || bufferW);
@@ -125,12 +151,14 @@
           if (!layer || !layer.canvas) {
             continue;
           }
-          targetCtx.drawImage(layer.canvas, 0, 0, layer.canvas.width, layer.canvas.height, 0, 0, outW, outH);
+          ctx.drawImage(layer.canvas, 0, 0, layer.canvas.width, layer.canvas.height, 0, 0, outW, outH);
         }
       }
 
+      /** @param {unknown} targetCtx @param {unknown} layerName @returns {void} */
       function blitLayer(targetCtx, layerName) {
-        if (!targetCtx || typeof targetCtx.drawImage !== "function") {
+        const ctx = /** @type {CanvasRenderingContext2D | null | undefined} */ (targetCtx);
+        if (!ctx || typeof ctx.drawImage !== "function") {
           return;
         }
         const layer = layers[String(layerName || "")];
@@ -139,9 +167,10 @@
         }
         const outW = Math.max(1, drawW || bufferW);
         const outH = Math.max(1, drawH || bufferH);
-        targetCtx.drawImage(layer.canvas, 0, 0, layer.canvas.width, layer.canvas.height, 0, 0, outW, outH);
+        ctx.drawImage(layer.canvas, 0, 0, layer.canvas.width, layer.canvas.height, 0, 0, outW, outH);
       }
 
+      /** @returns {void} */
       function invalidate() {
         dirty = true;
       }

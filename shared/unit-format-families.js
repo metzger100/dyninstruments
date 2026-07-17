@@ -1,7 +1,6 @@
 /**
- * Module: DyniUnitFormatFamilies - Bootstrap-loaded formatter family catalog and metric bindings
+ * @file DyniUnitFormatFamilies - Bootstrap-loaded formatter family catalog and metric bindings
  * Documentation: documentation/architecture/component-system.md
- * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) {
@@ -11,24 +10,34 @@
   } else {
     (root.DyniComponents = root.DyniComponents || {}).DyniUnitFormatFamilies = factory();
   }
-}(this, function () {
+}(this, /** @this {unknown} */ function () {
   "use strict";
 
-  const globalRoot = typeof globalThis !== "undefined" ? globalThis : (typeof window !== "undefined" ? window : this);
+  /** @typedef {{ tokens: readonly string[], labels: Readonly<Record<string, string>>, selectorList: readonly DyniEditableOption[] }} DyniUnitFormatFamilyRecord */
+  /** @typedef {{ families: Readonly<Record<string, DyniUnitFormatFamilyRecord>>, metricBindings: Readonly<Record<string, DyniUnitFormatBinding>> }} DyniUnitFormatCatalogRecord */
+  /** @typedef {{ config?: DyniPluginConfig }} DyniUnitFormatNamespace */
+  /** @typedef {{ DyniPlugin?: DyniUnitFormatNamespace, DyniComponents?: Record<string, unknown> }} DyniUnitFormatGlobalRoot */
+
+  const globalRoot = /** @type {DyniUnitFormatGlobalRoot} */ (
+    typeof globalThis !== "undefined" ? globalThis : (typeof window !== "undefined" ? window : /** @type {unknown} */ (this))
+  );
   const ns = globalRoot.DyniPlugin = globalRoot.DyniPlugin || {};
-  const config = ns.config = ns.config || {};
+  const config = ns.config = ns.config || /** @type {DyniPluginConfig} */ ({});
   const shared = config.shared = config.shared || {};
 
+  /** @param {string} name @param {string} value @returns {DyniEditableOption} */
   function opt(name, value) {
     return { name: name, value: value };
   }
 
+  /** @param {readonly string[]} tokens @param {Readonly<Record<string, string>>} labels @returns {readonly DyniEditableOption[]} */
   function freezeSelectorList(tokens, labels) {
     return Object.freeze(tokens.map(function (token) {
       return opt(labels[token], token);
     }));
   }
 
+  /** @param {readonly string[]} tokens @param {Readonly<Record<string, string>>} labels @returns {DyniUnitFormatFamilyRecord} */
   function freezeFamily(tokens, labels) {
     const frozenTokens = Object.freeze(tokens.slice());
     const frozenLabels = Object.freeze(Object.assign({}, labels));
@@ -39,7 +48,9 @@
     });
   }
 
+  /** @param {string} family @param {string} defaultToken @param {string | undefined} [rendererKey] @returns {DyniUnitFormatBinding} */
   function freezeBinding(family, defaultToken, rendererKey) {
+    /** @type {DyniUnitFormatBinding} */
     const out = {
       family: family,
       defaultToken: defaultToken
@@ -117,6 +128,7 @@
     pressure: freezeBinding("pressure", "hpa")
   });
 
+  /** @type {DyniUnitFormatCatalogRecord} */
   const catalog = Object.freeze({
     families: families,
     metricBindings: metricBindings

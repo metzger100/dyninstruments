@@ -1,12 +1,22 @@
 /**
- * Module: DyniPlugin Component Loader - Dynamic JS/CSS loading and scoped component instantiation
+ * @file DyniPlugin Component Loader - Dynamic JS/CSS loading and scoped component instantiation
  * Documentation: documentation/architecture/component-system.md
- * Depends: window.DyniComponents, runtime/asset-preloader.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {Record<string, unknown>} DyniLoaderModule */
+  /** @typedef {{ create(definition: DyniWidgetDefinitionData, context: DyniLoaderComponentContext): unknown }} DyniLoaderFactoryModule */
+  /** @typedef {{ require(dependencyId: string): unknown }} DyniLoaderComponentDependencies */
+  /** @typedef {{ resolveForRoot(rootEl: Element): unknown }} DyniLoaderThemeTokens */
+  /** @typedef {{ tokens: DyniLoaderThemeTokens }} DyniLoaderTheme */
+  /** @typedef {{ components: DyniLoaderComponentDependencies, theme: DyniLoaderTheme, format: DyniRuntimeNamespace["format"], canvas: DyniRuntimeNamespace["canvas"], dom: DyniRuntimeNamespace["dom"], hostActions: DyniRuntimeNamespace["hostActions"] }} DyniLoaderComponentContext */
+  /** @typedef {{ widget: string }} DyniLoaderWidgetReference */
+  /** @typedef {{ loadComponent(id: string): Promise<unknown>, uniqueComponents(definitions: DyniLoaderWidgetReference[]): string[], areComponentsLoaded(ids: unknown): boolean, createInstance(id: string, definition: DyniWidgetDefinitionData): unknown }} DyniLoader */
+  /** @typedef {DyniRuntimeNamespace & { createAssetPreloader: (baseUrl: string) => DyniAssetPreloader, loadScriptOnce: (assetId: string, url: string) => Promise<void>, loadCssOnce: (assetId: string, url: string | undefined) => Promise<void>, theme: { tokens: DyniLoaderThemeTokens } }} DyniLoaderRuntime */
+  /** @typedef {DyniPluginNamespace & { baseUrl: string, runtime: DyniLoaderRuntime }} DyniLoaderRoot */
+
+  const ns = /** @type {DyniLoaderRoot} */ (root.DyniPlugin);
   const runtime = ns.runtime;
   const createAssetPreloader = runtime.createAssetPreloader;
   const runtimeLoadScriptOnce = runtime.loadScriptOnce;
@@ -29,6 +39,7 @@
   };
   runtime.getAsset = assetPreloader.getAsset;
 
+  /** @param {DyniComponentRegistryGroup} registry @param {string} id @param {string} methodName @returns {DyniComponentDefinition} */
   function ensureComponent(registry, id, methodName) {
     const componentDef = registry[id];
     if (!componentDef) {
@@ -37,10 +48,12 @@
     return componentDef;
   }
 
+  /** @param {DyniComponentRegistryGroup} registry @param {string} id @param {string} methodName */
   function ensureNoDependencyCycle(registry, id, methodName) {
     const visiting = Object.create(null);
     const visited = Object.create(null);
 
+    /** @param {string} nodeId @param {string[]} path */
     function walk(nodeId, path) {
       if (visiting[nodeId]) {
         const cycleStart = path.indexOf(nodeId);
@@ -63,8 +76,10 @@
     walk(id, []);
   }
 
+  /** @param {DyniLoaderRuntime} runtimeRef @param {DyniWidgetDefinitionData} def @param {Record<string, unknown>} dependencyInstancesById @param {Record<string, boolean>} declaredDepsByOwner @param {string} ownerId @returns {DyniLoaderComponentContext} */
   function buildComponentContext(runtimeRef, def, dependencyInstancesById, declaredDepsByOwner, ownerId) {
     const themeTokens = Object.freeze({
+      /** @param {Element} rootEl */
       resolveForRoot: function (rootEl) {
         return runtimeRef.theme.tokens.resolveForRoot(rootEl);
       }
@@ -84,7 +99,6 @@
       theme: {
         tokens: themeTokens
       },
-      perf: runtimeRef.perf,
       format: runtimeRef.format,
       canvas: runtimeRef.canvas,
       dom: runtimeRef.dom,
@@ -93,28 +107,32 @@
     };
   }
 
+  /** @param {DyniComponentRegistryGroup} components @returns {DyniLoader} */
   function createComponentLoader(components) {
     const registry = components;
     const loadCache = new Map();
     const loadedComponents = Object.create(null);
 
+    /** @param {string} componentId @param {DyniComponentDefinition} componentDef @param {unknown} mod @returns {DyniLoaderModule} */
     function validateComponentApi(componentId, componentDef, mod) {
       const apiShape = componentDef.apiShape || "factory";
       if (apiShape === "factory") {
-        if (!mod || typeof mod.create !== "function") {
+        const factoryModule = /** @type {DyniLoaderFactoryModule | null} */ (mod);
+        if (!factoryModule || typeof factoryModule.create !== "function") {
           throw new Error("Component not found or invalid: " + componentDef.globalKey);
         }
-        return mod;
+        return factoryModule;
       }
       if (apiShape === "module") {
         if (!mod || typeof mod !== "object") {
           throw new Error("Component not found or invalid: " + componentDef.globalKey);
         }
-        return mod;
+        return /** @type {DyniLoaderModule} */ (mod);
       }
       throw new Error("Unsupported apiShape '" + apiShape + "' for component: " + componentId);
     }
 
+    /** @param {string} id @returns {Promise<unknown>} */
     function loadComponent(id) {
       ensureNoDependencyCycle(registry, id, "loadComponent");
 
@@ -143,7 +161,8 @@
           return assetPreloader.preloadAssets(assetDecls);
         })
         .then(function () {
-          const mod = root.DyniComponents[componentDef.globalKey];
+          const componentRegistry = root.DyniComponents || {};
+          const mod = componentRegistry[componentDef.globalKey];
           const validated = validateComponentApi(id, componentDef, mod);
           loadedComponents[id] = validated;
           return validated;
@@ -158,6 +177,7 @@
       return promise;
     }
 
+    /** @param {unknown} ids @returns {boolean} */
     function areComponentsLoaded(ids) {
       if (!Array.isArray(ids)) {
         return false;
@@ -170,9 +190,11 @@
       return true;
     }
 
+    /** @param {DyniLoaderWidgetReference[]} list @returns {string[]} */
     function uniqueComponents(list) {
       const result = new Set();
 
+      /** @param {string} id */
       function addWithDeps(id) {
         if (!registry[id] || result.has(id)) {
           return;
@@ -191,6 +213,7 @@
       return Array.from(result);
     }
 
+    /** @param {string} id @param {Record<string, boolean>} visited */
     function assertLoadedClosure(id, visited) {
       const componentDef = ensureComponent(registry, id, "createInstance");
       if (!loadedComponents[id]) {
@@ -206,6 +229,7 @@
       }
     }
 
+    /** @param {string} id @param {DyniWidgetDefinitionData} def @returns {unknown} */
     function createInstance(id, def) {
       ensureNoDependencyCycle(registry, id, "createInstance");
       assertLoadedClosure(id, Object.create(null));
@@ -213,6 +237,7 @@
       const building = Object.create(null);
       const built = Object.create(null);
 
+      /** @param {string} componentId @param {string[]} path @returns {unknown} */
       function instantiate(componentId, path) {
         if (Object.prototype.hasOwnProperty.call(built, componentId)) {
           return built[componentId];
@@ -246,7 +271,7 @@
           instance = moduleApi;
         } else {
           const componentContext = buildComponentContext(runtime, def, dependencyInstancesById, declaredDepsByOwner, componentId);
-          instance = moduleApi.create(def, componentContext);
+          instance = /** @type {DyniLoaderFactoryModule} */ (moduleApi).create(def, componentContext);
         }
 
         built[componentId] = instance;

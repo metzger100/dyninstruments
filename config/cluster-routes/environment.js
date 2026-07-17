@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Cluster Routes Environment - Route metadata for environment kinds
+ * @file DyniPlugin Cluster Routes Environment - Route metadata for environment kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: config/cluster-routes.js
  */
 (function (root) {
   "use strict";

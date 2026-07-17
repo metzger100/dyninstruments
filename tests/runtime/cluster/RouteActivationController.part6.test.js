@@ -90,10 +90,6 @@ describe("runtime/cluster/RouteActivationController.js", function () {
             return options.props;
           }),
         },
-        perf: {
-          startSpan: vi.fn(() => null),
-          endSpan: vi.fn(),
-        },
       },
       config: {
         shared: {},

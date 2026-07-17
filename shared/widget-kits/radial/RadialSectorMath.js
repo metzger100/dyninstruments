@@ -1,7 +1,6 @@
 /**
- * Module: RadialSectorMath - Shared radial sector-building helpers
+ * @file RadialSectorMath - Shared radial sector-building helpers
  * Documentation: documentation/radial/gauge-shared-api.md
- * Depends: RadialAngleMath, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,11 +11,16 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   */
   function create(def, componentContext) {
     const angle = componentContext.components.require("RadialAngleMath");
     const value = componentContext.components.require("ValueMath");
     const toOptionalFiniteNumber = value.toOptionalFiniteNumber;
 
+    /** @param {unknown} rawValue @param {unknown} defaultValue @returns {number | undefined} */
     function readOptionalThreshold(rawValue, defaultValue) {
       const parsed = toOptionalFiniteNumber(rawValue);
       if (typeof parsed === "number") {
@@ -25,6 +29,14 @@
       return toOptionalFiniteNumber(defaultValue);
     }
 
+    /**
+     * @param {unknown} from
+     * @param {unknown} to
+     * @param {number} minV
+     * @param {number} maxV
+     * @param {DyniArc} arc
+     * @returns {DyniAngleRange | null}
+     */
     function sectorAngles(from, to, minV, maxV, arc) {
       const f = value.toFiniteNumber(from);
       const t = value.toFiniteNumber(to);
@@ -49,18 +61,26 @@
       return { a0: a0, a1: a1 };
     }
 
+    /**
+     * @param {DyniSectorProps | undefined} props
+     * @param {number} minV
+     * @param {number} maxV
+     * @param {DyniArc} arc
+     * @param {DyniSectorOptions | undefined} options
+     * @returns {DyniColoredAngleRange[]}
+     */
     function buildHighEndSectors(props, minV, maxV, arc, options) {
       const p = props || {};
       const opts = options || {};
       const warningFrom = readOptionalThreshold(p.warningFrom, undefined);
       const alarmFrom = readOptionalThreshold(p.alarmFrom, undefined);
-      const warningTo = (Number.isFinite(alarmFrom) && Number.isFinite(warningFrom) && alarmFrom > warningFrom)
+      const warningTo = (typeof alarmFrom === "number" && typeof warningFrom === "number" && alarmFrom > warningFrom)
         ? alarmFrom
         : maxV;
-      const warning = Number.isFinite(warningFrom)
+      const warning = typeof warningFrom === "number"
         ? sectorAngles(warningFrom, warningTo, minV, maxV, arc)
         : null;
-      const alarm = Number.isFinite(alarmFrom)
+      const alarm = typeof alarmFrom === "number"
         ? sectorAngles(alarmFrom, maxV, minV, maxV, arc)
         : null;
       const sectors = [];
@@ -69,20 +89,28 @@
       return sectors;
     }
 
+    /**
+     * @param {DyniSectorProps | undefined} props
+     * @param {number} minV
+     * @param {number} maxV
+     * @param {DyniArc} arc
+     * @param {DyniSectorOptions | undefined} options
+     * @returns {DyniColoredAngleRange[]}
+     */
     function buildLowEndSectors(props, minV, maxV, arc, options) {
       const p = props || {};
       const opts = options || {};
       const warningFrom = readOptionalThreshold(p.warningFrom, opts.defaultWarningFrom);
       const alarmFrom = readOptionalThreshold(p.alarmFrom, opts.defaultAlarmFrom);
-      const alarmTo = Number.isFinite(alarmFrom) ? value.clamp(alarmFrom, minV, maxV) : undefined;
-      const warningTo = Number.isFinite(warningFrom) ? value.clamp(warningFrom, minV, maxV) : undefined;
-      const alarm = (Number.isFinite(alarmTo) && alarmTo > minV)
+      const alarmTo = typeof alarmFrom === "number" ? value.clamp(alarmFrom, minV, maxV) : undefined;
+      const warningTo = typeof warningFrom === "number" ? value.clamp(warningFrom, minV, maxV) : undefined;
+      const alarm = (typeof alarmTo === "number" && alarmTo > minV)
         ? sectorAngles(minV, alarmTo, minV, maxV, arc)
         : null;
-      const warning = (Number.isFinite(alarmTo) && Number.isFinite(warningTo) && warningTo > alarmTo)
+      const warning = (typeof alarmTo === "number" && typeof warningTo === "number" && warningTo > alarmTo)
         ? sectorAngles(alarmTo, warningTo, minV, maxV, arc)
         : null;
-      const warningOnly = (!alarm && Number.isFinite(warningTo) && warningTo > minV)
+      const warningOnly = (!alarm && typeof warningTo === "number" && warningTo > minV)
         ? sectorAngles(minV, warningTo, minV, maxV, arc)
         : null;
       const sectors = [];

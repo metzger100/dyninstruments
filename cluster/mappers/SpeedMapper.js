@@ -1,7 +1,6 @@
 /**
- * Module: SpeedMapper - Cluster translation for numeric, linear, and semicircle speed gauge kinds
+ * @file SpeedMapper - Cluster translation for numeric, linear, and semicircle speed gauge kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: routeContext.toolkit
  */
 
 (function (root, factory) {
@@ -14,8 +13,9 @@
   "use strict";
 
   function create() {
+    /** @param {DyniMapperProps|null|undefined} props @param {DyniMapperRouteContext} routeContext @returns {Record<string, unknown>} */
     function translate(props, routeContext) {
-      const p = props || {};
+      const p = /** @type {DyniMapperProps} */ (props || {});
       const toolkit = routeContext.toolkit;
       const cap = toolkit.cap;
       const unit = toolkit.unit;

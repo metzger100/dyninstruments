@@ -217,6 +217,57 @@ Setting `--dyni-alarm` updates every token cascading from alarm (for example AIS
 
 dyninstruments is developed with AI-assisted tooling. See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, architecture, coding standards, and release process.
 
+Use Node 26 with npm 12.0.1. Run `npm run setup` once; it installs the locked
+dependencies and provisions the checksum-verified actionlint binary outside
+`node_modules`.
+
+The complete local gate is:
+
+```bash
+npm run check:all
+```
+
+For fast local feedback during development:
+
+```bash
+npm run check:fast
+```
+
+`check:fast` runs the standard static layer, strict `checkJs`, and Node-only
+unit/tool tests without the full coverage gate.
+`check:standard` runs scoped Prettier formatting checks for quality/config files,
+ESLint (including required shipped-file `@file` overviews), Stylelint, pinned
+actionlint workflow validation, and jscpd before the project-specific gates in
+`check:core`; any detected clone makes this standard layer fail.
+`check:core` also runs the scoped no-emit TypeScript `checkJs` baseline via
+`npm run typecheck`, Ajv schema validation via `npm run schema:check`, and the
+release/package contract via `npm run package:check`. It verifies `.only`
+rejection through the direct Vitest configuration and every configured project.
+Documentation checks run through `npm run docs:check`, including the markdownlint
+baseline.
+
+Optional local pre-commit hooks can run the fast formatting, lint, actionlint,
+and documentation checks before the full local gate.
+
+For test-environment work, `npm run test:split` runs the configured projects:
+`unit-node` for pure/tool tests without jsdom, `contract` for VM-based registry
+and bootstrap contracts, and `unit-dom` for jsdom/canvas-backed runtime/widget
+tests. Required local and CI checks do not require Playwright, a downloaded
+browser, or a browser driver; browser-facing behavior is covered by the DOM and
+contract projects.
+Coverage uses Vitest/V8 global and critical-area thresholds, with the legacy
+coverage-summary parser retired after native threshold proof.
+
+The local `check:all` command is the complete quality authority. A tag push
+reruns locked setup and `check:all` in a read-only GitHub job; only after it
+passes does the publisher upload the committed ZIP and matching notes. GitHub
+does not rebuild release artifacts.
+
+Before release creation, perform the manual AvNav smoke checklist in
+`CONTRIBUTING.md`: load the plugin, inspect representative radial/linear/HTML
+widgets in a bundled layout, switch day/night appearance, and exercise the
+interactive route/AIS controls.
+
 ## License
 
 Bundled Roboto and Roboto Mono font assets include Apache 2.0 license text and attribution in [assets/fonts/LICENSE.txt](assets/fonts/LICENSE.txt).

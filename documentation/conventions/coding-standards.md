@@ -1,10 +1,10 @@
 # Coding Standards
 
-**Status:** ✅ Implemented | Canonical JS structure, naming, headers, and reuse rules
+**Status:** ✅ Implemented | Canonical JS structure, naming, doc comments, and reuse rules
 
 ## Overview
 
-Use this document for runtime-safe component structure and naming. It defines file-size limits, mandatory headers, canonical templates, and shared-utility reuse rules.
+Use this document for runtime-safe component structure and naming. It defines file-size limits, focused file doc comments, canonical templates, and shared-utility reuse rules.
 
 ## Key Details
 
@@ -12,8 +12,6 @@ Use this document for runtime-safe component structure and naming. It defines fi
 - No ES module `import`/`export` in plugin runtime files.
 - Cluster host registration uses `renderHtml`; host `renderCanvas` is not the cluster path.
 - Internal canvas rendering remains valid through `CanvasDomSurfaceAdapter` and renderer `renderCanvas(canvas, props)` callbacks.
-- Runtime IIFE modules must consume perf spans through `runtime.perf.startSpan()` / `runtime.perf.endSpan()` instead of duplicating hook-probe wiring.
-- Registered components must consume perf spans through `componentContext.perf.startSpan()` / `componentContext.perf.endSpan()`.
 - Reusable logic belongs in shared kits, not in duplicated widget-local helpers.
 - Preserve explicit falsy defaults (`""`, `0`, `false`) via property-presence/nullish checks; never use truthy fallback for configured defaults.
 - Cache-owning modules must expose explicit invalidation APIs and mutation paths must call them.
@@ -22,6 +20,10 @@ Use this document for runtime-safe component structure and naming. It defines fi
 - User-visible responsive floors must come from the shared responsive-profile contract; widget-local floors are allowed only for technical safety bounds.
 - Fail-fast / keep-it-simple: validate and default at boundaries, then trust the resulting internal contract.
 - Do not add speculative legacy/compat/fallback helpers or duplicate CSS/config defaults in runtime code.
+
+## Fail-fast / keep-it-simple
+
+Validate and default at boundaries, then trust the resulting internal contract.
 
 ## File Size Limits
 
@@ -41,15 +43,19 @@ Use this document for runtime-safe component structure and naming. It defines fi
 
 If an exec-plan's implementation phases would cause a file to exceed 400 lines, the agent must refactor and split the file as part of that phase. The plan does not need to mention splitting explicitly — the 400-line rule is always in effect. Do not wait for a later "cleanup" phase. Do not use one-liner compression to fit more logic into fewer lines.
 
-## Mandatory File Headers
+## File Overview Comments
 
-For new or modified JS component files, include a short header block:
+Every shipped JavaScript file starts with one top-level JSDoc `@file` overview.
+ESLint's `jsdoc/require-file-overview` rule enforces presence, uniqueness, and
+placement at the beginning of the file. Keep the overview short. Do not repeat
+component-registry dependencies in comments; `config.components` is their
+authoritative owner. When an overview includes a `Documentation:` target,
+`npm run docs:check` validates that the target exists.
 
 ```javascript
 /**
- * Module: [Name] - [One-line description]
+ * @file [Name] - [One-line description]
  * Documentation: documentation/[path].md
- * Depends: [list of component dependencies]
  */
 ```
 
@@ -57,9 +63,8 @@ Example:
 
 ```javascript
 /**
- * Module: SpeedRadialWidget - Semicircle speedometer with warning/alarm sectors
+ * @file SpeedRadialWidget - Semicircle speedometer with warning/alarm sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleRadialEngine
  */
 ```
 
@@ -155,7 +160,7 @@ Rule: Before creating any new widget, check this table. If your widget matches a
 
 ## Reference Implementations
 
-- For a new semicircle gauge: `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js` - canonical UMD wrapper, header format, and `SemicircleRadialEngine` delegation.
+- For a new semicircle gauge: `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js` - canonical UMD wrapper, focused doc comment, and `SemicircleRadialEngine` delegation.
 - For a new linear gauge: `widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js` - canonical UMD wrapper and `LinearGaugeEngine` delegation.
 - For a new generic shared utility facade: `shared/widget-kits/gauge/GaugeToolkit.js` - facade pattern and dependency composition across non-radial shared gauge modules.
 - For radial-only draw orchestration: `shared/widget-kits/radial/RadialToolkit.js` - radial facade extending `GaugeToolkit`.
@@ -166,13 +171,14 @@ Rule: Before creating any new widget, check this table. If your widget matches a
 - `shared/unit-format-families.js` is the bootstrap-loaded shared catalog for migrated formatter families.
 - It self-initializes `DyniPlugin.config.shared` before assigning `DyniPlugin.config.shared.unitFormatFamilies`.
 - The file is also registered on `window.DyniComponents.DyniUnitFormatFamilies`.
-- `tools/check-umd.mjs` keeps this bootstrap-only file on `MODULE_EXPORT_ALLOWLIST` so it is not forced to expose the normal `{ id, create }` runtime component shape.
+- The component registry contract keeps this bootstrap-only file exempt from the normal `{ id, create }` runtime component shape.
 
 ## Shared Utilities
 
 Reusable logic MUST go in `shared/widget-kits/`. Never duplicate functions across widgets.
 
 Current shared utilities include:
+- `HtmlDomPatchUtils.patchInnerHtml()`
 - `HtmlWidgetUtils.toFiniteNumber()`
 - `HtmlWidgetUtils.trimText()`
 - `HtmlWidgetUtils.escapeHtml()`
@@ -181,10 +187,6 @@ Current shared utilities include:
 - `HtmlWidgetUtils.resolveRatioMode()`
 - `HtmlWidgetUtils.isEditingMode()`
 - `PreparedPayloadModelCache.createPreparedModelCache()`
-- `runtime.perf.startSpan()`
-- `runtime.perf.endSpan()`
-- `componentContext.perf.startSpan()`
-- `componentContext.perf.endSpan()`
 - `ValueMath.clamp()`
 - `ValueMath.isFiniteNumber()`
 - `ValueMath.toFiniteNumber()`

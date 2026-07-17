@@ -14,6 +14,7 @@ Use these modules before adding local helper functions.
 |---|---|---|
 | `ValueMath` | `shared/widget-kits/value/ValueMath.js` | canonical value/text/math helpers, including `toObject`, `toText`, `clampNumber`, `isObject`, `toSafeInteger`, `hasText`, `keyToText`, `textLength`, `lerp`, `appendUnit`, `toFiniteNumber`, `toOptionalFiniteNumber`, `isFiniteNumber`, `trimText`, `clamp`, `clampPositive`, `ensureObject` |
 | `HtmlMeasureUtils` | `shared/widget-kits/html/HtmlMeasureUtils.js` | `parseFontPx`, `createApproximateMeasureContext`, `resolveMeasureContext`, `measurePx`, `measureStyle`, `toStyle`, `resolveOwnerDocument`, `resolveFitCache`, `APPROX_CHAR_WIDTH_RATIO` |
+| `HtmlDomPatchUtils` | `shared/widget-kits/html/HtmlDomPatchUtils.js` | DOM-root patching for HTML widget markup (`patchInnerHtml`) |
 | `HtmlWidgetUtils` | `shared/widget-kits/html/HtmlWidgetUtils.js` | `resolveSurfacePolicy`, `escapeHtml`, `resolveDefaultText`, `toFontStyle`, `buildTextOptions`, `toStyleText`, `resolveMetricValueFamily`, `resolveLabelEdgePolicy`, `toPx`, `joinStyles` |
 | `TextLayoutComposite` | `shared/widget-kits/text/TextLayoutComposite.js` | `resolveTextFillScale`, `clampTextFillScale`, `scaleTextCeiling`, `resolveOpacity`, `resolveCompactGeometryScale`, `scaleValueUnitFit`, `scaleInlineFit` |
 | `TextLayoutEngine` | `shared/widget-kits/text/TextLayoutEngine.js` | fit-cache ownership helpers `makeFitCacheKey`, `writeFitCache`, `readFitCache`, `createFitCache` |

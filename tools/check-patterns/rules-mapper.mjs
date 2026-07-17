@@ -1,11 +1,5 @@
 import path from "node:path";
-import {
-  escapeRegex,
-  findMatchingBrace,
-  getClusterPascalPrefixes,
-  getFileData,
-  lineAt
-} from "./shared.mjs";
+import { findMatchingBrace, getClusterPascalPrefixes, getFileData, lineAt } from "./shared.mjs";
 
 export function runMapperLogicLeakageRule(rule, files) {
   const out = [];

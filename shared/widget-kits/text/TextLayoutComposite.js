@@ -1,7 +1,6 @@
 /**
- * Module: TextLayoutComposite - Composite row layouts built on TextLayoutPrimitives
+ * @file TextLayoutComposite - Composite row layouts built on TextLayoutPrimitives
  * Documentation: documentation/shared/text-layout-engine.md
- * Depends: TextLayoutPrimitives, TextLayoutScaleHelpers
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,11 @@
 }(this, function () {
   "use strict";
   const ROW_SAFE_RATIO = 0.92;
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniTextLayoutCompositeApi}
+   */
   function create(def, componentContext) {
     const primitive = componentContext.components.require("TextLayoutPrimitives");
     const scaleHelpers = componentContext.components.require("TextLayoutScaleHelpers");
@@ -22,8 +26,9 @@
     const scaleValueUnitFit = scaleHelpers.scaleValueUnitFit;
     const scaleInlineFit = scaleHelpers.scaleInlineFit;
     const resolveOpacity = scaleHelpers.resolveOpacity;
+    /** @param {unknown} args @returns {DyniThreeRowFit} */
     function fitThreeRowBlock(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniTextArgs} */ (args || {});
       const secScale = Number(cfg.secScale);
       const scale = Number.isFinite(secScale) ? secScale : 0.8;
       const textFillScale = clampTextFillScale(cfg.textFillScale);
@@ -85,8 +90,9 @@
         uPx: uFit.px
       };
     }
+    /** @param {unknown} args @returns {void} */
     function drawThreeRowBlock(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniDrawThreeRowArgs} */ (args || {});
       const fit = cfg.fit;
       const hTop = Math.max(1, Math.floor(Number(fit.hTop) || 1));
       const hMid = Math.max(1, Math.floor(Number(fit.hMid) || 1));
@@ -124,8 +130,9 @@
         }
       }
     }
+    /** @param {unknown} args @returns {DyniValueUnitCaptionFit} */
     function fitValueUnitCaptionRows(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniTextArgs} */ (args || {});
       const secScale = Number(cfg.secScale);
       const scale = Number.isFinite(secScale) ? secScale : 0.8;
       const textFillScale = clampTextFillScale(cfg.textFillScale);
@@ -178,8 +185,9 @@
         gap: pair.gap
       };
     }
+    /** @param {unknown} args @returns {void} */
     function drawValueUnitCaptionRows(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniDrawValueUnitCaptionArgs} */ (args || {});
       const fit = cfg.fit;
       primitive.drawInlineTriplet({
         ctx: cfg.ctx,
@@ -220,8 +228,9 @@
         }
       }
     }
+    /** @param {unknown} args @returns {DyniTwoRowsHeaderFit} */
     function fitTwoRowsWithHeader(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniTextArgs} */ (args || {});
       const hasHeader = !!cfg.captionText || !!cfg.unitText;
       const align = cfg.align === "right" ? "right" : "center";
       const W = Math.max(1, Number(cfg.W) || 0);
@@ -254,6 +263,7 @@
         weight: cfg.valueWeight,
         minPx: 1,
         maxPx: maxRowH,
+        /** @param {DyniMultiRowMeta} meta @returns {boolean} */
         extraCheck: function (meta) {
           return meta.rowIndex !== 0 || !topRowExtraCheck || topRowExtraCheck(meta);
         }
@@ -309,8 +319,9 @@
         unitPx: unitPx
       };
     }
+    /** @param {unknown} args @returns {void} */
     function drawTwoRowsWithHeader(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniDrawTwoRowsHeaderArgs} */ (args || {});
       const fit = cfg.fit;
       const W = Math.max(1, Number(cfg.W) || 0);
       const ctx = cfg.ctx;

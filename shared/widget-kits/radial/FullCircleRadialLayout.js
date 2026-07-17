@@ -1,7 +1,6 @@
 /**
- * Module: FullCircleRadialLayout - Responsive geometry owner for full-circle radial dials
+ * @file FullCircleRadialLayout - Responsive geometry owner for full-circle radial dials
  * Documentation: documentation/radial/full-circle-dial-engine.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, GeometryScale, TextLayoutScaleHelpers, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -27,18 +26,26 @@
   const RESPONSIVE_SCALES = {
     textFillScale: 1.18
   };
-  let makeRect = null;
+  let makeRect = /** @type {DyniMakeRect} */ (/** @type {unknown} */ (null));
+  /** @type {DyniValueMathApi["clampNumber"]} */
   let clampNumber;
 
+  /**
+   * @param {DyniRect} contentRect
+   * @param {DyniRadialResolvedTheme | undefined} theme
+   * @param {number} compactGeometryScale
+   * @param {DyniGeometryScaleApi} gs
+   * @returns {DyniFullCircleGeom}
+   */
   function computeModeGeometry(contentRect, theme, compactGeometryScale, gs) {
     const width = Math.max(1, contentRect.w);
     const height = Math.max(1, contentRect.h);
-    const radial = theme && theme.radial ? theme.radial : {};
-    const ring = radial.ring || {};
-    const labels = radial.labels || {};
-    const fullCircle = radial.fullCircle || {};
-    const ticks = (fullCircle.ticks || radial.ticks || {});
-    const pointer = radial.pointer || {};
+    const radial = /** @type {DyniRadialThemeConfig} */ (theme && theme.radial ? theme.radial : {});
+    const ring = /** @type {DyniRadialConfigMap} */ (radial.ring || {});
+    const labels = /** @type {DyniRadialConfigMap} */ (radial.labels || {});
+    const fullCircle = /** @type {DyniRadialConfigMap} */ (radial.fullCircle || {});
+    const ticks = /** @type {DyniRadialConfigMap} */ (fullCircle.ticks || radial.ticks || {});
+    const pointer = /** @type {DyniRadialConfigMap} */ (radial.pointer || {});
     const radius = Math.max(1, Math.floor(Math.min(width, height) / 2));
     const cx = contentRect.x + Math.floor(width / 2);
     const cy = contentRect.y + Math.floor(height / 2);
@@ -94,7 +101,13 @@
     };
   }
 
+  /**
+   * @param {DyniRect} contentRect
+   * @param {DyniFullCircleGeom} geom
+   * @returns {DyniFullCircleSlots}
+   */
   function computeFlatSlots(contentRect, geom) {
+    /** @type {DyniFullCircleSlots} */
     const slots = {
       leftTop: null,
       leftBottom: null,
@@ -120,6 +133,13 @@
     return slots;
   }
 
+  /**
+   * @param {DyniRect} contentRect
+   * @param {DyniFullCircleGeom} geom
+   * @param {number} pad
+   * @param {DyniRadialConfigMap | undefined} widgetLayout
+   * @returns {DyniFullCircleSlots}
+   */
   function computeHighSlots(contentRect, geom, pad, widgetLayout) {
     const topFactor = clampNumber(widgetLayout && widgetLayout.highTopFactor, 0, 2, 0.85);
     const bottomFactor = clampNumber(widgetLayout && widgetLayout.highBottomFactor, 0, 2, 0.85);
@@ -140,6 +160,12 @@
     };
   }
 
+  /**
+   * @param {DyniRect} contentRect
+   * @param {DyniFullCircleGeom} geom
+   * @param {number} compactGeometryScale
+   * @returns {DyniFullCircleNormal}
+   */
   function computeNormalLayout(contentRect, geom, compactGeometryScale) {
     return {
       safeRadius: Math.max(1, geom.rOuter - (geom.labelInsetVal + Math.max(1, Math.floor(
@@ -154,6 +180,11 @@
     };
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniFullCircleRadialLayoutApi}
+   */
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
@@ -162,6 +193,13 @@
     clampNumber = componentContext.components.require("ValueMath").clampNumber;
     makeRect = rectApi.makeRect;
 
+    /**
+     * @param {unknown} W
+     * @param {unknown} H
+     * @param {unknown} thresholdNormal
+     * @param {unknown} thresholdFlat
+     * @returns {"flat" | "high" | "normal"}
+     */
     function computeMode(W, H, thresholdNormal, thresholdFlat) {
       const width = Number(W) || 0;
       const height = Math.max(1, Number(H) || 0);
@@ -184,6 +222,11 @@
       return ratio < normalThreshold ? "high" : "normal";
     }
 
+    /**
+     * @param {unknown} W
+     * @param {unknown} H
+     * @returns {DyniRadialInsets}
+     */
     function computeInsets(W, H) {
       const responsiveProfile = profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
       const padPx = profileApi.computeInsetPx(responsiveProfile, PAD_RATIO, 1);
@@ -195,6 +238,10 @@
       };
     }
 
+    /**
+     * @param {DyniFullCircleLayoutArgs} [args]
+     * @returns {DyniFullCircleLayout}
+     */
     function computeLayout(args) {
       const cfg = args || {};
       const W = Math.max(1, Math.floor(Number(cfg.W) || 0));

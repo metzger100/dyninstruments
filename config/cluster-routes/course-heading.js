@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Cluster Routes CourseHeading - Route metadata for course-heading kinds
+ * @file DyniPlugin Cluster Routes CourseHeading - Route metadata for course-heading kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: config/cluster-routes.js
  */
 (function (root) {
   "use strict";

@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Component Registry Assembly - Merges registry fragments into config.components
+ * @file DyniPlugin Component Registry Assembly - Merges registry fragments into config.components
  * Documentation: documentation/architecture/component-system.md
- * Depends: window.DyniPlugin.baseUrl, config/components/registry-*.js
  */
 (function (root) {
   "use strict";
@@ -22,6 +21,7 @@
     "widgets",
     "cluster"
   ];
+  /** @type {DyniComponentRegistryGroup} */
   const mergedComponents = {};
 
   if (!groups || typeof groups !== "object") {

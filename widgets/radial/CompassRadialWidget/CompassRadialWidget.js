@@ -1,7 +1,6 @@
 /**
- * Module: CompassRadialWidget - Full-circle rotating compass with upright labels
+ * @file CompassRadialWidget - Full-circle rotating compass with upright labels
  * Documentation: documentation/widgets/compass-gauge.md
- * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout, SpringEasing, StableDigits
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,7 +10,12 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {{ angleDeg: number, canvas: HTMLCanvasElement, width: number, height: number }} DyniCompassLabelSprite */
+  /** @typedef {{ sprites: DyniCompassLabelSprite[], labelRadius: number }} DyniCompassLabelCache */
+  /** @typedef {Record<string, unknown> & { heading?: unknown, markerCourse?: unknown, caption?: unknown, unit?: unknown, default?: unknown, leadingZero?: boolean, stableDigits?: boolean, easing?: boolean, captionUnitScale?: unknown }} DyniCompassRadialProps */
+  /** @typedef {{ heading: unknown, marker: unknown, caption: unknown, unit: unknown, value: unknown, secScale: number }} DyniCompassDisplay */
   const hasOwn = Object.prototype.hasOwnProperty;
+  /** @type {Record<number, string>} */
   const COMPASS_LABELS = {
     0: "N",
     45: "NE",
@@ -24,6 +28,7 @@
   };
   const COMPASS_LABEL_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const engine = componentContext.components.require("FullCircleRadialEngine");
     const textLayout = componentContext.components.require("FullCircleRadialTextLayout");
@@ -32,6 +37,7 @@
     const headingMotion = springEasing.createMotion({ wrap: 360 });
     const markerMotion = springEasing.createMotion({ wrap: 360 });
 
+    /** @param {HTMLCanvasElement} canvas @param {DyniFullCircleEngineState} state @returns {DyniCompassLabelCache} */
     function buildCompassLabelSprites(canvas, state) {
       const sprites = [];
       const labelRadius = state.labels.spriteRadius;
@@ -58,8 +64,8 @@
         }
         drawCtx.setTransform(1, 0, 0, 1, 0, 0);
         drawCtx.clearRect(0, 0, width, height);
-        drawCtx.fillStyle = state.color;
-        drawCtx.strokeStyle = state.color;
+        drawCtx.fillStyle = /** @type {string} */ (state.color);
+        drawCtx.strokeStyle = /** @type {string} */ (state.color);
         drawCtx.font = font;
         drawCtx.textAlign = "center";
         drawCtx.textBaseline = "middle";
@@ -75,8 +81,9 @@
       return { sprites: sprites, labelRadius: labelRadius };
     }
 
+    /** @param {DyniFullCircleEngineState} state @param {number} rotationDeg @param {DyniFullCircleRendererApi} api */
     function drawCompassCachedLabels(state, rotationDeg, api) {
-      const entry = api.getCacheMeta("labels:" + state.staticKey);
+      const entry = /** @type {DyniCompassLabelCache | undefined} */ (api.getCacheMeta("labels:" + state.staticKey));
       if (!entry || !entry.sprites || !entry.sprites.length) {
         return;
       }
@@ -89,6 +96,7 @@
       }
     }
 
+    /** @param {DyniFullCircleEngineState} state @param {DyniCompassRadialProps} props @returns {DyniCompassDisplay} */
     function compassDisplay(state, props) {
       const p = props || {};
       const heading = p.heading;
@@ -137,16 +145,17 @@
           stepMajor: 30,
           stepMinor: 10
         });
-        api.setCacheMeta("labels:" + state.staticKey, buildCompassLabelSprites(state.canvas, state));
+        api.setCacheMeta("labels:" + state.staticKey, buildCompassLabelSprites(/** @type {HTMLCanvasElement} */ (state.canvas), state));
       },
       drawFrame: function (state, props, api) {
         const display = compassDisplay(state, props);
         const easingEnabled = props.easing !== false;
         const nowMs = Date.now();
-        const easedHeading = headingMotion.resolve(state.canvas, display.heading, easingEnabled, nowMs);
+        const motionCanvas = /** @type {object} */ (state.canvas);
+        const easedHeading = headingMotion.resolve(motionCanvas, display.heading, easingEnabled, nowMs);
         const markerFinite = state.value.isFiniteNumber(display.marker);
         const easedMarker = markerFinite
-          ? markerMotion.resolve(state.canvas, display.marker, easingEnabled, nowMs)
+          ? markerMotion.resolve(motionCanvas, display.marker, easingEnabled, nowMs)
           : NaN;
         let rotationDeg = 0;
         if (Number.isFinite(easedHeading)) {
@@ -164,7 +173,7 @@
           });
         }
         drawCompassCachedLabels(state, rotationDeg, api);
-        if (headingMotion.isActive(state.canvas) || (markerFinite && markerMotion.isActive(state.canvas))) {
+        if (headingMotion.isActive(motionCanvas) || (markerFinite && markerMotion.isActive(motionCanvas))) {
           return { wantsFollowUpFrame: true };
         }
       },

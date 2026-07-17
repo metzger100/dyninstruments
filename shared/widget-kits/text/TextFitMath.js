@@ -1,7 +1,6 @@
 /**
- * Module: TextFitMath - Shared numeric fit helpers for HTML text-fit modules
+ * @file TextFitMath - Shared numeric fit helpers for HTML text-fit modules
  * Documentation: documentation/shared/text-layout-engine.md
- * Depends: ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,26 +11,38 @@
 }(this, function () {
   "use strict";
 
+  /** @type {DyniValueMathApi["toFiniteNumber"]} */
   let toFiniteNumber;
 
+  /**
+   * @param {DyniTextFitArgs} [args]
+   * @returns {number}
+   */
   function resolveSecondaryMaxPx(args) {
     const cfg = args || {};
     const ratio = toFiniteNumber(cfg.secondaryToValueRatio);
     const valueRatio = toFiniteNumber(cfg.valueMaxPxRatio);
-    const safeRatio = ratio > 0 ? ratio : 0.8;
-    const safeValueRatio = valueRatio > 0 ? valueRatio : 0.9;
+    const safeRatio = typeof ratio === "number" && ratio > 0 ? ratio : 0.8;
+    const safeValueRatio = typeof valueRatio === "number" && valueRatio > 0 ? valueRatio : 0.9;
     const safeValuePx = Number(cfg.valuePx);
 
     if (Number.isFinite(safeValuePx) && safeValuePx > 0) {
       return Math.max(1, Math.floor(safeValuePx * safeRatio));
     }
 
-    const rect = cfg.valueRect && typeof cfg.valueRect === "object" ? cfg.valueRect : {};
+    const rect = /** @type {{ h?: unknown }} */ (
+      cfg.valueRect && typeof cfg.valueRect === "object" ? cfg.valueRect : {}
+    );
     const rectHeight = Math.max(1, Number(rect.h) || 1);
     const baseValuePx = Math.max(1, Math.floor(rectHeight * safeValueRatio));
     return Math.max(1, Math.floor(baseValuePx * safeRatio));
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniTextFitMathApi}
+   */
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
     toFiniteNumber = valueMath.toFiniteNumber;

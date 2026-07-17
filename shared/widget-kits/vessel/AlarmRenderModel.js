@@ -1,7 +1,6 @@
 /**
- * Module: AlarmRenderModel - Pure semantic display model for vessel alarm HTML
+ * @file AlarmRenderModel - Pure semantic display model for vessel alarm HTML
  * Documentation: documentation/widgets/alarm.md
- * Depends: HtmlWidgetUtils, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -15,9 +14,12 @@
   const DEFAULT_CAPTION = "ALARM";
   const DEFAULT_IDLE_VALUE = "NONE";
 
+  /** @type {DyniValueMathApi["toObject"]} */
   let toObject;
+  /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */
   let toOptionalFiniteNumber;
 
+  /** @param {Record<string, unknown>} props @param {string} key @param {string} defaultValue @returns {string} */
   function readText(props, key, defaultValue) {
     if (Object.prototype.hasOwnProperty.call(props, key)) {
       const value = props[key];
@@ -26,6 +28,7 @@
     return defaultValue;
   }
 
+  /** @param {Record<string, unknown>} props @param {DyniAlarmState} state @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {DyniAlarmInteractionState} */
   function resolveAlarmInteractionState(props, state, htmlUtils) {
     if (htmlUtils.isEditingMode(props)) {
       return "passive";
@@ -38,14 +41,16 @@
       : "passive";
   }
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniAlarmRenderModelApi} */
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const valueMath = componentContext.components.require("ValueMath");
     toObject = valueMath.toObject;
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
+    /** @param {unknown} args @returns {DyniAlarmRenderModel} */
     function buildModel(args) {
-      const cfg = args || {};
+      const cfg = /** @type {Record<string, unknown>} */ (args || {});
       const props = toObject(cfg.props);
       const domain = toObject(cfg.domain || props.domain);
       const state = domain.state === "active" ? "active" : "idle";

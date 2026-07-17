@@ -1,7 +1,6 @@
 /**
- * Module: XteDisplayWidget - Responsive XTE highway renderer with integrated nav metrics
+ * @file XteDisplayWidget - Responsive XTE highway renderer with integrated nav metrics
  * Documentation: documentation/widgets/xte-display.md
- * Depends: GaugeToolkit, CanvasLayerCache, XteHighwayPrimitives, XteHighwayLayout, TextTileLayout, SpringEasing, PlaceholderNormalize, StableDigits, UnitAwareFormatter, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,9 +10,16 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {Record<string, unknown> & { disconnect?: unknown, wpName?: unknown, xte?: unknown, cog?: unknown, dtw?: unknown, btw?: unknown }} DyniXteDisplayData */
+  /** @typedef {Record<string, unknown> & { easing?: unknown, hideTextualMetrics?: unknown, xteRatioThresholdNormal?: unknown, xteRatioThresholdFlat?: unknown, showWpName?: unknown, leadingZero?: unknown }} DyniXteDisplayLayoutConfig */
+  /** @typedef {DyniRadialResolvedTheme & { surface: { fg: string }, colors: { pointer: string, alarm: string } }} DyniXteWidgetTheme */
+  /** @typedef {{ resolveForRoot(rootEl: unknown): DyniXteWidgetTheme }} DyniXteWidgetThemeResolver */
+  /** @typedef {DyniGaugeToolkitApi & { theme: DyniXteWidgetThemeResolver }} DyniXteWidgetToolkit */
+  /** @typedef {DyniComponentContext & { canvas: DyniCanvasHostApi }} DyniXteWidgetContext */
 
+  /** @param {unknown} def @param {DyniXteWidgetContext} componentContext */
   function create(def, componentContext) {
-    const toolkit = componentContext.components.require("GaugeToolkit");
+    const toolkit = /** @type {DyniXteWidgetToolkit} */ (componentContext.components.require("GaugeToolkit"));
     const cacheFactory = componentContext.components.require("CanvasLayerCache");
     const primitives = componentContext.components.require("XteHighwayPrimitives");
     const layoutApi = componentContext.components.require("XteHighwayLayout");
@@ -27,6 +33,7 @@
     const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
     const staticLayer = cacheFactory.createLayerCache({ layers: ["back"] });
 
+    /** @param {unknown} raw @returns {string} */
     function trimWaypointName(raw) {
       if (typeof raw !== "string") {
         return "";
@@ -34,19 +41,25 @@
       return raw.trim();
     }
 
+    /** @param {DyniWidgetValues} props */
     function resolveStateKind(props) {
-      const p = props || {};
-      const display = p.display && typeof p.display === "object" ? p.display : null;
+      const p = props;
+      const display = p.display && typeof p.display === "object" ? /** @type {DyniXteDisplayData} */ (p.display) : null;
+      const waypointName = display && typeof display.wpName === "string" ? display.wpName : "";
       return stateScreenPrecedence.pickFirst([
         { kind: "disconnected", when: display && display.disconnect === true },
-        { kind: "noTarget", when: typeof (display && display.wpName) === "string" && display.wpName.trim() === "" },
+        { kind: "noTarget", when: waypointName === "" },
         { kind: "data", when: true }
       ]);
     }
 
+    /** @param {HTMLCanvasElement} canvas @param {DyniWidgetValues} props */
     function renderCanvas(canvas, props) {
-      const p = props || {};
+      const p = props;
       const setup = componentContext.canvas.setupCanvas(canvas);
+      if (!setup) {
+        return;
+      }
       const ctx = setup.ctx;
       const W = setup.W;
       const H = setup.H;
@@ -88,15 +101,15 @@
         stripeLine: textColor
       };
 
-      const display = p.display && typeof p.display === "object" ? p.display : null;
-      const captions = p.captions && typeof p.captions === "object" ? p.captions : null;
-      const units = p.units && typeof p.units === "object" ? p.units : null;
-      const formatUnits = p.formatUnits && typeof p.formatUnits === "object" ? p.formatUnits : null;
-      const layoutConfig = p.layout && typeof p.layout === "object" ? p.layout : null;
+      const display = p.display && typeof p.display === "object" ? /** @type {DyniXteDisplayData} */ (p.display) : null;
+      const captions = p.captions && typeof p.captions === "object" ? /** @type {DyniXteDisplayData} */ (p.captions) : null;
+      const units = p.units && typeof p.units === "object" ? /** @type {DyniXteDisplayData} */ (p.units) : null;
+      const formatUnits = p.formatUnits && typeof p.formatUnits === "object" ? /** @type {DyniXteDisplayData} */ (p.formatUnits) : null;
+      const layoutConfig = p.layout && typeof p.layout === "object" ? /** @type {DyniXteDisplayLayoutConfig} */ (p.layout) : null;
       const easingEnabled = !layoutConfig || layoutConfig.easing !== false;
       const hideTextualMetrics = !!(layoutConfig && layoutConfig.hideTextualMetrics === true);
-      const xteScale = toolkit.value.isFiniteNumber(p.xteScale) && p.xteScale > 0 ? p.xteScale : 1;
-      const xteAvailable = toolkit.value.isFiniteNumber(display && display.xte);
+      const rawXteScale = p.xteScale;
+      const xteScale = typeof rawXteScale === "number" && Number.isFinite(rawXteScale) && rawXteScale > 0 ? rawXteScale : 1;
 
       const normalThreshold = layoutConfig ? layoutConfig.xteRatioThresholdNormal : undefined;
       const flatThreshold = layoutConfig ? layoutConfig.xteRatioThresholdFlat : undefined;
@@ -140,6 +153,8 @@
       staticLayer.blit(ctx);
 
       const xteRaw = display ? display.xte : undefined;
+      const xteNumber = typeof xteRaw === "number" && Number.isFinite(xteRaw) ? xteRaw : undefined;
+      const xteAvailable = xteNumber !== undefined;
       const cogRaw = display ? display.cog : undefined;
       const dtwRaw = display ? display.dtw : undefined;
       const btwRaw = display ? display.btw : undefined;
@@ -147,17 +162,17 @@
       const defaultText = placeholderNormalize.normalize(undefined, p.default);
 
       const xteDistance = unitFormatter.formatDistance(
-        toolkit.value.isFiniteNumber(xteRaw) ? Math.abs(xteRaw) : undefined,
+        xteNumber === undefined ? undefined : Math.abs(xteNumber),
         formatUnits && formatUnits.xte,
         defaultText
       );
       const dtwDistance = unitFormatter.formatDistance(dtwRaw, formatUnits && formatUnits.dtw, defaultText);
 
       const xteDistanceMissing = placeholderNormalize.isPlaceholder(xteDistance);
-      const xteSide = (!xteDistanceMissing && toolkit.value.isFiniteNumber(xteRaw)) ? (xteRaw > 0 ? "R" : (xteRaw < 0 ? "L" : "")) : "";
-      if (xteAvailable) {
-        const xteDisplayAbs = unitFormatter.extractNumericDisplay(xteDistance, Math.abs(xteRaw));
-        const signedDisplayXte = xteRaw < 0 ? -xteDisplayAbs : xteDisplayAbs;
+      const xteSide = (!xteDistanceMissing && xteNumber !== undefined) ? (xteNumber > 0 ? "R" : (xteNumber < 0 ? "L" : "")) : "";
+      if (xteNumber !== undefined) {
+        const xteDisplayAbs = unitFormatter.extractNumericDisplay(xteDistance, Math.abs(xteNumber));
+        const signedDisplayXte = xteNumber < 0 ? -xteDisplayAbs : xteDisplayAbs;
         const overflow = Math.abs(xteDisplayAbs) > xteScale;
         const xteTarget = signedDisplayXte / xteScale;
         const xteEased = springMotion.resolve(canvas, xteTarget, easingEnabled, Date.now());
@@ -175,11 +190,15 @@
       const trackValue = unitFormatter.formatWithToken(cogRaw, "formatDirection360", headingParams[0], defaultText);
       const bearingValue = unitFormatter.formatWithToken(btwRaw, "formatDirection360", headingParams[0], defaultText);
 
+      const metricRects = /** @type {DyniXteMetricRects | null} */ (layout.metricRects);
+      if (!metricRects) {
+        return;
+      }
       const metricSpacing = {
-        cog: layoutApi.computeMetricTileSpacing(layout.metricRects.cog, layout.responsive),
-        xte: layoutApi.computeMetricTileSpacing(layout.metricRects.xte, layout.responsive),
-        dtw: layoutApi.computeMetricTileSpacing(layout.metricRects.dtw, layout.responsive),
-        btw: layoutApi.computeMetricTileSpacing(layout.metricRects.btw, layout.responsive)
+        cog: layoutApi.computeMetricTileSpacing(metricRects.cog, layout.responsive),
+        xte: layoutApi.computeMetricTileSpacing(metricRects.xte, layout.responsive),
+        dtw: layoutApi.computeMetricTileSpacing(metricRects.dtw, layout.responsive),
+        btw: layoutApi.computeMetricTileSpacing(metricRects.btw, layout.responsive)
       };
       let xteValueText = xteDistance + xteSide;
       if (stableDigitsEnabled) {
@@ -191,11 +210,11 @@
         });
         xteValueText = xteStable.padded;
         if (xteStable.padded !== xteStable.plain) {
-          const probe = tileLayout.measureMetricTile({
+          const probe = /** @type {{ fit?: { total: number }, textW: number } | null} */ (tileLayout.measureMetricTile({
             textApi: toolkit.text,
             ctx: ctx,
             metric: { caption: captions && captions.xte, value: xteStable.padded, unit: units && units.xte },
-            rect: layout.metricRects.xte,
+            rect: metricRects.xte,
             family: family,
             valueWeight: valueWeight,
             labelWeight: labelWeight,
@@ -203,7 +222,7 @@
             textFillScale: layout.responsive.textFillScale,
             padX: metricSpacing.xte.padX,
             captionHeightPx: metricSpacing.xte.captionHeightPx
-          });
+          }));
           const fit = probe && probe.fit ? probe.fit : null;
           const clipped = !!(probe && fit && fit.total > probe.textW + 0.01);
           if (clipped) {
@@ -219,29 +238,30 @@
         btw: { caption: captions && captions.brg, value: bearingValue, unit: units && units.brg }
       };
 
-      const waypointFit = showWpName && !!wpName ? tileLayout.measureFittedLine({
+      const nameRect = layout.nameRect;
+      const waypointFit = showWpName && !!wpName && nameRect ? /** @type {DyniXteWaypointFit} */ (tileLayout.measureFittedLine({
         textApi: toolkit.text,
         ctx: ctx,
         text: wpName,
-        maxW: layout.nameRect.w,
-        maxH: layout.nameRect.h,
-        maxPx: Math.max(1, Math.floor(layout.nameRect.h * 0.72)),
+        maxW: nameRect.w,
+        maxH: nameRect.h,
+        maxPx: Math.max(1, Math.floor(nameRect.h * 0.72)),
         textFillScale: layout.responsive.textFillScale,
         family: family,
         weight: labelWeight
-      }) : null;
+      })) : null;
 
-      if (primitives.shouldShowWaypoint(mode, layout, showWpName, wpName, waypointFit)) {
+      if (nameRect && primitives.shouldShowWaypoint(mode, layout, showWpName, wpName, waypointFit)) {
         tileLayout.drawFittedLine({
           textApi: toolkit.text,
           ctx: ctx,
           fit: waypointFit,
           text: wpName,
-          rect: layout.nameRect,
+          rect: nameRect,
           align: "center",
           family: family,
           weight: labelWeight,
-          maxPx: Math.max(1, Math.floor(layout.nameRect.h * 0.72)),
+          maxPx: Math.max(1, Math.floor(nameRect.h * 0.72)),
           color: textColor
         });
       }
@@ -250,7 +270,7 @@
         textApi: toolkit.text,
         ctx: ctx,
         metric: metrics.cog,
-        rect: layout.metricRects.cog,
+        rect: metricRects.cog,
         family: family,
         color: textColor,
         valueWeight: valueWeight,
@@ -266,7 +286,7 @@
         textApi: toolkit.text,
         ctx: ctx,
         metric: metrics.xte,
-        rect: layout.metricRects.xte,
+        rect: metricRects.xte,
         family: family,
         color: textColor,
         valueWeight: valueWeight,
@@ -282,7 +302,7 @@
         textApi: toolkit.text,
         ctx: ctx,
         metric: metrics.dtw,
-        rect: layout.metricRects.dtw,
+        rect: metricRects.dtw,
         family: family,
         color: textColor,
         valueWeight: valueWeight,
@@ -298,7 +318,7 @@
         textApi: toolkit.text,
         ctx: ctx,
         metric: metrics.btw,
-        rect: layout.metricRects.btw,
+        rect: metricRects.btw,
         family: family,
         color: textColor,
         valueWeight: valueWeight,

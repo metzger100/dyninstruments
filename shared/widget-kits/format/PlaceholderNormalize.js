@@ -1,7 +1,6 @@
 /**
- * Module: PlaceholderNormalize - Shared placeholder normalization for formatter outputs
+ * @file PlaceholderNormalize - Shared placeholder normalization for formatter outputs
  * Documentation: documentation/shared/placeholder-normalize.md
- * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -22,6 +21,10 @@
     "NO DATA" /* dyni-lint-disable-line hardcoded-runtime-default -- PlaceholderNormalize must match the legacy overlay fallback token for cleanup. */
   ]);
 
+  /**
+   * @param {unknown} defaultText
+   * @returns {string}
+   */
   function resolveDefaultText(defaultText) {
     if (typeof defaultText === "string") {
       return defaultText;
@@ -32,6 +35,10 @@
     return String(defaultText);
   }
 
+  /**
+   * @param {unknown} text
+   * @returns {boolean}
+   */
   function isPlaceholder(text) {
     if (text == null) {
       return true;
@@ -56,6 +63,11 @@
     return PLACEHOLDER_PATTERNS.indexOf(trimmed) >= 0;
   }
 
+  /**
+   * @param {unknown} text
+   * @param {unknown} defaultText
+   * @returns {string}
+   */
   function normalize(text, defaultText) {
     if (isPlaceholder(text)) {
       return resolveDefaultText(defaultText);

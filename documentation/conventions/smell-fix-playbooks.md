@@ -8,7 +8,7 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 
 ## Key Details
 
-- Apply these playbooks after a smell finding is reported by `check-patterns` or `check-smell-contracts`.
+- Apply these playbooks after a smell finding is reported by `check-patterns` or a smell contract test.
 - Keep fixes minimal and aligned with canonical ownership boundaries documented in coding standards.
 - Use rule-specific suppressions only for intentional, temporary boundary exceptions.
 
@@ -133,7 +133,8 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 ### Canonical helper redefinition
 
 1. Identify the owning canonical module in `shared-helpers.md`.
-2. Add the module to the file `Depends:` header if it is missing.
+2. Add the dependency to the component registry entry when the module is a
+   registered component dependency.
 3. Require the canonical module in `create()` (or the runtime bootstrap owner where applicable).
 4. Replace local helper call sites with canonical module calls.
 5. Delete the private helper definition.
@@ -205,7 +206,6 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 
 1. Remove widget-local copy-paste blocks and move shared logic into `shared/widget-kits/`.
 2. Prefer shared API calls (`ValueMath.*`, `CanvasTextLayout.*`, shared renderers) over repeated local helper implementations.
-3. For runtime IIFE perf instrumentation, use `runtime.perf` as the canonical owner; if bootstrap constraints force temporary local duplication, keep a rule-specific suppression + debt entry.
 4. Keep duplicated orchestration stubs (`create`, `translate`, `translateFunction`, `renderHtml`, `renderCanvas`) minimal; all substantive logic belongs in shared modules or surface owners.
 5. Add/adjust tests to lock expected shared-helper behavior after extraction.
 

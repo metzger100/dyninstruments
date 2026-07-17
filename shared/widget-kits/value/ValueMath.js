@@ -1,7 +1,6 @@
 /**
- * Module: ValueMath - Canonical numeric, text, range, and gauge value helpers
+ * @file ValueMath - Canonical numeric, text, range, and gauge value helpers
  * Documentation: documentation/conventions/shared-helpers.md
- * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,22 +11,34 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @typedef {{ major: number, minor: number }} TickSteps
+   * @typedef {{ default: TickSteps, ranges: Array<{ max: number, major: number, minor: number }>, plain: TickSteps }} TickProfile
+   * @typedef {{ formatter?: unknown, formatterParameters?: unknown, default?: unknown }} GaugeDisplayProps
+   * @typedef {(value: number, options: { formatter: unknown, formatterParameters: unknown, default: unknown }) => unknown} ApplyFormatter
+   * @typedef {(text: unknown, defaultText: unknown) => string} NormalizeText
+   */
+
   const hasOwn = Object.prototype.hasOwnProperty;
 
+  /** @param {unknown} value @returns {value is number} */
   function isFiniteNumber(value) {
     return typeof value === "number" && Number.isFinite(value);
   }
 
+  /** @param {unknown} value @returns {number | undefined} */
   function toFiniteNumber(value) {
     const n = Number(value);
     return Number.isFinite(n) ? n : undefined;
   }
 
+  /** @param {unknown} value @param {number} defaultValue @returns {number} */
   function resolveFiniteNumber(value, defaultValue) {
     const n = Number(value);
     return Number.isFinite(n) ? n : defaultValue;
   }
 
+  /** @param {unknown} value @returns {number | undefined} */
   function toOptionalFiniteNumber(value) {
     if (value == null) {
       return undefined;
@@ -39,11 +50,13 @@
     return Number.isFinite(n) ? n : undefined;
   }
 
+  /** @param {unknown} value @returns {number} */
   function toNumber(value) {
     const n = toFiniteNumber(value);
     return typeof n === "number" ? n : NaN;
   }
 
+  /** @param {unknown} value @param {unknown} lo @param {unknown} hi @returns {number} */
   function clamp(value, lo, hi) {
     const low = toFiniteNumber(lo);
     const high = toFiniteNumber(hi);
@@ -62,11 +75,13 @@
     return Math.max(safeLo, Math.min(safeHi, n));
   }
 
+  /** @param {unknown} value @param {number} defaultValue @returns {number} */
   function clampPositive(value, defaultValue) {
     const n = toFiniteNumber(value);
     return typeof n === "number" && n > 0 ? n : defaultValue;
   }
 
+  /** @param {unknown} value @param {unknown} name @returns {object} */
   function ensureObject(value, name) {
     if (!value || typeof value !== "object") {
       throw new Error(String(name || "value") + " must be an object");
@@ -74,18 +89,22 @@
     return value;
   }
 
+  /** @param {unknown} value @returns {object} */
   function toObject(value) {
     return value && typeof value === "object" ? value : {};
   }
 
+  /** @param {unknown} value @returns {string} */
   function toText(value) {
     return value == null ? "" : String(value);
   }
 
+  /** @param {unknown} value @returns {string} */
   function trimText(value) {
     return value == null ? "" : String(value).trim();
   }
 
+  /** @param {unknown} value @param {number} min @param {number} max @param {number} defaultValue @returns {number} */
   function clampNumber(value, min, max, defaultValue) {
     if (value == null) {
       return defaultValue;
@@ -100,10 +119,12 @@
     return Math.max(min, Math.min(max, n));
   }
 
+  /** @param {unknown} value @returns {value is object} */
   function isObject(value) {
     return !!value && typeof value === "object";
   }
 
+  /** @param {unknown} value @param {number} defaultValue @returns {number} */
   function toSafeInteger(value, defaultValue) {
     const n = toFiniteNumber(value);
     if (typeof n !== "number") {
@@ -112,20 +133,24 @@
     return Math.round(n);
   }
 
+  /** @param {unknown} value @returns {boolean} */
   function hasText(value) {
     return value != null && String(value).trim().length > 0;
   }
 
+  /** @param {unknown} value @returns {string | undefined} */
   function keyToText(value) {
     return typeof value === "string" ? value : JSON.stringify(value);
   }
 
+  /** @param {unknown} valueText @param {unknown} displayUnit @param {unknown} defaultText @returns {string} */
   function appendUnit(valueText, displayUnit, defaultText) {
     const text = toText(valueText) || toText(defaultText);
     const unit = displayUnit == null ? "" : String(displayUnit);
     return unit ? text + unit : text;
   }
 
+  /** @param {unknown} value @returns {number} */
   function textLength(value) {
     if (value == null) {
       return 0;
@@ -133,25 +158,30 @@
     return String(value).length;
   }
 
+  /** @param {number} from @param {number} to @param {number} t @returns {number} */
   function lerp(from, to, t) {
     return from + ((to - from) * t);
   }
 
+  /** @param {number} value @param {unknown} eps @returns {boolean} */
   function almostInt(value, eps) {
     const epsilon = Number.isFinite(Number(eps)) ? Number(eps) : 1e-6;
     return Math.abs(value - Math.round(value)) <= epsilon;
   }
 
+  /** @param {unknown} a @param {unknown} b @param {unknown} eps @returns {boolean} */
   function isApprox(a, b, eps) {
     const epsilon = Number.isFinite(Number(eps)) ? Number(eps) : 1e-6;
     return Math.abs(Number(a) - Number(b)) <= epsilon;
   }
 
+  /** @param {unknown} text @returns {string} */
   function extractNumberText(text) {
     const match = String(text).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
     return match ? match[0] : "";
   }
 
+  /** @param {unknown} minRaw @param {unknown} maxRaw @param {unknown} defaultMin @param {unknown} defaultMax @returns {{ min: number, max: number, range: number }} */
   function normalizeRange(minRaw, maxRaw, defaultMin, defaultMax) {
     let minV = toNumber(minRaw);
     let maxV = toNumber(maxRaw);
@@ -166,14 +196,17 @@
     return { min: minV, max: maxV, range: maxV - minV };
   }
 
+  /** @param {number} W @param {number} H @returns {number} */
   function computePad(W, H) {
     return Math.max(6, Math.floor(Math.min(W, H) * 0.04));
   }
 
+  /** @param {number} W @param {number} H @returns {number} */
   function computeGap(W, H) {
     return Math.max(6, Math.floor(Math.min(W, H) * 0.03));
   }
 
+  /** @param {number} ratio @param {number} thresholdNormal @param {number} thresholdFlat @returns {"high" | "flat" | "normal"} */
   function computeMode(ratio, thresholdNormal, thresholdFlat) {
     if (ratio < thresholdNormal) {
       return "high";
@@ -184,6 +217,7 @@
     return "normal";
   }
 
+  /** @param {unknown} raw @param {GaugeDisplayProps | undefined} props @param {ApplyFormatter} applyFormatter @param {NormalizeText} normalize @param {unknown} defaultFormatter @param {unknown} defaultFormatterParameters @returns {{ num: number, text: unknown }} */
   function formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultFormatterParameters) {
     const p = props || {};
     const defaultText = hasOwn.call(p, "default") ? p.default : normalize(undefined, undefined);
@@ -207,6 +241,7 @@
     return Number.isFinite(num) ? { num: num, text: numberText } : { num: NaN, text: defaultText };
   }
 
+  /** @type {Record<string, TickProfile>} */
   const tickProfiles = {
     standard: {
       default: { major: 10, minor: 2 },
@@ -244,6 +279,7 @@
     }
   };
 
+  /** @param {unknown} range @param {string} profileName @returns {TickSteps} */
   function resolveTickSteps(range, profileName) {
     const profile = tickProfiles[profileName] || tickProfiles.standard;
     const n = Number(range);
@@ -259,18 +295,22 @@
     return { major: profile.plain.major, minor: profile.plain.minor };
   }
 
+  /** @param {unknown} range @returns {TickSteps} */
   function resolveStandardTickSteps(range) {
     return resolveTickSteps(range, "standard");
   }
 
+  /** @param {unknown} range @returns {TickSteps} */
   function resolveTemperatureTickSteps(range) {
     return resolveTickSteps(range, "temperature");
   }
 
+  /** @param {unknown} range @returns {TickSteps} */
   function resolveVoltageTickSteps(range) {
     return resolveTickSteps(range, "voltage");
   }
 
+  /** @param {unknown} value @param {boolean | undefined} leadingZero @returns {string} */
   function formatAngle180(value, leadingZero) {
     const n = toOptionalFiniteNumber(value);
     if (typeof n !== "number") {
@@ -285,6 +325,7 @@
     return out;
   }
 
+  /** @param {unknown} value @param {boolean | undefined} leadingZero @returns {string} */
   function formatDirection360(value, leadingZero) {
     const n = toOptionalFiniteNumber(value);
     if (typeof n !== "number") {
@@ -298,6 +339,7 @@
     return out;
   }
 
+  /** @param {unknown} value @returns {string} */
   function formatMajorLabel(value) {
     const n = toOptionalFiniteNumber(value);
     if (typeof n !== "number") {

@@ -1,7 +1,6 @@
 /**
- * Module: RegattaTimerTextHtmlWidget - Interactive committed HTML renderer for regatta timer controls
+ * @file RegattaTimerTextHtmlWidget - Interactive committed HTML renderer for regatta timer controls
  * Documentation: documentation/widgets/regatta-timer.md
- * Depends: RegattaTimerModel, RegattaTimerAudio, RegattaTimerSessionStore, RegattaTimerMarkup, RegattaTimerHtmlFit, HtmlWidgetUtils, ValueMath, componentContext.theme.tokens
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -28,6 +27,7 @@
     resetButtonStyle: ""
   };
 
+  /** @param {unknown} def @param {DyniRegattaTimerContext} componentContext */
   function create(def, componentContext) {
     const timerModelFactory = componentContext.components.require("RegattaTimerModel");
     const audioFactory = componentContext.components.require("RegattaTimerAudio");
@@ -41,14 +41,16 @@
     const toObject = valueMath.toObject;
     const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
+    /** @param {unknown} rawValue @returns {number} */
     function toDurationMinutes(rawValue) {
       const parsed = toOptionalFiniteNumber(rawValue);
-      if (!(parsed > 0)) {
+      if (parsed === undefined || !(parsed > 0)) {
         return DEFAULT_DURATION_MINUTES;
       }
       return Math.max(1, Math.round(parsed));
     }
 
+    /** @param {unknown} durationMinutes @returns {string} */
     function formatDurationDisplay(durationMinutes) {
       const safeMinutes = Math.max(1, toDurationMinutes(durationMinutes));
       if (safeMinutes >= 60) {
@@ -57,6 +59,7 @@
       return String(safeMinutes).padStart(2, "0") + ":00";
     }
 
+    /** @param {DyniWidgetValues} props @param {DyniHtmlShellRect | null} shellRect @returns {string} */
     function resolveMode(props, shellRect) {
       return htmlUtils.resolveRatioModeForRect({
         ratioThresholdNormal: props.regattaTimerRatioThresholdNormal,
@@ -68,6 +71,7 @@
       });
     }
 
+    /** @param {DyniWidgetValues} props @returns {string} */
     function resolveInteractionState(props) {
       if (htmlUtils.isEditingMode(props)) {
         return "passive";
@@ -75,34 +79,48 @@
       return htmlUtils.canDispatchSurfaceInteraction(props) ? "dispatch" : "passive";
     }
 
+    /** @param {Record<string, unknown>} rendererContext */
     function createCommittedRenderer(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
-      const hostContext = context.hostContext || {};
+      const hostContext = /** @type {DyniRegattaTimerHostContext} */ (context.hostContext || {});
       const sessionStore = sessionStoreFactory.createSessionStore({
         hostContext: hostContext
       });
 
+      /** @type {HTMLElement | null} */
       let rootEl = null;
+      /** @type {Element | null} */
       let wrapperEl = null;
+      /** @type {((ev: Event) => void) | null} */
       let clickHandler = null;
+      /** @type {DyniRegattaTimerModel | null} */
       let timerModel = null;
+      /** @type {DyniRegattaTimerAudioEngine | null} */
       let audioEngine = null;
       let lastProps = {};
+      /** @type {DyniHtmlShellRect | null} */
       let lastShellRect = null;
+      /** @type {HTMLElement | null} */
       let lastHostRootEl = null;
+      /** @type {DyniRegattaTimerHtmlFitResult} */
       let lastFit = BASELINE_FIT;
       let lastRenderedDisplayTime = "";
       let lastRenderedColorPhase = "";
       let lastRenderedPhase = "";
       let lastRenderedShellRectWidth = 0;
       let lastRenderedShellRectHeight = 0;
+      /** @type {DyniRegattaTimerConfig} */
       let config = {
         soundEnabled: true,
         progressBarEnabled: true,
-        durationMinutes: DEFAULT_DURATION_MINUTES
+        durationMinutes: DEFAULT_DURATION_MINUTES,
+        stableDigitsEnabled: false
       };
 
       function ensureRootClass() {
+        if (!rootEl) {
+          return;
+        }
         const className = rootEl ? String(rootEl.className || "") : "";
         if (className && className.indexOf(ROOT_CLASS_NAME) >= 0) {
           return;
@@ -116,6 +134,7 @@
         clickHandler = null;
       }
 
+      /** @param {DyniRegattaTimerResourceOptions} options */
       function clearOwnedResources(options) {
         const cfg = options || {};
         if (cfg.preserveSession === true && timerModel && typeof timerModel.getSnapshot === "function") {
@@ -139,6 +158,7 @@
         }
       }
 
+      /** @param {DyniWidgetValues} props @returns {DyniRegattaTimerConfig} */
       function resolveConfig(props) {
         return {
           soundEnabled: props.regattaSoundEnabled !== false,
@@ -148,6 +168,7 @@
         };
       }
 
+      /** @param {DyniRegattaTimerState} modelState */
       function patchDomFromState(modelState) {
         if (!rootEl || !timerModel) {
           return;
@@ -215,7 +236,7 @@
               ev.preventDefault();
               ev.stopPropagation();
 
-              const target = ev.target;
+              const target = /** @type {Element | null} */ (ev.target);
               const actionEl = target && typeof target.closest === "function"
                 ? target.closest("[data-dyni-action]")
                 : null;
@@ -255,6 +276,7 @@
         lastRenderedShellRectHeight = nextShellRectHeight;
       }
 
+      /** @param {number} durationMinutes */
       function createTimerModelInstance(durationMinutes) {
         const session = sessionStore.readStoredSnapshot();
         const hasActiveSession = session && (session.phase === "countdown" || session.phase === "elapsed");
@@ -276,6 +298,7 @@
         sessionStore.persistSnapshot(timerModel.getSnapshot());
       }
 
+      /** @param {HTMLElement} mountHostEl @param {DyniHtmlRendererPayload} payload */
       function mount(mountHostEl, payload) {
         clearOwnedResources({ preserveSession: true });
 
@@ -300,9 +323,12 @@
 
         audioEngine = audioFactory.createAudioEngine();
         createTimerModelInstance(config.durationMinutes);
-        patchDomFromState(timerModel.getState());
+        if (timerModel) {
+          patchDomFromState(timerModel.getState());
+        }
       }
 
+      /** @param {DyniHtmlRendererPayload} payload */
       function update(payload) {
         const nextPayload = payload || {};
         const nextProps = toObject(nextPayload.props);
@@ -331,6 +357,7 @@
         return false;
       }
 
+      /** @param {DyniRegattaTimerResourceOptions} options */
       function detach(options) {
         const cfg = options || {};
 
@@ -366,6 +393,7 @@
         detach({ preserveSession: true, clearSession: false });
       }
 
+      /** @param {DyniHtmlRendererPayload} payload @returns {string} */
       function layoutSignature(payload) {
         const p = toObject(payload && payload.props);
         const shellRect = payload && payload.shellRect ? payload.shellRect : null;

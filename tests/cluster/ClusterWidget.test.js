@@ -42,10 +42,6 @@ describe("ClusterWidget", function () {
 
     expect(widget.id).toBe("ClusterWidget");
     expect(widget.wantsHideNativeHead).toBe(true);
-    expect(harness.runtime.perf.startSpan).toHaveBeenCalledWith("ClusterWidget.translateFunction", {
-      cluster: undefined,
-      kind: "sog"
-    });
     expect(harness.shellRenderer.normalizeRouteFrame).toHaveBeenCalledWith(
       rawProps,
       { cluster: "speed" },
@@ -72,10 +68,6 @@ describe("ClusterWidget", function () {
 
     const html = widget.renderHtml.call(widgetContext, routeFrame);
     expect(html).toBe("<div class=\"dyni-shell\">shell</div>");
-    expect(harness.runtime.perf.startSpan).toHaveBeenCalledWith("ClusterWidget.renderHtml", {
-      cluster: "speed",
-      kind: "sog"
-    });
     expect(harness.hostCommitController.recordRender).toHaveBeenCalledWith(routeFrame);
     expect(harness.shellRenderer.renderRouteShell).toHaveBeenCalledWith(
       routeFrame,
@@ -110,8 +102,6 @@ describe("ClusterWidget", function () {
     expect(harness.activationController.activateCommittedRoute.mock.invocationCallOrder[0]).toBeLessThan(
       harness.surfaceSessionController.reconcileSession.mock.invocationCallOrder[0]
     );
-    expect(harness.runtime.perf.endSpan).toHaveBeenCalledTimes(2);
-
     widget.finalizeFunction.call(widgetContext);
     expect(harness.activationController.destroy).toHaveBeenCalledTimes(1);
     expect(harness.hostCommitController.cleanup).toHaveBeenCalledTimes(1);

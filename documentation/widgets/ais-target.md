@@ -30,6 +30,7 @@ AisTargetTextHtmlWidget renders AIS target summary state on the committed HTML s
 - layoutSignature handles branch-sensitive layout rerun triggers
 - postPatch can request one bounded relayout pass
 - `AisTargetLayoutSizing.resolveVisualChrome(...)` is the authoritative accent/shell-chrome geometry contract for AIS-aligned strips.
+- `AisTargetLayoutGeometry` owns metric sub-rectangles, while `AisTargetLayoutGeometryStyles` serializes those rectangles into CSS-grid styles through an explicit component dependency.
 
 ## Vertical Contract
 

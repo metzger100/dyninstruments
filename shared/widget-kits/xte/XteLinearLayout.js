@@ -1,7 +1,6 @@
 /**
- * Module: XteLinearLayout - Responsive layout rectangles for the XTE linear gauge renderer
+ * @file XteLinearLayout - Responsive layout rectangles for the XTE linear gauge renderer
  * Documentation: documentation/widgets/xte-display.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, LayoutSizingHelpers, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -51,11 +50,20 @@
     highGaugeShareScale: 0.97
   };
 
+  /** @type {DyniLayoutRectMathApi["makeRect"]} */
   let makeRect;
+  /** @type {DyniLayoutRectMathApi["splitRow"]} */
   let splitRow;
+  /** @type {DyniLayoutRectMathApi["splitStack"]} */
   let splitStack;
+  /** @type {DyniValueMathApi["clampNumber"]} */
   let clampNumber;
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniXteLinearLayoutApi}
+   */
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
@@ -72,18 +80,26 @@
       METRIC_TILE_CAPTION_RATIO
     );
 
+    /**
+     * @param {unknown} W
+     * @param {unknown} H
+     * @param {unknown} thresholdNormal
+     * @param {unknown} thresholdFlat
+     * @returns {DyniXteMode}
+     */
     function computeMode(W, H, thresholdNormal, thresholdFlat) {
       const width = Math.max(0, Number(W) || 0);
       const height = Math.max(1, Number(H) || 0);
       const ratio = width / height;
-      const normalLimit = Number.isFinite(thresholdNormal) ? thresholdNormal : 0.85;
-      const flatLimit = Number.isFinite(thresholdFlat) ? thresholdFlat : 2.3;
+      const normalLimit = Number.isFinite(thresholdNormal) ? /** @type {number} */ (thresholdNormal) : 0.85;
+      const flatLimit = Number.isFinite(thresholdFlat) ? /** @type {number} */ (thresholdFlat) : 2.3;
       if (ratio <= flatLimit) {
         return ratio < normalLimit ? "high" : "normal";
       }
       return "flat";
     }
 
+    /** @param {unknown} W @param {unknown} H @returns {DyniXteLinearInsets} */
     function computeInsets(W, H) {
       const responsive = profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
       return {
@@ -94,8 +110,9 @@
       };
     }
 
+    /** @param {unknown} args @returns {DyniXteLinearLayoutResult} */
     function computeLayout(args) {
-      const input = args && typeof args === "object" ? args : {};
+      const input = /** @type {DyniXteLayoutArgs} */ (args && typeof args === "object" ? args : {});
       const contentRect = input.contentRect || makeRect(0, 0, 0, 0);
       const responsive = input.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
       const maxSpan = Math.max(contentRect.w, contentRect.h);

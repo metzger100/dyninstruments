@@ -1,7 +1,6 @@
 /**
- * Module: VoltageLinearWidget - Linear voltage gauge with low-end warning/alarm sectors
+ * @file VoltageLinearWidget - Linear voltage gauge with low-end warning/alarm sectors
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, ValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,14 +11,20 @@
 }(this, function () {
   "use strict";
 
+  /** @typedef {DyniLinearGaugeProps & { voltageLinearWarningEnabled?: boolean, voltageLinearAlarmEnabled?: boolean, voltageLinearWarningFrom?: number, voltageLinearAlarmFrom?: number }} DyniVoltageLinearProps */
+
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const engine = componentContext.components.require("LinearGaugeEngine");
     const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    /** @param {unknown} raw @param {DyniLinearGaugeProps} props @returns {{ num: number, text: unknown }} */
     function formatDisplay(raw, props) {
-      return valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
+      const display = valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
+      return { num: display.num, text: placeholderNormalize.normalize(display.text, undefined) };
     }
 
+    /** @param {DyniVoltageLinearProps} props @param {number} minV @param {number} maxV @param {DyniLinearRange} axis @param {DyniLinearGaugeTheme} theme @returns {DyniLinearColoredRange[]} */
     function buildSectors(props, minV, maxV, axis, theme) {
       const p = props || {};
       const warningEnabled = (p.voltageLinearWarningEnabled !== false);
@@ -36,9 +41,11 @@
         : undefined;
       const alarmTo = Number.isFinite(alarmFrom) ? valueMath.clamp(alarmFrom, axis.min, axis.max) : undefined;
       const warningTo = Number.isFinite(warningFrom) ? valueMath.clamp(warningFrom, axis.min, axis.max) : undefined;
+      const alarmFinite = typeof alarmTo === "number" && Number.isFinite(alarmTo);
+      const warningFinite = typeof warningTo === "number" && Number.isFinite(warningTo);
       const sectors = [];
 
-      if (Number.isFinite(alarmTo) && alarmTo > minV) {
+      if (alarmFinite && alarmTo > minV) {
         sectors.push({
           from: valueMath.clamp(minV, axis.min, axis.max),
           to: alarmTo,
@@ -46,14 +53,14 @@
         });
       }
 
-      if (Number.isFinite(alarmTo) && Number.isFinite(warningTo) && warningTo > alarmTo) {
+      if (alarmFinite && warningFinite && warningTo > alarmTo) {
         sectors.push({
           from: alarmTo,
           to: warningTo,
           color: theme.colors.warning
         });
       }
-      else if (!Number.isFinite(alarmTo) && Number.isFinite(warningTo) && warningTo > minV) {
+      else if (!alarmFinite && warningFinite && warningTo > minV) {
         sectors.push({
           from: valueMath.clamp(minV, axis.min, axis.max),
           to: warningTo,

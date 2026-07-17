@@ -15,7 +15,6 @@ describe("runtime/surface/HtmlSurfaceController.js", function () {
     });
 
     runIifeScript("runtime/namespace.js", context);
-    runIifeScript("runtime/PerfSpanHelper.js", context);
     context.DyniPlugin.runtime.theme = {
       getShadowCssText: opts.getShadowCssText || vi.fn(() => "")
     };

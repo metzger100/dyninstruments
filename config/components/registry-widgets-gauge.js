@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Widgets Registry Gauge - Gauge widget component definitions
+ * @file DyniPlugin Widgets Registry Gauge - Gauge widget component definitions
  * Documentation: documentation/architecture/component-system.md
- * Depends: window.DyniPlugin.baseUrl, window.DyniPlugin.config.shared
  */
 (function (root) {
   "use strict";

@@ -32,7 +32,7 @@ Shared gauge logic is split into focused core modules:
 - `ResponsiveScaleProfile` owns the shared `minDim -> t -> textFillScale` compaction curve.
 - `SemicircleRadialLayout` and `FullCircleRadialLayout` map that curve into family-specific insets, slot bounds, label metrics, and text/layout spacing.
 - `GeometryScale` turns the family primary dimension into ring, tick, and pointer pixels; radial primary dimension is radius.
-- `SemicircleRadialEngine`, `SemicircleRadialTextLayout`, `FullCircleRadialEngine`, `FullCircleRadialTextLayout`, and wrapper callbacks consume layout-owned `responsive`, `textFillScale`, and `compactGeometryScale`.
+- `SemicircleRadialEngine` and `SemicircleRadialTextLayout` expose layout-owned `responsive`, `textFillScale`, and `compactGeometryScale` directly on state; full-circle callbacks consume `state.responsive`, `state.textFillScale`, and `state.layout.compactGeometryScale`.
 - `compactGeometryScale` only affects text/layout spacing and label sizing; it does not resize ring, tick, or pointer geometry.
 - Wrapper widgets must not import `ResponsiveScaleProfile` or add widget-local user-visible responsive floors; compact policy stays in the layout owners.
 

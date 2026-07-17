@@ -1,7 +1,6 @@
 /**
- * Module: ActiveRouteHtmlFit - Shared text-fit model for ActiveRoute interactive HTML renderer
+ * @file ActiveRouteHtmlFit - Shared text-fit model for ActiveRoute interactive HTML renderer
  * Documentation: documentation/widgets/active-route.md
- * Depends: componentContext.theme.tokens, CanvasTextLayout, TextTileLayout, ActiveRouteLayout, HtmlWidgetUtils, HtmlMeasureUtils, UnitAwareFormatter, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -18,8 +17,12 @@
   const ROUTE_NAME_MAX_PX_RATIO_NORMAL = 0.66;
   const FIT_CACHE_KEY = "__dyniActiveRouteHtmlFitCache";
 
+  /**
+   * @param {unknown} props
+   * @returns {DyniActiveRouteDisplayProps}
+   */
   function ensureDisplayProps(props) {
-    const p = props || {};
+    const p = /** @type {Record<string, unknown>} */ (props || {});
     if (!p.display || typeof p.display !== "object") {
       throw new Error("ActiveRouteTextHtmlWidget: props.display is required");
     }
@@ -32,21 +35,34 @@
     if (!Object.prototype.hasOwnProperty.call(p, "default")) {
       throw new Error("ActiveRouteTextHtmlWidget: props.default is required");
     }
-    return p;
+    return /** @type {DyniActiveRouteDisplayProps} */ (p);
   }
 
+  /**
+   * @param {unknown} props
+   * @param {DyniHtmlShellRect | null | undefined} shellRect
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @returns {DyniActiveRouteLayoutMode}
+   */
   function resolveDisplayMode(props, shellRect, htmlUtils) {
-    const p = props || {};
-    return htmlUtils.resolveRatioModeForRect({
+    const p = /** @type {Record<string, unknown>} */ (props || {});
+    return /** @type {DyniActiveRouteLayoutMode} */ (htmlUtils.resolveRatioModeForRect({
       ratioThresholdNormal: p.ratioThresholdNormal,
       ratioThresholdFlat: p.ratioThresholdFlat,
       defaultRatioThresholdNormal: 1.2,
       defaultRatioThresholdFlat: 3.8,
       defaultMode: "normal",
       shellRect: shellRect
-    });
+    }));
   }
 
+  /**
+   * @param {string} rawText
+   * @param {boolean} stableDigitsEnabled
+   * @param {DyniStableDigitsApi} stableDigits
+   * @param {number} minWidth
+   * @returns {DyniStableDigitsTextPair}
+   */
   function normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
     if (!stableDigitsEnabled) {
       return { padded: rawText, plain: rawText };
@@ -57,6 +73,7 @@
     });
   }
 
+  /** @param {DyniActiveRouteLayoutMode} mode @returns {number} */
   function resolveRouteNameMaxPxRatio(mode) {
     if (mode === "flat") {
       return ROUTE_NAME_MAX_PX_RATIO_FLAT;
@@ -67,6 +84,10 @@
     return ROUTE_NAME_MAX_PX_RATIO_NORMAL;
   }
 
+  /**
+   * @param {DyniActiveRouteRenderModel} model
+   * @returns {DyniActiveRouteMetricSpec[]}
+   */
   function buildMetricSpecs(model) {
     const specs = [
       {
@@ -96,8 +117,12 @@
     return specs;
   }
 
+  /**
+   * @param {DyniActiveRouteFitSignatureArgs | undefined} args
+   * @returns {string}
+   */
   function buildFitSignature(args) {
-    const cfg = args || {};
+    const cfg = /** @type {DyniActiveRouteFitSignatureArgs} */ (args || {});
     const model = cfg.model;
     if (!model || typeof model !== "object") {
       return "";
@@ -129,8 +154,15 @@
     ]);
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniActiveRouteHtmlFitApi}
+   */
   function create(def, componentContext) {
-    const theme = componentContext.theme.tokens;
+    const theme = /** @type {DyniActiveRouteThemeResolver} */ (/** @type {unknown} */ (
+      componentContext.theme && componentContext.theme.tokens
+    ));
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const unitFormatter = componentContext.components.require("UnitAwareFormatter");
@@ -139,6 +171,14 @@
     const layoutApi = componentContext.components.require("ActiveRouteLayout");
     const valueMath = componentContext.components.require("ValueMath");
 
+    /**
+     * @param {unknown} rawValue
+     * @param {unknown} formatter
+     * @param {unknown} formatterParameters
+     * @param {unknown} defaultText
+     * @param {DyniPlaceholderNormalizeApi} placeholderNormalize
+     * @returns {string}
+     */
     function formatActiveRouteMetric(rawValue, formatter, formatterParameters, defaultText, placeholderNormalize) {
       return unitFormatter.formatWithToken(
         rawValue,
@@ -150,8 +190,12 @@
       );
     }
 
+    /**
+     * @param {DyniActiveRouteHtmlFitArgs | undefined} args
+     * @returns {DyniActiveRouteMarkupFit | null}
+     */
     function compute(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniActiveRouteHtmlFitArgs} */ (args || {});
       const model = cfg.model || null;
       const shellRect = cfg.shellRect || null;
       const hostContext = cfg.hostContext || null;
@@ -165,7 +209,7 @@
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       const family = tokens.font.family;
-      const valueFamily = htmlUtils.resolveMetricValueFamily(model, tokens, family);
+      const valueFamily = /** @type {string} */ (htmlUtils.resolveMetricValueFamily(model, tokens, family));
       const valueTextOptions = model.stableDigitsEnabled === true
         ? {
           useMono: true,
@@ -180,7 +224,9 @@
 
       const W = Math.max(1, Math.round(shellRect.width));
       const H = Math.max(1, Math.round(shellRect.height));
-      const fitCache = htmlMeasureUtils.resolveFitCache(hostContext, FIT_CACHE_KEY);
+      const fitCache = /** @type {DyniActiveRouteFitCache | null} */ (
+        htmlMeasureUtils.resolveFitCache(hostContext, FIT_CACHE_KEY)
+      );
       const fitSignature = buildFitSignature({
         width: W,
         height: H,
@@ -205,7 +251,7 @@
       });
 
       const nameWeight = model.mode === "normal" ? valueWeight : labelWeight;
-      const nameFit = tileLayout.measureFittedLine({
+      const nameFit = /** @type {DyniFittedLineMeasurement} */ (tileLayout.measureFittedLine({
         textApi: radialText,
         ctx: measureCtx,
         text: model.routeNameText,
@@ -215,9 +261,11 @@
         textFillScale: layout.responsive.textFillScale,
         family: family,
         weight: nameWeight
-      });
+      }));
 
+      /** @type {Record<string, DyniActiveRouteMetricStyle>} */
       const metricStyles = Object.create(null);
+      /** @type {Record<string, string>} */
       const metricValues = Object.create(null);
       const metricSpecs = buildMetricSpecs(model);
       for (let i = 0; i < metricSpecs.length; i += 1) {
@@ -227,7 +275,7 @@
           continue;
         }
         const spacing = layoutApi.computeMetricTileSpacing(metricRect, layout.responsive);
-        const primaryMeasurement = tileLayout.measureMetricTile({
+        const primaryMeasurement = /** @type {DyniMetricTileMeasurement} */ (tileLayout.measureMetricTile({
           textApi: radialText,
           ctx: measureCtx,
           metric: metric,
@@ -240,9 +288,9 @@
           padX: spacing.padX,
           captionHeightPx: spacing.captionHeightPx,
           valueTextOptions: valueTextOptions
-        });
-        const primaryFit = primaryMeasurement && primaryMeasurement.fit ? primaryMeasurement.fit : null;
-        const primaryClipped = !!(primaryMeasurement && primaryFit && primaryFit.total > primaryMeasurement.textW + 0.01);
+        }));
+        const primaryFit = primaryMeasurement.fit;
+        const primaryClipped = primaryFit.total > primaryMeasurement.textW + 0.01;
         const usePlain = model.stableDigitsEnabled === true &&
           primaryClipped &&
           typeof metric.plainValue === "string" &&
@@ -257,7 +305,7 @@
           }
           : metric;
         const measurement = usePlain
-          ? tileLayout.measureMetricTile({
+          ? /** @type {DyniMetricTileMeasurement} */ (tileLayout.measureMetricTile({
             textApi: radialText,
             ctx: measureCtx,
             metric: metricForFit,
@@ -270,29 +318,29 @@
             padX: spacing.padX,
             captionHeightPx: spacing.captionHeightPx,
             valueTextOptions: valueTextOptions
-          })
+          }))
           : primaryMeasurement;
-        const fit = measurement && measurement.fit ? measurement.fit : null;
+        const fit = measurement.fit;
         const captionText = htmlUtils.trimText(metric.caption);
         const captionFit = captionText
-          ? tileLayout.measureFittedLine({
+          ? /** @type {DyniFittedLineMeasurement} */ (tileLayout.measureFittedLine({
             textApi: radialText,
             ctx: measureCtx,
             text: captionText,
-            maxW: measurement ? measurement.textW : 1,
-            maxH: measurement ? measurement.capH : 1,
-            maxPx: measurement ? measurement.capMaxPx : 1,
+            maxW: measurement.textW,
+            maxH: measurement.capH,
+            maxPx: measurement.capMaxPx,
             textFillScale: layout.responsive.textFillScale,
             family: family,
             weight: labelWeight
-          })
+          }))
           : null;
         metricValues[metric.id] = metricForFit.value;
         metricStyles[metric.id] = {
           captionStyle: htmlUtils.toFontStyle(captionFit && captionFit.px),
-          valueStyle: htmlUtils.toFontStyle(fit && fit.vPx),
-          unitStyle: htmlUtils.toFontStyle(fit && fit.uPx),
-          gapStyle: fit && fit.gap > 0
+          valueStyle: htmlUtils.toFontStyle(fit.vPx),
+          unitStyle: htmlUtils.toFontStyle(fit.uPx),
+          gapStyle: fit.gap > 0
             ? "gap:" + Math.max(1, Math.floor(fit.gap)) + "px;"
             : ""
         };
@@ -321,6 +369,7 @@
     };
   }
 
+  /** @type {DyniActiveRouteHtmlFitModule} */
   return {
     id: "ActiveRouteHtmlFit",
     create: create

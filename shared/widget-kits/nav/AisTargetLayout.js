@@ -1,7 +1,6 @@
 /**
- * Module: AisTargetLayout - Responsive geometry owner for AIS target HTML summary rendering
+ * @file AisTargetLayout - Responsive geometry owner for AIS target HTML summary rendering
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ResponsiveScaleProfile, AisTargetLayoutSizing, LayoutRectMath, AisTargetLayoutGeometry, AisTargetLayoutMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,11 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniAisTargetLayoutApi}
+   */
   function create(def, componentContext) {
     const layoutSizingApi = componentContext.components.require("AisTargetLayoutSizing");
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
@@ -33,6 +37,12 @@
     const resolveMetricVisibility = layoutSizingApi.resolveMetricVisibility;
     const resolveMetricOrder = layoutSizingApi.resolveMetricOrder;
 
+    /**
+     * @param {DyniAisTargetComputedLayout} out
+     * @param {DyniRect[]} tileRects
+     * @param {DyniResponsiveScaleProfile} responsive
+     * @param {DyniAisTargetLayoutMode} mode
+     */
     function fillInlineMetricBoxes(out, tileRects, responsive, mode) {
       for (let i = 0; i < METRIC_ORDER.length; i += 1) {
         out.metricBoxes[METRIC_ORDER[i]] = geometryApi.createInlineMetricBox(
@@ -45,6 +55,11 @@
       }
     }
 
+    /**
+     * @param {DyniAisTargetComputedLayout} out
+     * @param {DyniRect[]} tileRects
+     * @param {DyniResponsiveScaleProfile} responsive
+     */
     function fillStackedMetricBoxes(out, tileRects, responsive) {
       for (let i = 0; i < METRIC_ORDER.length; i += 1) {
         out.metricBoxes[METRIC_ORDER[i]] = geometryApi.createStackedMetricBox(
@@ -55,6 +70,13 @@
         );
       }
     }
+    /**
+     * @param {DyniRect} contentRect
+     * @param {DyniAisTargetInsets} insets
+     * @param {number} identityShare
+     * @param {number} rowMinHeight
+     * @returns {DyniAisTargetIdentityLayout}
+     */
     function resolveEqualIdentityLayout(contentRect, insets, identityShare, rowMinHeight) {
       const identityGap = Math.max(0, insets.identityGap);
       const identityMetricsGap = Math.max(0, insets.identityMetricsGap);
@@ -82,8 +104,12 @@
       };
     }
 
+    /**
+     * @param {DyniAisTargetLayoutArgs | undefined} args
+     * @returns {DyniAisTargetComputedLayout}
+     */
     function computeLayout(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniAisTargetLayoutArgs} */ (args || {});
       const renderState = cfg.renderState === "data" || cfg.renderState === "placeholder"
         ? cfg.renderState
         : "hidden";
@@ -118,6 +144,7 @@
       const metricVisibility = resolveMetricVisibility(renderState);
       const metricOrder = resolveMetricOrder(renderState);
 
+      /** @type {DyniAisTargetComputedLayout} */
       const out = {
         mode: mode,
         renderState: renderState,
@@ -150,6 +177,7 @@
         inlineGeometry: null,
         wrapperStyle: verticalShell.wrapperStyle
       };
+      /** @param {DyniAisTargetComputedLayout} layoutOut @returns {DyniAisTargetComputedLayout} */
       function finalize(layoutOut) {
         layoutOut.inlineGeometry = geometryApi.computeInlineGeometry(layoutOut);
         return layoutOut;
@@ -266,5 +294,6 @@
     };
   }
 
+  /** @type {DyniAisTargetLayoutModule} */
   return { id: "AisTargetLayout", create: create };
 }));

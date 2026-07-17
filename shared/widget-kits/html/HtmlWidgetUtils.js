@@ -1,7 +1,6 @@
 /**
- * Module: HtmlWidgetUtils - Shared helper utilities for HTML widget renderers and fit modules
+ * @file HtmlWidgetUtils - Shared helper utilities for HTML widget renderers and fit modules
  * Documentation: documentation/architecture/component-system.md
- * Depends: ValueMath
  */
 
 (function (root, factory) {
@@ -10,50 +9,69 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniHtmlWidgetUtils = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
+  /** @type {DyniValueMathApi["toFiniteNumber"]} */
   let toFiniteNumber;
+  /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */
   let toOptionalFiniteNumber;
+  /** @type {DyniValueMathApi["toText"]} */
   let toText;
+  /** @type {DyniValueMathApi["trimText"]} */
   let trimText;
+  /** @type {DyniValueMathApi["clampNumber"]} */
   let clampNumber;
+  let patchInnerHtml;
 
+  /** @param {unknown} value @returns {string} */
   function escapeHtml(value) {
     return String(value)
-      .split("&").join("&amp;")
-      .split("<").join("&lt;")
-      .split(">").join("&gt;")
-      .split("\"").join("&quot;")
-      .split("'").join("&#39;");
+      .split("&")
+      .join("&amp;")
+      .split("<")
+      .join("&lt;")
+      .split(">")
+      .join("&gt;")
+      .split('"')
+      .join("&quot;")
+      .split("'")
+      .join("&#39;");
   }
 
+  /** @param {unknown} style @returns {string} */
   function toStyleAttr(style) {
     const text = trimText(style);
-    return text ? (' style="' + text + '"') : "";
+    return text ? ' style="' + text + '"' : "";
   }
 
+  /** @param {unknown} hostContext @returns {HTMLElement | null | undefined} */
   function resolveHostCommitTarget(hostContext) {
-    const commit = hostContext && hostContext.__dyniHostCommitState;
-    return commit && (commit.shellEl || commit.rootEl);
+    const host = /** @type {{ __dyniHostCommitState?: DyniHostCommitState } | null | undefined} */ (hostContext);
+    const commit = host && host.__dyniHostCommitState;
+    return /** @type {HTMLElement | null | undefined} */ (
+      /** @type {unknown} */ (commit && (commit.shellEl || commit.rootEl))
+    );
   }
 
+  /** @param {unknown} hostContext @param {unknown} [targetEl] @returns {DyniHtmlShellRect | null} */
   function resolveShellRect(hostContext, targetEl) {
-    const target = targetEl || resolveHostCommitTarget(hostContext);
+    const target = /** @type {HTMLElement | null | undefined} */ (targetEl || resolveHostCommitTarget(hostContext));
     if (!target || typeof target.getBoundingClientRect !== "function") {
       return null;
     }
     const rect = target.getBoundingClientRect();
-    const width = toFiniteNumber(rect && rect.width);
-    const height = toFiniteNumber(rect && rect.height);
+    const width = /** @type {number} */ (toFiniteNumber(rect && rect.width));
+    const height = /** @type {number} */ (toFiniteNumber(rect && rect.height));
     if (!(width > 0) || !(height > 0)) {
       return null;
     }
     return { width: width, height: height };
   }
 
+  /** @param {unknown} [options] @returns {string} */
   function resolveRatioMode(options) {
-    const opts = options || {};
+    const opts = /** @type {Record<string, unknown>} */ (options || {});
     const rect = resolveShellRect(opts.hostContext, opts.targetEl);
     return resolveRatioModeForRect({
       ratioThresholdNormal: opts.ratioThresholdNormal,
@@ -65,20 +83,27 @@
     });
   }
 
+  /** @param {unknown} [options] @returns {string} */
   function resolveRatioModeForRect(options) {
-    const opts = options || {};
+    const opts = /** @type {Record<string, unknown>} */ (options || {});
     const normalThresholdRaw = toOptionalFiniteNumber(opts.ratioThresholdNormal);
     const flatThresholdRaw = toOptionalFiniteNumber(opts.ratioThresholdFlat);
     const defaultNormalRaw = toOptionalFiniteNumber(opts.defaultRatioThresholdNormal);
     const defaultFlatRaw = toOptionalFiniteNumber(opts.defaultRatioThresholdFlat);
-    const normalThreshold = typeof normalThresholdRaw === "number"
-      ? normalThresholdRaw
-      : (typeof defaultNormalRaw === "number" ? defaultNormalRaw : 1);
-    const flatThreshold = typeof flatThresholdRaw === "number"
-      ? flatThresholdRaw
-      : (typeof defaultFlatRaw === "number" ? defaultFlatRaw : 3);
+    const normalThreshold =
+      typeof normalThresholdRaw === "number"
+        ? normalThresholdRaw
+        : typeof defaultNormalRaw === "number"
+          ? defaultNormalRaw
+          : 1;
+    let flatThreshold = 3;
+    if (typeof flatThresholdRaw === "number") {
+      flatThreshold = flatThresholdRaw;
+    } else if (typeof defaultFlatRaw === "number") {
+      flatThreshold = defaultFlatRaw;
+    }
     const defaultMode = trimText(opts.defaultMode) || "normal";
-    const rect = opts.shellRect;
+    const rect = /** @type {DyniHtmlShellRect | null | undefined} */ (opts.shellRect);
 
     if (!rect) {
       return defaultMode;
@@ -94,36 +119,49 @@
     return "normal";
   }
 
+  /** @param {unknown} value @returns {string} */
   function toClassToken(value) {
     return String(value || "")
       .replace(/[^a-zA-Z0-9_-]/g, "-")
       .replace(/-{2,}/g, "-");
   }
 
+  /** @param {unknown} props @returns {Record<string, unknown> | null} */
   function resolveSurfacePolicy(props) {
-    const p = props && typeof props === "object" ? props : null;
-    return p && p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null;
+    const p = props && typeof props === "object" ? /** @type {Record<string, unknown>} */ (props) : null;
+    return p && p.surfacePolicy && typeof p.surfacePolicy === "object"
+      ? /** @type {Record<string, unknown>} */ (p.surfacePolicy)
+      : null;
   }
 
+  /** @param {string} colorKey @param {unknown} value @returns {string} */
   function toStyleText(colorKey, value) {
     const color = toText(value).trim();
-    return color ? (colorKey + ":" + color + ";") : "";
+    return color ? colorKey + ":" + color + ";" : "";
   }
 
   // dyni-lint-disable-next-line duplicate-functions -- PLAN27 Phase 2 adds canonical helper exports before Phase 3 call-site migration removes file-local copies.
+  /** @param {unknown} model @param {unknown} tokens @param {unknown} baseFamily @returns {unknown} */
   function resolveMetricValueFamily(model, tokens, baseFamily) {
-    const font = tokens && tokens.font ? tokens.font : {};
-    if (model && model.stableDigitsEnabled === true) {
+    const tokensObj = /** @type {{ font?: unknown } | null | undefined} */ (tokens);
+    const font = /** @type {{ familyMono?: unknown, family?: unknown }} */ (
+      tokensObj && tokensObj.font ? tokensObj.font : {}
+    );
+    const modelObj = /** @type {{ stableDigitsEnabled?: unknown } | null | undefined} */ (model);
+    if (modelObj && modelObj.stableDigitsEnabled === true) {
       return font.familyMono || baseFamily || font.family || "";
     }
     return baseFamily || font.family || "";
   }
 
+  /** @param {unknown} cfg @returns {"sliding" | "inset"} */
   function resolveLabelEdgePolicy(cfg) {
-    return cfg && cfg.labelEdgePolicy === "sliding" ? "sliding" : "inset";
+    const c = /** @type {{ labelEdgePolicy?: unknown } | null | undefined} */ (cfg);
+    return c && c.labelEdgePolicy === "sliding" ? "sliding" : "inset";
   }
 
   // dyni-lint-disable-next-line duplicate-functions -- PLAN27 Phase 2 adds canonical helper exports before Phase 3 call-site migration removes file-local copies.
+  /** @returns {string} */
   function joinStyles() {
     let text = "";
     for (let i = 0; i < arguments.length; i += 1) {
@@ -140,231 +178,89 @@
     return text;
   }
 
+  /** @param {unknown} state @returns {DyniHtmlTextOptions} */
   function buildTextOptions(state) {
-    const opacity = state && state.theme && state.theme.opacity && typeof state.theme.opacity === "object"
-      ? state.theme.opacity
-      : {};
+    const stateObj = /** @type {{ theme?: { opacity?: unknown } } | null | undefined} */ (state);
+    const opacity = /** @type {{ caption?: unknown, unit?: unknown }} */ (
+      stateObj && stateObj.theme && stateObj.theme.opacity && typeof stateObj.theme.opacity === "object"
+        ? stateObj.theme.opacity
+        : {}
+    );
     return { captionOpacity: opacity.caption, unitOpacity: opacity.unit };
   }
 
+  /** @param {unknown} px @returns {string} */
   function toFontStyle(px) {
-    const n = toFiniteNumber(px);
+    const n = /** @type {number} */ (toFiniteNumber(px));
     if (!(n > 0)) {
       return "";
     }
     return "font-size:" + Math.max(1, Math.floor(n)) + "px;";
   }
 
+  /** @param {unknown} value @returns {string} */
   function toPx(value) {
     const px = Math.max(0, Math.floor(clampNumber(value, 0, Number.MAX_SAFE_INTEGER, 0)));
     return String(px) + "px";
   }
 
+  /** @param {unknown} props @returns {string | undefined} */
   function resolveDefaultText(props) {
     if (Object.prototype.hasOwnProperty.call(props, "default")) {
-      return String(props.default);
+      return String(/** @type {Record<string, unknown>} */ (props).default);
     }
     return undefined;
   }
 
+  /** @param {unknown} rootEl @param {unknown} props @returns {void} */
   function applyMirroredContext(rootEl, props) {
-    if (!rootEl || typeof rootEl.setAttribute !== "function") {
+    const el = /** @type {HTMLElement | null | undefined} */ (rootEl);
+    if (!el || typeof el.setAttribute !== "function") {
       return;
     }
     const policy = resolveSurfacePolicy(props);
-    const pageId = policy && typeof policy.pageId === "string" && policy.pageId
-      ? policy.pageId
-      : "other";
-    const orientation = policy && policy.containerOrientation === "vertical"
-      ? "vertical"
-      : "default";
+    const pageId = policy && typeof policy.pageId === "string" && policy.pageId ? policy.pageId : "other";
+    const orientation = policy && policy.containerOrientation === "vertical" ? "vertical" : "default";
 
-    rootEl.className = "dyni-html-root dyni-page-" + toClassToken(pageId) + " dyni-orientation-" + toClassToken(orientation);
-    rootEl.setAttribute("data-dyni-page-id", pageId);
-    rootEl.setAttribute("data-dyni-orientation", orientation);
+    el.className =
+      "dyni-html-root dyni-page-" + toClassToken(pageId) + " dyni-orientation-" + toClassToken(orientation);
+    el.setAttribute("data-dyni-page-id", pageId);
+    el.setAttribute("data-dyni-orientation", orientation);
   }
 
-  function syncAttributes(currentEl, nextEl) {
-    if (!currentEl || !nextEl || !currentEl.attributes || !nextEl.attributes) {
-      return;
-    }
-    const currentAttrs = currentEl.attributes;
-    for (let i = currentAttrs.length - 1; i >= 0; i -= 1) {
-      const attr = currentAttrs[i];
-      if (!nextEl.hasAttribute(attr.name)) {
-        currentEl.removeAttribute(attr.name);
-      }
-    }
-    const nextAttrs = nextEl.attributes;
-    for (let i = 0; i < nextAttrs.length; i += 1) {
-      const attr = nextAttrs[i];
-      if (currentEl.getAttribute(attr.name) !== attr.value) {
-        currentEl.setAttribute(attr.name, attr.value);
-      }
-    }
-  }
-
-  function canSyncInPlace(currentNode, nextNode) {
-    if (!currentNode || !nextNode) {
-      return false;
-    }
-    if (currentNode.nodeType !== nextNode.nodeType) {
-      return false;
-    }
-    if (currentNode.nodeType === 1) {
-      return currentNode.tagName === nextNode.tagName;
-    }
-    return true;
-  }
-
-  const LAST_PATCHED_MARKUP_KEY = "__dyniLastPatchedMarkup";
-
-  function readLastPatchedMarkup(rootEl) {
-    return rootEl ? rootEl[LAST_PATCHED_MARKUP_KEY] : undefined;
-  }
-
-  function writeLastPatchedMarkup(rootEl, markup) {
-    if (!rootEl) {
-      return;
-    }
-    const value = markup == null ? "" : String(markup);
-    const desc = Object.getOwnPropertyDescriptor(rootEl, LAST_PATCHED_MARKUP_KEY);
-    if (desc && desc.writable) {
-      rootEl[LAST_PATCHED_MARKUP_KEY] = value;
-      return;
-    }
-    if (desc && !desc.configurable) {
-      return;
-    }
-    if (!Object.isExtensible(rootEl)) {
-      return;
-    }
-    Object.defineProperty(rootEl, LAST_PATCHED_MARKUP_KEY, {
-      value: value,
-      writable: true,
-      configurable: true,
-      enumerable: false
-    });
-  }
-
-  function isJsDomEnvironment(rootEl) {
-    const doc = rootEl && rootEl.ownerDocument;
-    const ownerView = doc && doc.defaultView;
-    const userAgent = ownerView && ownerView.navigator ? String(ownerView.navigator.userAgent || "") : "";
-    return /jsdom/i.test(userAgent);
-  }
-
-  function syncNodeTree(currentNode, nextNode) {
-    if (!canSyncInPlace(currentNode, nextNode)) {
-      return;
-    }
-    if (currentNode.nodeType === 3 || currentNode.nodeType === 8) {
-      if (currentNode.nodeValue !== nextNode.nodeValue) {
-        currentNode.nodeValue = nextNode.nodeValue;
-      }
-      return;
-    }
-    if (currentNode.nodeType !== 1) {
-      return;
-    }
-
-    syncAttributes(currentNode, nextNode);
-
-    let currentChild = currentNode.firstChild;
-    let nextChild = nextNode.firstChild;
-    while (currentChild || nextChild) {
-      if (!nextChild) {
-        const toRemove = currentChild;
-        currentChild = currentChild.nextSibling;
-        currentNode.removeChild(toRemove);
-        continue;
-      }
-      if (!currentChild) {
-        currentNode.appendChild(nextChild.cloneNode(true));
-        nextChild = nextChild.nextSibling;
-        continue;
-      }
-      if (canSyncInPlace(currentChild, nextChild)) {
-        syncNodeTree(currentChild, nextChild);
-      } else {
-        currentNode.replaceChild(nextChild.cloneNode(true), currentChild);
-      }
-      currentChild = currentChild.nextSibling;
-      nextChild = nextChild.nextSibling;
-    }
-  }
-
-  function patchInnerHtml(rootEl, nextHtml) {
-    if (!rootEl || typeof rootEl.appendChild !== "function") {
-      return null;
-    }
-    const markup = nextHtml == null ? "" : String(nextHtml);
-    if (readLastPatchedMarkup(rootEl) === markup) {
-      return rootEl.firstElementChild || null;
-    }
-
-    if (isJsDomEnvironment(rootEl)) {
-      rootEl.innerHTML = markup;
-      writeLastPatchedMarkup(rootEl, markup);
-      return rootEl.firstElementChild || null;
-    }
-
-    const doc = rootEl.ownerDocument;
-    const template = doc.createElement("template");
-    template.innerHTML = markup;
-    const nextRoot = template.content.firstElementChild;
-
-    if (!nextRoot) {
-      rootEl.textContent = "";
-      writeLastPatchedMarkup(rootEl, markup);
-      return null;
-    }
-
-    let currentRoot = rootEl.firstElementChild;
-    while (rootEl.firstChild && rootEl.firstChild !== currentRoot) {
-      rootEl.removeChild(rootEl.firstChild);
-    }
-
-    if (!currentRoot) {
-      rootEl.appendChild(nextRoot.cloneNode(true));
-      writeLastPatchedMarkup(rootEl, markup);
-      return rootEl.firstElementChild;
-    }
-
-    if (!canSyncInPlace(currentRoot, nextRoot)) {
-      rootEl.replaceChild(nextRoot.cloneNode(true), currentRoot);
-      writeLastPatchedMarkup(rootEl, markup);
-      return rootEl.firstElementChild;
-    }
-
-    syncNodeTree(currentRoot, nextRoot);
-    while (currentRoot.nextSibling) {
-      rootEl.removeChild(currentRoot.nextSibling);
-    }
-    writeLastPatchedMarkup(rootEl, markup);
-    return currentRoot;
-  }
-
+  /** @param {unknown} props @returns {boolean} */
   function isEditingMode(props) {
-    const p = props && typeof props === "object" ? props : {};
+    const p = /** @type {Record<string, unknown>} */ (props && typeof props === "object" ? props : {});
     return p.editing === true || p.dyniLayoutEditing === true;
   }
 
+  /** @param {unknown} props @returns {boolean} */
   function canDispatchSurfaceInteraction(props) {
-    const p = props && typeof props === "object" ? props : {};
-    const surfacePolicy = p.surfacePolicy && typeof p.surfacePolicy === "object"
-      ? p.surfacePolicy
-      : null;
-    return !!(surfacePolicy && surfacePolicy.interaction && surfacePolicy.interaction.mode === "dispatch");
+    const p = /** @type {Record<string, unknown>} */ (props && typeof props === "object" ? props : {});
+    const surfacePolicy = /** @type {Record<string, unknown> | null} */ (
+      p.surfacePolicy && typeof p.surfacePolicy === "object" ? p.surfacePolicy : null
+    );
+    return !!(
+      surfacePolicy &&
+      surfacePolicy.interaction &&
+      /** @type {Record<string, unknown>} */ (surfacePolicy.interaction).mode === "dispatch"
+    );
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniHtmlWidgetUtilsApi}
+   */
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
+    const domPatchUtils = componentContext.components.require("HtmlDomPatchUtils");
     toFiniteNumber = valueMath.toFiniteNumber;
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
     toText = valueMath.toText;
     trimText = valueMath.trimText;
     clampNumber = valueMath.clampNumber;
+    patchInnerHtml = domPatchUtils.patchInnerHtml;
 
     return {
       id: "HtmlWidgetUtils",
@@ -394,4 +290,4 @@
   }
 
   return { id: "HtmlWidgetUtils", create: create };
-}));
+});

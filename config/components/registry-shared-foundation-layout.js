@@ -1,14 +1,15 @@
 /**
- * Module: DyniPlugin Shared Foundation Registry Layout - Shared widget layout and fit component definitions
+ * @file DyniPlugin Shared Foundation Registry Layout - Shared widget layout and fit component definitions
  * Documentation: documentation/architecture/component-system.md
- * Depends: window.DyniPlugin.baseUrl, window.DyniPlugin.config.shared
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {DyniPluginSharedConfig & { componentRegistryGroups: Record<string, DyniComponentRegistryGroup> }} DyniFoundationRegistryShared */
+
+  const ns = /** @type {DyniPluginNamespace} */ (/** @type {unknown} */ (root.DyniPlugin));
   const config = ns.config;
-  const shared = config.shared = config.shared || {};
+  const shared = /** @type {DyniFoundationRegistryShared} */ (config.shared = config.shared || {});
   const BASE = ns.baseUrl;
 
   if (typeof BASE !== "string" || !BASE) {
@@ -16,7 +17,7 @@
   }
 
   const groups = shared.componentRegistryGroups = shared.componentRegistryGroups || {};
-  var sf = groups.sharedFoundation = groups.sharedFoundation || {};
+  var sf = /** @type {DyniComponentRegistryGroup} */ (groups.sharedFoundation = groups.sharedFoundation || {});
 
   sf.AisTargetLayoutSizing = {
       js: BASE + "shared/widget-kits/nav/AisTargetLayoutSizing.js",
@@ -49,6 +50,13 @@
       js: BASE + "shared/widget-kits/nav/AisTargetLayoutGeometry.js",
       css: undefined,
       globalKey: "DyniAisTargetLayoutGeometry",
+      deps: ["AisTargetLayoutGeometryStyles"]
+  };
+
+  sf.AisTargetLayoutGeometryStyles = {
+      js: BASE + "shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js",
+      css: undefined,
+      globalKey: "DyniAisTargetLayoutGeometryStyles",
       deps: ["HtmlWidgetUtils"]
   };
 

@@ -1,15 +1,20 @@
 # Testing Infrastructure
 
-**Status:** ✅ Implemented | Vitest + jsdom baseline, helper catalog, and HTML widget test pattern
+**Status:** ✅ Implemented | Vitest baseline, split projects, helper catalog, and HTML widget test pattern
 
 ## Overview
 
-dyninstruments uses Vitest with a jsdom runtime for unit and integration tests.
-Tests live under `tests/` and mirror source ownership areas.
+dyninstruments uses Vitest for unit, tool, and integration tests. Coverage runs
+with native global and critical-area thresholds, while `test:split` separates
+Node-only unit/tool tests, VM-based contract tests, and DOM/runtime/widget tests.
 
 ## Key Details
 
-- Test environment: Vitest + jsdom.
+- Coverage environment: Vitest + jsdom via `vitest.config.js`.
+- Coverage thresholds: global floors plus area floors for cluster mappers,
+  runtime, radial math core, and dynamic cluster update config files.
+- Split environments: `unit-node` and `contract` run without jsdom; `unit-dom`
+  uses jsdom and the canvas setup.
 - Test locations: `tests/**/*.test.js`.
 - Structure: `tests/` mirrors runtime/source modules and feature areas.
 
@@ -21,6 +26,23 @@ Tests live under `tests/` and mirror source ownership areas.
 - `globals: true`
 - `setupFiles: ["tests/setup/vitest.setup.js"]`
 - `include: ["tests/**/*.test.js"]`
+- `coverage.thresholds`: global and glob-specific coverage floors
+
+`vitest.config.js` `test.projects` split projects:
+
+| Project | Environment | Scope | Setup |
+|---|---|---|---|
+| `unit-node` | `node` | Pure shared math/format/layout, mapper/viewmodel/config, and tool tests | none |
+| `contract` | `node` | VM-based component registry, UMD registration/API-shape, dependency graph, plugin bootstrap, bundled layout, and runtime loading contracts | none |
+| `unit-dom` | `jsdom` | Remaining DOM/runtime/widget/integration tests | `tests/setup/vitest.setup.js` |
+
+Commands:
+
+- `npm run test:node` — `unit-node` only, no jsdom/canvas setup
+- `npm run test:contract` — AVnav/plugin registry, source-shape, cluster config, and bootstrap contracts
+- `npm run test:dom` — `unit-dom` jsdom/canvas-backed tests
+- `npm run test:unit` — `unit-node` plus `unit-dom`
+- `npm run test:split` — all configured Vitest projects
 
 ## Global Setup (`tests/setup/vitest.setup.js`)
 

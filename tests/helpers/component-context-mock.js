@@ -13,8 +13,10 @@ const DEFAULT_MODULE_PATHS = {
   RadialCanvasPrimitives: "shared/widget-kits/radial/RadialCanvasPrimitives.js",
   RadialFrameRenderer: "shared/widget-kits/radial/RadialFrameRenderer.js",
   HtmlMeasureUtils: "shared/widget-kits/html/HtmlMeasureUtils.js",
+  HtmlDomPatchUtils: "shared/widget-kits/html/HtmlDomPatchUtils.js",
   HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
   HtmlWidgetLifecycle: "shared/widget-kits/html/HtmlWidgetLifecycle.js",
+  MapZoomMarkup: "shared/widget-kits/nav/MapZoomMarkup.js",
   LayoutSizingHelpers: "shared/widget-kits/layout/LayoutSizingHelpers.js",
   NavModeRatio: "shared/widget-kits/nav/NavModeRatio.js",
   RegattaTimerPhase: "shared/widget-kits/vessel/RegattaTimerPhase.js",
@@ -29,13 +31,6 @@ function createComponentContextMock(options) {
   const modules = opts.modules || {};
   const services = opts.services || {};
   const instanceCache = Object.create(null);
-
-  const perf = services.perf || {
-    startSpan() {
-      return null;
-    },
-    endSpan() {},
-  };
 
   const format = services.format || {
     applyFormatter(value, cfg) {
@@ -127,7 +122,6 @@ function createComponentContextMock(options) {
     theme: {
       tokens: themeTokens,
     },
-    perf: perf,
     format: format,
     canvas: canvas,
     dom: dom,

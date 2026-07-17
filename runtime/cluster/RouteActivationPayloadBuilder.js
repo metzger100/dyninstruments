@@ -1,43 +1,59 @@
 /**
- * Module: DyniPlugin Route Activation Payload Builder - Route metadata and payload assembly helpers
+ * @file DyniPlugin Route Activation Payload Builder - Route metadata and payload assembly helpers
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: runtime/namespace.js, runtime/component-loader.js, runtime/theme-runtime.js, runtime/surface/index.js, ValueMath
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
-  const runtime = ns.runtime;
-  const valueMath = root.DyniComponents.DyniValueMath.create();
+  /** @typedef {DyniClusterRoute & { routeId: string }} DyniActivationRouteMeta */
+  /** @typedef {{ translate: (props: DyniMapperProps, routeContext: DyniMapperRouteContextWithViewModel) => Record<string, unknown> }} DyniActivationMapper */
+  /** @typedef {{ createToolkit: (props?: DyniMapperProps) => DyniMapperToolkit }} DyniActivationToolkitSpec */
+  /** @typedef {{ mapper: DyniActivationMapper, viewModel: DyniMapperViewModel | null, rendererSpec: unknown }} DyniActivationRouteCache */
+  /** @typedef {DyniMapperRouteContextWithViewModel & { routeId: string, cluster: string, kind: string }} DyniActivationRouteContext */
+  /** @typedef {{ routeFrame: DyniRouteFrame, revision: unknown, rootEl: unknown, shellEl: unknown, hostContext: unknown }} DyniActivationSnapshot */
+  /** @typedef {{ snapshot: DyniActivationSnapshot, routeMeta: DyniActivationRouteMeta, routeCache: DyniActivationRouteCache, toolkitSpec: DyniActivationToolkitSpec, surfaces: DyniSurfaceRuntimeApi }} DyniActivatedPayloadOptions */
+  /** @typedef {{ areComponentsLoaded: (ids: string[]) => boolean }} DyniActivationLoader */
+  /** @typedef {{ hasShadowCssText: (url: string) => boolean }} DyniActivationThemeRuntime */
+  /** @typedef {{ snapshot: DyniActivationSnapshot, routeMeta: DyniActivationRouteMeta, routeCache: DyniActivationRouteCache, toolkitSpec: DyniActivationToolkitSpec }} DyniPayloadBuildRequest */
 
+  const ns = /** @type {DyniPluginNamespace} */ (root.DyniPlugin);
+  const runtime = /** @type {DyniRuntimeNamespace} */ (ns.runtime);
+  const components = /** @type {{ DyniValueMath: { create: () => DyniValueMathApi } }} */ (root.DyniComponents);
+  const valueMath = components.DyniValueMath.create();
+
+  /** @param {unknown} value @param {string} name @returns {Record<string, unknown>} */
   const ensureObject = function (value, name) {
-    return valueMath.ensureObject(value, "RouteActivationPayloadBuilder: " + name);
+    return /** @type {Record<string, unknown>} */ (valueMath.ensureObject(value, "RouteActivationPayloadBuilder: " + name));
   };
   const trimText = valueMath.trimText;
 
+  /** @param {unknown} routeMeta @param {string} routeId @returns {asserts routeMeta is DyniActivationRouteMeta} */
   function ensureRouteMeta(routeMeta, routeId) {
     if (!routeMeta || typeof routeMeta !== "object") {
       throw new Error("RouteActivationController: unknown route '" + routeId + "'");
     }
-    if (typeof routeMeta.mapperId !== "string" || !routeMeta.mapperId) {
+    const meta = /** @type {Record<string, unknown>} */ (routeMeta);
+    if (typeof meta.mapperId !== "string" || !meta.mapperId) {
       throw new Error("RouteActivationController: route '" + routeId + "' requires mapperId");
     }
-    if (typeof routeMeta.rendererId !== "string" || !routeMeta.rendererId) {
+    if (typeof meta.rendererId !== "string" || !meta.rendererId) {
       throw new Error("RouteActivationController: route '" + routeId + "' requires rendererId");
     }
-    if (routeMeta.surface !== "html" && routeMeta.surface !== "canvas-dom") {
+    if (meta.surface !== "html" && meta.surface !== "canvas-dom") {
       throw new Error("RouteActivationController: route '" + routeId + "' requires surface 'html' or 'canvas-dom'");
     }
   }
 
+  /** @param {DyniRouteFrame|null|undefined} routeFrame @returns {DyniMapperProps} */
   function cloneRouteProps(routeFrame) {
     const props = routeFrame && typeof routeFrame === "object" ? routeFrame : {};
     const cleanProps = Object.assign({}, props);
     delete cleanProps.__dyniRouteId;
     delete cleanProps.__dyniRawProps;
-    return cleanProps;
+    return /** @type {DyniMapperProps} */ (cleanProps);
   }
 
+  /** @param {DyniRouteFrame|null|undefined} routeFrame @param {unknown} defaultCluster @returns {string} */
   function resolveRouteId(routeFrame, defaultCluster) {
     const props = routeFrame && typeof routeFrame === "object" ? routeFrame : {};
     const cluster = trimText(props.cluster || defaultCluster);
@@ -51,6 +67,7 @@
     return cluster + "/" + kind;
   }
 
+  /** @param {DyniActivationRouteMeta} routeMeta @returns {string[]} */
   function resolveRouteRoots(routeMeta) {
     const roots = [routeMeta.mapperId];
     if (routeMeta.viewModelId) {
@@ -60,6 +77,7 @@
     return roots;
   }
 
+  /** @param {string} rendererId @returns {string[]} */
   function resolveShadowCssUrls(rendererId) {
     const components = ns.config && ns.config.components ? ns.config.components : null;
     const componentDef = components && components[rendererId] ? components[rendererId] : null;
@@ -70,6 +88,7 @@
       : [];
   }
 
+  /** @param {DyniActivationRouteMeta} routeMeta @param {DyniActivationRouteCache} routeCache @param {DyniMapperProps} mapperProps @param {DyniActivationToolkitSpec} toolkitSpec @returns {DyniActivationRouteContext} */
   function createRouteContext(routeMeta, routeCache, mapperProps, toolkitSpec) {
     return {
       routeId: routeMeta.routeId,
@@ -80,6 +99,7 @@
     };
   }
 
+  /** @param {Record<string, unknown>} finalProps @param {Record<string, unknown>} mappedProps @returns {Record<string, unknown>} */
   function mergeRendererProps(finalProps, mappedProps) {
     if (mappedProps.rendererProps && typeof mappedProps.rendererProps === "object" && !Array.isArray(mappedProps.rendererProps)) {
       Object.assign(finalProps, mappedProps.rendererProps);
@@ -95,12 +115,13 @@
     return finalProps;
   }
 
+  /** @param {DyniActivatedPayloadOptions} options */
   function buildActivatedPayload(options) {
-    const snapshot = ensureObject(options.snapshot, "snapshot");
-    const routeMeta = ensureObject(options.routeMeta, "routeMeta");
-    const routeCache = ensureObject(options.routeCache, "routeCache");
-    const toolkitSpec = ensureObject(options.toolkitSpec, "toolkitSpec");
-    const surfaces = ensureObject(options.surfaces, "surfaces");
+    const snapshot = /** @type {DyniActivationSnapshot} */ (ensureObject(options.snapshot, "snapshot"));
+    const routeMeta = /** @type {DyniActivationRouteMeta} */ (/** @type {unknown} */ (ensureObject(options.routeMeta, "routeMeta")));
+    const routeCache = /** @type {DyniActivationRouteCache} */ (ensureObject(options.routeCache, "routeCache"));
+    const toolkitSpec = /** @type {DyniActivationToolkitSpec} */ (ensureObject(options.toolkitSpec, "toolkitSpec"));
+    const surfaces = /** @type {DyniSurfaceRuntimeApi} */ (/** @type {unknown} */ (ensureObject(options.surfaces, "surfaces")));
     const routeFrame = snapshot.routeFrame;
     const mapperProps = cloneRouteProps(routeFrame);
     const routeContext = createRouteContext(routeMeta, routeCache, mapperProps, toolkitSpec);
@@ -133,6 +154,7 @@
     };
   }
 
+  /** @param {DyniActivationRouteMeta} routeMeta @param {DyniActivationLoader} loader @param {DyniActivationThemeRuntime} themeRuntime @returns {boolean} */
   function resolveWarmReady(routeMeta, loader, themeRuntime) {
     const routeRoots = resolveRouteRoots(routeMeta);
     if (!loader.areComponentsLoaded(routeRoots)) {
@@ -150,10 +172,11 @@
     return true;
   }
 
+  /** @param {{ loader: DyniActivationLoader, themeRuntime: DyniActivationThemeRuntime, surfaces: DyniSurfaceRuntimeApi }} options */
   function createPayloadBuilder(options) {
-    const loader = ensureObject(options.loader, "loader");
-    const themeRuntime = ensureObject(options.themeRuntime, "themeRuntime");
-    const surfaces = ensureObject(options.surfaces, "surfaces");
+    const loader = /** @type {DyniActivationLoader} */ (ensureObject(options.loader, "loader"));
+    const themeRuntime = /** @type {DyniActivationThemeRuntime} */ (ensureObject(options.themeRuntime, "themeRuntime"));
+    const surfaces = /** @type {DyniSurfaceRuntimeApi} */ (/** @type {unknown} */ (ensureObject(options.surfaces, "surfaces")));
 
     if (typeof loader.areComponentsLoaded !== "function") {
       throw new Error("RouteActivationPayloadBuilder: loader.areComponentsLoaded must be a function");
@@ -171,9 +194,11 @@
       resolveRouteId: resolveRouteId,
       resolveRouteRoots: resolveRouteRoots,
       resolveShadowCssUrls: resolveShadowCssUrls,
+      /** @param {DyniActivationRouteMeta} routeMeta @returns {boolean} */
       resolveWarmReady: function (routeMeta) {
         return resolveWarmReady(routeMeta, loader, themeRuntime);
       },
+      /** @param {DyniPayloadBuildRequest} options */
       buildActivatedPayload: function (options) {
         return buildActivatedPayload({
           snapshot: options.snapshot,
@@ -186,7 +211,7 @@
     });
   }
 
-  runtime.routeActivationPayloadBuilder = Object.freeze({
+  /** @type {DyniRuntimeNamespace & Record<string, unknown>} */ (runtime).routeActivationPayloadBuilder = Object.freeze({
     createPayloadBuilder: createPayloadBuilder
   });
 }(this));

@@ -1,7 +1,6 @@
 /**
- * Module: EditRouteMarkup - Pure HTML assembly owner for edit-route renderer output
+ * @file EditRouteMarkup - Pure HTML assembly owner for edit-route renderer output
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: StateScreenMarkup, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,9 +12,16 @@
   "use strict";
 
   const METRIC_IDS = ["pts", "dst", "rte", "rteEta"];
+  /** @type {DyniValueMathApi["toObject"]} */
   let toObject;
+  /** @type {DyniValueMathApi["toText"]} */
   let toText;
 
+  /**
+   * @param {DyniEditRouteMetricText} metric
+   * @param {unknown} unitText
+   * @returns {boolean}
+   */
   function hasMetricUnit(metric, unitText) {
     if (metric && metric.hasUnit === true) {
       return true;
@@ -23,6 +29,13 @@
     return String(unitText || "").trim().length > 0;
   }
 
+  /**
+   * @param {unknown} mode
+   * @param {string} metricId
+   * @param {DyniEditRouteMetricText} metric
+   * @param {unknown} unitText
+   * @returns {boolean}
+   */
   function shouldRenderUnitNode(mode, metricId, metric, unitText) {
     if (!hasMetricUnit(metric, unitText)) {
       return false;
@@ -33,10 +46,18 @@
     return true;
   }
 
+  /**
+   * @param {DyniEditRouteMarkupModel} model
+   * @param {DyniEditRouteMarkupFit} fit
+   * @param {string} metricId
+   * @param {DyniHtmlWidgetUtilsApi} htmlUtils
+   * @returns {string}
+   */
   function renderMetric(model, fit, metricId, htmlUtils) {
-    const metrics = toObject(model.metrics);
-    const metric = toObject(metrics[metricId]);
-    const metricFit = toObject(toObject(fit.metrics)[metricId]);
+    const metrics = /** @type {Record<string, DyniEditRouteMetricText>} */ (toObject(model.metrics));
+    const metric = /** @type {DyniEditRouteMetricText} */ (toObject(metrics[metricId]));
+    const fitMetrics = /** @type {Record<string, DyniEditRouteMetricFit>} */ (toObject(fit.metrics));
+    const metricFit = /** @type {DyniEditRouteMetricFit} */ (toObject(fitMetrics[metricId]));
     const metricValues = toObject(fit.metricValues);
     const mode = model.mode || "normal";
     const metricClass = "dyni-edit-route-metric-" + metricId;
@@ -99,16 +120,25 @@
       + "</div>";
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniEditRouteMarkupApi}
+   */
   function create(def, componentContext) {
     const stateScreenMarkup = componentContext.components.require("StateScreenMarkup");
     const valueMath = componentContext.components.require("ValueMath");
     toObject = valueMath.toObject;
     toText = valueMath.toText;
 
+    /**
+     * @param {unknown} args
+     * @returns {string}
+     */
     function render(args) {
-      const cfg = args || {};
-      const model = toObject(cfg.model);
-      const fit = toObject(cfg.fit);
+      const cfg = /** @type {DyniEditRouteMarkupRenderArgs} */ (/** @type {unknown} */ (toObject(args)));
+      const model = /** @type {DyniEditRouteMarkupModel} */ (toObject(cfg.model));
+      const fit = /** @type {DyniEditRouteMarkupFit} */ (toObject(cfg.fit));
       const htmlUtils = cfg.htmlUtils;
       const mode = model.mode || "normal";
       const hasRoute = model.hasRoute === true;

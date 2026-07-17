@@ -1,7 +1,6 @@
 /**
- * Module: AlarmMarkup - Pure HTML assembly owner for vessel alarm renderer output
+ * @file AlarmMarkup - Pure HTML assembly owner for vessel alarm renderer output
  * Documentation: documentation/widgets/alarm.md
- * Depends: HtmlWidgetUtils, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,8 +11,10 @@
 }(this, function () {
   "use strict";
 
+  /** @type {DyniValueMathApi["toObject"]} */
   let toObject;
 
+  /** @param {string} className @param {unknown} text @param {unknown} style @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {string} */
   function renderTextCell(className, text, style, htmlUtils) {
     return ""
       + '<span class="' + className + '"'
@@ -23,6 +24,7 @@
       + "</span>";
   }
 
+  /** @param {string} className @param {string} text @param {unknown} style @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {string} */
   function renderRow(className, text, style, htmlUtils) {
     return ""
       + '<div class="' + className + '"'
@@ -32,6 +34,7 @@
       + "</div>";
   }
 
+  /** @param {DyniAlarmMarkupModel} model @param {DyniAlarmMarkupFit} fit @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {string} */
   function renderFlatMain(model, fit, htmlUtils) {
     return ""
       + '<div class="dyni-alarm-main dyni-alarm-main-flat">'
@@ -42,6 +45,7 @@
       + "</div>";
   }
 
+  /** @param {DyniAlarmMarkupModel} model @param {DyniAlarmMarkupFit} fit @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {string} */
   function renderNormalMain(model, fit, htmlUtils) {
     return ""
       + '<div class="dyni-alarm-main dyni-alarm-main-normal">'
@@ -60,6 +64,7 @@
       + "</div>";
   }
 
+  /** @param {DyniAlarmMarkupModel} model @param {DyniAlarmMarkupFit} fit @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {string} */
   function renderHighMain(model, fit, htmlUtils) {
     return ""
       + '<div class="dyni-alarm-main dyni-alarm-main-high">'
@@ -78,6 +83,7 @@
       + "</div>";
   }
 
+  /** @param {DyniAlarmMarkupModel} model @param {DyniAlarmMarkupFit} fit @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {string} */
   function renderMain(model, fit, htmlUtils) {
     if (fit.mode === "flat") {
       return renderFlatMain(model, fit, htmlUtils);
@@ -88,26 +94,30 @@
     return renderNormalMain(model, fit, htmlUtils);
   }
 
+  /** @param {DyniAlarmMarkupModel} model @param {DyniAlarmMarkupFit} fit @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {string} */
   function renderStateAccent(model, fit, htmlUtils) {
     return model.showStrip === true
       ? '<div class="dyni-alarm-state-accent"' + htmlUtils.toStyleAttr(fit.accentStyle) + "></div>"
       : "";
   }
 
+  /** @param {DyniAlarmMarkupModel} model @returns {string} */
   function renderHotspot(model) {
     return model.interactionState === "dispatch"
       ? '<div class="dyni-alarm-open-hotspot"></div>'
       : "";
   }
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniAlarmMarkupApi} */
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     toObject = componentContext.components.require("ValueMath").toObject;
 
+    /** @param {unknown} args @returns {string} */
     function render(args) {
-      const cfg = args || {};
-      const model = toObject(cfg.model);
-      const fit = toObject(cfg.fit);
+      const cfg = /** @type {DyniAlarmMarkupArgs} */ (args || {});
+      const model = /** @type {DyniAlarmMarkupModel} */ (toObject(cfg.model));
+      const fit = /** @type {DyniAlarmMarkupFit} */ (toObject(cfg.fit));
       const classes = [
         "dyni-alarm-html",
         "dyni-alarm-mode-" + fit.mode,

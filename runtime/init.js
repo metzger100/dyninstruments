@@ -1,15 +1,15 @@
 /**
- * Module: DyniPlugin Init - Runtime initialization and widget registration
+ * @file DyniPlugin Init - Runtime initialization and widget registration
  * Documentation: documentation/architecture/component-system.md
- * Depends: runtime/theme-runtime.js, runtime/component-loader.js, runtime/widget-registrar.js, config/widget-definitions.js, runtime/cluster/ClusterShellRenderer.js
  */
-(function (root) {
+(function (/** @type {DyniInitRoot} */ root) {
   "use strict";
 
   const ns = root.DyniPlugin;
   const runtime = ns.runtime;
   const state = ns.state;
 
+  /** @returns {DyniInitThemeRuntime} */
   function requireThemeRuntimeBoundary() {
     if (!runtime.theme || typeof runtime.theme.configure !== "function" || typeof runtime.theme.applyToRoot !== "function") {
       throw new Error("dyninstruments: runtime.theme boundary is required");
@@ -17,6 +17,7 @@
     return runtime.theme;
   }
 
+  /** @returns {DyniClusterShellRendererApi} */
   function requireClusterShellRenderer() {
     if (!runtime.clusterShellRenderer ||
       typeof runtime.clusterShellRenderer.normalizeRouteFrame !== "function" ||
@@ -26,6 +27,7 @@
     return runtime.clusterShellRenderer;
   }
 
+  /** @returns {DyniInitGeneration} */
   function getStartupGeneration() {
     return ns.startupGeneration || {
       id: "legacy",
@@ -35,6 +37,7 @@
     };
   }
 
+  /** @param {string} generationId */
   function clearGenerationState(generationId) {
     if (generationId && state.initGenerationId !== generationId) {
       return;
@@ -50,6 +53,7 @@
     runtime.componentLoader = null;
   }
 
+  /** @param {string} generationId @returns {() => void} */
   function createShutdown(generationId) {
     let shutdownDone = false;
     return function shutdownDyniPlugin() {
@@ -61,6 +65,7 @@
     };
   }
 
+  /** @returns {DyniInitAvnavApi | null} */
   function requireAvnavApi() {
     const avnavApi = runtime.getAvnavApi(root);
     if (!avnavApi) {
@@ -76,10 +81,11 @@
     return avnavApi;
   }
 
+  /** @returns {Promise<(() => void) | undefined>} */
   function runInit() {
     const generation = getStartupGeneration();
     if (state.initStarted && state.initGenerationId === generation.id) {
-      return state.initPromise;
+      return /** @type {Promise<(() => void) | undefined>} */ (state.initPromise);
     }
 
     if (state.initStarted && state.initGenerationId) {
@@ -87,17 +93,18 @@
     }
 
     if (state.initStarted) {
-      return state.initPromise;
+      return /** @type {Promise<(() => void) | undefined>} */ (state.initPromise);
     }
 
     const avnavApi = requireAvnavApi();
     if (!avnavApi) {
-      return Promise.resolve();
+      return Promise.resolve(undefined);
     }
 
-    state.hostActionBridge = runtime.createTemporaryHostActionBridge();
+    const hostActionBridge = runtime.createTemporaryHostActionBridge();
+    state.hostActionBridge = hostActionBridge;
     runtime.hostActions = function () {
-      return state.hostActionBridge.getHostActions();
+      return hostActionBridge.getHostActions();
     };
 
     const config = ns.config;
@@ -114,7 +121,7 @@
 
     const needed = loader.uniqueComponents(widgetDefinitions).slice();
     const startupPresetName = themeRuntime.resolveStartupPresetName(
-      root.document && root.document.documentElement
+      root.document ? root.document.documentElement : null
     );
 
     state.initPromise = Promise.all(needed.map(loader.loadComponent))
@@ -145,4 +152,4 @@
   }
 
   runtime.runInit = runInit;
-}(this));
+}(/** @type {DyniInitRoot} */ (/** @type {unknown} */ (this))));

@@ -1,7 +1,6 @@
 /**
- * Module: RoutePointsRowGeometry - Row policy and row-cell geometry owner for route-points layout
+ * @file RoutePointsRowGeometry - Row policy and row-cell geometry owner for route-points layout
  * Documentation: documentation/widgets/route-points.md
- * Depends: LayoutRectMath, RoutePointsLayoutSizing
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,11 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniRoutePointsRowGeometryApi}
+   */
   function create(def, componentContext) {
     const rectApi = componentContext.components.require("LayoutRectMath");
     const sizingApi = componentContext.components.require("RoutePointsLayoutSizing");
@@ -20,6 +24,7 @@
     const computeMarkerDiameter = sizingApi.computeMarkerDiameter;
     const computeMarkerCellWidth = sizingApi.computeMarkerCellWidth;
 
+    /** @param {DyniRoutePointsRowPolicyArgs | undefined} args @returns {DyniRoutePointsRowPolicy} */
     function resolveRowPolicy(args) {
       const cfg = args || {};
       const mode = cfg.mode;
@@ -29,6 +34,7 @@
       };
     }
 
+    /** @param {DyniRoutePointsRowPolicyArgs | undefined} args @returns {DyniRoutePointsRowPolicy} */
     function toRowPolicy(args) {
       const cfg = args || {};
       const provided = cfg.policy;
@@ -40,6 +46,7 @@
       return resolveRowPolicy(cfg);
     }
 
+    /** @param {DyniRect} innerRect @param {number} squareSize @param {boolean} showOrdinal @returns {DyniRect} */
     function toOrdinalRect(innerRect, squareSize, showOrdinal) {
       if (!showOrdinal) {
         return makeRect(innerRect.x, innerRect.y, 0, innerRect.h);
@@ -47,14 +54,15 @@
       return makeRect(innerRect.x, innerRect.y, squareSize, innerRect.h);
     }
 
+    /** @param {DyniRoutePointsRowCellsArgs} args @returns {DyniRoutePointsRowCells} */
     function buildHighRowCells(args) {
       const cfg = args || {};
-      const innerRect = cfg.innerRect;
-      const rowRect = cfg.rowRect;
-      const squareSize = cfg.squareSize;
-      const markerCellWidth = cfg.markerCellWidth;
-      const markerDiameter = cfg.markerDiameter;
-      const innerGap = cfg.innerGap;
+      const innerRect = /** @type {DyniRect} */ (cfg.innerRect);
+      const rowRect = /** @type {DyniRect} */ (cfg.rowRect);
+      const squareSize = Number(cfg.squareSize) || 0;
+      const markerCellWidth = Number(cfg.markerCellWidth) || 0;
+      const markerDiameter = Number(cfg.markerDiameter) || 0;
+      const innerGap = Number(cfg.innerGap) || 0;
       const showOrdinal = cfg.showOrdinal === true;
       const leadingWidth = showOrdinal ? squareSize : 0;
       const leadingGap = showOrdinal ? innerGap : 0;
@@ -78,14 +86,15 @@
       };
     }
 
+    /** @param {DyniRoutePointsRowCellsArgs} args @returns {DyniRoutePointsRowCells} */
     function buildWideRowCells(args) {
       const cfg = args || {};
-      const innerRect = cfg.innerRect;
-      const rowRect = cfg.rowRect;
-      const squareSize = cfg.squareSize;
-      const markerCellWidth = cfg.markerCellWidth;
-      const markerDiameter = cfg.markerDiameter;
-      const innerGap = cfg.innerGap;
+      const innerRect = /** @type {DyniRect} */ (cfg.innerRect);
+      const rowRect = /** @type {DyniRect} */ (cfg.rowRect);
+      const squareSize = Number(cfg.squareSize) || 0;
+      const markerCellWidth = Number(cfg.markerCellWidth) || 0;
+      const markerDiameter = Number(cfg.markerDiameter) || 0;
+      const innerGap = Number(cfg.innerGap) || 0;
       const showOrdinal = cfg.showOrdinal === true;
       const leadingWidth = showOrdinal ? squareSize : 0;
       const leadingGap = showOrdinal ? innerGap : 0;
@@ -107,6 +116,7 @@
       };
     }
 
+    /** @param {DyniRoutePointsRowCellsArgs | undefined} args @returns {DyniRoutePointsRowCells} */
     function buildRowCells(args) {
       const cfg = args || {};
       const rowRect = cfg.rowRect || makeRect(0, 0, 0, 0);

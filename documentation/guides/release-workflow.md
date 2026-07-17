@@ -4,14 +4,23 @@
 
 ## Overview
 
-Releases are created locally and committed into the repository first. GitHub Releases is a secondary copy target that publishes the already-created zip and notes. But don't push the release.
+Releases are created locally and committed into the repository first. A tag push
+reruns the complete quality gate before GitHub publishes the already-created ZIP
+and notes.
 
 ## Key Details
 
 - Local authority: `npm run release:prepare` + `npm run release:create`.
+- `release:prepare -- --help` is side-effect free; normal preparation requires a
+  completely clean tree, including `releases/`.
+- `release:create -- --version=X.Y.Z` permits only the canonical dirty notes
+  path `releases/dyninstruments-X.Y.Z.md`; existing/dirty ZIPs and every other
+  path fail before the quality gate.
 - Version source of truth: git tag `vX.Y.Z`.
-- `release:create` required gates: `npm run check:core` and `npm run test:coverage:check`.
-- `release:create` advisory-only gate: `npm run perf:check` (failure warns and continues by design).
+- `release:create` required gate: one blocking `npm run check:all` invocation.
+- `check:core` includes `npm run package:check`, which validates plugin/layout schemas and focused release/package tests.
+- `package:check` verifies release manifests exclude tests, tools, docs, schemas,
+  CI files, type declarations, package files, and dev-only quality configs.
 - Release artifacts written to `releases/`:
   - `releases/dyninstruments-X.Y.Z.zip`
   - `releases/dyninstruments-X.Y.Z.md`
@@ -20,7 +29,9 @@ Releases are created locally and committed into the repository first. GitHub Rel
 
 ## Prerequisites
 
-- Install dependencies: `npm install` (or `npm ci`).
+- Use Node 26 with npm 12.0.1, then run `npm run setup` from the plugin root.
+  The first actionlint acquisition requires network access; later gates reuse
+  the checksum-verified persistent cache.
 - Ensure `zip` command is available in `PATH`.
 
 ## Step-By-Step Release Flow
@@ -43,7 +54,20 @@ npm run release:prepare
 npm run release:create -- --version=X.Y.Z
 ```
 
-`release:create` runs required gates (`check:core`, `test:coverage:check`), runs `perf:check` as advisory-only, builds the zip, reads `releases/dyninstruments-X.Y.Z.md` directly, commits both artifacts, and creates an annotated `vX.Y.Z` tag.
+`release:create` runs one blocking `check:all` gate, builds the ZIP, reads
+`releases/dyninstruments-X.Y.Z.md` directly, commits both artifacts, and creates
+an annotated `vX.Y.Z` tag.
+
+5. Push the release commit and annotated tag.
+
+```bash
+git push origin main
+git push origin vX.Y.Z
+```
+
+The tag workflow installs the locked Node 26/npm 12.0.1 quality toolchain,
+reruns `npm run check:all`, validates the tag with the same SemVer owner used by
+`release:create`, and then publishes the committed files without rebuilding.
 
 ## SemVer Decision Guide
 
@@ -99,9 +123,11 @@ Practical checklist for each bullet:
 
 | Symptom | Likely Cause | Fix |
 |---|---|---|
-| `release:create` fails on `check:core` | Lint/docs/contracts gate failure | Run `npm run check:core`, fix all failures, rerun release |
+| `release:create` fails on `check:all` | Complete local gate failure | Run `npm run check:all`, fix all failures, rerun release |
 | `release:create` fails on notes file | Missing or empty `releases/dyninstruments-X.Y.Z.md` file | Create/populate the markdown file in `releases/` and rerun |
+| Preparation/creation reports dirty release paths | Stale ZIP, unrelated notes, or another uncommitted file exists | Commit, stash, or remove every path except the current canonical notes file used by `release:create` |
 | `release:create` fails with duplicate tag | `vX.Y.Z` already exists | Choose next version or delete/retarget tag intentionally |
+| Tag workflow quality job fails | The tagged commit does not pass the reproducible aggregate gate | Fix locally, create a new release commit/tag, and push the replacement tag intentionally |
 | Release zip/notes missing after run | Release command aborted before artifact stage | Fix earlier error and rerun full command |
 
 ## Related

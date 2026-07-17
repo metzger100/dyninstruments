@@ -1,0 +1,14 @@
+node_modules/
+coverage/
+artifacts/
+.kilo/
+releases/*.zip
+assets/fonts/*.woff2
+package-lock.json
+exec-plans/completed/
+.codex/
+.agents/
+tests/css/lint-fixtures/
+tests/tools/lint-fixtures/
+widgets/lint-fixtures/
+tools/lint-fixtures/

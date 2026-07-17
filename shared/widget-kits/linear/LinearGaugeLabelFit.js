@@ -1,7 +1,6 @@
 /**
- * Module: LinearGaugeLabelFit - Shared label fitting and placement helpers for linear gauges
+ * @file LinearGaugeLabelFit - Shared label fitting and placement helpers for linear gauges
  * Documentation: documentation/linear/linear-shared-api.md
- * Depends: CanvasTextFitting, HtmlWidgetUtils
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,10 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {DyniLinearGaugeDrawingState} state
+   * @returns {DyniLinearScaleBounds}
+   */
   function resolveScaleBounds(state) {
     return {
       left: Math.min(Number(state.layout.scaleX0) || 0, Number(state.layout.scaleX1) || 0),
@@ -19,6 +22,17 @@
     };
   }
 
+  /**
+   * @param {number} x
+   * @param {number} width
+   * @param {unknown} isStart
+   * @param {unknown} isEnd
+   * @param {unknown} isFirst
+   * @param {unknown} isLast
+   * @param {DyniLinearGaugeDrawingState} state
+   * @param {number} fontPx
+   * @returns {DyniLinearLabelPlacement}
+   */
   function resolveEdgePlacement(x, width, isStart, isEnd, isFirst, isLast, state, fontPx) {
     const scaleBounds = resolveScaleBounds(state);
     const edgePad = Math.max(1, Math.floor(fontPx * 0.08));
@@ -75,6 +89,18 @@
     };
   }
 
+  /**
+   * @param {DyniLinearLabelEntry} entry
+   * @param {number} width
+   * @param {unknown} isStart
+   * @param {unknown} isEnd
+   * @param {unknown} isFirst
+   * @param {unknown} isLast
+   * @param {DyniLinearGaugeDrawingState} state
+   * @param {number} fontPx
+   * @param {DyniLinearLabelEdgePolicyResolver} resolveLabelEdgePolicy
+   * @returns {DyniLinearLabelPlacement}
+   */
   function resolveLabelPlacement(entry, width, isStart, isEnd, isFirst, isLast, state, fontPx, resolveLabelEdgePolicy) {
     if (resolveLabelEdgePolicy(state) === "sliding") {
       const x = Number(entry && entry.naturalX);
@@ -97,6 +123,12 @@
     );
   }
 
+  /**
+   * @param {DyniLinearGaugeDrawingState} state
+   * @param {unknown} labelY
+   * @param {number} fontPx
+   * @returns {DyniLinearLabelClipRect}
+   */
   function resolveLabelClipRect(state, labelY, fontPx) {
     const scaleBounds = resolveScaleBounds(state);
     return {
@@ -107,7 +139,16 @@
     };
   }
 
+  /**
+   * @param {DyniLinearGaugeDrawingState} state
+   * @param {DyniLinearTicks} ticks
+   * @param {unknown} showEndLabels
+   * @param {DyniLinearGaugeMathApi} math
+   * @param {DyniLinearTickLabelFormatter | null} labelFormatter
+   * @returns {DyniLinearLabelEntry[]}
+   */
   function collectLabels(state, ticks, showEndLabels, math, labelFormatter) {
+    /** @type {DyniLinearLabelEntry[]} */
     const labels = [];
     if (!math || !state || !ticks || !ticks.major || !ticks.major.length) {
       return labels;
@@ -160,6 +201,15 @@
     return labels;
   }
 
+  /**
+   * @param {CanvasRenderingContext2D} layerCtx
+   * @param {DyniLinearGaugeDrawingState} state
+   * @param {DyniLinearLabelEntry[]} labels
+   * @param {number} fontPx
+   * @param {DyniCanvasTextFittingApi["setFont"]} setCanvasFont
+   * @param {DyniLinearLabelEdgePolicyResolver} resolveLabelEdgePolicy
+   * @returns {boolean}
+   */
   function labelPassFits(layerCtx, state, labels, fontPx, setCanvasFont, resolveLabelEdgePolicy) {
     if (!labels.length) {
       return true;
@@ -196,6 +246,14 @@
     return true;
   }
 
+  /**
+   * @param {CanvasRenderingContext2D} layerCtx
+   * @param {DyniLinearGaugeDrawingState} state
+   * @param {DyniLinearLabelEntry[]} labels
+   * @param {DyniCanvasTextFittingApi["setFont"]} setCanvasFont
+   * @param {DyniLinearLabelEdgePolicyResolver} resolveLabelEdgePolicy
+   * @returns {number}
+   */
   function resolveLabelFontPx(layerCtx, state, labels, setCanvasFont, resolveLabelEdgePolicy) {
     const ceilingPx = Math.max(1, Math.floor(Number(state.labelFontPx) || 0));
     let low = 1;
@@ -216,6 +274,11 @@
     return best;
   }
 
+  /**
+   * @param {DyniLinearGaugeDrawingState} state
+   * @param {number} fontPx
+   * @returns {number}
+   */
   function resolveLabelY(state, fontPx) {
     const tickReach = Math.max(
       Number(state.layout.majorTickLen) || 0,
@@ -237,12 +300,28 @@
     );
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniLinearGaugeLabelFitApi}
+   */
   function create(def, componentContext) {
     const fitting = componentContext.components.require("CanvasTextFitting");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const setCanvasFont = fitting.setFont;
     const resolveLabelEdgePolicy = htmlUtils.resolveLabelEdgePolicy;
 
+    /**
+     * @param {DyniLinearLabelEntry} entry
+     * @param {number} width
+     * @param {unknown} isStart
+     * @param {unknown} isEnd
+     * @param {unknown} isFirst
+     * @param {unknown} isLast
+     * @param {DyniLinearGaugeDrawingState} state
+     * @param {number} fontPx
+     * @returns {DyniLinearLabelPlacement}
+     */
     function resolveLabelPlacementWithPolicy(entry, width, isStart, isEnd, isFirst, isLast, state, fontPx) {
       return resolveLabelPlacement(
         entry,
@@ -257,6 +336,12 @@
       );
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} layerCtx
+     * @param {DyniLinearGaugeDrawingState} state
+     * @param {DyniLinearLabelEntry[]} labels
+     * @returns {number}
+     */
     function resolveLabelFontPxWithPolicy(layerCtx, state, labels) {
       return resolveLabelFontPx(layerCtx, state, labels, setCanvasFont, resolveLabelEdgePolicy);
     }

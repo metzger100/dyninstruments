@@ -1,14 +1,17 @@
 /**
- * Module: DyniPlugin Environment Cluster - Depth, temperature, and pressure config
+ * @file DyniPlugin Environment Cluster - Depth, temperature, and pressure config
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/environment-editables.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {Record<string, unknown> & { kind?: unknown, value?: unknown, depthKey?: unknown, tempKey?: unknown, depth?: unknown, temp?: unknown, storeKeys?: Record<string, unknown> }} DyniEnvironmentValues */
+  /** @typedef {DyniPluginSharedConfig & { environmentDefaultDepthKey: string, buildEnvironmentEditableParameters: () => DyniEditableParameters }} DyniEnvironmentSharedConfig */
+  /** @typedef {{ DyniPlugin: DyniPluginNamespace & { config: DyniPluginConfig & { clusters: DyniWidgetDefinition[] } } }} DyniEnvironmentRoot */
+
+  const ns = /** @type {DyniEnvironmentRoot} */ (/** @type {unknown} */ (root)).DyniPlugin;
   const config = ns.config;
-  const shared = config.shared;
+  const shared = /** @type {DyniEnvironmentSharedConfig} */ (config.shared);
   const DEFAULT_DEPTH_KEY = shared.environmentDefaultDepthKey;
   const hasOwn = Object.prototype.hasOwnProperty;
 
@@ -26,9 +29,10 @@
         temp: "nav.gps.waterTemp"
       },
       editableParameters: shared.buildEnvironmentEditableParameters(),
+      /** @this {DyniEnvironmentValues} @param {DyniEnvironmentValues | null | undefined} values @returns {DyniEnvironmentValues} */
       updateFunction: function (values) {
-        const out = values ? { ...values } : {};
-        const source = this && typeof this === "object" ? this : {};
+        const out = /** @type {DyniEnvironmentValues} */ (values ? { ...values } : {});
+        const source = /** @type {DyniEnvironmentValues} */ (this && typeof this === "object" ? this : {});
         const kind = (values && values.kind) || source.kind || "depth";
 
         if (!out.storeKeys) out.storeKeys = {};

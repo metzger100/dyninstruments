@@ -1,7 +1,6 @@
 /**
- * Module: SpeedLinearWidget - Linear speed gauge for SOG/STW with high-end warning/alarm sectors
+ * @file SpeedLinearWidget - Linear speed gauge for SOG/STW with high-end warning/alarm sectors
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, ValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,19 +11,25 @@
 }(this, function () {
   "use strict";
 
+  /** @typedef {DyniLinearGaugeProps & { speedLinearWarningFrom?: number, speedLinearAlarmFrom?: number }} DyniSpeedLinearProps */
+
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const engine = componentContext.components.require("LinearGaugeEngine");
     const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    /** @param {unknown} raw @param {DyniLinearGaugeProps} props @param {unknown} unit @returns {{ num: number, text: unknown }} */
     function formatDisplay(raw, props, unit) {
       return valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatSpeed", [unit || "kn"]);
     }
 
+    /** @param {DyniSpeedLinearProps} props @param {number} minV @param {number} maxV @param {DyniLinearRange} axis @param {DyniValueMathApi} valueApi @param {DyniLinearGaugeTheme} theme @returns {DyniLinearColoredRange[]} */
     function buildSectors(props, minV, maxV, axis, valueApi, theme) {
       const p = props || {};
       const warningFrom = p.speedLinearWarningFrom;
       const alarmFrom = p.speedLinearAlarmFrom;
-      const warningTo = (Number.isFinite(alarmFrom) && Number.isFinite(warningFrom) && alarmFrom > warningFrom)
+      const warningTo = (typeof alarmFrom === "number" && Number.isFinite(alarmFrom)
+        && typeof warningFrom === "number" && Number.isFinite(warningFrom) && alarmFrom > warningFrom)
         ? alarmFrom
         : maxV;
 

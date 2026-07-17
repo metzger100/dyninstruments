@@ -1,7 +1,6 @@
 /**
- * Module: StateScreenInteraction - Shared interaction gating for semantic state-screens
+ * @file StateScreenInteraction - Shared interaction gating for semantic state-screens
  * Documentation: documentation/shared/state-screens.md
- * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,11 +11,13 @@
 }(this, function () {
   "use strict";
 
+  /** @param {DyniStateScreenInteractionOptions} [options] @returns {unknown} */
   function resolveInteraction(options) {
     const cfg = options || {};
     return cfg.kind === "data" ? cfg.baseInteraction : "passive";
   }
 
+  /** @returns {DyniStateScreenInteractionApi} */
   function create() {
     return {
       id: "StateScreenInteraction",

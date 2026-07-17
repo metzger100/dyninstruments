@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: dyni-format-check
+        name: dyninstruments format check
+        entry: npm run format:check
+        language: system
+        pass_filenames: false
+      - id: dyni-lint
+        name: dyninstruments lint
+        entry: npm run lint
+        language: system
+        pass_filenames: false
+      - id: dyni-actions-lint
+        name: dyninstruments GitHub Actions lint
+        entry: npm run actions:lint
+        language: system
+        pass_filenames: false
+      - id: dyni-docs-check
+        name: dyninstruments docs check
+        entry: npm run docs:check
+        language: system
+        pass_filenames: false

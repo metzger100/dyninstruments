@@ -3,13 +3,9 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 
-import {
-  buildBootstrapBundleContent,
-  buildReleaseManifest,
-  validateManifest
-} from "./release-zip-builder.mjs";
-
-const VERSION_REGEX = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+import { buildBootstrapBundleContent, buildReleaseManifest, validateManifest } from "./release-zip-builder.mjs";
+import { getUnexpectedDirtyPaths } from "./release-git.mjs";
+import { isValidReleaseVersion } from "./release-version.mjs";
 
 export function parseReleaseCreateArgs(argv) {
   const out = { version: "" };
@@ -38,19 +34,16 @@ export function createRelease(options) {
 
   const notesAbs = validateInputs({ rootDir, version, runCommand });
   ensureZipBinaryAvailable(runCommand, rootDir);
-  ensureCleanWorktreeOutsideReleases(runCommand, rootDir);
+  ensureCleanReleaseCreation(runCommand, rootDir, version);
 
-  runRequiredCheck(runCommand, rootDir, ["run", "check:core"], "npm run check:core");
-  runRequiredCheck(runCommand, rootDir, ["run", "test:coverage:check"], "npm run test:coverage:check");
-
-  runAdvisoryPerfCheck(runCommand, rootDir, output);
+  runRequiredCheck(runCommand, rootDir, ["run", "check:all"], "npm run check:all");
 
   const manifestFiles = manifestBuilder(rootDir);
   const manifestValidation = manifestValidator(rootDir, manifestFiles);
   if (!manifestValidation.valid) {
     throw new Error(
       "release:create aborted: manifest contains missing files:\n" +
-      manifestValidation.missing.map((relPath) => `- ${relPath}`).join("\n")
+        manifestValidation.missing.map((relPath) => `- ${relPath}`).join("\n")
     );
   }
 
@@ -70,7 +63,11 @@ export function createRelease(options) {
   });
 
   const tag = `v${version}`;
-  runGit(runCommand, rootDir, ["add", `releases/${zipName}`, path.relative(rootDir, releaseNotesAbs).replace(/\\/g, "/")]);
+  runGit(runCommand, rootDir, [
+    "add",
+    `releases/${zipName}`,
+    path.relative(rootDir, releaseNotesAbs).replace(/\\/g, "/")
+  ]);
   runGit(runCommand, rootDir, ["commit", "-m", `release: ${tag}`]);
   runGit(runCommand, rootDir, ["tag", "-a", tag, "-m", `Release ${tag}`]);
 
@@ -108,18 +105,22 @@ export function main(argv = process.argv.slice(2)) {
 }
 
 function validateInputs({ rootDir, version, runCommand }) {
-  if (!VERSION_REGEX.test(version)) {
+  if (!isValidReleaseVersion(version)) {
     throw new Error("release:create aborted: --version must be a valid SemVer string without 'v' prefix");
   }
 
   const notesAbs = getCanonicalReleaseNotesPath(rootDir, version);
   if (!fs.existsSync(notesAbs)) {
-    throw new Error(`release:create aborted: notes file not found: ${path.relative(rootDir, notesAbs).replace(/\\/g, "/")}`);
+    throw new Error(
+      `release:create aborted: notes file not found: ${path.relative(rootDir, notesAbs).replace(/\\/g, "/")}`
+    );
   }
 
   const notesText = fs.readFileSync(notesAbs, "utf8");
   if (!notesText.trim()) {
-    throw new Error(`release:create aborted: notes file is empty: ${path.relative(rootDir, notesAbs).replace(/\\/g, "/")}`);
+    throw new Error(
+      `release:create aborted: notes file is empty: ${path.relative(rootDir, notesAbs).replace(/\\/g, "/")}`
+    );
   }
 
   const tag = `v${version}`;
@@ -140,20 +141,15 @@ function ensureZipBinaryAvailable(runCommand, rootDir) {
   }
 }
 
-function ensureCleanWorktreeOutsideReleases(runCommand, rootDir) {
-  const statusOutput = runGit(runCommand, rootDir, ["status", "--porcelain", "--untracked-files=all"]);
-  const dirtyOutsideReleases = statusOutput
-    .split(/\r?\n/)
-    .filter(Boolean)
-    .some((line) => {
-      const pathText = line.slice(3);
-      const targetPath = pathText.includes(" -> ") ? pathText.split(" -> ").pop() : pathText;
-      const normalized = normalizeRepoRelativePath(targetPath);
-      return !normalized.startsWith("releases/");
-    });
+export function ensureCleanReleaseCreation(runCommand, rootDir, version) {
+  const allowedNotesPath = `releases/dyninstruments-${version}.md`;
+  const unexpectedPaths = getUnexpectedDirtyPaths((args) => runGit(runCommand, rootDir, args), [allowedNotesPath]);
 
-  if (dirtyOutsideReleases) {
-    throw new Error("release:create aborted: working tree has uncommitted changes outside releases/");
+  if (unexpectedPaths.length > 0) {
+    throw new Error(
+      "release:create aborted: working tree has changes beyond the canonical release notes file:\n" +
+        unexpectedPaths.map((filePath) => `- ${filePath}`).join("\n")
+    );
   }
 }
 
@@ -161,20 +157,6 @@ function runRequiredCheck(runCommand, rootDir, args, label) {
   const result = runCommand("npm", args, { cwd: rootDir });
   if (result.status !== 0) {
     throw new Error(`release:create aborted: required gate failed (${label})`);
-  }
-}
-
-function runAdvisoryPerfCheck(runCommand, rootDir, output) {
-  const result = runCommand("npm", ["run", "perf:check"], { cwd: rootDir });
-  if (result.status !== 0) {
-    const detail = [result.stdout, result.stderr]
-      .filter((value) => typeof value === "string" && value.trim() !== "")
-      .join("\n")
-      .trim();
-    output.warn("release:create advisory: npm run perf:check failed; continuing by design");
-    if (detail) {
-      output.warn(detail);
-    }
   }
 }
 
@@ -216,13 +198,6 @@ function runGit(runCommand, rootDir, args) {
     throw new Error(`release:create aborted: git ${args.join(" ")} failed${detail ? `\n${detail}` : ""}`);
   }
   return result.stdout || "";
-}
-
-function normalizeRepoRelativePath(rawPath) {
-  return String(rawPath || "")
-    .replace(/\\/g, "/")
-    .replace(/^\.\//, "")
-    .trim();
 }
 
 function getCanonicalReleaseNotesPath(rootDir, version) {

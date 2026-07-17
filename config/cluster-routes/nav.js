@@ -1,12 +1,13 @@
 /**
- * Module: DyniPlugin Cluster Routes Nav - Route metadata for navigation kinds
+ * @file DyniPlugin Cluster Routes Nav - Route metadata for navigation kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: config/cluster-routes.js
  */
 (function (root) {
   "use strict";
 
-  var routes = root.DyniPlugin.config.clusterRoutes.routes;
+  const ns = /** @type {DyniPluginNamespace} */ (/** @type {unknown} */ (root.DyniPlugin));
+  /** @type {DyniClusterRoute[]} */
+  var routes = ns.config.clusterRoutes.routes;
 
   routes.push(
     {

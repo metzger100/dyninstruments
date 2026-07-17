@@ -1,7 +1,6 @@
 /**
- * Module: CompassLinearWidget - Linear compass with fixed center pointer and moving heading scale
+ * @file CompassLinearWidget - Linear compass with fixed center pointer and moving heading scale
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, ValueMath, SpringEasing
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,8 +10,10 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {DyniLinearGaugeProps & { heading?: unknown, markerCourse?: unknown, leadingZero?: boolean, easing?: boolean, compassLinearRange?: number }} DyniCompassLinearProps */
   const hasOwn = Object.prototype.hasOwnProperty;
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const engine = componentContext.components.require("LinearGaugeEngine");
     const valueMath = componentContext.components.require("ValueMath");
@@ -20,12 +21,14 @@
     const markerMotion = springEasing.createMotion({ wrap: 360 });
     const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
+    /** @param {unknown} delta @returns {number} */
     function norm180(delta) {
       let out = ((Number(delta) + 180) % 360 + 360) % 360 - 180;
       if (out === 180) out = -180;
       return out;
     }
 
+    /** @param {number} minValue @param {number} maxValue @param {unknown} stepValue @returns {number[]} */
     function buildSeries(minValue, maxValue, stepValue) {
       const step = Math.abs(Number(stepValue));
       if (!Number.isFinite(minValue) || !Number.isFinite(maxValue) || maxValue <= minValue || !Number.isFinite(step) || step <= 0) {
@@ -43,6 +46,7 @@
       return out;
     }
 
+    /** @param {DyniLinearRange} axis @param {unknown} tickMajorRaw @param {unknown} tickMinorRaw @returns {DyniLinearTicks} */
     function buildTicks(axis, tickMajorRaw, tickMinorRaw) {
       const tickMajor = Math.abs(Number(tickMajorRaw));
       const tickMinor = Math.abs(Number(tickMinorRaw));
@@ -58,6 +62,7 @@
       return { major: major, minor: minor };
     }
 
+    /** @param {unknown} raw @param {DyniCompassLinearProps} props @returns {{ num: number, text: unknown }} */
     function formatDisplay(raw, props) {
       const p = props || {};
       const heading = toOptionalFiniteNumber(raw);
@@ -70,6 +75,7 @@
       };
     }
 
+    /** @param {DyniCompassLinearProps} props @param {DyniLinearRange} range @param {DyniLinearRange} defaultAxis @returns {DyniLinearRange} */
     function resolveAxis(props, range, defaultAxis) {
       const p = props || {};
       const headingRaw = (typeof p.value !== "undefined") ? p.value : p.heading;
@@ -85,6 +91,7 @@
       };
     }
 
+    /** @param {DyniLinearGaugeDrawingState} state @param {DyniCompassLinearProps} props @param {DyniLinearRichDisplay} display @param {DyniLinearFrameDrawApi} api @returns {DyniLinearRenderResult} */
     function drawFrame(state, props, display, api) {
       const p = props || {};
       api.drawDefaultPointer();

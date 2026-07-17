@@ -1,7 +1,6 @@
 /**
- * Module: RegattaTimerAudio - Web Audio tone engine for regatta timer signals
+ * @file RegattaTimerAudio - Web Audio tone engine for regatta timer signals
  * Documentation: documentation/widgets/regatta-timer.md
- * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -20,16 +19,18 @@
   const ATTACK_SECONDS = 0.005;
   const RELEASE_SECONDS = 0.01;
 
+  /** @returns {DyniRegattaTimerAudioGlobal} */
   function resolveGlobalRoot() {
     if (typeof globalThis !== "undefined") {
-      return globalThis;
+      return /** @type {DyniRegattaTimerAudioGlobal} */ (globalThis);
     }
     if (typeof window !== "undefined") {
-      return window;
+      return /** @type {DyniRegattaTimerAudioGlobal} */ (window);
     }
     return {};
   }
 
+  /** @param {DyniRegattaTimerAudioGlobal} globalRoot @returns {DyniRegattaAudioContextCtor | null} */
   function resolveAudioContextCtor(globalRoot) {
     if (globalRoot && typeof globalRoot.AudioContext === "function") {
       return globalRoot.AudioContext;
@@ -40,12 +41,16 @@
     return null;
   }
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniRegattaTimerAudioApi} */
   function create(def, componentContext) {
+    /** @returns {DyniRegattaTimerAudioEngine} */
     function createAudioEngine() {
       const globalRoot = resolveGlobalRoot();
+      /** @type {AudioContext | null} */
       let audioContext = null;
       let audioUnavailable = false;
 
+      /** @returns {boolean} */
       function ensureContext() {
         if (audioContext) {
           return true;
@@ -70,6 +75,7 @@
         }
       }
 
+      /** @param {unknown} frequency @param {unknown} durationMs @returns {void} */
       function playTone(frequency, durationMs) {
         if (!audioContext) {
           return;
@@ -108,6 +114,7 @@
         }
       }
 
+      /** @returns {void} */
       function destroy() {
         if (!audioContext) {
           return;

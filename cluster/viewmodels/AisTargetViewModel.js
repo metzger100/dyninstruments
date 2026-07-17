@@ -1,7 +1,6 @@
 /**
- * Module: AisTargetViewModel - AIS target summary domain normalization contract owner
+ * @file AisTargetViewModel - AIS target summary domain normalization contract owner
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ValueMath
  */
 
 (function (root, factory) {
@@ -13,10 +12,21 @@
 }(this, function () {
   "use strict";
 
+  /** @typedef {{ mmsi?: unknown, type?: unknown, name?: string, shipname?: string, cpa?: unknown, tcpa?: unknown, passFront?: unknown, warning?: unknown, nextWarning?: unknown, nearest?: unknown, distance?: unknown, headingTo?: unknown } & Record<string, unknown>} DyniAisTarget */
+  /** @typedef {{ warning: boolean, nextWarning: boolean, nearest: boolean, trackedMatch: boolean, hasColorMmsi: boolean, aisMarkAllWarning: boolean }} DyniAisColorState */
+  /** @typedef {{ target?: unknown, trackedMmsi?: unknown, aisMarkAllWarning?: unknown }} DyniAisTargetProps */
+  /** @typedef {{ mmsiRaw: unknown, mmsiNormalized: string, trackedMmsiRaw: unknown, hasTargetIdentity: boolean, hasDispatchMmsi: boolean, hasColorMmsi: boolean, distance: number | undefined, cpa: number | undefined, tcpa: number | undefined, headingTo: number | undefined, nameOrMmsi: string, frontText: string, frontInitial: string, showTcpaBranch: boolean, warning: boolean, nextWarning: boolean, nearest: boolean, trackedMatch: boolean, colorRole: DyniAisColorRole | undefined, hasColorRole: boolean }} DyniAisTargetViewModelOutput */
+  /** @typedef {"warning" | "nearest" | "tracking" | "normal"} DyniAisColorRole */
+  /** @typedef {{ id: "AisTargetViewModel", build: (props?: DyniAisTargetProps) => DyniAisTargetViewModelOutput }} DyniAisTargetViewModelApi */
+
+  /** @type {DyniValueMathApi["isObject"]} */
   let isObject;
+  /** @type {DyniValueMathApi["hasText"]} */
   let hasText;
+  /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */
   let toOptionalFiniteNumber;
 
+  /** @param {unknown} mmsi @returns {string} */
   function toDispatchMmsi(mmsi) {
     if (typeof mmsi === "number" && Number.isFinite(mmsi)) {
       return String(Math.trunc(mmsi));
@@ -27,12 +37,13 @@
     return "";
   }
 
+  /** @param {DyniAisTarget} target @param {unknown} mmsiRaw @returns {string} */
   function pickNameOrMmsi(target, mmsiRaw) {
     const isAton = target.type === 21 || target.type === "21";
-    if (isAton && hasText(target.name)) {
+    if (isAton && typeof target.name === "string" && hasText(target.name)) {
       return target.name.trim();
     }
-    if (hasText(target.shipname)) {
+    if (typeof target.shipname === "string" && hasText(target.shipname)) {
       return target.shipname.trim();
     }
     if (typeof mmsiRaw === "string" && mmsiRaw.trim() !== "") {
@@ -44,6 +55,7 @@
     return "";
   }
 
+  /** @param {number | undefined} cpa @param {number | undefined} passFront @returns {string} */
   function deriveFrontText(cpa, passFront) {
     if (!cpa) {
       return "-";
@@ -60,6 +72,7 @@
     return "Pass";
   }
 
+  /** @param {DyniAisColorState} state @returns {DyniAisColorRole | undefined} */
   function deriveColorRole(state) {
     if ((state.warning && state.aisMarkAllWarning) || state.nextWarning) {
       return "warning";
@@ -76,15 +89,17 @@
     return undefined;
   }
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniAisTargetViewModelApi} */
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
     isObject = valueMath.isObject;
     hasText = valueMath.hasText;
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 
+    /** @param {DyniAisTargetProps | undefined} props @returns {DyniAisTargetViewModelOutput} */
     function build(props) {
-      const p = props || {};
-      const target = isObject(p.target) ? p.target : {};
+      const p = /** @type {DyniAisTargetProps} */ (props || {});
+      const target = /** @type {DyniAisTarget} */ (isObject(p.target) ? p.target : {});
       const mmsiRaw = target.mmsi;
       const trackedMmsiRaw = p.trackedMmsi;
       const hasTargetIdentity = typeof mmsiRaw !== "undefined";
@@ -92,6 +107,7 @@
       const cpa = toOptionalFiniteNumber(target.cpa);
       const tcpa = toOptionalFiniteNumber(target.tcpa);
       const passFront = toOptionalFiniteNumber(target.passFront);
+      /** @type {DyniAisColorState} */
       const colorState = {
         warning: target.warning === true,
         nextWarning: target.nextWarning === true,
@@ -120,13 +136,13 @@
         nameOrMmsi: pickNameOrMmsi(target, mmsiRaw),
         frontText: frontText,
         frontInitial: frontInitial,
-        showTcpaBranch: tcpa > 0,
+        showTcpaBranch: typeof tcpa === "number" && tcpa > 0,
         warning: colorState.warning,
         nextWarning: colorState.nextWarning,
         nearest: colorState.nearest,
         trackedMatch: colorState.trackedMatch,
         colorRole: colorRole,
-        hasColorRole: typeof colorRole === "string" && colorRole !== ""
+        hasColorRole: colorRole !== undefined
       };
     }
 

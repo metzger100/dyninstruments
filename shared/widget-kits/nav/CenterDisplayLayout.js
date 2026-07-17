@@ -1,7 +1,6 @@
 /**
- * Module: CenterDisplayLayout - Responsive layout rectangles for the CenterDisplay renderer
+ * @file CenterDisplayLayout - Responsive layout rectangles for the CenterDisplay renderer
  * Documentation: documentation/widgets/center-display.md
- * Depends: ResponsiveScaleProfile, LayoutRectMath, LayoutSizingHelpers, ValueMath
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -28,7 +27,8 @@
   const NORMAL_COORD_MIN_RATIO = 0.44;
   const FLAT_CENTER_MIN_RATIO = 0.28;
   const FLAT_CENTER_MAX_RATIO = 0.56;
-  let makeRect = null;
+  /** @type {DyniMakeRect} */
+  let makeRect = /** @type {DyniMakeRect} */ (/** @type {unknown} */ (null));
   const RESPONSIVE_SCALES = {
     textFillScale: 1.18,
     normalCaptionShareScale: 0.78,
@@ -36,8 +36,14 @@
     stackedCaptionScale: 0.76,
     highCenterWeightScale: 0.88
   };
+  /** @type {DyniValueMathApi["clampNumber"]} */
   let clampNumber;
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniCenterDisplayLayoutApi}
+   */
   function create(def, componentContext) {
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
@@ -46,6 +52,11 @@
     makeRect = rectApi.makeRect;
     const createContentRect = sizingHelpers.createInsetContentRectFactory(makeRect, "padX", "innerY");
 
+    /**
+     * @param {unknown} W
+     * @param {unknown} H
+     * @returns {DyniCenterDisplayInsets}
+     */
     function computeInsets(W, H) {
       const responsive = profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
       return {
@@ -56,6 +67,10 @@
       };
     }
 
+    /**
+     * @param {DyniCenterDisplayLayoutArgs | null | undefined} args
+     * @returns {DyniCenterDisplayLayoutResult}
+     */
     function computeLayout(args) {
       const cfg = args || {};
       const contentRect = cfg.contentRect || makeRect(0, 0, 0, 0);
@@ -113,7 +128,12 @@
       }
 
       const vertical = mode === "high"
-        ? computeVerticalRects(contentRect, relationCount, gap, HIGH_CENTER_WEIGHT * responsive.highCenterWeightScale)
+        ? computeVerticalRects(
+          contentRect,
+          relationCount,
+          gap,
+          HIGH_CENTER_WEIGHT * /** @type {number} */ (responsive.highCenterWeightScale)
+        )
         : computeNormalVerticalRects(contentRect, relationCount, gap);
       const highCaptionBase = clampNumber(cfg.highCaptionRatio, 0.16, 0.34, HIGH_STACKED_CAPTION_RATIO);
 
@@ -132,11 +152,21 @@
       };
     }
 
+    /**
+     * @param {Partial<DyniRect> | null | undefined} rect
+     * @param {DyniResponsiveScaleProfile | undefined} responsive
+     * @returns {number}
+     */
     function computeTextPadPx(rect, responsive) {
       const span = Math.min(Math.max(0, Number(rect && rect.w) || 0), Math.max(0, Number(rect && rect.h) || 0));
       return profileApi.computeIntrinsicSpacePx(responsive, span, TEXT_PAD_RATIO, 1, 1);
     }
 
+    /**
+     * @param {Partial<DyniRect> | null | undefined} rect
+     * @param {DyniResponsiveScaleProfile | undefined} responsive
+     * @returns {number}
+     */
     function computeRowValueGapPx(rect, responsive) {
       const span = Math.min(Math.max(0, Number(rect && rect.w) || 0), Math.max(0, Number(rect && rect.h) || 0));
       return profileApi.computeIntrinsicSpacePx(responsive, span, ROW_VALUE_GAP_RATIO, 2, 1);
@@ -152,6 +182,12 @@
     };
   }
 
+  /**
+   * @param {DyniRect} rect
+   * @param {number} count
+   * @param {number} gap
+   * @returns {DyniRect[]}
+   */
   function splitRows(rect, count, gap) {
     const rows = [];
     const rowCount = Math.max(1, count);
@@ -169,6 +205,12 @@
     return rows;
   }
 
+  /**
+   * @param {DyniRect} rect
+   * @param {unknown} captionRatio
+   * @param {unknown} coordAlign
+   * @returns {DyniCenterDisplayPanel}
+   */
   function splitStackedPanel(rect, captionRatio, coordAlign) {
     const ratio = clampNumber(captionRatio, 0.16, 0.34, HIGH_STACKED_CAPTION_RATIO);
     const captionHeight = Math.max(1, Math.floor(rect.h * ratio));
@@ -185,8 +227,15 @@
     };
   }
 
+  /**
+   * @param {DyniRect} rect
+   * @param {unknown} gap
+   * @param {unknown} captionShare
+   * @param {unknown} coordAlign
+   * @returns {DyniCenterDisplayPanel}
+   */
   function splitNormalPanel(rect, gap, captionShare, coordAlign) {
-    const safeGap = Math.max(0, Math.floor(gap));
+    const safeGap = Math.max(0, Math.floor(/** @type {number} */ (gap)));
     const maxCaptionRatio = Math.min(NORMAL_CAPTION_MAX_RATIO, 1 - NORMAL_COORD_MIN_RATIO);
     const share = clampNumber(captionShare, NORMAL_CAPTION_MIN_RATIO, maxCaptionRatio, NORMAL_CAPTION_COL_RATIO);
     const usableWidth = Math.max(1, rect.w - safeGap);
@@ -204,6 +253,13 @@
     };
   }
 
+  /**
+   * @param {DyniRect} contentRect
+   * @param {number} relationCount
+   * @param {number} gap
+   * @param {unknown} centerWeight
+   * @returns {DyniCenterDisplayVerticalRects}
+   */
   function computeVerticalRects(contentRect, relationCount, gap, centerWeight) {
     const safeGap = Math.max(0, Math.floor(gap));
     const rowGapTotal = safeGap * Math.max(0, relationCount - 1);
@@ -221,6 +277,12 @@
     };
   }
 
+  /**
+   * @param {DyniRect} contentRect
+   * @param {number} relationCount
+   * @param {number} gap
+   * @returns {DyniCenterDisplayVerticalRects}
+   */
   function computeNormalVerticalRects(contentRect, relationCount, gap) {
     const safeGap = Math.max(0, Math.floor(gap));
     const rowGapTotal = safeGap * Math.max(0, relationCount - 1);

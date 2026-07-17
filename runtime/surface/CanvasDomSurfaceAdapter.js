@@ -1,12 +1,16 @@
 /**
- * Module: DyniPlugin CanvasDom Surface Runtime - Canvas surface controller for internal canvas lifecycle
+ * @file DyniPlugin CanvasDom Surface Runtime - Canvas surface controller for internal canvas lifecycle
  * Documentation: documentation/architecture/canvas-dom-surface-adapter.md
- * Depends: runtime.perf
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {{ id?: unknown, renderCanvas(canvas: HTMLCanvasElement, props: Record<string, unknown> | undefined): { wantsFollowUpFrame?: boolean } | void }} DyniCanvasSurfaceRendererSpec */
+  /** @typedef {{ revision: number, rootEl: Element, shellEl: HTMLElement, props?: Record<string, unknown>, surface?: unknown }} DyniCanvasSurfacePayload */
+  /** @typedef {{ rendererSpec: DyniCanvasSurfaceRendererSpec, requestAnimationFrame?: (callback: () => void) => number, cancelAnimationFrame?: (handle: number) => void, ResizeObserver?: typeof ResizeObserver, hostContext?: unknown }} DyniCanvasSurfaceOptions */
+  /** @typedef {{ _createCanvasDomSurfaceAdapter: () => DyniSurfaceControllerFactory }} DyniCanvasRuntime */
+
+  const ns = /** @type {DyniPluginNamespace & { runtime: DyniCanvasRuntime }} */ (root.DyniPlugin);
   const runtime = ns.runtime;
 
   const hasOwn = Object.prototype.hasOwnProperty;
@@ -14,21 +18,26 @@
   const MOUNT_SELECTOR = ".dyni-surface-canvas-mount";
   const CANVAS_CLASS = "dyni-surface-canvas-node";
   const RENDER_NOT_READY = { updated: false, changed: false };
-  const GLOBAL_ROOT = (typeof globalThis !== "undefined") ? globalThis : (typeof self !== "undefined" ? self : {});
+  let globalRoot = {};
+  if (typeof globalThis !== "undefined") {
+    globalRoot = globalThis;
+  } else if (typeof self !== "undefined") {
+    globalRoot = self;
+  }
+  const GLOBAL_ROOT = /** @type {Window & typeof globalThis} */ (globalRoot);
 
+  /** @param {Element | null | undefined} el @param {string} className @returns {boolean} */
   function hasClass(el, className) {
-    return !!(el &&
-      el.classList &&
-      typeof el.classList.contains === "function" &&
-      el.classList.contains(className));
+    return !!(el && el.classList && typeof el.classList.contains === "function" && el.classList.contains(className));
   }
 
+  /** @param {Element | null | undefined} rootEl @param {string} className @returns {HTMLElement | null} */
   function findDescendantByClass(rootEl, className) {
     if (!rootEl || !rootEl.children || !rootEl.children.length) {
       return null;
     }
     for (let i = 0; i < rootEl.children.length; i += 1) {
-      const child = rootEl.children[i];
+      const child = /** @type {HTMLElement} */ (rootEl.children[i]);
       if (hasClass(child, className)) {
         return child;
       }
@@ -40,6 +49,7 @@
     return null;
   }
 
+  /** @param {string} methodName @param {DyniCanvasSurfacePayload} payload */
   function ensurePayload(methodName, payload) {
     if (!payload || typeof payload !== "object") {
       throw new Error("CanvasDomSurfaceAdapter: " + methodName + "() requires a payload object");
@@ -55,6 +65,7 @@
     }
   }
 
+  /** @param {Record<string, unknown> | undefined} a @param {Record<string, unknown> | undefined} b @returns {boolean} */
   function shallowEqual(a, b) {
     if (a === b) {
       return true;
@@ -78,35 +89,35 @@
     return true;
   }
 
+  /** @returns {DyniSurfaceControllerFactory} */
   function createCanvasDomSurfaceAdapter() {
-    const perf = runtime.perf;
-
+    /** @param {DyniCanvasSurfaceOptions} options */
     function createSurfaceController(options) {
-      const opts = options || {};
+      const opts = /** @type {DyniCanvasSurfaceOptions} */ (options || {});
       const rendererSpec = opts.rendererSpec;
       if (!rendererSpec || typeof rendererSpec.renderCanvas !== "function") {
         throw new Error("CanvasDomSurfaceAdapter: rendererSpec.renderCanvas is required");
       }
 
-      const requestFrame = (typeof opts.requestAnimationFrame === "function")
-        ? opts.requestAnimationFrame
-        : (typeof GLOBAL_ROOT.requestAnimationFrame === "function"
-          ? GLOBAL_ROOT.requestAnimationFrame.bind(GLOBAL_ROOT)
-          : function (cb) {
-            return GLOBAL_ROOT.setTimeout(cb, 16);
-          });
+      const requestFrame =
+        typeof opts.requestAnimationFrame === "function"
+          ? opts.requestAnimationFrame
+          : typeof GLOBAL_ROOT.requestAnimationFrame === "function"
+            ? GLOBAL_ROOT.requestAnimationFrame.bind(GLOBAL_ROOT)
+            : function (/** @type {() => void} */ cb) {
+                return GLOBAL_ROOT.setTimeout(cb, 16);
+              };
 
-      const cancelFrame = (typeof opts.cancelAnimationFrame === "function")
-        ? opts.cancelAnimationFrame
-        : (typeof GLOBAL_ROOT.cancelAnimationFrame === "function"
-          ? GLOBAL_ROOT.cancelAnimationFrame.bind(GLOBAL_ROOT)
-          : function (handle) {
-            GLOBAL_ROOT.clearTimeout(handle);
-          });
+      const cancelFrame =
+        typeof opts.cancelAnimationFrame === "function"
+          ? opts.cancelAnimationFrame
+          : typeof GLOBAL_ROOT.cancelAnimationFrame === "function"
+            ? GLOBAL_ROOT.cancelAnimationFrame.bind(GLOBAL_ROOT)
+            : function (/** @type {number} */ handle) {
+                GLOBAL_ROOT.clearTimeout(handle);
+              };
 
-      const ResizeObserverCtor = hasOwn.call(opts, "ResizeObserver")
-        ? opts.ResizeObserver
-        : GLOBAL_ROOT.ResizeObserver;
+      const ResizeObserverCtor = hasOwn.call(opts, "ResizeObserver") ? opts.ResizeObserver : GLOBAL_ROOT.ResizeObserver;
 
       if (typeof ResizeObserverCtor !== "function") {
         throw new Error("CanvasDomSurfaceAdapter: ResizeObserver is required");
@@ -114,21 +125,28 @@
 
       const hostContext = hasOwn.call(opts, "hostContext") ? opts.hostContext : null;
 
+      /** @type {Element | null} */
       let rootEl = null;
+      /** @type {HTMLElement | null} */
       let shellEl = null;
+      /** @type {HTMLElement | null} */
       let surfaceEl = null;
+      /** @type {HTMLElement | null} */
       let mountEl = null;
+      /** @type {HTMLCanvasElement | null} */
       let canvasEl = null;
+      /** @type {ResizeObserver | null} */
       let observer = null;
+      /** @type {number | null} */
       let rafHandle = null;
 
+      /** @type {Record<string, unknown> | undefined} */
       let props = undefined;
       let revision = 0;
       let attached = false;
       let destroyed = false;
       let paintDirty = false;
       let sizeDirty = false;
-      let pendingPaintWaitSpan = null;
       let consecutiveAnimateFrames = 0;
 
       function cancelPendingFrame() {
@@ -137,11 +155,6 @@
         }
         cancelFrame(rafHandle);
         rafHandle = null;
-        perf.endSpan(pendingPaintWaitSpan, {
-          rendererId: rendererSpec.id || "unknown",
-          status: "canceled"
-        });
-        pendingPaintWaitSpan = null;
       }
 
       function disconnectObserver() {
@@ -165,6 +178,7 @@
         sizeDirty = false;
       }
 
+      /** @param {unknown} reason */
       function markDirty(reason) {
         if (reason !== "animate") {
           consecutiveAnimateFrames = 0;
@@ -176,6 +190,7 @@
         paintDirty = true;
       }
 
+      /** @param {HTMLElement | null} hostShellEl @returns {HTMLElement | null} */
       function findSurfaceElement(hostShellEl) {
         if (!hostShellEl) {
           return null;
@@ -185,7 +200,7 @@
           return nestedFromChildren;
         }
         if (typeof hostShellEl.querySelector === "function") {
-          const nestedSurfaceEl = hostShellEl.querySelector(SURFACE_SELECTOR);
+          const nestedSurfaceEl = /** @type {HTMLElement | null} */ (hostShellEl.querySelector(SURFACE_SELECTOR));
           if (nestedSurfaceEl) {
             return nestedSurfaceEl;
           }
@@ -196,6 +211,7 @@
         return null;
       }
 
+      /** @param {HTMLElement} hostSurfaceEl @returns {HTMLElement | null} */
       function findMountElement(hostSurfaceEl) {
         if (hasClass(hostSurfaceEl, "dyni-surface-canvas-mount")) {
           return hostSurfaceEl;
@@ -203,7 +219,7 @@
         if (typeof hostSurfaceEl.querySelector !== "function") {
           return null;
         }
-        return hostSurfaceEl.querySelector(MOUNT_SELECTOR);
+        return /** @type {HTMLElement | null} */ (hostSurfaceEl.querySelector(MOUNT_SELECTOR));
       }
 
       function removeCanvasNode() {
@@ -216,6 +232,7 @@
         mountEl.removeChild(canvasEl);
       }
 
+      /** @returns {HTMLCanvasElement} */
       function createCanvasNode() {
         const doc = shellEl && shellEl.ownerDocument;
         if (!doc || typeof doc.createElement !== "function") {
@@ -227,6 +244,9 @@
       }
 
       function applySurfaceContractStyles() {
+        if (!surfaceEl || !mountEl || !canvasEl) {
+          throw new Error("CanvasDomSurfaceAdapter: surface DOM references are required before styling");
+        }
         surfaceEl.style.fontSize = "initial";
         surfaceEl.style.width = "100%";
         surfaceEl.style.height = "100%";
@@ -246,32 +266,12 @@
           return;
         }
 
-        const renderSpan = perf.startSpan("Renderer.renderCanvas", {
-          rendererId: rendererSpec.id || "unknown",
-          cluster: props && props.cluster,
-          kind: props && props.kind
-        });
         let paintResult;
-        try {
           if (hostContext) {
             paintResult = rendererSpec.renderCanvas.call(hostContext, canvasEl, props);
           } else {
             paintResult = rendererSpec.renderCanvas(canvasEl, props);
           }
-        }
-        finally {
-          perf.endSpan(renderSpan, {
-            rendererId: rendererSpec.id || "unknown",
-            cluster: props && props.cluster,
-            kind: props && props.kind
-          });
-        }
-        perf.endSpan(pendingPaintWaitSpan, {
-          rendererId: rendererSpec.id || "unknown",
-          revision: revision,
-          status: "painted"
-        });
-        pendingPaintWaitSpan = null;
         clearRenderFlags();
         if (paintResult && paintResult.wantsFollowUpFrame === true && consecutiveAnimateFrames < 600) {
           if (schedulePaint("animate")) {
@@ -280,6 +280,7 @@
         }
       }
 
+      /** @param {unknown} reason @returns {boolean} */
       function schedulePaint(reason) {
         if (!attached || destroyed || !canvasEl) {
           return false;
@@ -290,11 +291,6 @@
           return false;
         }
 
-        pendingPaintWaitSpan = perf.startSpan("CanvasDomSurfaceAdapter.schedulePaint->paintNow", {
-          rendererId: rendererSpec.id || "unknown",
-          reason: reason || "update",
-          revision: revision
-        });
         rafHandle = requestFrame(function () {
           rafHandle = null;
           paintNow();
@@ -303,7 +299,11 @@
       }
 
       function bindResizeObserver() {
-        observer = new ResizeObserverCtor(function () {
+        const ResizeObserverClass = /** @type {typeof ResizeObserver} */ (ResizeObserverCtor);
+        if (!surfaceEl) {
+          throw new Error("CanvasDomSurfaceAdapter: surface element is required before observing resize");
+        }
+        observer = new ResizeObserverClass(function () {
           if (!attached || destroyed) {
             return;
           }
@@ -312,6 +312,7 @@
         observer.observe(surfaceEl);
       }
 
+      /** @param {DyniCanvasSurfacePayload} payload */
       function setPayloadState(payload) {
         rootEl = payload.rootEl;
         shellEl = payload.shellEl;
@@ -319,6 +320,7 @@
         revision = payload.revision;
       }
 
+      /** @param {DyniCanvasSurfacePayload} payload */
       function attach(payload) {
         if (destroyed) {
           throw new Error("CanvasDomSurfaceAdapter: attach() after destroy()");
@@ -352,6 +354,7 @@
         schedulePaint("attach");
       }
 
+      /** @param {DyniCanvasSurfacePayload} payload */
       function update(payload) {
         ensurePayload("update", payload);
         if (!attached) {
@@ -370,15 +373,11 @@
         return { updated: true, changed: true };
       }
 
+      /** @param {unknown} reason */
       function detach(reason) {
         cancelPendingFrame();
         disconnectObserver();
         removeCanvasNode();
-        perf.endSpan(pendingPaintWaitSpan, {
-          rendererId: rendererSpec.id || "unknown",
-          status: "detached"
-        });
-        pendingPaintWaitSpan = null;
         clearRenderFlags();
         clearDomRefs();
         props = undefined;
@@ -408,4 +407,4 @@
   }
 
   runtime._createCanvasDomSurfaceAdapter = createCanvasDomSurfaceAdapter;
-}(this));
+})(this);

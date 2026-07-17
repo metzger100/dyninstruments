@@ -1,7 +1,6 @@
 /**
- * Module: RadialToolkit - Radial gauge facade extending generic GaugeToolkit
+ * @file RadialToolkit - Radial gauge facade extending generic GaugeToolkit
  * Documentation: documentation/radial/gauge-shared-api.md
- * Depends: GaugeToolkit, RadialAngleMath, RadialTickMath, RadialCanvasPrimitives, RadialFrameRenderer
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,11 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniRadialToolkitApi}
+   */
   function create(def, componentContext) {
     const gauge = componentContext.components.require("GaugeToolkit");
     const angle = componentContext.components.require("RadialAngleMath");

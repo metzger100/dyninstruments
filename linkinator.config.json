@@ -1,0 +1,7 @@
+{
+  "markdown": true,
+  "checkFragments": true,
+  "directoryListing": true,
+  "redirects": "error",
+  "linksToSkip": ["^(https?://(?!localhost))"]
+}

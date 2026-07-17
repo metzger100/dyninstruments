@@ -1,7 +1,6 @@
 /**
- * Module: PreparedPayloadModelCache - Shared renderer-local cache for reusing prepared payload models across lifecycle stages
+ * @file PreparedPayloadModelCache - Shared renderer-local cache for reusing prepared payload models across lifecycle stages
  * Documentation: documentation/architecture/html-renderer-lifecycle.md
- * Depends: none
  */
 
 (function (root, factory) {
@@ -13,43 +12,60 @@
 }(this, function () {
   "use strict";
 
+  /** @param {unknown} payload @returns {DyniPreparedPayloadInput} */
   function resolvePayload(payload) {
-    return payload && typeof payload === "object" ? payload : {};
+    return /** @type {DyniPreparedPayloadInput} */ (
+      payload && typeof payload === "object" ? payload : {}
+    );
   }
 
+  /** @param {DyniPreparedPayloadInput} payload @returns {unknown} */
   function resolveProps(payload) {
     return payload.props && typeof payload.props === "object" ? payload.props : {};
   }
 
+  /** @param {DyniPreparedPayloadInput} payload @returns {unknown} */
   function extractPayloadShellRect(payload) {
     return payload.shellRect || null;
   }
 
+  /** @param {unknown} shellRect @param {string} key @returns {number | null} */
   function resolveShellDimension(shellRect, key) {
     if (!shellRect || typeof shellRect !== "object") {
       return null;
     }
-    const value = shellRect[key];
-    return Number.isFinite(value) ? value : null;
+    const value = /** @type {Record<string, unknown>} */ (shellRect)[key];
+    return typeof value === "number" && Number.isFinite(value) ? value : null;
   }
 
+  /** @param {DyniPreparedPayloadInput} payload @returns {number | null} */
   function resolveRevision(payload) {
-    return Number.isFinite(payload.revision) ? payload.revision : null;
+    return typeof payload.revision === "number" && Number.isFinite(payload.revision)
+      ? payload.revision
+      : null;
   }
 
+  /**
+   * @param {DyniPreparedModelCacheOptions} [options]
+   * @returns {DyniPreparedModelCache}
+   */
   function createPreparedModelCache(options) {
-    const opts = options && typeof options === "object" ? options : {};
-    const buildModel = typeof opts.buildModel === "function" ? opts.buildModel : null;
-    if (!buildModel) {
+    const opts = /** @type {DyniPreparedModelCacheOptions} */ (
+      options && typeof options === "object" ? options : {}
+    );
+    if (typeof opts.buildModel !== "function") {
       throw new Error("PreparedPayloadModelCache: buildModel option is required");
     }
+    const buildModel = opts.buildModel;
 
+    /** @type {DyniPreparedPayloadEntry | null} */
     let preparedPayload = null;
 
     function clear() {
       preparedPayload = null;
     }
 
+    /** @param {unknown} payload @returns {DyniPreparedPayloadEntry} */
     function getPreparedPayload(payload) {
       const normalizedPayload = resolvePayload(payload);
       const props = resolveProps(normalizedPayload);
@@ -84,10 +100,12 @@
     };
   }
 
+  /** @param {unknown} buildModel @returns {DyniPreparedModelCache} */
   function createPreparedPayloadCache(buildModel) {
     return createPreparedModelCache({ buildModel: buildModel });
   }
 
+  /** @returns {DyniPreparedPayloadModelCacheApi} */
   function create() {
     return {
       createPreparedModelCache: createPreparedModelCache,

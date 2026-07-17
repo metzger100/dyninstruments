@@ -1,16 +1,15 @@
 /**
- * Module: DyniPlugin Common Editables - Shared ThreeValueTextWidget layout defaults
+ * @file DyniPlugin Common Editables - Shared ThreeValueTextWidget layout defaults
  * Documentation: documentation/widgets/three-elements.md
- * Depends: none
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
-  const config = ns.config;
-  const shared = config.shared;
+  const config = /** @type {DyniPluginConfig} */ (ns.config);
+  const shared = /** @type {DyniPluginSharedConfig} */ (config.shared);
 
-  shared.commonThreeElementsEditables = {
+  shared.commonThreeElementsEditables = /** @type {DyniEditableParameters} */ ({
     ratioThresholdNormal: {
       type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
       internal: true,
@@ -25,5 +24,5 @@
       type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
       name: "Caption/Unit size"
     }
-  };
+  });
 }(this));

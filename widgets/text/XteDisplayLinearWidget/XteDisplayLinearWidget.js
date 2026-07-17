@@ -1,7 +1,6 @@
 /**
- * Module: XteDisplayLinearWidget - Responsive XTE linear bar renderer with integrated nav metrics
+ * @file XteDisplayLinearWidget - Responsive XTE linear bar renderer with integrated nav metrics
  * Documentation: documentation/widgets/xte-display.md
- * Depends: GaugeToolkit, CanvasLayerCache, LinearCanvasPrimitives, LinearGaugeMath, GeometryScale, XteLinearLayout, TextTileLayout, SpringEasing, PlaceholderNormalize, StableDigits, UnitAwareFormatter, StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,9 +10,9 @@
   }
 }(this, function () {
   "use strict";
-
+  /** @param {unknown} def @param {DyniXteLinearContext} componentContext */
   function create(def, componentContext) {
-    const toolkit = componentContext.components.require("GaugeToolkit");
+    const toolkit = /** @type {DyniXteLinearToolkit} */ (componentContext.components.require("GaugeToolkit"));
     const cacheFactory = componentContext.components.require("CanvasLayerCache");
     const primitives = componentContext.components.require("LinearCanvasPrimitives");
     const gaugeMath = componentContext.components.require("LinearGaugeMath");
@@ -29,15 +28,18 @@
     const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
     const staticLayer = cacheFactory.createLayerCache({ layers: ["back", "front"] });
 
+    /** @param {DyniWidgetValues} props */
     function resolveStateKind(props) {
-      const display = props && typeof props.display === "object" ? props.display : null;
+      const display = props.display && typeof props.display === "object" ? /** @type {DyniXteLinearData} */ (props.display) : null;
+      const waypointName = display && typeof display.wpName === "string" ? toolkit.value.trimText(display.wpName) : "";
       return stateScreenPrecedence.pickFirst([
         { kind: "disconnected", when: display && display.disconnect === true },
-        { kind: "noTarget", when: typeof (display && display.wpName) === "string" && display.wpName.trim() === "" },
+        { kind: "noTarget", when: waypointName === "" },
         { kind: "data", when: true }
       ]);
     }
 
+    /** @param {DyniXteLinearLayoutResult} layout @param {DyniXteLinearTheme} theme @returns {DyniXteLinearGeometry} */
     function resolveGaugeGeometry(layout, theme) {
       const lt = theme.linear;
       const gb = layout.gaugeBar;
@@ -80,7 +82,7 @@
         Math.floor(
           primaryDim *
           toolkit.value.clampNumber(lt.labels.fontFactor, 0, Number.MAX_SAFE_INTEGER, 0.14) *
-          layout.responsive.textFillScale
+          (layout.responsive.textFillScale || 1)
         )
       ));
       const labelInset = Math.max(1, Math.floor(labelFontPx * toolkit.value.clampNumber(lt.labels.insetFactor, 0, Number.MAX_SAFE_INTEGER, 1.8) * 0.2));
@@ -102,6 +104,7 @@
       };
     }
 
+    /** @param {CanvasRenderingContext2D} ctx @param {DyniXteLinearTheme} theme @param {DyniXteLinearGeometry} geom @param {DyniLinearTicks} ticks @param {boolean} showEndLabels @param {unknown} family @param {unknown} labelWeight */
     function drawEndLabels(ctx, theme, geom, ticks, showEndLabels, family, labelWeight) {
       if (!showEndLabels || ticks.major.length < 2) {
         return;
@@ -122,6 +125,7 @@
       ctx.restore();
     }
 
+    /** @param {CanvasRenderingContext2D} ctx @param {number} x @param {DyniXteLinearGeometry} geom @param {string} color */
     function drawPointerUpward(ctx, x, geom, color) {
       const tipY = geom.trackY + Math.floor(geom.trackThickness / 2) + 1;
       const side = Math.max(1, Math.floor(geom.pointerSide));
@@ -137,10 +141,12 @@
       ctx.restore();
     }
 
+    /** @param {CanvasRenderingContext2D} ctx @param {DyniXteLinearGeometry} geom @param {string} color */
     function drawTrackLayer(ctx, geom, color) {
       primitives.drawTrack(ctx, geom.x0, geom.x1, geom.trackY, { lineWidth: geom.trackLineWidth, strokeStyle: color });
     }
 
+    /** @param {CanvasRenderingContext2D} ctx @param {DyniXteLinearGeometry} geom @param {DyniLinearTicks} ticks @param {number} xteScale @param {string} color */
     function drawTicksLayer(ctx, geom, ticks, xteScale, color) {
       const minorStyle = { lineWidth: geom.minorTickWidth, strokeStyle: color };
       const majorStyle = { lineWidth: geom.majorTickWidth, strokeStyle: color };
@@ -154,9 +160,13 @@
       }
     }
 
+    /** @param {HTMLCanvasElement} canvas @param {DyniWidgetValues} props */
     function renderCanvas(canvas, props) {
-      const p = props || {};
+      const p = props;
       const setup = componentContext.canvas.setupCanvas(canvas);
+      if (!setup) {
+        return;
+      }
       const ctx = setup.ctx;
       const W = setup.W;
       const H = setup.H;
@@ -187,15 +197,16 @@
         return;
       }
 
-      const display = p.display && typeof p.display === "object" ? p.display : null;
-      const captions = p.captions && typeof p.captions === "object" ? p.captions : null;
-      const units = p.units && typeof p.units === "object" ? p.units : null;
-      const formatUnits = p.formatUnits && typeof p.formatUnits === "object" ? p.formatUnits : null;
-      const layoutConfig = p.layout && typeof p.layout === "object" ? p.layout : null;
+      const display = p.display && typeof p.display === "object" ? /** @type {DyniXteLinearData} */ (p.display) : null;
+      const captions = p.captions && typeof p.captions === "object" ? /** @type {DyniXteLinearData} */ (p.captions) : null;
+      const units = p.units && typeof p.units === "object" ? /** @type {DyniXteLinearData} */ (p.units) : null;
+      const formatUnits = p.formatUnits && typeof p.formatUnits === "object" ? /** @type {DyniXteLinearData} */ (p.formatUnits) : null;
+      const layoutConfig = p.layout && typeof p.layout === "object" ? /** @type {DyniXteLinearLayoutConfig} */ (p.layout) : null;
       const easingEnabled = !layoutConfig || layoutConfig.easing !== false;
       const hideTextualMetrics = !!(layoutConfig && layoutConfig.hideTextualMetrics === true);
       const showWpName = !!(layoutConfig && layoutConfig.showWpName === true);
-      const xteScale = toolkit.value.isFiniteNumber(p.xteScale) && p.xteScale > 0 ? p.xteScale : 1;
+      const rawXteScale = p.xteScale;
+      const xteScale = typeof rawXteScale === "number" && Number.isFinite(rawXteScale) && rawXteScale > 0 ? rawXteScale : 1;
 
       const mode = layoutApi.computeMode(
         W,
@@ -204,7 +215,11 @@
         layoutConfig ? layoutConfig.ratioThresholdFlat : undefined
       );
       const insets = layoutApi.computeInsets(W, H);
-      const contentRect = layoutApi.createContentRect(W, H, insets);
+      const contentRect = layoutApi.createContentRect(
+        W,
+        H,
+        /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (insets))
+      );
       const wpName = toolkit.value.trimText(display && display.wpName);
       const layout = layoutApi.computeLayout({
         contentRect: contentRect,
@@ -249,12 +264,17 @@
       staticLayer.blitLayer(ctx, "back");
 
       const xteRaw = display ? display.xte : undefined;
-      const xteHasValue = toolkit.value.isFiniteNumber(xteRaw);
+      const xteNumber = typeof xteRaw === "number" && Number.isFinite(xteRaw) ? xteRaw : undefined;
+      const xteHasValue = xteNumber !== undefined;
       const defaultText = placeholderNormalize.normalize(undefined, p.default);
-      const xteDistance = unitFormatter.formatDistance(xteHasValue ? Math.abs(xteRaw) : undefined, formatUnits && formatUnits.xte, defaultText);
+      const xteDistance = unitFormatter.formatDistance(
+        xteNumber === undefined ? undefined : Math.abs(xteNumber),
+        formatUnits && formatUnits.xte,
+        defaultText
+      );
       const xteDistanceMissing = placeholderNormalize.isPlaceholder(xteDistance);
-      const xteNumeric = unitFormatter.extractNumericDisplay(xteDistance, xteHasValue ? Math.abs(xteRaw) : NaN);
-      const signedXte = xteHasValue && Number.isFinite(xteNumeric) ? (xteRaw < 0 ? -xteNumeric : xteNumeric) : NaN;
+      const xteNumeric = unitFormatter.extractNumericDisplay(xteDistance, xteNumber === undefined ? NaN : Math.abs(xteNumber));
+      const signedXte = xteNumber !== undefined && Number.isFinite(xteNumeric) ? (xteNumber < 0 ? -xteNumeric : xteNumeric) : NaN;
       const overflow = Number.isFinite(signedXte) && Math.abs(signedXte) > xteScale;
 
       if (Number.isFinite(signedXte)) {
@@ -281,8 +301,9 @@
       const dtwDistance = unitFormatter.formatDistance(dtwRaw, formatUnits && formatUnits.dtw, defaultText);
       const cogHeading = unitFormatter.formatWithToken(cogRaw, "formatDirection360", leadingZero, defaultText);
       const brgHeading = unitFormatter.formatWithToken(btwRaw, "formatDirection360", leadingZero, defaultText);
-      const xteSide = (!xteDistanceMissing && xteHasValue) ? (xteRaw > 0 ? "R" : (xteRaw < 0 ? "L" : "")) : "";
+      const xteSide = (!xteDistanceMissing && xteNumber !== undefined) ? (xteNumber > 0 ? "R" : (xteNumber < 0 ? "L" : "")) : "";
       let xteValueText = xteDistance + xteSide;
+      const metricRects = layout.metricRects;
 
       if (stableDigitsEnabled) {
         const xteStable = stableDigits.normalize(xteDistance, {
@@ -292,13 +313,13 @@
           reserveSideSuffixSlot: true
         });
         xteValueText = xteStable.padded;
-        if (xteStable.padded !== xteStable.plain && layout.metricRects && layout.metricRects.xte) {
-          const xteSpacing = layoutApi.computeMetricTileSpacing(layout.metricRects.xte, layout.responsive);
-          const probe = tileLayout.measureMetricTile({
+        if (xteStable.padded !== xteStable.plain && metricRects && metricRects.xte) {
+          const xteSpacing = layoutApi.computeMetricTileSpacing(metricRects.xte, layout.responsive);
+          const probe = /** @type {{ fit?: { total: number }, textW: number } | null} */ (tileLayout.measureMetricTile({
             textApi: toolkit.text,
             ctx: ctx,
             metric: { caption: captions && captions.xte, value: xteStable.padded, unit: units && units.xte },
-            rect: layout.metricRects.xte,
+            rect: metricRects.xte,
             family: family,
             valueWeight: valueWeight,
             labelWeight: labelWeight,
@@ -306,21 +327,20 @@
             textFillScale: layout.responsive.textFillScale,
             padX: xteSpacing.padX,
             captionHeightPx: xteSpacing.captionHeightPx
-          });
+          }));
           const fit = probe && probe.fit ? probe.fit : null;
           const clipped = !!(probe && fit && fit.total > probe.textW + 0.01);
           if (clipped) xteValueText = xteStable.plain;
         }
       }
 
-      const metrics = {
+      const metrics = /** @type {Record<keyof DyniXteMetricRects, { caption: unknown, value: string, unit: unknown }>} */ ({
         cog: { caption: captions && captions.track, value: cogHeading, unit: units && units.track },
         xte: { caption: captions && captions.xte, value: xteValueText, unit: units && units.xte },
         dtw: { caption: captions && captions.dtw, value: dtwDistance, unit: units && units.dtw },
         btw: { caption: captions && captions.brg, value: brgHeading, unit: units && units.brg }
-      };
+      });
 
-      const metricRects = layout.metricRects;
       if (metricRects && metricRects.cog && metricRects.xte && metricRects.dtw && metricRects.btw) {
         const spacing = {
           cog: layoutApi.computeMetricTileSpacing(metricRects.cog, layout.responsive),
@@ -328,7 +348,12 @@
           dtw: layoutApi.computeMetricTileSpacing(metricRects.dtw, layout.responsive),
           btw: layoutApi.computeMetricTileSpacing(metricRects.btw, layout.responsive)
         };
-        const fields = ["cog", "xte", "dtw", "btw"];
+        const fields = /** @type {Array<keyof DyniXteMetricRects>} */ ([
+          "cog",
+          "xte",
+          "dtw",
+          "btw"
+        ]);
         for (let i = 0; i < fields.length; i++) {
           const key = fields[i];
           tileLayout.drawMetricTile({
@@ -350,29 +375,30 @@
         }
       }
 
-      if (showWpName && wpName && layout.nameRect && layout.nameRect.w > 0 && layout.nameRect.h > 0) {
-        const fit = tileLayout.measureFittedLine({
+      const nameRect = layout.nameRect;
+      if (showWpName && wpName && nameRect && nameRect.w > 0 && nameRect.h > 0) {
+        const fit = /** @type {DyniXteWaypointFit} */ (tileLayout.measureFittedLine({
           textApi: toolkit.text,
           ctx: ctx,
           text: wpName,
-          maxW: layout.nameRect.w,
-          maxH: layout.nameRect.h,
-          maxPx: Math.max(1, Math.floor(layout.nameRect.h * 0.72)),
+          maxW: nameRect.w,
+          maxH: nameRect.h,
+          maxPx: Math.max(1, Math.floor(nameRect.h * 0.72)),
           textFillScale: layout.responsive.textFillScale,
           family: family,
           weight: labelWeight
-        });
+        }));
         if (fit && typeof fit.text === "string" && fit.text) {
           tileLayout.drawFittedLine({
             textApi: toolkit.text,
             ctx: ctx,
             fit: fit,
             text: wpName,
-            rect: layout.nameRect,
+            rect: nameRect,
             align: "center",
             family: family,
             weight: labelWeight,
-            maxPx: Math.max(1, Math.floor(layout.nameRect.h * 0.72)),
+            maxPx: Math.max(1, Math.floor(nameRect.h * 0.72)),
             color: theme.surface.fg
           });
         }

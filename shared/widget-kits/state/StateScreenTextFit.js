@@ -1,7 +1,6 @@
 /**
- * Module: StateScreenTextFit - Shared measured single-line fit helper for state-screen labels
+ * @file StateScreenTextFit - Shared measured single-line fit helper for state-screen labels
  * Documentation: documentation/shared/state-screens.md
- * Depends: ValueMath, HtmlWidgetUtils, HtmlMeasureUtils, CanvasTextFitting
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -17,8 +16,21 @@
   const DEFAULT_WEIGHT = 700;
   const WIDTH_EPSILON = 0.01;
 
+  /** @type {DyniValueMathApi["toFiniteNumber"]} */
   let toFiniteNumber;
+  /** @type {DyniValueMathApi["clampPositive"]} */
   let clampPositive;
+  /**
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {unknown} text
+   * @param {unknown} basePx
+   * @param {unknown} maxW
+   * @param {unknown} maxH
+   * @param {unknown} family
+   * @param {unknown} weight
+   * @param {DyniCanvasTextFittingApi} fitting
+   * @returns {number}
+   */
   function fitStateScreenTextPx(ctx, text, basePx, maxW, maxH, family, weight, fitting) {
     const ceilingPx = Math.min(clampPositive(basePx, MIN_FONT_PX), clampPositive(maxH, MIN_FONT_PX));
     const widthLimit = Math.max(0, Number(maxW) || 0);
@@ -40,6 +52,11 @@
     return Math.min(ceilingPx, Math.max(MIN_FONT_PX, ceilingPx * ratio));
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniStateScreenTextFitApi}
+   */
   function create(def, componentContext) {
     const valueMath = componentContext.components.require("ValueMath");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
@@ -48,12 +65,13 @@
     toFiniteNumber = valueMath.toFiniteNumber;
     clampPositive = valueMath.clampPositive;
 
+    /** @param {unknown} args @returns {string} */
     function compute(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniStateScreenTextFitArgs} */ (args || {});
       const label = typeof cfg.label === "string" ? cfg.label.trim() : "";
       const rect = cfg.shellRect || cfg.availableRect || null;
-      const width = toFiniteNumber(rect && rect.width);
-      const height = toFiniteNumber(rect && rect.height);
+      const width = toFiniteNumber(rect && rect.width) || 0;
+      const height = toFiniteNumber(rect && rect.height) || 0;
       if (!label || !(width > 0) || !(height > 0)) {
         return "";
       }
@@ -77,6 +95,16 @@
       const textApi = cfg.textApi && typeof cfg.textApi.fitSingleTextPx === "function"
         ? cfg.textApi
         : {
+          /**
+           * @param {CanvasRenderingContext2D} ctx
+           * @param {unknown} text
+           * @param {unknown} basePx
+           * @param {unknown} maxW
+           * @param {unknown} maxH
+           * @param {unknown} family
+           * @param {unknown} weight
+           * @returns {number}
+           */
           fitSingleTextPx: function (ctx, text, basePx, maxW, maxH, family, weight) {
             return fitStateScreenTextPx(ctx, text, basePx, maxW, maxH, family, weight, fitting);
           }

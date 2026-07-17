@@ -1,7 +1,6 @@
 /**
- * Module: StateScreenPrecedence - Shared first-match precedence helper for widget state-screens
+ * @file StateScreenPrecedence - Shared first-match precedence helper for widget state-screens
  * Documentation: documentation/shared/state-screens.md
- * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,11 +11,13 @@
 }(this, function () {
   "use strict";
 
+  /** @param {unknown} candidate @param {number} index @returns {void} */
   function validateCandidate(candidate, index) {
     if (!candidate || typeof candidate !== "object") {
       throw new Error("StateScreenPrecedence.pickFirst: candidate[" + index + "] must be an object");
     }
-    if (typeof candidate.kind !== "string" || candidate.kind.trim() === "") {
+    const entry = /** @type {{ kind?: unknown, when?: unknown }} */ (candidate);
+    if (typeof entry.kind !== "string" || entry.kind.trim() === "") {
       throw new Error("StateScreenPrecedence.pickFirst: candidate[" + index + "] requires a non-empty kind");
     }
     if (!Object.prototype.hasOwnProperty.call(candidate, "when")) {
@@ -24,6 +25,7 @@
     }
   }
 
+  /** @param {unknown} candidates @returns {string} */
   function pickFirst(candidates) {
     if (typeof candidates === "undefined") {
       return "data";
@@ -43,6 +45,7 @@
     return "data";
   }
 
+  /** @returns {DyniStateScreenPrecedenceApi} */
   function create() {
     return {
       id: "StateScreenPrecedence",

@@ -21,8 +21,6 @@ describe("runtime/HostCommitController.js", function () {
 
   function createHarness() {
     let shell = null;
-    const spans = [];
-
     const rafQueue = [];
     const canceledRafs = [];
     let rafId = 0;
@@ -89,20 +87,6 @@ describe("runtime/HostCommitController.js", function () {
       setTimeout: setTimeoutStub,
       clearTimeout: clearTimeoutStub,
       MutationObserver: MutationObserverStub,
-      __DYNI_PERF_HOOKS__: {
-        startSpan(name, tags) {
-          return { name, tags: tags || null };
-        },
-        endSpan(token, tags) {
-          spans.push({
-            name: token && token.name,
-            tags: {
-              ...(token && token.tags ? token.tags : {}),
-              ...(tags && typeof tags === "object" ? tags : {})
-            }
-          });
-        }
-      },
       DyniPlugin: {
         runtime: {},
         state: {},
@@ -110,7 +94,6 @@ describe("runtime/HostCommitController.js", function () {
       }
     });
 
-    runIifeScript("runtime/PerfSpanHelper.js", context);
     runIifeScript("runtime/HostCommitController.js", context);
 
     function runNextRaf() {
@@ -151,7 +134,6 @@ describe("runtime/HostCommitController.js", function () {
       timeoutQueue,
       clearedTimeouts,
       observerInstances,
-      spans,
       runNextRaf,
       runNextTimeout,
       triggerObserver
@@ -167,7 +149,6 @@ describe("runtime/HostCommitController.js", function () {
     rafOneController.recordRender({ kind: "activeRoute" });
     rafOneController.scheduleCommit({ onCommit: vi.fn() });
     rafOneHarness.runNextRaf();
-    expect(rafOneHarness.spans.some((entry) => entry.tags.waitStage === "raf-1")).toBe(true);
 
     const rafTwoHarness = createHarness();
     const rafTwoController = rafTwoHarness.createController();
@@ -178,7 +159,6 @@ describe("runtime/HostCommitController.js", function () {
     rafTwoHarness.runNextRaf();
     rafTwoHarness.setShell(rafTwoShell);
     rafTwoHarness.runNextRaf();
-    expect(rafTwoHarness.spans.some((entry) => entry.tags.waitStage === "raf-2")).toBe(true);
 
     const observerHarness = createHarness();
     const observerController = observerHarness.createController();
@@ -192,7 +172,6 @@ describe("runtime/HostCommitController.js", function () {
     observerHarness.runNextRaf();
     observerHarness.setShell(observerShell);
     observerHarness.triggerObserver(0);
-    expect(observerHarness.spans.some((entry) => entry.tags.waitStage === "mutation-observer")).toBe(true);
 
     const timeoutHarness = createHarness();
     const timeoutController = timeoutHarness.createController({ MutationObserver: null });
@@ -206,7 +185,6 @@ describe("runtime/HostCommitController.js", function () {
     timeoutHarness.runNextRaf();
     timeoutHarness.setShell(timeoutShell);
     timeoutHarness.runNextTimeout();
-    expect(timeoutHarness.spans.some((entry) => entry.tags.waitStage === "timeout")).toBe(true);
 
     const rafFourHarness = createHarness();
     const rafFourController = rafFourHarness.createController();
@@ -219,7 +197,6 @@ describe("runtime/HostCommitController.js", function () {
     rafFourHarness.runNextRaf();
     rafFourHarness.setShell(rafFourShell);
     rafFourHarness.runNextRaf();
-    expect(rafFourHarness.spans.some((entry) => entry.tags.waitStage === "raf-4")).toBe(true);
   });
 
   it("returns the same getState snapshot reference when state is unchanged", function () {

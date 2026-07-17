@@ -1,7 +1,6 @@
 /**
- * Module: TextLayoutEngine - Shared mode routing, fit-cache helpers, and composed text layout API
+ * @file TextLayoutEngine - Shared mode routing, fit-cache helpers, and composed text layout API
  * Documentation: documentation/shared/text-layout-engine.md
- * Depends: ValueMath, TextLayoutPrimitives, TextLayoutComposite, ResponsiveScaleProfile
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -22,12 +21,18 @@
     textFillScale: 1.18
   };
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniTextLayoutEngineApi}
+   */
   function create(def, componentContext) {
     const value = componentContext.components.require("ValueMath");
     const primitive = componentContext.components.require("TextLayoutPrimitives");
     const composite = componentContext.components.require("TextLayoutComposite");
     const responsiveProfile = componentContext.components.require("ResponsiveScaleProfile");
 
+    /** @param {unknown} modeList @returns {DyniFitCache} */
     function createFitCache(modeList) {
       const modes = Array.isArray(modeList) && modeList.length
         ? modeList
@@ -37,40 +42,62 @@
       return out;
     }
 
+    /** @param {unknown} cache @param {unknown} [mode] @returns {void} */
     function clearFitCache(cache, mode) {
       if (!cache || typeof cache !== "object") {
         return;
       }
+      const bag = /** @type {Record<string, unknown>} */ (cache);
       if (mode) {
-        cache[mode] = null;
+        bag[/** @type {string} */ (mode)] = null;
         return;
       }
-      const keys = Object.keys(cache);
-      for (let i = 0; i < keys.length; i++) cache[keys[i]] = null;
+      const keys = Object.keys(bag);
+      for (let i = 0; i < keys.length; i++) bag[keys[i]] = null;
     }
 
+    /** @param {unknown} parts @returns {string} */
     function makeFitCacheKey(parts) {
       return JSON.stringify(parts || {});
     }
 
+    /** @param {unknown} cache @param {unknown} mode @param {unknown} key @returns {unknown} */
     function readFitCache(cache, mode, key) {
       if (!cache || typeof cache !== "object") {
         return null;
       }
-      const entry = cache[mode];
+      const bag = /** @type {Record<string, DyniFitCacheEntry | null>} */ (cache);
+      const entry = bag[/** @type {string} */ (mode)];
       return entry && entry.key === key ? entry.result : null;
     }
 
+    /**
+     * @param {unknown} cache
+     * @param {unknown} mode
+     * @param {unknown} key
+     * @param {unknown} result
+     * @returns {unknown}
+     */
     function writeFitCache(cache, mode, key, result) {
-      if (cache && typeof cache === "object") cache[mode] = { key: key, result: result };
+      if (cache && typeof cache === "object") {
+        (/** @type {Record<string, DyniFitCacheEntry>} */ (cache))[/** @type {string} */ (mode)] = { key: key, result: result };
+      }
       return result;
     }
 
+    /**
+     * @param {unknown} cache
+     * @param {unknown} mode
+     * @param {unknown} key
+     * @param {() => unknown} computeFn
+     * @returns {unknown}
+     */
     function resolveFitCache(cache, mode, key, computeFn) {
       const cached = readFitCache(cache, mode, key);
       return cached || writeFitCache(cache, mode, key, computeFn());
     }
 
+    /** @param {number} W @param {number} H @returns {DyniTextInsets} */
     function computeInsets(W, H) {
       return {
         // dyni-lint-disable-next-line responsive-layout-hard-floor -- legacy non-responsive API kept for comparison coverage; responsive callers use computeResponsiveInsets
@@ -82,6 +109,7 @@
       };
     }
 
+    /** @param {unknown} W @param {unknown} H @returns {DyniTextResponsiveInsets} */
     function computeResponsiveInsets(W, H) {
       const responsive = responsiveProfile.computeProfile(W, H, { scales: RESPONSIVE_TEXT_SCALES });
       return {
@@ -92,12 +120,14 @@
       };
     }
 
+    /** @param {unknown} basePx @param {unknown} textFillScale @returns {number} */
     function scaleMaxTextPx(basePx, textFillScale) {
       return responsiveProfile.scaleMaxTextPx(basePx, textFillScale);
     }
 
+    /** @param {unknown} args @returns {DyniModeLayout} */
     function computeModeLayout(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniTextArgs} */ (args || {});
       const W = Number(cfg.W) || 0;
       const H = Number(cfg.H) || 0;
       const ratio = W / Math.max(1, H);

@@ -1,7 +1,6 @@
 /**
- * Module: CenterDisplayStateAdapter - Canvas state-screen gateway for CenterDisplayTextWidget
+ * @file CenterDisplayStateAdapter - Canvas state-screen gateway for CenterDisplayTextWidget
  * Documentation: documentation/widgets/center-display.md
- * Depends: StateScreenLabels, StateScreenPrecedence, StateScreenCanvasOverlay
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,14 +11,24 @@
 }(this, function () {
   "use strict";
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniCenterDisplayStateAdapterApi}
+   */
   function create(def, componentContext) {
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
 
+    /** @param {unknown} args @returns {boolean} */
     function renderStateScreenIfNeeded(args) {
-      const cfg = args && typeof args === "object" ? args : {};
-      const props = cfg.props && typeof cfg.props === "object" ? cfg.props : null;
+      const cfg = /** @type {{ props?: unknown, ctx?: unknown, W?: unknown, H?: unknown, family?: unknown, color?: unknown, labelWeight?: unknown }} */ (
+        args && typeof args === "object" ? args : {}
+      );
+      const props = cfg.props && typeof cfg.props === "object"
+        ? /** @type {{ disconnect?: unknown }} */ (cfg.props)
+        : null;
       const kind = stateScreenPrecedence.pickFirst([
         { kind: "disconnected", when: props && props.disconnect === true },
         { kind: "data", when: true }

@@ -193,7 +193,6 @@ describe("config/components.js", function () {
     const components = context.DyniPlugin.config.components;
     expect(components.ThemeModel).toBeUndefined();
     expect(components.ThemeResolver).toBeUndefined();
-    expect(components.PerfSpanHelper).toBeUndefined();
     expect(components.ClusterSurfacePolicy).toBeUndefined();
     expect(components.CanvasDomSurfaceAdapter).toBeUndefined();
     expect(components.HtmlSurfaceController).toBeUndefined();
@@ -265,7 +264,6 @@ describe("config/components.js", function () {
     expect(needed).not.toContain("ClusterSurfacePolicy");
     expect(needed).not.toContain("ThemeModel");
     expect(needed).not.toContain("ThemeResolver");
-    expect(needed).not.toContain("PerfSpanHelper");
     expect(needed).not.toContain("ActiveRouteViewModel");
     expect(needed).not.toContain("EditRouteViewModel");
     expect(needed).not.toContain("RoutePointsViewModel");
@@ -344,9 +342,6 @@ describe("config/components.js", function () {
     );
 
     expect(manifest[0]).toBe("runtime/namespace.js");
-    expect(manifest.indexOf("runtime/PerfSpanHelper.js")).toBeGreaterThan(
-      manifest.indexOf("runtime/namespace.js"),
-    );
     expect(
       manifest.indexOf("runtime/cluster/ClusterShellRenderer.js"),
     ).toBeGreaterThan(manifest.indexOf("runtime/surface/index.js"));

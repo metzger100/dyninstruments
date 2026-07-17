@@ -1,18 +1,38 @@
 /**
- * Module: DyniPlugin Cluster Surface Policy Runtime - Surface policy resolver for cluster routing
+ * @file DyniPlugin Cluster Surface Policy Runtime - Surface policy resolver for cluster routing
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: ValueMath
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
-  const runtime = ns.runtime;
-  const valueMath = root.DyniComponents.DyniValueMath.create();
+  /** @typedef {Record<string, unknown>} DyniSurfaceRecord */
+  /**
+   * @typedef {{
+   *   pageId: string,
+   *   alarm: { stopAll: string },
+   *   routeEditor?: { openActiveRoute?: unknown, openEditRoute?: unknown },
+   *   map?: { checkAutoZoom?: unknown },
+   *   ais?: { showInfo?: unknown },
+   *   routePoints?: { activate?: unknown },
+   *   [key: string]: unknown
+   * }} DyniSurfaceCapabilities
+   */
+  /** @typedef {{ route: { rendererId: string }, rendererSpec: unknown, props: DyniSurfaceRecord }} DyniSurfaceRouteState */
+  /** @typedef {{ routePoints: { activate(payload: unknown): boolean }, map: { checkAutoZoom(): boolean }, routeEditor: { openActiveRoute(): boolean, openEditRoute(): boolean }, ais: { showInfo(mmsi: unknown): boolean }, alarm: { stopAll(): boolean } }} DyniSurfaceActions */
+  /** @typedef {{ pageId: string, containerOrientation: "vertical" | "default", interaction: { mode: "dispatch" | "passive" }, actions: DyniSurfaceActions, hostFacts: { viewportHeight: number } }} DyniResolvedSurfacePolicy */
+  /** @typedef {{ hostActions: DyniSurfaceRecord | null, rawCapabilities: unknown, normalizedCapabilities: DyniSurfaceCapabilities, normalizedActions: DyniSurfaceActions }} DyniHostContextCache */
+  /** @typedef {{ toFiniteNumber(value: unknown): number }} DyniSurfaceValueMath */
+  /** @typedef {DyniRuntimeNamespace & { _createClusterSurfacePolicy?: () => DyniSurfacePolicy }} DyniSurfaceRuntime */
+  /** @typedef {{ DyniPlugin: DyniPluginNamespace & { runtime: DyniSurfaceRuntime }, DyniComponents: { DyniValueMath: { create(): DyniSurfaceValueMath } } }} DyniSurfaceRoot */
 
-  const GLOBAL_ROOT = (typeof globalThis !== "undefined")
+  const typedRoot = /** @type {DyniSurfaceRoot} */ (/** @type {unknown} */ (root));
+  const ns = typedRoot.DyniPlugin;
+  const runtime = ns.runtime;
+  const valueMath = typedRoot.DyniComponents.DyniValueMath.create();
+
+  const GLOBAL_ROOT = /** @type {DyniSurfaceRecord} */ ((typeof globalThis !== "undefined")
     ? globalThis
-    : (typeof self !== "undefined" ? self : {});
+    : (typeof self !== "undefined" ? self : {}));
   const DEFAULT_CAPABILITIES = Object.freeze({
     pageId: "other",
     alarm: Object.freeze({ stopAll: "unsupported" })
@@ -20,39 +40,53 @@
 
   const toFiniteNumber = valueMath.toFiniteNumber;
 
+  /** @param {unknown} props @returns {boolean} */
   function isEditingMode(props) {
-    const p = props && typeof props === "object" ? props : {};
+    const p = /** @type {DyniSurfaceRecord} */ (props && typeof props === "object" ? props : {});
     return p.editing === true || p.dyniLayoutEditing === true;
   }
 
+  /** @param {unknown} hostContext @returns {DyniSurfaceRecord | null} */
   function resolveHostActions(hostContext) {
-    const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
+    const ctx = /** @type {DyniSurfaceRecord | null} */ (hostContext && typeof hostContext === "object" ? hostContext : null);
     const hostActions = ctx && ctx.hostActions ? ctx.hostActions : null;
-    return hostActions && typeof hostActions === "object" ? hostActions : null;
+    return /** @type {DyniSurfaceRecord | null} */ (hostActions && typeof hostActions === "object" ? hostActions : null);
   }
 
+  /** @param {unknown} capabilities @returns {DyniSurfaceCapabilities} */
   function normalizeHostCapabilities(capabilities) {
     if (!capabilities || typeof capabilities !== "object") {
       return DEFAULT_CAPABILITIES;
     }
-    const hasPageId = typeof capabilities.pageId === "string" && capabilities.pageId;
-    const hasAlarmGroup = capabilities.alarm && typeof capabilities.alarm === "object" && typeof capabilities.alarm.stopAll === "string";
+    const capabilityRecord = /** @type {DyniSurfaceRecord} */ (capabilities);
+    const hasPageId = typeof capabilityRecord.pageId === "string" && capabilityRecord.pageId;
+    const alarmGroup = /** @type {DyniSurfaceRecord | null} */ (
+      capabilityRecord.alarm && typeof capabilityRecord.alarm === "object" ? capabilityRecord.alarm : null
+    );
+    const hasAlarmGroup = alarmGroup && typeof alarmGroup.stopAll === "string";
     if (hasPageId && hasAlarmGroup) {
-      return capabilities;
+      return /** @type {DyniSurfaceCapabilities} */ (capabilityRecord);
     }
-    const out = hasPageId ? Object.assign({}, capabilities) : Object.assign({}, capabilities, { pageId: "other" });
+    const out = /** @type {DyniSurfaceCapabilities} */ (hasPageId ? Object.assign({}, capabilityRecord) : Object.assign({}, capabilityRecord, { pageId: "other" }));
     if (!hasAlarmGroup) {
       out.alarm = { stopAll: "unsupported" };
     }
     return out;
   }
 
+  /** @param {DyniSurfaceRecord | null} hostActions @returns {DyniSurfaceActions} */
   function createNormalizedActions(hostActions) {
+    /** @param {string} ownerKey @param {string} actionKey @param {unknown[]} args @returns {boolean} */
     function callAction(ownerKey, actionKey, args) {
-      if (!hostActions || !hostActions[ownerKey] || typeof hostActions[ownerKey][actionKey] !== "function") {
+      const owner = hostActions && hostActions[ownerKey];
+      if (!owner || typeof owner !== "object") {
         return false;
       }
-      return hostActions[ownerKey][actionKey].apply(hostActions[ownerKey], args || []) !== false;
+      const action = /** @type {DyniSurfaceRecord} */ (owner)[actionKey];
+      if (typeof action !== "function") {
+        return false;
+      }
+      return action.apply(owner, args) !== false;
     }
     return {
       routePoints: {
@@ -86,6 +120,7 @@
     };
   }
 
+  /** @returns {DyniHostContextCache} */
   function createHostContextCache() {
     return {
       hostActions: null,
@@ -95,6 +130,7 @@
     };
   }
 
+  /** @param {unknown} hostContext @param {WeakMap<object, DyniHostContextCache>} cacheByHostContext @returns {DyniHostContextCache | null} */
   function resolveHostContextCache(hostContext, cacheByHostContext) {
     const ctx = hostContext && typeof hostContext === "object" ? hostContext : null;
     if (!ctx) {
@@ -108,6 +144,7 @@
     return cached;
   }
 
+  /** @param {unknown} hostContext @param {WeakMap<object, DyniHostContextCache>} cacheByHostContext @returns {DyniSurfaceCapabilities} */
   function resolveHostCapabilities(hostContext, cacheByHostContext) {
     const hostActions = resolveHostActions(hostContext);
     const hostCache = resolveHostContextCache(hostContext, cacheByHostContext);
@@ -117,10 +154,11 @@
       hostCache.normalizedCapabilities = DEFAULT_CAPABILITIES;
       hostCache.normalizedActions = createNormalizedActions(hostActions);
     }
-    if (!hostActions || typeof hostActions.getCapabilities !== "function") {
+    const getCapabilities = hostActions && hostActions.getCapabilities;
+    if (typeof getCapabilities !== "function") {
       return DEFAULT_CAPABILITIES;
     }
-    const rawCapabilities = hostActions.getCapabilities();
+    const rawCapabilities = getCapabilities.call(hostActions);
     if (!hostCache) {
       return normalizeHostCapabilities(rawCapabilities);
     }
@@ -133,6 +171,7 @@
     return normalizedCapabilities;
   }
 
+  /** @param {unknown} hostContext @param {WeakMap<object, DyniHostContextCache>} cacheByHostContext @returns {DyniSurfaceActions} */
   function resolveNormalizedActions(hostContext, cacheByHostContext) {
     const hostActions = resolveHostActions(hostContext);
     const hostCache = resolveHostContextCache(hostContext, cacheByHostContext);
@@ -148,13 +187,16 @@
     return hostCache.normalizedActions;
   }
 
+  /** @param {DyniSurfaceRecord} props @returns {"vertical" | "default"} */
   function resolveContainerOrientation(props) {
     return props && props.mode === "vertical" ? "vertical" : "default";
   }
 
+  /** @param {DyniSurfaceRouteState} routeState @param {DyniSurfaceCapabilities} capabilities @returns {"dispatch" | "passive"} */
   function resolveInteractionMode(routeState, capabilities) {
     const rendererId = routeState.route.rendererId;
     const props = routeState.props || {};
+    const domain = /** @type {DyniSurfaceRecord | null} */ (props.domain && typeof props.domain === "object" ? props.domain : null);
     if (isEditingMode(props)) {
       return "passive";
     }
@@ -180,9 +222,8 @@
       return capabilities &&
         capabilities.ais &&
         capabilities.ais.showInfo === "dispatch" &&
-        props &&
-        props.domain &&
-        props.domain.hasDispatchMmsi === true
+        domain &&
+        domain.hasDispatchMmsi === true
         ? "dispatch"
         : "passive";
     }
@@ -190,9 +231,8 @@
       return capabilities &&
         capabilities.alarm &&
         capabilities.alarm.stopAll === "dispatch" &&
-        props &&
-        props.domain &&
-        props.domain.state === "active"
+        domain &&
+        domain.state === "active"
         ? "dispatch"
         : "passive";
     }
@@ -206,11 +246,13 @@
     return "passive";
   }
 
+  /** @returns {number} */
   function resolveViewportHeight() {
     const viewport = toFiniteNumber(GLOBAL_ROOT && GLOBAL_ROOT.innerHeight);
     return typeof viewport === "number" && viewport > 0 ? Math.floor(viewport) : 0;
   }
 
+  /** @param {DyniSurfaceRouteState} routeState @param {unknown} hostContext @param {WeakMap<object, DyniHostContextCache>} cacheByHostContext @returns {DyniResolvedSurfacePolicy} */
   function buildSurfacePolicy(routeState, hostContext, cacheByHostContext) {
     const capabilities = resolveHostCapabilities(hostContext, cacheByHostContext);
     return {
@@ -226,6 +268,7 @@
     };
   }
 
+  /** @param {DyniSurfaceRecord} props @param {string} key @param {unknown} value */
   function materializeRuntimeField(props, key, value) {
     const descriptor = Object.getOwnPropertyDescriptor(props, key);
     if (descriptor && descriptor.enumerable === false && descriptor.configurable === true && descriptor.writable === true) {
@@ -240,6 +283,7 @@
     });
   }
 
+  /** @param {DyniSurfaceRouteState} routeState @param {unknown} hostContext @param {WeakMap<object, DyniHostContextCache>} cacheByHostContext @returns {DyniSurfaceRecord} */
   function withSurfacePolicyProps(routeState, hostContext, cacheByHostContext) {
     const surfacePolicy = buildSurfacePolicy(routeState, hostContext, cacheByHostContext);
     const routedProps = routeState.props;
@@ -252,6 +296,7 @@
     return routedProps;
   }
 
+  /** @param {DyniSurfaceRouteState} routeState @param {unknown} hostContext @param {WeakMap<object, DyniHostContextCache>} cacheByHostContext @returns {DyniSurfaceRouteState} */
   function resolveRouteStateWithPolicy(routeState, hostContext, cacheByHostContext) {
     const routedProps = withSurfacePolicyProps(routeState, hostContext, cacheByHostContext);
     return {
@@ -261,18 +306,24 @@
     };
   }
 
+  /** @param {unknown} shellEl @returns {number | undefined} */
   function resolveShellWidth(shellEl) {
-    if (!shellEl || typeof shellEl.getBoundingClientRect !== "function") {
+    const element = /** @type {{ getBoundingClientRect?: () => { width: unknown } } | null} */ (
+      shellEl && typeof shellEl === "object" ? shellEl : null
+    );
+    if (!element || typeof element.getBoundingClientRect !== "function") {
       return undefined;
     }
-    const width = toFiniteNumber(shellEl.getBoundingClientRect().width);
+    const width = toFiniteNumber(element.getBoundingClientRect().width);
     return width > 0 ? Math.round(width) : undefined;
   }
+  /** @returns {DyniSurfacePolicy} */
   function createClusterSurfacePolicy() {
+    /** @type {WeakMap<object, DyniHostContextCache>} */
     const cacheByHostContext = new WeakMap();
     return {
       resolveRouteStateWithPolicy: function (routeState, hostContext) {
-        return resolveRouteStateWithPolicy(routeState, hostContext, cacheByHostContext);
+        return resolveRouteStateWithPolicy(/** @type {DyniSurfaceRouteState} */ (routeState), hostContext, cacheByHostContext);
       },
       resolveShellWidth: resolveShellWidth
     };

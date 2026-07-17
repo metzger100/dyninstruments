@@ -1,7 +1,6 @@
 /**
- * Module: VoltageRadialWidget - Semicircle voltage gauge with low-end warning/alarm sectors
+ * @file VoltageRadialWidget - Semicircle voltage gauge with low-end warning/alarm sectors
  * Documentation: documentation/widgets/semicircle-gauges.md
- * Depends: SemicircleRadialEngine, ValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,7 @@
 }(this, function () {
   "use strict";
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const renderer = componentContext.components.require("SemicircleRadialEngine");
     const valueMath = componentContext.components.require("ValueMath");
@@ -36,7 +36,8 @@
       hideTextualMetricsProp: "voltageRadialHideTextualMetrics",
       tickSteps: valueMath.resolveVoltageTickSteps,
       formatDisplay: function (raw, props) {
-        return valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
+        const display = valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
+        return { num: display.num, text: placeholderNormalize.normalize(display.text, undefined) };
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
         const p = props || {};

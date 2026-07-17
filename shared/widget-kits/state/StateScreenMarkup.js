@@ -1,7 +1,6 @@
 /**
- * Module: StateScreenMarkup - Shared HTML wrapper/body markup for semantic state-screens
+ * @file StateScreenMarkup - Shared HTML wrapper/body markup for semantic state-screens
  * Documentation: documentation/shared/state-screens.md
- * Depends: HtmlWidgetUtils, StateScreenLabels, StateScreenTextFit
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,7 @@
 }(this, function () {
   "use strict";
 
+  /** @param {unknown} input @returns {string[]} */
   function normalizeClasses(input) {
     if (Array.isArray(input)) {
       return input.filter(Boolean).map((entry) => String(entry));
@@ -22,6 +22,7 @@
     return [];
   }
 
+  /** @param {string[]} classList @returns {string[]} */
   function dedupeClasses(classList) {
     const seen = Object.create(null);
     const out = [];
@@ -36,6 +37,7 @@
     return out;
   }
 
+  /** @param {unknown} kind @returns {string} */
   function kindToClassSuffix(kind) {
     return String(kind || "")
       .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
@@ -43,6 +45,7 @@
       .toLowerCase();
   }
 
+  /** @param {string[]} classList @returns {string[]} */
   function forcePassiveClasses(classList) {
     const out = [];
     for (let i = 0; i < classList.length; i += 1) {
@@ -56,6 +59,7 @@
     return dedupeClasses(out);
   }
 
+  /** @param {unknown} extraAttrs @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {string} */
   function resolveExtraAttrs(extraAttrs, htmlUtils) {
     if (typeof extraAttrs === "string") {
       const text = extraAttrs.trim();
@@ -65,11 +69,12 @@
       return "";
     }
 
+    const record = /** @type {Record<string, unknown>} */ (extraAttrs);
     let attrs = "";
-    const keys = Object.keys(extraAttrs);
+    const keys = Object.keys(record);
     for (let i = 0; i < keys.length; i += 1) {
       const key = keys[i];
-      const value = extraAttrs[key];
+      const value = record[key];
       if (!key || value == null || value === false) {
         continue;
       }
@@ -82,12 +87,18 @@
     return attrs;
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniStateScreenMarkupApi}
+   */
   function create(def, componentContext) {
     const labelsApi = componentContext.components.require("StateScreenLabels");
     const labels = labelsApi;
     const defaultHtmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const stateScreenTextFit = componentContext.components.require("StateScreenTextFit");
 
+    /** @param {DyniStateScreenRenderArgs} cfg @param {string} labelText @returns {string} */
     function resolveLabelStyle(cfg, labelText) {
       const explicit = typeof cfg.labelStyle === "string" ? cfg.labelStyle : cfg.fitStyle;
       if (typeof explicit === "string" && explicit.trim()) {
@@ -107,8 +118,9 @@
       });
     }
 
+    /** @param {unknown} args @returns {string} */
     function renderStateScreen(args) {
-      const cfg = args || {};
+      const cfg = /** @type {DyniStateScreenRenderArgs} */ (args || {});
       const htmlUtils = cfg.htmlUtils || defaultHtmlUtils;
       const kind = typeof cfg.kind === "string" && cfg.kind ? cfg.kind : labels.KINDS.DATA;
       const stateClass = "dyni-state-" + kindToClassSuffix(kind);

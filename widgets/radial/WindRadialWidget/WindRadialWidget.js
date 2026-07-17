@@ -1,7 +1,6 @@
 /**
- * Module: WindRadialWidget - Full-circle wind dial for angle and speed pairs
+ * @file WindRadialWidget - Full-circle wind dial for angle and speed pairs
  * Documentation: documentation/widgets/wind-dial.md
- * Depends: FullCircleRadialEngine, FullCircleRadialTextLayout, ValueMath, SpringEasing, StableDigits, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -11,7 +10,11 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {Record<string, unknown> & { angle?: unknown, speed?: unknown, angleUnit?: unknown, speedUnit?: unknown, angleCaption?: unknown, speedCaption?: unknown, leadingZero?: boolean, stableDigits?: boolean, captionUnitScale?: unknown, easing?: boolean, layEnabled?: boolean, windRadialLayMin?: unknown, windRadialLayMax?: unknown, formatter?: unknown, formatterParameters?: unknown, default?: unknown }} DyniWindRadialProps */
+  /** @typedef {{ caption: unknown, value: unknown, unit: unknown, secScale: number }} DyniWindRadialMetric */
+  /** @typedef {{ angle: unknown, layEnabled: boolean, windRadialLayMin: number, windRadialLayMax: number, left: DyniWindRadialMetric, right: DyniWindRadialMetric }} DyniWindRadialDisplay */
 
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const engine = componentContext.components.require("FullCircleRadialEngine");
     const textLayout = componentContext.components.require("FullCircleRadialTextLayout");
@@ -21,18 +24,18 @@
     const springMotion = componentContext.components.require("SpringEasing").createMotion({ wrap: 360 });
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
 
+    /** @param {unknown} raw @param {DyniWindRadialProps} props @param {unknown} speedUnit @returns {string} */
     function windFormatSpeedText(raw, props, speedUnit) {
       const p = props || {};
+      const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
+        ? placeholderNormalize.normalize(p.default, undefined)
+        : placeholderNormalize.normalize(undefined, undefined);
       if (raw == null || (typeof raw === "string" && raw.trim() === "")) {
-        return Object.prototype.hasOwnProperty.call(p, "default")
-          ? p.default
-          : placeholderNormalize.normalize(undefined, undefined);
+        return defaultText;
       }
       const n = toOptionalFiniteNumber(raw);
       if (typeof n !== "number") {
-        return Object.prototype.hasOwnProperty.call(p, "default")
-          ? p.default
-          : placeholderNormalize.normalize(undefined, undefined);
+        return defaultText;
       }
 
       const formatter = p.formatter;
@@ -41,20 +44,21 @@
       return placeholderNormalize.normalize(String(componentContext.format.applyFormatter(n, {
         formatter: formatter,
         formatterParameters: formatterParameters,
-        default: p.default
+        default: defaultText
       })), Object.prototype.hasOwnProperty.call(p, "default") ? p.default : placeholderNormalize.normalize(undefined, undefined));
     }
 
+    /** @param {DyniFullCircleEngineState} state @param {DyniWindRadialProps} props @returns {DyniWindRadialDisplay} */
     function windDisplay(state, props) {
       const p = props || {};
       const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
-        ? p.default
+        ? placeholderNormalize.normalize(p.default, undefined)
         : placeholderNormalize.normalize(undefined, undefined);
       const angleUnit = p.angleUnit;
       const speedUnit = p.speedUnit;
       const secScale = state.value.clamp(p.captionUnitScale, 0.3, 3.0);
       let angleText = defaultText;
-      if (Number.isFinite(p.angle)) {
+      if (state.value.isFiniteNumber(p.angle)) {
         angleText = state.value.formatAngle180(p.angle, !!p.leadingZero);
       }
       const speedText = windFormatSpeedText(p.speed, p, speedUnit);
@@ -149,10 +153,10 @@
             fontPx: state.labels.fontPx,
             weight: state.labelWeight,
             family: state.family,
-            labelFormatter: function (deg) {
+            labelFormatter: /** @param {number} deg @returns {string} */ function (deg) {
               return String(deg);
             },
-            labelFilter: function (deg) {
+            labelFilter: /** @param {number} deg @returns {boolean} */ function (deg) {
               return deg !== -180 && deg !== 180;
             }
           });
@@ -161,7 +165,8 @@
       drawFrame: function (state, props, api) {
         const display = windDisplay(state, props);
         const easingEnabled = props.easing !== false;
-        const easedAngle = springMotion.resolve(state.canvas, display.angle, easingEnabled, Date.now());
+        const motionCanvas = /** @type {object} */ (state.canvas);
+        const easedAngle = springMotion.resolve(motionCanvas, display.angle, easingEnabled, Date.now());
         api.drawCachedLayer("back");
         if (state.value.isFiniteNumber(easedAngle)) {
           state.draw.drawPointerAtRim(state.ctx, state.geom.cx, state.geom.cy, state.geom.rOuter, easedAngle, {
@@ -171,7 +176,7 @@
           });
         }
         api.drawCachedLayer("front");
-        if (springMotion.isActive(state.canvas)) {
+        if (springMotion.isActive(motionCanvas)) {
           return { wantsFollowUpFrame: true };
         }
       },

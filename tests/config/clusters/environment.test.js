@@ -120,6 +120,7 @@ describe("config/clusters/environment.js", function () {
     const def = loadEnvDef();
     const out = def.updateFunction({ kind: "pressure", value: "  ", storeKeys: { value: "old.path" } });
     expect(out.storeKeys.value).toBeUndefined();
+    expect(Object.prototype.hasOwnProperty.call(out.storeKeys, "value")).toBe(false);
   });
 
   it("removes pressure store key when non-pressure kind is active", function () {

@@ -1,17 +1,17 @@
 /**
- * Module: DyniPlugin Bootstrap Manifest - authoritative bootstrap script list
+ * @file DyniPlugin Bootstrap Manifest - authoritative bootstrap script list
  * Documentation: documentation/architecture/component-system.md
- * Depends: window.DyniPlugin
  */
 (function (root) {
   "use strict";
 
-  var ns = root.DyniPlugin;
-  var config = ns.config = ns.config || {};
+  /** @typedef {{ DyniPlugin: DyniPluginNamespace & { config: DyniPluginConfig } }} DyniBootstrapManifestRoot */
+
+  var ns = /** @type {DyniBootstrapManifestRoot} */ (/** @type {unknown} */ (root)).DyniPlugin;
+  var config = ns.config;
 
   config.bootstrapManifest = [
     "runtime/namespace.js",
-    "runtime/PerfSpanHelper.js",
     "runtime/format-runtime.js",
     "runtime/canvas-runtime.js",
     "runtime/dom-runtime.js",

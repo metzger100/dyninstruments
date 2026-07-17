@@ -104,17 +104,16 @@ If you created a new documentation file:
 **AGENTS.md / CLAUDE.md** — Update when:
 - Architecture guidance changes
 - New file map entries are needed
-- After updating either, run `node tools/sync-ai-instructions.mjs --from=agents` (or `--from=claude`) to keep them synchronized
+- Keep `AGENTS.md` canonical. Keep `CLAUDE.md` as a short pointer unless genuinely Claude-specific notes are required.
 
 ### Step 7: Validate
 
 Run the documentation validation checks:
 
 ```bash
-node tools/check-docs.mjs           # Link and anchor validation
-node tools/check-doc-format.mjs     # Format enforcement
-node tools/check-doc-reachability.mjs  # Reachability from AGENTS.md
-npm run ai:check                     # AI instruction sync check
+npm run check:doclinks     # Link, anchor, and JS Documentation: target validation
+npm run check:docformat    # Required doc section/format enforcement
+npm run check:reachability # Reachability from AGENTS.md or CLAUDE.md
 ```
 
 Or run everything at once:
@@ -132,4 +131,4 @@ Non-zero exit means docs are not consistent. Fix all failures before proceeding.
 - ❌ Writing verbose "Why?" sections or "Future Enhancements"
 - ❌ Using more than 1-2 examples per concept
 - ❌ Leaving empty sections in docs
-- ❌ Updating AGENTS.md without syncing to CLAUDE.md (or vice versa)
+- ❌ Duplicating the full AGENTS.md rule catalog into CLAUDE.md

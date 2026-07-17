@@ -1,12 +1,18 @@
 /**
- * Module: DyniPlugin Theme Model Runtime - Canonical semantic owner for theme token/preset metadata
+ * @file DyniPlugin Theme Model Runtime - Canonical semantic owner for theme token/preset metadata
  * Documentation: documentation/shared/theme-tokens.md
- * Depends: runtime/namespace.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {Record<string, unknown>} DyniThemeValues */
+  /** @typedef {{ path: string, inputVar: string, type: string, default?: unknown, defaultByMode?: Record<string, unknown>, outputVar?: string, defaultFrom?: string, compatibilityInputVar?: string, [key: string]: unknown }} DyniThemeTokenDefinition */
+  /** @typedef {{ base?: DyniThemeValues, day?: DyniThemeValues, night?: DyniThemeValues, [mode: string]: DyniThemeValues | undefined }} DyniThemePreset */
+  /** @typedef {{ DEFAULT_PRESET_NAME: string, PRESETS: Readonly<Record<string, DyniThemePreset>>, BASE_DEFAULTS: DyniThemeValues, MODE_DEFAULTS: Readonly<Record<string, DyniThemeValues>>, normalizePresetName(presetName: unknown): string, getSupportedPresetNames(): string[], getSupportedModes(): string[], getPresetDefinition(presetName: unknown): DyniThemePreset, getPresetBase(presetName: unknown): DyniThemeValues, getPresetMode(presetName: unknown, mode: unknown): DyniThemeValues, getTokenDefinition(path: string): DyniThemeTokenDefinition | null, getTokenDefinitions(): DyniThemeTokenDefinition[], getOutputTokenDefinitions(): DyniThemeTokenDefinition[], getMergeOrder(): string[] }} DyniThemeModel */
+  /** @typedef {DyniRuntimeNamespace & { createThemeModel?: () => DyniThemeModel }} DyniThemeModelRuntime */
+  /** @typedef {{ DyniPlugin: DyniPluginNamespace & { runtime: DyniThemeModelRuntime } }} DyniThemeModelRoot */
+
+  const ns = /** @type {DyniThemeModelRoot} */ (/** @type {unknown} */ (root)).DyniPlugin;
   const runtime = ns.runtime;
 
   const DEFAULT_PRESET_NAME = "default";
@@ -24,6 +30,7 @@
     "parentCascade"
   ]);
 
+  /** @param {string} path @param {string} inputVar @param {string} type @param {unknown} [defaultValue] @param {Record<string, unknown> | undefined} [defaultByMode] @param {string | undefined} [outputVar] @param {string | undefined} [defaultFrom] @param {string | undefined} [deprecatedInputVar] @returns {DyniThemeTokenDefinition} */
   // dyni-lint-disable-next-line premature-legacy-support -- Regatta camelCase CSS aliases remain supported for existing user.css files.
   function defineToken(path, inputVar, type, defaultValue, defaultByMode, outputVar, defaultFrom, deprecatedInputVar) {
     return {
@@ -136,6 +143,7 @@
     defineToken("linear.labels.fontFactor", "--dyni-linear-label-font", "number", 0.14)
   ]);
 
+  /** @type {Readonly<Record<string, DyniThemePreset>>} */
   const PRESETS = Object.freeze({
     default: {
       base: {},
@@ -233,19 +241,23 @@
     }
   });
 
+  /** @param {DyniThemeValues} target @param {string[]} pathSegments @param {unknown} value */
   function setByPath(target, pathSegments, value) {
+    /** @type {DyniThemeValues} */
     let cursor = target;
     for (let i = 0; i < pathSegments.length - 1; i += 1) {
       const segment = pathSegments[i];
       if (!cursor[segment] || typeof cursor[segment] !== "object") {
         cursor[segment] = {};
       }
-      cursor = cursor[segment];
+      cursor = /** @type {DyniThemeValues} */ (cursor[segment]);
     }
     cursor[pathSegments[pathSegments.length - 1]] = value;
   }
 
+  /** @returns {DyniThemeValues} */
   function buildBaseDefaults() {
+    /** @type {DyniThemeValues} */
     const out = {};
     TOKEN_DEFS.forEach(function (def) {
       if (typeof def.default === "undefined") {
@@ -256,7 +268,9 @@
     return out;
   }
 
+  /** @param {string} mode @returns {DyniThemeValues} */
   function buildModeDefaults(mode) {
+    /** @type {DyniThemeValues} */
     const out = {};
     TOKEN_DEFS.forEach(function (def) {
       if (!def.defaultByMode || typeof def.defaultByMode[mode] === "undefined") {
@@ -273,6 +287,7 @@
     night: Object.freeze(buildModeDefaults("night"))
   });
 
+  /** @type {Record<string, DyniThemeTokenDefinition>} */
   const TOKEN_DEF_BY_PATH = {};
   TOKEN_DEFS.forEach(function (def) {
     TOKEN_DEF_BY_PATH[def.path] = def;
@@ -282,6 +297,7 @@
     return typeof def.outputVar === "string" && def.outputVar.length > 0;
   });
 
+  /** @param {unknown} presetName @returns {string} */
   function normalizePresetName(presetName) {
     if (typeof presetName !== "string") {
       return DEFAULT_PRESET_NAME;
@@ -295,15 +311,18 @@
       : DEFAULT_PRESET_NAME;
   }
 
+  /** @param {unknown} presetName @returns {DyniThemePreset} */
   function getPresetDefinition(presetName) {
     return PRESETS[normalizePresetName(presetName)];
   }
 
+  /** @param {unknown} presetName @returns {DyniThemeValues} */
   function getPresetBase(presetName) {
     const preset = getPresetDefinition(presetName);
     return preset && preset.base ? preset.base : {};
   }
 
+  /** @param {unknown} presetName @param {unknown} mode @returns {DyniThemeValues} */
   function getPresetMode(presetName, mode) {
     const preset = getPresetDefinition(presetName);
     if (!preset || typeof mode !== "string") {
@@ -312,20 +331,24 @@
     return preset[mode] && typeof preset[mode] === "object" ? preset[mode] : {};
   }
 
+  /** @param {string} path @returns {DyniThemeTokenDefinition | null} */
   function getTokenDefinition(path) {
     return Object.prototype.hasOwnProperty.call(TOKEN_DEF_BY_PATH, path)
       ? TOKEN_DEF_BY_PATH[path]
       : null;
   }
 
+  /** @returns {DyniThemeTokenDefinition[]} */
   function getTokenDefinitions() {
     return TOKEN_DEFS.slice();
   }
 
+  /** @returns {DyniThemeTokenDefinition[]} */
   function getOutputTokenDefinitions() {
     return OUTPUT_TOKEN_DEFS.slice();
   }
 
+  /** @returns {string[]} */
   function getMergeOrder() {
     return MERGE_ORDER.slice();
   }

@@ -1,7 +1,6 @@
 /**
- * Module: VesselMapper - Cluster translation for vessel voltage/time/attitude/alarm/regatta kinds
+ * @file VesselMapper - Cluster translation for vessel voltage/time/attitude/alarm/regatta kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: routeContext.toolkit, routeContext.viewModel
  */
 
 (function (root, factory) {
@@ -13,9 +12,11 @@
 }(this, function () {
   "use strict";
 
+  /** @param {unknown} def @param {unknown} componentContext */
   function create(def, componentContext) {
+    /** @param {DyniMapperProps|null|undefined} props @param {DyniMapperRouteContextWithViewModel} routeContext @returns {Record<string, unknown>} */
     function translate(props, routeContext) {
-      const p = props || {};
+      const p = /** @type {DyniMapperProps} */ (props || {});
       const toolkit = routeContext.toolkit;
       const alarmViewModel = routeContext.viewModel;
       const cap = toolkit.cap;

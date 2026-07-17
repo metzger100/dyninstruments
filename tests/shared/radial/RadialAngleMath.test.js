@@ -36,4 +36,17 @@ describe("RadialAngleMath", function () {
     expect(mod.valueToAngleFlat(150, 0, 100, arc, true)).toBe(180);
     expect(mod.valueToAngleFlat(150, 0, 100, arc, false)).toBe(270);
   });
+
+  it("covers direct conversions and invalid angle inputs", function () {
+    const opts = { min: 0, max: 100, startDeg: 0, endDeg: 180 };
+
+    expect(mod.mod(-1, 360)).toBe(359);
+    expect(mod.degToRad(180)).toBeCloseTo(Math.PI);
+    expect(mod.radToDeg(Math.PI)).toBeCloseTo(180);
+    expect(mod.norm360(NaN)).toBeNaN();
+    expect(mod.norm180(Infinity)).toBe(Infinity);
+    expect(mod.valueToAngle(10, { min: 0, max: 100, startDeg: 0 })).toBeNaN();
+    expect(mod.angleToValue(NaN, opts)).toBeNaN();
+    expect(mod.valueRangeToAngleRange(0, 100, opts)).toEqual({ a0: 0, a1: 180 });
+  });
 });

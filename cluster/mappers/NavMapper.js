@@ -1,7 +1,6 @@
 /**
- * Module: NavMapper - Cluster translation for navigation ETA/distance/position kinds
+ * @file NavMapper - Cluster translation for navigation ETA/distance/position kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: routeContext.toolkit, routeContext.viewModel
  */
 
 (function (root, factory) {
@@ -13,9 +12,20 @@
 }(this, function () {
   "use strict";
 
+  /** @typedef {{ display: { remain: unknown, rteEta: unknown, nextCourse: unknown, isApproaching: unknown }, routeName: unknown, captions: Record<string, unknown>, units: Record<string, unknown>, formatUnits?: Record<string, unknown>, hideSeconds: unknown }} DyniActiveRouteDomain */
+  /** @typedef {{ build: (props: DyniMapperProps, toolkit: DyniMapperToolkit) => DyniActiveRouteDomain }} DyniActiveRouteMapperViewModel */
+  /** @typedef {{ name: unknown, points: unknown[] }} DyniRoutePointsRoute */
+  /** @typedef {{ route: DyniRoutePointsRoute | null, selectedIndex: unknown, isActiveRoute: unknown, showLatLon: unknown, useRhumbLine: unknown }} DyniRoutePointsDomain */
+  /** @typedef {{ build: (props: DyniMapperProps, toolkit: DyniMapperToolkit) => DyniRoutePointsDomain }} DyniRoutePointsMapperViewModel */
+  /** @typedef {{ displayName: unknown, pointCount: unknown, totalDistance: unknown, isLocalRoute: unknown, isServerRoute: unknown }} DyniEditRouteMapperRoute */
+  /** @typedef {{ route: DyniEditRouteMapperRoute | null, hasRoute: unknown, remainingDistance: unknown, rteEta: unknown, hideSeconds: unknown, isActiveRoute: unknown }} DyniEditRouteDomain */
+  /** @typedef {{ build: (props: DyniMapperProps, toolkit: DyniMapperToolkit) => DyniEditRouteDomain }} DyniEditRouteMapperViewModel */
+
+  /** @param {unknown} def @param {unknown} componentContext */
   function create(def, componentContext) {
+    /** @param {DyniMapperProps|null|undefined} props @param {DyniMapperRouteContextWithViewModel} routeContext @returns {Record<string, unknown>} */
     function translate(props, routeContext) {
-      const p = props || {};
+      const p = /** @type {DyniMapperProps} */ (props || {});
       const toolkit = routeContext.toolkit;
       const viewModel = routeContext.viewModel;
       const cap = toolkit.cap;
@@ -46,10 +56,11 @@
         return out(p.vmg, cap("vmg"), toolkit.unitText("vmg", "speed", token), "formatSpeed", [token]);
       }
       if (req === "activeRoute") {
-        if (!viewModel || typeof viewModel.build !== "function") {
+        const activeRouteViewModel = /** @type {DyniActiveRouteMapperViewModel | null | undefined} */ (viewModel);
+        if (!activeRouteViewModel || typeof activeRouteViewModel.build !== "function") {
           throw new Error("NavMapper: routeContext.viewModel is required for 'activeRoute'");
         }
-        const activeRouteDomain = viewModel.build(p, toolkit);
+        const activeRouteDomain = activeRouteViewModel.build(p, toolkit);
         const remainToken = toolkit.formatUnit("activeRouteRemain", "distance");
         activeRouteDomain.units.remain = toolkit.unitText("activeRouteRemain", "distance", remainToken);
         activeRouteDomain.formatUnits = { remain: remainToken };
@@ -72,10 +83,11 @@
         };
       }
       if (req === "routePoints") {
-        if (!viewModel || typeof viewModel.build !== "function") {
+        const routePointsViewModel = /** @type {DyniRoutePointsMapperViewModel | null | undefined} */ (viewModel);
+        if (!routePointsViewModel || typeof routePointsViewModel.build !== "function") {
           throw new Error("NavMapper: routeContext.viewModel is required for 'routePoints'");
         }
-        const routePointsDomain = viewModel.build(p, toolkit);
+        const routePointsDomain = routePointsViewModel.build(p, toolkit);
         const distanceToken = toolkit.formatUnit("routePointsDistance", "distance");
         return {
           domain: {
@@ -105,10 +117,11 @@
         };
       }
       if (req === "editRoute") {
-        if (!viewModel || typeof viewModel.build !== "function") {
+        const editRouteViewModel = /** @type {DyniEditRouteMapperViewModel | null | undefined} */ (viewModel);
+        if (!editRouteViewModel || typeof editRouteViewModel.build !== "function") {
           throw new Error("NavMapper: routeContext.viewModel is required for 'editRoute'");
         }
-        const editRouteDomain = viewModel.build(p, toolkit);
+        const editRouteDomain = editRouteViewModel.build(p, toolkit);
         const route = editRouteDomain.route;
         return {
           domain: {

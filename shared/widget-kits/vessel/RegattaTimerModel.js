@@ -1,7 +1,6 @@
 /**
- * Module: RegattaTimerModel - Countdown/elapsed regatta timer state machine
+ * @file RegattaTimerModel - Countdown/elapsed regatta timer state machine
  * Documentation: documentation/widgets/regatta-timer.md
- * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -9,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRegattaTimerModel = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const DEFAULT_DURATION_MINUTES = 5;
@@ -20,10 +19,11 @@
   const MINUTE_BEEP_MS = 300;
   const SECOND_BEEP_MS = 150;
   const START_TONE_MS = 800;
-  const PHASE_IDLE = "idle";
-  const PHASE_COUNTDOWN = "countdown";
-  const PHASE_ELAPSED = "elapsed";
+  const PHASE_IDLE = /** @type {DyniRegattaPhase} */ ("idle");
+  const PHASE_COUNTDOWN = /** @type {DyniRegattaPhase} */ ("countdown");
+  const PHASE_ELAPSED = /** @type {DyniRegattaPhase} */ ("elapsed");
 
+  /** @param {unknown} rawMinutes @returns {number} */
   function toDurationMinutes(rawMinutes) {
     const minutes = Number(rawMinutes);
     if (!Number.isFinite(minutes) || minutes <= 0) {
@@ -32,6 +32,7 @@
     return Math.max(1, Math.round(minutes));
   }
 
+  /** @param {number} totalSeconds @returns {string} */
   function formatTimeFromSeconds(totalSeconds) {
     const safe = Math.max(0, Math.floor(totalSeconds));
     const hours = Math.floor(safe / 3600);
@@ -48,6 +49,7 @@
     return minuteText + ":" + secondText;
   }
 
+  /** @param {number} durationMinutes @returns {number[]} */
   function toSyncSignalPoints(durationMinutes) {
     const durationSeconds = durationMinutes * 60;
     const points = [durationSeconds, (durationMinutes - 1) * 60, 4 * 60, 60, 0];
@@ -71,13 +73,15 @@
     return result;
   }
 
+  /** @param {unknown} rawPhase @returns {DyniRegattaPhase} */
   function normalizePhase(rawPhase) {
     if (rawPhase === PHASE_COUNTDOWN || rawPhase === PHASE_ELAPSED) {
-      return rawPhase;
+      return /** @type {DyniRegattaPhase} */ (rawPhase);
     }
     return PHASE_IDLE;
   }
 
+  /** @param {unknown} rawValue @returns {number | null} */
   function toOptionalTimestamp(rawValue) {
     const value = Number(rawValue);
     if (!Number.isFinite(value) || value <= 0) {
@@ -86,6 +90,7 @@
     return Math.floor(value);
   }
 
+  /** @param {unknown} rawValue @returns {number | null} */
   function toOptionalCountdownSecond(rawValue) {
     const value = Number(rawValue);
     if (!Number.isFinite(value) || value < 0) {
@@ -94,9 +99,11 @@
     return Math.floor(value);
   }
 
+  /** @param {unknown} def @param {unknown} componentContext */
   function create(def, componentContext) {
+    /** @param {DyniRegattaTimerModelOptions} options @returns {DyniRegattaTimerModel} */
     function createTimerModel(options) {
-      const opts = options || {};
+      const opts = /** @type {DyniRegattaTimerModelOptions} */ (options || {});
       const snapshot = opts.snapshot && typeof opts.snapshot === "object" ? opts.snapshot : null;
       const snapshotDuration = snapshot ? toDurationMinutes(snapshot.durationMinutes) : null;
       const durationMinutes = snapshotDuration || toDurationMinutes(opts.durationMinutes);
@@ -105,20 +112,27 @@
       let onTick = typeof opts.onTick === "function" ? opts.onTick : null;
       let onSignal = typeof opts.onSignal === "function" ? opts.onSignal : null;
       let phase = PHASE_IDLE;
+      /** @type {number | null} */
       let endTimeMs = null;
+      /** @type {number | null} */
       let elapsedStartMs = null;
+      /** @type {number | null} */
       let timerId = null;
+      /** @type {number | null} */
       let lastCountdownSecond = null;
 
+      /** @param {number} nowMs @returns {DyniRegattaTimerState} */
       function resolveState(nowMs) {
         const now = Number.isFinite(nowMs) ? nowMs : Date.now();
         let remainingMs = 0;
         let elapsedMs = 0;
         if (phase === PHASE_COUNTDOWN) {
-          remainingMs = Math.max(0, endTimeMs - now);
+          const countdownEndTime = endTimeMs === null ? now : endTimeMs;
+          remainingMs = Math.max(0, countdownEndTime - now);
           elapsedMs = Math.max(0, durationMs - remainingMs);
         } else if (phase === PHASE_ELAPSED) {
-          elapsedMs = Math.max(0, now - elapsedStartMs);
+          const elapsedStart = elapsedStartMs === null ? now : elapsedStartMs;
+          elapsedMs = Math.max(0, now - elapsedStart);
         } else {
           remainingMs = durationMs;
         }
@@ -133,9 +147,10 @@
           }
         }
 
-        const displayTime = phase === PHASE_ELAPSED
-          ? formatTimeFromSeconds(Math.floor(elapsedMs / 1000))
-          : formatTimeFromSeconds(Math.ceil(remainingMs / 1000));
+        const displayTime =
+          phase === PHASE_ELAPSED
+            ? formatTimeFromSeconds(Math.floor(elapsedMs / 1000))
+            : formatTimeFromSeconds(Math.ceil(remainingMs / 1000));
 
         return {
           phase: phase,
@@ -146,6 +161,7 @@
         };
       }
 
+      /** @param {number} nowMs */
       function emitTick(nowMs) {
         if (!onTick) {
           return;
@@ -153,6 +169,7 @@
         onTick(resolveState(nowMs));
       }
 
+      /** @param {string} type @param {number} frequency @param {number} durationMsValue */
       function emitSignal(type, frequency, durationMsValue) {
         if (!onSignal) {
           return;
@@ -167,6 +184,7 @@
         }
       }
 
+      /** @param {number} nowMs @param {boolean} emitStartSignal */
       function beginElapsed(nowMs, emitStartSignal) {
         const now = Number.isFinite(nowMs) ? nowMs : Date.now();
         phase = PHASE_ELAPSED;
@@ -178,8 +196,12 @@
         }
       }
 
+      /** @param {number} nowMs */
       function handleCountdownTick(nowMs) {
         if (phase !== PHASE_COUNTDOWN) {
+          return;
+        }
+        if (endTimeMs === null) {
           return;
         }
         const remainingMs = Math.max(0, endTimeMs - nowMs);
@@ -216,16 +238,22 @@
         timerId = setInterval(handleTick, TICK_INTERVAL_MS);
       }
 
+      /** @param {number} nowMs */
       function resetCountdownCursor(nowMs) {
         const now = Number.isFinite(nowMs) ? nowMs : Date.now();
         if (phase !== PHASE_COUNTDOWN) {
           lastCountdownSecond = null;
           return;
         }
+        if (endTimeMs === null) {
+          lastCountdownSecond = 0;
+          return;
+        }
         const remainingMs = Math.max(0, endTimeMs - now);
         lastCountdownSecond = Math.max(0, Math.ceil(remainingMs / 1000));
       }
 
+      /** @param {DyniRegattaTimerSessionSnapshot | null | undefined} rawSnapshot */
       function applySnapshot(rawSnapshot) {
         const source = rawSnapshot && typeof rawSnapshot === "object" ? rawSnapshot : null;
         if (!source) {
@@ -272,13 +300,16 @@
           return;
         }
         const now = Date.now();
+        if (endTimeMs === null) {
+          return;
+        }
         const remainingSeconds = Math.max(0, (endTimeMs - now) / 1000);
         let targetSeconds = 0;
         let i;
 
         for (i = 0; i < syncPoints.length; i += 1) {
           const point = syncPoints[i];
-          if ((remainingSeconds - point) > SYNC_GRACE_SECONDS) {
+          if (remainingSeconds - point > SYNC_GRACE_SECONDS) {
             targetSeconds = point;
             break;
           }
@@ -353,4 +384,4 @@
   }
 
   return { id: "RegattaTimerModel", create: create };
-}));
+});

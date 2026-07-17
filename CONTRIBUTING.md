@@ -25,8 +25,12 @@ Run inside the plugin folder:
 
 ```bash
 cd ~/avnav-master/run/avnavdata/plugins/dyninstruments
-npm ci
+npm run setup
 ```
+
+The supported development runtime is Node 26 with npm 12.0.1. `npm run setup`
+runs the locked install and provisions the checksum-verified actionlint binary
+in the persistent cache outside `node_modules`.
 
 ### 2.3 Install and watch AvNav viewer
 
@@ -52,6 +56,12 @@ python3 ~/avnav-master/server/avnav_server.py \
 - Open AvNav in the browser.
 - Enter layout edit mode.
 - Confirm `dyninstruments_*` widgets are visible.
+
+For final manual validation, also verify one radial gauge, one linear gauge,
+and one HTML widget from the bundled layouts; switch day/night appearance; and
+exercise the route/AIS interaction controls. Record the date, AvNav version,
+browser, representative widgets/layouts, and any limitation in the active
+execution plan before declaring the migration complete.
 
 ## 3) How to Prompt AI Effectively
 
@@ -80,7 +90,7 @@ Scope:
 - In scope: <items>
 - Out of scope: <items>
 Constraints:
-- follow AGENTS.md/CLAUDE.md
+- follow `AGENTS.md` (canonical agent guidance; `CLAUDE.md` points there)
 - keep runtime boundaries intact
 Required validation:
 - npm run check:all
@@ -118,7 +128,7 @@ If unsure, choose planning mode.
 
 When correctly prompted, the AI will:
 
-- follow rules in `AGENTS.md` / `CLAUDE.md`
+- follow rules in `AGENTS.md`
 - follow architecture and boundary constraints
 - apply code + doc changes
 - run required checks/tests and report results
@@ -144,19 +154,25 @@ Do not just patch symptoms.
 
 At least one prevention action is required:
 
-1. Strengthen/enhance linter or check scripts so this class of issue is caught automatically, or
-2. Add/update documentation guardrails that define the correct pattern and where it belongs.
+1. Add or strengthen a standard lint/type/schema rule when the problem is static.
+2. Add or strengthen a behavior or contract test when the problem is semantic.
+3. Add focused documentation when the correct design is not discoverable.
 
-Prefer both when practical.
+New custom checker code is allowed only for irreducible AvNav contracts with a
+documented reason.
 
 ## 8) Execution and Validation Workflow
 
-Install tracked local hooks once per clone:
+Optional local hooks can be installed when `pre-commit` is available:
 
 ```bash
-npm run hooks:install
-npm run hooks:doctor
+pre-commit install
+pre-commit run --all-files
 ```
+
+The hooks run fast local checks only. The complete local `check:all` gate is the
+quality authority; tag pushes rerun it before GitHub publishes only the locally
+prepared, committed release artifacts.
 
 Run from repository root after implementation:
 
@@ -167,9 +183,22 @@ npm run check:all
 For faster local iteration before final validation, targeted checks are still useful:
 
 ```bash
+npm run check:standard
+npm run check:fast
 npm run check:core
+npm run test:split
 npm test
 ```
+
+`check:standard` is the standard-tool layer: scoped Prettier config/workflow
+formatting, ESLint, Stylelint, pinned actionlint workflow validation, and jscpd.
+Any clone detected by jscpd fails this layer.
+`check:fast` adds strict type checking and Node-only unit/tool tests without
+the full coverage gate.
+`check:core` includes it plus
+`typecheck`, `package:check`, and `docs:check` before the remaining
+project-specific Dyni gates.
+`test:split` separates Node-only tool tests from jsdom runtime/widget tests.
 
 Do not merge with failing checks.
 
@@ -181,6 +210,11 @@ Use the dedicated release guide for the full local-first workflow, SemVer decisi
 
 In short: run `npm run release:prepare`, choose `X.Y.Z`, write notes in `releases/dyninstruments-X.Y.Z.md`, then run `npm run release:create -- --version=X.Y.Z`.
 
+Tag publication uses the committed release artifacts created locally. The
+tag workflow reruns locked setup and `check:all`, validates SemVer, and never
+rebuilds the ZIP. The documented manual AvNav validation supplements the
+blocking jsdom and VM contracts before release creation.
+
 ## 10) Pre-Merge Checklist
 
 - [ ] Prompt had explicit scope, constraints, and required checks.
@@ -188,5 +222,5 @@ In short: run `npm run release:prepare`, choose `X.Y.Z`, write notes in `release
 - [ ] Implementation matches requested intent and scope.
 - [ ] Documentation was updated wherever behavior/config/contracts changed.
 - [ ] AI slop review completed.
-- [ ] `npm run hooks:doctor` passed.
+- [ ] Optional `pre-commit run --all-files` passed when pre-commit is installed.
 - [ ] `npm run check:all` passed (required final gate).

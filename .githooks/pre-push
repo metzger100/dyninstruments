@@ -1,5 +1,0 @@
-#!/bin/sh
-set -eu
-
-echo "[dyninstruments] pre-push quality gate: npm run check:all"
-npm run check:all

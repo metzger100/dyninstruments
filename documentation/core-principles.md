@@ -12,7 +12,7 @@ These rules are mandatory for all contributors and AI agents in this repository.
 4. Rule: Dependency direction is one-way by layer: `widgets -> shared`; `cluster -> cluster/widgets/shared`; `shared -> shared`; `config` is pure data; `runtime` must not depend on `widgets/cluster/shared`.
 5. Rule: Hard 400-line limit on all JS files (source and test) and Markdown documentation files. Split before crossing the limit. This rule is absolute and overrides exec-plan assumptions. Exempt: `.css`, `.json`, `exec-plans/`, `.agents/skills/`, `tools/`, package configs. → [conventions/coding-standards.md](conventions/coding-standards.md#file-size-limits)
 6. Rule: Documentation must be updated in the same task as code/architecture changes.
-7. Rule: Every JS component file must include `Module`, `Documentation`, and `Depends` headers. → [conventions/coding-standards.md](conventions/coding-standards.md#mandatory-file-headers)
+7. Rule: Public or complex runtime contracts need focused documentation or JSDoc; `Documentation:` header targets are validated when present. → [conventions/coding-standards.md](conventions/coding-standards.md#focused-file-doc-comments)
 8. Rule: Reusable logic goes in `shared/widget-kits/`, not duplicated widget-local helpers. → [conventions/coding-standards.md](conventions/coding-standards.md#shared-utilities)
 9. Rule: Widgets and cluster code must not access `window.avnav` directly; use the component-context boundaries (`componentContext.format.applyFormatter()` and `componentContext.dom.requirePluginRoot()`). → [conventions/coding-standards.md](conventions/coding-standards.md#key-details)
 10. Rule: Validate/default props at translate boundaries; interior code should trust validated inputs.

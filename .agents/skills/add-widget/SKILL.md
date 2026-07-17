@@ -51,13 +51,13 @@ Editable condition: { kind: "{kindName}" }
 
 ### Step 3: Generate the Widget Module
 
-Create the widget file with the mandatory UMD wrapper and header:
+Create the widget file with the mandatory UMD wrapper and leading `@file`
+overview. Add a `Documentation:` target for its public or complex contract:
 
 ```javascript
 /**
- * Module: {ComponentId} - {One-line description}
+ * @file {ComponentId} - {One-line description}
  * Documentation: documentation/widgets/{doc-name}.md
- * Depends: {SharedEngine}, {OtherDeps}
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -241,7 +241,8 @@ Run the completion gate:
 npm run check:all
 ```
 
-This runs `check:core` (headers, naming, dependencies, UMD, file size, patterns, docs) + `test:coverage:check` + `perf:check`.
+This runs `check:core` (standard tools, typecheck, package contracts,
+component contracts, file size, patterns, docs) + `test:coverage:check`.
 
 ### Output Checklist
 
@@ -249,7 +250,7 @@ Print this checklist and verify every item:
 
 - [ ] Widget module created at `widgets/{type}/{ComponentId}/{ComponentId}.js`
 - [ ] UMD wrapper with correct `globalKey` on `window.DyniComponents`
-- [ ] Mandatory header: `Module`, `Documentation`, `Depends`
+- [ ] Focused doc comment added when the file owns a public or complex contract
 - [ ] Component registered in the appropriate `config/components/registry-widgets-*.js` fragment
 - [ ] Added to the relevant `config/cluster-routes.js` tuple(s) if cluster-routed
 - [ ] Route metadata tuple added in `config/cluster-routes/<cluster>.js`

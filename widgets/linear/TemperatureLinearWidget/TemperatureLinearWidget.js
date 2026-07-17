@@ -1,7 +1,6 @@
 /**
- * Module: TemperatureLinearWidget - Linear temperature gauge with optional high-end sectors
+ * @file TemperatureLinearWidget - Linear temperature gauge with optional high-end sectors
  * Documentation: documentation/linear/linear-gauge-style-guide.md
- * Depends: LinearGaugeEngine, ValueMath, PlaceholderNormalize
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,10 +11,14 @@
 }(this, function () {
   "use strict";
 
+  /** @typedef {DyniLinearGaugeProps & { tempLinearWarningFrom?: number, tempLinearAlarmFrom?: number }} DyniTemperatureLinearProps */
+
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
     const engine = componentContext.components.require("LinearGaugeEngine");
     const valueMath = componentContext.components.require("ValueMath");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
+    /** @param {unknown} raw @param {DyniLinearGaugeProps} props @returns {{ num: number, text: unknown }} */
     function formatDisplay(raw, props) {
       const formatted = valueMath.formatGaugeDisplay(
         raw,
@@ -27,24 +30,27 @@
       );
       return Number.isFinite(formatted.num)
         ? { num: formatted.num, text: formatted.num.toFixed(1) }
-        : formatted;
+        : { num: formatted.num, text: placeholderNormalize.normalize(formatted.text, undefined) };
     }
 
+    /** @param {DyniTemperatureLinearProps} props @param {number} minV @param {number} maxV @param {DyniLinearRange} axis @param {DyniLinearGaugeTheme} theme @returns {DyniLinearColoredRange[]} */
     function buildSectors(props, minV, maxV, axis, theme) {
       const p = props || {};
       const warningFrom = p.tempLinearWarningFrom;
       const alarmFrom = p.tempLinearAlarmFrom;
+      const warningFinite = typeof warningFrom === "number" && Number.isFinite(warningFrom);
+      const alarmFinite = typeof alarmFrom === "number" && Number.isFinite(alarmFrom);
       const sectors = [];
 
-      if (Number.isFinite(warningFrom)) {
-        const warningCeiling = Number.isFinite(alarmFrom) && alarmFrom > warningFrom ? alarmFrom : maxV;
+      if (warningFinite) {
+        const warningCeiling = alarmFinite && alarmFrom > warningFrom ? alarmFrom : maxV;
         sectors.push({
           from: valueMath.clamp(warningFrom, axis.min, axis.max),
           to: valueMath.clamp(warningCeiling, axis.min, axis.max),
           color: theme.colors.warning
         });
       }
-      if (!Number.isFinite(alarmFrom)) {
+      if (!alarmFinite) {
         return sectors.filter(function (entry) {
           return entry.to > entry.from;
         });

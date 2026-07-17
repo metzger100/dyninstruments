@@ -1,7 +1,6 @@
 /**
- * Module: RadialFrameRenderer - Shared tick, label and frame drawing helpers for radial dials
+ * @file RadialFrameRenderer - Shared tick, label and frame drawing helpers for radial dials
  * Documentation: documentation/radial/gauge-shared-api.md
- * Depends: RadialAngleMath, RadialTickMath, RadialCanvasPrimitives
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -13,6 +12,11 @@
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniRadialFrameRendererApi}
+   */
   function create(def, componentContext) {
     const angle = componentContext.components.require("RadialAngleMath");
     const tick = componentContext.components.require("RadialTickMath");
@@ -24,10 +28,24 @@
     const buildTickAngles = tick.buildTickAngles;
     const withCtx = primitive.withCtx;
     const drawRing = primitive.drawRing;
+    /**
+     * @param {DyniRadialDrawOptions} opts
+     * @param {string} key
+     * @param {unknown} defaultValue
+     * @returns {number}
+     */
     function readOptionNumber(opts, key, defaultValue) {
       return Number(hasOwn.call(opts, key) ? opts[key] : defaultValue);
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} cx
+     * @param {number} cy
+     * @param {number} rOuter
+     * @param {DyniRadialDrawOptions} [opts]
+     * @returns {void}
+     */
     function drawTicks(ctx, cx, cy, rOuter, opts) {
       opts = opts || {};
       const ticksToDraw = buildTickAngles({
@@ -41,6 +59,15 @@
       drawTicksFromAngles(ctx, cx, cy, rOuter, ticksToDraw, opts);
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} cx
+     * @param {number} cy
+     * @param {number} rOuter
+     * @param {DyniRadialTickAngles} [angles]
+     * @param {DyniRadialDrawOptions} [opts]
+     * @returns {void}
+     */
     function drawTicksFromAngles(ctx, cx, cy, rOuter, angles, opts) {
       opts = opts || {};
       angles = angles || { majors: [], minors: [] };
@@ -54,7 +81,7 @@
       const minor = Object.assign({ len: 5, width: 1 }, minorSource || {});
 
       withCtx(ctx, function () {
-        ctx.lineCap = hasOwn.call(opts, "lineCap") ? opts.lineCap : "butt";
+        ctx.lineCap = /** @type {CanvasLineCap} */ (hasOwn.call(opts, "lineCap") ? opts.lineCap : "butt");
 
         if (angles.minors && angles.minors.length) {
           ctx.beginPath();
@@ -93,6 +120,14 @@
       });
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} cx
+     * @param {number} cy
+     * @param {number} rOuter
+     * @param {DyniRadialDrawOptions} [opts]
+     * @returns {void}
+     */
     function drawLabels(ctx, cx, cy, rOuter, opts) {
       opts = opts || {};
       const rot = readOptionNumber(opts, "rotationDeg", 0);
@@ -131,17 +166,19 @@
         if (includeEnd) angles.push(e);
       }
 
-      const labelsMap = hasOwn.call(opts, "labelsMap") ? opts.labelsMap : (opts.labels || null);
-      const labelFormatter = (typeof opts.labelFormatter === "function")
+      const labelsMap = /** @type {Record<string, unknown> | null} */ (
+        hasOwn.call(opts, "labelsMap") ? opts.labelsMap : (opts.labels || null)
+      );
+      const labelFormatter = /** @type {(deg: unknown) => string} */ ((typeof opts.labelFormatter === "function")
         ? opts.labelFormatter
         : function (deg) {
           return String(deg);
-        };
-      const labelFilter = (typeof opts.labelFilter === "function")
+        });
+      const labelFilter = /** @type {(deg: unknown) => unknown} */ ((typeof opts.labelFilter === "function")
         ? opts.labelFilter
         : function () {
           return true;
-        };
+        });
       const textRotation = hasOwn.call(opts, "textRotation") ? opts.textRotation : "upright";
 
       withCtx(ctx, function () {
@@ -184,24 +221,32 @@
       });
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {number} cx
+     * @param {number} cy
+     * @param {number} rOuter
+     * @param {DyniRadialDrawOptions} [opts]
+     * @returns {void}
+     */
     function drawDialFrame(ctx, cx, cy, rOuter, opts) {
       opts = opts || {};
       const rot = readOptionNumber(opts, "rotationDeg", 0);
 
       if (opts.ring !== false) {
         const ringSource = hasOwn.call(opts, "ring") ? opts.ring : null;
-        const ringOpts = Object.assign({}, ringSource || {});
+        const ringOpts = /** @type {DyniRadialDrawOptions} */ (Object.assign({}, ringSource || {}));
         drawRing(ctx, cx, cy, rOuter, ringOpts);
       }
 
       if (opts.ticks) {
-        const tOpts = Object.assign({}, opts.ticks);
+        const tOpts = /** @type {DyniRadialDrawOptions} */ (Object.assign({}, opts.ticks));
         tOpts.rotationDeg = (tOpts.rotationDeg != null) ? tOpts.rotationDeg : rot;
         drawTicks(ctx, cx, cy, rOuter, tOpts);
       }
 
       if (opts.labels) {
-        const lOpts = Object.assign({}, opts.labels);
+        const lOpts = /** @type {DyniRadialDrawOptions} */ (Object.assign({}, opts.labels));
         lOpts.rotationDeg = (lOpts.rotationDeg != null) ? lOpts.rotationDeg : rot;
         drawLabels(ctx, cx, cy, rOuter, lOpts);
       }

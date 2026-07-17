@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Shared Engines Registry - Shared rendering engine and layout component definitions
+ * @file DyniPlugin Shared Engines Registry - Shared rendering engine and layout component definitions
  * Documentation: documentation/architecture/component-system.md
- * Depends: window.DyniPlugin.baseUrl, window.DyniPlugin.config.shared
  */
 (function (root) {
   "use strict";

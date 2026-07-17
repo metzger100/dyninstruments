@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Cluster Routes Finalize - Derives routeId and byRouteId index
+ * @file DyniPlugin Cluster Routes Finalize - Derives routeId and byRouteId index
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: config/cluster-routes.js
  */
 (function (root) {
   "use strict";

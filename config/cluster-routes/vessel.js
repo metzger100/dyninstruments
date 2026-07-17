@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Cluster Routes Vessel - Route metadata for vessel kinds
+ * @file DyniPlugin Cluster Routes Vessel - Route metadata for vessel kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: config/cluster-routes.js
  */
 (function (root) {
   "use strict";

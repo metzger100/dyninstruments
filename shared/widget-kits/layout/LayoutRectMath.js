@@ -1,7 +1,6 @@
 /**
- * Module: LayoutRectMath - Shared rectangle rounding helper for responsive layout owners
+ * @file LayoutRectMath - Shared rectangle rounding helper for responsive layout owners
  * Documentation: documentation/shared/responsive-scale-profile.md
- * Depends: none
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,7 +11,9 @@
 }(this, function () {
   "use strict";
 
+  /** @returns {DyniLayoutRectMathApi} */
   function create() {
+    /** @type {DyniMakeRect} */
     function makeRect(x, y, w, h) {
       return {
         x: Math.round(x),
@@ -22,6 +23,13 @@
       };
     }
 
+    /**
+     * @param {DyniRect | undefined} rect
+     * @param {number} gap
+     * @param {number} count
+     * @param {DyniMakeRect} [makeRectFn]
+     * @returns {DyniRect[]}
+     */
     function splitRow(rect, gap, count, makeRectFn) {
       const source = rect && typeof rect === "object" ? rect : makeRect(0, 0, 0, 0);
       const buildRect = typeof makeRectFn === "function" ? makeRectFn : makeRect;
@@ -45,6 +53,13 @@
       return out;
     }
 
+    /**
+     * @param {DyniRect | undefined} rect
+     * @param {number} gap
+     * @param {number} count
+     * @param {DyniMakeRect} [makeRectFn]
+     * @returns {DyniRect[]}
+     */
     function splitStack(rect, gap, count, makeRectFn) {
       const source = rect && typeof rect === "object" ? rect : makeRect(0, 0, 0, 0);
       const buildRect = typeof makeRectFn === "function" ? makeRectFn : makeRect;

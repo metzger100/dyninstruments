@@ -1,7 +1,6 @@
 /**
- * Module: CanvasTextLayout - Generic canvas text drawing helpers
+ * @file CanvasTextLayout - Generic canvas text drawing helpers
  * Documentation: documentation/conventions/shared-helpers.md
- * Depends: CanvasTextFitting
  */
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
@@ -12,6 +11,7 @@
 }(this, function () {
   "use strict";
 
+  /** @param {number} x @param {number} w @param {unknown} align @returns {number} */
   function lineAnchor(x, w, align) {
     if (align === "right") {
       return x + w;
@@ -22,14 +22,22 @@
     return x;
   }
 
+  /** @param {unknown} family @param {unknown} options @returns {unknown} */
   function resolveFamily(family, options) {
-    const opts = options && typeof options === "object" ? options : null;
+    const opts = options && typeof options === "object"
+      ? /** @type {{ useMono?: unknown, monoFamily?: unknown }} */ (options)
+      : null;
     if (!opts || opts.useMono !== true) {
       return family;
     }
     return opts.monoFamily || family;
   }
 
+  /**
+   * @param {unknown} def
+   * @param {DyniComponentContext} componentContext
+   * @returns {DyniCanvasTextLayoutApi}
+   */
   function create(def, componentContext) {
     const fitting = componentContext.components.require("CanvasTextFitting");
     const MIN_FONT_PX = fitting.MIN_FONT_PX;
@@ -42,14 +50,24 @@
     const measureValueUnitFit = fitting.measureValueUnitFit;
     const fitInlineCapValUnit = fitting.fitInlineCapValUnit;
 
+    /** @param {unknown} textOptions @param {string} key @returns {number} */
     function resolveTextOptionOpacity(textOptions, key) {
       if (!textOptions || typeof textOptions !== "object") {
         return 1;
       }
-      const raw = textOptions[key];
+      const raw = /** @type {Record<string, unknown>} */ (textOptions)[key];
       return typeof raw === "number" && raw >= 0 && raw <= 1 ? raw : 1;
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {unknown} text
+     * @param {number} anchorX
+     * @param {number} y
+     * @param {unknown} maxW
+     * @param {unknown} align
+     * @returns {void}
+     */
     function drawClampedLine(ctx, text, anchorX, y, maxW, align) {
       const content = String(text || "");
       const widthLimit = Math.max(0, Number(maxW) || 0);
@@ -57,7 +75,7 @@
         return;
       }
 
-      const mode = align || "left";
+      const mode = /** @type {CanvasTextAlign} */ (align || "left");
       ctx.textAlign = mode;
       const measured = measureTextWidth(ctx, content);
       if (measured <= widthLimit + WIDTH_EPSILON) {
@@ -73,6 +91,20 @@
       ctx.restore();
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {unknown} family
+     * @param {number} x
+     * @param {number} y
+     * @param {number} w
+     * @param {number} h
+     * @param {unknown} caption
+     * @param {unknown} capMaxPx
+     * @param {unknown} align
+     * @param {unknown} labelWeight
+     * @param {unknown} textOptions
+     * @returns {void}
+     */
     function drawCaptionMax(ctx, family, x, y, w, h, caption, capMaxPx, align, labelWeight, textOptions) {
       if (w <= 0 || h <= 0 || !caption) {
         return;
@@ -99,12 +131,29 @@
       }
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {unknown} family
+     * @param {number} x
+     * @param {number} y
+     * @param {number} w
+     * @param {number} h
+     * @param {unknown} value
+     * @param {unknown} unit
+     * @param {unknown} fit
+     * @param {unknown} align
+     * @param {unknown} valueWeight
+     * @param {unknown} labelWeight
+     * @param {unknown} textOptions
+     * @returns {void}
+     */
     function drawValueUnitWithFit(ctx, family, x, y, w, h, value, unit, fit, align, valueWeight, labelWeight, textOptions) {
       if (w <= 0 || h <= 0 || !value) {
         return;
       }
 
-      const data = fit || { vPx: MIN_FONT_PX, uPx: MIN_FONT_PX, gap: 0 };
+      const data = /** @type {{ vPx?: unknown, uPx?: unknown, gap?: unknown }} */ (fit)
+        || { vPx: MIN_FONT_PX, uPx: MIN_FONT_PX, gap: 0 };
       const vPx = Math.max(MIN_FONT_PX, Number(data.vPx) || 0);
       const uPx = Math.max(MIN_FONT_PX, Number(data.uPx) || 0);
       const gap = Math.max(0, Math.floor(Number(data.gap) || 0));
@@ -146,12 +195,29 @@
       ctx.restore();
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {unknown} family
+     * @param {number} x
+     * @param {number} y
+     * @param {number} w
+     * @param {number} h
+     * @param {unknown} caption
+     * @param {unknown} value
+     * @param {unknown} unit
+     * @param {unknown} fit
+     * @param {unknown} valueWeight
+     * @param {unknown} labelWeight
+     * @param {unknown} textOptions
+     * @returns {void}
+     */
     function drawInlineCapValUnit(ctx, family, x, y, w, h, caption, value, unit, fit, valueWeight, labelWeight, textOptions) {
       if (w <= 0 || h <= 0 || !value) {
         return;
       }
 
-      const data = fit || fitInlineCapValUnit(ctx, family, caption, value, unit, w, h, 0.8, valueWeight, labelWeight);
+      const data = /** @type {DyniInlineCapValUnitFitResult} */ (fit)
+        || fitInlineCapValUnit(ctx, family, caption, value, unit, w, h, 0.8, valueWeight, labelWeight);
       const widthLimit = Math.max(0, Number(w) || 0);
       const rowScale = data.total > widthLimit + WIDTH_EPSILON
         ? Math.max(0.01, widthLimit / Math.max(WIDTH_EPSILON, data.total))
@@ -195,20 +261,44 @@
       ctx.restore();
     }
 
+    /**
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {unknown} family
+     * @param {number} x
+     * @param {number} y
+     * @param {number} w
+     * @param {number} h
+     * @param {unknown} caption
+     * @param {unknown} value
+     * @param {unknown} unit
+     * @param {unknown} secScale
+     * @param {unknown} align
+     * @param {unknown} sizes
+     * @param {unknown} valueWeight
+     * @param {unknown} labelWeight
+     * @param {unknown} textOptions
+     * @returns {void}
+     */
     function drawThreeRowsBlock(ctx, family, x, y, w, h, caption, value, unit, secScale, align, sizes, valueWeight, labelWeight, textOptions) {
       const mode = align || "center";
+      /** @type {number} */
       let cPx;
+      /** @type {number} */
       let vPx;
+      /** @type {number} */
       let uPx;
+      /** @type {number} */
       let hCap;
+      /** @type {number} */
       let hVal;
 
       if (sizes) {
-        cPx = sizes.cPx;
-        vPx = sizes.vPx;
-        uPx = sizes.uPx;
-        hCap = sizes.hCap;
-        hVal = sizes.hVal;
+        const s = /** @type {{ cPx: number, vPx: number, uPx: number, hCap: number, hVal: number }} */ (sizes);
+        cPx = s.cPx;
+        vPx = s.vPx;
+        uPx = s.uPx;
+        hCap = s.hCap;
+        hVal = s.hVal;
       } else {
         const ratio = Number(secScale);
         const scale = Number.isFinite(ratio) ? ratio : 0.8;

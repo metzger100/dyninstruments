@@ -1,7 +1,6 @@
 /**
- * Module: ActiveRouteTextHtmlWidget - Interactive HTML renderer for nav active-route kind
+ * @file ActiveRouteTextHtmlWidget - Interactive HTML renderer for nav active-route kind
  * Documentation: documentation/widgets/active-route.md
- * Depends: ActiveRouteHtmlFit, HtmlWidgetUtils, HtmlWidgetLifecycle, PreparedPayloadModelCache, PlaceholderNormalize, StableDigits, componentContext.theme.tokens, StateScreenLabels, StateScreenPrecedence, StateScreenInteraction, StateScreenMarkup
  */
 
 (function (root, factory) {
@@ -18,12 +17,13 @@
     metrics: Object.create(null)
   };
 
+  /** @param {unknown} props @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {boolean} */
   function openActiveRoute(props, htmlUtils) {
     const p = props && typeof props === "object" ? props : null;
     if (htmlUtils.isEditingMode(p)) {
       return false;
     }
-    const policy = htmlUtils.resolveSurfacePolicy(p);
+    const policy = /** @type {{ actions?: { routeEditor?: { openActiveRoute?: () => boolean } } } | null} */ (htmlUtils.resolveSurfacePolicy(p));
     if (!policy || !policy.actions || !policy.actions.routeEditor || typeof policy.actions.routeEditor.openActiveRoute !== "function") {
       return false;
     }
@@ -33,6 +33,7 @@
     return policy.actions.routeEditor.openActiveRoute() !== false;
   }
 
+  /** @param {DyniActiveRouteDisplayProps} props @param {DyniHtmlWidgetUtilsApi} htmlUtils @param {DyniStateScreenPrecedenceApi} stateScreenPrecedence @returns {string} */
   function resolveStateKind(props, htmlUtils, stateScreenPrecedence) {
     const p = props || {};
     const display = p.display && typeof p.display === "object" ? p.display : {};
@@ -44,6 +45,7 @@
     ]);
   }
 
+  /** @param {unknown} props @param {DyniHtmlShellRect | null} shellRect @param {DyniActiveRouteContext} componentContext @param {DyniHtmlWidgetUtilsApi} htmlUtils @param {DyniActiveRouteHtmlFitApi} htmlFit @param {DyniPlaceholderNormalizeApi} placeholderNormalize @param {DyniStableDigitsApi} stableDigits @param {DyniStateScreenLabelsApi} stateScreenLabels @param {DyniStateScreenPrecedenceApi} stateScreenPrecedence @param {DyniStateScreenInteractionApi} stateScreenInteraction @returns {DyniActiveRouteRenderModel} */
   function buildRenderModel(
     props,
     shellRect,
@@ -75,12 +77,12 @@
     });
 
     if (kind !== stateScreenLabels.KINDS.DATA) {
-      return {
+      return /** @type {DyniActiveRouteRenderModel} */ (/** @type {unknown} */ ({
         kind: kind,
         stateLabel: stateScreenLabels.LABELS[kind] || "",
         mode: mode,
         interactionState: interactionState
-      };
+      }));
     }
 
     const routeNameText = htmlUtils.trimText(display.routeName) || defaultText;
@@ -141,6 +143,7 @@
     };
   }
 
+  /** @param {string} metricId @param {unknown} caption @param {unknown} value @param {unknown} unit @param {DyniActiveRouteMetricStyle | undefined} style @param {DyniHtmlWidgetUtilsApi} htmlUtils @param {unknown} tabular @returns {string} */
   function renderMetricTile(metricId, caption, value, unit, style, htmlUtils, tabular) {
     const captionStyle = style && typeof style.captionStyle === "string" ? style.captionStyle : "";
     const valueStyle = style && typeof style.valueStyle === "string" ? style.valueStyle : "";
@@ -160,6 +163,7 @@
       + "</div>";
   }
 
+  /** @param {DyniActiveRouteRenderModel} model @param {DyniActiveRouteMarkupFit} fitStyles @param {DyniHtmlShellRect | null} shellRect @param {DyniActiveRouteThemeTokens} theme @param {DyniHtmlWidgetUtilsApi} htmlUtils @param {DyniStateScreenLabelsApi} stateScreenLabels @param {DyniStateScreenMarkupApi} stateScreenMarkup @returns {string} */
   function renderMarkup(model, fitStyles, shellRect, theme, htmlUtils, stateScreenLabels, stateScreenMarkup) {
     const routeNameStyle = fitStyles && fitStyles.routeNameStyle ? fitStyles.routeNameStyle : "";
     const metricStyles = fitStyles && fitStyles.metrics ? fitStyles.metrics : Object.create(null);
@@ -219,6 +223,7 @@
       + "</div>";
   }
 
+  /** @param {unknown} def @param {DyniActiveRouteContext} componentContext */
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("ActiveRouteHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
@@ -232,19 +237,26 @@
     const stateScreenMarkup = componentContext.components.require("StateScreenMarkup");
     const themeResolver = componentContext.theme.tokens;
 
+    /** @param {Record<string, unknown>} rendererContext */
     function translateFunction(rendererContext) {
       const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
       const hostContext = context.hostContext || {};
 
+      /** @type {HTMLElement | null} */
       let mountEl = null;
+      /** @type {HTMLElement | null} */
       let rootEl = null;
+      /** @type {Element | null} */
       let wrapperEl = null;
+      /** @type {((ev: Event) => void) | null} */
       let clickHandler = null;
       let lastFit = EMPTY_FIT;
+      /** @type {DyniActiveRouteDisplayProps | null} */
       let lastProps = null;
+      /** @param {unknown} props @param {DyniHtmlShellRect | null} shellRect */
       const translate = function (props, shellRect) {
         return buildRenderModel(
-        props,
+        /** @type {DyniActiveRouteDisplayProps} */ (props),
         shellRect,
         componentContext,
         htmlUtils,
@@ -259,6 +271,7 @@
 
       const preparedPayload = preparedPayloadModelCache.createPreparedPayloadCache(translate);
 
+      /** @param {DyniActiveRouteRenderModel} model */
       function bindDispatchListener(model) {
         if (wrapperEl && clickHandler) {
           wrapperEl.removeEventListener("click", clickHandler);
@@ -277,11 +290,12 @@
         wrapperEl.addEventListener("click", clickHandler);
       }
 
+      /** @param {DyniHtmlRendererPayload} payload */
       function patchDom(payload) {
         const prepared = preparedPayload.getPreparedPayload(payload);
         const shellRect = payload.shellRect || null;
         const theme = themeResolver.resolveForRoot(payload.rootEl);
-        const model = prepared.model;
+        const model = /** @type {DyniActiveRouteRenderModel} */ (prepared.model);
         const fit = shellRect
           ? (htmlFit.compute({
             model: model,
@@ -294,7 +308,7 @@
         htmlUtils.applyMirroredContext(rootEl, payload.props);
         wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(model, fit, shellRect, theme, htmlUtils, stateScreenLabels, stateScreenMarkup));
         lastFit = fit;
-        lastProps = prepared.props;
+        lastProps = /** @type {DyniActiveRouteDisplayProps} */ (prepared.props);
 
         bindDispatchListener(model);
       }
@@ -307,6 +321,7 @@
         patchDom: patchDom
       });
 
+      /** @param {DyniHtmlRendererPayload} payload */
       function update(payload) {
         patchDom(payload);
       }
@@ -336,9 +351,10 @@
         detach();
       }
 
+      /** @param {DyniHtmlRendererPayload} payload @returns {string} */
       function layoutSignature(payload) {
         const prepared = preparedPayload.getPreparedPayload(payload);
-        const model = prepared.model;
+        const model = /** @type {DyniActiveRouteRenderModel} */ (prepared.model);
         const shellRect = payload && payload.shellRect ? payload.shellRect : null;
         return [
           model.kind,

@@ -1,12 +1,11 @@
 /**
- * Module: DyniPlugin Nav Cluster - Canonical navigation widget config (ETA, distances, positions, route points)
+ * @file DyniPlugin Nav Cluster - Canonical navigation widget config (ETA, distances, positions, route points)
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: config/shared/editable-param-utils.js, config/shared/kind-defaults.js, config/shared/common-editables.js, config/shared/unit-editable-utils.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  const ns = /** @type {DyniNavClusterRoot} */ (/** @type {unknown} */ (root)).DyniPlugin;
   const config = ns.config;
   const shared = config.shared;
 
@@ -29,23 +28,23 @@
     { kind: "positionBoat" },
     { kind: "positionWp" }
   ];
-  const XTE_DISPLAY_SCALE_FIELDS = {
+  const XTE_DISPLAY_SCALE_FIELDS = /** @type {Record<string, DyniXteScaleFieldSpec>} */ ({
     nm: { default: 1, min: 0, max: 20, step: 0.1 },
     m: { default: 1852, min: 0, max: 20000, step: 10 },
     km: { default: 1.852, min: 0, max: 20, step: 0.01 },
     ft: { default: 6076, min: 0, max: 40000, step: 10 },
     yd: { default: 2025, min: 0, max: 40000, step: 1 }
-  };
-  const XTE_LINEAR_SCALE_FIELDS = {
+  });
+  const XTE_LINEAR_SCALE_FIELDS = /** @type {Record<string, DyniXteScaleFieldSpec>} */ ({
     nm: { default: 1, min: 0, max: 20, step: 0.1 },
     m: { default: 1852, min: 0, max: 20000, step: 10 },
     km: { default: 1.852, min: 0, max: 20, step: 0.01 },
     ft: { default: 6076, min: 0, max: 40000, step: 10 },
     yd: { default: 2025, min: 0, max: 40000, step: 1 }
-  };
+  });
 
   function makeXteDisplayScaleParams() {
-    const out = {};
+    const out = /** @type {DyniEditableParameters} */ ({});
     Object.keys(XTE_DISPLAY_SCALE_FIELDS).forEach(function (token) {
       const spec = XTE_DISPLAY_SCALE_FIELDS[token];
       out["xteDisplayScale_" + token] = {
@@ -65,7 +64,7 @@
   }
 
   function makeXteLinearScaleParams() {
-    const out = {};
+    const out = /** @type {DyniEditableParameters} */ ({});
     Object.keys(XTE_LINEAR_SCALE_FIELDS).forEach(function (token) {
       const spec = XTE_LINEAR_SCALE_FIELDS[token];
       out["xteLinearScale_" + token] = {
@@ -367,22 +366,23 @@
         ...makeUnitAwareTextParams(NAV_UNIT_AWARE_KIND, navBindings),
         ...makePerKindTextParams(NAV_TEXT_KIND),
         ratioThresholdNormal: {
-          ...commonThreeElementsEditables.ratioThresholdNormal,
+          .../** @type {DyniEditableParameterSpec} */ (commonThreeElementsEditables.ratioThresholdNormal),
           internal: true,
           condition: NAV_TEXT_KIND_CONDITION
         },
         ratioThresholdFlat: {
-          ...commonThreeElementsEditables.ratioThresholdFlat,
+          .../** @type {DyniEditableParameterSpec} */ (commonThreeElementsEditables.ratioThresholdFlat),
           internal: true,
           condition: NAV_TEXT_KIND_CONDITION
         },
         captionUnitScale: {
-          ...commonThreeElementsEditables.captionUnitScale,
+          .../** @type {DyniEditableParameterSpec} */ (commonThreeElementsEditables.captionUnitScale),
           condition: NAV_TEXT_KIND_CONDITION
         }
       },
+      /** @this {DyniClusterConfigValues} @param {DyniClusterConfigValues | null | undefined} values @returns {DyniClusterConfigValues} */
       updateFunction: function (values) {
-        const out = values ? { ...values } : {};
+        const out = /** @type {DyniClusterConfigValues} */ (values ? { ...values } : {});
         const kind = (values && values.kind) || "wpEta";
         const needsWp = (kind === "dst" || kind === "positionWp" || kind === "xteDisplay" || kind === "xteDisplayLinear");
         if (needsWp && values && values.wpServer === false) out.disconnect = true;

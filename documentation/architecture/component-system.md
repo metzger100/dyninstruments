@@ -39,8 +39,13 @@ Assembly fail-closes when:
 
 Recent shared-foundation/runtime registrations:
 
+- `HtmlDomPatchUtils` is registered in `registry-shared-foundation-state.js` as the DOM patching helper consumed by `HtmlWidgetUtils`
 - `PreparedPayloadModelCache` is registered in `registry-shared-foundation-state.js`
 - `ActiveRouteTextHtmlWidget` and `MapZoomTextHtmlWidget` include `PreparedPayloadModelCache` in `deps`
+- `MapZoomTextHtmlWidget` depends on `MapZoomMarkup`, which owns map-zoom state
+  and data markup assembly; widget lifecycle and interaction remain in the
+  renderer
+- `AisTargetLayoutGeometry` depends on `AisTargetLayoutGeometryStyles` from `registry-shared-foundation-layout.js`; rectangle construction and CSS-grid serialization remain separate UMD components
 - component entries may include optional `assets` arrays with relative paths and explicit asset types
 
 ## API Shape Contract

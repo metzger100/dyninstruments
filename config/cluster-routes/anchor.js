@@ -1,7 +1,6 @@
 /**
- * Module: DyniPlugin Cluster Routes Anchor - Route metadata for anchor kinds
+ * @file DyniPlugin Cluster Routes Anchor - Route metadata for anchor kinds
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: config/cluster-routes.js
  */
 (function (root) {
   "use strict";

@@ -1,7 +1,6 @@
 /**
- * Module: AisTargetTextHtmlWidget - Native HTML AIS target summary renderer shell
+ * @file AisTargetTextHtmlWidget - Native HTML AIS target summary renderer shell
  * Documentation: documentation/guides/add-new-html-kind.md
- * Depends: AisTargetHtmlFit, HtmlWidgetUtils, HtmlWidgetLifecycle, AisTargetRenderModel, AisTargetMarkup, ValueMath, componentContext.theme.tokens
  */
 
 (function (root, factory) {
@@ -12,12 +11,16 @@
   }
 }(this, function () {
   "use strict";
+  /** @typedef {DyniComponentContext & { theme: { tokens: DyniAisTargetThemeResolver } }} DyniAisTargetWidgetContext */
+  /** @typedef {{ props: DyniWidgetValues, shellRect?: DyniHtmlShellRect | null, rootEl?: HTMLElement | null, layoutChanged?: boolean }} DyniAisTargetWidgetPayload */
 
   const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.2;
   const DEFAULT_RATIO_THRESHOLD_FLAT = 3.8;
 
+  /** @type {DyniValueMathApi["toObject"]} */
   let toObject;
 
+  /** @param {unknown} def @param {DyniAisTargetWidgetContext} componentContext */
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("AisTargetHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
@@ -27,8 +30,12 @@
     const themeResolver = componentContext.theme.tokens;
     toObject = componentContext.components.require("ValueMath").toObject;
 
+    /** @param {unknown} props @param {unknown} shellRect @returns {DyniAisTargetRenderModel} */
     function buildModel(props, shellRect) {
-      const p = props || {};
+      const p = toObject(props);
+      const rect = shellRect && typeof shellRect === "object"
+        ? /** @type {DyniHtmlShellRect} */ (shellRect)
+        : null;
       const layout = toObject(p.layout);
       const surfacePolicy = htmlUtils.resolveSurfacePolicy(p);
       const mode = htmlUtils.resolveRatioModeForRect({
@@ -37,27 +44,35 @@
         defaultRatioThresholdNormal: DEFAULT_RATIO_THRESHOLD_NORMAL,
         defaultRatioThresholdFlat: DEFAULT_RATIO_THRESHOLD_FLAT,
         defaultMode: "normal",
-        shellRect: shellRect
+        shellRect: rect
       });
 
       return renderModel.buildModel({
         props: p,
-        shellRect: shellRect,
+        shellRect: rect,
         mode: mode,
         isVerticalCommitted: !!(surfacePolicy && surfacePolicy.containerOrientation === "vertical")
       });
     }
 
+    /** @param {unknown} rendererContext */
     function createCommittedRenderer(rendererContext) {
-      const context = rendererContext && typeof rendererContext === "object" ? rendererContext : {};
+      const context = /** @type {Record<string, unknown>} */ (rendererContext && typeof rendererContext === "object" ? rendererContext : {});
       const hostContext = context.hostContext || {};
 
+      /** @type {HTMLElement | null} */
       let mountEl = null;
+      /** @type {HTMLElement | null} */
       let rootEl = null;
+      /** @type {Element | null} */
       let wrapperEl = null;
+      /** @type {((ev: Event) => void) | null} */
       let clickHandler = null;
+      /** @type {DyniWidgetValues | null} */
       let lastProps = null;
+      /** @type {DyniAisTargetRenderModel | null} */
       let lastModel = null;
+      /** @type {DyniAisTargetMarkupFit} */
       let lastFit = {
         nameStyle: "",
         frontStyle: "",
@@ -66,6 +81,7 @@
         accentStyle: ""
       };
 
+      /** @param {DyniAisTargetRenderModel} model */
       function bindDispatchListener(model) {
         if (wrapperEl && clickHandler) {
           wrapperEl.removeEventListener("click", clickHandler);
@@ -80,7 +96,10 @@
           ev.preventDefault();
           ev.stopPropagation();
           const policy = htmlUtils.resolveSurfacePolicy(lastProps);
-          const aisActions = policy && policy.actions ? policy.actions.ais : null;
+          const actions = policy && policy.actions
+            ? /** @type {{ ais?: { showInfo?: (mmsi: string) => void } }} */ (policy.actions)
+            : null;
+          const aisActions = actions ? actions.ais : null;
           if (!aisActions || typeof aisActions.showInfo !== "function") {
             return;
           }
@@ -92,16 +111,17 @@
         wrapperEl.addEventListener("click", clickHandler);
       }
 
+      /** @param {DyniAisTargetWidgetPayload} payload */
       function patchDom(payload) {
-      const shellRect = payload.shellRect || null;
-      const theme = themeResolver.resolveForRoot(payload.rootEl);
-      const model = buildModel(payload.props, shellRect);
+        const shellRect = payload.shellRect || null;
+        const theme = themeResolver.resolveForRoot(payload.rootEl);
+        const model = buildModel(payload.props, shellRect);
         const fit = payload.layoutChanged || !lastFit
           ? (htmlFit.compute({
             model: model,
             hostContext: hostContext,
             targetEl: payload.rootEl,
-            shellRect: shellRect
+            shellRect: shellRect || undefined
           }) || {
             nameStyle: "",
             frontStyle: "",
@@ -135,6 +155,7 @@
         patchDom: patchDom
       });
 
+      /** @param {DyniAisTargetWidgetPayload} payload */
       function update(payload) {
         patchDom(payload);
       }

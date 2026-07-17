@@ -1,15 +1,15 @@
 /**
- * Module: DyniPlugin Cluster Utils - Shared helpers for cluster config authoring
+ * @file DyniPlugin Cluster Utils - Shared helpers for cluster config authoring
  * Documentation: documentation/guides/add-new-cluster.md
- * Depends: none
  */
 (function (root) {
   "use strict";
 
   const ns = root.DyniPlugin;
-  const config = ns.config;
-  const shared = config.shared;
+  const config = /** @type {DyniPluginConfig} */ (ns.config);
+  const shared = /** @type {DyniPluginSharedConfig} */ (config.shared);
 
+  /** @param {unknown} kind @param {string} fallbackKind @returns {DyniEditableCondition} */
   function makeKindCondition(kind, fallbackKind) {
     if (Array.isArray(kind)) {
       return kind.map(function (k) {
@@ -22,10 +22,11 @@
     return { kind: fallbackKind };
   }
 
+  /** @param {DyniPerKindTextParameterMap} map @returns {DyniEditableParameters} */
   function makePerKindTextParams(map) {
-    const out = {};
+    const out = /** @type {DyniEditableParameters} */ ({});
     Object.keys(map).forEach(function (k) {
-      const d = map[k] || {};
+      const d = map[k];
       const condition = makeKindCondition(d.kind, k);
       out["caption_" + k] = {
         type: "STRING",
@@ -43,6 +44,7 @@
     return out;
   }
 
+  /** @param {unknown} name @param {unknown} value @returns {DyniEditableOption} */
   function opt(name, value) {
     return { name: name, value: value };
   }

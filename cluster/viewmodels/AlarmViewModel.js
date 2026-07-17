@@ -1,7 +1,6 @@
 /**
- * Module: AlarmViewModel - Shared domain normalization for vessel alarm kind
+ * @file AlarmViewModel - Shared domain normalization for vessel alarm kind
  * Documentation: documentation/architecture/cluster-widget-system.md
- * Depends: none
  */
 
 (function (root, factory) {
@@ -13,14 +12,22 @@
 }(this, function () {
   "use strict";
 
+  /** @typedef {{ name: string, category: unknown, repeat: unknown, index: number }} DyniActiveAlarm */
+  /** @typedef {{ name: string, category: unknown, repeat: unknown }} DyniVisibleAlarm */
+  /** @typedef {{ activeAlarms: DyniVisibleAlarm[], hasActiveAlarms: boolean, activeCount: number, alarmNames: string[], alarmText: string, state: "active" | "idle" }} DyniAlarmViewModelOutput */
+  /** @typedef {{ id: "AlarmViewModel", build: (props?: { alarmInfo?: unknown }) => DyniAlarmViewModelOutput }} DyniAlarmViewModelApi */
+
+  /** @param {unknown} value @returns {value is Record<string, unknown>} */
   function isPlainObject(value) {
     return Object.prototype.toString.call(value) === "[object Object]";
   }
 
+  /** @param {unknown} value @returns {boolean} */
   function hasDefinedCategory(value) {
     return value !== undefined && value !== null;
   }
 
+  /** @param {DyniVisibleAlarm} a @param {DyniVisibleAlarm} b @returns {number} */
   function compareActiveAlarms(a, b) {
     const aHasCategory = hasDefinedCategory(a.category);
     const bHasCategory = hasDefinedCategory(b.category);
@@ -39,6 +46,7 @@
     return 0;
   }
 
+  /** @param {string[]} names @returns {string} */
   function buildAlarmText(names) {
     const count = names.length;
     if (count === 0) {
@@ -53,7 +61,9 @@
     return names[0] + ", " + names[1] + " +" + (count - 2);
   }
 
+  /** @returns {DyniAlarmViewModelApi} */
   function create() {
+    /** @param {{ alarmInfo?: unknown } | undefined} props @returns {DyniAlarmViewModelOutput} */
     function build(props) {
       const p = props || {};
       const alarmInfo = isPlainObject(p.alarmInfo) ? p.alarmInfo : {};

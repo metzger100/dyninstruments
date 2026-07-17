@@ -1,53 +1,63 @@
 /**
- * Module: DyniPlugin Theme Runtime - Startup preset wiring, commit-time root materialization, and shadow CSS text cache
+ * @file DyniPlugin Theme Runtime - Startup preset wiring, commit-time root materialization, and shadow CSS text cache
  * Documentation: documentation/architecture/runtime-lifecycle.md
- * Depends: runtime/theme/model.js, runtime/theme/resolver.js
  */
 (function (root) {
   "use strict";
 
-  const ns = root.DyniPlugin;
+  /** @typedef {{ outputVar?: unknown, path?: string }} DyniThemeOutputDefinition */
+  /** @typedef {{ normalizePresetName(presetName: unknown): string, getOutputTokenDefinitions(): DyniThemeOutputDefinition[] }} DyniThemeModel */
+  /** @typedef {{ resolveOutputsForRoot(rootEl: Element): Record<string, unknown>, resolveForRoot(rootEl: Element): unknown }} DyniThemeResolver */
+  /** @typedef {{ getNightModeState(rootEl: Element): boolean, getActivePresetName(rootEl: Element): string }} DyniThemeResolverOptions */
+  /** @typedef {{ ok?: unknown, status?: unknown, text(): Promise<unknown> }} DyniThemeFetchResponse */
+  /** @typedef {{ style: { setProperty(name: string, value: string): void } }} DyniThemeStyleRoot */
+  /** @typedef {DyniRuntimeNamespace & { createThemeModel: () => DyniThemeModel, createThemeResolver: (model: DyniThemeModel, options: DyniThemeResolverOptions) => DyniThemeResolver, dom: { getNightModeState(rootEl: Element): boolean }, theme?: unknown }} DyniThemeRuntime */
+  /** @typedef {{ DyniPlugin: DyniPluginNamespace & { runtime: DyniThemeRuntime }, fetch?: (url: string) => Promise<DyniThemeFetchResponse>, getComputedStyle?: (element: Element) => CSSStyleDeclaration }} DyniThemeRoot */
+
+  const ns = /** @type {DyniThemeRoot} */ (/** @type {unknown} */ (root)).DyniPlugin;
   const runtime = ns.runtime;
   const hasOwn = Object.prototype.hasOwnProperty;
 
   let configured = false;
+  /** @type {DyniThemeModel | null} */
   let themeModel = null;
+  /** @type {DyniThemeResolver | null} */
   let themeResolver = null;
   let activePresetName = "default";
 
   const shadowCssTextCache = new Map();
   const shadowCssLoadCache = new Map();
 
+  /** @param {unknown} value @returns {value is string} */
   function isNonEmptyString(value) {
     return typeof value === "string" && value.trim().length > 0;
   }
 
+  /** @param {unknown} presetName @returns {string} */
   function normalizePresetName(presetName) {
-    const model = (themeModel && typeof themeModel.normalizePresetName === "function")
-      ? themeModel
-      : (typeof runtime.createThemeModel === "function" ? runtime.createThemeModel() : null);
-    if (!model || typeof model.normalizePresetName !== "function") {
-      return "default";
-    }
+    const model = themeModel || runtime.createThemeModel();
     return model.normalizePresetName(presetName);
   }
 
+  /** @param {unknown} source @param {unknown} path @returns {unknown} */
   function resolveByPath(source, path) {
     if (!source || typeof source !== "object" || !isNonEmptyString(path)) {
       return undefined;
     }
     const segments = path.split(".");
+    /** @type {unknown} */
     let cursor = source;
     for (let i = 0; i < segments.length; i += 1) {
       const segment = segments[i];
       if (!cursor || typeof cursor !== "object" || !hasOwn.call(cursor, segment)) {
         return undefined;
       }
-      cursor = cursor[segment];
+      cursor = /** @type {Record<string, unknown>} */ (cursor)[segment];
     }
     return cursor;
   }
 
+  /** @returns {(url: string) => Promise<DyniThemeFetchResponse>} */
   function ensureFetchApi() {
     if (typeof root.fetch === "function") {
       return root.fetch.bind(root);
@@ -55,6 +65,7 @@
     throw new Error("dyninstruments: runtime.theme shadow CSS preload requires fetch()");
   }
 
+  /** @param {unknown} url @returns {Promise<string>} */
   function fetchShadowCssText(url) {
     if (!isNonEmptyString(url)) {
       return Promise.reject(new Error("dyninstruments: shadow CSS preload requires non-empty url"));
@@ -96,6 +107,7 @@
     return loadPromise;
   }
 
+  /** @param {unknown} urls @returns {Promise<string[]>} */
   function preloadShadowCssUrls(urls) {
     if (!Array.isArray(urls) || !urls.length) {
       return Promise.resolve([]);
@@ -118,6 +130,7 @@
     return Promise.all(unique.map(fetchShadowCssText));
   }
 
+  /** @param {Element | null | undefined} el @returns {string | null} */
   function readThemePresetCssVarFromElement(el) {
     if (!el || typeof root.getComputedStyle !== "function") {
       return null;
@@ -132,36 +145,34 @@
     return value || null;
   }
 
+  /** @param {Element | null | undefined} docElement @returns {string} */
   function resolveStartupPresetName(docElement) {
     const rootPreset = readThemePresetCssVarFromElement(docElement);
     return normalizePresetName(rootPreset);
   }
 
+  /** @param {string} methodName */
   function ensureConfigured(methodName) {
     if (!configured || !themeModel || !themeResolver) {
       throw new Error("dyninstruments: runtime.theme." + methodName + "() requires prior configure()");
     }
   }
 
+  /** @param {{ activePresetName?: unknown } | null | undefined} options @returns {string} */
   function configure(options) {
     const opts = options || {};
-    if (typeof runtime.createThemeModel !== "function") {
-      throw new Error("dyninstruments: runtime.theme.configure() requires runtime.createThemeModel()");
-    }
-    if (typeof runtime.createThemeResolver !== "function") {
-      throw new Error("dyninstruments: runtime.theme.configure() requires runtime.createThemeResolver()");
-    }
 
-    themeModel = runtime.createThemeModel();
-    activePresetName = themeModel.normalizePresetName(opts.activePresetName);
+    const model = runtime.createThemeModel();
+    themeModel = model;
+    activePresetName = model.normalizePresetName(opts.activePresetName);
 
-    themeResolver = runtime.createThemeResolver(themeModel, {
+    themeResolver = runtime.createThemeResolver(model, {
       getNightModeState: function (rootEl) {
         return runtime.dom.getNightModeState(rootEl);
       },
       getActivePresetName: function (rootEl) {
         const rootPreset = readThemePresetCssVarFromElement(rootEl);
-        return themeModel.normalizePresetName(rootPreset || activePresetName);
+        return model.normalizePresetName(rootPreset || activePresetName);
       }
     });
 
@@ -169,15 +180,22 @@
     return activePresetName;
   }
 
+  /** @param {unknown} rootEl @returns {Record<string, unknown>} */
   function applyToRoot(rootEl) {
     ensureConfigured("applyToRoot");
 
-    if (!rootEl || !rootEl.style || typeof rootEl.style.setProperty !== "function") {
+    if (!rootEl || typeof rootEl !== "object") {
       throw new Error("dyninstruments: runtime.theme.applyToRoot() requires root element with style.setProperty()");
     }
 
-    const resolvedTheme = themeResolver.resolveOutputsForRoot(rootEl);
-    const outputDefs = themeModel.getOutputTokenDefinitions();
+    const styleRoot = /** @type {DyniThemeStyleRoot} */ (/** @type {unknown} */ (rootEl));
+    if (!styleRoot.style || typeof styleRoot.style.setProperty !== "function") {
+      throw new Error("dyninstruments: runtime.theme.applyToRoot() requires root element with style.setProperty()");
+    }
+
+    const element = /** @type {Element} */ (rootEl);
+    const resolvedTheme = /** @type {DyniThemeResolver} */ (themeResolver).resolveOutputsForRoot(element);
+    const outputDefs = /** @type {DyniThemeModel} */ (themeModel).getOutputTokenDefinitions();
     for (let i = 0; i < outputDefs.length; i += 1) {
       const outputDef = outputDefs[i];
       const outputVar = outputDef && outputDef.outputVar;
@@ -188,15 +206,16 @@
       if (typeof resolvedValue === "undefined") {
         throw new Error("dyninstruments: runtime.theme.applyToRoot() missing resolved token '" + outputDef.path + "'");
       }
-      rootEl.style.setProperty(outputVar, String(resolvedValue));
+      styleRoot.style.setProperty(outputVar, String(resolvedValue));
     }
 
     return resolvedTheme;
   }
 
+  /** @param {Element} rootEl @returns {unknown} */
   function resolveForRoot(rootEl) {
     ensureConfigured("resolveForRoot");
-    return themeResolver.resolveForRoot(rootEl);
+    return /** @type {DyniThemeResolver} */ (themeResolver).resolveForRoot(rootEl);
   }
 
   runtime.theme = Object.freeze({
@@ -207,9 +226,11 @@
     tokens: Object.freeze({
       resolveForRoot: resolveForRoot
     }),
+    /** @param {unknown} url @returns {string | null} */
     getShadowCssText: function (url) {
       return shadowCssTextCache.has(url) ? shadowCssTextCache.get(url) : null;
     },
+    /** @param {unknown} url @returns {boolean} */
     hasShadowCssText: function (url) {
       return shadowCssTextCache.has(url);
     }
