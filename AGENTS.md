@@ -111,7 +111,7 @@ Task: Add new BarometerGauge
 - User-facing documentation: [README.md](README.md)
 - HTML renderer lifecycle patterns: [documentation/architecture/html-renderer-lifecycle.md](documentation/architecture/html-renderer-lifecycle.md)
 - Step-by-step implementation workflows: [documentation/guides/](documentation/guides/)
-- New release requests: start with [documentation/guides/release-workflow.md](documentation/guides/release-workflow.md) and follow `npm run release:prepare` -> `npm run release:create`
+- New stable or prerelease requests: start with [documentation/guides/release-workflow.md](documentation/guides/release-workflow.md) and follow `npm run release:prepare` -> `npm run release:create`
 - Multi-session active execution plans: [exec-plans/active/](exec-plans/active/)
 
 ---
@@ -127,7 +127,7 @@ Task: Add new BarometerGauge
 - [ ] Updated `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js` when adding or changing a kind with new user-visible visuals/layout behavior.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
 - [ ] Ran `npm run check:all` — no failures; required final gate (`check:core` plus native coverage threshold enforcement).
-- [ ] For releases, pushed only a locally created annotated tag; the tag workflow reruns `check:all` before publishing committed artifacts.
+- [ ] For releases, pushed only a locally created annotated tag; the tag workflow reruns `check:all` before publishing committed artifacts with the correct stable/prerelease classification.
 - [ ] Completed the documented manual AvNav validation before release: plugin load, representative radial/linear/HTML widgets, day/night switch, and route/AIS interactions.
 
 ---

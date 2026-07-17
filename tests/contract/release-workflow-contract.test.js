@@ -52,7 +52,18 @@ describe("tag-only release workflow", function () {
     });
     expect(validationIndex).toBeGreaterThan(-1);
     expect(validationIndex).toBeLessThan(artifactIndex);
-    expect(publish.steps[validationIndex].run).toBe('node tools/release-version.mjs "$GITHUB_REF_NAME"');
+    expect(publish.steps[validationIndex].id).toBe("release_version");
+    expect(publish.steps[validationIndex].run).toBe(
+      'node tools/release-version.mjs --github-output "$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"'
+    );
+
+    const artifactCommands = publish.steps[artifactIndex].run;
+    expect(artifactCommands).toContain('version="${{ steps.release_version.outputs.version }}"');
+
+    const releaseStep = publish.steps.find(function (step) {
+      return step.name === "Create GitHub Release";
+    });
+    expect(releaseStep.with.prerelease).toBe("${{ steps.release_version.outputs.prerelease }}");
   });
 
   it("uses immutable actions and never rebuilds in the publish job", function () {

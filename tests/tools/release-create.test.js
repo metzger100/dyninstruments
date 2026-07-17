@@ -65,7 +65,12 @@ describe("release-create", function () {
   });
 
   it("shares strict SemVer validation with tag publication", async function () {
-    const { isValidReleaseVersion, parseReleaseTag } = await import("../../tools/release-version.mjs");
+    const {
+      classifyReleaseTag,
+      formatGithubOutput,
+      isValidReleaseVersion,
+      parseReleaseTag
+    } = await import("../../tools/release-version.mjs");
 
     ["0.0.0", "1.2.3", "1.2.3-rc.1", "1.2.3+build.5"].forEach(function (version) {
       expect(isValidReleaseVersion(version), version).toBe(true);
@@ -75,13 +80,23 @@ describe("release-create", function () {
     });
     expect(parseReleaseTag("v1.2.3-rc.1")).toBe("1.2.3-rc.1");
     expect(() => parseReleaseTag("release-1.2.3")).toThrow(/vX\.Y\.Z/);
+    expect(classifyReleaseTag("v1.2.3")).toEqual({ version: "1.2.3", prerelease: false });
+    expect(classifyReleaseTag("v1.2.3-beta.1+build.5")).toEqual({
+      version: "1.2.3-beta.1+build.5",
+      prerelease: true
+    });
+    expect(classifyReleaseTag("v1.2.3+build-with-hyphen")).toEqual({
+      version: "1.2.3+build-with-hyphen",
+      prerelease: false
+    });
+    expect(formatGithubOutput("v1.2.3-rc.1")).toBe("version=1.2.3-rc.1\nprerelease=true\n");
   });
 
-  it("creates release artifacts, commit, and annotated tag after one aggregate gate", async function () {
+  it("creates prerelease artifacts, commit, and annotated tag after one aggregate gate", async function () {
     const { createRelease } = await import("../../tools/release-create.mjs");
 
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-create-"));
-    const version = "1.2.3";
+    const version = "1.2.3-beta.1";
     const tag = `v${version}`;
     const notesRel = `releases/dyninstruments-${version}.md`;
 
@@ -100,7 +115,7 @@ describe("release-create", function () {
       runReal("git", ["add", "."], tempRoot);
       runReal("git", ["commit", "-m", "chore: initial"], tempRoot);
 
-      writeFile(tempRoot, notesRel, "# Release 1.2.3\n\n- test\n");
+      writeFile(tempRoot, notesRel, "# Release 1.2.3-beta.1\n\n- test\n");
 
       const manifest = [
         "plugin.js",
@@ -183,7 +198,7 @@ describe("release-create", function () {
       expect(aggregateGateCalls).toBe(1);
       expect(fs.existsSync(path.join(tempRoot, releaseZipRel))).toBe(true);
       expect(fs.existsSync(path.join(tempRoot, notesRel))).toBe(true);
-      expect(fs.readFileSync(path.join(tempRoot, notesRel), "utf8")).toContain("# Release 1.2.3");
+      expect(fs.readFileSync(path.join(tempRoot, notesRel), "utf8")).toContain("# Release 1.2.3-beta.1");
 
       expect(zippedEntries).toEqual([
         "assets/fonts/Roboto-Regular.woff2",
@@ -197,13 +212,13 @@ describe("release-create", function () {
       ]);
 
       const headMessage = runReal("git", ["log", "-1", "--pretty=%s"], tempRoot).trim();
-      expect(headMessage).toBe("release: v1.2.3");
+      expect(headMessage).toBe("release: v1.2.3-beta.1");
 
       const tagType = runReal("git", ["cat-file", "-t", tag], tempRoot).trim();
       expect(tagType).toBe("tag");
 
       const taggedObject = runReal("git", ["cat-file", "-p", tag], tempRoot);
-      expect(taggedObject).toContain("Release v1.2.3");
+      expect(taggedObject).toContain("Release v1.2.3-beta.1");
 
       const statusOutput = runReal("git", ["status", "--porcelain", "--untracked-files=all"], tempRoot).trim();
       expect(statusOutput).toBe("");

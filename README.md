@@ -40,6 +40,15 @@ Pinned release example:
 bash <(curl -sSL https://raw.githubusercontent.com/metzger100/dyninstruments/main/install.sh) --version 3.6.0
 ```
 
+Beta prerelease example:
+
+```bash
+bash <(curl -sSL https://raw.githubusercontent.com/metzger100/dyninstruments/main/install.sh) --version 4.0.0-beta.1
+```
+
+The same pinned version can be supplied as
+`DYNINSTRUMENTS_VERSION=4.0.0-beta.1`.
+
 Manual install:
 
 1. Download the latest release zip from GitHub Releases (or from `releases/` in this repository).
@@ -260,8 +269,9 @@ coverage-summary parser retired after native threshold proof.
 
 The local `check:all` command is the complete quality authority. A tag push
 reruns locked setup and `check:all` in a read-only GitHub job; only after it
-passes does the publisher upload the committed ZIP and matching notes. GitHub
-does not rebuild release artifacts.
+passes does the publisher upload the committed ZIP and matching notes. SemVer
+prerelease tags publish as GitHub prereleases; stable tags publish as normal
+releases. GitHub does not rebuild release artifacts.
 
 Before release creation, perform the manual AvNav smoke checklist in
 `CONTRIBUTING.md`: load the plugin, inspect representative radial/linear/HTML

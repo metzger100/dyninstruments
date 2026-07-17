@@ -26,11 +26,32 @@ export function parseReleaseTag(tag) {
   return version;
 }
 
+export function classifyReleaseTag(tag) {
+  const version = parseReleaseTag(tag);
+  const buildSeparator = version.indexOf("+");
+  const versionWithoutBuild = buildSeparator === -1 ? version : version.slice(0, buildSeparator);
+
+  return {
+    version,
+    prerelease: versionWithoutBuild.includes("-")
+  };
+}
+
+export function formatGithubOutput(tag) {
+  const release = classifyReleaseTag(tag);
+  return `version=${release.version}\nprerelease=${release.prerelease}\n`;
+}
+
 export function main(argv = process.argv.slice(2)) {
-  if (argv.length !== 1) {
-    throw new Error("Usage: node tools/release-version.mjs vX.Y.Z");
+  if (argv.length === 1) {
+    process.stdout.write(parseReleaseTag(argv[0]) + "\n");
+    return;
   }
-  process.stdout.write(parseReleaseTag(argv[0]) + "\n");
+  if (argv.length === 2 && argv[0] === "--github-output") {
+    process.stdout.write(formatGithubOutput(argv[1]));
+    return;
+  }
+  throw new Error("Usage: node tools/release-version.mjs [--github-output] vX.Y.Z");
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

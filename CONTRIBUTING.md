@@ -208,12 +208,16 @@ Use the dedicated release guide for the full local-first workflow, SemVer decisi
 
 - [documentation/guides/release-workflow.md](documentation/guides/release-workflow.md)
 
-In short: run `npm run release:prepare`, choose `X.Y.Z`, write notes in `releases/dyninstruments-X.Y.Z.md`, then run `npm run release:create -- --version=X.Y.Z`.
+In short: run `npm run release:prepare`, choose a full SemVer version, write
+notes in `releases/dyninstruments-VERSION.md`, then run
+`npm run release:create -- --version=VERSION`. Prereleases such as
+`4.0.0-beta.1` use the same flow.
 
 Tag publication uses the committed release artifacts created locally. The
 tag workflow reruns locked setup and `check:all`, validates SemVer, and never
-rebuilds the ZIP. The documented manual AvNav validation supplements the
-blocking jsdom and VM contracts before release creation.
+rebuilds the ZIP. It publishes SemVer prerelease tags as GitHub prereleases and
+stable tags as normal releases. The documented manual AvNav validation
+supplements the blocking jsdom and VM contracts before release creation.
 
 ## 10) Pre-Merge Checklist
 

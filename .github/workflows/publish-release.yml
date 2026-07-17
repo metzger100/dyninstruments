@@ -64,7 +64,8 @@ jobs:
           package-manager-cache: false
 
       - name: Validate release tag
-        run: node tools/release-version.mjs "$GITHUB_REF_NAME"
+        id: release_version
+        run: node tools/release-version.mjs --github-output "$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Verify release artifacts
         id: release_assets
@@ -72,7 +73,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          version="${GITHUB_REF_NAME#v}"
+          version="${{ steps.release_version.outputs.version }}"
           zip_path="releases/dyninstruments-${version}.zip"
           notes_path="releases/dyninstruments-${version}.md"
 
@@ -92,3 +93,4 @@ jobs:
           name: dyninstruments v${{ steps.release_assets.outputs.version }}
           body_path: ${{ steps.release_assets.outputs.notes_path }}
           files: ${{ steps.release_assets.outputs.zip_path }}
+          prerelease: ${{ steps.release_version.outputs.prerelease }}

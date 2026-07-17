@@ -23,7 +23,7 @@ Usage: install.sh [options]
 Install or update dyninstruments for an AvNav Linux server.
 
 Options:
-  --version X.Y.Z     Install a specific GitHub release version.
+  --version VERSION   Install a specific GitHub release or prerelease version.
   --zip PATH_OR_URL   Install from a local or remote zip file.
   --data-dir PATH     Use an AvNav data directory; installs below PATH/plugins.
   --plugin-dir PATH   Use the final dyninstruments plugin directory.
@@ -33,7 +33,7 @@ Options:
   --help              Show this help.
 
 Environment:
-  DYNINSTRUMENTS_VERSION=X.Y.Z
+  DYNINSTRUMENTS_VERSION=VERSION
 USAGE
 }
 

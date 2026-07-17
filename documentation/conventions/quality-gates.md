@@ -36,7 +36,9 @@ before GitHub publishes artifacts prepared and committed locally.
 - Release creation is locally gated by `check:all` before package creation.
 - `.github/workflows/publish-release.yml` reruns `setup` and `check:all` in a
   read-only tag quality job; the write-privileged publisher depends on it and
-  never rebuilds release artifacts.
+  never rebuilds release artifacts. The shared release-version tool validates
+  the tag and tells the publisher whether to create a normal or prerelease
+  GitHub Release.
 
 ## API/Interfaces
 
@@ -91,7 +93,7 @@ before GitHub publishes artifacts prepared and committed locally.
 | Ajv schema validation | `plugin.json` and `layouts/*.json` | Release artifact contents are covered by `package:check` |
 | Registry contracts | Vitest `contract` project | Component ID/globalKey/path uniqueness, broad component-source UMD/create-export parity, cluster widget-name parity, dependency existence/direction/cycles, retired owner-path absence (including performance), and runtime-owned service exclusion |
 | JS doc traceability | ESLint plus `docs:check` | Every shipped JavaScript file has one leading `@file`; existing `Documentation:` targets must resolve; registry entries, not comment text, own dependencies |
-| Package contracts | Release prepare/create/zip-builder tests plus `test:contract` in `check:core` | Release contents and bootstrap/package behavior are covered without an external browser dependency |
+| Package contracts | Release prepare/create/version/zip-builder tests plus `test:contract` in `check:core` | Stable and prerelease tag classification, release contents, and bootstrap/package behavior are covered without an external browser dependency |
 | Browser-facing integration | Vitest `unit-dom` plus `contract` | jsdom lifecycle/DOM coverage and VM bootstrap/registry contracts; no external browser automation is part of the development environment |
 | Vitest coverage thresholds | Global and critical-area groups in `vitest.config.js` | Replaces the retired coverage-summary parser |
 

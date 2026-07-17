@@ -102,7 +102,9 @@ for release preparation, release creation, and release manifest contents.
 
 The tag-only publisher reruns `npm run setup` and `npm run check:all` in a
 read-only job. Its write-privileged publish job depends on that result and only
-uploads the committed ZIP and notes.
+uploads the committed ZIP and notes. The shared SemVer tool classifies the
+validated tag so prerelease versions publish as GitHub prereleases while stable
+versions publish as normal releases.
 
 `docs:check` runs `markdownlint-cli2`, Linkinator fixture proofs and the
 repository scan from `linkinator.config.json`, then the documentation-specific,

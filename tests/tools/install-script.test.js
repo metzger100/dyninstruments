@@ -189,15 +189,18 @@ describe("install.sh", function () {
       const target = path.join(tempRoot, "plugins", "dyninstruments");
 
       const result = runInstaller([
-        "--zip",
-        "local.zip",
+        "--version",
+        "4.0.0-beta.2",
         "--plugin-dir",
         target,
         "--dry-run"
       ]);
 
       expect(result.status).toBe(0);
-      expect(result.stdout).toContain("dyninstruments source: local.zip");
+      expect(result.stdout).toContain(
+        "dyninstruments source: https://github.com/metzger100/dyninstruments/releases/download/" +
+          "v4.0.0-beta.2/dyninstruments-4.0.0-beta.2.zip"
+      );
       expect(result.stdout).toContain(`dyninstruments target: ${target}`);
       expect(fs.existsSync(target)).toBe(false);
     } finally {
