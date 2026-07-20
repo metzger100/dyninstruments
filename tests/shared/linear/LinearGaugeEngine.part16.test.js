@@ -1,8 +1,5 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./LinearGaugeEngine.harness");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
 describe("LinearGaugeEngine", function () {
   it("allocates high-mode caption/value row height according to captionUnitScale", function () {
@@ -17,14 +14,14 @@ describe("LinearGaugeEngine", function () {
         tickProps: {
           major: "major",
           minor: "minor",
-          showEndLabels: "showEndLabels",
-        },
+          showEndLabels: "showEndLabels"
+        }
       });
       renderer(
         createMockCanvas({
           rectWidth: 120,
           rectHeight: 320,
-          ctx: createMockContext2D(),
+          ctx: createMockContext2D()
         }),
         {
           value: 10,
@@ -35,22 +32,17 @@ describe("LinearGaugeEngine", function () {
           n: 1.1,
           f: 3.5,
           caption: "SOG",
-          captionUnitScale: scale,
-        },
+          captionUnitScale: scale
+        }
       );
       return harness.calls;
     }
 
     const lowScale = renderHigh(0.5);
     const highScale = renderHigh(1.2);
-    const lowRatio =
-      lowScale.captionRowHeights[0] /
-      (lowScale.captionRowHeights[0] + lowScale.valueRowHeights[0]);
-    const highRatio =
-      highScale.captionRowHeights[0] /
-      (highScale.captionRowHeights[0] + highScale.valueRowHeights[0]);
+    const lowRatio = lowScale.captionRowHeights[0] / (lowScale.captionRowHeights[0] + lowScale.valueRowHeights[0]);
+    const highRatio = highScale.captionRowHeights[0] / (highScale.captionRowHeights[0] + highScale.valueRowHeights[0]);
 
     expect(lowRatio).toBeLessThan(highRatio);
   });
-
 });

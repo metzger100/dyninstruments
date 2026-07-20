@@ -20,10 +20,12 @@ describe("StateScreenPrecedence", function () {
   it("falls through to data when no candidate matches", function () {
     const precedence = createApi();
 
-    expect(precedence.pickFirst([
-      { kind: "disconnected", when: false },
-      { kind: "noRoute", when: 0 }
-    ])).toBe("data");
+    expect(
+      precedence.pickFirst([
+        { kind: "disconnected", when: false },
+        { kind: "noRoute", when: 0 }
+      ])
+    ).toBe("data");
   });
 
   it("returns data for an empty list", function () {

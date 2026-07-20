@@ -11,7 +11,11 @@
 
   /** @returns {DyniInitThemeRuntime} */
   function requireThemeRuntimeBoundary() {
-    if (!runtime.theme || typeof runtime.theme.configure !== "function" || typeof runtime.theme.applyToRoot !== "function") {
+    if (
+      !runtime.theme ||
+      typeof runtime.theme.configure !== "function" ||
+      typeof runtime.theme.applyToRoot !== "function"
+    ) {
       throw new Error("dyninstruments: runtime.theme boundary is required");
     }
     return runtime.theme;
@@ -19,9 +23,11 @@
 
   /** @returns {DyniClusterShellRendererApi} */
   function requireClusterShellRenderer() {
-    if (!runtime.clusterShellRenderer ||
+    if (
+      !runtime.clusterShellRenderer ||
       typeof runtime.clusterShellRenderer.normalizeRouteFrame !== "function" ||
-      typeof runtime.clusterShellRenderer.renderRouteShell !== "function") {
+      typeof runtime.clusterShellRenderer.renderRouteShell !== "function"
+    ) {
       throw new Error("dyninstruments: runtime.clusterShellRenderer boundary is required");
     }
     return runtime.clusterShellRenderer;
@@ -29,12 +35,14 @@
 
   /** @returns {DyniInitGeneration} */
   function getStartupGeneration() {
-    return ns.startupGeneration || {
-      id: "legacy",
-      entrypoint: "legacy",
-      baseUrl: ns.baseUrl || "",
-      hostApi: ns.avnavApi || null
-    };
+    return (
+      ns.startupGeneration || {
+        id: "legacy",
+        entrypoint: "legacy",
+        baseUrl: ns.baseUrl || "",
+        hostApi: ns.avnavApi || null
+      }
+    );
   }
 
   /** @param {string} generationId */
@@ -152,4 +160,4 @@
   }
 
   runtime.runInit = runInit;
-}(/** @type {DyniInitRoot} */ (/** @type {unknown} */ (this))));
+})(/** @type {DyniInitRoot} */ (/** @type {unknown} */ (this)));

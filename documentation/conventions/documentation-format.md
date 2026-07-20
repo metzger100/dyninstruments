@@ -20,21 +20,26 @@ Use this format for all new or updated documentation files. Keep docs compact, s
 **Status:** [✅ Implemented / ⏳ In Progress / ❌ Not Started] [Brief]
 
 ## Overview
+
 [1-2 sentences max]
 
 ## Key Details
+
 - Compact bullet lists
 - API signatures
 - Data types and values
 - Configuration keys
 
 ## API/Interfaces
+
 [Tables or compact code blocks]
 
 ## Fixed Issues (if any)
+
 [Only important items]
 
 ## Related
+
 [links to other docs]
 ```
 
@@ -61,17 +66,19 @@ Use this format for all new or updated documentation files. Keep docs compact, s
 
 Preserve tokens for implementation, not context gathering.
 
-| Budget | Allocation |
-|---|---|
+| Budget | Allocation                                                   |
+| ------ | ------------------------------------------------------------ |
 | 20-30% | Reading relevant docs via `documentation/TABLEOFCONTENTS.md` |
-| 70-80% | Implementation, debugging, and validation |
+| 70-80% | Implementation, debugging, and validation                    |
 
 Anti-patterns:
+
 - Reading all docs sequentially
 - Re-reading the same docs repeatedly
 - Reading verbose examples when not needed
 
 Best practices:
+
 - Start with `documentation/TABLEOFCONTENTS.md`
 - Read only `Key Details` first
 - Open examples only when implementing a matching pattern

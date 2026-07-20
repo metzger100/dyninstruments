@@ -6,7 +6,7 @@
   "use strict";
 
   /** @typedef {Record<string, unknown> & { value?: unknown, storeKeys?: Record<string, unknown> }} DyniDefaultValues */
-  /** @typedef {DyniPluginSharedConfig & { makePerKindTextParams: (map: DyniPerKindTextParameterMap) => DyniEditableParameters, opt: (name: unknown, value: unknown) => DyniEditableOption, kindMaps: Record<string, DyniPerKindTextParameterMap> }} DyniDefaultSharedConfig */
+  /** @typedef {DyniPluginSharedConfig & { makePerKindTextParams: (map: DyniPerKindTextParameterMap) => DyniEditableParameters, opt: (name: unknown, value: unknown) => DyniEditableOption, kindMaps: Record<string, DyniPerKindTextParameterMap>, buildDefaultRadialEditableParameters: () => DyniEditableParameters }} DyniDefaultSharedConfig */
   /** @typedef {{ DyniPlugin: DyniPluginNamespace & { config: DyniPluginConfig & { clusters: DyniWidgetDefinition[] } } }} DyniDefaultRoot */
 
   const ns = /** @type {DyniDefaultRoot} */ (/** @type {unknown} */ (root)).DyniPlugin;
@@ -30,11 +30,7 @@
       editableParameters: {
         kind: {
           type: "SELECT",
-          list: [
-            opt("Text", "text"),
-            opt("Linear gauge", "linearGauge"),
-            opt("Radial gauge", "radialGauge")
-          ],
+          list: [opt("Text", "text"), opt("Linear gauge", "linearGauge"), opt("Radial gauge", "radialGauge")],
           default: "text",
           name: "Instrument"
         },
@@ -45,40 +41,45 @@
         },
 
         ratioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.0,
           internal: true,
           name: "3-Rows Threshold (numeric)",
           condition: { kind: "text" }
         },
         ratioThresholdFlat: {
-          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+          type: "FLOAT",
+          min: 1.5,
+          max: 6.0,
+          step: 0.05,
+          default: 3.0,
           internal: true,
           name: "1-Row Threshold (numeric)",
           condition: { kind: "text" }
         },
 
         captionUnitScale: {
-          type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
+          type: "FLOAT",
+          min: 0.5,
+          max: 1.5,
+          step: 0.05,
+          default: 0.8,
           name: "Caption/Unit size"
         },
         stableDigits: {
           type: "BOOLEAN",
           default: false,
           name: "Stable digits",
-          condition: [
-            { kind: "text" },
-            { kind: "linearGauge" },
-            { kind: "radialGauge" }
-          ]
+          condition: [{ kind: "text" }, { kind: "linearGauge" }, { kind: "radialGauge" }]
         },
         easing: {
           type: "BOOLEAN",
           default: true,
           name: "Smooth motion",
-          condition: [
-            { kind: "linearGauge" },
-            { kind: "radialGauge" }
-          ]
+          condition: [{ kind: "linearGauge" }, { kind: "radialGauge" }]
         },
         defaultLinearHideTextualMetrics: {
           type: "BOOLEAN",
@@ -100,34 +101,58 @@
         className: true,
 
         defaultLinearRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.1,
           internal: true,
           name: "DefaultLinearWidget: Normal Threshold",
           condition: { kind: "linearGauge" }
         },
         defaultLinearRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          type: "FLOAT",
+          min: 1.0,
+          max: 6.0,
+          step: 0.05,
+          default: 3.5,
           internal: true,
           name: "DefaultLinearWidget: Flat Threshold",
           condition: { kind: "linearGauge" }
         },
         defaultLinearMinValue: {
-          type: "FLOAT", min: 0, max: 100, step: 1, default: 0,
+          type: "FLOAT",
+          min: 0,
+          max: 100,
+          step: 1,
+          default: 0,
           name: "Min value",
           condition: { kind: "linearGauge" }
         },
         defaultLinearMaxValue: {
-          type: "FLOAT", min: 1, max: 100, step: 1, default: 100,
+          type: "FLOAT",
+          min: 1,
+          max: 100,
+          step: 1,
+          default: 100,
           name: "Max value",
           condition: { kind: "linearGauge" }
         },
         defaultLinearTickMajor: {
-          type: "FLOAT", min: 0.5, max: 100, step: 0.5, default: 10,
+          type: "FLOAT",
+          min: 0.5,
+          max: 100,
+          step: 0.5,
+          default: 10,
           name: "Major tick step",
           condition: { kind: "linearGauge" }
         },
         defaultLinearTickMinor: {
-          type: "FLOAT", min: 0.1, max: 50, step: 0.1, default: 2,
+          type: "FLOAT",
+          min: 0.1,
+          max: 50,
+          step: 0.1,
+          default: 2,
           name: "Minor tick step",
           condition: { kind: "linearGauge" }
         },
@@ -144,7 +169,11 @@
           condition: { kind: "linearGauge" }
         },
         defaultLinearAlarmLowAt: {
-          type: "FLOAT", min: 0, max: 100, step: 1, default: 10,
+          type: "FLOAT",
+          min: 0,
+          max: 100,
+          step: 1,
+          default: 10,
           name: "Alarm at or below",
           condition: { kind: "linearGauge", defaultLinearAlarmLowEnabled: true }
         },
@@ -161,7 +190,11 @@
           condition: { kind: "linearGauge" }
         },
         defaultLinearWarningLowAt: {
-          type: "FLOAT", min: 0, max: 100, step: 1, default: 25,
+          type: "FLOAT",
+          min: 0,
+          max: 100,
+          step: 1,
+          default: 25,
           name: "Warning at or below",
           condition: { kind: "linearGauge", defaultLinearWarningLowEnabled: true }
         },
@@ -178,7 +211,11 @@
           condition: { kind: "linearGauge" }
         },
         defaultLinearWarningHighAt: {
-          type: "FLOAT", min: 0, max: 100, step: 1, default: 75,
+          type: "FLOAT",
+          min: 0,
+          max: 100,
+          step: 1,
+          default: 75,
           name: "Warning at or above",
           condition: { kind: "linearGauge", defaultLinearWarningHighEnabled: true }
         },
@@ -195,7 +232,11 @@
           condition: { kind: "linearGauge" }
         },
         defaultLinearAlarmHighAt: {
-          type: "FLOAT", min: 0, max: 100, step: 1, default: 90,
+          type: "FLOAT",
+          min: 0,
+          max: 100,
+          step: 1,
+          default: 90,
           name: "Alarm at or above",
           condition: { kind: "linearGauge", defaultLinearAlarmHighEnabled: true }
         },
@@ -206,112 +247,7 @@
           condition: { kind: "linearGauge", defaultLinearAlarmHighEnabled: true }
         },
 
-        defaultRadialRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
-          internal: true,
-          name: "DefaultRadialWidget: Normal Threshold",
-          condition: { kind: "radialGauge" }
-        },
-        defaultRadialRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
-          internal: true,
-          name: "DefaultRadialWidget: Flat Threshold",
-          condition: { kind: "radialGauge" }
-        },
-        defaultRadialMinValue: {
-          type: "FLOAT", min: 0, max: 100, step: 1, default: 0,
-          name: "Min value",
-          condition: { kind: "radialGauge" }
-        },
-        defaultRadialMaxValue: {
-          type: "FLOAT", min: 1, max: 100, step: 1, default: 100,
-          name: "Max value",
-          condition: { kind: "radialGauge" }
-        },
-        defaultRadialTickMajor: {
-          type: "FLOAT", min: 0.5, max: 100, step: 0.5, default: 10,
-          name: "Major tick step",
-          condition: { kind: "radialGauge" }
-        },
-        defaultRadialTickMinor: {
-          type: "FLOAT", min: 0.1, max: 50, step: 0.1, default: 2,
-          name: "Minor tick step",
-          condition: { kind: "radialGauge" }
-        },
-        defaultRadialShowEndLabels: {
-          type: "BOOLEAN",
-          default: false,
-          name: "Show min/max labels",
-          condition: { kind: "radialGauge" }
-        },
-        defaultRadialAlarmLowEnabled: {
-          type: "BOOLEAN",
-          default: false,
-          name: "Show low alarm sector",
-          condition: { kind: "radialGauge" }
-        },
-        defaultRadialAlarmLowAt: {
-          type: "FLOAT", min: 0, max: 100, step: 1, default: 10,
-          name: "Alarm at or below",
-          condition: { kind: "radialGauge", defaultRadialAlarmLowEnabled: true }
-        },
-        defaultRadialAlarmLowColor: {
-          type: "COLOR",
-          default: "#d9534a",
-          name: "Alarm color",
-          condition: { kind: "radialGauge", defaultRadialAlarmLowEnabled: true }
-        },
-        defaultRadialWarningLowEnabled: {
-          type: "BOOLEAN",
-          default: false,
-          name: "Show low warning sector",
-          condition: { kind: "radialGauge" }
-        },
-        defaultRadialWarningLowAt: {
-          type: "FLOAT", min: 0, max: 100, step: 1, default: 25,
-          name: "Warning at or below",
-          condition: { kind: "radialGauge", defaultRadialWarningLowEnabled: true }
-        },
-        defaultRadialWarningLowColor: {
-          type: "COLOR",
-          default: "#e0a92e",
-          name: "Warning color",
-          condition: { kind: "radialGauge", defaultRadialWarningLowEnabled: true }
-        },
-        defaultRadialWarningHighEnabled: {
-          type: "BOOLEAN",
-          default: false,
-          name: "Show high warning sector",
-          condition: { kind: "radialGauge" }
-        },
-        defaultRadialWarningHighAt: {
-          type: "FLOAT", min: 0, max: 100, step: 1, default: 75,
-          name: "Warning at or above",
-          condition: { kind: "radialGauge", defaultRadialWarningHighEnabled: true }
-        },
-        defaultRadialWarningHighColor: {
-          type: "COLOR",
-          default: "#e0a92e",
-          name: "Warning color",
-          condition: { kind: "radialGauge", defaultRadialWarningHighEnabled: true }
-        },
-        defaultRadialAlarmHighEnabled: {
-          type: "BOOLEAN",
-          default: false,
-          name: "Show high alarm sector",
-          condition: { kind: "radialGauge" }
-        },
-        defaultRadialAlarmHighAt: {
-          type: "FLOAT", min: 0, max: 100, step: 1, default: 90,
-          name: "Alarm at or above",
-          condition: { kind: "radialGauge", defaultRadialAlarmHighEnabled: true }
-        },
-        defaultRadialAlarmHighColor: {
-          type: "COLOR",
-          default: "#d9534a",
-          name: "Alarm color",
-          condition: { kind: "radialGauge", defaultRadialAlarmHighEnabled: true }
-        },
+        ...shared.buildDefaultRadialEditableParameters(),
 
         ...makePerKindTextParams(DEFAULT_KIND)
       },
@@ -323,8 +259,7 @@
 
         if (typeof out.value === "string" && out.value.trim()) {
           out.storeKeys = { ...out.storeKeys, value: out.value.trim() };
-        }
-        else if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
+        } else if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
           const sk = { ...out.storeKeys };
           delete sk.value;
           out.storeKeys = sk;
@@ -334,4 +269,4 @@
       }
     }
   });
-}(this));
+})(this);

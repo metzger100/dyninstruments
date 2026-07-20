@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetTextHtmlWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {DyniComponentContext & { theme: { tokens: DyniAisTargetThemeResolver } }} DyniAisTargetWidgetContext */
   /** @typedef {{ props: DyniWidgetValues, shellRect?: DyniHtmlShellRect | null, rootEl?: HTMLElement | null, layoutChanged?: boolean }} DyniAisTargetWidgetPayload */
@@ -33,9 +33,7 @@
     /** @param {unknown} props @param {unknown} shellRect @returns {DyniAisTargetRenderModel} */
     function buildModel(props, shellRect) {
       const p = toObject(props);
-      const rect = shellRect && typeof shellRect === "object"
-        ? /** @type {DyniHtmlShellRect} */ (shellRect)
-        : null;
+      const rect = shellRect && typeof shellRect === "object" ? /** @type {DyniHtmlShellRect} */ (shellRect) : null;
       const layout = toObject(p.layout);
       const surfacePolicy = htmlUtils.resolveSurfacePolicy(p);
       const mode = htmlUtils.resolveRatioModeForRect({
@@ -57,7 +55,9 @@
 
     /** @param {unknown} rendererContext */
     function createCommittedRenderer(rendererContext) {
-      const context = /** @type {Record<string, unknown>} */ (rendererContext && typeof rendererContext === "object" ? rendererContext : {});
+      const context = /** @type {Record<string, unknown>} */ (
+        rendererContext && typeof rendererContext === "object" ? rendererContext : {}
+      );
       const hostContext = context.hostContext || {};
 
       /** @type {HTMLElement | null} */
@@ -96,9 +96,10 @@
           ev.preventDefault();
           ev.stopPropagation();
           const policy = htmlUtils.resolveSurfacePolicy(lastProps);
-          const actions = policy && policy.actions
-            ? /** @type {{ ais?: { showInfo?: (mmsi: string) => void } }} */ (policy.actions)
-            : null;
+          const actions =
+            policy && policy.actions
+              ? /** @type {{ ais?: { showInfo?: (mmsi: string) => void } }} */ (policy.actions)
+              : null;
           const aisActions = actions ? actions.ais : null;
           if (!aisActions || typeof aisActions.showInfo !== "function") {
             return;
@@ -116,30 +117,34 @@
         const shellRect = payload.shellRect || null;
         const theme = themeResolver.resolveForRoot(payload.rootEl);
         const model = buildModel(payload.props, shellRect);
-        const fit = payload.layoutChanged || !lastFit
-          ? (htmlFit.compute({
-            model: model,
-            hostContext: hostContext,
-            targetEl: payload.rootEl,
-            shellRect: shellRect || undefined
-          }) || {
-            nameStyle: "",
-            frontStyle: "",
-            placeholderStyle: "",
-            metrics: Object.create(null),
-            accentStyle: ""
-          })
-          : lastFit;
+        const fit =
+          payload.layoutChanged || !lastFit
+            ? htmlFit.compute({
+                model: model,
+                hostContext: hostContext,
+                targetEl: payload.rootEl,
+                shellRect: shellRect || undefined
+              }) || {
+                nameStyle: "",
+                frontStyle: "",
+                placeholderStyle: "",
+                metrics: Object.create(null),
+                accentStyle: ""
+              }
+            : lastFit;
 
         htmlUtils.applyMirroredContext(rootEl, payload.props);
-        wrapperEl = htmlUtils.patchInnerHtml(rootEl, markup.render({
-          model: model,
-          fit: fit,
-          htmlUtils: htmlUtils,
-          shellRect: shellRect,
-          fontFamily: theme.font.family,
-          fontWeight: theme.font.labelWeight
-        }));
+        wrapperEl = htmlUtils.patchInnerHtml(
+          rootEl,
+          markup.render({
+            model: model,
+            fit: fit,
+            htmlUtils: htmlUtils,
+            shellRect: shellRect,
+            fontFamily: theme.font.family,
+            fontWeight: theme.font.labelWeight
+          })
+        );
         lastProps = payload.props;
         lastModel = model;
         lastFit = fit;
@@ -215,4 +220,4 @@
   }
 
   return { id: "AisTargetTextHtmlWidget", create: create };
-}));
+});

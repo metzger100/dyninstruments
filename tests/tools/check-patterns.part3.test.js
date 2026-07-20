@@ -1,10 +1,11 @@
+// @ts-nocheck
 const {
   toolPath,
   tempDirs,
   runPatternCheck,
   createWorkspace,
   joinMessages,
-  joinWarningMessages,
+  joinWarningMessages
 } = require("./check-patterns.harness.js");
 
 describe("tools/check-patterns.mjs", function () {
@@ -60,5 +61,4 @@ describe("tools/check-patterns.mjs", function () {
     expect(result.summary.ok).toBe(true);
     expect(result.summary.byRule["redundant-internal-fallback"]).toBe(0);
   });
-
 });

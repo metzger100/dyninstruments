@@ -8,14 +8,18 @@ describe("RoutePointsRowGeometry", function () {
 
   function createRowGeometry() {
     const routePointsLayoutSizing = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
-    return loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js").create({}, createComponentContextMock({
-      modules: {
-        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-        RoutePointsLayoutSizing: routePointsLayoutSizing
-      }
-    }));
+    return loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+          RoutePointsLayoutSizing: routePointsLayoutSizing
+        }
+      })
+    );
   }
 
+  /** @param {any} rowGeometry @param {string} mode @param {boolean} showOrdinal @param {any} [rowRect] */
   function buildRow(rowGeometry, mode, showOrdinal, rowRect) {
     return rowGeometry.buildRowCells({
       rowRect: rowRect || { x: 0, y: 0, w: 220, h: 48 },

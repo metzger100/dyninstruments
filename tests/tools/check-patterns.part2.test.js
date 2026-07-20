@@ -1,10 +1,11 @@
+// @ts-nocheck
 const {
   toolPath,
   tempDirs,
   runPatternCheck,
   createWorkspace,
   joinMessages,
-  joinWarningMessages,
+  joinWarningMessages
 } = require("./check-patterns.harness.js");
 
 describe("tools/check-patterns.mjs", function () {
@@ -120,7 +121,7 @@ describe("tools/check-patterns.mjs", function () {
     expect(out).toContain("decorate");
   });
 
-  it("warns when mapper translate return object has more than 8 properties", function () {
+  it("blocks when mapper translate return object has more than 8 properties", function () {
     const cwd = createWorkspace({
       "cluster/mappers/SampleMapper.js": `
 (function () {
@@ -137,8 +138,8 @@ describe("tools/check-patterns.mjs", function () {
           formatter: "formatSpeed",
           formatterParameters: ["kn"],
           minValue: 0,
-          maxValue: 30,
-          tickMajor: 5
+          maxValue: props.maxValue,
+          tickMajor: props.tickMajor
         };
       }
       return {};
@@ -151,16 +152,15 @@ describe("tools/check-patterns.mjs", function () {
     });
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
-    const warningOut = joinWarningMessages(result.warnings || []);
+    const failureOut = joinMessages(result.findings);
 
-    expect(result.summary.ok).toBe(true);
-    expect(result.summary.failures).toBe(0);
-    expect(result.summary.warnings).toBe(1);
-    expect(result.summary.byRuleWarnings["mapper-output-complexity"]).toBe(1);
-    expect(result.summary.byRuleFailures["mapper-output-complexity"]).toBe(0);
-    expect(result.findings).toHaveLength(0);
-    expect(warningOut).toContain("[mapper-output-complexity]");
-    expect(warningOut).toContain("kind 'speedGraphic'");
+    expect(result.summary.ok).toBe(false);
+    expect(result.summary.failures).toBe(1);
+    expect(result.summary.warnings).toBe(0);
+    expect(result.summary.byRuleFailures["mapper-output-complexity"]).toBe(1);
+    expect(result.summary.byRuleWarnings["mapper-output-complexity"]).toBe(0);
+    expect(failureOut).toContain("[mapper-output-complexity]");
+    expect(failureOut).toContain("kind 'speedGraphic'");
   });
 
   it("blocks when mapper translate return object has more than 12 properties", function () {
@@ -180,13 +180,13 @@ describe("tools/check-patterns.mjs", function () {
           formatter: "formatSpeed",
           formatterParameters: ["kn"],
           minValue: 0,
-          maxValue: 30,
-          tickMajor: 5,
-          tickMinor: 1,
-          warningFrom: 20,
-          alarmFrom: 25,
-          ratioThresholdNormal: 1.2,
-          ratioThresholdFlat: 3.5
+          maxValue: props.maxValue,
+          tickMajor: props.tickMajor,
+          tickMinor: props.tickMinor,
+          warningFrom: props.warningFrom,
+          alarmFrom: props.alarmFrom,
+          ratioThresholdNormal: props.ratioThresholdNormal,
+          ratioThresholdFlat: props.ratioThresholdFlat
         };
       }
       return {};
@@ -241,10 +241,10 @@ describe("tools/check-patterns.mjs", function () {
     });
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
-    const warningOut = joinWarningMessages(result.warnings || []);
+    const failureOut = joinMessages(result.findings);
 
-    expect(result.summary.ok).toBe(true);
-    expect(warningOut).toContain("kind 'aGraphic|bGraphic'");
+    expect(result.summary.ok).toBe(false);
+    expect(failureOut).toContain("kind 'aGraphic|bGraphic'");
   });
 
   it("blocks cluster-prefixed renderer wrapper ids in cluster/rendering", function () {
@@ -323,7 +323,6 @@ describe("tools/check-patterns.mjs", function () {
     expect(out).toContain("[redundant-internal-fallback]");
     expect(out).toContain("trackCaption");
     expect(out).toContain("trackUnit");
-    expect(out).toContain("p.unit ?? \"°\"");
+    expect(out).toContain('p.unit ?? "°"');
   });
-
 });

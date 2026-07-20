@@ -4,14 +4,18 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 describe("CenterDisplayLayout", function () {
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    return loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create({}, createComponentContextMock({
-      modules: {
-        ResponsiveScaleProfile: responsiveScaleProfile,
-        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
-      }
-    }));
+    return loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          ResponsiveScaleProfile: responsiveScaleProfile,
+          LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+        }
+      })
+    );
   }
 
+  /** @param {any} inner @param {any} outer */
   function expectRectInside(inner, outer) {
     expect(inner.x).toBeGreaterThanOrEqual(outer.x);
     expect(inner.y).toBeGreaterThanOrEqual(outer.y);
@@ -19,6 +23,14 @@ describe("CenterDisplayLayout", function () {
     expect(inner.y + inner.h).toBeLessThanOrEqual(outer.y + outer.h);
   }
 
+  /**
+   * @param {any} layout
+   * @param {number} width
+   * @param {number} height
+   * @param {string} mode
+   * @param {number} relationCount
+   * @param {string} [coordAlign]
+   */
   function buildSnapshot(layout, width, height, mode, relationCount, coordAlign) {
     const insets = layout.computeInsets(width, height);
     const contentRect = layout.createContentRect(width, height, insets);
@@ -74,7 +86,7 @@ describe("CenterDisplayLayout", function () {
       expectRectInside(out.center.lonRect, out.center.rect);
       expect(out.center.captionAlign).toBe("left");
       expect(out.center.coordAlign).toBe("center");
-      out.rowRects.forEach((rect, index) => {
+      out.rowRects.forEach((/** @type {any} */ rect, /** @type {number} */ index) => {
         expectRectInside(rect, contentRect);
         expect(rect.h).toBeGreaterThanOrEqual(Math.floor(contentRect.h * 0.12));
         if (index > 0) {
@@ -142,7 +154,7 @@ describe("CenterDisplayLayout", function () {
       const lastRow = out.rowRects[out.rowRects.length - 1];
       const lastRowCenter = lastRow.y + Math.floor(lastRow.h / 2);
       const topMargin = firstCoordCenter - contentRect.y;
-      const bottomMargin = (contentRect.y + contentRect.h) - lastRowCenter;
+      const bottomMargin = contentRect.y + contentRect.h - lastRowCenter;
 
       expect(Math.abs(topMargin - bottomMargin)).toBeLessThanOrEqual(1);
     });
@@ -154,8 +166,10 @@ describe("CenterDisplayLayout", function () {
     const large = buildSnapshot(layout, 520, 180, "flat", 2);
 
     expectRectInside(compact.out.center.rect, compact.contentRect);
-    compact.out.rowRects.forEach((rect) => expectRectInside(rect, compact.contentRect));
-    expect(compact.out.center.rect.w / compact.contentRect.w).toBeLessThan(large.out.center.rect.w / large.contentRect.w);
+    compact.out.rowRects.forEach((/** @type {any} */ rect) => expectRectInside(rect, compact.contentRect));
+    expect(compact.out.center.rect.w / compact.contentRect.w).toBeLessThan(
+      large.out.center.rect.w / large.contentRect.w
+    );
     expect(compact.out.center.captionRect.h / compact.out.center.rect.h).toBeLessThan(
       large.out.center.captionRect.h / large.out.center.rect.h
     );
@@ -181,8 +195,10 @@ describe("CenterDisplayLayout", function () {
     const large = buildSnapshot(layout, 180, 260, "high", 2);
 
     expectRectInside(compact.out.center.rect, compact.contentRect);
-    compact.out.rowRects.forEach((rect) => expectRectInside(rect, compact.contentRect));
-    expect(compact.out.center.rect.h / compact.contentRect.h).toBeLessThan(large.out.center.rect.h / large.contentRect.h);
+    compact.out.rowRects.forEach((/** @type {any} */ rect) => expectRectInside(rect, compact.contentRect));
+    expect(compact.out.center.rect.h / compact.contentRect.h).toBeLessThan(
+      large.out.center.rect.h / large.contentRect.h
+    );
     expect(compact.out.center.captionRect.h / compact.out.center.rect.h).toBeLessThan(
       large.out.center.captionRect.h / large.out.center.rect.h
     );

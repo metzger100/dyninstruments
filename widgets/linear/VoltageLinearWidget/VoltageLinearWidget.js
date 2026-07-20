@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniVoltageLinearWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @typedef {DyniLinearGaugeProps & { voltageLinearWarningEnabled?: boolean, voltageLinearAlarmEnabled?: boolean, voltageLinearWarningFrom?: number, voltageLinearAlarmFrom?: number }} DyniVoltageLinearProps */
@@ -20,25 +20,28 @@
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     /** @param {unknown} raw @param {DyniLinearGaugeProps} props @returns {{ num: number, text: unknown }} */
     function formatDisplay(raw, props) {
-      const display = valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
+      const display = valueMath.formatGaugeDisplay(
+        raw,
+        props,
+        componentContext.format.applyFormatter,
+        placeholderNormalize.normalize,
+        "formatDecimal",
+        [3, 1, true]
+      );
       return { num: display.num, text: placeholderNormalize.normalize(display.text, undefined) };
     }
 
     /** @param {DyniVoltageLinearProps} props @param {number} minV @param {number} maxV @param {DyniLinearRange} axis @param {DyniLinearGaugeTheme} theme @returns {DyniLinearColoredRange[]} */
     function buildSectors(props, minV, maxV, axis, theme) {
       const p = props || {};
-      const warningEnabled = (p.voltageLinearWarningEnabled !== false);
-      const alarmEnabled = (p.voltageLinearAlarmEnabled !== false);
+      const warningEnabled = p.voltageLinearWarningEnabled !== false;
+      const alarmEnabled = p.voltageLinearAlarmEnabled !== false;
       if (!warningEnabled && !alarmEnabled) {
         return [];
       }
 
-      const warningFrom = warningEnabled
-        ? p.voltageLinearWarningFrom
-        : undefined;
-      const alarmFrom = alarmEnabled
-        ? p.voltageLinearAlarmFrom
-        : undefined;
+      const warningFrom = warningEnabled ? p.voltageLinearWarningFrom : undefined;
+      const alarmFrom = alarmEnabled ? p.voltageLinearAlarmFrom : undefined;
       const alarmTo = Number.isFinite(alarmFrom) ? valueMath.clamp(alarmFrom, axis.min, axis.max) : undefined;
       const warningTo = Number.isFinite(warningFrom) ? valueMath.clamp(warningFrom, axis.min, axis.max) : undefined;
       const alarmFinite = typeof alarmTo === "number" && Number.isFinite(alarmTo);
@@ -59,8 +62,7 @@
           to: warningTo,
           color: theme.colors.warning
         });
-      }
-      else if (!alarmFinite && warningFinite && warningTo > minV) {
+      } else if (!alarmFinite && warningFinite && warningTo > minV) {
         sectors.push({
           from: valueMath.clamp(minV, axis.min, axis.max),
           to: warningTo,
@@ -111,4 +113,4 @@
   }
 
   return { id: "VoltageLinearWidget", create: create };
-}));
+});

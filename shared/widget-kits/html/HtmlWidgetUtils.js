@@ -140,7 +140,6 @@
     return color ? colorKey + ":" + color + ";" : "";
   }
 
-  // dyni-lint-disable-next-line duplicate-functions -- PLAN27 Phase 2 adds canonical helper exports before Phase 3 call-site migration removes file-local copies.
   /** @param {unknown} model @param {unknown} tokens @param {unknown} baseFamily @returns {unknown} */
   function resolveMetricValueFamily(model, tokens, baseFamily) {
     const tokensObj = /** @type {{ font?: unknown } | null | undefined} */ (tokens);
@@ -160,7 +159,6 @@
     return c && c.labelEdgePolicy === "sliding" ? "sliding" : "inset";
   }
 
-  // dyni-lint-disable-next-line duplicate-functions -- PLAN27 Phase 2 adds canonical helper exports before Phase 3 call-site migration removes file-local copies.
   /** @returns {string} */
   function joinStyles() {
     let text = "";

@@ -4,16 +4,23 @@
 
 ## Overview
 
-editableParameters define the widget configuration UI in AvNav's Layout Editor. Passed as second argument to `avnav.api.registerWidget(def, editableParameters)`. Parameter values are available in renderHtml/renderCanvas props (exception: KEY type provides the store-read value, not the path).
+editableParameters define the widget configuration UI in AvNav's Layout Editor. Passed as second argument to
+`avnav.api.registerWidget(def, editableParameters)`. Parameter values are available in renderHtml/renderCanvas props
+(exception: KEY type provides the store-read value, not the path).
 
 ## Parameter Definition
 
 editableParameters is an object of parameter specs.
 
-- The **object key** is the **property name** that appears in renderHtml/renderCanvas props (e.g. `minValue`, `speedRadialRatioThresholdFlat`).
-- The **editor label** is controlled by the spec field `name` (used across cluster config files in config/clusters/*) or `displayName` (used by dyninstruments helper `makePerKindTextParams`).
+- The **object key** is the **property name** that appears in renderHtml/renderCanvas props (e.g. `minValue`,
+  `speedRadialRatioThresholdFlat`).
+- The **editor label** is controlled by the spec field `name` (used across cluster config files in config/clusters/*) or
+  `displayName` (used by dyninstruments helper `makePerKindTextParams`).
 - If neither `name` nor `displayName` is set, AvNav may fall back to showing the key.
-- dyninstruments editor labels should stay short. Remove mode hints already implied by `condition`, prefer `Instrument` for the top-level selector label, use `store path` wording for `KEY` selectors, keep common abbreviations such as `min/max`, and add directional wording only when it changes the meaning (for example `Warning at or above` vs `Warning at or below`).
+- dyninstruments editor labels should stay short. Remove mode hints already implied by `condition`, prefer `Instrument`
+  for the top-level selector label, use `store path` wording for `KEY` selectors, keep common abbreviations such as
+  `min/max`, and add directional wording only when it changes the meaning (for example `Warning at or above` vs
+  `Warning at or below`).
 - In the nav cluster, active-route editables are scoped to `activeRoute`.
 
 ```javascript
@@ -28,20 +35,21 @@ editableParameters is an object of parameter specs.
 
 ## Parameter Types (AvNav API)
 
-| Type | Editor UI | Value Type | Notes |
-|---|---|---|---|
-| `STRING` | Text input | string | |
-| `NUMBER` | Number input | number | Integer |
-| `FLOAT` | Number input | number | With min/max/step |
-| `BOOLEAN` | Toggle | boolean | |
-| `SELECT` | Dropdown | string | Requires `list` |
-| `KEY` | Store key browser | any | **Special:** render functions receive the *value read from store*, not the path string |
-| `ARRAY` | Text input (comma-separated) | array | |
-| `COLOR` | Color picker | string | CSS color value, e.g. `"rgba(200, 50, 50, .75)"` |
+| Type      | Editor UI                    | Value Type | Notes                                                                                  |
+| --------- | ---------------------------- | ---------- | -------------------------------------------------------------------------------------- |
+| `STRING`  | Text input                   | string     |                                                                                        |
+| `NUMBER`  | Number input                 | number     | Integer                                                                                |
+| `FLOAT`   | Number input                 | number     | With min/max/step                                                                      |
+| `BOOLEAN` | Toggle                       | boolean    |                                                                                        |
+| `SELECT`  | Dropdown                     | string     | Requires `list`                                                                        |
+| `KEY`     | Store key browser            | any        | **Special:** render functions receive the _value read from store_, not the path string |
+| `ARRAY`   | Text input (comma-separated) | array      |                                                                                        |
+| `COLOR`   | Color picker                 | string     | CSS color value, e.g. `"rgba(200, 50, 50, .75)"`                                       |
 
 ### SELECT Details
 
 `list` accepts three forms:
+
 - Array of strings: `["option1", "option2"]`
 - Array of objects: `[{ name: "Display Name", value: "val" }, ...]`
 - Function returning array (or function returning Promise that resolves to array)
@@ -72,9 +80,11 @@ The render/update path receives the **store value** under `<parameterName>`, not
 value: { type: "KEY", default: "" }
 ```
 
-Recommended editor captions for `KEY` parameters should describe the AvNav store-path override directly, for example `Depth store path`, `Temperature store path`, or `Voltage store path`.
-Environment depth kinds use `depthKey` with default `nav.gps.depthBelowKeel`; clearing it restores that below-keel default.
-Alias selectors such as `depthKey` and `tempKey` must copy the live `<parameterName>` value onto the mapper-owned prop (`depth`, `temp`) in `updateFunction`; they cannot rewrite `storeKeys` during render.
+Recommended editor captions for `KEY` parameters should describe the AvNav store-path override directly, for example
+`Depth store path`, `Temperature store path`, or `Voltage store path`. Environment depth kinds use `depthKey` with
+default `nav.gps.depthBelowKeel`; clearing it restores that below-keel default. Alias selectors such as `depthKey` and
+`tempKey` must copy the live `<parameterName>` value onto the mapper-owned prop (`depth`, `temp`) in `updateFunction`;
+they cannot rewrite `storeKeys` during render.
 
 ### COLOR Details
 
@@ -86,14 +96,14 @@ bgColor: { type: "COLOR", default: "rgba(200, 50, 50, .75)" }
 
 These are well-known to AvNav and need no type definition — just `true` (show in editor) or `false` (hide):
 
-| Name | Type | Description |
-|---|---|---|
-| `caption` | STRING | Widget caption |
-| `unit` | STRING | Widget unit |
-| `formatter` | SELECT | Formatter picker (all registered formatters) |
-| `formatterParameters` | ARRAY | Parameters passed to formatter |
-| `value` | KEY | Store key selector |
-| `className` | STRING | CSS class name |
+| Name                  | Type   | Description                                  |
+| --------------------- | ------ | -------------------------------------------- |
+| `caption`             | STRING | Widget caption                               |
+| `unit`                | STRING | Widget unit                                  |
+| `formatter`           | SELECT | Formatter picker (all registered formatters) |
+| `formatterParameters` | ARRAY  | Parameters passed to formatter               |
+| `value`               | KEY    | Store key selector                           |
+| `className`           | STRING | CSS class name                               |
 
 ```javascript
 editableParameters: {
@@ -106,7 +116,8 @@ editableParameters: {
 }
 ```
 
-`formatterParameters` are positional and formatter-specific. Parameter order and supported values are defined by the selected formatter; see [formatters.md](formatters.md#built-in-formatters-canonical-list).
+`formatterParameters` are positional and formatter-specific. Parameter order and supported values are defined by the
+selected formatter; see [formatters.md](formatters.md#built-in-formatters-canonical-list).
 
 ---
 
@@ -114,26 +125,33 @@ editableParameters: {
 
 ### condition (Undocumented AvNav Feature)
 
-`condition` is used extensively in dyninstruments but **not documented in the official AvNav API**. It controls when a parameter is visible in the editor.
+`condition` is used extensively in dyninstruments but **not documented in the official AvNav API**. It controls when a
+parameter is visible in the editor.
 
 **Single condition** — visible when match:
+
 ```javascript
-condition: { kind: "sogRadial" }
+condition: {
+  kind: "sogRadial";
+}
 ```
 
 **OR logic** — array of objects, visible if ANY matches:
+
 ```javascript
-condition: [{ kind: "sog" }, { kind: "stw" }]
+condition: [{ kind: "sog" }, { kind: "stw" }];
 ```
 
 **AND logic** — multiple keys in one object, ALL must match:
+
 ```javascript
 condition: { kind: "depthRadial", depthRadialAlarmEnabled: true }
 ```
 
 **Always visible:**
+
 ```javascript
-condition: []   // or omit condition entirely
+condition: []; // or omit condition entirely
 ```
 
 ### internal (dyninstruments-internal)
@@ -142,15 +160,16 @@ condition: []   // or omit condition entirely
 
 - The spec stays in the cluster/shared config object.
 - `runtime/editable-defaults.js` still extracts its `default` value into the registered widget definition.
-- `runtime/widget-registrar.js` strips it from the `editableParameters` object passed to `avnav.api.registerWidget(...)`, so AvNav does not show it in the config editor.
+- `runtime/widget-registrar.js` strips it from the `editableParameters` object passed to
+  `avnav.api.registerWidget(...)`, so AvNav does not show it in the config editor.
 - This is a dyninstruments convention, not part of the documented AvNav API.
 
-Use it for implementation-detail layout tuning knobs such as responsive ratio thresholds. Do not use it for meaningful end-user controls such as range, ticks, captions, units, or feature toggles.
+Use it for implementation-detail layout tuning knobs such as responsive ratio thresholds. Do not use it for meaningful
+end-user controls such as range, ticks, captions, units, or feature toggles.
 
 ### Per-Kind Caption/Unit Pattern (dyninstruments-internal)
 
-Helper `makePerKindTextParams(KIND_MAP)` generates per-kind STRING parameters.
-Map entries support this schema:
+Helper `makePerKindTextParams(KIND_MAP)` generates per-kind STRING parameters. Map entries support this schema:
 
 ```javascript
 {
@@ -182,9 +201,8 @@ const WIND_KIND = {
 // unit_angleTrueRadialAngle:    { type: "STRING", displayName: "Angle unit", default: "°", condition: { kind: "angleTrueRadial" } }
 ```
 
-ClusterWidget resolves via `p['caption_' + kindName]` and `p['unit_' + kindName]`.
-Kinds that intentionally render no caption/unit may override the generated
-fields with `false` after the spread. Treat those entries as editor-hide
+ClusterWidget resolves via `p['caption_' + kindName]` and `p['unit_' + kindName]`. Kinds that intentionally render no
+caption/unit may override the generated fields with `false` after the spread. Treat those entries as editor-hide
 shorthands, not as typed parameter specs.
 
 ```javascript
@@ -228,8 +246,8 @@ Shared layout thresholds for numeric (ThreeValueTextWidget) kinds:
 ```javascript
 const commonThreeElementsEditables = {
   ratioThresholdNormal: { type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0, internal: true },
-  ratioThresholdFlat:   { type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0, internal: true },
-  captionUnitScale:     { type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8 }
+  ratioThresholdFlat: { type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0, internal: true },
+  captionUnitScale: { type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8 }
 };
 ```
 
@@ -273,7 +291,8 @@ They are scoped per cluster via `condition` lists (no global shared editable):
   - `dateTime`
   - `timeStatus`
 
-The option swaps `formatTime` for `formatClock` at the mapper or render-model boundary. No shared editable is used in `config/shared/common-editables.js`.
+The option swaps `formatTime` for `formatClock` at the mapper or render-model boundary. No shared editable is used in
+`config/shared/common-editables.js`.
 
 ## Related
 

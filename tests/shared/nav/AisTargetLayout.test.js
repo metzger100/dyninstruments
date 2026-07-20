@@ -1,73 +1,48 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("AisTargetLayout", function () {
   function createLayout() {
-    const responsiveScaleProfile = loadFresh(
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-    );
-    const layoutRectMath = loadFresh(
-      "shared/widget-kits/layout/LayoutRectMath.js",
-    );
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
     return loadFresh("shared/widget-kits/nav/AisTargetLayout.js").create(
       {},
       createComponentContextMock({
         modules: {
           ResponsiveScaleProfile: responsiveScaleProfile,
           LayoutRectMath: layoutRectMath,
-          AisTargetLayoutSizing: loadFresh(
-            "shared/widget-kits/nav/AisTargetLayoutSizing.js",
-          ),
-          AisTargetLayoutGeometry: loadFresh(
-            "shared/widget-kits/nav/AisTargetLayoutGeometry.js",
-          ),
-          AisTargetLayoutGeometryStyles: loadFresh(
-            "shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js",
-          ),
-          AisTargetLayoutMath: loadFresh(
-            "shared/widget-kits/nav/AisTargetLayoutMath.js",
-          ),
-        },
-      }),
+          AisTargetLayoutSizing: loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js"),
+          AisTargetLayoutGeometry: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js"),
+          AisTargetLayoutGeometryStyles: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js"),
+          AisTargetLayoutMath: loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js")
+        }
+      })
     );
   }
 
+  /** @param {any} box */
   function expectStackedSubRects(box) {
     expect(box.captionRect).toBeTruthy();
     expect(box.valueRect).toBeTruthy();
     expect(box.unitRect).toBeTruthy();
-    expect(box.valueRect.y).toBeGreaterThanOrEqual(
-      box.captionRect.y + box.captionRect.h,
-    );
-    expect(box.unitRect.y).toBeGreaterThanOrEqual(
-      box.valueRect.y + box.valueRect.h,
-    );
+    expect(box.valueRect.y).toBeGreaterThanOrEqual(box.captionRect.y + box.captionRect.h);
+    expect(box.unitRect.y).toBeGreaterThanOrEqual(box.valueRect.y + box.valueRect.h);
   }
 
+  /** @param {any} box */
   function expectInlineSubRects(box) {
     expect(box.labelRect).toBeTruthy();
     expect(box.valueRect).toBeTruthy();
     expect(box.valueTextRect).toBeTruthy();
     expect(box.unitRect).toBeTruthy();
-    expect(box.valueRect.x).toBeGreaterThanOrEqual(
-      box.labelRect.x + box.labelRect.w,
-    );
-    expect(box.unitRect.x).toBeGreaterThanOrEqual(
-      box.valueTextRect.x + box.valueTextRect.w,
-    );
+    expect(box.valueRect.x).toBeGreaterThanOrEqual(box.labelRect.x + box.labelRect.w);
+    expect(box.unitRect.x).toBeGreaterThanOrEqual(box.valueTextRect.x + box.valueTextRect.w);
   }
 
+  /** @param {any} styleText @param {string} key */
   function readPxFromStyle(styleText, key) {
     const match = String(styleText || "").match(new RegExp(key + ":(\\d+)px;"));
     return match ? Number(match[1]) : NaN;
-  }
-
-  function expectedAlarmStripWidth(shellWidth) {
-    const preferred = Math.round(shellWidth * 0.072);
-    const maxWidth = Math.max(8, Math.floor(shellWidth * 0.19));
-    return Math.max(8, Math.min(maxWidth, preferred));
   }
 
   it("resolves high/normal/flat mode by ratio thresholds", function () {
@@ -78,24 +53,24 @@ describe("AisTargetLayout", function () {
         W: 180,
         H: 200,
         ratioThresholdNormal: 1.2,
-        ratioThresholdFlat: 3.8,
-      }),
+        ratioThresholdFlat: 3.8
+      })
     ).toBe("high");
     expect(
       layout.resolveMode({
         W: 260,
         H: 180,
         ratioThresholdNormal: 1.2,
-        ratioThresholdFlat: 3.8,
-      }),
+        ratioThresholdFlat: 3.8
+      })
     ).toBe("normal");
     expect(
       layout.resolveMode({
         W: 520,
         H: 120,
         ratioThresholdNormal: 1.2,
-        ratioThresholdFlat: 3.8,
-      }),
+        ratioThresholdFlat: 3.8
+      })
     ).toBe("flat");
   });
 
@@ -108,20 +83,18 @@ describe("AisTargetLayout", function () {
       renderState: "data",
       showTcpaBranch: false,
       ratioThresholdNormal: 1.2,
-      ratioThresholdFlat: 3.8,
+      ratioThresholdFlat: 3.8
     });
 
     expect(out.mode).toBe("flat");
     expect(out.nameRect).toBeTruthy();
     expect(out.frontRect).toBeTruthy();
-    expect(Object.prototype.hasOwnProperty.call(out, "frontInitialRect")).toBe(
-      false,
-    );
+    expect(Object.prototype.hasOwnProperty.call(out, "frontInitialRect")).toBe(false);
     expect(out.metricVisibility).toEqual({
       dst: true,
       cpa: true,
       tcpa: true,
-      brg: true,
+      brg: true
     });
     expect(out.metricOrder).toEqual(["dst", "cpa", "tcpa", "brg"]);
     expect(out.flatMetricRows).toBeUndefined();
@@ -141,7 +114,7 @@ describe("AisTargetLayout", function () {
       W: 290,
       H: 140,
       renderState: "data",
-      showTcpaBranch: true,
+      showTcpaBranch: true
     });
 
     expect(out.mode).toBe("flat");
@@ -159,7 +132,7 @@ describe("AisTargetLayout", function () {
       renderState: "data",
       showTcpaBranch: true,
       ratioThresholdNormal: 1.2,
-      ratioThresholdFlat: 3.8,
+      ratioThresholdFlat: 3.8
     });
 
     expect(out.mode).toBe("normal");
@@ -171,12 +144,8 @@ describe("AisTargetLayout", function () {
     ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
       expectInlineSubRects(out.metricBoxes[id]);
     });
-    expect(out.inlineGeometry.wrapperStyle).toContain(
-      'grid-template-areas:"identity" "metrics"',
-    );
-    expect(out.inlineGeometry.metricStyles.tcpa.valueRowStyle).toContain(
-      "grid-template-columns:",
-    );
+    expect(out.inlineGeometry.wrapperStyle).toContain('grid-template-areas:"identity" "metrics"');
+    expect(out.inlineGeometry.metricStyles.tcpa.valueRowStyle).toContain("grid-template-columns:");
   });
 
   it("favors value width for DCPA/TCPA in normal and high inline rows", function () {
@@ -186,28 +155,20 @@ describe("AisTargetLayout", function () {
       W: 300,
       H: 190,
       renderState: "data",
-      showTcpaBranch: true,
+      showTcpaBranch: true
     });
     const high = layout.computeLayout({
       mode: "high",
       W: 180,
       H: 320,
       renderState: "data",
-      showTcpaBranch: true,
+      showTcpaBranch: true
     });
 
-    expect(normal.metricBoxes.cpa.valueTextRect.w).toBeGreaterThan(
-      normal.metricBoxes.cpa.labelRect.w,
-    );
-    expect(normal.metricBoxes.tcpa.valueTextRect.w).toBeGreaterThan(
-      normal.metricBoxes.tcpa.labelRect.w,
-    );
-    expect(high.metricBoxes.cpa.valueTextRect.w).toBeGreaterThan(
-      high.metricBoxes.cpa.labelRect.w,
-    );
-    expect(high.metricBoxes.tcpa.valueTextRect.w).toBeGreaterThan(
-      high.metricBoxes.tcpa.labelRect.w,
-    );
+    expect(normal.metricBoxes.cpa.valueTextRect.w).toBeGreaterThan(normal.metricBoxes.cpa.labelRect.w);
+    expect(normal.metricBoxes.tcpa.valueTextRect.w).toBeGreaterThan(normal.metricBoxes.tcpa.labelRect.w);
+    expect(high.metricBoxes.cpa.valueTextRect.w).toBeGreaterThan(high.metricBoxes.cpa.labelRect.w);
+    expect(high.metricBoxes.tcpa.valueTextRect.w).toBeGreaterThan(high.metricBoxes.tcpa.labelRect.w);
   });
 
   it("builds high data layout as four stacked rows with inline label/value-group metric boxes", function () {
@@ -217,7 +178,7 @@ describe("AisTargetLayout", function () {
       W: 170,
       H: 320,
       renderState: "data",
-      showTcpaBranch: false,
+      showTcpaBranch: false
     });
 
     expect(out.mode).toBe("high");
@@ -240,14 +201,14 @@ describe("AisTargetLayout", function () {
         W: 320,
         H: 180,
         renderState: state,
-        showTcpaBranch: true,
+        showTcpaBranch: true
       });
 
       expect(out.metricVisibility).toEqual({
         dst: false,
         cpa: false,
         tcpa: false,
-        brg: false,
+        brg: false
       });
       expect(out.metricOrder).toEqual([]);
       expect(Object.keys(out.metricBoxes)).toEqual([]);
@@ -263,7 +224,7 @@ describe("AisTargetLayout", function () {
       H: 180,
       renderState: "data",
       showTcpaBranch: true,
-      hasAccent: false,
+      hasAccent: false
     });
     const withAccent = layout.computeLayout({
       mode: "normal",
@@ -271,19 +232,15 @@ describe("AisTargetLayout", function () {
       H: 180,
       renderState: "data",
       showTcpaBranch: true,
-      hasAccent: true,
+      hasAccent: true
     });
 
-    expect(withAccent.contentRect.x).toBeGreaterThan(
-      withoutAccent.contentRect.x,
-    );
+    expect(withAccent.contentRect.x).toBeGreaterThan(withoutAccent.contentRect.x);
     expect(withAccent.contentRect.w).toBeLessThan(withoutAccent.contentRect.w);
     expect(withAccent.accentRect).toBeTruthy();
     expect(withAccent.accentRect.w).toBeGreaterThanOrEqual(14);
     expect(withAccent.insets.accentGap).toBeGreaterThanOrEqual(3);
-    expect(withAccent.insets.accentReserve).toBeGreaterThan(
-      withoutAccent.insets.accentReserve,
-    );
+    expect(withAccent.insets.accentReserve).toBeGreaterThan(withoutAccent.insets.accentReserve);
   });
 
   it("scales accent strip chrome from shell width in non-vertical data layouts", function () {
@@ -293,34 +250,24 @@ describe("AisTargetLayout", function () {
       H: 100,
       renderState: "data",
       showTcpaBranch: true,
-      hasAccent: true,
+      hasAccent: true
     });
     const wide = layout.computeLayout({
       W: 320,
       H: 100,
       renderState: "data",
       showTcpaBranch: true,
-      hasAccent: true,
+      hasAccent: true
     });
-    const narrowWidth = readPxFromStyle(
-      narrow.inlineGeometry.accentStyle,
-      "width",
-    );
+    const narrowWidth = readPxFromStyle(narrow.inlineGeometry.accentStyle, "width");
     const wideWidth = readPxFromStyle(wide.inlineGeometry.accentStyle, "width");
 
     expect(wide.accentRect.w).toBeGreaterThan(narrow.accentRect.w);
-    expect(wide.insets.accentReserve).toBeGreaterThan(
-      narrow.insets.accentReserve,
-    );
+    expect(wide.insets.accentReserve).toBeGreaterThan(narrow.insets.accentReserve);
     expect(narrowWidth).toBe(narrow.accentRect.w);
     expect(wideWidth).toBe(wide.accentRect.w);
     expect(wide.contentRect.x).toBeGreaterThan(narrow.contentRect.x);
-    expect(wide.contentRect.x - wide.insets.padX).toBe(
-      wide.insets.accentReserve,
-    );
-    expect(narrow.contentRect.x - narrow.insets.padX).toBe(
-      narrow.insets.accentReserve,
-    );
+    expect(wide.contentRect.x - wide.insets.padX).toBe(wide.insets.accentReserve);
+    expect(narrow.contentRect.x - narrow.insets.padX).toBe(narrow.insets.accentReserve);
   });
-
 });

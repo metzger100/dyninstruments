@@ -1,8 +1,5 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./LinearGaugeEngine.harness");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
 describe("LinearGaugeEngine", function () {
   it("falls back to engine-owned range defaults when range props are absent", function () {
@@ -15,27 +12,26 @@ describe("LinearGaugeEngine", function () {
       tickProps: {
         major: "major",
         minor: "minor",
-        showEndLabels: "showEndLabels",
+        showEndLabels: "showEndLabels"
       },
       drawFrame(state) {
         axisSnapshot = state.axis;
-      },
+      }
     });
 
     renderer(
       createMockCanvas({
         rectWidth: 300,
         rectHeight: 300,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
       {
         value: 15,
         major: 10,
-        minor: 5,
-      },
+        minor: 5
+      }
     );
 
     expect(axisSnapshot).toEqual({ min: 0, max: 30 });
   });
-
 });

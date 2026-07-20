@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniCenterDisplayTextWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {{ resolveForRoot(rootEl: unknown): { font: { family: string, familyMono?: string, weight: unknown, labelWeight: unknown }, surface: { fg: string }, opacity?: { caption?: unknown, unit?: unknown } } }} DyniCenterDisplayThemeResolver */
   /** @typedef {DyniComponentContext & { theme: { tokens: DyniCenterDisplayThemeResolver }, canvas: DyniCanvasHostApi }} DyniCenterDisplayWidgetContext */
@@ -57,28 +57,32 @@
   function drawCenterPanel(layout, state, displayState, labelFamily, valueFamily, valueWeight, labelWeight, color) {
     const textFillScale = layout.responsive.textFillScale || 1;
     const relationValueMaxPx = computeRelationValueMaxPx(layout, textFillScale);
-    const latFit = /** @type {{ px: number, text: string }} */ (state.tileLayout.measureFittedLine({
-      textApi: state.radialText,
-      ctx: state.ctx,
-      text: displayState.latText,
-      maxW: layout.center.latRect.w,
-      maxH: layout.center.latRect.h,
-      maxPx: relationValueMaxPx,
-      textFillScale: textFillScale,
-      family: valueFamily,
-      weight: valueWeight
-    }));
-    const lonFit = /** @type {{ px: number, text: string }} */ (state.tileLayout.measureFittedLine({
-      textApi: state.radialText,
-      ctx: state.ctx,
-      text: displayState.lonText,
-      maxW: layout.center.lonRect.w,
-      maxH: layout.center.lonRect.h,
-      maxPx: relationValueMaxPx,
-      textFillScale: textFillScale,
-      family: valueFamily,
-      weight: valueWeight
-    }));
+    const latFit = /** @type {{ px: number, text: string }} */ (
+      state.tileLayout.measureFittedLine({
+        textApi: state.radialText,
+        ctx: state.ctx,
+        text: displayState.latText,
+        maxW: layout.center.latRect.w,
+        maxH: layout.center.latRect.h,
+        maxPx: relationValueMaxPx,
+        textFillScale: textFillScale,
+        family: valueFamily,
+        weight: valueWeight
+      })
+    );
+    const lonFit = /** @type {{ px: number, text: string }} */ (
+      state.tileLayout.measureFittedLine({
+        textApi: state.radialText,
+        ctx: state.ctx,
+        text: displayState.lonText,
+        maxW: layout.center.lonRect.w,
+        maxH: layout.center.lonRect.h,
+        maxPx: relationValueMaxPx,
+        textFillScale: textFillScale,
+        family: valueFamily,
+        weight: valueWeight
+      })
+    );
     const coupledPx = Math.min(latFit.px, lonFit.px);
     const coupledLatFit = latFit.px === coupledPx ? latFit : { px: coupledPx, text: latFit.text };
     const coupledLonFit = lonFit.px === coupledPx ? lonFit : { px: coupledPx, text: lonFit.text };
@@ -129,14 +133,14 @@
     const valueMaxPx = computeResponsiveLineMaxPx(rect, 0.66, textFillScale);
     const desiredLabelWidth = row.caption
       ? measureCachedTextWidth(
-        state.ctx,
-        state.radialText,
-        row.caption,
-        labelFamily,
-        labelWeight,
-        labelMaxPx,
-        state.frameWidthCache
-      )
+          state.ctx,
+          state.radialText,
+          row.caption,
+          labelFamily,
+          labelWeight,
+          labelMaxPx,
+          state.frameWidthCache
+        )
       : 0;
     const fullValueWidth = measureCachedTextWidth(
       state.ctx,
@@ -156,20 +160,18 @@
       valueMaxPx,
       state.frameWidthCache
     );
-    const maxLabelWidth = Math.floor(rect.w * 0.40);
+    const maxLabelWidth = Math.floor(rect.w * 0.4);
     const minValueWidth = Math.floor(rect.w * 0.42);
     const availableLabelWidth = Math.max(0, rect.w - minValueWidth - (row.caption ? gap : 0));
     const labelWidth = row.caption
       ? Math.max(0, Math.min(maxLabelWidth, availableLabelWidth, Math.floor(desiredLabelWidth)))
       : 0;
     const availableValueWidth = Math.max(1, rect.w - labelWidth - (row.caption ? gap : 0));
-    const valueText = fullValueWidth <= availableValueWidth + 0.01
-      ? row.fullValueText
-      : row.compactValueText;
+    const valueText = fullValueWidth <= availableValueWidth + 0.01 ? row.fullValueText : row.compactValueText;
     const valueWidth = valueText === row.fullValueText ? fullValueWidth : compactValueWidth;
     const pairWidth = labelWidth + (row.caption ? gap : 0) + valueWidth;
     const pairX = rect.x + Math.max(0, Math.floor((rect.w - pairWidth) / 2));
-    const valueOffset = row.caption ? (pairX - rect.x + labelWidth + gap) : (pairX - rect.x);
+    const valueOffset = row.caption ? pairX - rect.x + labelWidth + gap : pairX - rect.x;
     return {
       labelRect: { x: pairX, y: rect.y, w: labelWidth, h: rect.h },
       valueRect: {
@@ -257,18 +259,20 @@
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       const captionOpacity = resolveOpacity(tokens.opacity && tokens.opacity.caption);
-      if (centerDisplayStateAdapter.renderStateScreenIfNeeded({
-        ctx: ctx,
-        W: W,
-        H: H,
-        props: p,
-        family: family,
-        color: color,
-        labelWeight: labelWeight
-      })) {
+      if (
+        centerDisplayStateAdapter.renderStateScreenIfNeeded({
+          ctx: ctx,
+          W: W,
+          H: H,
+          props: p,
+          family: family,
+          color: color,
+          labelWeight: labelWeight
+        })
+      ) {
         return;
       }
-      const defaultText = String(p.default);
+      const defaultText = /** @type {string} */ (p.default);
       const modeData = text.computeModeLayout({
         W: W,
         H: H,
@@ -278,7 +282,11 @@
         unitText: ""
       });
       const insets = layoutApi.computeInsets(W, H);
-      const contentRect = layoutApi.createContentRect(W, H, /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (insets)));
+      const contentRect = layoutApi.createContentRect(
+        W,
+        H,
+        /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (insets))
+      );
       const displayState = centerDisplayRenderModel.buildDisplayState(p, math, defaultText);
       /** @type {Record<string, number>} */
       const frameWidthCache = Object.create(null);
@@ -335,7 +343,9 @@
         color
       );
     }
-    function translateFunction() { return {}; }
+    function translateFunction() {
+      return {};
+    }
     return {
       id: "CenterDisplayTextWidget",
       wantsHideNativeHead: true,
@@ -344,4 +354,4 @@
     };
   }
   return { id: "CenterDisplayTextWidget", create: create };
-}));
+});

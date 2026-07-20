@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniStableDigits = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -22,9 +22,7 @@
    */
 
   const hasOwn = Object.prototype.hasOwnProperty;
-  const NUMBER_PARTS_RE = new RegExp(
-    "^\\s*([+-]?)(\\d+)(?:[.,](\\d+))?\\s*(.*?)\\s*$"
-  );
+  const NUMBER_PARTS_RE = new RegExp("^\\s*([+-]?)(\\d+)(?:[.,](\\d+))?\\s*(.*?)\\s*$");
 
   /** @type {(value: unknown) => string} */
   let toText = String;
@@ -84,9 +82,10 @@
    */
   function buildPadded(parts, suffix, reserveSignSlot, integerWidth) {
     const sign = parts.signActual || (reserveSignSlot ? " " : "");
-    const integer = integerWidth > 0 && parts.integer.length < integerWidth
-      ? parts.integer.padStart(integerWidth, "0")
-      : parts.integer;
+    const integer =
+      integerWidth > 0 && parts.integer.length < integerWidth
+        ? parts.integer.padStart(integerWidth, "0")
+        : parts.integer;
     return sign + integer + parts.dot + parts.fraction + suffix;
   }
 
@@ -146,9 +145,7 @@
       const reserveSideSuffixSlot = cfg.reserveSideSuffixSlot === true;
       const sideSuffix = resolveSideSuffix(cfg);
       const suffix = resolveSuffix(cfg.suffix, sideSuffix || parts.parsedSuffix);
-      const paddedSuffix = reserveSideSuffixSlot
-        ? (sideSuffix || " ")
-        : suffix;
+      const paddedSuffix = reserveSideSuffixSlot ? sideSuffix || " " : suffix;
       const plain = buildPlain(parts, suffix);
       const padded = buildPadded(parts, paddedSuffix, reserveSignSlot, integerWidth);
 
@@ -169,4 +166,4 @@
     id: "StableDigits",
     create: create
   };
-}));
+});

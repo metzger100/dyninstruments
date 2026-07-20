@@ -26,9 +26,8 @@
     }
     try {
       return Object.getOwnPropertyNames(obj);
-    }
-    // dyni-lint-disable-next-line catch-fallback-without-suppression -- DOM host objects can reject property enumeration; the bridge treats that as a non-match and keeps scanning.
-    catch (err) {
+      // dyni-boundary-next-line(category: dom-host-uncertainty, owner: Metzger100, date: 2026-07-17) -- DOM host objects can reject property enumeration; the bridge treats that as a non-match and keeps scanning.
+    } catch (err) {
       return [];
     }
   }
@@ -164,9 +163,8 @@
     try {
       const found = doc.querySelectorAll(".alarmWidget");
       return /** @type {Element[]} */ (Array.prototype.slice.call(found));
-    }
-    // dyni-lint-disable-next-line catch-fallback-without-suppression -- DOM query selection can be unavailable on host stubs; the bridge falls back to unsupported.
-    catch (err) {
+      // dyni-boundary-next-line(category: dom-host-uncertainty, owner: Metzger100, date: 2026-07-17) -- DOM query selection can be unavailable on host stubs; the bridge falls back to unsupported.
+    } catch (err) {
       return [];
     }
   }
@@ -195,7 +193,10 @@
   /** @param {unknown} rootRef @param {(message: string) => Error} createBridgeError @returns {DyniHostActionDiscoveryApi} */
   function create(rootRef, createBridgeError) {
     const rootWithDocument = /** @type {{ document?: Document } | null | undefined} */ (rootRef);
-    const doc = rootWithDocument && rootWithDocument.document ? rootWithDocument.document : /** @type {Document | null} */ (rootRef);
+    const doc =
+      rootWithDocument && rootWithDocument.document
+        ? rootWithDocument.document
+        : /** @type {Document | null} */ (rootRef);
 
     /** @param {string} actionName @param {string} pageId @param {Record<string, unknown>} avnavData @param {string[]} propNames @param {string} missingLabel @returns {true} */
     function dispatchPageAction(actionName, pageId, avnavData, propNames, missingLabel) {
@@ -231,7 +232,10 @@
     };
   }
 
-  /** @type {DyniRuntimeNamespace & Record<string, unknown>} */ (runtime).createTemporaryHostActionBridgeDiscovery = /** @type {(rootRef: unknown, createBridgeError: (message: string) => Error) => DyniHostActionDiscoveryApi} */ (function (rootRef, createBridgeError) {
-    return create(rootRef, createBridgeError);
-  });
-}(this));
+  /** @type {DyniRuntimeNamespace & Record<string, unknown>} */ (runtime).createTemporaryHostActionBridgeDiscovery =
+    /** @type {(rootRef: unknown, createBridgeError: (message: string) => Error) => DyniHostActionDiscoveryApi} */ (
+      function (rootRef, createBridgeError) {
+        return create(rootRef, createBridgeError);
+      }
+    );
+})(this);

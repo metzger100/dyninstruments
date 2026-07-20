@@ -29,9 +29,7 @@
 
   /** @param {DyniAvnavApi | null | undefined} hostApi @returns {hostApi is DyniRequiredHostApi} */
   function hasRequiredHostApi(hostApi) {
-    return !!(hostApi &&
-      typeof hostApi.registerWidget === "function" &&
-      typeof hostApi.log === "function");
+    return !!(hostApi && typeof hostApi.registerWidget === "function" && typeof hostApi.log === "function");
   }
 
   /** @param {string} scriptId @param {string} src @returns {Promise<void>} */
@@ -105,8 +103,8 @@
         entrypoint: "legacy"
       });
     })
-    // dyni-lint-disable-next-line catch-fallback-without-suppression -- Top-level bootstrap should log startup failures without turning them into unhandled browser promise rejections.
+    // dyni-boundary-next-line(category: browser-runtime-boundary, owner: Metzger100, date: 2026-07-17) -- Top-level bootstrap should log startup failures without turning them into unhandled browser promise rejections.
     .catch(function (error) {
       console.error("dyninstruments bootstrap failed:", error);
     });
-}());
+})();

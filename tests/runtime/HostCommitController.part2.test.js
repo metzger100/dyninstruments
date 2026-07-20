@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
 describe("runtime/HostCommitController.js", function () {
@@ -257,5 +258,4 @@ describe("runtime/HostCommitController.js", function () {
     expect(onCommitNew).toHaveBeenCalledTimes(1);
     expect(onCommitNew.mock.calls[0][0].revision).toBe(2);
   });
-
 });

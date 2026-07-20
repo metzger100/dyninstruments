@@ -20,7 +20,8 @@ describe("config/clusters/environment.js", function () {
     runIifeScript("config/shared/environment-editables.js", context);
     runIifeScript("config/clusters/environment.js", context);
 
-    return context.DyniPlugin.config.clusters.find((c) => c.def && c.def.cluster === "environment").def;
+    return context.DyniPlugin.config.clusters.find((/** @type {any} */ c) => c.def && c.def.cluster === "environment")
+      .def;
   }
 
   it("registers environment cluster with expected keys", function () {
@@ -30,7 +31,7 @@ describe("config/clusters/environment.js", function () {
     expect(def.storeKeys.depth).toBe("nav.gps.depthBelowKeel");
     expect(def.editableParameters.kind.default).toBe("depth");
     expect(def.editableParameters.kind.name).toBe("Instrument");
-    const kinds = def.editableParameters.kind.list.map((entry) => entry.value);
+    const kinds = def.editableParameters.kind.list.map((/** @type {any} */ entry) => entry.value);
     expect(kinds).toEqual(expect.arrayContaining(["depthLinear", "tempLinear"]));
     expect(def.editableParameters.kind.list[0].name).toBe("Depth");
     expect(def.editableParameters.depthKey.name).toBe("Depth store path");
@@ -153,32 +154,44 @@ describe("config/clusters/environment.js", function () {
   it("uses live depthKey values for custom depth store paths at runtime", function () {
     const def = loadEnvDef();
 
-    const text = def.updateFunction.call({ kind: "depth" }, {
-      depth: undefined,
-      depthKey: 4.2
-    });
+    const text = def.updateFunction.call(
+      { kind: "depth" },
+      {
+        depth: undefined,
+        depthKey: 4.2
+      }
+    );
     expect(text.depth).toBe(4.2);
 
-    const linear = def.updateFunction.call({ kind: "depthLinear" }, {
-      depth: undefined,
-      depthKey: 5.1
-    });
+    const linear = def.updateFunction.call(
+      { kind: "depthLinear" },
+      {
+        depth: undefined,
+        depthKey: 5.1
+      }
+    );
     expect(linear.depth).toBe(5.1);
 
-    const radial = def.updateFunction.call({ kind: "depthRadial" }, {
-      depth: undefined,
-      depthKey: 6.3
-    });
+    const radial = def.updateFunction.call(
+      { kind: "depthRadial" },
+      {
+        depth: undefined,
+        depthKey: 6.3
+      }
+    );
     expect(radial.depth).toBe(6.3);
   });
 
   it("keeps missing selected depth keys missing instead of falling back to keel", function () {
     const def = loadEnvDef();
 
-    const out = def.updateFunction.call({ kind: "depthRadial" }, {
-      depth: 3.8,
-      depthKey: undefined
-    });
+    const out = def.updateFunction.call(
+      { kind: "depthRadial" },
+      {
+        depth: 3.8,
+        depthKey: undefined
+      }
+    );
 
     expect(out.depth).toBeUndefined();
   });
@@ -199,10 +212,13 @@ describe("config/clusters/environment.js", function () {
   it("uses live tempKey values for custom temperature store paths at runtime", function () {
     const def = loadEnvDef();
 
-    const out = def.updateFunction.call({ kind: "tempLinear" }, {
-      temp: undefined,
-      tempKey: 21.5
-    });
+    const out = def.updateFunction.call(
+      { kind: "tempLinear" },
+      {
+        temp: undefined,
+        tempKey: 21.5
+      }
+    );
 
     expect(out.temp).toBe(21.5);
   });

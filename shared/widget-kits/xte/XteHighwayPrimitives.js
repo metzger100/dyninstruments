@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniXteHighwayPrimitives = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   const RAIL_WIDTH_FACTOR = 0.013;
   const CROSSBAR_WIDTH_FACTOR = 0.009;
@@ -123,7 +123,14 @@
       const crossbarWidth = gs.scaleStroke(pd, CROSSBAR_WIDTH_FACTOR, sw, sFloor);
       const seamWidth = gs.scaleStroke(pd, SEAM_WIDTH_FACTOR, sw, sFloor);
       const horizonWidth = gs.scaleStroke(pd, HORIZON_WIDTH_FACTOR, sw, sFloor);
-      const stripeCount = mode === "high" ? 8 : (mode === "flat" ? 6 : 7);
+      let stripeCount;
+      if (mode === "high") {
+        stripeCount = 8;
+      } else if (mode === "flat") {
+        stripeCount = 6;
+      } else {
+        stripeCount = 7;
+      }
 
       ctx.save();
       ctx.lineCap = "butt";
@@ -196,7 +203,16 @@
      * @param {unknown} pointerDepthWeight
      * @returns {void}
      */
-    function drawDynamicHighway(ctx, geom, colors, xteNormalized, overflow, primaryDim, strokeWeight, pointerDepthWeight) {
+    function drawDynamicHighway(
+      ctx,
+      geom,
+      colors,
+      xteNormalized,
+      overflow,
+      primaryDim,
+      strokeWeight,
+      pointerDepthWeight
+    ) {
       const cx = geom.cx;
       const horizonY = geom.horizonY;
       const baseY = geom.baseY;
@@ -250,9 +266,14 @@
       if (!showWpName || !name || !rect || !fit) {
         return false;
       }
-      const fittedText = typeof fit.text === "string"
-        ? fit.text.trim()
-        : (fit.text == null ? "" : String(fit.text).trim());
+      let fittedText;
+      if (typeof fit.text === "string") {
+        fittedText = fit.text.trim();
+      } else if (fit.text == null) {
+        fittedText = "";
+      } else {
+        fittedText = String(fit.text).trim();
+      }
       if (!fittedText) {
         return false;
       }
@@ -279,4 +300,4 @@
   }
 
   return { id: "XteHighwayPrimitives", create: create };
-}));
+});

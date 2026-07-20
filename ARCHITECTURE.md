@@ -31,31 +31,37 @@
 
 ## Dependency Direction Rule
 
-| Layer | Allowed direction |
-|---|---|
-| `widgets/` | `widgets -> shared -> (no imports, UMD globals)` |
-| `cluster/` | `cluster -> cluster/widgets/shared -> (no imports, UMD globals)` |
-| `config/` | `config -> (pure data, no runtime imports)` |
-| `runtime/cluster/` | `runtime/cluster -> config/cluster-routes -> widgets/shared` |
-| `runtime/surface/` | `runtime/surface -> widgets/shared` |
-| `runtime/` | `runtime -> (framework, no widget/cluster imports)` |
+| Layer              | Allowed direction                                                |
+| ------------------ | ---------------------------------------------------------------- |
+| `widgets/`         | `widgets -> shared -> (no imports, UMD globals)`                 |
+| `cluster/`         | `cluster -> cluster/widgets/shared -> (no imports, UMD globals)` |
+| `config/`          | `config -> (pure data, no runtime imports)`                      |
+| `runtime/cluster/` | `runtime/cluster -> config/cluster-routes -> widgets/shared`     |
+| `runtime/surface/` | `runtime/surface -> widgets/shared`                              |
+| `runtime/`         | `runtime -> (framework, no widget/cluster imports)`              |
 
-Widget feature code depends on shared code. Cluster orchestration code may depend on cluster/widgets/shared. Shared code depends only on shared. Config is pure data. Runtime is framework-only.
+Widget feature code depends on shared code. Cluster orchestration code may depend on cluster/widgets/shared. Shared code
+depends only on shared. Config is pure data. Runtime is framework-only.
 
 ## Boundary Rule
 
 1. Only `runtime/`, `plugin.js`, and `plugin.mjs` may access `window.avnav`/AvNav API objects directly.
-2. Widgets and cluster code must use `componentContext.format.applyFormatter()` for formatter dispatch/fallback behavior.
-3. Cluster host registration is `renderHtml` on AvNav host; internal visual surface selection is owned by `config/cluster-routes`, `ClusterWidget`, `RouteActivationController`, and `RouteActivationPayloadBuilder`.
-4. Canvas rendering remains valid as an internal renderer contract via `CanvasDomSurfaceAdapter` (`renderCanvas(canvas, props)` callbacks).
+2. Widgets and cluster code must use `componentContext.format.applyFormatter()` for formatter dispatch/fallback
+   behavior.
+3. Cluster host registration is `renderHtml` on AvNav host; internal visual surface selection is owned by
+   `config/cluster-routes`, `ClusterWidget`, `RouteActivationController`, and `RouteActivationPayloadBuilder`.
+4. Canvas rendering remains valid as an internal renderer contract via `CanvasDomSurfaceAdapter`
+   (`renderCanvas(canvas, props)` callbacks).
 
 ## Component Registration Flow
 
 1. `plugin.js` and `plugin.mjs` delegate startup to `runtime/plugin-bootstrap-core.js`.
-2. The shared bootstrap core loads `bootstrap-bundle.js` first, falls back to `config/bootstrap-manifest.js` when needed, then starts `runtime.runInit()`.
+2. The shared bootstrap core loads `bootstrap-bundle.js` first, falls back to `config/bootstrap-manifest.js` when
+   needed, then starts `runtime.runInit()`.
 3. `runtime/component-loader.js` loads required components declared in `config/components.js`.
 4. `runtime/widget-registrar.js` composes widget definitions and registers via `avnav.api.registerWidget()`.
-5. `ClusterWidget` drives host `renderHtml` lifecycle; deferred commit/surface switching is owned by `HostCommitController` + `SurfaceSessionController`.
+5. `ClusterWidget` drives host `renderHtml` lifecycle; deferred commit/surface switching is owned by
+   `HostCommitController` + `SurfaceSessionController`.
 
 ## Cross-References
 

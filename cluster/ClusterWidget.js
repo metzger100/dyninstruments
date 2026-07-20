@@ -203,7 +203,7 @@
           shellEl: shellEl,
           hostContext: hostContext
         });
-        // dyni-lint-disable-next-line catch-fallback-without-suppression -- Activation failures are logged by the runtime boundary; the shell remains committed.
+        // dyni-boundary-next-line(category: avnav-host-boundary, owner: Metzger100, date: 2026-07-17) -- Activation failures are logged by the runtime boundary; the shell remains committed.
       } catch (error) {
         runtimeApi.routeActivation.reportActivationError(error);
         return;
@@ -221,7 +221,7 @@
         activation && typeof activation === "object" ? /** @type {Record<string, unknown>} */ (activation) : null;
       if (activationRecord && typeof activationRecord.then === "function") {
         const activationPromise = /** @type {Promise<unknown>} */ (activation);
-        // dyni-lint-disable-next-line catch-fallback-without-suppression -- Route activation rejections are logged by the runtime boundary; the shell remains committed.
+        // dyni-boundary-next-line(category: avnav-host-boundary, owner: Metzger100, date: 2026-07-17) -- Route activation rejections are logged by the runtime boundary; the shell remains committed.
         activationPromise.then(reconcile).catch(function (error) {
           runtimeApi.routeActivation.reportActivationError(error);
         });

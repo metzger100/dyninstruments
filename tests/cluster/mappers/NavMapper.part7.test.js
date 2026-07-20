@@ -1,7 +1,6 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  installUnitFormatFamilies,
-} = require("../../helpers/unit-format-families");
+const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
 const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
 function makeToolkit(overrides, bindingOverrides) {
@@ -57,10 +56,10 @@ function makeToolkit(overrides, bindingOverrides) {
           caption_editRouteRte: "RTE CAP",
           formatUnit_editRouteRte: "km",
           unit_editRouteRte_km: "kmR",
-          caption_editRouteEta: "ETA CAP",
+          caption_editRouteEta: "ETA CAP"
         },
-        overrides || {},
-      ),
+        overrides || {}
+      )
     );
 }
 
@@ -76,7 +75,7 @@ function routeContext(kind, activeToolkit, viewModel) {
     cluster: "nav",
     kind: kind,
     toolkit: activeToolkit,
-    viewModel: viewModel,
+    viewModel: viewModel
   });
 }
 
@@ -103,25 +102,25 @@ function makeActiveRouteViewModel() {
           remain: toMaybeNumber(props.activeRouteRemain),
           rteEta: props.activeRouteEta,
           nextCourse: toMaybeNumber(props.activeRouteNextCourse),
-          isApproaching: props.activeRouteApproaching === true,
+          isApproaching: props.activeRouteApproaching === true
         },
         routeName: trimText(props.activeRouteName),
         captions: {
           remain: "RTE CAP",
           rteEta: "ETA CAP",
-          nextCourse: "NEXT CAP",
+          nextCourse: "NEXT CAP"
         },
         units: {
           remain: "nmA",
           rteEta: "",
-          nextCourse: "degN",
+          nextCourse: "degN"
         },
         formatUnits: {
-          remain: "nm",
+          remain: "nm"
         },
-        hideSeconds: props.hideSeconds === true,
+        hideSeconds: props.hideSeconds === true
       };
-    },
+    }
   };
 }
 
@@ -136,7 +135,7 @@ function makeRoutePointsViewModel() {
               return {
                 name: trimText(point.name) || String(index),
                 lat: toMaybeNumber(point.lat),
-                lon: toMaybeNumber(point.lon),
+                lon: toMaybeNumber(point.lon)
               };
             })
           : [];
@@ -146,18 +145,15 @@ function makeRoutePointsViewModel() {
           ? {
               name: routeName,
               points: points,
-              sourceRoute: editingRoute,
+              sourceRoute: editingRoute
             }
           : null,
-        selectedIndex:
-          typeof props.editingIndex === "undefined"
-            ? undefined
-            : Number(props.editingIndex),
+        selectedIndex: typeof props.editingIndex === "undefined" ? undefined : Number(props.editingIndex),
         isActiveRoute: trimText(props.activeName) === routeName,
         showLatLon: props.routeShowLL === true,
-        useRhumbLine: props.useRhumbLine === true,
+        useRhumbLine: props.useRhumbLine === true
       };
-    },
+    }
   };
 }
 
@@ -165,19 +161,10 @@ function makeEditRouteViewModel() {
   return {
     build(props) {
       const editingRoute = props.editingRoute;
-      const routeName = editingRoute
-        ? trimText(editingRoute.name).replace(/^local@/, "")
-        : "";
-      const pointCount =
-        editingRoute && Array.isArray(editingRoute.points)
-          ? editingRoute.points.length
-          : 0;
-      const isLocalRoute = !!(
-        editingRoute && /^local@/.test(editingRoute.name)
-      );
-      const isServerRoute = !!(
-        editingRoute && /^server@/.test(editingRoute.name)
-      );
+      const routeName = editingRoute ? trimText(editingRoute.name).replace(/^local@/, "") : "";
+      const pointCount = editingRoute && Array.isArray(editingRoute.points) ? editingRoute.points.length : 0;
+      const isLocalRoute = !!(editingRoute && /^local@/.test(editingRoute.name));
+      const isServerRoute = !!(editingRoute && /^server@/.test(editingRoute.name));
 
       return {
         hasRoute: !!editingRoute,
@@ -190,19 +177,17 @@ function makeEditRouteViewModel() {
                   ? editingRoute.computeLength()
                   : undefined,
               isLocalRoute: isLocalRoute,
-              isServerRoute: isServerRoute,
+              isServerRoute: isServerRoute
             }
           : null,
         remainingDistance: toMaybeNumber(props.rteDistance),
         rteEta: props.rteEta,
         hideSeconds: props.hideSeconds === true,
-        isActiveRoute:
-          !!editingRoute &&
-          trimText(props.activeName) === trimText(editingRoute.name),
+        isActiveRoute: !!editingRoute && trimText(props.activeName) === trimText(editingRoute.name),
         isLocalRoute: isLocalRoute,
-        isServerRoute: isServerRoute,
+        isServerRoute: isServerRoute
       };
-    },
+    }
   };
 }
 
@@ -217,15 +202,15 @@ describe("NavMapper", function () {
         editingRoute: editingRoute,
         showHeader: true,
         courseUnit: "°",
-        waypointsText: "waypoints",
+        waypointsText: "waypoints"
       },
-      routeContext("routePoints", toolkit, routePointsViewModel),
+      routeContext("routePoints", toolkit, routePointsViewModel)
     );
 
     expect(out.domain.route).toEqual({
       name: "Empty",
       points: [],
-      sourceRoute: editingRoute,
+      sourceRoute: editingRoute
     });
     expect(out.domain.pointCount).toBe(0);
   });
@@ -238,11 +223,11 @@ describe("NavMapper", function () {
       name: "local@Harbor Run",
       points: [
         { lat: 54.1, lon: 10.4 },
-        { lat: 54.2, lon: 10.5 },
+        { lat: 54.2, lon: 10.5 }
       ],
       computeLength() {
         return 1512.2;
-      },
+      }
     };
     const out = mapper.translate(
       {
@@ -253,9 +238,9 @@ describe("NavMapper", function () {
         rteEta: rteEta,
         hideSeconds: true,
         editRouteRatioThresholdNormal: "1.23",
-        editRouteRatioThresholdFlat: "3.95",
+        editRouteRatioThresholdFlat: "3.95"
       },
-      routeContext("editRoute", toolkit, editRouteViewModel),
+      routeContext("editRoute", toolkit, editRouteViewModel)
     );
 
     expect(out).toEqual({
@@ -269,27 +254,26 @@ describe("NavMapper", function () {
         hideSeconds: true,
         isActiveRoute: true,
         isLocalRoute: true,
-        isServerRoute: false,
+        isServerRoute: false
       },
       layout: {
         ratioThresholdNormal: 1.23,
-        ratioThresholdFlat: 3.95,
+        ratioThresholdFlat: 3.95
       },
       captions: {
         pts: "PTS CAP",
         dst: "DST CAP",
         rte: "RTE CAP",
-        rteEta: "ETA CAP",
+        rteEta: "ETA CAP"
       },
       units: {
         dst: "nmE",
-        rte: "kmR",
+        rte: "kmR"
       },
       formatUnits: {
         dst: "nm",
-        rte: "km",
-      },
+        rte: "km"
+      }
     });
   });
-
 });

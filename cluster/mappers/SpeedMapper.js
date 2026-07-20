@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniSpeedMapper = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   function create() {
@@ -25,12 +25,12 @@
       const effKind = p.kind;
 
       if (effKind === "sogLinear" || effKind === "stwLinear") {
-        const baseKind = (effKind === "sogLinear") ? "sog" : "stw";
+        const baseKind = effKind === "sogLinear" ? "sog" : "stw";
         const val = p[baseKind];
         const formatToken = toolkit.formatUnit(effKind, "speed");
         const displayUnit = toolkit.unitText(effKind, "speed", formatToken);
-        const warnOn = (p.speedLinearWarningEnabled !== false);
-        const alarmOn = (p.speedLinearAlarmEnabled !== false);
+        const warnOn = p.speedLinearWarningEnabled !== false;
+        const alarmOn = p.speedLinearAlarmEnabled !== false;
         return {
           value: val,
           caption: cap(effKind),
@@ -54,13 +54,13 @@
       }
 
       if (effKind === "sogRadial" || effKind === "stwRadial") {
-        const baseKind = (effKind === "sogRadial") ? "sog" : "stw";
+        const baseKind = effKind === "sogRadial" ? "sog" : "stw";
         const val = p[baseKind];
         const formatToken = toolkit.formatUnit(effKind, "speed");
         const displayUnit = toolkit.unitText(effKind, "speed", formatToken);
 
-        const warnOn = (p.speedRadialWarningEnabled !== false);
-        const alarmOn = (p.speedRadialAlarmEnabled !== false);
+        const warnOn = p.speedRadialWarningEnabled !== false;
+        const alarmOn = p.speedRadialAlarmEnabled !== false;
 
         return {
           value: val,
@@ -100,4 +100,4 @@
   }
 
   return { id: "SpeedMapper", create: create };
-}));
+});

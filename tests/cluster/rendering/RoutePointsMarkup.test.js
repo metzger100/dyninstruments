@@ -18,70 +18,78 @@ describe("RoutePointsMarkup", function () {
     return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js").create();
   }
 
+  /** @param {Record<string, any>} [overrides] @returns {any} */
   function makeModel(overrides) {
-    return Object.assign({
-      mode: "normal",
-      kind: "data",
-      stateLabel: "",
-      interactionState: "dispatch",
-      showHeader: true,
-      hasRoute: true,
-      routeNameText: "Harbor Run",
-      metaText: "2 waypoints",
-      canActivateRoutePoint: true,
-      isActiveRoute: true,
-      showOrdinal: true,
-      points: [
-        { index: 0, ordinalText: "1", nameText: "Start", infoText: "--°/--nm", selected: false },
-        { index: 1, ordinalText: "2", nameText: "Finish", infoText: "DIR:89°/DST:2:nm", selected: true }
-      ],
-      inlineGeometry: {
-        wrapper: { style: "height:180px;" },
-        header: {
-          style: "width:100px;height:20px;",
-          routeNameStyle: "width:60px;height:20px;",
-          metaStyle: "width:40px;height:20px;"
-        },
-        list: {
-          style: "width:100px;height:160px;",
-          contentStyle: "min-height:90px;gap:2px;"
-        },
-        rows: [
-          {
-            rowStyle: "width:100px;height:40px;",
-            ordinalStyle: "width:20px;height:40px;",
-            middleStyle: "width:60px;height:40px;",
-            nameStyle: "width:30px;height:40px;",
-            infoStyle: "width:30px;height:40px;",
-            markerStyle: "width:20px;height:40px;",
-            markerDotStyle: "width:9px;height:9px;"
+    return Object.assign(
+      {
+        mode: "normal",
+        kind: "data",
+        stateLabel: "",
+        interactionState: "dispatch",
+        showHeader: true,
+        hasRoute: true,
+        routeNameText: "Harbor Run",
+        metaText: "2 waypoints",
+        canActivateRoutePoint: true,
+        isActiveRoute: true,
+        showOrdinal: true,
+        points: [
+          { index: 0, ordinalText: "1", nameText: "Start", infoText: "--°/--nm", selected: false },
+          { index: 1, ordinalText: "2", nameText: "Finish", infoText: "DIR:89°/DST:2:nm", selected: true }
+        ],
+        inlineGeometry: {
+          wrapper: { style: "height:180px;" },
+          header: {
+            style: "width:100px;height:20px;",
+            routeNameStyle: "width:60px;height:20px;",
+            metaStyle: "width:40px;height:20px;"
           },
-          {
-            rowStyle: "width:100px;height:40px;",
-            ordinalStyle: "width:20px;height:40px;",
-            middleStyle: "width:60px;height:40px;",
-            nameStyle: "width:30px;height:40px;",
-            infoStyle: "width:30px;height:40px;",
-            markerStyle: "width:20px;height:40px;",
-            markerDotStyle: "width:9px;height:9px;"
-          }
-        ]
-      }
-    }, overrides || {});
+          list: {
+            style: "width:100px;height:160px;",
+            contentStyle: "min-height:90px;gap:2px;"
+          },
+          rows: [
+            {
+              rowStyle: "width:100px;height:40px;",
+              ordinalStyle: "width:20px;height:40px;",
+              middleStyle: "width:60px;height:40px;",
+              nameStyle: "width:30px;height:40px;",
+              infoStyle: "width:30px;height:40px;",
+              markerStyle: "width:20px;height:40px;",
+              markerDotStyle: "width:9px;height:9px;"
+            },
+            {
+              rowStyle: "width:100px;height:40px;",
+              ordinalStyle: "width:20px;height:40px;",
+              middleStyle: "width:60px;height:40px;",
+              nameStyle: "width:30px;height:40px;",
+              infoStyle: "width:30px;height:40px;",
+              markerStyle: "width:20px;height:40px;",
+              markerDotStyle: "width:9px;height:9px;"
+            }
+          ]
+        }
+      },
+      overrides || {}
+    );
   }
 
+  /** @param {Record<string, any>} [overrides] @returns {any} */
   function makeFit(overrides) {
-    return Object.assign({
-      headerFit: {
-        routeNameStyle: "font-size:11px;",
-        metaStyle: "font-size:9px;"
+    return Object.assign(
+      {
+        headerFit: {
+          routeNameStyle: "font-size:11px;",
+          metaStyle: "font-size:9px;"
+        },
+        emptyStyle: "",
+        rowFits: [
+          { ordinalStyle: "font-size:8px;", nameStyle: "font-size:10px;", infoStyle: "font-size:8px;" },
+          { ordinalStyle: "font-size:8px;", nameStyle: "font-size:10px;", infoStyle: "font-size:8px;" }
+        ]
       },
-      emptyStyle: "",
-      rowFits: [
-        { ordinalStyle: "font-size:8px;", nameStyle: "font-size:10px;", infoStyle: "font-size:8px;" },
-        { ordinalStyle: "font-size:8px;", nameStyle: "font-size:10px;", infoStyle: "font-size:8px;" }
-      ]
-    }, overrides || {});
+      overrides || {}
+    );
   }
 
   it("renders dispatch-mode wrapper/rows with active-route and selected state classes", function () {
@@ -116,8 +124,18 @@ describe("RoutePointsMarkup", function () {
     });
     const fit = makeFit({
       rowFits: [
-        { ordinalStyle: "font-size:8px;", nameStyle: "font-size:10px;", infoStyle: "font-size:8px;", infoText: "54.102 N / 10.400 E" },
-        { ordinalStyle: "font-size:8px;", nameStyle: "font-size:10px;", infoStyle: "font-size:8px;", infoText: "081°/01.2nm" }
+        {
+          ordinalStyle: "font-size:8px;",
+          nameStyle: "font-size:10px;",
+          infoStyle: "font-size:8px;",
+          infoText: "54.102 N / 10.400 E"
+        },
+        {
+          ordinalStyle: "font-size:8px;",
+          nameStyle: "font-size:10px;",
+          infoStyle: "font-size:8px;",
+          infoText: "081°/01.2nm"
+        }
       ]
     });
     const html = markup.render({
@@ -191,8 +209,8 @@ describe("RoutePointsMarkup", function () {
 
   it("does not render ordinal cell markup when compact row policy disables it", function () {
     const markup = createMarkup();
-    const compactGeometry = makeModel().inlineGeometry.rows.map((row) =>
-      Object.assign({}, row, { ordinalStyle: "" })
+    const compactGeometry = makeModel().inlineGeometry.rows.map(
+      /** @param {any} row */ (row) => Object.assign({}, row, { ordinalStyle: "" })
     );
     const html = markup.render({
       model: makeModel({
@@ -201,7 +219,7 @@ describe("RoutePointsMarkup", function () {
         inlineGeometry: Object.assign({}, makeModel().inlineGeometry, { rows: compactGeometry })
       }),
       fit: makeFit({
-        rowFits: makeFit().rowFits.map((row) => Object.assign({}, row, { ordinalStyle: "" }))
+        rowFits: makeFit().rowFits.map(/** @param {any} row */ (row) => Object.assign({}, row, { ordinalStyle: "" }))
       }),
       htmlUtils: createHtmlUtils()
     });
@@ -240,7 +258,7 @@ describe("RoutePointsMarkup", function () {
     const markup = createMarkup();
     const html = markup.render({
       model: makeModel({
-        routeNameText: '<img src=x onerror=1>',
+        routeNameText: "<img src=x onerror=1>",
         metaText: '"meta"',
         points: [
           {

@@ -80,11 +80,15 @@
   grid-auto-rows: minmax(0, 1fr);
 }
 
-.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-normal.dyni-active-route-approaching .dyni-active-route-metrics {
+.dyni-html-root
+  .dyni-active-route-html.dyni-active-route-mode-normal.dyni-active-route-approaching
+  .dyni-active-route-metrics {
   grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 
-.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-normal.dyni-active-route-approaching .dyni-active-route-metric-next {
+.dyni-html-root
+  .dyni-active-route-html.dyni-active-route-mode-normal.dyni-active-route-approaching
+  .dyni-active-route-metric-next {
   grid-column: 1 / span 2;
 }
 
@@ -93,7 +97,9 @@
   grid-auto-rows: minmax(0, 1fr);
 }
 
-.dyni-html-root .dyni-active-route-html.dyni-active-route-mode-flat.dyni-active-route-approaching .dyni-active-route-metrics {
+.dyni-html-root
+  .dyni-active-route-html.dyni-active-route-mode-flat.dyni-active-route-approaching
+  .dyni-active-route-metrics {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -123,7 +129,7 @@
   align-items: baseline;
   justify-content: center;
   line-height: 1;
-  min-height: 0
+  min-height: 0;
 }
 
 .dyni-html-root .dyni-active-route-metric-value {

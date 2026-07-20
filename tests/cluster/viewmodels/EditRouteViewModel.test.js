@@ -2,12 +2,14 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("EditRouteViewModel", function () {
+  /** @param {(...args: any[]) => any} [centerMathFactory] @returns {any} */
   function createViewModel(centerMathFactory) {
     const componentContext = createComponentContextMock({
       modules: {
-        CenterDisplayMath: typeof centerMathFactory === "function"
-          ? { create: centerMathFactory }
-          : loadFresh("shared/widget-kits/nav/CenterDisplayMath.js")
+        CenterDisplayMath:
+          typeof centerMathFactory === "function"
+            ? { create: centerMathFactory }
+            : loadFresh("shared/widget-kits/nav/CenterDisplayMath.js")
       }
     });
 
@@ -124,7 +126,11 @@ describe("EditRouteViewModel", function () {
     const out = vm.build({
       editingRoute: {
         name: "Harbor Run",
-        points: [{ lat: 54.1, lon: 10.4 }, { lat: 54.2, lon: 10.5 }],
+        points: [
+          { lat: 54.1, lon: 10.4 },
+          { lat: 54.2, lon: 10.5 }
+        ],
+        /** @param {number} fromIndex @param {boolean} useRhumbLine */
         computeLength(fromIndex, useRhumbLine) {
           expect(fromIndex).toBe(0);
           expect(useRhumbLine).toBe(true);
@@ -138,9 +144,10 @@ describe("EditRouteViewModel", function () {
   });
 
   it("falls back to leg summation when computeLength is missing, invalid, or throws", function () {
-    const calls = [];
+    const calls = /** @type {boolean[]} */ ([]);
     const vm = createViewModel(function () {
       return {
+        /** @param {any} previousPoint @param {any} currentPoint @param {boolean} useRhumbLine */
         computeCourseDistance(previousPoint, currentPoint, useRhumbLine) {
           calls.push(useRhumbLine);
           if (currentPoint && currentPoint.badLeg === true) {
@@ -154,7 +161,11 @@ describe("EditRouteViewModel", function () {
     const noComputeLength = vm.build({
       editingRoute: {
         name: "NoMethod",
-        points: [{ lat: 1, lon: 1 }, { lat: 2, lon: 2 }, { lat: 3, lon: 3 }]
+        points: [
+          { lat: 1, lon: 1 },
+          { lat: 2, lon: 2 },
+          { lat: 3, lon: 3 }
+        ]
       },
       useRhumbLine: false
     });
@@ -163,7 +174,11 @@ describe("EditRouteViewModel", function () {
     const invalidComputeLength = vm.build({
       editingRoute: {
         name: "BadMethod",
-        points: [{ lat: 1, lon: 1 }, { lat: 2, lon: 2 }, { lat: 3, lon: 3 }],
+        points: [
+          { lat: 1, lon: 1 },
+          { lat: 2, lon: 2 },
+          { lat: 3, lon: 3 }
+        ],
         computeLength() {
           return "NaN";
         }
@@ -175,7 +190,11 @@ describe("EditRouteViewModel", function () {
     const blankComputeLength = vm.build({
       editingRoute: {
         name: "BlankMethod",
-        points: [{ lat: 1, lon: 1 }, { lat: 2, lon: 2 }, { lat: 3, lon: 3 }],
+        points: [
+          { lat: 1, lon: 1 },
+          { lat: 2, lon: 2 },
+          { lat: 3, lon: 3 }
+        ],
         computeLength() {
           return "   ";
         }

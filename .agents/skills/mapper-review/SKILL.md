@@ -78,8 +78,7 @@ Count top-level properties in each `translate()` return object.
 | Count | Severity | Action |
 |---|---|---|
 | ≤8 | OK | No action needed |
-| 9–12 | WARN | Fix before merge or document the cleanup plan |
-| >12 | BLOCK | Refactor immediately — group into sub-objects or move to dedicated renderer adapter |
+| >8 | BLOCK | Refactor immediately — group into sub-objects or move to dedicated renderer adapter |
 
 Grouping pattern for complex outputs:
 

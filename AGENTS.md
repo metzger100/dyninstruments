@@ -1,7 +1,9 @@
 # AGENTS.md - Project Standards & Workflow
+
 This file is guidance for agents working in this repository.
 
 <!-- BEGIN SHARED_INSTRUCTIONS -->
+
 **Critical:** AGENTS.md is a routing map. Use it to find focused docs, not to store full implementation details.
 
 ---
@@ -17,6 +19,7 @@ Before planning, coding, review, or documentation edits, always read:
 These three reads are mandatory for every task. Start implementation only after this preflight is complete.
 
 If guidance conflicts, precedence is:
+
 1. `documentation/core-principles.md`
 2. `documentation/conventions/coding-standards.md`
 3. `documentation/conventions/smell-prevention.md`
@@ -32,13 +35,17 @@ If guidance conflicts, precedence is:
 - **avnav.api** - Only external dependency. Plugin API provided by AvNav host app
 - **AVNAV_BASE_URL** - Global string set by AvNav, used to construct module URLs
 - **Host path is renderHtml-only** - Cluster widgets register `renderHtml` on AvNav host
-- **Internal dual-surface model** - `surface: "html"` for native HTML kinds, `surface: "canvas-dom"` for internal canvas kinds
-- **Canvas 2D remains internal** - Existing gauges/text canvas renderers run through `CanvasDomSurfaceAdapter` and `renderCanvas(canvas, props)` callbacks
+- **Internal dual-surface model** - `surface: "html"` for native HTML kinds, `surface: "canvas-dom"` for internal canvas
+  kinds
+- **Canvas 2D remains internal** - Existing gauges/text canvas renderers run through `CanvasDomSurfaceAdapter` and
+  `renderCanvas(canvas, props)` callbacks
 - **No ES modules, no import/export** - Must use IIFE or UMD wrappers
 - **HiDPI** - `componentContext.canvas.setupCanvas()` handles devicePixelRatio scaling
 - **Plugin runtime is browser-only** - No server-side runtime code
-- **Testing stack available** - Vitest configured projects for Node/jsdom tests, with native V8 coverage thresholds; required local/CI gates must not require an external browser binary or driver
-- **Development toolchain** - Use Node 26 with npm 12.0.1; run `npm run setup` to install the lockfile and provision the checksum-verified actionlint cache before gates
+- **Testing stack available** - Vitest configured projects for Node/jsdom tests, with native V8 coverage thresholds;
+  required local/CI gates must not require an external browser binary or driver
+- **Development toolchain** - Use Node 26 with npm 12.0.1; run `npm run setup` to install the lockfile and provision the
+  checksum-verified actionlint cache before gates
 
 ---
 
@@ -65,7 +72,7 @@ documentation/
 │   ├── css-theming.md              # CSS vars, day/night, font stack
 │   └── theme-tokens.md             # runtime.theme token snapshot + cache behavior
 ├── widgets/
-│   ├── semicircle-gauges.md        # Speed/Depth/Temperature/Voltage shared 
+│   ├── semicircle-gauges.md        # Speed/Depth/Temperature/Voltage shared
 │   ├── three-elements.md           # ThreeValueTextWidget numeric renderer
 │   ├── wind-dial.md                # WindRadialWidget full-circle wind compass
 │   └── compass-gauge.md            # CompassRadialWidget rotating compass card
@@ -78,7 +85,8 @@ documentation/
 ### RULE: Always Start with TABLEOFCONTENTS.md
 
 1. **Read `documentation/TABLEOFCONTENTS.md` FIRST**
-2. **Read `documentation/conventions/coding-standards.md` and `documentation/conventions/smell-prevention.md` for every task**
+2. **Read `documentation/conventions/coding-standards.md` and `documentation/conventions/smell-prevention.md` for every
+   task**
 3. Identify 1-3 additional relevant files for your task
 4. Read ONLY those additional files
 5. **Never read all files sequentially** (wastes tokens)
@@ -86,12 +94,14 @@ documentation/
 ### Example Workflow
 
 **Bad (Token wasteful):**
+
 ```
 Task: Add new BarometerGauge
 ❌ Read all documentation files and large source areas sequentially.
 ```
 
 **Good (Token efficient):**
+
 ```
 Task: Add new BarometerGauge
 ✅ Read TABLEOFCONTENTS.md
@@ -109,9 +119,12 @@ Task: Add new BarometerGauge
 - Non-negotiable project rules: [documentation/core-principles.md](documentation/core-principles.md)
 - Root structural orientation map: [ARCHITECTURE.md](ARCHITECTURE.md)
 - User-facing documentation: [README.md](README.md)
-- HTML renderer lifecycle patterns: [documentation/architecture/html-renderer-lifecycle.md](documentation/architecture/html-renderer-lifecycle.md)
+- HTML renderer lifecycle patterns:
+  [documentation/architecture/html-renderer-lifecycle.md](documentation/architecture/html-renderer-lifecycle.md)
 - Step-by-step implementation workflows: [documentation/guides/](documentation/guides/)
-- New stable or prerelease requests: start with [documentation/guides/release-workflow.md](documentation/guides/release-workflow.md) and follow `npm run release:prepare` -> `npm run release:create`
+- New stable or prerelease requests: start with
+  [documentation/guides/release-workflow.md](documentation/guides/release-workflow.md) and follow
+  `npm run release:prepare` -> `npm run release:create`
 - Multi-session active execution plans: [exec-plans/active/](exec-plans/active/)
 
 ---
@@ -122,25 +135,42 @@ Task: Add new BarometerGauge
 - [ ] Read only necessary additional documentation beyond mandatory preflight.
 - [ ] Implementation complete.
 - [ ] Updated relevant documentation.
-- [ ] Updated user-facing `README.md` when changes touch theming, clusters/kinds, layouts, installation, configuration, requirements, or development workflow.
+- [ ] Updated user-facing `README.md` when changes touch theming, clusters/kinds, layouts, installation, configuration,
+      requirements, or development workflow.
 - [ ] Updated `tests/css/theme-token-extremes.user.css` when theme tokens/input vars/default theming behavior changes.
-- [ ] Updated `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js` when adding or changing a kind with new user-visible visuals/layout behavior.
+- [ ] Updated `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js` when adding or
+      changing a kind with new user-visible visuals/layout behavior.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
-- [ ] Ran `npm run check:all` — no failures; required final gate (`check:core` plus native coverage threshold enforcement).
-- [ ] For releases, pushed only a locally created annotated tag; the tag workflow reruns `check:all` before publishing committed artifacts with the correct stable/prerelease classification.
-- [ ] Completed the documented manual AvNav validation before release: plugin load, representative radial/linear/HTML widgets, day/night switch, and route/AIS interactions.
+- [ ] Ran `npm run check:all` — no failures; required final gate (`check:core` plus native coverage threshold
+      enforcement).
+- [ ] New production files use a recognized coverage classification and do not lower the immutable per-file floor; new
+      tests enter the strict inventory; only paths in the hash-locked test-exception capture may retain a checked
+      temporary-fragment or negative-fixture classification.
+- [ ] Coverage/complexity policy edits preserve the hash-locked coverage snapshot and regenerated Phase 0 complexity
+      capture; only the 12 frozen legacy coverage paths may retain their exact below-default values, and every active
+      complexity value exactly matches its current finding; all quality-policy surfaces remain CODEOWNERS-protected.
+- [ ] For releases, pushed only a locally created annotated tag; the tag workflow reruns `check:all` before publishing
+      committed artifacts with the correct stable/prerelease classification.
+- [ ] Completed the documented manual AvNav validation before release: plugin load, representative radial/linear/HTML
+      widgets, day/night switch, and route/AIS interactions.
 
 ---
 
 ## 6. Smell Prevention & Fail-Closed Rules
 
-- Mandatory on every task: follow `documentation/conventions/coding-standards.md` and `documentation/conventions/smell-prevention.md` as binding rules.
+- Mandatory on every task: follow `documentation/conventions/coding-standards.md` and
+  `documentation/conventions/smell-prevention.md` as binding rules.
 - Required completion gate: `npm run check:all` (`check:core` + `test:coverage:check`).
-- `check:core` includes `check:standard` (scoped Prettier, ESLint, Stylelint, actionlint, jscpd), `typecheck`, `package:check`, `test:focus:check`, and `docs:check` before the remaining project-specific gates.
+- `check:core` includes `check:standard` (Prettier over maintained code/docs, agent skills, and active plans, plus
+  ESLint, Stylelint, actionlint, and jscpd), `typecheck`, `package:check`, `test:focus:check`, `check:complexity`
+  (complexity no-regression budget), `check:scaling` (validated non-negative integer operation-count contracts, never
+  timing), and `docs:check` before the remaining project-specific gates.
 - `test:coverage:check` runs native Vitest/V8 global and critical-area thresholds.
 - `test:split` runs the Vitest configured split: `unit-node`, `contract`, and `unit-dom` projects.
-- Full smell catalog, enforcement matrix, and suppression syntax: [documentation/conventions/smell-prevention.md](documentation/conventions/smell-prevention.md).
-- Fail-fast / keep-it-simple is mandatory. Details: [documentation/conventions/coding-standards.md](documentation/conventions/coding-standards.md#fail-fast--keep-it-simple).
+- Full smell catalog, enforcement matrix, and suppression syntax:
+  [documentation/conventions/smell-prevention.md](documentation/conventions/smell-prevention.md).
+- Fail-fast / keep-it-simple is mandatory. Details:
+  [documentation/conventions/coding-standards.md](documentation/conventions/coding-standards.md#fail-fast--keep-it-simple).
 
 ---
 
@@ -151,7 +181,8 @@ Task: Add new BarometerGauge
 1. Read `documentation/conventions/shared-helpers.md` to check whether a canonical helper already exists.
 2. Search the codebase for the function name: `grep -rn "function <name>" --include="*.js"`.
 3. If a canonical version exists, require and use it. Do not create a local copy.
-4. If no canonical version exists but the helper is generic (not widget-specific), propose adding it to the appropriate canonical module.
+4. If no canonical version exists but the helper is generic (not widget-specific), propose adding it to the appropriate
+   canonical module.
 
 ### Forbidden patterns
 
@@ -191,6 +222,10 @@ For execution plans, include explicit README deliverables and exit conditions fo
 
 When changing user-facing theming or user-visible kind visuals, update the related fixtures/tests in the same task:
 
-1. Theme token/input var/default changes: update `tests/css/theme-token-extremes.user.css` (and related `tests/css` fixtures when relevant) so manual/theming fixture coverage stays current.
-2. New or visually changed kind (for example a new renderer variant such as `xteDisplayLinear`): update `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js` so showcase coverage includes the new visual behavior.
+1. Theme token/input var/default changes: update `tests/css/theme-token-extremes.user.css` (and related `tests/css`
+   fixtures when relevant) so manual/theming fixture coverage stays current.
+2. New or visually changed kind (for example a new renderer variant such as `xteDisplayLinear`): update
+   `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js` so showcase coverage
+   includes the new visual behavior.
+
 <!-- END SHARED_INSTRUCTIONS -->

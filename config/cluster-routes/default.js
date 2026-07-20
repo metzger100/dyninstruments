@@ -33,4 +33,4 @@
       shellSizing: { kind: "ratio", aspectRatio: 1 }
     }
   );
-}(this));
+})(this);

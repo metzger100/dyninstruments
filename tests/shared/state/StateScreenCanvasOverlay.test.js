@@ -1,25 +1,20 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("StateScreenCanvasOverlay", function () {
   function createOverlay() {
-    return loadFresh(
-      "shared/widget-kits/state/StateScreenCanvasOverlay.js",
-    ).create(
+    return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js").create(
       {},
       createComponentContextMock({
         modules: {
-          StateScreenLabels: loadFresh(
-            "shared/widget-kits/state/StateScreenLabels.js",
-          ),
-        },
-      }),
+          StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js")
+        }
+      })
     );
   }
 
+  /** @param {any} ctx */
   function readFontPx(ctx) {
     const match = /(\d+)px/.exec(String(ctx.font || ""));
     return match ? Number(match[1]) : 0;
@@ -31,7 +26,7 @@ describe("StateScreenCanvasOverlay", function () {
       disconnected: "GPS Lost",
       noRoute: "No Route",
       noTarget: "No Waypoint",
-      noAis: "No AIS",
+      noAis: "No AIS"
     };
 
     Object.keys(expected).forEach((kind) => {
@@ -43,14 +38,14 @@ describe("StateScreenCanvasOverlay", function () {
         H: 200,
         family: "Roboto",
         color: "#f0f0f0",
-        labelWeight: 650,
+        labelWeight: 650
       });
 
-      const fillRectCall = ctx.calls.find((entry) => entry.name === "fillRect");
-      const fillTextCall = ctx.calls.find((entry) => entry.name === "fillText");
+      const fillRectCall = ctx.calls.find((/** @type {any} */ entry) => entry.name === "fillRect");
+      const fillTextCall = ctx.calls.find((/** @type {any} */ entry) => entry.name === "fillText");
       expect(fillRectCall).toBeUndefined();
       expect(fillTextCall).toBeTruthy();
-      expect(fillTextCall.args[0]).toBe(expected[kind]);
+      expect(fillTextCall.args[0]).toBe(expected[/** @type {keyof typeof expected} */ (kind)]);
       expect(fillTextCall.args[1]).toBe(150);
       expect(fillTextCall.args[2]).toBe(100);
     });
@@ -59,18 +54,18 @@ describe("StateScreenCanvasOverlay", function () {
   it("reduces font size on a narrow canvas versus a same-area square canvas", function () {
     const overlay = createOverlay();
     const narrowCtx = createMockContext2D({
-      charWidth: 1,
+      charWidth: 1
     });
     const squareCtx = createMockContext2D({
-      charWidth: 1,
+      charWidth: 1
     });
 
-    narrowCtx.measureText = function (text) {
+    narrowCtx.measureText = function (/** @type {any} */ text) {
       this.calls.push({ name: "measureText", args: [text] });
       const px = readFontPx(this);
       return { width: String(text || "").length * px * 0.6 };
     };
-    squareCtx.measureText = function (text) {
+    squareCtx.measureText = function (/** @type {any} */ text) {
       this.calls.push({ name: "measureText", args: [text] });
       const px = readFontPx(this);
       return { width: String(text || "").length * px * 0.6 };
@@ -83,7 +78,7 @@ describe("StateScreenCanvasOverlay", function () {
       H: 400,
       family: "Roboto",
       color: "#f0f0f0",
-      labelWeight: 650,
+      labelWeight: 650
     });
     overlay.drawStateScreen({
       ctx: squareCtx,
@@ -92,7 +87,7 @@ describe("StateScreenCanvasOverlay", function () {
       H: 200,
       family: "Roboto",
       color: "#f0f0f0",
-      labelWeight: 650,
+      labelWeight: 650
     });
 
     expect(readFontPx(narrowCtx)).toBeLessThan(readFontPx(squareCtx));
@@ -102,11 +97,9 @@ describe("StateScreenCanvasOverlay", function () {
     const overlay = createOverlay();
     const ctx = createMockContext2D();
 
-    expect(() =>
-      overlay.drawStateScreen({ ctx: ctx, kind: "hidden", W: 10, H: 10 }),
-    ).toThrow("invalid on canvas");
-    expect(() =>
-      overlay.drawStateScreen({ ctx: ctx, kind: "data", W: 10, H: 10 }),
-    ).toThrow("invalid on canvas");
+    const hiddenArgs = { ctx: ctx, kind: "hidden", W: 10, H: 10 };
+    const dataArgs = { ctx: ctx, kind: "data", W: 10, H: 10 };
+    expect(() => overlay.drawStateScreen(hiddenArgs)).toThrow("invalid on canvas");
+    expect(() => overlay.drawStateScreen(dataArgs)).toThrow("invalid on canvas");
   });
 });

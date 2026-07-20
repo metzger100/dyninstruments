@@ -16,81 +16,83 @@ Source of truth: AvNav `viewer/util/formatter.js` snapshot verified on 2026-02-2
 ## Token Rules and Fallbacks
 
 - `formatSpeed` uses exact token comparison. Unrecognized tokens fall through to knots.
-- `formatDistance` uses exact token comparison. Reviewed core tokens are `nm`, `m`, `km`, `ft`, and `yd`; unrecognized tokens fall through to meters.
+- `formatDistance` uses exact token comparison. Reviewed core tokens are `nm`, `m`, `km`, `ft`, and `yd`; unrecognized
+  tokens fall through to meters.
 - `formatTemperature` lowercases its token and accepts any token that starts with `c` or `k`.
 - `formatPressure` lowercases its token and uses exact comparison against `pa`, `hpa`, and `bar`.
 - All four formatters silently fall through to their default unit when the token is missing or unrecognized.
-- Public AvNav docs may lag the reviewed distance-unit contract; dyninstruments documents the reviewed core snapshot directly rather than branching on the older docs.
+- Public AvNav docs may lag the reviewed distance-unit contract; dyninstruments documents the reviewed core snapshot
+  directly rather than branching on the older docs.
 
 ## API/Interfaces
 
 ### Canonical Formatter Signatures
 
-| Formatter | Signature | Notes |
-|---|---|---|
-| `formatLonLatsDecimal` | `(coordinate, axis)` | axis: `lat`/`lon` |
-| `formatLonLats` | `(lonlat)` | expects object with `lat` and `lon` |
-| `formatDecimal` | `(number, fix, fract, addSpace, prefixZero)` | core numeric formatter |
-| `formatDecimalOpt` | `(number, fix, fract, addSpace, prefixZero)` | fractional digits shown only when needed |
-| `formatFloat` | `(number, digits, maxPlaces, leadingZeroes)` | variable decimal placement |
-| `formatDistance` | `(distance, unit, numDigits, fillRight)` | distance conversion and formatting; reviewed tokens include `ft` and `yd` |
-| `formatSpeed` | `(speed, unit)` | speed conversion and formatting |
-| `formatDirection` | `(dir, inputRadian, range180, leadingZero)` | direction conversion and range formatting |
-| `formatDirection360` | `(dir, leadingZero)` | direct `0..360` formatting |
-| `formatTime` | `(dateValue)` | expects Date-like value in AvNav flow |
-| `formatClock` | `(dateValue)` | `HH:MM` |
-| `formatDateTime` | `(dateValue)` | date + time |
-| `formatDate` | `(dateValue)` | date only |
-| `formatString` | `(value)` | passthrough |
-| `formatPressure` | `(value, unit)` | `pa`/`hpa`/`bar` |
-| `formatTemperature` | `(value, unit)` | `kelvin`/`celsius` |
+| Formatter              | Signature                                    | Notes                                                                     |
+| ---------------------- | -------------------------------------------- | ------------------------------------------------------------------------- |
+| `formatLonLatsDecimal` | `(coordinate, axis)`                         | axis: `lat`/`lon`                                                         |
+| `formatLonLats`        | `(lonlat)`                                   | expects object with `lat` and `lon`                                       |
+| `formatDecimal`        | `(number, fix, fract, addSpace, prefixZero)` | core numeric formatter                                                    |
+| `formatDecimalOpt`     | `(number, fix, fract, addSpace, prefixZero)` | fractional digits shown only when needed                                  |
+| `formatFloat`          | `(number, digits, maxPlaces, leadingZeroes)` | variable decimal placement                                                |
+| `formatDistance`       | `(distance, unit, numDigits, fillRight)`     | distance conversion and formatting; reviewed tokens include `ft` and `yd` |
+| `formatSpeed`          | `(speed, unit)`                              | speed conversion and formatting                                           |
+| `formatDirection`      | `(dir, inputRadian, range180, leadingZero)`  | direction conversion and range formatting                                 |
+| `formatDirection360`   | `(dir, leadingZero)`                         | direct `0..360` formatting                                                |
+| `formatTime`           | `(dateValue)`                                | expects Date-like value in AvNav flow                                     |
+| `formatClock`          | `(dateValue)`                                | `HH:MM`                                                                   |
+| `formatDateTime`       | `(dateValue)`                                | date + time                                                               |
+| `formatDate`           | `(dateValue)`                                | date only                                                                 |
+| `formatString`         | `(value)`                                    | passthrough                                                               |
+| `formatPressure`       | `(value, unit)`                              | `pa`/`hpa`/`bar`                                                          |
+| `formatTemperature`    | `(value, unit)`                              | `kelvin`/`celsius`                                                        |
 
 ### Legacy Aliases Present in Core
 
-| Alias | Target |
-|---|---|
+| Alias           | Target              |
+| --------------- | ------------------- |
 | `skTemperature` | `formatTemperature` |
-| `skPressure` | `formatPressure` |
+| `skPressure`    | `formatPressure`    |
 
 ## Normative Vessel Attitude Contract
 
-| Kind | Raw unit | Formatter | formatterParameters |
-|---|---|---|---|
-| `pitch` | radians | `formatDirection` | `[true, true, false]` |
-| `roll` | radians | `formatDirection` | `[true, true, false]` |
+| Kind    | Raw unit | Formatter         | formatterParameters   |
+| ------- | -------- | ----------------- | --------------------- |
+| `pitch` | radians  | `formatDirection` | `[true, true, false]` |
+| `roll`  | radians  | `formatDirection` | `[true, true, false]` |
 
 ## Normative XteDisplay Renderer Contract
 
-| Field | Formatter | formatterParameters |
-|---|---|---|
-| `xte` | `formatDistance` | `[unit]` |
-| `dtw` | `formatDistance` | `[unit]` |
-| `cog` | `formatDirection360` | `[leadingZero]` |
-| `btw` | `formatDirection360` | `[leadingZero]` |
+| Field | Formatter            | formatterParameters |
+| ----- | -------------------- | ------------------- |
+| `xte` | `formatDistance`     | `[unit]`            |
+| `dtw` | `formatDistance`     | `[unit]`            |
+| `cog` | `formatDirection360` | `[leadingZero]`     |
+| `btw` | `formatDirection360` | `[leadingZero]`     |
 
 ## Normative ActiveRoute Renderer Contract
 
-| Field | Formatter | formatterParameters |
-|---|---|---|
-| `remain` | `formatDistance` | `[remainUnit]` |
-| `eta` | `formatTime` | `[]` |
-| `nextCourse` | `formatDirection` | `[]` |
+| Field        | Formatter         | formatterParameters |
+| ------------ | ----------------- | ------------------- |
+| `remain`     | `formatDistance`  | `[remainUnit]`      |
+| `eta`        | `formatTime`      | `[]`                |
+| `nextCourse` | `formatDirection` | `[]`                |
 
 ## Normative MapZoom Renderer Contract
 
-| Field | Formatter | formatterParameters |
-|---|---|---|
-| `zoom` | `formatDecimalOpt` | `[2, 1]` |
-| `requiredZoom` | `formatDecimalOpt` | `[2, 1]` |
+| Field          | Formatter          | formatterParameters |
+| -------------- | ------------------ | ------------------- |
+| `zoom`         | `formatDecimalOpt` | `[2, 1]`            |
+| `requiredZoom` | `formatDecimalOpt` | `[2, 1]`            |
 
 ## Normative AisTarget Renderer Contract
 
-| Field | Formatter | formatterParameters |
-|---|---|---|
-| `distance` | `formatDistance` | `[dstUnit]` |
-| `cpa` | `formatDistance` | `[cpaUnit]` |
-| `tcpa / 60` | `formatDecimal` | `[3, Math.abs(tcpa) > 60 ? 0 : 2]` |
-| `headingTo` | `formatDirection` | `[]` |
+| Field       | Formatter         | formatterParameters                |
+| ----------- | ----------------- | ---------------------------------- |
+| `distance`  | `formatDistance`  | `[dstUnit]`                        |
+| `cpa`       | `formatDistance`  | `[cpaUnit]`                        |
+| `tcpa / 60` | `formatDecimal`   | `[3, Math.abs(tcpa) > 60 ? 0 : 2]` |
+| `headingTo` | `formatDirection` | `[]`                               |
 
 Branch semantics:
 
@@ -99,24 +101,24 @@ Branch semantics:
 
 ## Normative CenterDisplay Renderer Contract
 
-| Field | Formatter | formatterParameters |
-|---|---|---|
-| `position.lat` | `formatLonLatsDecimal` | `["lat"]` |
-| `position.lon` | `formatLonLatsDecimal` | `["lon"]` |
-| `marker.course` | `formatDirection` | `[]` |
-| `marker.distance` | `formatDistance` | `[markerUnit]` |
-| `boat.course` | `formatDirection` | `[]` |
-| `boat.distance` | `formatDistance` | `[boatUnit]` |
-| `measure.course` | `formatDirection` | `[]` |
-| `measure.distance` | `formatDistance` | `[measureUnit]` |
+| Field              | Formatter              | formatterParameters |
+| ------------------ | ---------------------- | ------------------- |
+| `position.lat`     | `formatLonLatsDecimal` | `["lat"]`           |
+| `position.lon`     | `formatLonLatsDecimal` | `["lon"]`           |
+| `marker.course`    | `formatDirection`      | `[]`                |
+| `marker.distance`  | `formatDistance`       | `[markerUnit]`      |
+| `boat.course`      | `formatDirection`      | `[]`                |
+| `boat.distance`    | `formatDistance`       | `[boatUnit]`        |
+| `measure.course`   | `formatDirection`      | `[]`                |
+| `measure.distance` | `formatDistance`       | `[measureUnit]`     |
 
 ## Common Mistakes
 
-| Mistake | Wrong example | Correct contract |
-|---|---|---|
-| Wrong parameter order | `[true, false, true]` interpreted ad hoc | Keep exact order: `[inputRadian, range180, leadingZero]` |
-| Wrong rad/deg assumption | `[false, true, false]` for raw radians | `[true, true, false]` |
-| Wrong formatter choice | `formatDirection360` for pitch/roll | `formatDirection` with `range180=true` |
+| Mistake                  | Wrong example                            | Correct contract                                         |
+| ------------------------ | ---------------------------------------- | -------------------------------------------------------- |
+| Wrong parameter order    | `[true, false, true]` interpreted ad hoc | Keep exact order: `[inputRadian, range180, leadingZero]` |
+| Wrong rad/deg assumption | `[false, true, false]` for raw radians   | `[true, true, false]`                                    |
+| Wrong formatter choice   | `formatDirection360` for pitch/roll      | `formatDirection` with `range180=true`                   |
 
 ## Related
 

@@ -1,49 +1,47 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("RadialCanvasPrimitives", function () {
   function create() {
-    const mod = loadFresh(
-      "shared/widget-kits/radial/RadialCanvasPrimitives.js",
-    );
+    const mod = loadFresh("shared/widget-kits/radial/RadialCanvasPrimitives.js");
     return mod.create(
       {},
       createComponentContextMock({
         modules: {
-          RadialAngleMath: loadFresh(
-            "shared/widget-kits/radial/RadialAngleMath.js",
-          ),
-        },
-      }),
+          RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js")
+        }
+      })
     );
   }
 
+  /** @param {any} ctx @param {string} name */
   function callsNamed(ctx, name) {
-    return ctx.calls.filter(function (call) {
+    return ctx.calls.filter(function (/** @type {any} */ call) {
       return call.name === name;
     });
   }
 
+  /** @param {any} ctx */
   function expectBalancedSaveRestore(ctx) {
     expect(callsNamed(ctx, "save")).toHaveLength(1);
     expect(callsNamed(ctx, "restore")).toHaveLength(1);
   }
 
+  /** @param {{x: number, y: number}} a @param {{x: number, y: number}} b */
   function pointDistance(a, b) {
     const dx = a.x - b.x;
     const dy = a.y - b.y;
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  /** @param {any} ctx */
   function pointerMetrics(ctx) {
     const points = ctx.calls
-      .filter(function (call) {
+      .filter(function (/** @type {any} */ call) {
         return call.name === "moveTo" || call.name === "lineTo";
       })
-      .map(function (call) {
+      .map(function (/** @type {any} */ call) {
         return { x: call.args[0], y: call.args[1] };
       });
     const tip = points[0];
@@ -51,11 +49,11 @@ describe("RadialCanvasPrimitives", function () {
     const right = points[2];
     const baseCenter = {
       x: (left.x + right.x) / 2,
-      y: (left.y + right.y) / 2,
+      y: (left.y + right.y) / 2
     };
     return {
       width: pointDistance(left, right),
-      length: pointDistance(tip, baseCenter),
+      length: pointDistance(tip, baseCenter)
     };
   }
 
@@ -66,7 +64,7 @@ describe("RadialCanvasPrimitives", function () {
     draw.drawRing(ctx, 100, 100, 50, {
       strokeStyle: "#224466",
       lineWidth: 3,
-      dash: [4, 2],
+      dash: [4, 2]
     });
 
     expect(ctx.strokeStyle).toBe("#224466");
@@ -87,7 +85,7 @@ describe("RadialCanvasPrimitives", function () {
       thickness: 8,
       fillStyle: "#123456",
       strokeStyle: "#abcdef",
-      lineWidth: 2,
+      lineWidth: 2
     });
 
     expect(ctx.fillStyle).toBe("#123456");
@@ -103,7 +101,7 @@ describe("RadialCanvasPrimitives", function () {
     draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
       fillStyle: "#123456",
       depth: 10,
-      halfWidth: 4,
+      halfWidth: 4
     });
     expect(ctx.fillStyle).toBe("#123456");
     expectBalancedSaveRestore(ctx);
@@ -116,19 +114,20 @@ describe("RadialCanvasPrimitives", function () {
     draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
       color: "#abcdef",
       depth: 10,
-      halfWidth: 4,
+      halfWidth: 4
     });
     expect(ctx.fillStyle).toBe("#abcdef");
     expectBalancedSaveRestore(ctx);
   });
 
   it("does not alter pointer geometry by variant when dimensions are fixed", function () {
+    /** @param {any} ctx */
     function pointerPath(ctx) {
       return ctx.calls
-        .filter(function (call) {
+        .filter(function (/** @type {any} */ call) {
           return call.name === "moveTo" || call.name === "lineTo";
         })
-        .map(function (call) {
+        .map(function (/** @type {any} */ call) {
           return [call.name].concat(call.args);
         });
     }
@@ -139,25 +138,11 @@ describe("RadialCanvasPrimitives", function () {
     const pointerOptions = {
       depth: 10,
       halfWidth: 4,
-      fillStyle: "#123456",
+      fillStyle: "#123456"
     };
 
-    draw.drawPointerAtRim(
-      normalCtx,
-      100,
-      100,
-      50,
-      0,
-      Object.assign({}, pointerOptions, { variant: "normal" }),
-    );
-    draw.drawPointerAtRim(
-      longCtx,
-      100,
-      100,
-      50,
-      0,
-      Object.assign({}, pointerOptions, { variant: "long" }),
-    );
+    draw.drawPointerAtRim(normalCtx, 100, 100, 50, 0, Object.assign({}, pointerOptions, { variant: "normal" }));
+    draw.drawPointerAtRim(longCtx, 100, 100, 50, 0, Object.assign({}, pointerOptions, { variant: "long" }));
 
     expect(pointerPath(longCtx)).toEqual(pointerPath(normalCtx));
   });
@@ -170,12 +155,12 @@ describe("RadialCanvasPrimitives", function () {
     draw.drawPointerAtRim(shortCtx, 100, 100, 50, 0, {
       depth: 10,
       halfWidth: 4,
-      fillStyle: "#123456",
+      fillStyle: "#123456"
     });
     draw.drawPointerAtRim(longCtx, 100, 100, 50, 0, {
       depth: 18,
       halfWidth: 4,
-      fillStyle: "#123456",
+      fillStyle: "#123456"
     });
 
     const shortMetrics = pointerMetrics(shortCtx);
@@ -193,12 +178,12 @@ describe("RadialCanvasPrimitives", function () {
     draw.drawPointerAtRim(narrowCtx, 100, 100, 50, 0, {
       depth: 10,
       halfWidth: 3,
-      fillStyle: "#123456",
+      fillStyle: "#123456"
     });
     draw.drawPointerAtRim(wideCtx, 100, 100, 50, 0, {
       depth: 10,
       halfWidth: 8,
-      fillStyle: "#123456",
+      fillStyle: "#123456"
     });
 
     const narrowMetrics = pointerMetrics(narrowCtx);
@@ -215,7 +200,7 @@ describe("RadialCanvasPrimitives", function () {
     draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
       depth: 10.7,
       halfWidth: 4.3,
-      fillStyle: "#123456",
+      fillStyle: "#123456"
     });
 
     expect(pointerMetrics(ctx).length).toBeCloseTo(9.7, 6);
@@ -229,7 +214,7 @@ describe("RadialCanvasPrimitives", function () {
     draw.drawPointerAtRim(ctx, 100, 100, 50, 0, {
       depth: 0,
       halfWidth: 4.3,
-      fillStyle: "#123456",
+      fillStyle: "#123456"
     });
 
     expect(ctx.calls).toHaveLength(0);
@@ -242,7 +227,7 @@ describe("RadialCanvasPrimitives", function () {
     draw.drawRimMarker(ctx, 100, 100, 150, 0, {
       len: 12.7,
       width: 3.4,
-      strokeStyle: "#123456",
+      strokeStyle: "#123456"
     });
 
     expect(ctx.lineWidth).toBeCloseTo(3.4, 6);
@@ -250,13 +235,13 @@ describe("RadialCanvasPrimitives", function () {
       pointDistance(
         {
           x: callsNamed(ctx, "moveTo")[0].args[0],
-          y: callsNamed(ctx, "moveTo")[0].args[1],
+          y: callsNamed(ctx, "moveTo")[0].args[1]
         },
         {
           x: callsNamed(ctx, "lineTo")[0].args[0],
-          y: callsNamed(ctx, "lineTo")[0].args[1],
-        },
-      ),
+          y: callsNamed(ctx, "lineTo")[0].args[1]
+        }
+      )
     ).toBeCloseTo(12.7, 6);
   });
 
@@ -267,7 +252,7 @@ describe("RadialCanvasPrimitives", function () {
     draw.drawRimMarker(ctx, 100, 100, 150, 0, {
       len: 12.7,
       width: 0,
-      strokeStyle: "#123456",
+      strokeStyle: "#123456"
     });
 
     expect(ctx.calls).toHaveLength(0);
@@ -281,14 +266,14 @@ describe("RadialCanvasPrimitives", function () {
       tail: 0.4,
       head: 0.2,
       width: 0.3,
-      strokeStyle: "#123456",
+      strokeStyle: "#123456"
     });
 
     const pathPoints = ctx.calls
-      .filter(function (call) {
+      .filter(function (/** @type {any} */ call) {
         return call.name === "moveTo" || call.name === "lineTo";
       })
-      .map(function (call) {
+      .map(function (/** @type {any} */ call) {
         return { x: call.args[0], y: call.args[1] };
       });
 

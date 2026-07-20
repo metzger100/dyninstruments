@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniResponsiveScaleProfile = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const RESPONSIVE_MIN_DIM = 80;
@@ -25,8 +25,8 @@
    * @returns {Record<string, number>}
    */
   function createScaleMap(spec) {
-    const cfg = (spec && typeof spec === "object") ? spec : {};
-    const scales = (cfg.scales && typeof cfg.scales === "object") ? cfg.scales : {};
+    const cfg = spec && typeof spec === "object" ? spec : {};
+    const scales = cfg.scales && typeof cfg.scales === "object" ? cfg.scales : {};
     /** @type {Record<string, number>} */
     const out = {};
     const keys = Object.keys(scales);
@@ -149,4 +149,4 @@
   }
 
   return { id: "ResponsiveScaleProfile", create: create };
-}));
+});

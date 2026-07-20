@@ -1,10 +1,9 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("TemperatureLinearWidget", function () {
   it("passes LinearGaugeEngine config with temperature tick profile and high-end sectors", function () {
+    /** @type {any} */
     let captured;
     const renderCanvas = vi.fn();
     const applyFormatter = vi.fn((value) => Number(value).toFixed(1) + " C");
@@ -14,9 +13,7 @@ describe("TemperatureLinearWidget", function () {
       return { major: 50, minor: 10 };
     });
 
-    const mod = loadFresh(
-      "widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js",
-    );
+    const mod = loadFresh("widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js");
     const spec = mod.create(
       {},
       createComponentContextMock({
@@ -24,105 +21,98 @@ describe("TemperatureLinearWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
+                /** @param {any} text @param {any} defaultText @returns {any} */
                 normalize(text, defaultText) {
-                  if (text == null)
-                    return defaultText == null ? "---" : defaultText;
+                  if (text == null) return defaultText == null ? "---" : defaultText;
                   const value = String(text).trim();
                   return value === "NO DATA" || /^-+$/.test(value)
                     ? defaultText == null
                       ? "---"
                       : defaultText
                     : String(text);
-                },
+                }
               };
-            },
+            }
           },
           ValueMath: {
             create() {
               return {
-                formatGaugeDisplay(
-                  raw,
-                  props,
-                  applyFormatter,
-                  normalize,
-                  defaultFormatter,
-                  defaultParameters,
-                ) {
+                /**
+                 * @param {any} raw
+                 * @param {any} props
+                 * @param {any} applyFormatter
+                 * @param {any} normalize
+                 * @param {any} defaultFormatter
+                 * @param {any} defaultParameters
+                 * @returns {any}
+                 */
+                formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
-                  const defaultText = Object.prototype.hasOwnProperty.call(
-                    p,
-                    "default",
-                  )
+                  const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
                     ? p.default
                     : normalize(undefined, undefined);
                   const n = Number(raw);
                   if (!Number.isFinite(n)) {
                     return { num: NaN, text: defaultText };
                   }
-                  const formatter = Object.prototype.hasOwnProperty.call(
-                    p,
-                    "formatter",
-                  )
+                  const formatter = Object.prototype.hasOwnProperty.call(p, "formatter")
                     ? p.formatter
                     : defaultFormatter;
-                  const formatterParameters =
-                    Object.prototype.hasOwnProperty.call(
-                      p,
-                      "formatterParameters",
-                    )
-                      ? p.formatterParameters
-                      : defaultParameters;
+                  const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
+                    ? p.formatterParameters
+                    : defaultParameters;
                   const formatted = normalize(
                     String(
                       applyFormatter(n, {
                         formatter: formatter,
                         formatterParameters: formatterParameters,
-                        default: defaultText,
-                      }),
+                        default: defaultText
+                      })
                     ),
-                    defaultText,
+                    defaultText
                   );
                   const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
                   return Number.isFinite(num)
-                    ? { num: num, text: match[0] }
+                    ? { num: num, text: /** @type {RegExpMatchArray} */ (match)[0] }
                     : { num: NaN, text: defaultText };
                 },
+                /** @param {any} text @returns {any} */
                 extractNumberText(text) {
                   const match = String(text).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   return match ? match[0] : "";
                 },
+                /** @param {any} v @param {any} lo @param {any} hi @returns {any} */
                 clamp(v, lo, hi) {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
-                resolveTemperatureTickSteps,
+                resolveTemperatureTickSteps
               };
-            },
+            }
           },
           LinearGaugeEngine: {
             create() {
               return {
+                /** @param {any} cfg @returns {any} */
                 createRenderer(cfg) {
                   captured = cfg;
                   return renderCanvas;
-                },
+                }
               };
-            },
-          },
+            }
+          }
         },
-        services: { format: { applyFormatter } },
-      }),
+        services: { format: { applyFormatter } }
+      })
     );
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.unitDefault).toBe("°C");
-    expect(captured.hideTextualMetricsProp).toBe(
-      "tempLinearHideTextualMetrics",
-    );
+    expect(captured.hideTextualMetricsProp).toBe("tempLinearHideTextualMetrics");
     expect(captured).not.toHaveProperty("rangeDefaults");
     expect(captured.ratioProps).toEqual({
       normal: "tempLinearRatioThresholdNormal",
-      flat: "tempLinearRatioThresholdFlat",
+      flat: "tempLinearRatioThresholdFlat"
     });
     expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(8)).toEqual({ major: 1, minor: 0.5 });
@@ -131,8 +121,8 @@ describe("TemperatureLinearWidget", function () {
     expect(
       captured.formatDisplay(23.44, {
         formatter: "formatTemperature",
-        formatterParameters: ["celsius"],
-      }),
+        formatterParameters: ["celsius"]
+      })
     ).toEqual({ num: 23.4, text: "23.4" });
     expect(applyFormatter).toHaveBeenCalled();
 
@@ -140,27 +130,26 @@ describe("TemperatureLinearWidget", function () {
     const sectors = captured.buildSectors(
       {
         tempLinearWarningFrom: 28,
-        tempLinearAlarmFrom: 32,
+        tempLinearAlarmFrom: 32
       },
       0,
       35,
       { min: 0, max: 35 },
       {},
-      theme,
+      theme
     );
 
     expect(sectors).toEqual([
       { from: 28, to: 32, color: "#123456" },
-      { from: 32, to: 35, color: "#654321" },
+      { from: 32, to: 35, color: "#654321" }
     ]);
   });
 
   it("returns default text when formatter output is not parseable", function () {
+    /** @type {any} */
     let captured;
 
-    const mod = loadFresh(
-      "widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js",
-    );
+    const mod = loadFresh("widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js");
     mod.create(
       {},
       createComponentContextMock({
@@ -168,110 +157,104 @@ describe("TemperatureLinearWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
+                /** @param {any} text @param {any} defaultText @returns {any} */
                 normalize(text, defaultText) {
-                  if (text == null)
-                    return defaultText == null ? "---" : defaultText;
+                  if (text == null) return defaultText == null ? "---" : defaultText;
                   const value = String(text).trim();
                   return value === "NO DATA" || /^-+$/.test(value)
                     ? defaultText == null
                       ? "---"
                       : defaultText
                     : String(text);
-                },
+                }
               };
-            },
+            }
           },
           ValueMath: {
             create() {
               return {
-                formatGaugeDisplay(
-                  raw,
-                  props,
-                  applyFormatter,
-                  normalize,
-                  defaultFormatter,
-                  defaultParameters,
-                ) {
+                /**
+                 * @param {any} raw
+                 * @param {any} props
+                 * @param {any} applyFormatter
+                 * @param {any} normalize
+                 * @param {any} defaultFormatter
+                 * @param {any} defaultParameters
+                 * @returns {any}
+                 */
+                formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
-                  const defaultText = Object.prototype.hasOwnProperty.call(
-                    p,
-                    "default",
-                  )
+                  const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
                     ? p.default
                     : normalize(undefined, undefined);
                   const n = Number(raw);
                   if (!Number.isFinite(n)) {
                     return { num: NaN, text: defaultText };
                   }
-                  const formatter = Object.prototype.hasOwnProperty.call(
-                    p,
-                    "formatter",
-                  )
+                  const formatter = Object.prototype.hasOwnProperty.call(p, "formatter")
                     ? p.formatter
                     : defaultFormatter;
-                  const formatterParameters =
-                    Object.prototype.hasOwnProperty.call(
-                      p,
-                      "formatterParameters",
-                    )
-                      ? p.formatterParameters
-                      : defaultParameters;
+                  const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
+                    ? p.formatterParameters
+                    : defaultParameters;
                   const formatted = normalize(
                     String(
                       applyFormatter(n, {
                         formatter: formatter,
                         formatterParameters: formatterParameters,
-                        default: defaultText,
-                      }),
+                        default: defaultText
+                      })
                     ),
-                    defaultText,
+                    defaultText
                   );
                   const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
                   return Number.isFinite(num)
-                    ? { num: num, text: match[0] }
+                    ? { num: num, text: /** @type {RegExpMatchArray} */ (match)[0] }
                     : { num: NaN, text: defaultText };
                 },
+                /** @param {any} text @returns {any} */
                 extractNumberText(text) {
                   const match = String(text).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   return match ? match[0] : "";
                 },
+                /** @param {any} v @param {any} lo @param {any} hi @returns {any} */
                 clamp(v, lo, hi) {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
                 resolveTemperatureTickSteps() {
                   return { major: 10, minor: 2 };
-                },
+                }
               };
-            },
+            }
           },
           LinearGaugeEngine: {
             create() {
               return {
+                /** @param {any} cfg @returns {any} */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
-                },
+                }
               };
-            },
-          },
+            }
+          }
         },
         services: {
           format: {
             applyFormatter() {
               return "n/a";
-            },
-          },
-        },
-      }),
+            }
+          }
+        }
+      })
     );
 
     expect(
       captured.formatDisplay(23.4, {
         formatter: "formatTemperature",
-        formatterParameters: ["celsius"],
-      }),
+        formatterParameters: ["celsius"]
+      })
     ).toEqual({ num: NaN, text: "---" });
   });
-
 });

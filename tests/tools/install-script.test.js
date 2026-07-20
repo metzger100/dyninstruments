@@ -16,20 +16,16 @@ function childEnv(overrides = {}) {
   };
 }
 
+/** @param {string} rootDir @param {string} relPath @param {string} content */
 function writeFile(rootDir, relPath, content) {
   const absPath = path.join(rootDir, relPath);
   fs.mkdirSync(path.dirname(absPath), { recursive: true });
   fs.writeFileSync(absPath, content);
 }
 
+/** @param {string} sourceRoot @param {string} zipPath @param {string} topDir */
 function createZip(sourceRoot, zipPath, topDir) {
-  const pythonArgs = [
-    "-m",
-    "zipfile",
-    "-c",
-    zipPath,
-    topDir
-  ];
+  const pythonArgs = ["-m", "zipfile", "-c", zipPath, topDir];
   const pythonResult = spawnSync("python3", pythonArgs, {
     cwd: sourceRoot,
     env: childEnv(),
@@ -37,12 +33,7 @@ function createZip(sourceRoot, zipPath, topDir) {
   });
   if (pythonResult.status === 0) return;
 
-  const zipArgs = [
-    "-q",
-    "-r",
-    zipPath,
-    topDir
-  ];
+  const zipArgs = ["-q", "-r", zipPath, topDir];
   const zipResult = spawnSync("zip", zipArgs, {
     cwd: sourceRoot,
     env: childEnv(),
@@ -53,6 +44,7 @@ function createZip(sourceRoot, zipPath, topDir) {
   }
 }
 
+/** @param {string} rootDir @param {string} name @param {string} jsContent */
 function createPluginZip(rootDir, name, jsContent) {
   const sourceRoot = path.join(rootDir, `${name}-src`);
   const zipPath = path.join(rootDir, `${name}.zip`);
@@ -63,6 +55,7 @@ function createPluginZip(rootDir, name, jsContent) {
   return zipPath;
 }
 
+/** @param {string[]} args @param {Record<string, any>} [options] */
 function runInstaller(args, options = {}) {
   return spawnSync("bash", [SCRIPT_PATH, ...args], {
     cwd: ROOT_DIR,
@@ -76,10 +69,7 @@ function runInstaller(args, options = {}) {
 
 describe("install.sh", function () {
   it("passes bash syntax validation", function () {
-    const result = spawnSync("bash", [
-      "-n",
-      SCRIPT_PATH
-    ], {
+    const result = spawnSync("bash", ["-n", SCRIPT_PATH], {
       env: childEnv(),
       encoding: "utf8"
     });
@@ -94,13 +84,7 @@ describe("install.sh", function () {
       const zipPath = createPluginZip(tempRoot, "release", "window.release = true;\n");
       const target = path.join(tempRoot, "plugins", "dyninstruments");
 
-      const result = runInstaller([
-        "--zip",
-        zipPath,
-        "--plugin-dir",
-        target,
-        "--no-restart"
-      ]);
+      const result = runInstaller(["--zip", zipPath, "--plugin-dir", target, "--no-restart"]);
 
       expect(result.status).toBe(0);
       expect(fs.readFileSync(path.join(target, "plugin.js"), "utf8")).toContain("window.release");
@@ -119,13 +103,7 @@ describe("install.sh", function () {
       writeFile(target, "plugin.js", "window.old = true;\n");
       writeFile(target, "stale.txt", "stale\n");
 
-      const result = runInstaller([
-        "--zip",
-        zipPath,
-        "--plugin-dir",
-        target,
-        "--no-restart"
-      ]);
+      const result = runInstaller(["--zip", zipPath, "--plugin-dir", target, "--no-restart"]);
 
       expect(result.status).toBe(0);
       expect(fs.readFileSync(path.join(target, "plugin.js"), "utf8")).toContain("window.updated");
@@ -142,13 +120,7 @@ describe("install.sh", function () {
       const dataDir = path.join(tempRoot, "avnav-data");
       const target = path.join(dataDir, "plugins", "dyninstruments");
 
-      const result = runInstaller([
-        "--zip",
-        zipPath,
-        "--data-dir",
-        dataDir,
-        "--no-restart"
-      ]);
+      const result = runInstaller(["--zip", zipPath, "--data-dir", dataDir, "--no-restart"]);
 
       expect(result.status).toBe(0);
       expect(fs.readFileSync(path.join(target, "plugin.js"), "utf8")).toContain("window.dataDir");
@@ -168,13 +140,7 @@ describe("install.sh", function () {
       writeFile(target, "plugin.js", "window.old = true;\n");
       createZip(sourceRoot, zipPath, "wrong");
 
-      const result = runInstaller([
-        "--zip",
-        zipPath,
-        "--plugin-dir",
-        target,
-        "--no-restart"
-      ]);
+      const result = runInstaller(["--zip", zipPath, "--plugin-dir", target, "--no-restart"]);
 
       expect(result.status).not.toBe(0);
       expect(fs.readFileSync(path.join(target, "plugin.js"), "utf8")).toContain("window.old");
@@ -188,13 +154,7 @@ describe("install.sh", function () {
     try {
       const target = path.join(tempRoot, "plugins", "dyninstruments");
 
-      const result = runInstaller([
-        "--version",
-        "4.0.0-beta.2",
-        "--plugin-dir",
-        target,
-        "--dry-run"
-      ]);
+      const result = runInstaller(["--version", "4.0.0-beta.2", "--plugin-dir", target, "--dry-run"]);
 
       expect(result.status).toBe(0);
       expect(result.stdout).toContain(
@@ -218,18 +178,9 @@ describe("install.sh", function () {
       writeFile(binDir, "systemctl", `#!/bin/sh\nprintf called > "${marker}"\nexit 0\n`);
       fs.chmodSync(path.join(binDir, "systemctl"), 0o755);
 
-      const result = runInstaller(
-        [
-          "--zip",
-          zipPath,
-          "--plugin-dir",
-          target,
-          "--no-restart"
-        ],
-        {
-          path: `${binDir}:${process.env.PATH}`
-        }
-      );
+      const result = runInstaller(["--zip", zipPath, "--plugin-dir", target, "--no-restart"], {
+        path: `${binDir}:${process.env.PATH}`
+      });
 
       expect(result.status).toBe(0);
       expect(fs.existsSync(marker)).toBe(false);

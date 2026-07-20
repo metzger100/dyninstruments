@@ -1,25 +1,14 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("AlarmHtmlFit", function () {
   function createAisLayout() {
-    const responsiveScaleProfile = loadFresh(
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-    );
-    const layoutRectMath = loadFresh(
-      "shared/widget-kits/layout/LayoutRectMath.js",
-    );
-    const aisSizing = loadFresh(
-      "shared/widget-kits/nav/AisTargetLayoutSizing.js",
-    );
-    const aisGeometry = loadFresh(
-      "shared/widget-kits/nav/AisTargetLayoutGeometry.js",
-    );
-    const aisGeometryStyles = loadFresh(
-      "shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js",
-    );
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const aisSizing = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
+    const aisGeometry = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
+    const aisGeometryStyles = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js");
     const aisMath = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
     return loadFresh("shared/widget-kits/nav/AisTargetLayout.js").create(
       {},
@@ -30,9 +19,9 @@ describe("AlarmHtmlFit", function () {
           AisTargetLayoutSizing: aisSizing,
           AisTargetLayoutGeometry: aisGeometry,
           AisTargetLayoutGeometryStyles: aisGeometryStyles,
-          AisTargetLayoutMath: aisMath,
-        },
-      }),
+          AisTargetLayoutMath: aisMath
+        }
+      })
     );
   }
 
@@ -45,7 +34,7 @@ describe("AlarmHtmlFit", function () {
         const px = match ? Number(match[1]) : 12;
         const safePx = Number.isFinite(px) ? px : 12;
         return { width: String(text).length * safePx * 0.56 };
-      },
+      }
     };
   }
 
@@ -82,15 +71,9 @@ describe("AlarmHtmlFit", function () {
           ctx.font = valueWeight + " " + valuePx + "px " + family;
           const valueWidth = ctx.measureText(valueText).width;
           ctx.font = labelWeight + " " + captionPx + "px " + family;
-          const captionWidth = captionText
-            ? ctx.measureText(captionText).width
-            : 0;
-          const totalWidth =
-            captionWidth + (captionText ? gap : 0) + valueWidth;
-          const fits =
-            totalWidth <= maxW + 0.01 &&
-            valuePx <= safeMaxH &&
-            captionPx <= safeMaxH;
+          const captionWidth = captionText ? ctx.measureText(captionText).width : 0;
+          const totalWidth = captionWidth + (captionText ? gap : 0) + valueWidth;
+          const fits = totalWidth <= maxW + 0.01 && valuePx <= safeMaxH && captionPx <= safeMaxH;
           if (fits) {
             best = {
               sPx: captionPx,
@@ -98,7 +81,7 @@ describe("AlarmHtmlFit", function () {
               cW: captionWidth,
               vW: valueWidth,
               total: totalWidth,
-              gap: gap,
+              gap: gap
             };
             lo = valuePx + 1;
           } else {
@@ -110,45 +93,33 @@ describe("AlarmHtmlFit", function () {
           ctx.font = valueWeight + " 1px " + family;
           const valueWidth = ctx.measureText(valueText).width;
           ctx.font = labelWeight + " 1px " + family;
-          const captionWidth = captionText
-            ? ctx.measureText(captionText).width
-            : 0;
+          const captionWidth = captionText ? ctx.measureText(captionText).width : 0;
           best = {
             sPx: 1,
             vPx: 1,
             cW: captionWidth,
             vW: valueWidth,
             total: captionWidth + (captionText ? gap : 0) + valueWidth,
-            gap: gap,
+            gap: gap
           };
         }
 
         return best;
-      }),
+      })
     };
   }
 
   function createHarness(options) {
     const cfg = options || {};
-    const htmlUtilsModule = loadFresh(
-      "shared/widget-kits/html/HtmlWidgetUtils.js",
-    );
-    const responsiveScaleProfile = loadFresh(
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-    );
-    const layoutRectMath = loadFresh(
-      "shared/widget-kits/layout/LayoutRectMath.js",
-    );
-    const aisLayoutMath = loadFresh(
-      "shared/widget-kits/nav/AisTargetLayoutMath.js",
-    );
-    const aisLayoutSizing = loadFresh(
-      "shared/widget-kits/nav/AisTargetLayoutSizing.js",
-    );
+    const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const aisLayoutMath = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
+    const aisLayoutSizing = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
     const fitCalls = {
       high: [],
       normal: [],
-      flat: [],
+      flat: []
     };
     const textLayoutApi = cfg.textLayoutApi || {
       fitThreeRowBlock: vi.fn((args) => {
@@ -162,41 +133,39 @@ describe("AlarmHtmlFit", function () {
       fitInlineTriplet: vi.fn((args) => {
         fitCalls.flat.push(args);
         return { sPx: 9, vPx: 15 };
-      }),
+      })
     };
     const themeTokens = {
       colors: {
         alarmWidget: {
           bg: "#d9534a",
           fg: "#ffffff",
-          strip: "#2e9e6b",
-        },
+          strip: "#2e9e6b"
+        }
       },
       font: {
         family: "sans-serif",
         weight: 700,
-        labelWeight: 600,
-      },
+        labelWeight: 600
+      }
     };
     const themeApi = {
-      resolveForRoot: vi.fn(() => themeTokens),
+      resolveForRoot: vi.fn(() => themeTokens)
     };
     const targetEl = document.createElement("div");
     const componentContext = createComponentContextMock({
       modules: {
         HtmlWidgetUtils: htmlUtilsModule,
-        AlarmHtmlFitChrome: loadFresh(
-          "shared/widget-kits/vessel/AlarmHtmlFitChrome.js",
-        ),
+        AlarmHtmlFitChrome: loadFresh("shared/widget-kits/vessel/AlarmHtmlFitChrome.js"),
         AisTargetLayoutSizing: aisLayoutSizing,
         ResponsiveScaleProfile: responsiveScaleProfile,
         LayoutRectMath: layoutRectMath,
         AisTargetLayoutMath: aisLayoutMath,
-        TextLayoutEngine: { create: () => textLayoutApi },
+        TextLayoutEngine: { create: () => textLayoutApi }
       },
       services: {
         themeTokens: {
-          resolveForRoot: themeApi.resolveForRoot,
+          resolveForRoot: themeApi.resolveForRoot
         },
         dom: {
           requirePluginRoot(target) {
@@ -204,22 +173,19 @@ describe("AlarmHtmlFit", function () {
           },
           getNightModeState() {
             return false;
-          },
-        },
-      },
+          }
+        }
+      }
     });
 
     return {
-      fit: loadFresh("shared/widget-kits/vessel/AlarmHtmlFit.js").create(
-        {},
-        componentContext,
-      ),
+      fit: loadFresh("shared/widget-kits/vessel/AlarmHtmlFit.js").create({}, componentContext),
       textLayoutApi: textLayoutApi,
       themeApi: themeApi,
       targetEl: targetEl,
       hostContext: {
-        __dyniAlarmMeasureCtx: createMeasureContext(),
-      },
+        __dyniAlarmMeasureCtx: createMeasureContext()
+      }
     };
   }
 
@@ -233,9 +199,9 @@ describe("AlarmHtmlFit", function () {
         captionText: "ALARM",
         valueText: "ENGINE, FIRE",
         ratioThresholdNormal: 1.0,
-        ratioThresholdFlat: 3.0,
+        ratioThresholdFlat: 3.0
       },
-      overrides || {},
+      overrides || {}
     );
   }
 
@@ -275,27 +241,27 @@ describe("AlarmHtmlFit", function () {
       showStrip: true,
       showActiveBackground: false,
       ratioThresholdNormal: 1.0,
-      ratioThresholdFlat: 3.0,
+      ratioThresholdFlat: 3.0
     });
     const shell = { width: 120, height: 100 };
     const alarmFit = h.fit.compute({
       model: model,
       targetEl: h.targetEl,
       hostContext: {
-        __dyniAlarmMeasureCtx: createMeasureContext(),
+        __dyniAlarmMeasureCtx: createMeasureContext()
       },
-      shellRect: shell,
+      shellRect: shell
     });
     const alarmLayout = h.fit.resolveLayout({
       model: model,
-      shellRect: shell,
+      shellRect: shell
     });
     const ais = aisLayout.computeLayout({
       W: shell.width,
       H: shell.height,
       renderState: "data",
       showTcpaBranch: true,
-      hasAccent: true,
+      hasAccent: true
     });
 
     expect(ais.mode).toBe("high");
@@ -304,28 +270,13 @@ describe("AlarmHtmlFit", function () {
     const alarmAccent = parseStyleText(alarmFit.accentStyle);
     const alarmShell = parseStyleText(alarmFit.shellStyle);
     const shellPadding = String(alarmShell.padding || "").split(/\s+/);
-    const alarmTopPad =
-      shellPadding.length === 4
-        ? readPx({ value: shellPadding[0] }, "value")
-        : NaN;
-    const alarmRightPad =
-      shellPadding.length === 4
-        ? readPx({ value: shellPadding[1] }, "value")
-        : NaN;
-    const alarmBottomPad =
-      shellPadding.length === 4
-        ? readPx({ value: shellPadding[2] }, "value")
-        : NaN;
-    const alarmLeftPad =
-      shellPadding.length === 4
-        ? readPx({ value: shellPadding[3] }, "value")
-        : NaN;
-    const aisBottom =
-      ais.effectiveLayoutHeight - ais.accentRect.y - ais.accentRect.h;
-    const aisContentRight =
-      ais.shellWidth - ais.contentRect.x - ais.contentRect.w;
-    const aisContentBottom =
-      ais.effectiveLayoutHeight - ais.contentRect.y - ais.contentRect.h;
+    const alarmTopPad = shellPadding.length === 4 ? readPx({ value: shellPadding[0] }, "value") : NaN;
+    const alarmRightPad = shellPadding.length === 4 ? readPx({ value: shellPadding[1] }, "value") : NaN;
+    const alarmBottomPad = shellPadding.length === 4 ? readPx({ value: shellPadding[2] }, "value") : NaN;
+    const alarmLeftPad = shellPadding.length === 4 ? readPx({ value: shellPadding[3] }, "value") : NaN;
+    const aisBottom = ais.effectiveLayoutHeight - ais.accentRect.y - ais.accentRect.h;
+    const aisContentRight = ais.shellWidth - ais.contentRect.x - ais.contentRect.w;
+    const aisContentBottom = ais.effectiveLayoutHeight - ais.contentRect.y - ais.contentRect.h;
 
     expect(readPx(alarmAccent, "left")).toBe(ais.accentRect.x);
     expect(readPx(alarmAccent, "top")).toBe(ais.accentRect.y);
@@ -337,5 +288,4 @@ describe("AlarmHtmlFit", function () {
     expect(alarmTopPad).toBe(ais.contentRect.y);
     expect(alarmBottomPad).toBe(aisContentBottom);
   });
-
 });

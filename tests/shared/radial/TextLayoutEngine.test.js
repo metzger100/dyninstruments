@@ -1,72 +1,63 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("TextLayoutEngine", function () {
   function createSizingContext() {
     const ctx = createMockContext2D();
-    ctx.measureText = function (text) {
+    ctx.measureText = function (/** @type {any} */ text) {
       const match = /(\d+)px/.exec(String(this.font || ""));
       const px = match ? Number(match[1]) : 10;
       const width = String(text || "").length * px * 0.6;
       return {
         width: width,
         actualBoundingBoxAscent: px * 0.7,
-        actualBoundingBoxDescent: px * 0.3,
+        actualBoundingBoxDescent: px * 0.3
       };
     };
     return ctx;
   }
 
   function createEngine() {
-    const engineModule = loadFresh(
-      "shared/widget-kits/text/TextLayoutEngine.js",
-    );
-    const primitiveModule = loadFresh(
-      "shared/widget-kits/text/TextLayoutPrimitives.js",
-    );
-    const compositeModule = loadFresh(
-      "shared/widget-kits/text/TextLayoutComposite.js",
-    );
-    const textLayoutModule = loadFresh(
-      "shared/widget-kits/text/CanvasTextLayout.js",
-    );
-    const textFittingModule = loadFresh(
-      "shared/widget-kits/radial/RadialTextFitting.js",
-    );
-    const responsiveProfileModule = loadFresh(
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-    );
+    const engineModule = loadFresh("shared/widget-kits/text/TextLayoutEngine.js");
+    const primitiveModule = loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js");
+    const compositeModule = loadFresh("shared/widget-kits/text/TextLayoutComposite.js");
+    const textLayoutModule = loadFresh("shared/widget-kits/text/CanvasTextLayout.js");
+    const textFittingModule = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
+    const responsiveProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const valueMathModule = {
       create() {
         return {
-          isFiniteNumber(n) {
+          isFiniteNumber(/** @type {any} */ n) {
             return typeof n === "number" && isFinite(n);
           },
-          clamp(n, lo, hi) {
+          clamp(/** @type {any} */ n, /** @type {any} */ lo, /** @type {any} */ hi) {
             const num = Number(n);
             if (!isFinite(num)) return Number(lo);
             return Math.max(Number(lo), Math.min(Number(hi), num));
           },
-          clampNumber(value, lo, hi, fallbackValue) {
+          clampNumber(
+            /** @type {any} */ value,
+            /** @type {any} */ lo,
+            /** @type {any} */ hi,
+            /** @type {any} */ fallbackValue
+          ) {
             const n = Number(value);
             if (!Number.isFinite(n)) {
               return Number(fallbackValue);
             }
             return Math.max(Number(lo), Math.min(Number(hi), n));
           },
-          lerp(from, to, t) {
+          lerp(/** @type {any} */ from, /** @type {any} */ to, /** @type {any} */ t) {
             return from + (to - from) * t;
           },
-          computeMode(ratio, normal, flat) {
+          computeMode(/** @type {any} */ ratio, /** @type {any} */ normal, /** @type {any} */ flat) {
             if (ratio < normal) return "high";
             if (ratio > flat) return "flat";
             return "normal";
-          },
+          }
         };
-      },
+      }
     };
 
     return engineModule.create(
@@ -78,9 +69,9 @@ describe("TextLayoutEngine", function () {
           RadialTextFitting: textFittingModule,
           TextLayoutPrimitives: primitiveModule,
           TextLayoutComposite: compositeModule,
-          ResponsiveScaleProfile: responsiveProfileModule,
-        },
-      }),
+          ResponsiveScaleProfile: responsiveProfileModule
+        }
+      })
     );
   }
 
@@ -90,40 +81,40 @@ describe("TextLayoutEngine", function () {
       W: 120,
       H: 220,
       captionText: "SPD",
-      unitText: "kn",
+      unitText: "kn"
     });
     const normal = engine.computeModeLayout({
       W: 220,
       H: 140,
       captionText: "SPD",
-      unitText: "kn",
+      unitText: "kn"
     });
     const flat = engine.computeModeLayout({
       W: 500,
       H: 120,
       captionText: "SPD",
-      unitText: "kn",
+      unitText: "kn"
     });
     const noCaption = engine.computeModeLayout({
       W: 220,
       H: 140,
       captionText: "",
       unitText: "kn",
-      collapseNoCaptionToFlat: true,
+      collapseNoCaptionToFlat: true
     });
     const noUnitHigh = engine.computeModeLayout({
       W: 120,
       H: 220,
       captionText: "SPD",
       unitText: "",
-      collapseHighWithoutUnitToNormal: true,
+      collapseHighWithoutUnitToNormal: true
     });
     const clamped = engine.computeModeLayout({
       W: 220,
       H: 140,
       captionText: "SPD",
       unitText: "kn",
-      captionUnitScale: 99,
+      captionUnitScale: 99
     });
 
     expect(high.mode).toBe("high");
@@ -174,16 +165,10 @@ describe("TextLayoutEngine", function () {
     expect(compact.padX).toBeLessThan(legacy.padX);
     expect(compact.innerY).toBeLessThan(legacy.innerY);
     expect(compact.gapBase).toBeLessThan(legacy.gapBase);
-    expect(compact.responsive.textFillScale).toBeGreaterThan(
-      medium.responsive.textFillScale,
-    );
-    expect(medium.responsive.textFillScale).toBeGreaterThan(
-      large.responsive.textFillScale,
-    );
+    expect(compact.responsive.textFillScale).toBeGreaterThan(medium.responsive.textFillScale);
+    expect(medium.responsive.textFillScale).toBeGreaterThan(large.responsive.textFillScale);
     expect(large.responsive.textFillScale).toBe(1);
-    expect(
-      engine.scaleMaxTextPx(20, compact.responsive.textFillScale),
-    ).toBeGreaterThan(20);
+    expect(engine.scaleMaxTextPx(20, compact.responsive.textFillScale)).toBeGreaterThan(20);
   });
 
   it("fits single-line and multi-row text with binary search", function () {
@@ -198,7 +183,7 @@ describe("TextLayoutEngine", function () {
       minPx: 1,
       maxPx: 60,
       family: "sans-serif",
-      weight: 700,
+      weight: 700
     });
     const multi = engine.fitMultiRowBinary({
       ctx: ctx,
@@ -208,7 +193,7 @@ describe("TextLayoutEngine", function () {
       minPx: 1,
       maxPx: 52,
       family: "sans-serif",
-      weight: 700,
+      weight: 700
     });
 
     expect(single.px).toBeGreaterThan(0);
@@ -235,7 +220,7 @@ describe("TextLayoutEngine", function () {
       maxH: 44,
       family: "sans-serif",
       valueWeight: 730,
-      labelWeight: 610,
+      labelWeight: 610
     });
     const inline = engine.fitInlineTriplet({
       ctx: ctx,
@@ -248,7 +233,7 @@ describe("TextLayoutEngine", function () {
       maxH: 44,
       family: "sans-serif",
       valueWeight: 730,
-      labelWeight: 610,
+      labelWeight: 610
     });
 
     expect(pair.total).toBeLessThanOrEqual(92.01);
@@ -276,7 +261,7 @@ describe("TextLayoutEngine", function () {
       align: "right",
       family: "sans-serif",
       valueWeight: 730,
-      labelWeight: 610,
+      labelWeight: 610
     });
     const drawCtx = createMockContext2D();
 
@@ -291,16 +276,13 @@ describe("TextLayoutEngine", function () {
       bottomText: "LON",
       family: "sans-serif",
       valueWeight: 730,
-      labelWeight: 610,
+      labelWeight: 610
     });
 
-    const fillCalls = drawCtx.calls.filter(
-      (entry) => entry.name === "fillText",
-    );
+    const fillCalls = drawCtx.calls.filter((/** @type {any} */ entry) => entry.name === "fillText");
     expect(fit.align).toBe("right");
     expect(drawCtx.textAlign).toBe("right");
     expect(fillCalls[2].args[1]).toBe(188);
     expect(fillCalls[3].args[1]).toBe(188);
   });
-
 });

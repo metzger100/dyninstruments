@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniMapZoomTextHtmlWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {DyniComponentContext & { theme: { tokens: DyniMapZoomThemeResolver } }} DyniMapZoomWidgetContext */
   /** @typedef {{ props: DyniWidgetValues, shellRect?: DyniHtmlShellRect | null, rootEl?: HTMLElement | null }} DyniMapZoomWidgetPayload */
@@ -24,7 +24,8 @@
     valueStyle: "",
     unitStyle: "",
     requiredStyle: "",
-    zoomText: "", requiredText: ""
+    zoomText: "",
+    requiredText: ""
   };
 
   /** @param {DyniWidgetValues} props @param {DyniHtmlShellRect | null} shellRect @param {DyniHtmlWidgetUtilsApi} htmlUtils */
@@ -58,9 +59,8 @@
       return false;
     }
     const policy = htmlUtils.resolveSurfacePolicy(p);
-    const actions = policy && policy.actions
-      ? /** @type {{ map?: { checkAutoZoom?: () => boolean } }} */ (policy.actions)
-      : null;
+    const actions =
+      policy && policy.actions ? /** @type {{ map?: { checkAutoZoom?: () => boolean } }} */ (policy.actions) : null;
     if (!actions || !actions.map || typeof actions.map.checkAutoZoom !== "function") {
       return false;
     }
@@ -81,11 +81,16 @@
 
   /** @param {unknown} value @param {string} defaultText @param {DyniComponentContext} componentContext @param {DyniPlaceholderNormalizeApi} placeholderNormalize */
   function formatZoom(value, defaultText, componentContext, placeholderNormalize) {
-    const out = placeholderNormalize.normalize(String(componentContext.format.applyFormatter(value, {
-      formatter: "formatDecimalOpt",
-      formatterParameters: [2, 1],
-      default: defaultText
-    })), defaultText);
+    const out = placeholderNormalize.normalize(
+      String(
+        componentContext.format.applyFormatter(value, {
+          formatter: "formatDecimalOpt",
+          formatterParameters: [2, 1],
+          default: defaultText
+        })
+      ),
+      defaultText
+    );
     return out.trim() ? out : defaultText;
   }
 
@@ -108,43 +113,56 @@
   }
 
   /** @param {unknown} props @param {unknown} shellRect @param {DyniComponentContext} componentContext @param {DyniHtmlWidgetUtilsApi} htmlUtils @param {DyniStateScreenLabelsApi} stateScreenLabels @param {DyniStateScreenPrecedenceApi} stateScreenPrecedence @param {DyniStateScreenInteractionApi} stateScreenInteraction @param {DyniStableDigitsApi} stableDigits @param {DyniValueMathApi["toOptionalFiniteNumber"]} toOptionalFiniteNumber @returns {DyniMapZoomRenderModel} */
-  function buildModel(props, shellRect, componentContext, htmlUtils, stateScreenLabels,
-    stateScreenPrecedence, stateScreenInteraction, stableDigits, toOptionalFiniteNumber) {
+  function buildModel(
+    props,
+    shellRect,
+    componentContext,
+    htmlUtils,
+    stateScreenLabels,
+    stateScreenPrecedence,
+    stateScreenInteraction,
+    stableDigits,
+    toOptionalFiniteNumber
+  ) {
     const p = ensureProps(props);
-    const rect = shellRect && typeof shellRect === "object"
-      ? /** @type {DyniHtmlShellRect} */ (shellRect)
-      : null;
-    const defaultText = String(p.default);
-    const caption = htmlUtils.trimText(p.caption);
-    const unit = htmlUtils.trimText(p.unit);
+    const rect = shellRect && typeof shellRect === "object" ? /** @type {DyniHtmlShellRect} */ (shellRect) : null;
+    const defaultText = /** @type {string} */ (p.default);
+    const caption = /** @type {string} */ (p.caption);
+    const unit = /** @type {string} */ (p.unit);
     const ratioMode = resolveDisplayMode(p, rect, htmlUtils);
     const mode = resolveComposedMode(ratioMode, caption, unit);
     const kind = resolveStateKind(p, stateScreenPrecedence);
-    const zoomNumber = toOptionalFiniteNumber(p.zoom);
-    const requiredZoomNumber = toOptionalFiniteNumber(p.requiredZoom);
+    // MapMapper's "zoom" route (cluster/mappers/MapMapper.js) already guarantees
+    // zoom/requiredZoom as number|undefined via toolkit.num; trust that boundary
+    // instead of re-normalizing here (see mapper-prop-renormalization).
+    const zoomNumber = /** @type {number | undefined} */ (p.zoom);
+    const requiredZoomNumber = /** @type {number | undefined} */ (p.requiredZoom);
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     const stableDigitsEnabled = p.stableDigits === true;
     const zoomRawText = formatZoom(zoomNumber, defaultText, componentContext, placeholderNormalize);
     const zoomStable = stableDigitsEnabled
       ? stableDigits.normalize(zoomRawText, {
-        integerWidth: stableDigits.resolveIntegerWidth(zoomRawText, 2),
-        reserveSignSlot: false
-      })
+          integerWidth: stableDigits.resolveIntegerWidth(zoomRawText, 2),
+          reserveSignSlot: false
+        })
       : { padded: zoomRawText, plain: zoomRawText };
     const requiredRawText = formatZoom(requiredZoomNumber, defaultText, componentContext, placeholderNormalize);
-    const requiredStable = stableDigitsEnabled && typeof requiredZoomNumber === "number"
-      ? stableDigits.normalize(requiredRawText, {
-        integerWidth: stableDigits.resolveIntegerWidth(requiredRawText, 2),
-        reserveSignSlot: false
-      })
-      : { padded: requiredRawText, plain: requiredRawText };
+    const requiredStable =
+      stableDigitsEnabled && typeof requiredZoomNumber === "number"
+        ? stableDigits.normalize(requiredRawText, {
+            integerWidth: stableDigits.resolveIntegerWidth(requiredRawText, 2),
+            reserveSignSlot: false
+          })
+        : { padded: requiredRawText, plain: requiredRawText };
     const showRequired = typeof requiredZoomNumber === "number" && requiredZoomNumber !== zoomNumber;
     const isEditing = htmlUtils.isEditingMode(p);
     const canDispatch = !isEditing && htmlUtils.canDispatchSurfaceInteraction(p);
-    const interactionState = /** @type {string} */ (stateScreenInteraction.resolveInteraction({
-      kind: kind,
-      baseInteraction: canDispatch ? "dispatch" : "passive"
-    }));
+    const interactionState = /** @type {string} */ (
+      stateScreenInteraction.resolveInteraction({
+        kind: kind,
+        baseInteraction: canDispatch ? "dispatch" : "passive"
+      })
+    );
     if (kind !== stateScreenLabels.KINDS.DATA) {
       return {
         kind: kind,
@@ -191,7 +209,9 @@
 
     /** @param {unknown} rendererContext */
     function translateFunction(rendererContext) {
-      const context = /** @type {Record<string, unknown>} */ (rendererContext && typeof rendererContext === "object" ? rendererContext : {});
+      const context = /** @type {Record<string, unknown>} */ (
+        rendererContext && typeof rendererContext === "object" ? rendererContext : {}
+      );
       const hostContext = context.hostContext || {};
 
       /** @type {HTMLElement | null} */
@@ -208,8 +228,17 @@
       let lastFit = EMPTY_FIT;
       /** @param {unknown} props @param {unknown} shellRect */
       const translate = function (props, shellRect) {
-        return buildModel(props, shellRect, componentContext, htmlUtils, stateScreenLabels,
-          stateScreenPrecedence, stateScreenInteraction, stableDigits, toOptionalFiniteNumber);
+        return buildModel(
+          props,
+          shellRect,
+          componentContext,
+          htmlUtils,
+          stateScreenLabels,
+          stateScreenPrecedence,
+          stateScreenInteraction,
+          stableDigits,
+          toOptionalFiniteNumber
+        );
       };
 
       const preparedPayload = preparedPayloadModelCache.createPreparedPayloadCache(translate);
@@ -240,12 +269,12 @@
         const theme = themeResolver.resolveForRoot(payload.rootEl);
         const baseModel = /** @type {DyniMapZoomRenderModel} */ (prepared.model);
         const fit = shellRect
-          ? (htmlFit.compute({
-            model: /** @type {DyniMapZoomFitModel} */ (baseModel),
-            hostContext: hostContext,
-            targetEl: payload.rootEl,
-            shellRect: shellRect
-          }) || EMPTY_FIT)
+          ? htmlFit.compute({
+              model: /** @type {DyniMapZoomFitModel} */ (baseModel),
+              hostContext: hostContext,
+              targetEl: payload.rootEl,
+              shellRect: shellRect
+            }) || EMPTY_FIT
           : lastFit;
 
         const renderModel = /** @type {DyniMapZoomRenderModel} */ ({
@@ -267,12 +296,15 @@
         });
 
         htmlUtils.applyMirroredContext(rootEl, payload.props);
-        wrapperEl = htmlUtils.patchInnerHtml(rootEl, markup.render({
-          model: renderModel,
-          shellRect: shellRect,
-          theme: theme,
-          htmlUtils: htmlUtils
-        }));
+        wrapperEl = htmlUtils.patchInnerHtml(
+          rootEl,
+          markup.render({
+            model: renderModel,
+            shellRect: shellRect,
+            theme: theme,
+            htmlUtils: htmlUtils
+          })
+        );
         lastFit = fit;
         lastProps = /** @type {DyniWidgetValues} */ (prepared.props);
 
@@ -370,4 +402,4 @@
   }
 
   return { id: "MapZoomTextHtmlWidget", create: create };
-}));
+});

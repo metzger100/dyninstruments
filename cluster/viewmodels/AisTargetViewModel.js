@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetViewModel = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @typedef {{ mmsi?: unknown, type?: unknown, name?: string, shipname?: string, cpa?: unknown, tcpa?: unknown, passFront?: unknown, warning?: unknown, nextWarning?: unknown, nearest?: unknown, distance?: unknown, headingTo?: unknown } & Record<string, unknown>} DyniAisTarget */
@@ -117,9 +117,7 @@
         aisMarkAllWarning: p.aisMarkAllWarning === true
       };
       const frontText = deriveFrontText(cpa, passFront);
-      const frontInitial = typeof frontText === "string" && frontText
-        ? frontText.charAt(0)
-        : "-";
+      const frontInitial = typeof frontText === "string" && frontText ? frontText.charAt(0) : "-";
       const colorRole = deriveColorRole(colorState);
 
       return {
@@ -153,4 +151,4 @@
   }
 
   return { id: "AisTargetViewModel", create: create };
-}));
+});

@@ -1,10 +1,4 @@
-import {
-  escapeRegex,
-  findMatchingBrace,
-  getFileData,
-  lineAt,
-  readLiteralToken
-} from "./shared.mjs";
+import { escapeRegex, findMatchingBrace, getFileData, lineAt, readLiteralToken } from "./shared.mjs";
 
 export function findNamedObjectLiterals(data, propertyName) {
   const out = [];
@@ -85,9 +79,11 @@ export function readNestedObjectProperty(data, parentProp, keyName) {
     return null;
   }
   const nestedProps = parseObjectLiteral(data, parentProp.valueStart, nestedClose);
-  return nestedProps.find(function (entry) {
-    return entry.key === keyName;
-  }) || null;
+  return (
+    nestedProps.find(function (entry) {
+      return entry.key === keyName;
+    }) || null
+  );
 }
 
 export function readStringObjectGroup(data, props, groupName) {
@@ -148,8 +144,12 @@ export function readDefaultRatioMap(file) {
     return null;
   }
   const props = parseObjectLiteral(data, openBrace, closeBrace);
-  const normal = props.find(function (entry) { return entry.key === "normal"; });
-  const flat = props.find(function (entry) { return entry.key === "flat"; });
+  const normal = props.find(function (entry) {
+    return entry.key === "normal";
+  });
+  const flat = props.find(function (entry) {
+    return entry.key === "flat";
+  });
   if (!normal || !flat) {
     return null;
   }
@@ -202,7 +202,8 @@ export function readConstLiteral(file, constantName) {
 
 export function collectFrameworkAliases(maskedText) {
   const out = new Set();
-  const detect = /\b(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*[^;]*Helpers\.getModule\(\s*["'`][^"'`]+["'`]\s*\)\.create\s*\(/g;
+  const detect =
+    /\b(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*[^;]*Helpers\.getModule\(\s*["'`][^"'`]+["'`]\s*\)\.create\s*\(/g;
   let match;
 
   while ((match = detect.exec(maskedText))) {
@@ -213,7 +214,9 @@ export function collectFrameworkAliases(maskedText) {
 }
 
 export function normalizeToken(token) {
-  return String(token || "").replace(/\s+/g, " ").trim();
+  return String(token || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function readObjectGroup(data, props, groupName, kind) {
@@ -239,9 +242,7 @@ function readObjectGroup(data, props, groupName, kind) {
     if (kind === "string" && literal.type !== "string") {
       return null;
     }
-    values[entry.key] = kind === "string"
-      ? { value: literal.value, token: literal.token }
-      : { token: literal.token };
+    values[entry.key] = kind === "string" ? { value: literal.value, token: literal.token } : { token: literal.token };
   }
 
   return {
@@ -253,7 +254,7 @@ function readObjectGroup(data, props, groupName, kind) {
 
 function readPropertyKey(text, maskedText, start) {
   const ch = text[start];
-  if (ch === "\"" || ch === "'" || ch === "`") {
+  if (ch === '"' || ch === "'" || ch === "`") {
     const end = findStringEnd(text, start, ch);
     if (end < 0) {
       return null;

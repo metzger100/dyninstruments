@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniNavMapper = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @typedef {{ display: { remain: unknown, rteEta: unknown, nextCourse: unknown, isApproaching: unknown }, routeName: unknown, captions: Record<string, unknown>, units: Record<string, unknown>, formatUnits?: Record<string, unknown>, hideSeconds: unknown }} DyniActiveRouteDomain */
@@ -49,7 +49,13 @@
       }
       if (req === "rteDistance") {
         const token = toolkit.formatUnit("rteDistance", "distance");
-        return out(p.rteDistance, cap("rteDistance"), toolkit.unitText("rteDistance", "distance", token), "formatDistance", [token]);
+        return out(
+          p.rteDistance,
+          cap("rteDistance"),
+          toolkit.unitText("rteDistance", "distance", token),
+          "formatDistance",
+          [token]
+        );
       }
       if (req === "vmg") {
         const token = toolkit.formatUnit("vmg", "speed");
@@ -179,7 +185,7 @@
             cog: num(p.cog),
             dtw: num(p.dtw),
             btw: num(p.btw),
-            wpName: typeof p.wpName === "string" ? p.wpName : "",
+            wpName: typeof p.wpName === "string" ? p.wpName.trim() : "",
             disconnect: p.disconnect === true
           },
           captions: {
@@ -198,7 +204,7 @@
             xte: xteToken,
             dtw: dtwToken
           },
-          xteScale: toolkit.unitNumber("xteDisplayScale", xteToken),
+          xteScale: toolkit.positiveUnitNumber("xteDisplayScale", xteToken, 1),
           layout: {
             leadingZero: p.leadingZero !== false,
             showWpName: p.showWpNameXteDisplay === true,
@@ -219,7 +225,7 @@
             cog: num(p.cog),
             dtw: num(p.dtw),
             btw: num(p.btw),
-            wpName: typeof p.wpName === "string" ? p.wpName : "",
+            wpName: typeof p.wpName === "string" ? p.wpName.trim() : "",
             disconnect: p.disconnect === true
           },
           captions: {
@@ -238,7 +244,7 @@
             xte: xteToken,
             dtw: dtwToken
           },
-          xteScale: toolkit.unitNumber("xteLinearScale", xteToken),
+          xteScale: toolkit.positiveUnitNumber("xteLinearScale", xteToken, 1),
           layout: {
             leadingZero: p.xteLinearLeadingZero !== false,
             showWpName: p.xteLinearShowWpName === true,
@@ -263,4 +269,4 @@
   }
 
   return { id: "NavMapper", create: create };
-}));
+});

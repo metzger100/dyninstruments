@@ -23,9 +23,7 @@
       return candidate;
     }
     const source = /** @type {DyniWidgetValues} */ (sourceValues);
-    const out = /** @type {DyniWidgetValues} */ (
-      (candidate && typeof candidate === "object") ? candidate : {}
-    );
+    const out = /** @type {DyniWidgetValues} */ (candidate && typeof candidate === "object" ? candidate : {});
     out[LAYOUT_EDITING_HINT_KEY] = source.editing === true;
     return out;
   }
@@ -35,22 +33,26 @@
    * @returns {DyniWidgetUpdate|undefined}
    */
   function composeUpdates(...updates) {
-    const fns = /** @type {DyniWidgetUpdate[]} */ (updates.filter(function (fn) {
-      return typeof fn === "function";
-    }));
+    const fns = /** @type {DyniWidgetUpdate[]} */ (
+      updates.filter(function (fn) {
+        return typeof fn === "function";
+      })
+    );
 
     if (!fns.length) {
       return undefined;
     }
 
-    return /** @type {DyniWidgetUpdate} */ (function (values) {
-      const ctx = this;
-      const next = fns.reduce(function (acc, fn) {
-        const r = fn.call(ctx, acc);
-        return (r && typeof r === "object") ? /** @type {DyniWidgetValues} */ (r) : acc;
-      }, values);
-      return applyLayoutEditingHint(values, next);
-    });
+    return /** @type {DyniWidgetUpdate} */ (
+      function (values) {
+        const ctx = this;
+        const next = fns.reduce(function (acc, fn) {
+          const r = fn.call(ctx, acc);
+          return r && typeof r === "object" ? /** @type {DyniWidgetValues} */ (r) : acc;
+        }, values);
+        return applyLayoutEditingHint(values, next);
+      }
+    );
   }
 
   /**
@@ -62,15 +64,21 @@
 
     const defaultClass = "dyniplugin";
     const wantsHide = !!spec.wantsHideNativeHead;
-    const mergedClassName = Array.from(new Set([
-      defaultClass,
-      "dyni-host-html",
-      widgetDef.def.className,
-      spec.className,
-      wantsHide ? "dyni-hide-native-head" : null
-    ].filter(Boolean))).join(" ");
+    const mergedClassName = Array.from(
+      new Set(
+        [
+          defaultClass,
+          "dyni-host-html",
+          widgetDef.def.className,
+          spec.className,
+          wantsHide ? "dyni-hide-native-head" : null
+        ].filter(Boolean)
+      )
+    ).join(" ");
 
-    const storeKeys = spec.storeKeys || widgetDef.def.storeKeys ||
+    const storeKeys =
+      spec.storeKeys ||
+      widgetDef.def.storeKeys ||
       (widgetDef.def.storeKey ? { value: widgetDef.def.storeKey } : undefined);
 
     const renderHtml = typeof spec.renderHtml === "function" ? spec.renderHtml : undefined;
@@ -104,9 +112,7 @@
     }
 
     const defaultsFn = runtime.defaultsFromEditableParams;
-    const perInstrumentDefaults = typeof defaultsFn === "function"
-      ? defaultsFn(widgetDef.def.editableParameters)
-      : {};
+    const perInstrumentDefaults = typeof defaultsFn === "function" ? defaultsFn(widgetDef.def.editableParameters) : {};
     const editableFn = runtime.editableParamsForRegistration;
 
     const baseDef = /** @type {Record<string, unknown>} */ ({
@@ -128,12 +134,16 @@
       updateFunction: updateFunction
     });
 
-    const editable = typeof editableFn === "function"
-      ? editableFn(widgetDef.def.editableParameters)
-      : (widgetDef.def.editableParameters || {});
-    const avnavApi = /** @type {DyniAvnavApi & { registerWidget(definition: Record<string, unknown>, editable: Record<string, unknown>): void }} */ (runtime.getAvnavApi(root));
+    const editable =
+      typeof editableFn === "function"
+        ? editableFn(widgetDef.def.editableParameters)
+        : widgetDef.def.editableParameters || {};
+    const avnavApi =
+      /** @type {DyniAvnavApi & { registerWidget(definition: Record<string, unknown>, editable: Record<string, unknown>): void }} */ (
+        runtime.getAvnavApi(root)
+      );
     avnavApi.registerWidget(baseDef, editable);
   }
 
   runtime.registerWidget = registerWidget;
-}(this));
+})(this);

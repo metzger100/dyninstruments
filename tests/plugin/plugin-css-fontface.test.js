@@ -1,10 +1,12 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
+/** @param {any} value @returns {string} */
 function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/** @param {string} cssText @returns {string[]} */
 function extractFontFaceBlocks(cssText) {
   return cssText.match(/@font-face\s*\{[\s\S]*?\}/g) || [];
 }
@@ -46,9 +48,11 @@ describe("plugin.css font-face rules", function () {
     expectedFaces.forEach(function (face) {
       const familyPattern = new RegExp('font-family:\\s*"' + escapeRegExp(face.family) + '"');
       const weightPattern = new RegExp("font-weight:\\s*" + escapeRegExp(face.weight));
-      const block = fontFaceBlocks.find(function (candidate) {
-        return familyPattern.test(candidate) && weightPattern.test(candidate);
-      });
+      const block = /** @type {string} */ (
+        fontFaceBlocks.find(function (candidate) {
+          return familyPattern.test(candidate) && weightPattern.test(candidate);
+        })
+      );
 
       expect(block).toBeDefined();
       expect(block).toMatch(/font-style:\s*normal/);

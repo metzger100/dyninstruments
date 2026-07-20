@@ -4,11 +4,13 @@
 
 ## Overview
 
-Full-circle rotating compass card with upright cardinal labels. The dial rotates by `-heading`; the lubber pointer stays fixed at North. Optional target marker (`markerCourse`) is supported.
-The target marker now eases independently from heading, then renders at the eased marker course relative to the eased heading so wrapped target changes take the shortest arc.
-Pointer color is resolved once per render via `FullCircleRadialEngine` (`const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);` internally).
-Static dial rendering is cached via shared `CanvasLayerCache` managed by `FullCircleRadialEngine`.
-Responsive ring, label, marker, and pointer geometry come from `FullCircleRadialLayout` through the shared engine state.
+Full-circle rotating compass card with upright cardinal labels. The dial rotates by `-heading`; the lubber pointer stays
+fixed at North. Optional target marker (`markerCourse`) is supported. The target marker now eases independently from
+heading, then renders at the eased marker course relative to the eased heading so wrapped target changes take the
+shortest arc. Pointer color is resolved once per render via `FullCircleRadialEngine`
+(`const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);` internally). Static dial rendering is cached via
+shared `CanvasLayerCache` managed by `FullCircleRadialEngine`. Responsive ring, label, marker, and pointer geometry come
+from `FullCircleRadialLayout` through the shared engine state.
 
 ## Module Registration
 
@@ -24,30 +26,31 @@ CompassRadialWidget: {
 
 ## Props
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `heading` | number | — | Heading (0..360) |
-| `markerCourse` | number | — | Optional rim marker target |
-| `caption` | string | `""` | Caption text |
-| `unit` | string | `"°"` | Unit text |
-| `leadingZero` | boolean | `true` | Zero-pad heading |
-| `compassRadialRatioThresholdNormal` | number | `0.8` | Ratio below -> `high` |
-| `compassRadialRatioThresholdFlat` | number | `2.2` | Ratio above -> `flat` |
-| `captionUnitScale` | number | `0.8` | Caption/unit ratio vs value |
-| `default` | string | `"---"` | Fallback text for invalid heading |
-| `disconnect` | boolean | `false` | Show shared `disconnected` state-screen (`GPS Lost`) and skip dial rendering |
+| Prop                                | Type    | Default | Description                                                                  |
+| ----------------------------------- | ------- | ------- | ---------------------------------------------------------------------------- |
+| `heading`                           | number  | —       | Heading (0..360)                                                             |
+| `markerCourse`                      | number  | —       | Optional rim marker target                                                   |
+| `caption`                           | string  | `""`    | Caption text                                                                 |
+| `unit`                              | string  | `"°"`   | Unit text                                                                    |
+| `leadingZero`                       | boolean | `true`  | Zero-pad heading                                                             |
+| `compassRadialRatioThresholdNormal` | number  | `0.8`   | Ratio below -> `high`                                                        |
+| `compassRadialRatioThresholdFlat`   | number  | `2.2`   | Ratio above -> `flat`                                                        |
+| `captionUnitScale`                  | number  | `0.8`   | Caption/unit ratio vs value                                                  |
+| `default`                           | string  | `"---"` | Fallback text for invalid heading                                            |
+| `disconnect`                        | boolean | `false` | Show shared `disconnected` state-screen (`GPS Lost`) and skip dial rendering |
 
 ## Compass Dial Drawing (via `RadialToolkit.draw`)
 
-The rotating dial face cache is built from static inputs. At render time, `heading` is applied as a draw transform (`rotationDeg = -heading`) without invalidating static cache state.
+The rotating dial face cache is built from static inputs. At render time, `heading` is applied as a draw transform
+(`rotationDeg = -heading`) without invalidating static cache state.
 
-| Element | Draw Function | Parameters |
-|---|---|---|
-| Ring (cached face) | `draw.drawRing` | full circle |
-| Ticks (cached face) | `draw.drawTicks` | `0..360`, major 30, minor 10 |
-| Lubber pointer | `draw.drawPointerAtRim` | fixed at 0°, with `fillStyle: tokens.colors.pointer` and layout-owned `fixedPointerDepth` |
-| Target marker | `draw.drawRimMarker` | at `(easedMarker - easedHeading)` if both finite, with layout-owned `markerLen` / `markerWidth` |
-| Cardinal labels | cached label sprites | existing label set (`N/NE/E/SE/S/SW/W/NW`), rendered upright at heading-rotated positions |
+| Element             | Draw Function           | Parameters                                                                                      |
+| ------------------- | ----------------------- | ----------------------------------------------------------------------------------------------- |
+| Ring (cached face)  | `draw.drawRing`         | full circle                                                                                     |
+| Ticks (cached face) | `draw.drawTicks`        | `0..360`, major 30, minor 10                                                                    |
+| Lubber pointer      | `draw.drawPointerAtRim` | fixed at 0°, with `fillStyle: tokens.colors.pointer` and layout-owned `fixedPointerDepth`       |
+| Target marker       | `draw.drawRimMarker`    | at `(easedMarker - easedHeading)` if both finite, with layout-owned `markerLen` / `markerWidth` |
+| Cardinal labels     | cached label sprites    | existing label set (`N/NE/E/SE/S/SW/W/NW`), rendered upright at heading-rotated positions       |
 
 Rendering order keeps labels on top for readability.
 
@@ -109,14 +112,15 @@ otherwise -> normal
 `high`: one inline row above dial
 
 Responsive ownership:
+
 - `FullCircleRadialLayout` owns mode routing, compact insets, dial geometry, label metrics, and slot bounds.
 - `FullCircleRadialEngine` owns cache lifecycle and shared callback state.
 - `CompassRadialWidget` only owns compass-specific static face and marker behavior.
 
 ## Internal Value Formatting
 
-| Function | Input | Output |
-|---|---|---|
+| Function                                       | Input       | Output          |
+| ---------------------------------------------- | ----------- | --------------- |
 | `ValueMath.formatDirection360(v, leadingZero)` | heading deg | `0..359` string |
 
 ## Phase 6 Options

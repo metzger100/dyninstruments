@@ -4,6 +4,7 @@ const path = require("node:path");
 
 const { checkDocumentationContracts, STALE_PHRASES } = require("../helpers/markdown-docs");
 
+/** @param {Record<string, string>} files @param {(dir: string) => any} body */
 function withFixture(files, body) {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-doc-links-"));
   try {
@@ -18,10 +19,9 @@ function withFixture(files, body) {
   }
 }
 
+/** @param {any} root @param {Record<string, string>} files */
 function typesFor(root, files) {
-  return withFixture(files, (dir) =>
-    checkDocumentationContracts(dir).failures.map((f) => f.type),
-  );
+  return withFixture(files, (dir) => checkDocumentationContracts(dir).failures.map((f) => f.type));
 }
 
 describe("documentation-specific contracts", function () {
@@ -31,7 +31,7 @@ describe("documentation-specific contracts", function () {
 
   it("fails when a document contains a banned stale phrase", function () {
     const types = typesFor(null, {
-      "documentation/a.md": `# A\n\n${STALE_PHRASES[0]}\n`,
+      "documentation/a.md": `# A\n\n${STALE_PHRASES[0]}\n`
     });
     expect(types).toContain("stale-phrase");
   });
@@ -39,7 +39,7 @@ describe("documentation-specific contracts", function () {
   it("fails when a JS Documentation header points at a missing doc", function () {
     const types = typesFor(null, {
       "documentation/existing.md": "# Existing\n",
-      "runtime/bad.js": "/**\n * Documentation: documentation/missing.md\n */\nconst x = 1;\n",
+      "runtime/bad.js": "/**\n * Documentation: documentation/missing.md\n */\nconst x = 1;\n"
     });
     expect(types).toContain("missing-doc-target");
   });
@@ -48,18 +48,17 @@ describe("documentation-specific contracts", function () {
     const result = withFixture(
       {
         "documentation/existing.md": "# Existing\n",
-        "runtime/good.js": "/**\n * Documentation: documentation/existing.md\n */\nconst x = 1;\n",
+        "runtime/good.js": "/**\n * Documentation: documentation/existing.md\n */\nconst x = 1;\n"
       },
-      (dir) => checkDocumentationContracts(dir),
+      (dir) => checkDocumentationContracts(dir)
     );
     expect(result.failures).toEqual([]);
     expect(result.checkedJsFiles).toBe(1);
   });
 
   it("does not require a Documentation header on every JS file", function () {
-    const result = withFixture(
-      { "widgets/plain.js": "const plain = true;\n" },
-      (dir) => checkDocumentationContracts(dir),
+    const result = withFixture({ "widgets/plain.js": "const plain = true;\n" }, (dir) =>
+      checkDocumentationContracts(dir)
     );
     expect(result.failures).toEqual([]);
   });

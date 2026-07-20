@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniDefaultRadialWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {Record<string, unknown> & { defaultRadialAlarmLowEnabled?: boolean, defaultRadialWarningLowEnabled?: boolean, defaultRadialWarningHighEnabled?: boolean, defaultRadialAlarmHighEnabled?: boolean, defaultRadialAlarmLowAt?: number, defaultRadialWarningLowAt?: number, defaultRadialWarningHighAt?: number, defaultRadialAlarmHighAt?: number, defaultRadialAlarmLowColor?: unknown, defaultRadialWarningLowColor?: unknown, defaultRadialWarningHighColor?: unknown, defaultRadialAlarmHighColor?: unknown }} DyniDefaultRadialProps */
 
@@ -64,7 +64,7 @@
       if (warningLowEnabled && warningLowValid) {
         pushSector(
           sectors,
-          (alarmLowEnabled && alarmLowValid) ? alarmLowAt : minV,
+          alarmLowEnabled && alarmLowValid ? alarmLowAt : minV,
           warningLowAt,
           p.defaultRadialWarningLowColor || theme.colors.warning,
           minV,
@@ -77,7 +77,7 @@
         pushSector(
           sectors,
           warningHighAt,
-          (alarmHighEnabled && alarmHighValid) ? alarmHighAt : maxV,
+          alarmHighEnabled && alarmHighValid ? alarmHighAt : maxV,
           p.defaultRadialWarningHighColor || theme.colors.warning,
           minV,
           maxV,
@@ -119,7 +119,14 @@
       hideTextualMetricsProp: "defaultRadialHideTextualMetrics",
       tickSteps: valueMath.resolveStandardTickSteps,
       formatDisplay: function (raw, props) {
-        const display = valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
+        const display = valueMath.formatGaugeDisplay(
+          raw,
+          props,
+          componentContext.format.applyFormatter,
+          placeholderNormalize.normalize,
+          "formatDecimal",
+          [3, 1, true]
+        );
         return { num: display.num, text: placeholderNormalize.normalize(display.text, undefined) };
       },
       buildSectors: buildSectors
@@ -138,4 +145,4 @@
   }
 
   return { id: "DefaultRadialWidget", create };
-}));
+});

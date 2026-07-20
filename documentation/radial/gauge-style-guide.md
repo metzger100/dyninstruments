@@ -1,11 +1,15 @@
 # Gauge Style Guide
 
-**Status:** ✅ Implemented | SpeedRadialWidget, DepthRadialWidget, TemperatureRadialWidget, VoltageRadialWidget, DefaultRadialWidget
+**Status:** ✅ Implemented | SpeedRadialWidget, DepthRadialWidget, TemperatureRadialWidget, VoltageRadialWidget,
+DefaultRadialWidget
 
 ## Overview
 
-Visual specification for semicircle gauge widgets. `GeometryScale` turns the semicircle radius into ring, tick, and pointer pixels while `compactGeometryScale` only tightens label and text spacing; data source/formatting/sector strategy still differs per gauge.
-Shared geometry weights come from `tokens.strokeWeight`, `tokens.pointerDepthWeight`, and `tokens.pointerSideWeight`.
+Visual specification for semicircle gauge widgets. `GeometryScale` turns the semicircle radius into ring, tick, and
+pointer pixels while `compactGeometryScale` only tightens label and text spacing; data source/formatting/sector strategy
+still differs per gauge. Shared geometry weights come from `tokens.strokeWeight`, `tokens.pointerDepthWeight`, and
+`tokens.pointerSideWeight`.
+
 - Theme tokens are resolved once per render via `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
 
 ## Arc Configuration
@@ -23,15 +27,15 @@ angleDeg = startDeg + (endDeg - startDeg) * ((value - min) / (max - min))
 
 ## Proportions (Function of R)
 
-| Element | Formula | Example R=100 |
-|---|---|---|
-| `R` | `min(floor(availW/2), floor(availH))`, min 14 | 100 |
-| `pad` | `ResponsiveScaleProfile.computeInsetPx(responsive, 0.04, 1)` | ~4 |
-| `gap` | `ResponsiveScaleProfile.computeInsetPx(responsive, 0.03, 1)` | ~3 |
-| `ringW` | `GeometryScale.scale(R, theme.radial.ring.widthFactor)` | 12 |
-| `pointerDepth` | `GeometryScale.scalePointer(R, theme.radial.pointer.depthFactor, pointerDepthWeight)` | 10 |
-| `labelInset` | `max(1, floor(ringW * theme.radial.labels.insetFactor * compactGeometryScale))` | ~17 |
-| `labelFontPx` | `max(1, floor(R * theme.radial.labels.fontFactor * compactGeometryScale))` | ~16 |
+| Element        | Formula                                                                               | Example R=100 |
+| -------------- | ------------------------------------------------------------------------------------- | ------------- |
+| `R`            | `min(floor(availW/2), floor(availH))`, min 14                                         | 100           |
+| `pad`          | `ResponsiveScaleProfile.computeInsetPx(responsive, 0.04, 1)`                          | ~4            |
+| `gap`          | `ResponsiveScaleProfile.computeInsetPx(responsive, 0.03, 1)`                          | ~3            |
+| `ringW`        | `GeometryScale.scale(R, theme.radial.ring.widthFactor)`                               | 12            |
+| `pointerDepth` | `GeometryScale.scalePointer(R, theme.radial.pointer.depthFactor, pointerDepthWeight)` | 10            |
+| `labelInset`   | `max(1, floor(ringW * theme.radial.labels.insetFactor * compactGeometryScale))`       | ~17           |
+| `labelFontPx`  | `max(1, floor(R * theme.radial.labels.fontFactor * compactGeometryScale))`            | ~16           |
 
 Gauge centering:
 
@@ -59,14 +63,14 @@ Ownership:
 
 ## Colors
 
-| Element | Theme token | Default | Usage |
-|---|---|---|---|
-| Warning sector | `tokens.colors.warning` | `#e0a92e` | Amber caution band |
-| Alarm sector | `tokens.colors.alarm` | `#d9534a` | Soft alarm red |
-| Pointer | `tokens.colors.pointer` | inherits `colors.info` (`#3366cc`) | Blue live-value triangle |
-| Text/ticks/arc stroke | `tokens.surface.fg` | CSS-resolved | Foreground |
-| Layline starboard (WindRadialWidget) | `tokens.colors.laylineStb` | inherits `colors.ok` (`#2e9e6b`) | Starboard tack |
-| Layline port (WindRadialWidget) | `tokens.colors.laylinePort` | inherits `colors.alarm` (`#d9534a`) | Port tack |
+| Element                              | Theme token                 | Default                             | Usage                    |
+| ------------------------------------ | --------------------------- | ----------------------------------- | ------------------------ |
+| Warning sector                       | `tokens.colors.warning`     | `#e0a92e`                           | Amber caution band       |
+| Alarm sector                         | `tokens.colors.alarm`       | `#d9534a`                           | Soft alarm red           |
+| Pointer                              | `tokens.colors.pointer`     | inherits `colors.info` (`#3366cc`)  | Blue live-value triangle |
+| Text/ticks/arc stroke                | `tokens.surface.fg`         | CSS-resolved                        | Foreground               |
+| Layline starboard (WindRadialWidget) | `tokens.colors.laylineStb`  | inherits `colors.ok` (`#2e9e6b`)    | Starboard tack           |
+| Layline port (WindRadialWidget)      | `tokens.colors.laylinePort` | inherits `colors.alarm` (`#d9534a`) | Port tack                |
 
 Theme defaults are provided by `runtime.theme` and can be overridden via CSS variables.
 
@@ -84,9 +88,13 @@ draw.drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, {
 
 Pointer color is passed directly via `fillStyle` from `tokens.colors.pointer`.
 
-Pointer z-order matches the full-circle dial: the static background is split into a `back` cache layer (sectors + arc ring) and a `front` cache layer (ticks + value labels). The live pointer is drawn between them (`back` → pointer → `front`), so it sits over the ring/sectors but behind ticks and labels.
+Pointer z-order matches the full-circle dial: the static background is split into a `back` cache layer (sectors + arc
+ring) and a `front` cache layer (ticks + value labels). The live pointer is drawn between them (`back` → pointer →
+`front`), so it sits over the ring/sectors but behind ticks and labels.
 
-`SemicircleRadialLayout` reserves bottom clearance (`POINTER_BOTTOM_CLEARANCE_FACTOR`) below the arc so the pointer at the horizontal extremes does not clip the bottom border with default pointer width. The reserve is fixed for the default pointer; wider user-configured pointers may clip.
+`SemicircleRadialLayout` reserves bottom clearance (`POINTER_BOTTOM_CLEARANCE_FACTOR`) below the arc so the pointer at
+the horizontal extremes does not clip the bottom border with default pointer width. The reserve is fixed for the default
+pointer; wider user-configured pointers may clip.
 
 Pointer depth and side thickness are scaled in the layout owner from the semicircle radius using shared weights:
 
@@ -135,28 +143,29 @@ if (sector) {
 }
 ```
 
-Warning/alarm sectors in shared builders receive scalar color inputs (`warningColor`/`alarmColor`), typically from theme tokens.
+Warning/alarm sectors in shared builders receive scalar color inputs (`warningColor`/`alarmColor`), typically from theme
+tokens.
 
 ## Layout Modes
 
 Aspect ratio `ratio = W / H` determines text layout:
 
-| Mode | Condition | Layout |
-|---|---|---|
-| `high` | `ratio < thresholdNormal` | Gauge centered, inline text band below |
-| `normal` | between thresholds | Three-row text block inside semicircle |
-| `flat` | `ratio > thresholdFlat` | Gauge left, caption/value/unit box right |
+| Mode     | Condition                 | Layout                                   |
+| -------- | ------------------------- | ---------------------------------------- |
+| `high`   | `ratio < thresholdNormal` | Gauge centered, inline text band below   |
+| `normal` | between thresholds        | Three-row text block inside semicircle   |
+| `flat`   | `ratio > thresholdFlat`   | Gauge left, caption/value/unit box right |
 
 ### Default Thresholds
 
-| Gauge | thresholdNormal | thresholdFlat |
-|---|---|---|
-| SpeedRadialWidget | `speedRadialRatioThresholdNormal` (`1.1`) | `speedRadialRatioThresholdFlat` (`3.5`) |
-| DepthRadialWidget | `depthRadialRatioThresholdNormal` (`1.1`) | `depthRadialRatioThresholdFlat` (`3.5`) |
-| TemperatureRadialWidget | `tempRadialRatioThresholdNormal` (`1.1`) | `tempRadialRatioThresholdFlat` (`3.5`) |
-| VoltageRadialWidget | `voltageRadialRatioThresholdNormal` (`1.1`) | `voltageRadialRatioThresholdFlat` (`3.5`) |
-| CompassRadialWidget | `compassRadialRatioThresholdNormal` (`0.8`) | `compassRadialRatioThresholdFlat` (`2.2`) |
-| WindRadialWidget | `windRadialRatioThresholdNormal` (`0.7`) | `windRadialRatioThresholdFlat` (`2.0`) |
+| Gauge                   | thresholdNormal                             | thresholdFlat                             |
+| ----------------------- | ------------------------------------------- | ----------------------------------------- |
+| SpeedRadialWidget       | `speedRadialRatioThresholdNormal` (`1.1`)   | `speedRadialRatioThresholdFlat` (`3.5`)   |
+| DepthRadialWidget       | `depthRadialRatioThresholdNormal` (`1.1`)   | `depthRadialRatioThresholdFlat` (`3.5`)   |
+| TemperatureRadialWidget | `tempRadialRatioThresholdNormal` (`1.1`)    | `tempRadialRatioThresholdFlat` (`3.5`)    |
+| VoltageRadialWidget     | `voltageRadialRatioThresholdNormal` (`1.1`) | `voltageRadialRatioThresholdFlat` (`3.5`) |
+| CompassRadialWidget     | `compassRadialRatioThresholdNormal` (`0.8`) | `compassRadialRatioThresholdFlat` (`2.2`) |
+| WindRadialWidget        | `windRadialRatioThresholdNormal` (`0.7`)    | `windRadialRatioThresholdFlat` (`2.0`)    |
 
 ### Text Layout Per Mode
 
@@ -182,26 +191,34 @@ Row 3: Unit
 Caption  Value  Unit
 ```
 
-All three layouts now consume `SemicircleRadialLayout` boxes plus `SemicircleRadialTextLayout` ceiling scaling; they no longer rely on fixed user-visible minima like `18`, `10`, `8`, `6`, or `4`.
+All three layouts now consume `SemicircleRadialLayout` boxes plus `SemicircleRadialTextLayout` ceiling scaling; they no
+longer rely on fixed user-visible minima like `18`, `10`, `8`, `6`, or `4`.
 
 Text fit contract for semicircle gauges:
+
 - Caption, value, and unit must stay inside their assigned layout boxes in `flat`, `normal`, and `high` modes.
-- Compact canvases are allowed to downscale text aggressively to preserve containment; overlap into ring/tick/pointer geometry is not allowed.
+- Compact canvases are allowed to downscale text aggressively to preserve containment; overlap into ring/tick/pointer
+  geometry is not allowed.
 - Final draw-time clamping remains active even after cached fit selection to absorb measurement/rounding drift.
 
 ## Hide Textual Metrics
 
 - Public UI label: `Hide textual metrics`
 - Default: `false`
-- Applies to `SpeedRadialWidget`, `DepthRadialWidget`, `TemperatureRadialWidget`, `VoltageRadialWidget`, and `DefaultRadialWidget`
-- This semicircle family is hide-only: `hideTextualMetrics` suppresses the live caption/value/unit metric readouts while preserving the existing geometry, responsive mode, arc/ring, pointer, sectors, ticks, scale/end labels, and state screens
+- Applies to `SpeedRadialWidget`, `DepthRadialWidget`, `TemperatureRadialWidget`, `VoltageRadialWidget`, and
+  `DefaultRadialWidget`
+- This semicircle family is hide-only: `hideTextualMetrics` suppresses the live caption/value/unit metric readouts while
+  preserving the existing geometry, responsive mode, arc/ring, pointer, sectors, ticks, scale/end labels, and state
+  screens
 - `SemicircleRadialEngine` skips the live text draw path when the relevant `hideTextualMetrics` prop is `true`
 - No layout space is reclaimed for semicircle radial gauges in hide mode
 
 ## Tick Rendering
 
-- Major ticks: `len=GeometryScale.scale(R, theme.radial.ticks.majorLenFactor)`, `width=GeometryScale.scaleStroke(R, theme.radial.ticks.majorWidthFactor, strokeWeight)`
-- Minor ticks: `len=GeometryScale.scale(R, theme.radial.ticks.minorLenFactor)`, `width=GeometryScale.scaleStroke(R, theme.radial.ticks.minorWidthFactor, strokeWeight)`
+- Major ticks: `len=GeometryScale.scale(R, theme.radial.ticks.majorLenFactor)`,
+  `width=GeometryScale.scaleStroke(R, theme.radial.ticks.majorWidthFactor, strokeWeight)`
+- Minor ticks: `len=GeometryScale.scale(R, theme.radial.ticks.minorLenFactor)`,
+  `width=GeometryScale.scaleStroke(R, theme.radial.ticks.minorWidthFactor, strokeWeight)`
 - Labels: `weight=tokens.font.labelWeight`, font family from `tokens.font.family`
 - End labels optional via `showEndLabels`
 
@@ -223,7 +240,8 @@ Semicircle gauges resolve state-screens before layout/draw work:
 - `disconnected` candidate: `p.disconnect === true`
 - fallback candidate: `data`
 
-When `kind !== "data"`, the engine clears the canvas and renders the shared `StateScreenCanvasOverlay` label (`GPS Lost` for `disconnected`).
+When `kind !== "data"`, the engine clears the canvas and renders the shared `StateScreenCanvasOverlay` label (`GPS Lost`
+for `disconnected`).
 
 ## Related
 

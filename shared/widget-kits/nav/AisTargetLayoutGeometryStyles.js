@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetLayoutGeometryStyles = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniHtmlWidgetUtilsApi["toPx"]} */
@@ -70,7 +70,7 @@
     }
 
     if (l.mode === "flat") {
-      style += "grid-template-areas:\"identity metrics\";";
+      style += 'grid-template-areas:"identity metrics";';
       style += "grid-template-columns:" + joinTrackSizes([l.identityRect.w, l.metricsRect.w]) + ";";
       style += "grid-template-rows:" + joinTrackSizes([l.contentRect ? l.contentRect.h : 1]) + ";";
       style += "column-gap:" + toPx(resolveRectGap(l.identityRect, l.metricsRect, "x")) + ";";
@@ -78,7 +78,7 @@
       return style;
     }
 
-    style += "grid-template-areas:\"identity\" \"metrics\";";
+    style += 'grid-template-areas:"identity" "metrics";';
     style += "grid-template-columns:" + joinTrackSizes([l.contentRect ? l.contentRect.w : 1]) + ";";
     style += "grid-template-rows:" + joinTrackSizes([l.identityRect.h, l.metricsRect.h]) + ";";
     style += "row-gap:" + toPx(resolveRectGap(l.identityRect, l.metricsRect, "y")) + ";";
@@ -92,9 +92,15 @@
     if (!l.identityRect || !l.nameRect || !l.frontRect) {
       return "";
     }
-    return ""
-      + "grid-template-rows:" + joinTrackSizes([l.nameRect.h, l.frontRect.h]) + ";"
-      + "row-gap:" + toPx(resolveRectGap(l.nameRect, l.frontRect, "y")) + ";";
+    return (
+      "" +
+      "grid-template-rows:" +
+      joinTrackSizes([l.nameRect.h, l.frontRect.h]) +
+      ";" +
+      "row-gap:" +
+      toPx(resolveRectGap(l.nameRect, l.frontRect, "y")) +
+      ";"
+    );
   }
 
   /** @param {DyniAisTargetGeometryLayout | undefined} layout @returns {string} */
@@ -110,26 +116,52 @@
     }
 
     if (l.mode === "flat") {
-      return ""
-        + "grid-template-columns:" + joinTrackSizes([dst.w, cpa.w, tcpa.w, brg.w]) + ";"
-        + "grid-template-rows:" + joinTrackSizes([dst.h]) + ";"
-        + "column-gap:" + toPx(resolveRectGap(dst, cpa, "x")) + ";"
-        + "row-gap:0px;";
+      return (
+        "" +
+        "grid-template-columns:" +
+        joinTrackSizes([dst.w, cpa.w, tcpa.w, brg.w]) +
+        ";" +
+        "grid-template-rows:" +
+        joinTrackSizes([dst.h]) +
+        ";" +
+        "column-gap:" +
+        toPx(resolveRectGap(dst, cpa, "x")) +
+        ";" +
+        "row-gap:0px;"
+      );
     }
 
     if (l.mode === "normal") {
-      return ""
-        + "grid-template-columns:" + joinTrackSizes([dst.w, cpa.w]) + ";"
-        + "grid-template-rows:" + joinTrackSizes([dst.h, tcpa.h]) + ";"
-        + "column-gap:" + toPx(resolveRectGap(dst, cpa, "x")) + ";"
-        + "row-gap:" + toPx(resolveRectGap(dst, tcpa, "y")) + ";";
+      return (
+        "" +
+        "grid-template-columns:" +
+        joinTrackSizes([dst.w, cpa.w]) +
+        ";" +
+        "grid-template-rows:" +
+        joinTrackSizes([dst.h, tcpa.h]) +
+        ";" +
+        "column-gap:" +
+        toPx(resolveRectGap(dst, cpa, "x")) +
+        ";" +
+        "row-gap:" +
+        toPx(resolveRectGap(dst, tcpa, "y")) +
+        ";"
+      );
     }
 
-    return ""
-      + "grid-template-columns:" + joinTrackSizes([dst.w]) + ";"
-      + "grid-template-rows:" + joinTrackSizes([dst.h, cpa.h, tcpa.h, brg.h]) + ";"
-      + "row-gap:" + toPx(resolveRectGap(dst, cpa, "y")) + ";"
-      + "column-gap:0px;";
+    return (
+      "" +
+      "grid-template-columns:" +
+      joinTrackSizes([dst.w]) +
+      ";" +
+      "grid-template-rows:" +
+      joinTrackSizes([dst.h, cpa.h, tcpa.h, brg.h]) +
+      ";" +
+      "row-gap:" +
+      toPx(resolveRectGap(dst, cpa, "y")) +
+      ";" +
+      "column-gap:0px;"
+    );
   }
 
   /** @param {DyniAisTargetMetricBox | null | undefined} box @returns {string} */
@@ -143,12 +175,20 @@
     const top = Math.max(0, tile.captionRect.y - tile.y);
     const bottom = Math.max(0, tile.y + tile.h - tile.unitRect.y - tile.unitRect.h);
     const rowGap = Math.max(0, tile.valueRect.y - tile.captionRect.y - tile.captionRect.h);
-    return ""
-      + toPaddingStyle(top, right, bottom, left)
-      + "grid-template-columns:" + joinTrackSizes([tile.captionRect.w]) + ";"
-      + "grid-template-rows:" + joinTrackSizes([tile.captionRect.h, tile.valueRect.h, tile.unitRect.h]) + ";"
-      + "row-gap:" + toPx(rowGap) + ";"
-      + "column-gap:0px;";
+    return (
+      "" +
+      toPaddingStyle(top, right, bottom, left) +
+      "grid-template-columns:" +
+      joinTrackSizes([tile.captionRect.w]) +
+      ";" +
+      "grid-template-rows:" +
+      joinTrackSizes([tile.captionRect.h, tile.valueRect.h, tile.unitRect.h]) +
+      ";" +
+      "row-gap:" +
+      toPx(rowGap) +
+      ";" +
+      "column-gap:0px;"
+    );
   }
 
   /** @param {DyniAisTargetMetricBox | null | undefined} box @returns {string} */
@@ -162,12 +202,20 @@
     const top = Math.max(0, tile.labelRect.y - tile.y);
     const bottom = Math.max(0, tile.y + tile.h - tile.labelRect.y - tile.labelRect.h);
     const colGap = Math.max(0, tile.valueRect.x - tile.labelRect.x - tile.labelRect.w);
-    return ""
-      + toPaddingStyle(top, right, bottom, left)
-      + "grid-template-columns:" + joinTrackSizes([tile.labelRect.w, tile.valueRect.w]) + ";"
-      + "grid-template-rows:" + joinTrackSizes([tile.labelRect.h]) + ";"
-      + "column-gap:" + toPx(colGap) + ";"
-      + "row-gap:0px;";
+    return (
+      "" +
+      toPaddingStyle(top, right, bottom, left) +
+      "grid-template-columns:" +
+      joinTrackSizes([tile.labelRect.w, tile.valueRect.w]) +
+      ";" +
+      "grid-template-rows:" +
+      joinTrackSizes([tile.labelRect.h]) +
+      ";" +
+      "column-gap:" +
+      toPx(colGap) +
+      ";" +
+      "row-gap:0px;"
+    );
   }
 
   /** @param {DyniAisTargetMetricBox | null | undefined} box @returns {string} */
@@ -177,9 +225,15 @@
       return "";
     }
     const colGap = Math.max(0, tile.unitRect.x - tile.valueTextRect.x - tile.valueTextRect.w);
-    return ""
-      + "grid-template-columns:" + joinTrackSizes([tile.valueTextRect.w, tile.unitRect.w]) + ";"
-      + "column-gap:" + toPx(colGap) + ";";
+    return (
+      "" +
+      "grid-template-columns:" +
+      joinTrackSizes([tile.valueTextRect.w, tile.unitRect.w]) +
+      ";" +
+      "column-gap:" +
+      toPx(colGap) +
+      ";"
+    );
   }
 
   /** @param {DyniAisTargetGeometryLayout | undefined} layout @returns {Record<string, DyniAisTargetMetricGeometry>} */
@@ -195,9 +249,7 @@
         continue;
       }
       out[id] = {
-        metricStyle: l.mode === "flat"
-          ? buildStackedMetricStyle(box)
-          : buildInlineMetricStyle(box),
+        metricStyle: l.mode === "flat" ? buildStackedMetricStyle(box) : buildInlineMetricStyle(box),
         valueRowStyle: l.mode === "flat" ? "" : buildInlineValueRowStyle(box)
       };
     }
@@ -213,12 +265,24 @@
     }
     const shellH = Math.max(1, Math.floor(Number(l.effectiveLayoutHeight) || 1));
     const bottom = Math.max(0, shellH - accent.y - accent.h);
-    return ""
-      + "left:" + toPx(accent.x) + ";"
-      + "top:" + toPx(accent.y) + ";"
-      + "bottom:" + toPx(bottom) + ";"
-      + "width:" + toPx(accent.w) + ";"
-      + "border-radius:" + toPx(accent.w) + ";";
+    return (
+      "" +
+      "left:" +
+      toPx(accent.x) +
+      ";" +
+      "top:" +
+      toPx(accent.y) +
+      ";" +
+      "bottom:" +
+      toPx(bottom) +
+      ";" +
+      "width:" +
+      toPx(accent.w) +
+      ";" +
+      "border-radius:" +
+      toPx(accent.w) +
+      ";"
+    );
   }
 
   /** @param {DyniAisTargetGeometryLayout | undefined} layout @returns {DyniAisTargetInlineGeometry} */
@@ -247,4 +311,4 @@
   }
 
   return { id: "AisTargetLayoutGeometryStyles", create: create };
-}));
+});

@@ -19,4 +19,4 @@
     const thresholds = shared.buildEnvironmentThresholdEditableParameters();
     return Object.assign({}, base, depth, mode, temperature, sharedScale, perKind, thresholds);
   };
-}(this));
+})(this);

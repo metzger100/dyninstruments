@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniEditRouteRenderModel = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniEditRouteMetricId[]} */
@@ -27,9 +27,7 @@
    * @returns {DyniEditRouteShellSize}
    */
   function toShellSize(shellRect) {
-    const rect = shellRect && typeof shellRect === "object"
-      ? /** @type {Record<string, unknown>} */ (shellRect)
-      : null;
+    const rect = shellRect && typeof shellRect === "object" ? /** @type {Record<string, unknown>} */ (shellRect) : null;
     return {
       width: Math.max(1, Math.round(toFiniteNumber(rect && rect.width) || 1)),
       height: Math.max(1, Math.round(toFiniteNumber(rect && rect.height) || 1))
@@ -64,7 +62,14 @@
    * @param {DyniPlaceholderNormalizeApi} placeholderNormalize
    * @returns {string}
    */
-  function formatRouteMetric(value, formatter, formatterParameters, defaultText, componentContext, placeholderNormalize) {
+  function formatRouteMetric(
+    value,
+    formatter,
+    formatterParameters,
+    defaultText,
+    componentContext,
+    placeholderNormalize
+  ) {
     /** @type {Parameters<DyniFormatService["applyFormatter"]>[1]} */
     const opts = {
       formatter: formatter,
@@ -203,10 +208,8 @@
       const isServerRoute = hasRoute && domain.isServerRoute === true;
       const defaultText = htmlUtils.resolveDefaultText(props);
       const etaFormatter = domain.hideSeconds === true ? "formatClock" : "formatTime";
-      const nameText = hasRoute
-        ? htmlUtils.trimText(domain.routeName)
-        : "";
-      const stateLabel = kind === "data" ? "" : (stateScreenLabels.LABELS[kind] || "");
+      const nameText = hasRoute ? htmlUtils.trimText(domain.routeName) : "";
+      const stateLabel = kind === "data" ? "" : stateScreenLabels.LABELS[kind] || "";
       const metricUnits = {
         dst: hasRoute ? normalizeMetricUnit(unitsConfig.dst, htmlUtils) : "",
         rte: hasRoute ? normalizeMetricUnit(unitsConfig.rte, htmlUtils) : ""
@@ -242,7 +245,14 @@
           id: "pts",
           labelText: metricCaptions.pts,
           ...buildMetricValueText(
-            formatRouteMetric(domain.pointCount, "formatDecimal", [3], defaultText, componentContext, placeholderNormalize),
+            formatRouteMetric(
+              domain.pointCount,
+              "formatDecimal",
+              [3],
+              defaultText,
+              componentContext,
+              placeholderNormalize
+            ),
             3
           ),
           unitText: "",
@@ -251,10 +261,7 @@
         metrics.dst = {
           id: "dst",
           labelText: metricCaptions.dst,
-          ...buildMetricValueText(
-            unitFormatter.formatDistance(domain.totalDistance, formatTokens.dst, defaultText),
-            2
-          ),
+          ...buildMetricValueText(unitFormatter.formatDistance(domain.totalDistance, formatTokens.dst, defaultText), 2),
           unitText: metricUnits.dst,
           hasUnit: metricHasUnit.dst
         };
@@ -262,7 +269,11 @@
           id: "rte",
           labelText: metricCaptions.rte,
           ...buildMetricValueText(
-            unitFormatter.formatDistance(isActiveRoute ? domain.remainingDistance : undefined, formatTokens.rte, defaultText),
+            unitFormatter.formatDistance(
+              isActiveRoute ? domain.remainingDistance : undefined,
+              formatTokens.rte,
+              defaultText
+            ),
             2
           ),
           unitText: metricUnits.rte,
@@ -291,24 +302,29 @@
         return !!(layout.metricVisibility && layout.metricVisibility[id]);
       });
       const baseInteraction = navInteractionPolicy.canDispatchWhenNotEditing(props) ? "dispatch" : "passive";
-      const interactionState = toText(stateScreenInteraction.resolveInteraction({
-        kind: kind,
-        baseInteraction: baseInteraction
-      }));
+      const interactionState = toText(
+        stateScreenInteraction.resolveInteraction({
+          kind: kind,
+          baseInteraction: baseInteraction
+        })
+      );
       const canOpenEditRoute = interactionState === "dispatch";
-      const verticalWrapperStyle = layout.verticalShell && typeof layout.verticalShell.wrapperStyle === "string"
-        ? layout.verticalShell.wrapperStyle.trim()
-        : "";
-      const flatWrapperStyle = layout.mode === "flat" && typeof layout.flatWrapperLayoutStyle === "string"
-        ? layout.flatWrapperLayoutStyle.trim()
-        : "";
-      const wrapperStyle = ""
-        + (verticalWrapperStyle
-          ? (verticalWrapperStyle.endsWith(";") ? verticalWrapperStyle : verticalWrapperStyle + ";")
-          : "")
-        + (flatWrapperStyle
-          ? (flatWrapperStyle.endsWith(";") ? flatWrapperStyle : flatWrapperStyle + ";")
-          : "");
+      const verticalWrapperStyle =
+        layout.verticalShell && typeof layout.verticalShell.wrapperStyle === "string"
+          ? layout.verticalShell.wrapperStyle.trim()
+          : "";
+      const flatWrapperStyle =
+        layout.mode === "flat" && typeof layout.flatWrapperLayoutStyle === "string"
+          ? layout.flatWrapperLayoutStyle.trim()
+          : "";
+      const wrapperStyle =
+        "" +
+        (verticalWrapperStyle
+          ? verticalWrapperStyle.endsWith(";")
+            ? verticalWrapperStyle
+            : verticalWrapperStyle + ";"
+          : "") +
+        (flatWrapperStyle ? (flatWrapperStyle.endsWith(";") ? flatWrapperStyle : flatWrapperStyle + ";") : "");
 
       /** @type {DyniEditRouteRenderModel} */
       const model = {
@@ -326,12 +342,14 @@
         isVerticalCommitted: layout.isVerticalCommitted === true,
         shellWidth: shellSize.width,
         shellHeight: shellSize.height,
-        effectiveLayoutHeight: layout.verticalShell && typeof layout.verticalShell.effectiveLayoutHeight === "number"
-          ? layout.verticalShell.effectiveLayoutHeight
-          : shellSize.height,
-        layoutShellHeight: layout.verticalShell && typeof layout.verticalShell.effectiveLayoutHeight === "number"
-          ? layout.verticalShell.effectiveLayoutHeight
-          : shellSize.height,
+        effectiveLayoutHeight:
+          layout.verticalShell && typeof layout.verticalShell.effectiveLayoutHeight === "number"
+            ? layout.verticalShell.effectiveLayoutHeight
+            : shellSize.height,
+        layoutShellHeight:
+          layout.verticalShell && typeof layout.verticalShell.effectiveLayoutHeight === "number"
+            ? layout.verticalShell.effectiveLayoutHeight
+            : shellSize.height,
         ratioThresholdNormal: layoutConfig.ratioThresholdNormal,
         ratioThresholdFlat: layoutConfig.ratioThresholdFlat,
         nameText: nameText,
@@ -341,7 +359,7 @@
         visibleMetricIds: visibleMetricIds,
         flatMetricRows: layout.flatMetricRows || 0,
         flatMetricColumns: layout.flatMetricColumns || 0,
-        metricsStyle: layout.mode === "flat" ? (layout.flatMetricsLayoutStyle || "") : "",
+        metricsStyle: layout.mode === "flat" ? layout.flatMetricsLayoutStyle || "" : "",
         wrapperStyle: wrapperStyle,
         resizeSignatureParts: []
       };
@@ -363,13 +381,17 @@
         const domain = toObject(props.domain);
         const kind = resolveStateKind(props, domain);
         const baseInteraction = navInteractionPolicy.canDispatchWhenNotEditing(props) ? "dispatch" : "passive";
-        return toText(stateScreenInteraction.resolveInteraction({
-          kind: kind,
-          baseInteraction: baseInteraction
-        })) === "dispatch";
+        return (
+          toText(
+            stateScreenInteraction.resolveInteraction({
+              kind: kind,
+              baseInteraction: baseInteraction
+            })
+          ) === "dispatch"
+        );
       }
     };
   }
 
   return { id: "EditRouteRenderModel", create: create };
-}));
+});

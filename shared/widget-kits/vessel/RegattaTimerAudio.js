@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRegattaTimerAudio = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const LOW_TONE_HZ = 440;
@@ -67,7 +67,7 @@
         try {
           audioContext = new AudioContextCtor();
           return true;
-        // dyni-lint-disable-next-line catch-fallback-without-suppression -- Web Audio availability is an external boundary and must fail closed.
+          // dyni-boundary-next-line(category: web-audio-boundary, owner: Metzger100, date: 2026-07-17) -- Web Audio availability is an external boundary and must fail closed.
         } catch (error) {
           audioContext = null;
           audioUnavailable = true;
@@ -108,7 +108,7 @@
           gainNode.connect(audioContext.destination);
           oscillator.start(now);
           oscillator.stop(toneEnd);
-        // dyni-lint-disable-next-line catch-fallback-without-suppression -- Tone playback is best-effort and must not break the widget render flow.
+          // dyni-boundary-next-line(category: web-audio-boundary, owner: Metzger100, date: 2026-07-17) -- Tone playback is best-effort and must not break the widget render flow.
         } catch (error) {
           // Silent by contract: audio failures must never throw into renderer flow.
         }
@@ -122,11 +122,14 @@
         try {
           const closeResult = audioContext.close();
           if (closeResult && typeof closeResult.then === "function") {
-            closeResult.then(function () {}, function () {
-              // Intentional no-op: close failure is non-fatal during widget teardown.
-            });
+            closeResult.then(
+              function () {},
+              function () {
+                // Intentional no-op: close failure is non-fatal during widget teardown.
+              }
+            );
           }
-        // dyni-lint-disable-next-line catch-fallback-without-suppression -- Teardown failures are intentionally non-fatal at this boundary.
+          // dyni-boundary-next-line(category: web-audio-boundary, owner: Metzger100, date: 2026-07-17) -- Teardown failures are intentionally non-fatal at this boundary.
         } catch (error) {
           // Silent by contract: tear-down failures are ignored.
         }
@@ -152,4 +155,4 @@
   }
 
   return { id: "RegattaTimerAudio", create: create };
-}));
+});

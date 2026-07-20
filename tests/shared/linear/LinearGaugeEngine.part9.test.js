@@ -1,8 +1,5 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./LinearGaugeEngine.harness");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
 describe("LinearGaugeEngine", function () {
   it("keeps sector bands above the scale track", function () {
@@ -14,17 +11,17 @@ describe("LinearGaugeEngine", function () {
       tickProps: {
         major: "major",
         minor: "minor",
-        showEndLabels: "showEndLabels",
+        showEndLabels: "showEndLabels"
       },
       buildSectors() {
         return [{ from: 5, to: 15, color: "#e0a92e" }];
-      },
+      }
     });
 
     const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 120,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     renderer(canvas, {
       value: 10,
@@ -32,20 +29,14 @@ describe("LinearGaugeEngine", function () {
       max: 30,
       major: 10,
       minor: 5,
-      showEndLabels: true,
+      showEndLabels: true
     });
 
     const trackY = harness.calls.track[0].y;
     const band = harness.calls.bands[0];
-    const trackClearance = Math.max(
-      1,
-      Math.ceil(harness.calls.track[0].opts.lineWidth / 2),
-    );
+    const trackClearance = Math.max(1, Math.ceil(harness.calls.track[0].opts.lineWidth / 2));
 
     expect(band).toBeDefined();
-    expect(band.y + band.thickness / 2).toBeLessThanOrEqual(
-      trackY - trackClearance,
-    );
+    expect(band.y + band.thickness / 2).toBeLessThanOrEqual(trackY - trackClearance);
   });
-
 });

@@ -1,12 +1,13 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("VoltageRadialWidget", function () {
   it("builds low-end sectors from config-backed warning/alarm values", function () {
+    /** @type {any} */
     let captured;
+    /** @type {any} */
     let receivedProps;
+    /** @type {any} */
     let receivedOptions;
     const renderCanvas = vi.fn();
     const applyFormatter = vi.fn((value) => Number(value).toFixed(1));
@@ -16,9 +17,7 @@ describe("VoltageRadialWidget", function () {
       return { major: 50, minor: 10 };
     });
 
-    const mod = loadFresh(
-      "widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js",
-    );
+    const mod = loadFresh("widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js");
     const spec = mod.create(
       {},
       createComponentContextMock({
@@ -26,6 +25,7 @@ describe("VoltageRadialWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
+                /** @param {any} text @param {any} defaultText */
                 normalize(text, defaultText) {
                   if (text == null) {
                     return defaultText == null ? "---" : defaultText;
@@ -36,95 +36,86 @@ describe("VoltageRadialWidget", function () {
                       ? "---"
                       : defaultText
                     : String(text);
-                },
+                }
               };
-            },
+            }
           },
           ValueMath: {
             create() {
               return {
-                formatGaugeDisplay(
-                  raw,
-                  props,
-                  applyFormatter,
-                  normalize,
-                  defaultFormatter,
-                  defaultParameters,
-                ) {
+                /**
+                 * @param {any} raw
+                 * @param {any} props
+                 * @param {any} applyFormatter
+                 * @param {any} normalize
+                 * @param {any} defaultFormatter
+                 * @param {any} defaultParameters
+                 */
+                formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
-                  const defaultText = Object.prototype.hasOwnProperty.call(
-                    p,
-                    "default",
-                  )
+                  const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
                     ? p.default
                     : normalize(undefined, undefined);
                   const n = Number(raw);
                   if (!Number.isFinite(n)) {
                     return { num: NaN, text: defaultText };
                   }
-                  const formatter = Object.prototype.hasOwnProperty.call(
-                    p,
-                    "formatter",
-                  )
+                  const formatter = Object.prototype.hasOwnProperty.call(p, "formatter")
                     ? p.formatter
                     : defaultFormatter;
-                  const formatterParameters =
-                    Object.prototype.hasOwnProperty.call(
-                      p,
-                      "formatterParameters",
-                    )
-                      ? p.formatterParameters
-                      : defaultParameters;
+                  const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
+                    ? p.formatterParameters
+                    : defaultParameters;
                   const formatted = normalize(
                     String(
                       applyFormatter(n, {
                         formatter: formatter,
                         formatterParameters: formatterParameters,
-                        default: defaultText,
-                      }),
+                        default: defaultText
+                      })
                     ),
-                    defaultText,
+                    defaultText
                   );
                   const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
                   return Number.isFinite(num)
-                    ? { num: num, text: match[0] }
+                    ? { num: num, text: /** @type {any} */ (match)[0] }
                     : { num: NaN, text: defaultText };
                 },
+                /** @param {any} text */
                 extractNumberText(text) {
                   const match = String(text).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   return match ? match[0] : "";
                 },
-                resolveVoltageTickSteps,
+                resolveVoltageTickSteps
               };
-            },
+            }
           },
           SemicircleRadialEngine: {
             create() {
               return {
+                /** @param {any} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return renderCanvas;
-                },
+                }
               };
-            },
-          },
+            }
+          }
         },
         services: {
-          format: { applyFormatter },
-        },
-      }),
+          format: { applyFormatter }
+        }
+      })
     );
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured).not.toHaveProperty("rangeDefaults");
     expect(captured.ratioProps).toEqual({
       normal: "voltageRadialRatioThresholdNormal",
-      flat: "voltageRadialRatioThresholdFlat",
+      flat: "voltageRadialRatioThresholdFlat"
     });
-    expect(captured.hideTextualMetricsProp).toBe(
-      "voltageRadialHideTextualMetrics",
-    );
+    expect(captured.hideTextualMetricsProp).toBe("voltageRadialHideTextualMetrics");
     expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.tickSteps(3)).toEqual({ major: 0.5, minor: 0.1 });
     expect(captured.tickSteps(12)).toEqual({ major: 2, minor: 0.5 });
@@ -132,23 +123,24 @@ describe("VoltageRadialWidget", function () {
     expect(
       captured.formatDisplay(12.34, {
         formatter: "formatDecimal",
-        formatterParameters: [3, 1, true],
-      }),
+        formatterParameters: [3, 1, true]
+      })
     ).toEqual({ num: 12.3, text: "12.3" });
     expect(applyFormatter).toHaveBeenCalledWith(
       12.34,
       expect.objectContaining({
-        formatter: "formatDecimal",
-      }),
+        formatter: "formatDecimal"
+      })
     );
 
     const theme = {
       colors: {
         warning: "#123456",
-        alarm: "#654321",
-      },
+        alarm: "#654321"
+      }
     };
     const valueUtils = {
+      /** @param {any} props @param {any} minV @param {any} maxV @param {any} arc @param {any} options */
       buildLowEndSectors(props, minV, maxV, arc, options) {
         receivedProps = props;
         receivedOptions = options;
@@ -157,35 +149,34 @@ describe("VoltageRadialWidget", function () {
           {
             a0: props.alarmFrom,
             a1: props.warningFrom,
-            color: options.warningColor,
-          },
+            color: options.warningColor
+          }
         ];
-      },
+      }
     };
     const sectors = captured.buildSectors(
       {
         voltageRadialWarningFrom: 12.2,
-        voltageRadialAlarmFrom: 11.6,
+        voltageRadialAlarmFrom: 11.6
       },
       10,
       15,
       {},
       valueUtils,
-      theme,
+      theme
     );
 
     expect(sectors).toEqual([
       { a0: 10, a1: 11.6, color: "#654321" },
-      { a0: 11.6, a1: 12.2, color: "#123456" },
+      { a0: 11.6, a1: 12.2, color: "#123456" }
     ]);
     expect(receivedProps).toEqual({
       warningFrom: 12.2,
-      alarmFrom: 11.6,
+      alarmFrom: 11.6
     });
     expect(receivedOptions).not.toHaveProperty("defaultWarningFrom");
     expect(receivedOptions).not.toHaveProperty("defaultAlarmFrom");
     expect(receivedOptions.warningColor).toBe(theme.colors.warning);
     expect(receivedOptions.alarmColor).toBe(theme.colors.alarm);
   });
-
 });

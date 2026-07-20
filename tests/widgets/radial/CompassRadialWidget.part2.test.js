@@ -1,11 +1,7 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createMockCanvas,
-  createMockContext2D,
-} = require("../../helpers/mock-canvas");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("CompassRadialWidget", function () {
   it("skips drawing a stale marker when markerCourse is invalid", function () {
@@ -14,7 +10,7 @@ describe("CompassRadialWidget", function () {
       resolve: vi.fn(),
       isActive() {
         return false;
-      },
+      }
     };
     const springEasingModule = {
       create() {
@@ -25,105 +21,81 @@ describe("CompassRadialWidget", function () {
             return motionIndex === 1
               ? {
                   active: false,
-                  resolve: vi.fn(
-                    function (canvas, target, easingEnabled, nowMs) {
-                      void canvas;
-                      void target;
-                      void easingEnabled;
-                      void nowMs;
-                      return 20;
-                    },
-                  ),
+                  resolve: vi.fn(function (canvas, target, easingEnabled, nowMs) {
+                    void canvas;
+                    void target;
+                    void easingEnabled;
+                    void nowMs;
+                    return 20;
+                  }),
                   isActive() {
                     return false;
-                  },
+                  }
                 }
               : markerMotion;
-          },
+          }
         };
-      },
+      }
     };
     const harness = createCompassCachingHarness({
-      springEasingModule: springEasingModule,
+      springEasingModule: springEasingModule
     });
     const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     expect(
-      harness.spec.renderCanvas(
-        canvas,
-        makeCompassProps({ heading: 20, markerCourse: undefined }),
-      ),
+      harness.spec.renderCanvas(canvas, makeCompassProps({ heading: 20, markerCourse: undefined }))
     ).toBeUndefined();
-    expect(
-      harness.spec.renderCanvas(
-        canvas,
-        makeCompassProps({ heading: 20, markerCourse: null }),
-      ),
-    ).toBeUndefined();
+    expect(harness.spec.renderCanvas(canvas, makeCompassProps({ heading: 20, markerCourse: null }))).toBeUndefined();
     expect(markerMotion.resolve).not.toHaveBeenCalled();
     expect(harness.calls.rimMarker).toHaveLength(0);
   });
 
   function createCompassCachingHarness(options) {
     const opts = options || {};
-    const fullCircleEngine = loadFresh(
-      "shared/widget-kits/radial/FullCircleRadialEngine.js",
-    );
-    const fullCircleLayout = loadFresh(
-      "shared/widget-kits/radial/FullCircleRadialLayout.js",
-    );
-    const layerCache = loadFresh(
-      "shared/widget-kits/canvas/CanvasLayerCache.js",
-    );
-    const textLayout = loadFresh(
-      "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
-    );
-    const responsiveScaleProfile = loadFresh(
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-    );
-    const layoutRectMath = loadFresh(
-      "shared/widget-kits/layout/LayoutRectMath.js",
-    );
-    const geometryScale = loadFresh(
-      "shared/widget-kits/layout/GeometryScale.js",
-    );
+    const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
+    const fullCircleLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
+    const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
+    const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     const calls = {
       ring: [],
       ticks: [],
       pointer: [],
       rimMarker: [],
-      textDraws: 0,
+      textDraws: 0
     };
     const theme = {
       surface: {
-        fg: "#fff",
+        fg: "#fff"
       },
       colors: {
-        pointer: "#3366cc",
+        pointer: "#3366cc"
       },
       radial: {
         ticks: {
           majorLenFactor: 0.08,
           majorWidthFactor: 0.02,
           minorLenFactor: 0.047,
-          minorWidthFactor: 0.01,
+          minorWidthFactor: 0.01
         },
         pointer: {
           depthFactor: 0.22,
-          sideFactor: 0.11,
+          sideFactor: 0.11
         },
         ring: {
           arcLineWidthFactor: 0.013,
-          widthFactor: 0.35,
+          widthFactor: 0.35
         },
         labels: {
           insetFactor: 2.1,
-          fontFactor: 0.35,
-        },
+          fontFactor: 0.35
+        }
       },
       strokeWeight: 1,
       pointerDepthWeight: 1,
@@ -131,13 +103,11 @@ describe("CompassRadialWidget", function () {
       font: {
         family: "sans-serif",
         weight: 705,
-        labelWeight: 645,
-      },
+        labelWeight: 645
+      }
     };
 
-    const spec = loadFresh(
-      "widgets/radial/CompassRadialWidget/CompassRadialWidget.js",
-    ).create(
+    const spec = loadFresh("widgets/radial/CompassRadialWidget/CompassRadialWidget.js").create(
       {},
       createComponentContextMock({
         modules: {
@@ -148,22 +118,12 @@ describe("CompassRadialWidget", function () {
           ResponsiveScaleProfile: responsiveScaleProfile,
           LayoutRectMath: layoutRectMath,
           GeometryScale: geometryScale,
-          StateScreenLabels: loadFresh(
-            "shared/widget-kits/state/StateScreenLabels.js",
-          ),
-          StateScreenPrecedence: loadFresh(
-            "shared/widget-kits/state/StateScreenPrecedence.js",
-          ),
-          StateScreenCanvasOverlay: loadFresh(
-            "shared/widget-kits/state/StateScreenCanvasOverlay.js",
-          ),
+          StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+          StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+          StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
           StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-          PlaceholderNormalize: loadFresh(
-            "shared/widget-kits/format/PlaceholderNormalize.js",
-          ),
-          SpringEasing:
-            opts.springEasingModule ||
-            loadFresh("shared/widget-kits/anim/SpringEasing.js"),
+          PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+          SpringEasing: opts.springEasingModule || loadFresh("shared/widget-kits/anim/SpringEasing.js"),
           RadialToolkit: {
             create() {
               return {
@@ -179,19 +139,19 @@ describe("CompassRadialWidget", function () {
                   },
                   drawRimMarker(ctx, cx, cy, rOuter, angle, opts) {
                     calls.rimMarker.push({ angle, opts });
-                  },
+                  }
                 },
                 angle: {
                   degToCanvasRad(deg, cfg, rotationDeg) {
                     const d = Number(deg) + (Number(rotationDeg) || 0);
                     const norm = ((d % 360) + 360) % 360;
                     return ((norm - 90) * Math.PI) / 180;
-                  },
+                  }
                 },
                 theme: {
                   resolveForRoot() {
                     return theme;
-                  },
+                  }
                 },
                 text: {
                   measureValueUnitFit() {
@@ -215,7 +175,7 @@ describe("CompassRadialWidget", function () {
                   drawThreeRowsBlock() {
                     calls.textDraws += 1;
                   },
-                  drawDisconnectOverlay() {},
+                  drawDisconnectOverlay() {}
                 },
                 value: {
                   clamp(value, lo, hi) {
@@ -235,11 +195,11 @@ describe("CompassRadialWidget", function () {
                     if (!isFinite(n)) return "---";
                     const norm = ((Math.round(n) % 360) + 360) % 360;
                     return String(norm).padStart(3, "0");
-                  },
-                },
+                  }
+                }
               };
-            },
-          },
+            }
+          }
         },
         services: {
           canvas: {
@@ -249,17 +209,17 @@ describe("CompassRadialWidget", function () {
               return {
                 ctx,
                 W: Math.round(rect.width),
-                H: Math.round(rect.height),
+                H: Math.round(rect.height)
               };
-            },
+            }
           },
           dom: {
             requirePluginRoot(target) {
               return target;
-            },
-          },
-        },
-      }),
+            }
+          }
+        }
+      })
     );
 
     return {
@@ -273,9 +233,9 @@ describe("CompassRadialWidget", function () {
             modules: {
               ResponsiveScaleProfile: responsiveScaleProfile,
               LayoutRectMath: layoutRectMath,
-              GeometryScale: geometryScale,
-            },
-          }),
+              GeometryScale: geometryScale
+            }
+          })
         );
         const mode = api.computeMode(width, height, 0.8, 2.2);
         const insets = api.computeInsets(width, height);
@@ -286,9 +246,9 @@ describe("CompassRadialWidget", function () {
           theme: theme,
           insets: insets,
           responsive: insets.responsive,
-          layoutConfig: { highTopFactor: 0.9, highBottomFactor: 0.9 },
+          layoutConfig: { highTopFactor: 0.9, highBottomFactor: 0.9 }
         });
-      },
+      }
     };
   }
 
@@ -298,10 +258,9 @@ describe("CompassRadialWidget", function () {
         heading: 12,
         markerCourse: 30,
         caption: "HDG",
-        unit: "°",
+        unit: "°"
       },
-      overrides || {},
+      overrides || {}
     );
   }
-
 });

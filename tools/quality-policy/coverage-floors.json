@@ -1,0 +1,1146 @@
+{
+  "note": "Coverage inventory floors. Every shipped production file is classified exactly once. classification=measured entries are enforced against coverage/coverage-summary.json by tools/quality-policy/check-coverage-inventory.mjs (in addition to the native Vitest/V8 thresholds in vitest.config.js). Floor is 80 lines / 65 branches by default; files below that at capture time keep their verified achieved floor as explicit legacy debt (never below the achieved baseline) until improved later.",
+  "generatedAgainstEntryCount": 228,
+  "entries": {
+    "cluster/ClusterWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/AnchorMapper.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 61.11
+    },
+    "cluster/mappers/ClusterMapperToolkit.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/CourseHeadingMapper.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/DefaultMapper.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/EnvironmentMapper.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/MapMapper.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/NavMapper.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/SpeedMapper.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/VesselMapper.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/WindMapper.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/viewmodels/ActiveRouteViewModel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 58.82
+    },
+    "cluster/viewmodels/AisTargetViewModel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/viewmodels/AlarmViewModel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/viewmodels/EditRouteViewModel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/viewmodels/RoutePointsViewModel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/bootstrap-manifest.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/anchor.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/course-heading.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/default.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/environment.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/finalize.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/map.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/nav.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/speed.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/vessel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/wind.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/anchor.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/course-heading.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/default-radial-editables.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/default.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/environment.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/map.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/nav-ratio-thresholds.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/nav.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/speed.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/vessel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/wind.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-cluster.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-shared-engines.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-shared-foundation-format.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-shared-foundation-geometry.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-shared-foundation-layout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-shared-foundation-state.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-shared-foundation-xte.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-widgets-gauge.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-widgets-nav.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-widgets-vessel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/common-editables.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/editable-param-utils.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/environment-base-editables.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/environment-depth-editables.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/environment-editables.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/environment-temperature-editables.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/kind-defaults.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/unit-editable-utils.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/vessel-voltage-editables.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "config/widget-definitions.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "plugin.js": {
+      "classification": "measured",
+      "lines": 71.73,
+      "branches": 65
+    },
+    "plugin.mjs": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/HostCommitController.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/SurfaceSessionController.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/TemporaryHostActionBridge.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/TemporaryHostActionBridgeDiscovery.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/asset-preloader.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/canvas-runtime.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 53.84
+    },
+    "runtime/cluster/ClusterShellRenderer.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/cluster/RouteActivationController.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/cluster/RouteActivationLatestWins.js": {
+      "classification": "measured",
+      "lines": 73.06,
+      "branches": 63.88
+    },
+    "runtime/cluster/RouteActivationPayloadBuilder.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/component-loader.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/dom-runtime.js": {
+      "classification": "measured",
+      "lines": 58.13,
+      "branches": 44.44
+    },
+    "runtime/editable-defaults.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/format-runtime.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/init.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/namespace.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/plugin-bootstrap-core.js": {
+      "classification": "measured",
+      "lines": 77.68,
+      "branches": 64.21
+    },
+    "runtime/surface/CanvasDomSurfaceAdapter.js": {
+      "classification": "measured",
+      "lines": 76.55,
+      "branches": 51.67
+    },
+    "runtime/surface/ClusterSurfacePolicy.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/surface/HtmlSurfaceController.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/surface/index.js": {
+      "classification": "measured",
+      "lines": 38.7,
+      "branches": 23.07
+    },
+    "runtime/theme-runtime.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/theme/token-catalog.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/theme/model.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/theme/resolver.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/widget-registrar.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/unit-format-families.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/anim/SpringEasing.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/canvas/CanvasLayerCache.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/format/DepthDisplayFormatter.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/format/PlaceholderNormalize.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/format/StableDigits.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/format/UnitAwareFormatter.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/gauge/GaugeToolkit.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/html/HtmlDomPatchUtils.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/html/HtmlMeasureUtils.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/html/HtmlWidgetLifecycle.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/html/HtmlWidgetUtils.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/html/PreparedPayloadModelCache.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/layout/GeometryScale.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/layout/LayoutRectMath.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/layout/LayoutSizingHelpers.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/layout/ResponsiveScaleProfile.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearCanvasPrimitives.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeEngineFrame.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeEngine.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeEngineDrawing.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 63.46
+    },
+    "shared/widget-kits/linear/LinearGaugeEngineSupport.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 50
+    },
+    "shared/widget-kits/linear/LinearGaugeLabelFit.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeLayoutVariants.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeMath.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeTextLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/ActiveRouteHtmlFit.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/ActiveRouteLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetHtmlFit.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetLayoutGeometry.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetLayoutMath.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetLayoutSizing.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetMarkup.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetRenderModel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/CenterDisplayLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/CenterDisplayMath.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/CenterDisplayRenderModel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteHtmlFit.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteHtmlFitSupport.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteLayoutTiles.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteLayoutGeometry.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteLayoutMath.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteMarkup.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteRenderModel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/MapZoomHtmlFit.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/MapZoomMarkup.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/NavInteractionPolicy.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/NavModeRatio.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsDomEffects.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsHtmlFit.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsInfoText.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsLayoutSizing.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsMarkup.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsRenderModel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsRowGeometry.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/FullCircleRadialEngine.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/FullCircleRadialLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/FullCircleRadialMeasure.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/FullCircleRadialDrawing.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/FullCircleRadialTextLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialAngleMath.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialCanvasPrimitives.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialFrameRenderer.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialSectorMath.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialTextFitting.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialTextLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialTickMath.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialToolkit.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 50
+    },
+    "shared/widget-kits/radial/RadialValueMath.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialMajorValueLabels.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/SemicircleRadialEngine.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/SemicircleRadialLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/SemicircleRadialTextLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/state/StateScreenCanvasOverlay.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/state/StateScreenInteraction.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/state/StateScreenLabels.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/state/StateScreenMarkup.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/state/StateScreenPrecedence.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/state/StateScreenTextFit.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/CanvasTextFitting.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/CanvasTextLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/CenterDisplayStateAdapter.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/PositionCoordinateFormatting.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/TextFitMath.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/TextLayoutComposite.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/TextLayoutEngine.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/TextLayoutPrimitives.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/TextLayoutScaleHelpers.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/TextTileLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/value/ValueMath.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/AlarmHtmlFit.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/AlarmHtmlFitChrome.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/AlarmMarkup.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/AlarmRenderModel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/RegattaTimerAudio.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/RegattaTimerHtmlFit.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/RegattaTimerMarkup.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/RegattaTimerModel.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/RegattaTimerPhase.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/RegattaTimerSessionStore.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteHighwayLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteHighwayPrimitives.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteLinearPrimitives.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteLinearDynamicMetrics.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteDisplayMetrics.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteDisplayPropsNormalize.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteDisplayRenderSetup.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteLinearLayout.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/CompassLinearWidget/CompassLinearWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/DefaultLinearWidget/DefaultLinearWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/DepthLinearWidget/DepthLinearWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/WindLinearWidget/WindLinearWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/ClockRadialWidget/ClockRadialWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/CompassRadialWidget/CompassRadialWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/DepthRadialWidget/DepthRadialWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/WindRadialWidget/WindRadialWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/XteDisplayLinearWidget/XteDisplayLinearWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/XteDisplayWidget/XteDisplayWidget.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    }
+  }
+}

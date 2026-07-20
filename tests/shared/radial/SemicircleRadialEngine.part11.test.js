@@ -1,3 +1,4 @@
+// @ts-nocheck
 const {
   makeThemeDefaults,
   makeComponentContext,
@@ -5,7 +6,7 @@ const {
   createBaseSequence,
   createValueMath,
   makeBaseSpec,
-  createRenderHarness,
+  createRenderHarness
 } = require("./SemicircleRadialEngine.harness");
 
 describe("SemicircleRadialEngine", function () {
@@ -14,7 +15,7 @@ describe("SemicircleRadialEngine", function () {
     const layoutCalls = {
       computeMode: 0,
       computeInsets: 0,
-      computeLayout: 0,
+      computeLayout: 0
     };
     const layoutSnapshot = {
       mode: "normal",
@@ -31,19 +32,19 @@ describe("SemicircleRadialEngine", function () {
         minorTickWidth: 1,
         arcLineWidth: 1,
         pointerDepth: 10,
-        pointerSide: 5,
+        pointerSide: 5
       },
       labels: {
         radiusOffset: 20,
-        fontPx: 12,
+        fontPx: 12
       },
       flat: {
         box: { x: 0, y: 0, w: 0, h: 0 },
         topBox: { x: 0, y: 0, w: 0, h: 0 },
-        bottomBox: { x: 0, y: 0, w: 0, h: 0 },
+        bottomBox: { x: 0, y: 0, w: 0, h: 0 }
       },
       high: { bandBox: { x: 0, y: 0, w: 0, h: 0 } },
-      normal: { rSafe: 20, yBottom: 52, mhMax: 18, mhMin: 12 },
+      normal: { rSafe: 20, yBottom: 52, mhMax: 18, mhMin: 12 }
     };
     const modules = {
       RadialToolkit: {
@@ -53,13 +54,13 @@ describe("SemicircleRadialEngine", function () {
               resolveForRoot() {
                 return makeThemeDefaults({
                   colors: {
-                    pointer: "#3366cc",
-                  },
+                    pointer: "#3366cc"
+                  }
                 });
-              },
+              }
             },
             text: {
-              drawDisconnectOverlay() {},
+              drawDisconnectOverlay() {}
             },
             value: createValueMath(),
             draw: {
@@ -67,10 +68,10 @@ describe("SemicircleRadialEngine", function () {
               drawAnnularSector() {},
               drawPointerAtRim() {},
               drawTicksFromAngles() {},
-              drawLabels() {},
-            },
+              drawLabels() {}
+            }
           };
-        },
+        }
       },
       SemicircleRadialLayout: {
         create() {
@@ -86,9 +87,9 @@ describe("SemicircleRadialEngine", function () {
             computeLayout() {
               layoutCalls.computeLayout += 1;
               return layoutSnapshot;
-            },
+            }
           };
-        },
+        }
       },
       SemicircleRadialTextLayout: {
         create() {
@@ -96,14 +97,12 @@ describe("SemicircleRadialEngine", function () {
             createFitCache() {
               return {};
             },
-            drawModeText: drawModeText,
+            drawModeText: drawModeText
           };
-        },
-      },
+        }
+      }
     };
-    const renderer = loadFresh(
-      "shared/widget-kits/radial/SemicircleRadialEngine.js",
-    )
+    const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
       .create({}, makeComponentContext(modules))
       .createRenderer(makeBaseSpec());
 
@@ -111,13 +110,13 @@ describe("SemicircleRadialEngine", function () {
       createMockCanvas({
         rectWidth: 220,
         rectHeight: 140,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
       {
         value: 12.3,
         caption: 0,
-        unit: "",
-      },
+        unit: ""
+      }
     );
 
     expect(layoutCalls.computeMode).toBe(1);
@@ -131,8 +130,7 @@ describe("SemicircleRadialEngine", function () {
       valueText: "12.3",
       unit: "",
       secScale: 0.3,
-      hideTextualMetrics: false,
+      hideTextualMetrics: false
     });
   });
-
 });

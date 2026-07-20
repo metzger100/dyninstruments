@@ -13,15 +13,13 @@ describe("documentation format contract", function () {
   it("rejects documents without a top-level title", function () {
     const findings = validateDoc("documentation/fixture.md", "**Status:** ok\n");
 
-    expect(findings).toContain(
-      "documentation/fixture.md missing '# Title' heading at top of file.",
-    );
+    expect(findings).toContain("documentation/fixture.md missing '# Title' heading at top of file.");
   });
 
   it("rejects documents without a status line", function () {
     const findings = validateDoc(
       "documentation/fixture.md",
-      ["# Fixture", "", "## Overview", "", "## Related", ""].join("\n"),
+      ["# Fixture", "", "## Overview", "", "## Related", ""].join("\n")
     );
 
     expect(findings).toContain("documentation/fixture.md missing '**Status:**' line.");
@@ -30,7 +28,7 @@ describe("documentation format contract", function () {
   it("rejects documents without required compact sections", function () {
     const findings = validateDoc(
       "documentation/fixture.md",
-      ["# Fixture", "", "**Status:** test", "", "## Overview", ""].join("\n"),
+      ["# Fixture", "", "**Status:** test", "", "## Overview", ""].join("\n")
     );
 
     expect(findings).toContain("documentation/fixture.md missing '## Related' section.");
@@ -50,8 +48,9 @@ function scanRepositoryDocs() {
   });
 }
 
+/** @param {string} rel @param {string} content */
 function validateDoc(rel, content) {
-  const findings = [];
+  const findings = /** @type {string[]} */ ([]);
   if (!hasTitle(content)) {
     return [rel + " missing '# Title' heading at top of file."];
   }
@@ -67,6 +66,7 @@ function validateDoc(rel, content) {
   return findings;
 }
 
+/** @param {string} content */
 function hasTitle(content) {
   const lines = content.split(/\r?\n/);
   for (const line of lines) {
@@ -76,20 +76,24 @@ function hasTitle(content) {
   return false;
 }
 
+/** @param {string} content */
 function hasStatus(content) {
   return /^\*\*Status:\*\*.+$/m.test(content);
 }
 
+/** @param {string} content @param {string} name */
 function hasSection(content, name) {
   return new RegExp("^##\\s+" + escapeRegex(name) + "\\b", "m").test(content);
 }
 
+/** @param {string} startPath */
 function collectMarkdownFiles(startPath) {
-  const out = [];
+  const out = /** @type {string[]} */ ([]);
   walk(startPath, out);
   return out.sort();
 }
 
+/** @param {string} currentPath @param {string[]} out */
 function walk(currentPath, out) {
   const stat = fs.statSync(currentPath);
   if (stat.isFile()) {
@@ -101,6 +105,7 @@ function walk(currentPath, out) {
   });
 }
 
+/** @param {string} value */
 function escapeRegex(value) {
   return String(value).replace(/[|\\{}()[\]^$+?.]/g, "\\$&");
 }

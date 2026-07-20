@@ -4,13 +4,17 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 describe("RoutePointsDomEffects", function () {
   function createDomEffects() {
     const htmlWidgetUtils = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-    return loadFresh("shared/widget-kits/nav/RoutePointsDomEffects.js").create({}, createComponentContextMock({
-      modules: {
-        HtmlWidgetUtils: htmlWidgetUtils
-      }
-    }));
+    return loadFresh("shared/widget-kits/nav/RoutePointsDomEffects.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          HtmlWidgetUtils: htmlWidgetUtils
+        }
+      })
+    );
   }
 
+  /** @param {any} target @param {string} key @param {any} value */
   function defineFixedMetric(target, key, value) {
     Object.defineProperty(target, key, {
       configurable: true,
@@ -20,6 +24,7 @@ describe("RoutePointsDomEffects", function () {
     });
   }
 
+  /** @param {number} rowCount @returns {any} */
   function createListRoot(rowCount) {
     const root = document.createElement("div");
     const list = document.createElement("div");
@@ -42,6 +47,7 @@ describe("RoutePointsDomEffects", function () {
     return { root, list };
   }
 
+  /** @param {any} root @returns {any} */
   function createHostContext(root) {
     return {
       __dyniHostCommitState: {
@@ -51,11 +57,17 @@ describe("RoutePointsDomEffects", function () {
     };
   }
 
+  /** @param {any} domEffects @param {any} hostContext @param {any} list @param {Record<string, any>} [args] @returns {any} */
   function runReveal(domEffects, hostContext, list, args) {
-    const scheduled = domEffects.maybeRevealActiveRow(Object.assign({
-      hostContext: hostContext,
-      rootEl: hostContext.__dyniHostCommitState.rootEl
-    }, args || {}));
+    const scheduled = domEffects.maybeRevealActiveRow(
+      Object.assign(
+        {
+          hostContext: hostContext,
+          rootEl: hostContext.__dyniHostCommitState.rootEl
+        },
+        args || {}
+      )
+    );
     vi.runAllTimers();
     return { scheduled, scrollTop: list.scrollTop };
   }

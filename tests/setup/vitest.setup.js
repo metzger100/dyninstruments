@@ -6,6 +6,7 @@
 (function () {
   "use strict";
 
+  /** @param {string} [fontValue] @returns {number} */
   function resolveFontPx(fontValue) {
     var match = /(\d+(?:\.\d+)?)px/.exec(fontValue || "");
     return match ? Number(match[1]) : 16;
@@ -13,6 +14,7 @@
 
   var mock2dContext = {
     font: "16px sans-serif",
+    /** @param {any} text */
     measureText: function (text) {
       var safeText = text == null ? "" : String(text);
       var fontPx = resolveFontPx(this.font);
@@ -39,10 +41,13 @@
     strokeText: function () {}
   };
 
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (type) {
-    if (type === "2d") {
-      return mock2dContext;
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(
+    /** @param {string} type @returns {any} */
+    function (type) {
+      if (type === "2d") {
+        return mock2dContext;
+      }
+      return null;
     }
-    return null;
-  });
-}());
+  );
+})();

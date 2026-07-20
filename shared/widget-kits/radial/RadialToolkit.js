@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRadialToolkit = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -45,4 +45,4 @@
   }
 
   return { id: "RadialToolkit", create: create };
-}));
+});

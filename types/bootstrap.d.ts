@@ -51,6 +51,7 @@ interface DyniBootstrapCoreApi {
   resolveScriptScope(options: DyniBootstrapOptions | undefined, baseUrl: string): string;
   resolveEntrypoint(options: DyniBootstrapOptions | undefined): "legacy" | "module";
   normalizeBaseUrl(baseUrl: unknown): string;
+  resolveGlobalRoot(): DyniBootstrapRoot;
 }
 
 interface DyniBootstrapRoot {

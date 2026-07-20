@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniTemperatureLinearWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @typedef {DyniLinearGaugeProps & { tempLinearWarningFrom?: number, tempLinearAlarmFrom?: number }} DyniTemperatureLinearProps */
@@ -104,4 +104,4 @@
   }
 
   return { id: "TemperatureLinearWidget", create: create };
-}));
+});

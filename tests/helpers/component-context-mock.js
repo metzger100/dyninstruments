@@ -5,6 +5,7 @@ const DEFAULT_MODULE_PATHS = {
   CanvasTextFitting: "shared/widget-kits/text/CanvasTextFitting.js",
   CanvasTextLayout: "shared/widget-kits/text/CanvasTextLayout.js",
   TextLayoutScaleHelpers: "shared/widget-kits/text/TextLayoutScaleHelpers.js",
+  PositionCoordinateFormatting: "shared/widget-kits/text/PositionCoordinateFormatting.js",
   GaugeToolkit: "shared/widget-kits/gauge/GaugeToolkit.js",
   RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
   RadialSectorMath: "shared/widget-kits/radial/RadialSectorMath.js",
@@ -12,19 +13,24 @@ const DEFAULT_MODULE_PATHS = {
   RadialTickMath: "shared/widget-kits/radial/RadialTickMath.js",
   RadialCanvasPrimitives: "shared/widget-kits/radial/RadialCanvasPrimitives.js",
   RadialFrameRenderer: "shared/widget-kits/radial/RadialFrameRenderer.js",
+  FullCircleRadialMeasure: "shared/widget-kits/radial/FullCircleRadialMeasure.js",
+  FullCircleRadialDrawing: "shared/widget-kits/radial/FullCircleRadialDrawing.js",
   HtmlMeasureUtils: "shared/widget-kits/html/HtmlMeasureUtils.js",
   HtmlDomPatchUtils: "shared/widget-kits/html/HtmlDomPatchUtils.js",
   HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
   HtmlWidgetLifecycle: "shared/widget-kits/html/HtmlWidgetLifecycle.js",
   MapZoomMarkup: "shared/widget-kits/nav/MapZoomMarkup.js",
   LayoutSizingHelpers: "shared/widget-kits/layout/LayoutSizingHelpers.js",
+  EditRouteLayoutTiles: "shared/widget-kits/nav/EditRouteLayoutTiles.js",
   NavModeRatio: "shared/widget-kits/nav/NavModeRatio.js",
+  NavInteractionPolicy: "shared/widget-kits/nav/NavInteractionPolicy.js",
   RegattaTimerPhase: "shared/widget-kits/vessel/RegattaTimerPhase.js",
   StateScreenLabels: "shared/widget-kits/state/StateScreenLabels.js",
   StateScreenTextFit: "shared/widget-kits/state/StateScreenTextFit.js",
-  StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js",
+  StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js"
 };
 
+/** @param {Record<string, any>} [options] @returns {any} */
 function createComponentContextMock(options) {
   const opts = options || {};
   const def = opts.def || {};
@@ -33,6 +39,7 @@ function createComponentContextMock(options) {
   const instanceCache = Object.create(null);
 
   const format = services.format || {
+    /** @param {any} value @param {any} [cfg] @returns {any} */
     applyFormatter(value, cfg) {
       if (value == null || Number.isNaN(value)) {
         if (cfg && Object.prototype.hasOwnProperty.call(cfg, "default")) {
@@ -41,13 +48,13 @@ function createComponentContextMock(options) {
         return "---";
       }
       return String(value);
-    },
+    }
   };
 
   const canvas = services.canvas || {
     setupCanvas() {
       return null;
-    },
+    }
   };
 
   const dom = services.dom || {
@@ -56,15 +63,10 @@ function createComponentContextMock(options) {
     },
     getNightModeState() {
       return false;
-    },
+    }
   };
 
-  const hostActionsSnapshot = Object.prototype.hasOwnProperty.call(
-    services,
-    "hostActions",
-  )
-    ? services.hostActions
-    : {};
+  const hostActionsSnapshot = Object.prototype.hasOwnProperty.call(services, "hostActions") ? services.hostActions : {};
   const hostActions =
     typeof hostActionsSnapshot === "function"
       ? hostActionsSnapshot
@@ -86,15 +88,16 @@ function createComponentContextMock(options) {
           family: "sans-serif",
           familyMono: "monospace",
           weight: 700,
-          labelWeight: 700,
+          labelWeight: 700
         },
-        colors: {},
+        colors: {}
       };
-    },
+    }
   };
 
   const context = {
     components: {
+      /** @param {string} id @returns {any} */
       require(id) {
         if (Object.prototype.hasOwnProperty.call(instanceCache, id)) {
           return instanceCache[id];
@@ -103,34 +106,29 @@ function createComponentContextMock(options) {
           !Object.prototype.hasOwnProperty.call(modules, id) &&
           Object.prototype.hasOwnProperty.call(DEFAULT_MODULE_PATHS, id)
         ) {
-          modules[id] = loadFresh(DEFAULT_MODULE_PATHS[id]);
+          modules[id] = loadFresh(DEFAULT_MODULE_PATHS[/** @type {keyof typeof DEFAULT_MODULE_PATHS} */ (id)]);
         }
         if (!Object.prototype.hasOwnProperty.call(modules, id)) {
-          throw new Error(
-            "component-context-mock: missing module '" + id + "'",
-          );
+          throw new Error("component-context-mock: missing module '" + id + "'");
         }
         const entry = modules[id];
-        const value =
-          entry && typeof entry.create === "function"
-            ? entry.create(def, context)
-            : entry;
+        const value = entry && typeof entry.create === "function" ? entry.create(def, context) : entry;
         instanceCache[id] = value;
         return value;
-      },
+      }
     },
     theme: {
-      tokens: themeTokens,
+      tokens: themeTokens
     },
     format: format,
     canvas: canvas,
     dom: dom,
-    hostActions: hostActions,
+    hostActions: hostActions
   };
 
   return context;
 }
 
 module.exports = {
-  createComponentContextMock,
+  createComponentContextMock
 };

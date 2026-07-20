@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniCourseHeadingMapper = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   function create() {
@@ -25,10 +25,10 @@
       const effKind = p.kind;
 
       if (effKind === "hdtRadial" || effKind === "hdmRadial") {
-        const heading = (effKind === "hdtRadial") ? p.hdt : p.hdm;
+        const heading = num(effKind === "hdtRadial" ? p.hdt : p.hdm);
         return {
           heading: heading,
-          markerCourse: p.brg,
+          markerCourse: num(p.brg),
           caption: cap(effKind),
           unit: unit(effKind),
           rendererProps: {
@@ -42,10 +42,10 @@
       }
 
       if (effKind === "hdtLinear" || effKind === "hdmLinear") {
-        const heading = (effKind === "hdtLinear") ? p.hdt : p.hdm;
+        const heading = num(effKind === "hdtLinear" ? p.hdt : p.hdm);
         return {
           heading: heading,
-          markerCourse: p.brg,
+          markerCourse: num(p.brg),
           caption: cap(effKind),
           unit: unit(effKind),
           rendererProps: {
@@ -78,4 +78,4 @@
   }
 
   return { id: "CourseHeadingMapper", create: create };
-}));
+});

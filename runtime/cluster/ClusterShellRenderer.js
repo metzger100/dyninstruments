@@ -10,14 +10,13 @@
   const components = /** @type {Record<string, { create(): DyniValueMathApi }>} */ (root.DyniComponents);
   const valueMath = components.DyniValueMath.create();
   const CANVAS_INNER_HTML = '<div class="dyni-surface-canvas"><div class="dyni-surface-canvas-mount"></div></div>';
-  const HTML_INNER_HTML = '<div class="dyni-surface-html"><div class="dyni-surface-html-mount" data-dyni-html-mount="1"></div></div>';
+  const HTML_INNER_HTML =
+    '<div class="dyni-surface-html"><div class="dyni-surface-html-mount" data-dyni-html-mount="1"></div></div>';
   const trimText = valueMath.trimText;
 
   /** @param {unknown} rawProps @param {unknown} def @param {unknown} clusterRoutes @returns {string} */
   function resolveCluster(rawProps, def, clusterRoutes) {
-    const props = /** @type {DyniMapperProps} */ (
-      rawProps && typeof rawProps === "object" ? rawProps : {}
-    );
+    const props = /** @type {DyniMapperProps} */ (rawProps && typeof rawProps === "object" ? rawProps : {});
     const cluster = trimText(props.cluster);
     if (cluster) {
       return cluster;
@@ -28,17 +27,13 @@
 
   /** @param {unknown} rawProps @returns {string} */
   function resolveKind(rawProps) {
-    const props = /** @type {DyniMapperProps} */ (
-      rawProps && typeof rawProps === "object" ? rawProps : {}
-    );
+    const props = /** @type {DyniMapperProps} */ (rawProps && typeof rawProps === "object" ? rawProps : {});
     return trimText(props.kind);
   }
 
   /** @param {DyniRouteFrame|null|undefined} routeFrame @returns {boolean} */
   function isVerticalShell(routeFrame) {
-    return !!(routeFrame &&
-      routeFrame.__dyniRawProps &&
-      routeFrame.__dyniRawProps.mode === "vertical");
+    return !!(routeFrame && routeFrame.__dyniRawProps && routeFrame.__dyniRawProps.mode === "vertical");
   }
 
   /** @param {unknown} instanceId @param {DyniClusterShellHostContext|null|undefined} hostContext @returns {string} */
@@ -77,9 +72,7 @@
 
   runtime.clusterShellRenderer = /** @type {DyniClusterShellRendererApi} */ ({
     normalizeRouteFrame: function (rawProps, def, clusterRoutes) {
-      const source = /** @type {DyniMapperProps} */ (
-        rawProps && typeof rawProps === "object" ? rawProps : {}
-      );
+      const source = /** @type {DyniMapperProps} */ (rawProps && typeof rawProps === "object" ? rawProps : {});
       const routeFrame = /** @type {DyniRouteFrame} */ (Object.assign({}, source));
       const cluster = resolveCluster(source, def, clusterRoutes);
       const kind = resolveKind(source);
@@ -92,9 +85,7 @@
       return routeFrame;
     },
     renderRouteShell: function (routeFrame, routeMeta, instanceId, hostContext) {
-      const frame = /** @type {DyniRouteFrame} */ (
-        routeFrame && typeof routeFrame === "object" ? routeFrame : {}
-      );
+      const frame = /** @type {DyniRouteFrame} */ (routeFrame && typeof routeFrame === "object" ? routeFrame : {});
       const routeId = trimText(frame.__dyniRouteId);
       const surface = routeMeta && typeof routeMeta.surface === "string" ? routeMeta.surface : "unknown";
       const clusterToken = trimText(frame.cluster)
@@ -105,14 +96,15 @@
         .replace(/[^a-zA-Z0-9_-]/g, "-")
         .replace(/-{2,}/g, "-")
         .replace(/^-+|-+$/g, "");
-      const surfaceToken = surface === "canvas-dom"
-        ? "canvas"
-        : (surface === "html"
-          ? "html"
-          : trimText(surface)
-            .replace(/[^a-zA-Z0-9_-]/g, "-")
-            .replace(/-{2,}/g, "-")
-            .replace(/^-+|-+$/g, "") || "unknown");
+      const surfaceToken =
+        surface === "canvas-dom"
+          ? "canvas"
+          : surface === "html"
+            ? "html"
+            : trimText(surface)
+                .replace(/[^a-zA-Z0-9_-]/g, "-")
+                .replace(/-{2,}/g, "-")
+                .replace(/^-+|-+$/g, "") || "unknown";
       const shellClasses = [
         "widgetData",
         "dyni-shell",
@@ -145,12 +137,24 @@
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
 
-      return '<div class="' + shellClasses.join(" ") + '"'
-        + ' data-dyni-instance="' + instanceIdAttr + '"'
-        + ' data-dyni-route="' + routeIdAttr + '"'
-        + ' data-dyni-surface="' + surfaceAttr + '"'
-        + shellStyle
-        + '>' + shellInner + "</div>";
+      return (
+        '<div class="' +
+        shellClasses.join(" ") +
+        '"' +
+        ' data-dyni-instance="' +
+        instanceIdAttr +
+        '"' +
+        ' data-dyni-route="' +
+        routeIdAttr +
+        '"' +
+        ' data-dyni-surface="' +
+        surfaceAttr +
+        '"' +
+        shellStyle +
+        ">" +
+        shellInner +
+        "</div>"
+      );
     }
   });
-}(this));
+})(this);

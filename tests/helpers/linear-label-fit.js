@@ -1,13 +1,14 @@
 const { loadFresh } = require("./load-umd");
 const { createComponentContextMock } = require("./component-context-mock");
 
+/** @param {any[]} [calls] @param {{ charFactor?: number }} [options] @returns {any} */
 function createFontAwareContext(calls, options) {
   const opts = options || {};
-  const charFactor = Number.isFinite(opts.charFactor) ? opts.charFactor : 0.58;
+  const charFactor = typeof opts.charFactor === "number" && Number.isFinite(opts.charFactor) ? opts.charFactor : 0.58;
   const ctxCalls = calls || [];
   let currentFont = "600 10px sans-serif";
   let currentFontPx = 10;
-  const stateStack = [];
+  const stateStack = /** @type {any[]} */ ([]);
 
   return {
     calls: ctxCalls,
@@ -16,11 +17,13 @@ function createFontAwareContext(calls, options) {
     get font() {
       return currentFont;
     },
+    /** @param {any} value */
     set font(value) {
       currentFont = String(value || "");
       const match = currentFont.match(/([0-9]+(?:\.[0-9]+)?)px/);
       currentFontPx = match ? Number(match[1]) : 10;
     },
+    /** @param {any} text @returns {{ width: number }} */
     measureText(text) {
       const content = String(text || "");
       const width = content.length * currentFontPx * charFactor;
@@ -55,12 +58,14 @@ function createFontAwareContext(calls, options) {
     beginPath() {
       ctxCalls.push({ type: "beginPath" });
     },
+    /** @param {any} x @param {any} y @param {any} w @param {any} h */
     rect(x, y, w, h) {
       ctxCalls.push({ type: "rect", x: x, y: y, w: w, h: h });
     },
     clip() {
       ctxCalls.push({ type: "clip" });
     },
+    /** @param {any} text @param {any} x @param {any} y */
     fillText(text, x, y) {
       ctxCalls.push({
         type: "fillText",
@@ -75,14 +80,18 @@ function createFontAwareContext(calls, options) {
   };
 }
 
+/** @returns {any} */
 function createTextLayout() {
   const textLayoutMod = loadFresh("shared/widget-kits/linear/LinearGaugeTextLayout.js");
   const labelFitMod = loadFresh("shared/widget-kits/linear/LinearGaugeLabelFit.js");
-  return textLayoutMod.create({}, createComponentContextMock({
-    modules: {
-      LinearGaugeLabelFit: labelFitMod
-    }
-  }));
+  return textLayoutMod.create(
+    {},
+    createComponentContextMock({
+      modules: {
+        LinearGaugeLabelFit: labelFitMod
+      }
+    })
+  );
 }
 
 module.exports = {

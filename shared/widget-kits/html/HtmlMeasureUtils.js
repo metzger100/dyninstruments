@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniHtmlMeasureUtils = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const APPROX_CHAR_WIDTH_RATIO = 0.56;
@@ -53,26 +53,21 @@
    * @returns {CanvasRenderingContext2D | null}
    */
   function resolveMeasureContext(hostContext, targetElOrOwnerDocument) {
-    const ctxStore = hostContext && typeof hostContext === "object"
-      ? /** @type {Record<string, unknown>} */ (hostContext)
-      : null;
-    const cached = ctxStore
-      ? /** @type {CanvasRenderingContext2D | null} */ (ctxStore[MEASURE_CTX_KEY])
-      : null;
+    const ctxStore =
+      hostContext && typeof hostContext === "object" ? /** @type {Record<string, unknown>} */ (hostContext) : null;
+    const cached = ctxStore ? /** @type {CanvasRenderingContext2D | null} */ (ctxStore[MEASURE_CTX_KEY]) : null;
     if (cached) {
       return cached;
     }
 
-    const ownerDocument = targetElOrOwnerDocument
-      && typeof /** @type {{ createElement?: unknown }} */ (targetElOrOwnerDocument).createElement === "function"
-      ? /** @type {Document} */ (targetElOrOwnerDocument)
-      : resolveOwnerDocument(targetElOrOwnerDocument);
-    const probe = ownerDocument && typeof ownerDocument.createElement === "function"
-      ? ownerDocument.createElement("canvas")
-      : null;
-    const context2d = probe && typeof probe.getContext === "function"
-      ? probe.getContext("2d")
-      : null;
+    const ownerDocument =
+      targetElOrOwnerDocument &&
+      typeof (/** @type {{ createElement?: unknown }} */ (targetElOrOwnerDocument).createElement) === "function"
+        ? /** @type {Document} */ (targetElOrOwnerDocument)
+        : resolveOwnerDocument(targetElOrOwnerDocument);
+    const probe =
+      ownerDocument && typeof ownerDocument.createElement === "function" ? ownerDocument.createElement("canvas") : null;
+    const context2d = probe && typeof probe.getContext === "function" ? probe.getContext("2d") : null;
     const resolved = context2d || /** @type {CanvasRenderingContext2D} */ (createApproximateMeasureContext());
     if (ctxStore) {
       ctxStore[MEASURE_CTX_KEY] = resolved;
@@ -103,20 +98,21 @@
     }
     const explicitMaxPx = /** @type {number} */ (htmlUtils.toFiniteNumber(cfg.maxPx));
     const maxPxRatio = /** @type {number} */ (htmlUtils.toFiniteNumber(cfg.maxPxRatio));
-    const requestedMaxPx = explicitMaxPx > 0
-      ? explicitMaxPx
-      : Math.max(1, Math.floor(rect.h * (maxPxRatio > 0 ? maxPxRatio : 1)));
-    const fit = /** @type {{ px: number, text: string } | null} */ (tileLayout.measureFittedLine({
-      textApi: cfg.textApi,
-      ctx: cfg.ctx,
-      text: cfg.text,
-      maxW: Math.max(1, Math.floor(rect.w)),
-      maxH: Math.max(1, Math.floor(rect.h)),
-      maxPx: Math.max(1, Math.floor(requestedMaxPx)),
-      textFillScale: cfg.textFillScale,
-      family: cfg.family,
-      weight: cfg.weight
-    }));
+    const requestedMaxPx =
+      explicitMaxPx > 0 ? explicitMaxPx : Math.max(1, Math.floor(rect.h * (maxPxRatio > 0 ? maxPxRatio : 1)));
+    const fit = /** @type {{ px: number, text: string } | null} */ (
+      tileLayout.measureFittedLine({
+        textApi: cfg.textApi,
+        ctx: cfg.ctx,
+        text: cfg.text,
+        maxW: Math.max(1, Math.floor(rect.w)),
+        maxH: Math.max(1, Math.floor(rect.h)),
+        maxPx: Math.max(1, Math.floor(requestedMaxPx)),
+        textFillScale: cfg.textFillScale,
+        family: cfg.family,
+        weight: cfg.weight
+      })
+    );
     if (!fit) {
       return null;
     }
@@ -140,17 +136,13 @@
    * @returns {string}
    */
   function measureStyle(args, htmlUtils, tileLayout) {
-    return toStyle(
-      /** @type {{ px?: unknown }} */ (measurePx(args, htmlUtils, tileLayout) || {}).px,
-      htmlUtils
-    );
+    return toStyle(/** @type {{ px?: unknown }} */ (measurePx(args, htmlUtils, tileLayout) || {}).px, htmlUtils);
   }
 
   /** @param {unknown} hostContext @param {unknown} cacheKey @returns {DyniHtmlFitCache | null} */
   function resolveFitCache(hostContext, cacheKey) {
-    const ctx = hostContext && typeof hostContext === "object"
-      ? /** @type {Record<string, unknown>} */ (hostContext)
-      : null;
+    const ctx =
+      hostContext && typeof hostContext === "object" ? /** @type {Record<string, unknown>} */ (hostContext) : null;
     const key = typeof cacheKey === "string" && cacheKey ? cacheKey : "";
     if (!ctx || !key) {
       return null;
@@ -191,4 +183,4 @@
     id: "HtmlMeasureUtils",
     create: create
   };
-}));
+});

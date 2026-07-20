@@ -15,9 +15,10 @@ describe("config/clusters/nav.js", function () {
     runIifeScript("shared/unit-format-families.js", context);
     runIifeScript("config/shared/unit-editable-utils.js", context);
     runIifeScript("config/shared/common-editables.js", context);
+    runIifeScript("config/shared/nav-ratio-thresholds.js", context);
     runIifeScript("config/clusters/nav.js", context);
 
-    return context.DyniPlugin.config.clusters.find((c) => c.def && c.def.cluster === "nav").def;
+    return context.DyniPlugin.config.clusters.find((/** @type {any} */ c) => c.def && c.def.cluster === "nav").def;
   }
 
   it("registers nav cluster definition", function () {
@@ -41,13 +42,25 @@ describe("config/clusters/nav.js", function () {
     expect(def.storeKeys.routeShowLL).toBe("properties.routeShowLL");
     expect(def.editableParameters.kind.default).toBe("wpEta");
     expect(def.editableParameters.kind.name).toBe("Instrument");
-    expect(def.editableParameters.kind.list.some((entry) => entry.value === "activeRoute")).toBe(true);
-    expect(def.editableParameters.kind.list.some((entry) => entry.value === "editRoute")).toBe(true);
-    expect(def.editableParameters.kind.list.some((entry) => entry.value === "routePoints")).toBe(true);
-    expect(def.editableParameters.kind.list.some((entry) => entry.value === "activeRouteInteractive")).toBe(false);
-    expect(def.editableParameters.kind.list.some((entry) => entry.value === "centerDisplay")).toBe(false);
-    expect(def.editableParameters.kind.list.some((entry) => entry.value === "xteDisplay")).toBe(true);
-    expect(def.editableParameters.kind.list.some((entry) => entry.value === "xteDisplayLinear")).toBe(true);
+    expect(def.editableParameters.kind.list.some((/** @type {any} */ entry) => entry.value === "activeRoute")).toBe(
+      true
+    );
+    expect(def.editableParameters.kind.list.some((/** @type {any} */ entry) => entry.value === "editRoute")).toBe(true);
+    expect(def.editableParameters.kind.list.some((/** @type {any} */ entry) => entry.value === "routePoints")).toBe(
+      true
+    );
+    expect(
+      def.editableParameters.kind.list.some((/** @type {any} */ entry) => entry.value === "activeRouteInteractive")
+    ).toBe(false);
+    expect(def.editableParameters.kind.list.some((/** @type {any} */ entry) => entry.value === "centerDisplay")).toBe(
+      false
+    );
+    expect(def.editableParameters.kind.list.some((/** @type {any} */ entry) => entry.value === "xteDisplay")).toBe(
+      true
+    );
+    expect(
+      def.editableParameters.kind.list.some((/** @type {any} */ entry) => entry.value === "xteDisplayLinear")
+    ).toBe(true);
     expect(def.editableParameters.centerDisplayRatioThresholdNormal).toBeUndefined();
     expect(def.editableParameters.centerDisplayRatioThresholdFlat).toBeUndefined();
     expect(def.editableParameters.leadingZero.condition).toEqual({ kind: "xteDisplay" });
@@ -376,7 +389,6 @@ describe("config/clusters/nav.js", function () {
       disconnect: true
     });
     expect(staleDisconnect.disconnect).toBeUndefined();
-
   });
 
   it("clears stale visible state on nav kinds", function () {

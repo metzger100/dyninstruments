@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniStateScreenInteraction = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @param {DyniStateScreenInteractionOptions} [options] @returns {unknown} */
@@ -29,4 +29,4 @@
     id: "StateScreenInteraction",
     create: create
   };
-}));
+});

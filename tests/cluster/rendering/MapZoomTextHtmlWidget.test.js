@@ -1,9 +1,5 @@
-const fs = require("node:fs");
-const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("MapZoomTextHtmlWidget", function () {
   const MODULE_PATH_BY_ID = {
@@ -15,26 +11,25 @@ describe("MapZoomTextHtmlWidget", function () {
     RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
     TextLayoutPrimitives: "shared/widget-kits/text/TextLayoutPrimitives.js",
     TextLayoutComposite: "shared/widget-kits/text/TextLayoutComposite.js",
-    ResponsiveScaleProfile:
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+    ResponsiveScaleProfile: "shared/widget-kits/layout/ResponsiveScaleProfile.js",
     CanvasTextLayout: "shared/widget-kits/text/CanvasTextLayout.js",
     RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js",
     PlaceholderNormalize: "shared/widget-kits/format/PlaceholderNormalize.js",
-    PreparedPayloadModelCache:
-      "shared/widget-kits/html/PreparedPayloadModelCache.js",
+    PreparedPayloadModelCache: "shared/widget-kits/html/PreparedPayloadModelCache.js",
     StateScreenLabels: "shared/widget-kits/state/StateScreenLabels.js",
     StateScreenPrecedence: "shared/widget-kits/state/StateScreenPrecedence.js",
-    StateScreenInteraction:
-      "shared/widget-kits/state/StateScreenInteraction.js",
+    StateScreenInteraction: "shared/widget-kits/state/StateScreenInteraction.js",
     StateScreenTextFit: "shared/widget-kits/state/StateScreenTextFit.js",
-    StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js",
+    StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js"
   };
 
+  /** @param {Record<string, any>} [options] @returns {any} */
   function createRenderer(options) {
     const opts = options || {};
     const moduleCache = Object.create(null);
     const applyFormatter =
       opts.applyFormatter ||
+      /** @param {any} value @param {any} [formatterOptions] */
       function (value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (value == null) {
@@ -60,8 +55,9 @@ describe("MapZoomTextHtmlWidget", function () {
       };
     const loadDep =
       opts.loadDep ||
+      /** @param {string} id @returns {any} */
       function (id) {
-        const relPath = MODULE_PATH_BY_ID[id];
+        const relPath = MODULE_PATH_BY_ID[/** @type {keyof typeof MODULE_PATH_BY_ID} */ (id)];
         if (!relPath) {
           throw new Error("unexpected module lookup: " + id);
         }
@@ -87,19 +83,18 @@ describe("MapZoomTextHtmlWidget", function () {
                 family: "sans-serif",
                 familyMono: "monospace",
                 weight: 700,
-                labelWeight: 700,
+                labelWeight: 700
               },
-              colors: {},
+              colors: {}
             };
-          },
-        },
-      },
+          }
+        }
+      }
     });
-    return loadFresh(
-      "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
-    ).create({}, componentContext);
+    return loadFresh("widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js").create({}, componentContext);
   }
 
+  /** @param {Record<string, any>} [overrides] @returns {any} */
   function makeProps(overrides) {
     return Object.assign(
       {
@@ -107,18 +102,18 @@ describe("MapZoomTextHtmlWidget", function () {
         unit: "",
         zoom: 12.2,
         requiredZoom: 11.9,
-        default: "---",
+        default: "---"
       },
-      overrides || {},
+      overrides || {}
     );
   }
 
+  /** @param {Record<string, any>} [props] @param {Record<string, any>} [options] @returns {any} */
   function withSurfacePolicy(props, options) {
     const opts = options || {};
     const mode = opts.mode === "passive" ? "passive" : "dispatch";
     const checkAutoZoom = opts.checkAutoZoom || vi.fn(() => true);
-    const orientation =
-      opts.orientation === "vertical" ? "vertical" : "default";
+    const orientation = opts.orientation === "vertical" ? "vertical" : "default";
     const pageId = opts.pageId || "navpage";
 
     return Object.assign({}, props || {}, {
@@ -128,13 +123,14 @@ describe("MapZoomTextHtmlWidget", function () {
         interaction: { mode },
         actions: {
           map: {
-            checkAutoZoom,
-          },
-        },
-      },
+            checkAutoZoom
+          }
+        }
+      }
     });
   }
 
+  /** @param {any} rendererSpec @param {Record<string, any>} [props] @param {Record<string, any>} [options] @returns {any} */
   function mountCommitted(rendererSpec, props, options) {
     const opts = options || {};
     const shellSize = opts.shellSize || { width: 320, height: 180 };
@@ -149,17 +145,20 @@ describe("MapZoomTextHtmlWidget", function () {
     rootEl.appendChild(shellEl);
     hostContext.__dyniHostCommitState = { rootEl, shellEl };
 
-    mountEl.getBoundingClientRect = vi.fn(() => ({
-      width: shellSize.width,
-      height: shellSize.height,
-    }));
+    mountEl.getBoundingClientRect = /** @type {any} */ (
+      vi.fn(() => ({
+        width: shellSize.width,
+        height: shellSize.height
+      }))
+    );
 
     const committed = rendererSpec.createCommittedRenderer({
       hostContext,
       mountEl,
-      shadowRoot: null,
+      shadowRoot: null
     });
 
+    /** @param {any} nextProps @param {number} revision @param {boolean} layoutChanged @returns {any} */
     function payload(nextProps, revision, layoutChanged) {
       return {
         props: nextProps,
@@ -171,7 +170,7 @@ describe("MapZoomTextHtmlWidget", function () {
         shellRect: { width: shellSize.width, height: shellSize.height },
         hostContext,
         layoutChanged: layoutChanged === true,
-        relayoutPass: 0,
+        relayoutPass: 0
       };
     }
 
@@ -182,6 +181,7 @@ describe("MapZoomTextHtmlWidget", function () {
     return {
       mountEl,
       committed,
+      /** @param {any} nextProps @param {boolean} [layoutChanged] */
       update(nextProps, layoutChanged) {
         const next = payload(nextProps, 2, layoutChanged === true);
         committed.update(next);
@@ -189,7 +189,7 @@ describe("MapZoomTextHtmlWidget", function () {
       },
       html() {
         return mountEl.innerHTML;
-      },
+      }
     };
   }
 
@@ -203,10 +203,7 @@ describe("MapZoomTextHtmlWidget", function () {
   it("renders dispatch markup and dispatches map check action on click", function () {
     const renderer = createRenderer();
     const checkAutoZoom = vi.fn(() => true);
-    const mounted = mountCommitted(
-      renderer,
-      withSurfacePolicy(makeProps(), { mode: "dispatch", checkAutoZoom }),
-    );
+    const mounted = mountCommitted(renderer, withSurfacePolicy(makeProps(), { mode: "dispatch", checkAutoZoom }));
 
     const html = mounted.html();
     expect(html).toContain("dyni-map-zoom-html");
@@ -214,10 +211,8 @@ describe("MapZoomTextHtmlWidget", function () {
     expect(html).toContain('data-dyni-action="map-zoom-check-auto"');
     expect(html).toContain("dyni-map-zoom-open-hotspot");
 
-    const wrapper = mounted.mountEl.querySelector(".dyni-map-zoom-html");
-    wrapper.dispatchEvent(
-      new MouseEvent("click", { bubbles: true, cancelable: true }),
-    );
+    const wrapper = /** @type {HTMLElement} */ (mounted.mountEl.querySelector(".dyni-map-zoom-html"));
+    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(checkAutoZoom).toHaveBeenCalledTimes(1);
   });
 
@@ -228,17 +223,15 @@ describe("MapZoomTextHtmlWidget", function () {
       renderer,
       withSurfacePolicy(makeProps({ editing: true }), {
         mode: "dispatch",
-        checkAutoZoom,
-      }),
+        checkAutoZoom
+      })
     );
 
     const html = mounted.html();
     expect(html).toContain("dyni-map-zoom-open-passive");
 
-    const wrapper = mounted.mountEl.querySelector(".dyni-map-zoom-html");
-    wrapper.dispatchEvent(
-      new MouseEvent("click", { bubbles: true, cancelable: true }),
-    );
+    const wrapper = /** @type {HTMLElement} */ (mounted.mountEl.querySelector(".dyni-map-zoom-html"));
+    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(checkAutoZoom).not.toHaveBeenCalled();
   });
 
@@ -249,8 +242,8 @@ describe("MapZoomTextHtmlWidget", function () {
       renderer,
       withSurfacePolicy(makeProps({ disconnect: true }), {
         mode: "dispatch",
-        checkAutoZoom,
-      }),
+        checkAutoZoom
+      })
     );
 
     expect(mounted.html()).toContain("dyni-state-disconnected");
@@ -258,11 +251,8 @@ describe("MapZoomTextHtmlWidget", function () {
     expect(mounted.html()).toContain("dyni-map-zoom-open-passive");
     expect(mounted.html()).not.toContain("dyni-map-zoom-open-hotspot");
 
-    const wrapper = mounted.mountEl.querySelector(".dyni-map-zoom-html");
-    wrapper.dispatchEvent(
-      new MouseEvent("click", { bubbles: true, cancelable: true }),
-    );
+    const wrapper = /** @type {HTMLElement} */ (mounted.mountEl.querySelector(".dyni-map-zoom-html"));
+    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(checkAutoZoom).not.toHaveBeenCalled();
   });
-
 });

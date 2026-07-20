@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniTextLayoutPrimitives = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -58,13 +58,15 @@
         const metrics = ctx.measureText(textValue);
         const width = metrics.width;
         const okWidth = width <= maxW + 0.01;
-        const okExtra = !extraCheck || extraCheck({
-          px: px,
-          width: width,
-          metrics: metrics,
-          maxW: maxW,
-          maxH: maxH
-        });
+        const okExtra =
+          !extraCheck ||
+          extraCheck({
+            px: px,
+            width: width,
+            metrics: metrics,
+            maxW: maxW,
+            maxH: maxH
+          });
         if (okWidth && px <= maxH && okExtra) {
           bestPx = px;
           bestWidth = width;
@@ -121,15 +123,17 @@
           const width = metrics.width;
           widths.push(width);
           const okWidth = width <= maxW + 0.01;
-          const okExtra = !extraCheck || extraCheck({
-            px: px,
-            rowIndex: j,
-            text: textValue,
-            width: width,
-            metrics: metrics,
-            maxW: maxW,
-            maxH: maxH
-          });
+          const okExtra =
+            !extraCheck ||
+            extraCheck({
+              px: px,
+              rowIndex: j,
+              text: textValue,
+              width: width,
+              metrics: metrics,
+              maxW: maxW,
+              maxH: maxH
+            });
           ok = okWidth && okExtra;
         }
 
@@ -174,7 +178,7 @@
         const widthScale = Math.max(0.1, maxW / Math.max(1, total));
         vPx = Math.max(1, Math.floor(Math.min(maxH, vPx * widthScale)));
         uPx = Math.max(1, Math.floor(Math.min(maxH, uPx * widthScale)));
-      primitiveSetFont(ctx, vPx, valueWeight, family, valueMonoOptions);
+        primitiveSetFont(ctx, vPx, valueWeight, family, valueMonoOptions);
         vW = valueText ? ctx.measureText(valueText).width : 0;
         primitiveSetFont(ctx, uPx, labelWeight, family);
         uW = unitText ? ctx.measureText(unitText).width : 0;
@@ -196,6 +200,11 @@
     // of the row height as a safe visual margin.
     const ROW_SAFE_RATIO = 0.85;
 
+    /** @param {unknown} labelText @param {number} width @param {number} gap @returns {number} */
+    function edgeSegmentWidth(labelText, width, gap) {
+      return labelText ? width + gap : 0;
+    }
+
     /** @param {unknown} args @returns {DyniInlineTripletFit} */
     function fitInlineTriplet(args) {
       const cfg = /** @type {DyniTextArgs} */ (args || {});
@@ -214,11 +223,9 @@
       const steps = Math.max(1, Math.floor(Number(cfg.steps) || 14));
       const minPx = Math.max(1, Math.floor(Number(cfg.minPx) || 1));
       const safeMaxH = Math.max(1, Math.floor(maxH * ROW_SAFE_RATIO));
-      const maxPx = Math.max(minPx, Math.floor(Number(cfg.maxPx) || (safeMaxH * 1.6)));
+      const maxPx = Math.max(minPx, Math.floor(Number(cfg.maxPx) || safeMaxH * 1.6));
       const valueMonoOptions = { useMono: cfg.useMono === true, monoFamily: cfg.monoFamily };
-      const extraValueCheck = typeof cfg.extraValueCheck === "function"
-        ? cfg.extraValueCheck
-        : null;
+      const extraValueCheck = typeof cfg.extraValueCheck === "function" ? cfg.extraValueCheck : null;
       let lo = minPx;
       let hi = maxPx;
       let best = null;
@@ -236,14 +243,18 @@
         const captionWidth = captionText ? cW + gap : 0;
         const unitWidth = unitText ? gap + uW : 0;
         const total = captionWidth + vW + unitWidth;
-        const ok = total <= maxW + 0.01 && vPx <= safeMaxH && sPx <= safeMaxH &&
-          (!extraValueCheck || extraValueCheck({
-            valuePx: vPx,
-            secondaryPx: sPx,
-            valueMetrics: valueMetrics,
-            maxW: maxW,
-            maxH: maxH
-          }));
+        const ok =
+          total <= maxW + 0.01 &&
+          vPx <= safeMaxH &&
+          sPx <= safeMaxH &&
+          (!extraValueCheck ||
+            extraValueCheck({
+              valuePx: vPx,
+              secondaryPx: sPx,
+              valueMetrics: valueMetrics,
+              maxW: maxW,
+              maxH: maxH
+            }));
         if (ok) {
           best = { vPx: vPx, sPx: sPx, cW: cW, vW: vW, uW: uW, total: total, gap: gap };
           lo = mid;
@@ -266,9 +277,10 @@
         cW: baseCaptionWidth,
         vW: baseValueWidth,
         uW: baseUnitWidth,
-        total: (captionText ? baseCaptionWidth + gap : 0)
-          + baseValueWidth
-          + (unitText ? gap + baseUnitWidth : 0),
+        total:
+          edgeSegmentWidth(captionText, baseCaptionWidth, gap) +
+          baseValueWidth +
+          edgeSegmentWidth(unitText, baseUnitWidth, gap),
         gap: gap
       };
     }
@@ -294,12 +306,12 @@
       const total = Math.max(0, Number(fit.total) || 0);
       const cW = Math.max(0, Number(fit.cW) || 0);
       const vW = Math.max(0, Number(fit.vW) || 0);
-      const capOpacity = typeof cfg.captionOpacity === "number" && cfg.captionOpacity >= 0 && cfg.captionOpacity <= 1
-        ? cfg.captionOpacity
-        : 1;
-      const unitOpacity = typeof cfg.unitOpacity === "number" && cfg.unitOpacity >= 0 && cfg.unitOpacity <= 1
-        ? cfg.unitOpacity
-        : 1;
+      const capOpacity =
+        typeof cfg.captionOpacity === "number" && cfg.captionOpacity >= 0 && cfg.captionOpacity <= 1
+          ? cfg.captionOpacity
+          : 1;
+      const unitOpacity =
+        typeof cfg.unitOpacity === "number" && cfg.unitOpacity >= 0 && cfg.unitOpacity <= 1 ? cfg.unitOpacity : 1;
       let xPos = x + Math.floor((W - total) / 2);
 
       ctx.textAlign = "left";
@@ -343,4 +355,4 @@
   }
 
   return { id: "TextLayoutPrimitives", create: create };
-}));
+});

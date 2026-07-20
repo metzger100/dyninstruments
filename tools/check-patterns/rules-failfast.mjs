@@ -1,14 +1,10 @@
-import {
-  findMatchingBrace,
-  findMatchingParen,
-  getFileData,
-  getInvalidLintSuppressions,
-  lineAt
-} from "./shared.mjs";
+import { findMatchingBrace, findMatchingParen, getFileData, getInvalidLintSuppressions, lineAt } from "./shared.mjs";
 
 const INTERNAL_SOURCE_EXPR = String.raw`(?:cfg|p|props|state|theme|display|parsed|opts|style|st|fit)\.[A-Za-z_$][A-Za-z0-9_$.]*`;
-const PREMATURE_MEMBER_OR_FUNCTION_RE = /([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*\|\|\s*function\s*\(/g;
-const PREMATURE_MEMBER_OR_MEMBER_RE = /([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*\|\|\s*\1\.([A-Za-z_$][A-Za-z0-9_$]*)/g;
+const PREMATURE_MEMBER_OR_FUNCTION_RE =
+  /([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*\|\|\s*function\s*\(/g;
+const PREMATURE_MEMBER_OR_MEMBER_RE =
+  /([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*\|\|\s*\1\.([A-Za-z_$][A-Za-z0-9_$]*)/g;
 
 const CANONICAL_HELPERS = {
   // ValueMath
@@ -178,9 +174,12 @@ export function runInternalHookFallbackRule(rule, files) {
     let match;
 
     while ((match = functionDecl.exec(data.maskedText))) {
-      const params = match[2].split(",").map(function (item) {
-        return item.trim();
-      }).filter(Boolean);
+      const params = match[2]
+        .split(",")
+        .map(function (item) {
+          return item.trim();
+        })
+        .filter(Boolean);
       const hasFallbackParam = params.some(function (name) {
         return /fallback/i.test(name);
       });
@@ -261,7 +260,10 @@ export function runRedundantNullTypeGuardRule(rule, files) {
       }
     },
     {
-      re: new RegExp(String.raw`(?:[A-Za-z_$][A-Za-z0-9_$.]*\.)?(?:isFiniteNumber|Number\.isFinite|isFinite)\s*\(\s*(${INTERNAL_SOURCE_EXPR})\s*\)\s*\?`, "g"),
+      re: new RegExp(
+        String.raw`(?:[A-Za-z_$][A-Za-z0-9_$.]*\.)?(?:isFiniteNumber|Number\.isFinite|isFinite)\s*\(\s*(${INTERNAL_SOURCE_EXPR})\s*\)\s*\?`,
+        "g"
+      ),
       build: function (match) {
         return match[0].trim();
       }
@@ -297,6 +299,15 @@ export function runRedundantNullTypeGuardRule(rule, files) {
   return out;
 }
 
+const HARDCODED_RUNTIME_DEFAULT_ALLOWLIST = {
+  // runtime/format-runtime.js's applyFormatter is the documented runtime owner of
+  // the generic missing-value placeholder (documentation/shared/helpers.md).
+  "runtime/format-runtime.js": new Set(['"---"']),
+  // PlaceholderNormalize.js is the canonical owner of the shared fallback token and
+  // the legacy overlay "NO DATA" match target (documentation/shared/placeholder-normalize.md).
+  "shared/widget-kits/format/PlaceholderNormalize.js": new Set(['"---"', '"NO DATA"'])
+};
+
 export function runHardcodedRuntimeDefaultRule(rule, files) {
   const out = [];
   const patterns = [
@@ -317,12 +328,16 @@ export function runHardcodedRuntimeDefaultRule(rule, files) {
   for (const file of files) {
     const data = getFileData(file);
     const seen = new Set();
+    const allowlisted = HARDCODED_RUNTIME_DEFAULT_ALLOWLIST[file] || new Set();
 
     for (const pattern of patterns) {
       let match;
       while ((match = pattern.re.exec(data.text))) {
-        const line = lineAt(match.index, data.lineStarts);
         const expression = pattern.build(match);
+        if (allowlisted.has(expression)) {
+          continue;
+        }
+        const line = lineAt(match.index, data.lineStarts);
         const key = `${file}:${line}:${expression}`;
         if (seen.has(key)) {
           continue;
@@ -344,14 +359,27 @@ export function runHardcodedRuntimeDefaultRule(rule, files) {
   return out;
 }
 
+const CSS_JS_DEFAULT_DUPLICATION_ALLOWLIST = {
+  // runtime/theme/token-catalog.js is the documented canonical semantic owner for
+  // theme token/preset metadata (documentation/shared/theme-tokens.md); its own
+  // font-stack constant declaration and token-table usage are the canonical
+  // definition, not a duplication of some other owner's default.
+  "runtime/theme/token-catalog.js": new Set(["DEFAULT_FONT_STACK"]),
+  // runtime/theme-runtime.js reads the live CSS-resolved preset name from the
+  // documented CSS boundary; it does not hardcode/duplicate a default value.
+  "runtime/theme-runtime.js": new Set(['getPropertyValue("--dyni-theme-preset")'])
+};
+
 export function runCssJsDefaultDuplicationRule(rule, files) {
   const out = [];
   const themeDefault = /\bdefaultValue\s*:/g;
-  const styleFallback = /(?:\.color\s*\|\|\s*["'`][^"'`]+["'`]|DEFAULT_FONT_STACK|getPropertyValue\s*\([^)]*--dyni-[^)]*\))/g;
+  const styleFallback =
+    /(?:\.color\s*\|\|\s*["'`][^"'`]+["'`]|DEFAULT_FONT_STACK|getPropertyValue\s*\([^)]*--dyni-[^)]*\))/g;
 
   for (const file of files) {
     const data = getFileData(file);
     const seen = new Set();
+    const allowlisted = CSS_JS_DEFAULT_DUPLICATION_ALLOWLIST[file] || new Set();
     let match;
 
     if (data.text.includes("--dyni-")) {
@@ -375,6 +403,9 @@ export function runCssJsDefaultDuplicationRule(rule, files) {
     }
 
     while ((match = styleFallback.exec(data.text))) {
+      if (allowlisted.has(match[0].trim())) {
+        continue;
+      }
       const line = lineAt(match.index, data.lineStarts);
       const key = `${file}:${line}:${match[0]}`;
       if (seen.has(key)) {
@@ -396,6 +427,15 @@ export function runCssJsDefaultDuplicationRule(rule, files) {
   return out;
 }
 
+const PREMATURE_LEGACY_SUPPORT_ALLOWLIST = {
+  // runtime/theme/token-catalog.js and runtime/theme/resolver.js implement the
+  // documented, permanent deprecated-CSS-alias contract (Regatta camelCase input
+  // vars) so existing user.css files keep working; the "deprecated..." naming here
+  // correctly describes required backward compatibility, not speculative support.
+  "runtime/theme/token-catalog.js": new Set(["deprecatedInputVar"]),
+  "runtime/theme/resolver.js": new Set(["deprecatedAliasInputVar"])
+};
+
 export function runPrematureLegacySupportRule(rule, files) {
   const out = [];
   const functionDecl = /\bfunction\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(([^)]*)\)/g;
@@ -405,16 +445,20 @@ export function runPrematureLegacySupportRule(rule, files) {
   for (const file of files) {
     const data = getFileData(file);
     const seen = new Set();
+    const allowlisted = PREMATURE_LEGACY_SUPPORT_ALLOWLIST[file] || new Set();
     let match;
 
     while ((match = functionDecl.exec(data.maskedText))) {
       const line = lineAt(match.index, data.lineStarts);
-      const params = match[2].split(",").map(function (item) {
-        return item.trim();
-      }).filter(Boolean);
+      const params = match[2]
+        .split(",")
+        .map(function (item) {
+          return item.trim();
+        })
+        .filter(Boolean);
       const allNames = [match[1]].concat(params);
       for (const name of allNames) {
-        if (!/(legacy|compat|deprecated|fallback)/i.test(name)) {
+        if (!/(legacy|compat|deprecated|fallback)/i.test(name) || allowlisted.has(name)) {
           continue;
         }
         const key = `${file}:${line}:${name}`;
@@ -436,7 +480,7 @@ export function runPrematureLegacySupportRule(rule, files) {
 
     while ((match = variableDecl.exec(data.maskedText))) {
       const name = match[1];
-      if (!/(legacy|compat|deprecated|fallback)/i.test(name)) {
+      if (!/(legacy|compat|deprecated|fallback)/i.test(name) || allowlisted.has(name)) {
         continue;
       }
       const line = lineAt(match.index, data.lineStarts);
@@ -634,12 +678,12 @@ function normalizePath(value) {
 
 function readLineText(data, line) {
   const start = data.lineStarts[Math.max(0, line - 1)] || 0;
-  const end = line < data.lineStarts.length
-    ? data.lineStarts[line] - 1
-    : data.text.length;
+  const end = line < data.lineStarts.length ? data.lineStarts[line] - 1 : data.text.length;
   return data.text.slice(start, end);
 }
 
 function isLikelyFunctionMemberName(name) {
-  return /^(to|is|has|resolve|build|measure|set|fit|format|append|read|write|create|make|clamp|scale|split|valueTo|angleTo|normalize)[A-Z_]/.test(String(name || ""));
+  return /^(to|is|has|resolve|build|measure|set|fit|format|append|read|write|create|make|clamp|scale|split|valueTo|angleTo|normalize)[A-Z_]/.test(
+    String(name || "")
+  );
 }

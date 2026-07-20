@@ -1,9 +1,10 @@
+// @ts-nocheck
 const {
   originalDyniPlugin,
   createDeferred,
   createLoaderHarness,
   loadController,
-  createBaseContext,
+  createBaseContext
 } = require("./RouteActivationController.harness.js");
 
 describe("runtime/cluster/RouteActivationController.js", function () {
@@ -12,49 +13,45 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       return {
         mappedValue: props.extra,
         rendererProps: {
-          warm: true,
-        },
+          warm: true
+        }
       };
     });
     const toolkitCreate = vi.fn(function (props) {
       return {
         fromToolkit: "warm",
-        props: props,
+        props: props
       };
     });
     const loader = createLoaderHarness({
-      initialLoadedIds: [
-        "ClusterMapperToolkit",
-        "SpeedMapper",
-        "SpeedRadialWidget",
-      ],
+      initialLoadedIds: ["ClusterMapperToolkit", "SpeedMapper", "SpeedRadialWidget"],
       modules: {
         ClusterMapperToolkit: {
           create: function () {
             return {
-              createToolkit: toolkitCreate,
+              createToolkit: toolkitCreate
             };
-          },
+          }
         },
         SpeedMapper: {
           create: function () {
             return {
-              translate: mapperTranslate,
+              translate: mapperTranslate
             };
-          },
+          }
         },
         SpeedRadialWidget: {
           create: function () {
             return {
-              renderCanvas: vi.fn(),
+              renderCanvas: vi.fn()
             };
-          },
-        },
-      },
+          }
+        }
+      }
     });
     const themeRuntime = {
       preloadShadowCssUrls: vi.fn(),
-      hasShadowCssText: vi.fn(() => true),
+      hasShadowCssText: vi.fn(() => true)
     };
     const widgetDef = { cluster: "speed" };
     const context = createBaseContext({
@@ -62,8 +59,8 @@ describe("runtime/cluster/RouteActivationController.js", function () {
         componentLoader: loader,
         theme: themeRuntime,
         surfaces: {
-          materializeSurfacePolicyProps: vi.fn(),
-        },
+          materializeSurfacePolicyProps: vi.fn()
+        }
       },
       config: {
         shared: {},
@@ -77,11 +74,11 @@ describe("runtime/cluster/RouteActivationController.js", function () {
               mapperId: "SpeedMapper",
               rendererId: "SpeedRadialWidget",
               surface: "canvas-dom",
-              shellSizing: { kind: "ratio", aspectRatio: 1 },
-            },
-          },
-        },
-      },
+              shellSizing: { kind: "ratio", aspectRatio: 1 }
+            }
+          }
+        }
+      }
     });
     const routeActivation = loadController(context);
     const controller = routeActivation.createWidgetController(widgetDef);
@@ -90,14 +87,14 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       kind: "sog",
       extra: "warm-a",
       __dyniRouteId: "speed/sog",
-      __dyniRawProps: { cluster: "speed", kind: "sog", extra: "warm-a" },
+      __dyniRawProps: { cluster: "speed", kind: "sog", extra: "warm-a" }
     };
     const secondRouteFrame = {
       cluster: "speed",
       kind: "sog",
       extra: "warm-b",
       __dyniRouteId: "speed/sog",
-      __dyniRawProps: { cluster: "speed", kind: "sog", extra: "warm-b" },
+      __dyniRawProps: { cluster: "speed", kind: "sog", extra: "warm-b" }
     };
 
     const first = controller.activateCommittedRoute({
@@ -105,14 +102,14 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       revision: 11,
       rootEl: { id: "root-a" },
       shellEl: { id: "shell-a" },
-      hostContext: { marker: "a" },
+      hostContext: { marker: "a" }
     });
     const second = controller.activateCommittedRoute({
       routeFrame: secondRouteFrame,
       revision: 12,
       rootEl: { id: "root-b" },
       shellEl: { id: "shell-b" },
-      hostContext: { marker: "b" },
+      hostContext: { marker: "b" }
     });
 
     expect(first).not.toBeInstanceOf(Promise);
@@ -121,23 +118,23 @@ describe("runtime/cluster/RouteActivationController.js", function () {
     expect(
       loader.createRecords.map(function (entry) {
         return entry.id;
-      }),
+      })
     ).toEqual(["SpeedMapper", "SpeedRadialWidget", "ClusterMapperToolkit"]);
     expect(
       loader.createRecords.every(function (entry) {
         return entry.def === widgetDef;
-      }),
+      })
     ).toBe(true);
     expect(loader.loadRecords).toEqual([]);
     expect(toolkitCreate).toHaveBeenCalledWith({
       cluster: "speed",
       kind: "sog",
-      extra: "warm-a",
+      extra: "warm-a"
     });
     expect(toolkitCreate).toHaveBeenCalledWith({
       cluster: "speed",
       kind: "sog",
-      extra: "warm-b",
+      extra: "warm-b"
     });
     expect(toolkitCreate).toHaveBeenCalledTimes(2);
     expect(mapperTranslate).toHaveBeenCalledTimes(2);
@@ -146,14 +143,13 @@ describe("runtime/cluster/RouteActivationController.js", function () {
     expect(first.rootEl).toEqual({ id: "root-a" });
     expect(second.rootEl).toEqual({ id: "root-b" });
     expect(first.props).toMatchObject({
-      warm: true,
+      warm: true
     });
     expect(JSON.parse(first.__mappedSignature)).toEqual({
       mappedValue: "warm-a",
       rendererProps: {
-        warm: true,
-      },
+        warm: true
+      }
     });
   });
-
 });

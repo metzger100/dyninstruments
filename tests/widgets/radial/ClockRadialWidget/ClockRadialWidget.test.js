@@ -1,17 +1,14 @@
 const { loadFresh } = require("../../../helpers/load-umd");
-const {
-  createMockContext2D,
-  createMockCanvas,
-} = require("../../../helpers/mock-canvas");
-const {
-  createComponentContextMock,
-} = require("../../../helpers/component-context-mock");
+const { createMockContext2D, createMockCanvas } = require("../../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../../helpers/component-context-mock");
 
+/** @param {any} deg */
 function mockDegToCanvasRad(deg) {
   const d = Number(deg);
   return ((d - 90) * Math.PI) / 180;
 }
 
+/** @param {any} ctx @param {any} [overrides] */
 function makeMockState(ctx, overrides) {
   var o = overrides || {};
   return {
@@ -27,26 +24,27 @@ function makeMockState(ctx, overrides) {
     geom: {
       cx: o.cx || 120,
       cy: o.cy || 120,
-      rOuter: o.rOuter || 100,
+      rOuter: o.rOuter || 100
     },
     labels: {
       fontPx: 14,
-      spriteRadius: 75,
+      spriteRadius: 75
     },
     theme: {
       colors: { pointer: "#3366cc" },
-      surface: { fg: "#000" },
+      surface: { fg: "#000" }
     },
     angle: {
-      degToCanvasRad: mockDegToCanvasRad,
+      degToCanvasRad: mockDegToCanvasRad
     },
     value: {
+      /** @param {any} v @param {any} lo @param {any} hi */
       clamp: function (v, lo, hi) {
         var n = Number(v);
         if (!isFinite(n)) return lo;
         return Math.max(lo, Math.min(hi, n));
-      },
-    },
+      }
+    }
   };
 }
 
@@ -58,7 +56,7 @@ function makeMockApi() {
     getCacheMeta: function () {
       return null;
     },
-    setCacheMeta: function () {},
+    setCacheMeta: function () {}
   };
 }
 
@@ -67,15 +65,19 @@ describe("ClockRadialWidget", function () {
     return loadFresh("widgets/radial/ClockRadialWidget/ClockRadialWidget.js");
   }
 
+  /** @param {any} [options] */
   function createWidget(options) {
     var opts = options || {};
+    /** @type {Record<string, any>} */
     var captured = {};
     var mockEngine = {
+      /** @param {any} cfg */
       createRenderer: function (cfg) {
         captured.spec = cfg;
         captured.buildStaticKey = cfg.buildStaticKey;
         captured.rebuildLayer = cfg.rebuildLayer;
         captured.drawFrame = cfg.drawFrame;
+        /** @param {any} canvas @param {any} props */
         return function (canvas, props) {
           var ctx = canvas.getContext && canvas.getContext("2d");
           var state = makeMockState(ctx, opts.overrides);
@@ -83,7 +85,7 @@ describe("ClockRadialWidget", function () {
           captured.lastProps = props;
           cfg.drawFrame(state, props, makeMockApi());
         };
-      },
+      }
     };
     var geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     var mod = loadWidget();
@@ -94,24 +96,25 @@ describe("ClockRadialWidget", function () {
           FullCircleRadialEngine: {
             create: function () {
               return mockEngine;
-            },
+            }
           },
-          GeometryScale: geometryScale,
+          GeometryScale: geometryScale
         },
         services: {
           canvas: {
+            /** @param {any} canvas */
             setupCanvas: function (canvas) {
               var ctx = canvas.getContext("2d");
               var rect = canvas.getBoundingClientRect();
               return {
                 ctx: ctx,
                 W: Math.round(rect.width),
-                H: Math.round(rect.height),
+                H: Math.round(rect.height)
               };
-            },
-          },
-        },
-      }),
+            }
+          }
+        }
+      })
     );
     return { spec: spec, captured: captured };
   }
@@ -134,7 +137,7 @@ describe("ClockRadialWidget", function () {
     var result = createWidget();
     expect(result.captured.spec.ratioProps).toEqual({
       normal: "clockRadialRatioThresholdNormal",
-      flat: "clockRadialRatioThresholdFlat",
+      flat: "clockRadialRatioThresholdFlat"
     });
     expect(result.captured.spec.cacheLayers).toEqual(["face"]);
     expect(result.captured.spec).not.toHaveProperty("ratioDefaults");
@@ -149,7 +152,7 @@ describe("ClockRadialWidget", function () {
     expect(key).toEqual({
       labelPx: 14,
       labelRadius: 75,
-      tickSig: "1-12|major30|minor6",
+      tickSig: "1-12|major30|minor6"
     });
   });
 
@@ -158,26 +161,17 @@ describe("ClockRadialWidget", function () {
     var ctx = createMockContext2D();
     var state = makeMockState(ctx);
     result.captured.rebuildLayer(ctx, "face", state, {}, makeMockApi());
-    var textCalls = ctx.calls.filter(function (c) {
-      return c.name === "fillText";
-    });
-    var labelTexts = textCalls.map(function (c) {
-      return String(c.args[0]);
-    });
-    expect(labelTexts).toEqual([
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
-      "9",
-      "10",
-      "11",
-      "12",
-    ]);
+    var textCalls = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "fillText";
+      }
+    );
+    var labelTexts = textCalls.map(
+      /** @param {any} c */ function (c) {
+        return String(c.args[0]);
+      }
+    );
+    expect(labelTexts).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]);
     expect(ctx.fillStyle).toBe("#000");
     expect(ctx.textAlign).toBe("center");
     expect(ctx.textBaseline).toBe("middle");
@@ -189,9 +183,11 @@ describe("ClockRadialWidget", function () {
     var state = makeMockState(ctx);
     result.captured.rebuildLayer(ctx, "other", state, {}, makeMockApi());
     expect(
-      ctx.calls.filter(function (c) {
-        return c.name === "fillText";
-      }),
+      ctx.calls.filter(
+        /** @param {any} c */ function (c) {
+          return c.name === "fillText";
+        }
+      )
     ).toHaveLength(0);
   });
 
@@ -201,18 +197,22 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     result.spec.renderCanvas(canvas, {
       value: "2026-05-25T12:00:00Z",
-      hideSeconds: false,
+      hideSeconds: false
     });
-    var moveTos = ctx.calls.filter(function (c) {
-      return c.name === "moveTo";
-    });
-    var lineTos = ctx.calls.filter(function (c) {
-      return c.name === "lineTo";
-    });
+    var moveTos = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "moveTo";
+      }
+    );
+    var lineTos = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "lineTo";
+      }
+    );
     expect(moveTos.length).toBeGreaterThanOrEqual(3);
     expect(lineTos.length).toBeGreaterThanOrEqual(3);
   });
@@ -223,15 +223,17 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     result.spec.renderCanvas(canvas, {
       value: "03:00:00",
-      hideSeconds: false,
+      hideSeconds: false
     });
-    var lineTos = ctx.calls.filter(function (c) {
-      return c.name === "lineTo";
-    });
+    var lineTos = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "lineTo";
+      }
+    );
     expect(lineTos.length).toBe(3);
     expect(lineTos[1].args[0]).toBe(100);
     expect(lineTos[2].args[0]).toBe(100);
@@ -244,15 +246,17 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     result.spec.renderCanvas(canvas, {
       value: "06:30:00",
-      hideSeconds: false,
+      hideSeconds: false
     });
-    var lineTos = ctx.calls.filter(function (c) {
-      return c.name === "lineTo";
-    });
+    var lineTos = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "lineTo";
+      }
+    );
     expect(lineTos.length).toBe(3);
     expect(lineTos[1].args[0]).toBe(100);
     expect(lineTos[1].args[1]).toBe(152);
@@ -266,15 +270,17 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     result.spec.renderCanvas(canvas, {
       value: "09:15:30",
-      hideSeconds: false,
+      hideSeconds: false
     });
-    var lineTos = ctx.calls.filter(function (c) {
-      return c.name === "lineTo";
-    });
+    var lineTos = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "lineTo";
+      }
+    );
     expect(lineTos.length).toBe(3);
     expect(lineTos[0].args[0]).toBeLessThan(100);
     expect(lineTos[1].args[0]).toBeGreaterThan(100);
@@ -288,12 +294,14 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     result.spec.renderCanvas(canvas, { value: null, hideSeconds: false });
-    var strokes = ctx.calls.filter(function (c) {
-      return c.name === "stroke";
-    });
+    var strokes = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "stroke";
+      }
+    );
     expect(strokes.length).toBe(0);
   });
 
@@ -303,13 +311,14 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     result.spec.renderCanvas(canvas, { value: "", hideSeconds: false });
-    var strokes = ctx.calls.filter(function (c) {
-      return c.name === "stroke";
-    });
+    var strokes = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "stroke";
+      }
+    );
     expect(strokes.length).toBe(0);
   });
-
 });

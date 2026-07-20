@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetMarkup = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniValueMathApi["toObject"]} */
@@ -33,52 +33,64 @@
     const valueText = toText(metricFit.valueText != null ? metricFit.valueText : metric.valueText);
 
     if (mode === "flat") {
-      return ""
-        + '<div class="dyni-ais-target-metric dyni-ais-target-metric-' + metricId + '"'
-        + htmlUtils.toStyleAttr(metricGeometry.metricStyle)
-        + ">"
-        + '<div class="dyni-ais-target-metric-caption"'
-        + htmlUtils.toStyleAttr(metricFit.captionStyle)
-        + ">"
-        + htmlUtils.escapeHtml(toText(metric.captionText))
-        + "</div>"
-        + '<div class="dyni-ais-target-metric-value' + valueClass + '"'
-        + htmlUtils.toStyleAttr(metricFit.valueStyle)
-        + ">"
-        + htmlUtils.escapeHtml(valueText)
-        + "</div>"
-        + '<div class="dyni-ais-target-metric-unit"'
-        + htmlUtils.toStyleAttr(metricFit.unitStyle)
-        + ">"
-        + htmlUtils.escapeHtml(toText(metric.unitText))
-        + "</div>"
-        + "</div>";
+      return (
+        "" +
+        '<div class="dyni-ais-target-metric dyni-ais-target-metric-' +
+        metricId +
+        '"' +
+        htmlUtils.toStyleAttr(metricGeometry.metricStyle) +
+        ">" +
+        '<div class="dyni-ais-target-metric-caption"' +
+        htmlUtils.toStyleAttr(metricFit.captionStyle) +
+        ">" +
+        htmlUtils.escapeHtml(toText(metric.captionText)) +
+        "</div>" +
+        '<div class="dyni-ais-target-metric-value' +
+        valueClass +
+        '"' +
+        htmlUtils.toStyleAttr(metricFit.valueStyle) +
+        ">" +
+        htmlUtils.escapeHtml(valueText) +
+        "</div>" +
+        '<div class="dyni-ais-target-metric-unit"' +
+        htmlUtils.toStyleAttr(metricFit.unitStyle) +
+        ">" +
+        htmlUtils.escapeHtml(toText(metric.unitText)) +
+        "</div>" +
+        "</div>"
+      );
     }
 
-    return ""
-      + '<div class="dyni-ais-target-metric dyni-ais-target-metric-' + metricId + '"'
-      + htmlUtils.toStyleAttr(metricGeometry.metricStyle)
-      + ">"
-      + '<div class="dyni-ais-target-metric-caption"'
-      + htmlUtils.toStyleAttr(metricFit.captionStyle)
-      + ">"
-      + htmlUtils.escapeHtml(toText(metric.captionText))
-      + "</div>"
-      + '<div class="dyni-ais-target-metric-value-row"'
-      + htmlUtils.toStyleAttr(htmlUtils.joinStyles(metricGeometry.valueRowStyle, metricFit.valueRowStyle))
-      + ">"
-      + '<span class="dyni-ais-target-metric-value-text' + valueClass + '"'
-      + htmlUtils.toStyleAttr(metricFit.valueStyle)
-      + ">"
-      + htmlUtils.escapeHtml(valueText)
-      + "</span>"
-      + '<span class="dyni-ais-target-metric-unit"'
-      + htmlUtils.toStyleAttr(metricFit.unitStyle)
-      + ">"
-      + htmlUtils.escapeHtml(toText(metric.unitText))
-      + "</span>"
-      + "</div>"
-      + "</div>";
+    return (
+      "" +
+      '<div class="dyni-ais-target-metric dyni-ais-target-metric-' +
+      metricId +
+      '"' +
+      htmlUtils.toStyleAttr(metricGeometry.metricStyle) +
+      ">" +
+      '<div class="dyni-ais-target-metric-caption"' +
+      htmlUtils.toStyleAttr(metricFit.captionStyle) +
+      ">" +
+      htmlUtils.escapeHtml(toText(metric.captionText)) +
+      "</div>" +
+      '<div class="dyni-ais-target-metric-value-row"' +
+      htmlUtils.toStyleAttr(htmlUtils.joinStyles(metricGeometry.valueRowStyle, metricFit.valueRowStyle)) +
+      ">" +
+      '<span class="dyni-ais-target-metric-value-text' +
+      valueClass +
+      '"' +
+      htmlUtils.toStyleAttr(metricFit.valueStyle) +
+      ">" +
+      htmlUtils.escapeHtml(valueText) +
+      "</span>" +
+      '<span class="dyni-ais-target-metric-unit"' +
+      htmlUtils.toStyleAttr(metricFit.unitStyle) +
+      ">" +
+      htmlUtils.escapeHtml(toText(metric.unitText)) +
+      "</span>" +
+      "</div>" +
+      "</div>"
+    );
   }
 
   /**
@@ -94,21 +106,22 @@
     const geometry = model.inlineGeometry;
     const metricGeometry = geometry.metricStyles;
 
-    const identityHtml = ""
-      + '<div class="dyni-ais-target-identity"'
-      + htmlUtils.toStyleAttr(geometry.identityStyle)
-      + ">"
-      + '<div class="dyni-ais-target-name"'
-      + htmlUtils.toStyleAttr(fit.nameStyle)
-      + ">"
-      + htmlUtils.escapeHtml(toText(model.nameText))
-      + "</div>"
-      + '<div class="dyni-ais-target-front"'
-      + htmlUtils.toStyleAttr(fit.frontStyle)
-      + ">"
-      + htmlUtils.escapeHtml(toText(model.frontText))
-      + "</div>"
-      + "</div>";
+    const identityHtml =
+      "" +
+      '<div class="dyni-ais-target-identity"' +
+      htmlUtils.toStyleAttr(geometry.identityStyle) +
+      ">" +
+      '<div class="dyni-ais-target-name"' +
+      htmlUtils.toStyleAttr(fit.nameStyle) +
+      ">" +
+      htmlUtils.escapeHtml(toText(model.nameText)) +
+      "</div>" +
+      '<div class="dyni-ais-target-front"' +
+      htmlUtils.toStyleAttr(fit.frontStyle) +
+      ">" +
+      htmlUtils.escapeHtml(toText(model.frontText)) +
+      "</div>" +
+      "</div>";
 
     let metricsHtml = "";
     for (let i = 0; i < metricIds.length; i += 1) {
@@ -124,13 +137,15 @@
       });
     }
 
-    return ""
-      + identityHtml
-      + '<div class="dyni-ais-target-metrics"'
-      + htmlUtils.toStyleAttr(geometry.metricsStyle)
-      + ">"
-      + metricsHtml
-      + "</div>";
+    return (
+      "" +
+      identityHtml +
+      '<div class="dyni-ais-target-metrics"' +
+      htmlUtils.toStyleAttr(geometry.metricsStyle) +
+      ">" +
+      metricsHtml +
+      "</div>"
+    );
   }
 
   /**
@@ -160,7 +175,9 @@
           kind: model.kind,
           label: toText(model.stateLabel),
           wrapperClasses: wrapperClasses,
-          extraAttrs: 'data-dyni-action="ais-target-open"' + htmlUtils.toStyleAttr(htmlUtils.joinStyles(model.wrapperStyle, geometry.wrapperStyle)),
+          extraAttrs:
+            'data-dyni-action="ais-target-open"' +
+            htmlUtils.toStyleAttr(htmlUtils.joinStyles(model.wrapperStyle, geometry.wrapperStyle)),
           htmlUtils: htmlUtils,
           shellRect: cfg.shellRect,
           fontFamily: cfg.fontFamily,
@@ -168,26 +185,29 @@
         });
       }
 
-      const hotspotHtml = model.showHotspot === true
-        ? '<div class="dyni-ais-target-open-hotspot"></div>'
-        : "";
-      const accentHtml = model.hasAccent === true
-        ? ('<div class="dyni-ais-target-state-accent"'
-          + htmlUtils.toStyleAttr(htmlUtils.joinStyles(geometry.accentStyle, fit.accentStyle))
-          + "></div>")
-        : "";
+      const hotspotHtml = model.showHotspot === true ? '<div class="dyni-ais-target-open-hotspot"></div>' : "";
+      const accentHtml =
+        model.hasAccent === true
+          ? '<div class="dyni-ais-target-state-accent"' +
+            htmlUtils.toStyleAttr(htmlUtils.joinStyles(geometry.accentStyle, fit.accentStyle)) +
+            "></div>"
+          : "";
 
       const bodyHtml = renderDataBody(model, fit, htmlUtils);
 
-      return ""
-        + '<div class="' + wrapperClasses.join(" ") + '"'
-        + ' data-dyni-action="ais-target-open"'
-        + htmlUtils.toStyleAttr(htmlUtils.joinStyles(model.wrapperStyle, geometry.wrapperStyle))
-        + ">"
-        + accentHtml
-        + hotspotHtml
-        + bodyHtml
-        + "</div>";
+      return (
+        "" +
+        '<div class="' +
+        wrapperClasses.join(" ") +
+        '"' +
+        ' data-dyni-action="ais-target-open"' +
+        htmlUtils.toStyleAttr(htmlUtils.joinStyles(model.wrapperStyle, geometry.wrapperStyle)) +
+        ">" +
+        accentHtml +
+        hotspotHtml +
+        bodyHtml +
+        "</div>"
+      );
     }
 
     return {
@@ -197,4 +217,4 @@
   }
 
   return { id: "AisTargetMarkup", create: create };
-}));
+});

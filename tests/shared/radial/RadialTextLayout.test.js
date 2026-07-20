@@ -1,20 +1,25 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
+const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 
 describe("RadialTextLayout", function () {
   function createTextApi() {
-    return loadFresh("shared/widget-kits/radial/RadialTextLayout.js").create({}, createComponentContextMock({
-      modules: {
-        CanvasTextLayout: loadFresh("shared/widget-kits/text/CanvasTextLayout.js"),
-        CanvasTextFitting: loadFresh("shared/widget-kits/text/CanvasTextFitting.js"),
-        ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
-      }
-    }));
+    return loadFresh("shared/widget-kits/radial/RadialTextLayout.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          CanvasTextLayout: loadFresh("shared/widget-kits/text/CanvasTextLayout.js"),
+          CanvasTextFitting: loadFresh("shared/widget-kits/text/CanvasTextFitting.js"),
+          ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
+        }
+      })
+    );
   }
 
   function createScalingContext() {
     const ctx = createMockContext2D({ charWidth: 1 });
+    /** @param {any} text */
     ctx.measureText = function (text) {
       const match = String(ctx.font || "").match(/([0-9]+(?:\.[0-9]+)?)px/);
       const px = match ? Number(match[1]) : 10;
@@ -23,10 +28,11 @@ describe("RadialTextLayout", function () {
     return ctx;
   }
 
+  /** @param {any} ctx */
   function readScaleCalls(ctx) {
     return ctx.calls
-      .filter((entry) => entry.name === "scale")
-      .map((entry) => Number(entry.args[0]));
+      .filter((/** @type {any} */ entry) => entry.name === "scale")
+      .map((/** @type {any} */ entry) => Number(entry.args[0]));
   }
 
   it("keeps fitTextPx inside max width for long labels on compact boxes", function () {
@@ -53,18 +59,7 @@ describe("RadialTextLayout", function () {
   it("keeps inline caption/value/unit fit totals inside the target width", function () {
     const text = createTextApi();
     const ctx = createScalingContext();
-    const fit = text.fitInlineCapValUnit(
-      ctx,
-      "sans-serif",
-      "True Wind Speed",
-      "9.0",
-      "Knots",
-      52,
-      18,
-      0.8,
-      700,
-      650
-    );
+    const fit = text.fitInlineCapValUnit(ctx, "sans-serif", "True Wind Speed", "9.0", "Knots", 52, 18, 0.8, 700, 650);
 
     expect(fit.total).toBeLessThanOrEqual(52 + 0.01);
     expect(fit.vPx).toBeGreaterThan(0);
@@ -80,7 +75,7 @@ describe("RadialTextLayout", function () {
 
     text.setFont(ctx, fittedPx, 650, "sans-serif");
     expect(ctx.measureText("VeryLongCaption").width).toBeLessThanOrEqual(maxW + 0.01);
-    expect(ctx.calls.some((entry) => entry.name === "fillText")).toBe(true);
+    expect(ctx.calls.some((/** @type {any} */ entry) => entry.name === "fillText")).toBe(true);
   });
 
   it("applies final draw-time clamp for value+unit rows and inline rows", function () {
@@ -100,7 +95,7 @@ describe("RadialTextLayout", function () {
       700,
       650
     );
-    expect(readScaleCalls(valueCtx).some((value) => value < 1)).toBe(true);
+    expect(readScaleCalls(valueCtx).some((/** @type {number} */ value) => value < 1)).toBe(true);
 
     const inlineCtx = createScalingContext();
     text.drawInlineCapValUnit(
@@ -117,7 +112,7 @@ describe("RadialTextLayout", function () {
       700,
       650
     );
-    expect(readScaleCalls(inlineCtx).some((value) => value < 1)).toBe(true);
+    expect(readScaleCalls(inlineCtx).some((/** @type {number} */ value) => value < 1)).toBe(true);
   });
 
   it("clamps each three-row line to the row width budget", function () {
@@ -150,6 +145,32 @@ describe("RadialTextLayout", function () {
 
     const scales = readScaleCalls(ctx);
     expect(scales.length).toBeGreaterThan(0);
-    expect(scales.some((value) => value < 1)).toBe(true);
+    expect(scales.some((/** @type {number} */ value) => value < 1)).toBe(true);
+  });
+
+  it("registers itself on root.DyniComponents when loaded outside a module system", function () {
+    const context = createScriptContext();
+    runIifeScript("shared/widget-kits/radial/RadialTextLayout.js", context);
+
+    const component = context.DyniComponents.DyniRadialTextLayout;
+    expect(component.id).toBe("RadialTextLayout");
+
+    const text = component.create(
+      {},
+      createComponentContextMock({
+        modules: {
+          CanvasTextLayout: loadFresh("shared/widget-kits/text/CanvasTextLayout.js"),
+          CanvasTextFitting: loadFresh("shared/widget-kits/text/CanvasTextFitting.js"),
+          ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
+        }
+      })
+    );
+    const ctx = createScalingContext();
+    const maxW = 32;
+    const px = text.fitTextPx(ctx, "VeryLongCaptionLabel", maxW, 18, "sans-serif", 700);
+
+    text.setFont(ctx, px, 700, "sans-serif");
+    expect(ctx.measureText("VeryLongCaptionLabel").width).toBeLessThanOrEqual(maxW + 0.01);
+    expect(px).toBeGreaterThan(0);
   });
 });

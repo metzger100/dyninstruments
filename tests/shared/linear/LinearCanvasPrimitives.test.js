@@ -3,18 +3,21 @@ const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("LinearCanvasPrimitives", function () {
   function create() {
-    const mod = loadFresh(
-      "shared/widget-kits/linear/LinearCanvasPrimitives.js",
-    );
+    const mod = loadFresh("shared/widget-kits/linear/LinearCanvasPrimitives.js");
     return mod.create();
   }
 
+  /**
+   * @param {any} ctx
+   * @param {string} name
+   */
   function callsNamed(ctx, name) {
-    return ctx.calls.filter(function (call) {
+    return ctx.calls.filter(function (/** @type {any} */ call) {
       return call.name === name;
     });
   }
 
+  /** @param {any} ctx */
   function expectBalancedSaveRestore(ctx) {
     expect(callsNamed(ctx, "save")).toHaveLength(1);
     expect(callsNamed(ctx, "restore")).toHaveLength(1);
@@ -27,28 +30,20 @@ describe("LinearCanvasPrimitives", function () {
     draw.drawTrack(ctx, 10, 90, 24, {
       strokeStyle: "#fff",
       lineWidth: 3,
-      dash: [6, 3],
+      dash: [6, 3]
     });
 
-    const dashCalls = ctx.calls.filter(function (call) {
+    const dashCalls = ctx.calls.filter(function (/** @type {any} */ call) {
       return call.name === "setLineDash";
     });
     expect(dashCalls).toHaveLength(1);
     expect(dashCalls[0].args[0]).toEqual([6, 3]);
     expectBalancedSaveRestore(ctx);
     expect(
-      ctx.calls.map(function (call) {
+      ctx.calls.map(function (/** @type {any} */ call) {
         return call.name;
-      }),
-    ).toEqual([
-      "save",
-      "setLineDash",
-      "beginPath",
-      "moveTo",
-      "lineTo",
-      "stroke",
-      "restore",
-    ]);
+      })
+    ).toEqual(["save", "setLineDash", "beginPath", "moveTo", "lineTo", "stroke", "restore"]);
   });
 
   it("strokes bands when lineWidth is positive and balances save/restore", function () {
@@ -58,18 +53,18 @@ describe("LinearCanvasPrimitives", function () {
     draw.drawBand(ctx, 12, 52, 20, 6, {
       fillStyle: "#f00",
       strokeStyle: "#0f0",
-      lineWidth: 2,
+      lineWidth: 2
     });
 
     expect(
-      ctx.calls.filter(function (call) {
+      ctx.calls.filter(function (/** @type {any} */ call) {
         return call.name === "fillRect";
-      }),
+      })
     ).toHaveLength(1);
     expect(
-      ctx.calls.filter(function (call) {
+      ctx.calls.filter(function (/** @type {any} */ call) {
         return call.name === "strokeRect";
-      }),
+      })
     ).toHaveLength(1);
     expectBalancedSaveRestore(ctx);
   });
@@ -81,18 +76,18 @@ describe("LinearCanvasPrimitives", function () {
     draw.drawBand(ctx, 12, 52, 20, 6, {
       fillStyle: "#f00",
       strokeStyle: "#0f0",
-      lineWidth: 0,
+      lineWidth: 0
     });
 
     expect(
-      ctx.calls.filter(function (call) {
+      ctx.calls.filter(function (/** @type {any} */ call) {
         return call.name === "fillRect";
-      }),
+      })
     ).toHaveLength(1);
     expect(
-      ctx.calls.filter(function (call) {
+      ctx.calls.filter(function (/** @type {any} */ call) {
         return call.name === "strokeRect";
-      }),
+      })
     ).toHaveLength(0);
     expectBalancedSaveRestore(ctx);
   });
@@ -103,14 +98,14 @@ describe("LinearCanvasPrimitives", function () {
 
     draw.drawTick(ctx, 24, 36, 8, {
       strokeStyle: "#0ff",
-      lineWidth: 2,
+      lineWidth: 2
     });
 
     expectBalancedSaveRestore(ctx);
     expect(
-      ctx.calls.map(function (call) {
+      ctx.calls.map(function (/** @type {any} */ call) {
         return call.name;
-      }),
+      })
     ).toEqual(["save", "beginPath", "moveTo", "lineTo", "stroke", "restore"]);
     expect(callsNamed(ctx, "moveTo")[0].args).toEqual([24, 36]);
     expect(callsNamed(ctx, "lineTo")[0].args).toEqual([24, 28]);
@@ -123,25 +118,16 @@ describe("LinearCanvasPrimitives", function () {
     draw.drawPointer(ctx, 40, 30, {
       color: "#abcdef",
       depth: 9,
-      side: 6,
+      side: 6
     });
 
     expect(ctx.fillStyle).toBe("#abcdef");
     expectBalancedSaveRestore(ctx);
     expect(
-      ctx.calls.map(function (call) {
+      ctx.calls.map(function (/** @type {any} */ call) {
         return call.name;
-      }),
-    ).toEqual([
-      "save",
-      "beginPath",
-      "moveTo",
-      "lineTo",
-      "lineTo",
-      "closePath",
-      "fill",
-      "restore",
-    ]);
+      })
+    ).toEqual(["save", "beginPath", "moveTo", "lineTo", "lineTo", "closePath", "fill", "restore"]);
     expect(callsNamed(ctx, "moveTo")[0].args).toEqual([40, 30]);
     expect(callsNamed(ctx, "lineTo")[0].args).toEqual([34, 21]);
     expect(callsNamed(ctx, "lineTo")[1].args).toEqual([46, 21]);
@@ -154,7 +140,7 @@ describe("LinearCanvasPrimitives", function () {
     draw.drawPointer(ctx, 40, 30, {
       depth: 0.2,
       side: 0.3,
-      fillStyle: "#abcdef",
+      fillStyle: "#abcdef"
     });
 
     expect(callsNamed(ctx, "lineTo")[0].args).toEqual([39, 29]);

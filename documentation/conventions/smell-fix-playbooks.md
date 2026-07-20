@@ -28,7 +28,8 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 
 ### Absolute user-home path leak
 
-1. Replace machine-local absolute paths with repo-relative references, runtime variables, or placeholders (`/path/to/...`, `/home/<user>/...`).
+1. Replace machine-local absolute paths with repo-relative references, runtime variables, or placeholders
+   (`/path/to/...`, `/home/<user>/...`).
 2. Keep installation docs generic (`<AVNAV_DATA_DIR>`, `<YOUR_AVNAV_PLUGIN_DIR>`) instead of personal home directories.
 3. If a real path is temporarily unavoidable in a test fixture, add a rule-specific suppression and an explicit reason.
 
@@ -40,8 +41,10 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 
 ### Redundant internal fallback
 
-1. Remove fallback wrappers on renderer props that are guaranteed by mapper contracts (`cap/unit` defaults or explicit mapper literals).
-2. Remove outer `fallbackText(...)` wrappers when `componentContext.format.applyFormatter(..., { default: X })` already uses the same fallback `X`.
+1. Remove fallback wrappers on renderer props that are guaranteed by mapper contracts (`cap/unit` defaults or explicit
+   mapper literals).
+2. Remove outer `fallbackText(...)` wrappers when `componentContext.format.applyFormatter(..., { default: X })` already
+   uses the same fallback `X`.
 3. Keep defensive fallbacks only where values depend on external runtime uncertainty (for example AvNav/browser APIs).
 4. Add/adjust `check-patterns` tests for both block cases and allowed external-factor cases.
 
@@ -59,13 +62,15 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 
 ### Redundant null/type guard
 
-1. Remove repeated `String(... == null ? ... : ...)`, `Array.isArray(...) ? ... : []`, and `isFiniteNumber(...) ? ... : ...` patterns on internal values.
+1. Remove repeated `String(... == null ? ... : ...)`, `Array.isArray(...) ? ... : []`, and
+   `isFiniteNumber(...) ? ... : ...` patterns on internal values.
 2. Tighten the upstream contract instead of silently normalizing downstream.
 3. Add suppression only for temporary migrations that still bridge an external boundary.
 
 ### Hardcoded runtime default
 
-1. Move placeholder/default literals to declarative config, mapper defaults, runtime helpers, or CSS/theme token boundaries.
+1. Move placeholder/default literals to declarative config, mapper defaults, runtime helpers, or CSS/theme token
+   boundaries.
 2. Remove inline object/array fallback stubs in widget/shared code where the shape is already contract-owned.
 3. Treat new findings as fail-closed; do not reopen warning debt for this rule family.
 
@@ -84,7 +89,8 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 ### Canvas API typeof guard
 
 1. Remove `typeof ctx.* === "function"` guards for standard Canvas 2D methods on internal drawing paths.
-2. Keep capability checks only at genuine DOM/canvas boundaries and annotate intentional exceptions with rule-specific suppressions.
+2. Keep capability checks only at genuine DOM/canvas boundaries and annotate intentional exceptions with rule-specific
+   suppressions.
 3. Add or adjust checker tests for any newly allowlisted Canvas methods.
 
 ### Try/finally canvas drawing
@@ -96,7 +102,8 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 ### Framework method typeof guard
 
 1. Remove internal `typeof ... === "function"` and module-alias method guards after internal resolution.
-2. Keep runtime/theme invalidation call paths on direct contract calls (`resolver.invalidateRoot(...)`) once module ownership is established.
+2. Keep runtime/theme invalidation call paths on direct contract calls (`resolver.invalidateRoot(...)`) once module
+   ownership is established.
 3. Keep bootstrap- or DOM-boundary exceptions explicit with rule-specific suppressions.
 4. Extend alias detection coverage when a new internal resolver pattern is introduced.
 
@@ -108,33 +115,38 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 
 ### Responsive layout hard floor
 
-1. Replace user-visible `Math.max(N>=3, ...)` / `clamp(..., N>=3, ...)` layout floors with `ResponsiveScaleProfile`-derived geometry or text ceilings.
-2. Keep only true technical canvas-viability guards above `2`, and annotate those lines with a rule-specific suppression comment plus reason.
+1. Replace user-visible `Math.max(N>=3, ...)` / `clamp(..., N>=3, ...)` layout floors with
+   `ResponsiveScaleProfile`-derived geometry or text ceilings.
+2. Keep only true technical canvas-viability guards above `2`, and annotate those lines with a rule-specific suppression
+   comment plus reason.
 3. Treat any new finding as fail-closed; the rollout backlog was cleared and the rule is now `block`.
 
 ### Responsive profile ownership drift
 
-1. Resolve `ResponsiveScaleProfile` only in layout-owner modules (`TextLayoutEngine`, layout owners for nav/xte/linear/radial families).
-2. Keep consumer modules on layout-owned state (`responsive`, `textFillScale`, `computeResponsiveInsets`) instead of importing the profile directly.
+1. Resolve `ResponsiveScaleProfile` only in layout-owner modules (`TextLayoutEngine`, layout owners for
+   nav/xte/linear/radial families).
+2. Keep consumer modules on layout-owned state (`responsive`, `textFillScale`, `computeResponsiveInsets`) instead of
+   importing the profile directly.
 3. Add or adjust tool tests when ownership boundaries move so the manifest stays aligned with the repo architecture.
 
 ### CSS/JS default duplication
 
 1. Keep style/token defaults in `plugin.css` or `runtime.theme`.
-2. Remove duplicated JS defaults around `getComputedStyle`, `defaultValue`, and `--dyni-*` lookups when a single boundary can own them.
+2. Remove duplicated JS defaults around `getComputedStyle`, `defaultValue`, and `--dyni-*` lookups when a single
+   boundary can own them.
 3. Suppress only temporary boundary bridges and document why the duplication still exists.
 
 ### Premature legacy support
 
-1. Remove speculative `fallback*`, `legacy*`, `compat*`, or `deprecated*` code names when no live contract requires them.
+1. Remove speculative `fallback*`, `legacy*`, `compat*`, or `deprecated*` code names when no live contract requires
+   them.
 2. Collapse multi-source compatibility branches down to the single supported input path.
 3. Reintroduce compatibility only when there is a documented boundary contract and coverage for it.
 
 ### Canonical helper redefinition
 
 1. Identify the owning canonical module in `shared-helpers.md`.
-2. Add the dependency to the component registry entry when the module is a
-   registered component dependency.
+2. Add the dependency to the component registry entry when the module is a registered component dependency.
 3. Require the canonical module in `create()` (or the runtime bootstrap owner where applicable).
 4. Replace local helper call sites with canonical module calls.
 5. Delete the private helper definition.
@@ -157,20 +169,25 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 1. Keep mapper logic limited to kind routing, field mapping, and numeric normalization.
 2. Remove mapper-local helper functions (other than `create`/`translate`).
 3. Move formatter/status/display logic to `widgets/`, shared widget kits, or `ClusterMapperToolkit`.
-4. Apply the renderer decision rule before adding renderer-specific prop sets to mapper branches: [../guides/add-new-cluster.md#renderer-decision-rule](../guides/add-new-cluster.md#renderer-decision-rule).
+4. Apply the renderer decision rule before adding renderer-specific prop sets to mapper branches:
+   [../guides/add-new-cluster.md#renderer-decision-rule](../guides/add-new-cluster.md#renderer-decision-rule).
 
 ### Mapper output complexity
 
 1. Keep each direct `translate()` return object literal under 9 top-level props when feasible.
-2. If one `kind` requires renderer-specific configuration beyond this threshold, move those props into a dedicated renderer wrapper/adapter contract.
-3. Use the renderer decision rule as the default architecture gate: [../guides/add-new-cluster.md#renderer-decision-rule](../guides/add-new-cluster.md#renderer-decision-rule).
-4. Treat `>12` as fail-closed and refactor immediately; treat `9..12` as warning debt and fix it or document the cleanup plan in the active task or execution plan.
+2. If one `kind` requires renderer-specific configuration beyond this threshold, move those props into a dedicated
+   renderer wrapper/adapter contract.
+3. Use the renderer decision rule as the default architecture gate:
+   [../guides/add-new-cluster.md#renderer-decision-rule](../guides/add-new-cluster.md#renderer-decision-rule).
+4. Treat `>12` as fail-closed and refactor immediately; treat `9..12` as warning debt and fix it or document the cleanup
+   plan in the active task or execution plan.
 
 ### Renderer naming drift
 
 1. Use role-based IDs for renderer components (remove cluster prefixes).
 2. Keep `componentId`, UMD `globalKey`, returned `id`, and file basename aligned.
-3. Keep route identity in `config/cluster-routes/` and update the renderer registry together (`config/components/registry-*.js`, assembled by `config/components.js`).
+3. Keep route identity in `config/cluster-routes/` and update the renderer registry together
+   (`config/components/registry-*.js`, assembled by `config/components.js`).
 
 ### Hotspot growth
 
@@ -205,15 +222,18 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 ### Cross-file clone drift
 
 1. Remove widget-local copy-paste blocks and move shared logic into `shared/widget-kits/`.
-2. Prefer shared API calls (`ValueMath.*`, `CanvasTextLayout.*`, shared renderers) over repeated local helper implementations.
-4. Keep duplicated orchestration stubs (`create`, `translate`, `translateFunction`, `renderHtml`, `renderCanvas`) minimal; all substantive logic belongs in shared modules or surface owners.
-5. Add/adjust tests to lock expected shared-helper behavior after extraction.
+2. Prefer shared API calls (`ValueMath.*`, `CanvasTextLayout.*`, shared renderers) over repeated local helper
+   implementations.
+3. Keep duplicated orchestration stubs (`create`, `translate`, `translateFunction`, `renderHtml`, `renderCanvas`)
+   minimal; all substantive logic belongs in shared modules or surface owners.
+4. Add/adjust tests to lock expected shared-helper behavior after extraction.
 
 ### Oneliner line-limit bypass
 
 1. Reformat dense oneliners into multiline blocks.
 2. Split very long packed lines into multiline object literals/call arguments.
-3. Use `npm run check:filesize` for fail-closed enforcement; use `npm run check:filesize:warn` only for exploratory cleanup passes.
+3. Use `npm run check:filesize` for fail-closed enforcement; use `npm run check:filesize:warn` only for exploratory
+   cleanup passes.
 
 ## Related
 

@@ -20,20 +20,25 @@
       if (hasOwn.call(p, "default")) {
         return p.default;
       }
-      // dyni-lint-disable-next-line hardcoded-runtime-default -- runtime.format.applyFormatter is the documented runtime owner of the generic missing-value placeholder.
       return "---";
     }
     if (typeof raw === "string" && raw.trim() === "") {
       if (hasOwn.call(p, "default")) {
         return p.default;
       }
-      // dyni-lint-disable-next-line hardcoded-runtime-default -- runtime.format.applyFormatter is the documented runtime owner of the generic missing-value placeholder.
       return "---";
     }
 
     const fpRaw = p.formatterParameters;
-    const fp = /** @type {unknown[]} */ (Array.isArray(fpRaw) ? fpRaw
-      : (typeof fpRaw === "string" ? fpRaw.split(",") : []));
+    /** @type {unknown[]} */
+    let fp;
+    if (Array.isArray(fpRaw)) {
+      fp = fpRaw;
+    } else if (typeof fpRaw === "string") {
+      fp = fpRaw.split(",");
+    } else {
+      fp = [];
+    }
     const formatterArgs = /** @type {[unknown, ...unknown[]]} */ ([raw].concat(fp));
     const avnavApi = /** @type {DyniAvnavApi|null} */ (runtime.getAvnavApi(root));
     try {
@@ -41,19 +46,16 @@
         const formatter = /** @type {DyniFormatterCallback} */ (p.formatter);
         return formatter.apply(null, formatterArgs);
       }
-      if (
-        typeof p.formatter === "string" &&
-        avnavApi &&
-        avnavApi.formatter
-      ) {
+      if (typeof p.formatter === "string" && avnavApi && avnavApi.formatter) {
         const formatter = avnavApi.formatter[p.formatter];
         if (typeof formatter === "function") {
           return formatter.apply(avnavApi.formatter, formatterArgs);
         }
       }
+      // dyni-boundary-next-line(category: avnav-host-boundary, owner: Metzger100, date: 2026-07-17) -- Formatter dispatch is an external AvNav/custom boundary; documented fallback behavior must remain centralized here.
+    } catch (e) {
+      /* intentional: formatter failures fall back to default/raw formatting */
     }
-    // dyni-lint-disable-next-line catch-fallback-without-suppression -- Formatter dispatch is an external AvNav/custom boundary; documented fallback behavior must remain centralized here.
-    catch (e) { /* intentional: formatter failures fall back to default/raw formatting */ }
 
     return String(raw);
   }
@@ -61,4 +63,4 @@
   runtime.format = Object.freeze({
     applyFormatter: applyFormatter
   });
-}(this));
+})(this);

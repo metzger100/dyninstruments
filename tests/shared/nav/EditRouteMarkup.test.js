@@ -1,52 +1,34 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("EditRouteMarkup", function () {
   function createMarkup() {
-    const stateScreenMarkup = loadFresh(
-      "shared/widget-kits/state/StateScreenMarkup.js",
-    ).create(
+    const stateScreenMarkup = loadFresh("shared/widget-kits/state/StateScreenMarkup.js").create(
       {},
       createComponentContextMock({
         modules: {
-          HtmlWidgetUtils: loadFresh(
-            "shared/widget-kits/html/HtmlWidgetUtils.js",
-          ),
-          StateScreenLabels: loadFresh(
-            "shared/widget-kits/state/StateScreenLabels.js",
-          ),
-          StateScreenTextFit: loadFresh(
-            "shared/widget-kits/state/StateScreenTextFit.js",
-          ),
-        },
-      }),
+          HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+          StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+          StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js")
+        }
+      })
     );
     const componentContext = createComponentContextMock({
       modules: {
         StateScreenMarkup: stateScreenMarkup,
-        StateScreenTextFit: loadFresh(
-          "shared/widget-kits/state/StateScreenTextFit.js",
-        ),
-        StateScreenLabels: loadFresh(
-          "shared/widget-kits/state/StateScreenLabels.js",
-        ),
-        HtmlWidgetUtils: loadFresh(
-          "shared/widget-kits/html/HtmlWidgetUtils.js",
-        ),
-      },
+        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js")
+      }
     });
-    return loadFresh("shared/widget-kits/nav/EditRouteMarkup.js").create(
-      {},
-      componentContext,
-    );
+    return loadFresh("shared/widget-kits/nav/EditRouteMarkup.js").create({}, componentContext);
   }
 
   function createHtmlUtils() {
     return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js").create();
   }
 
+  /** @param {any} [overrides] */
   function makeModel(overrides) {
     return Object.assign(
       {
@@ -69,32 +51,33 @@ describe("EditRouteMarkup", function () {
             labelText: "PTS:",
             valueText: "005",
             unitText: "",
-            hasUnit: false,
+            hasUnit: false
           },
           dst: {
             labelText: "DST:",
             valueText: "12.3",
             unitText: "nm",
-            hasUnit: true,
+            hasUnit: true
           },
           rte: {
             labelText: "RTE:",
             valueText: "3.9",
             unitText: "nm",
-            hasUnit: true,
+            hasUnit: true
           },
           rteEta: {
             labelText: "ETA:",
             valueText: "12:34",
             unitText: "",
-            hasUnit: false,
-          },
-        },
+            hasUnit: false
+          }
+        }
       },
-      overrides || {},
+      overrides || {}
     );
   }
 
+  /** @param {any} [overrides] */
   function makeFit(overrides) {
     return Object.assign(
       {
@@ -105,29 +88,29 @@ describe("EditRouteMarkup", function () {
             labelStyle: "font-size:8px;",
             valueRowStyle: "",
             valueStyle: "font-size:12px;",
-            unitStyle: "",
+            unitStyle: ""
           },
           dst: {
             labelStyle: "font-size:8px;",
             valueRowStyle: "",
             valueStyle: "font-size:12px;",
-            unitStyle: "font-size:9px;",
+            unitStyle: "font-size:9px;"
           },
           rte: {
             labelStyle: "font-size:8px;",
             valueRowStyle: "",
             valueStyle: "font-size:12px;",
-            unitStyle: "font-size:9px;",
+            unitStyle: "font-size:9px;"
           },
           rteEta: {
             labelStyle: "font-size:8px;",
             valueRowStyle: "",
             valueStyle: "font-size:12px;",
-            unitStyle: "",
-          },
-        },
+            unitStyle: ""
+          }
+        }
       },
-      overrides || {},
+      overrides || {}
     );
   }
 
@@ -136,7 +119,7 @@ describe("EditRouteMarkup", function () {
     const html = markup.render({
       model: makeModel(),
       fit: makeFit(),
-      htmlUtils: createHtmlUtils(),
+      htmlUtils: createHtmlUtils()
     });
 
     expect(html).toContain("dyni-edit-route-html");
@@ -157,10 +140,7 @@ describe("EditRouteMarkup", function () {
     expect(etaIndex).toBeGreaterThan(rteIndex);
     expect(html).toContain("dyni-edit-route-metric-unit");
     expect(html).toContain(">nm</span>");
-    const ptsSlice = html.slice(
-      html.indexOf("dyni-edit-route-metric-pts"),
-      html.indexOf("dyni-edit-route-metric-dst"),
-    );
+    const ptsSlice = html.slice(html.indexOf("dyni-edit-route-metric-pts"), html.indexOf("dyni-edit-route-metric-dst"));
     const etaSlice = html.slice(html.indexOf("dyni-edit-route-metric-rteEta"));
     expect(ptsSlice).not.toContain("dyni-edit-route-metric-unit");
     expect(etaSlice).not.toContain("dyni-edit-route-metric-unit");
@@ -174,10 +154,10 @@ describe("EditRouteMarkup", function () {
         canOpenEditRoute: false,
         captureClicks: false,
         isLocalRoute: false,
-        sourceBadgeText: "",
+        sourceBadgeText: ""
       }),
       fit: makeFit(),
-      htmlUtils: createHtmlUtils(),
+      htmlUtils: createHtmlUtils()
     });
 
     expect(html).toContain("dyni-edit-route-open-passive");
@@ -198,10 +178,10 @@ describe("EditRouteMarkup", function () {
         canOpenEditRoute: false,
         captureClicks: false,
         visibleMetricIds: [],
-        metricVisibility: { pts: false, dst: false, rte: false, rteEta: false },
+        metricVisibility: { pts: false, dst: false, rte: false, rteEta: false }
       }),
       fit: makeFit({ sourceBadgeStyle: "", metrics: {} }),
-      htmlUtils: createHtmlUtils(),
+      htmlUtils: createHtmlUtils()
     });
 
     expect(html).toContain("dyni-state-no-route");
@@ -220,10 +200,10 @@ describe("EditRouteMarkup", function () {
         metricsStyle:
           "grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(1,minmax(0,1fr));gap:3px;",
         visibleMetricIds: ["pts", "dst", "rte", "rteEta"],
-        metricVisibility: { pts: true, dst: true, rte: true, rteEta: true },
+        metricVisibility: { pts: true, dst: true, rte: true, rteEta: true }
       }),
       fit: makeFit(),
-      htmlUtils: createHtmlUtils(),
+      htmlUtils: createHtmlUtils()
     });
 
     expect(html).toContain("dyni-edit-route-mode-flat");
@@ -235,13 +215,10 @@ describe("EditRouteMarkup", function () {
     expect(html).toContain("dyni-edit-route-metric-dst");
     expect(html).not.toContain("dyni-edit-route-metric-value-stack");
     expect(html).toContain(
-      'class="dyni-edit-route-metrics" style="grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(1,minmax(0,1fr));gap:3px;"',
+      'class="dyni-edit-route-metrics" style="grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(1,minmax(0,1fr));gap:3px;"'
     );
     expect(html).toContain('class="dyni-edit-route-metric-unit"');
-    const ptsSlice = html.slice(
-      html.indexOf("dyni-edit-route-metric-pts"),
-      html.indexOf("dyni-edit-route-metric-dst"),
-    );
+    const ptsSlice = html.slice(html.indexOf("dyni-edit-route-metric-pts"), html.indexOf("dyni-edit-route-metric-dst"));
     const etaSlice = html.slice(html.indexOf("dyni-edit-route-metric-rteEta"));
     expect(ptsSlice).not.toContain("dyni-edit-route-metric-unit");
     expect(etaSlice).not.toContain("dyni-edit-route-metric-unit");
@@ -252,13 +229,10 @@ describe("EditRouteMarkup", function () {
     const html = markup.render({
       model: makeModel({ mode: "high" }),
       fit: makeFit(),
-      htmlUtils: createHtmlUtils(),
+      htmlUtils: createHtmlUtils()
     });
 
-    const ptsSlice = html.slice(
-      html.indexOf("dyni-edit-route-metric-pts"),
-      html.indexOf("dyni-edit-route-metric-dst"),
-    );
+    const ptsSlice = html.slice(html.indexOf("dyni-edit-route-metric-pts"), html.indexOf("dyni-edit-route-metric-dst"));
     const etaSlice = html.slice(html.indexOf("dyni-edit-route-metric-rteEta"));
     expect(ptsSlice).not.toContain("dyni-edit-route-metric-unit");
     expect(etaSlice).not.toContain("dyni-edit-route-metric-unit");
@@ -278,17 +252,15 @@ describe("EditRouteMarkup", function () {
           pts: { labelText: "<PTS>", valueText: "<5>", unitText: "" },
           dst: { labelText: "<DST>", valueText: "<12>", unitText: "<nm>" },
           rte: { labelText: "<RTE>", valueText: "<3>", unitText: "<nm>" },
-          rteEta: { labelText: "<ETA>", valueText: "<1>", unitText: "" },
-        },
+          rteEta: { labelText: "<ETA>", valueText: "<1>", unitText: "" }
+        }
       }),
       fit: makeFit(),
-      htmlUtils: createHtmlUtils(),
+      htmlUtils: createHtmlUtils()
     });
 
     expect(html).toContain("dyni-edit-route-mode-high");
-    expect(html).toContain(
-      "dyni-edit-route-metric-row dyni-edit-route-metric-pts",
-    );
+    expect(html).toContain("dyni-edit-route-metric-row dyni-edit-route-metric-pts");
     expect(html).toContain("&lt;img src=x onerror=&quot;1&quot;&gt;");
     expect(html).toContain("&quot;LOCAL&quot;");
     expect(html).toContain("&lt;PTS&gt;");
@@ -302,27 +274,15 @@ describe("EditRouteMarkup", function () {
     const html = markup.render({
       model: makeModel(),
       fit: makeFit(),
-      htmlUtils: createHtmlUtils(),
+      htmlUtils: createHtmlUtils()
     });
 
-    expect(html).toContain(
-      'style="height:auto;aspect-ratio:7/8;min-height:8em;"',
-    );
-    expect(html).toContain(
-      'class="dyni-edit-route-name-text" style="font-size:13px;"',
-    );
-    expect(html).toContain(
-      'class="dyni-edit-route-source-badge" style="font-size:10px;"',
-    );
-    expect(html).toContain(
-      'class="dyni-edit-route-metric-label" style="font-size:8px;"',
-    );
-    expect(html).toContain(
-      'class="dyni-edit-route-metric-value-text" style="font-size:12px;"',
-    );
-    expect(html).toContain(
-      'class="dyni-edit-route-metric-unit" style="font-size:9px;"',
-    );
+    expect(html).toContain('style="height:auto;aspect-ratio:7/8;min-height:8em;"');
+    expect(html).toContain('class="dyni-edit-route-name-text" style="font-size:13px;"');
+    expect(html).toContain('class="dyni-edit-route-source-badge" style="font-size:10px;"');
+    expect(html).toContain('class="dyni-edit-route-metric-label" style="font-size:8px;"');
+    expect(html).toContain('class="dyni-edit-route-metric-value-text" style="font-size:12px;"');
+    expect(html).toContain('class="dyni-edit-route-metric-unit" style="font-size:9px;"');
   });
 
   it("adds dyni-tabular class on metric value text when stableDigits is enabled", function () {
@@ -330,7 +290,7 @@ describe("EditRouteMarkup", function () {
     const html = markup.render({
       model: makeModel({ stableDigitsEnabled: true }),
       fit: makeFit(),
-      htmlUtils: createHtmlUtils(),
+      htmlUtils: createHtmlUtils()
     });
 
     expect(html).toContain("dyni-edit-route-metric-value-text dyni-tabular");
@@ -345,14 +305,14 @@ describe("EditRouteMarkup", function () {
             labelText: "DST:",
             valueText: "PADDED-LONG",
             unitText: "nm",
-            hasUnit: true,
-          },
-        },
+            hasUnit: true
+          }
+        }
       }),
       fit: makeFit({
-        metricValues: { dst: "123.4" },
+        metricValues: { dst: "123.4" }
       }),
-      htmlUtils: createHtmlUtils(),
+      htmlUtils: createHtmlUtils()
     });
 
     expect(html).toContain(">123.4</span>");
@@ -367,11 +327,11 @@ describe("EditRouteMarkup", function () {
           pts: { labelText: "POINTS:", valueText: "005", unitText: "" },
           dst: { labelText: "DIST:", valueText: "12.3", unitText: "km" },
           rte: { labelText: "LEFT:", valueText: "3.9", unitText: "mi" },
-          rteEta: { labelText: "ARRIVE:", valueText: "12:34", unitText: "" },
-        },
+          rteEta: { labelText: "ARRIVE:", valueText: "12:34", unitText: "" }
+        }
       }),
       fit: makeFit(),
-      htmlUtils: createHtmlUtils(),
+      htmlUtils: createHtmlUtils()
     });
 
     expect(html).toContain("POINTS:");

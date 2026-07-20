@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniEditRouteLayoutMath = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniValueMathApi["toFiniteNumber"]} */
@@ -39,4 +39,4 @@
   }
 
   return { id: "EditRouteLayoutMath", create: create };
-}));
+});

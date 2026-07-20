@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniThreeValueTextWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {DyniComponentContext & { canvas: DyniCanvasHostApi, dom: DyniRadialHostDom, theme: { tokens: DyniGaugeThemeResolver } }} DyniThreeValueContext */
   /** @typedef {Record<string, unknown> & DyniFormatterOptions & { stableDigits?: boolean, disconnect?: boolean, ratioThresholdNormal?: unknown, ratioThresholdFlat?: unknown, captionUnitScale?: unknown, caption?: unknown, unit?: unknown, value?: unknown }} DyniThreeValueProps */
@@ -39,9 +39,7 @@
       const rootEl = componentContext.dom.requirePluginRoot(canvas);
       const tokens = theme.resolveForRoot(rootEl);
       const stableDigitsEnabled = props.stableDigits === true;
-      const family = stableDigitsEnabled
-        ? (tokens.font.familyMono || tokens.font.family)
-        : tokens.font.family;
+      const family = stableDigitsEnabled ? tokens.font.familyMono || tokens.font.family : tokens.font.family;
       const color = tokens.surface.fg;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
@@ -66,7 +64,7 @@
       }
 
       const defaultText = Object.prototype.hasOwnProperty.call(props || {}, "default")
-        ? String(props.default)
+        ? /** @type {string} */ (props.default)
         : undefined;
       const normalizedValueText = placeholderNormalize.normalize(
         String(componentContext.format.applyFormatter(props.value, props)),
@@ -74,9 +72,9 @@
       );
       const stableValue = stableDigitsEnabled
         ? stableDigits.normalize(normalizedValueText, {
-          integerWidth: stableDigits.resolveIntegerWidth(normalizedValueText, 2),
-          reserveSignSlot: true
-        })
+            integerWidth: stableDigits.resolveIntegerWidth(normalizedValueText, 2),
+            reserveSignSlot: true
+          })
         : { padded: normalizedValueText, plain: normalizedValueText };
       const valueText = stableValue.padded;
       const modeData = text.computeModeLayout({
@@ -205,10 +203,11 @@
           unitOpacity: unitOpacity
         });
       }
-
     }
 
-    function translateFunction() { return {}; }
+    function translateFunction() {
+      return {};
+    }
 
     return {
       id: "ThreeValueTextWidget",
@@ -219,4 +218,4 @@
   }
 
   return { id: "ThreeValueTextWidget", create: create };
-}));
+});

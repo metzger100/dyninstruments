@@ -1,7 +1,6 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  installUnitFormatFamilies,
-} = require("../../helpers/unit-format-families");
+const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
 const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
 function makeToolkit(overrides, bindingOverrides) {
@@ -57,10 +56,10 @@ function makeToolkit(overrides, bindingOverrides) {
           caption_editRouteRte: "RTE CAP",
           formatUnit_editRouteRte: "km",
           unit_editRouteRte_km: "kmR",
-          caption_editRouteEta: "ETA CAP",
+          caption_editRouteEta: "ETA CAP"
         },
-        overrides || {},
-      ),
+        overrides || {}
+      )
     );
 }
 
@@ -76,7 +75,7 @@ function routeContext(kind, activeToolkit, viewModel) {
     cluster: "nav",
     kind: kind,
     toolkit: activeToolkit,
-    viewModel: viewModel,
+    viewModel: viewModel
   });
 }
 
@@ -103,25 +102,25 @@ function makeActiveRouteViewModel() {
           remain: toMaybeNumber(props.activeRouteRemain),
           rteEta: props.activeRouteEta,
           nextCourse: toMaybeNumber(props.activeRouteNextCourse),
-          isApproaching: props.activeRouteApproaching === true,
+          isApproaching: props.activeRouteApproaching === true
         },
         routeName: trimText(props.activeRouteName),
         captions: {
           remain: "RTE CAP",
           rteEta: "ETA CAP",
-          nextCourse: "NEXT CAP",
+          nextCourse: "NEXT CAP"
         },
         units: {
           remain: "nmA",
           rteEta: "",
-          nextCourse: "degN",
+          nextCourse: "degN"
         },
         formatUnits: {
-          remain: "nm",
+          remain: "nm"
         },
-        hideSeconds: props.hideSeconds === true,
+        hideSeconds: props.hideSeconds === true
       };
-    },
+    }
   };
 }
 
@@ -136,7 +135,7 @@ function makeRoutePointsViewModel() {
               return {
                 name: trimText(point.name) || String(index),
                 lat: toMaybeNumber(point.lat),
-                lon: toMaybeNumber(point.lon),
+                lon: toMaybeNumber(point.lon)
               };
             })
           : [];
@@ -146,18 +145,15 @@ function makeRoutePointsViewModel() {
           ? {
               name: routeName,
               points: points,
-              sourceRoute: editingRoute,
+              sourceRoute: editingRoute
             }
           : null,
-        selectedIndex:
-          typeof props.editingIndex === "undefined"
-            ? undefined
-            : Number(props.editingIndex),
+        selectedIndex: typeof props.editingIndex === "undefined" ? undefined : Number(props.editingIndex),
         isActiveRoute: trimText(props.activeName) === routeName,
         showLatLon: props.routeShowLL === true,
-        useRhumbLine: props.useRhumbLine === true,
+        useRhumbLine: props.useRhumbLine === true
       };
-    },
+    }
   };
 }
 
@@ -165,19 +161,10 @@ function makeEditRouteViewModel() {
   return {
     build(props) {
       const editingRoute = props.editingRoute;
-      const routeName = editingRoute
-        ? trimText(editingRoute.name).replace(/^local@/, "")
-        : "";
-      const pointCount =
-        editingRoute && Array.isArray(editingRoute.points)
-          ? editingRoute.points.length
-          : 0;
-      const isLocalRoute = !!(
-        editingRoute && /^local@/.test(editingRoute.name)
-      );
-      const isServerRoute = !!(
-        editingRoute && /^server@/.test(editingRoute.name)
-      );
+      const routeName = editingRoute ? trimText(editingRoute.name).replace(/^local@/, "") : "";
+      const pointCount = editingRoute && Array.isArray(editingRoute.points) ? editingRoute.points.length : 0;
+      const isLocalRoute = !!(editingRoute && /^local@/.test(editingRoute.name));
+      const isServerRoute = !!(editingRoute && /^server@/.test(editingRoute.name));
 
       return {
         hasRoute: !!editingRoute,
@@ -190,19 +177,17 @@ function makeEditRouteViewModel() {
                   ? editingRoute.computeLength()
                   : undefined,
               isLocalRoute: isLocalRoute,
-              isServerRoute: isServerRoute,
+              isServerRoute: isServerRoute
             }
           : null,
         remainingDistance: toMaybeNumber(props.rteDistance),
         rteEta: props.rteEta,
         hideSeconds: props.hideSeconds === true,
-        isActiveRoute:
-          !!editingRoute &&
-          trimText(props.activeName) === trimText(editingRoute.name),
+        isActiveRoute: !!editingRoute && trimText(props.activeName) === trimText(editingRoute.name),
         isLocalRoute: isLocalRoute,
-        isServerRoute: isServerRoute,
+        isServerRoute: isServerRoute
       };
-    },
+    }
   };
 }
 
@@ -220,7 +205,7 @@ describe("NavMapper", function () {
       unit_xteDisplayLinearDst_km: "kmD",
       caption_xteDisplayLinearBrg: "BRG LIN",
       unit_xteDisplayLinearBrg: "degM",
-      xteLinearScale_m: "250",
+      xteLinearScale_m: "250"
     });
     const out = mapper.translate(
       {
@@ -241,9 +226,9 @@ describe("NavMapper", function () {
         xteLinearTickMajor: "2",
         xteLinearTickMinor: "0.5",
         xteLinearShowEndLabels: true,
-        stableDigits: true,
+        stableDigits: true
       },
-      routeContext("xteDisplayLinear", customToolkit),
+      routeContext("xteDisplayLinear", customToolkit)
     );
 
     expect(out).toEqual({
@@ -253,23 +238,23 @@ describe("NavMapper", function () {
         dtw: 2.4,
         btw: 100,
         wpName: "West Cardinal",
-        disconnect: true,
+        disconnect: true
       },
       captions: {
         xte: "XTE LIN",
         track: "COG LIN",
         dtw: "DST LIN",
-        brg: "BRG LIN",
+        brg: "BRG LIN"
       },
       units: {
         xte: "mX",
         track: "degT",
         dtw: "kmD",
-        brg: "degM",
+        brg: "degM"
       },
       formatUnits: {
         xte: "m",
-        dtw: "km",
+        dtw: "km"
       },
       xteScale: 250,
       layout: {
@@ -281,10 +266,9 @@ describe("NavMapper", function () {
         ratioThresholdFlat: 2.6,
         tickMajor: 2,
         tickMinor: 0.5,
-        showEndLabels: true,
+        showEndLabels: true
       },
-      stableDigits: true,
+      stableDigits: true
     });
   });
-
 });

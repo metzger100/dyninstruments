@@ -1,9 +1,8 @@
+// @ts-nocheck
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RoutePointsTextHtmlWidget", function () {
   function createRenderer(options) {
@@ -12,9 +11,7 @@ describe("RoutePointsTextHtmlWidget", function () {
       opts.buildModel ||
       vi.fn(function (args) {
         const props = args && args.props ? args.props : {};
-        const interactionState =
-          props.__interactionState ||
-          (props.__canActivate === true ? "dispatch" : "passive");
+        const interactionState = props.__interactionState || (props.__canActivate === true ? "dispatch" : "passive");
         const points = Array.isArray(props.__points)
           ? props.__points
           : [
@@ -23,8 +20,8 @@ describe("RoutePointsTextHtmlWidget", function () {
                 ordinalText: "1",
                 nameText: "WP1",
                 infoText: "I",
-                selected: false,
-              },
+                selected: false
+              }
             ];
         return {
           mode: props.__mode || "normal",
@@ -41,9 +38,7 @@ describe("RoutePointsTextHtmlWidget", function () {
           isActiveRoute: false,
           canActivateRoutePoint: interactionState === "dispatch",
           hasValidSelection: props.__hasValidSelection === true,
-          selectedIndex: Number.isInteger(props.__selectedIndex)
-            ? props.__selectedIndex
-            : -1,
+          selectedIndex: Number.isInteger(props.__selectedIndex) ? props.__selectedIndex : -1,
           activeWaypointKey: props.__activeKey || null,
           resizeSignatureParts: ["sig", props.__token || "1"],
           inlineGeometry: {
@@ -58,10 +53,10 @@ describe("RoutePointsTextHtmlWidget", function () {
                 nameStyle: "",
                 infoStyle: "",
                 markerStyle: "",
-                markerDotStyle: "",
+                markerDotStyle: ""
               };
-            }),
-          },
+            })
+          }
         };
       });
     const fitCompute =
@@ -73,56 +68,44 @@ describe("RoutePointsTextHtmlWidget", function () {
           rowFits: model.points.map(function () {
             return { ordinalStyle: "", nameStyle: "", infoStyle: "" };
           }),
-          emptyStyle: "",
+          emptyStyle: ""
         };
       });
     const maybeReveal = opts.maybeReveal || vi.fn(() => true);
-    const measureListScrollbarGutter =
-      opts.measureListScrollbarGutter || vi.fn(() => 0);
-    const computeNaturalHeight =
-      opts.computeNaturalHeight || vi.fn(() => ({ cappedHeight: 240 }));
+    const measureListScrollbarGutter = opts.measureListScrollbarGutter || vi.fn(() => 0);
+    const computeNaturalHeight = opts.computeNaturalHeight || vi.fn(() => ({ cappedHeight: 240 }));
 
     const componentContext = createComponentContextMock({
       modules: {
         RoutePointsHtmlFit: {
           create() {
             return { compute: fitCompute };
-          },
+          }
         },
-        HtmlWidgetUtils: loadFresh(
-          "shared/widget-kits/html/HtmlWidgetUtils.js",
-        ),
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
         RoutePointsRenderModel: {
           create() {
             return { buildModel };
-          },
+          }
         },
-        RoutePointsMarkup: loadFresh(
-          "shared/widget-kits/nav/RoutePointsMarkup.js",
-        ),
+        RoutePointsMarkup: loadFresh("shared/widget-kits/nav/RoutePointsMarkup.js"),
         RoutePointsDomEffects: {
           create() {
             return {
               measureListScrollbarGutter,
               maybeRevealActiveRow: maybeReveal,
-              scheduleSelectedRowVisibility: maybeReveal,
+              scheduleSelectedRowVisibility: maybeReveal
             };
-          },
+          }
         },
         RoutePointsLayout: {
           create() {
             return { computeNaturalHeight };
-          },
+          }
         },
-        StateScreenMarkup: loadFresh(
-          "shared/widget-kits/state/StateScreenMarkup.js",
-        ),
-        StateScreenTextFit: loadFresh(
-          "shared/widget-kits/state/StateScreenTextFit.js",
-        ),
-        StateScreenLabels: loadFresh(
-          "shared/widget-kits/state/StateScreenLabels.js",
-        ),
+        StateScreenMarkup: loadFresh("shared/widget-kits/state/StateScreenMarkup.js"),
+        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js")
       },
       services: {
         themeTokens: {
@@ -132,23 +115,24 @@ describe("RoutePointsTextHtmlWidget", function () {
                 family: "sans-serif",
                 familyMono: "monospace",
                 weight: 720,
-                labelWeight: 610,
-              },
+                labelWeight: 610
+              }
             };
-          },
-        },
-      },
+          }
+        }
+      }
     });
 
     return {
-      renderer: loadFresh(
-        "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js",
-      ).create({}, componentContext),
+      renderer: loadFresh("widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js").create(
+        {},
+        componentContext
+      ),
       buildModel,
       fitCompute,
       maybeReveal,
       measureListScrollbarGutter,
-      computeNaturalHeight,
+      computeNaturalHeight
     };
   }
 
@@ -156,8 +140,7 @@ describe("RoutePointsTextHtmlWidget", function () {
     const opts = options || {};
     const mode = opts.mode === "passive" ? "passive" : "dispatch";
     const activate = opts.activate || vi.fn(() => true);
-    const orientation =
-      opts.orientation === "vertical" ? "vertical" : "default";
+    const orientation = opts.orientation === "vertical" ? "vertical" : "default";
 
     return Object.assign({}, props || {}, {
       surfacePolicy: {
@@ -166,10 +149,10 @@ describe("RoutePointsTextHtmlWidget", function () {
         containerOrientation: orientation,
         actions: {
           routePoints: {
-            activate,
-          },
-        },
-      },
+            activate
+          }
+        }
+      }
     });
   }
 
@@ -189,13 +172,13 @@ describe("RoutePointsTextHtmlWidget", function () {
 
     mountEl.getBoundingClientRect = vi.fn(() => ({
       width: shellSize.width,
-      height: shellSize.height,
+      height: shellSize.height
     }));
 
     const committed = rendererSpec.createCommittedRenderer({
       hostContext,
       mountEl,
-      shadowRoot: null,
+      shadowRoot: null
     });
 
     let revision = 0;
@@ -212,7 +195,7 @@ describe("RoutePointsTextHtmlWidget", function () {
         shellRect: { width: shellSize.width, height: shellSize.height },
         hostContext,
         layoutChanged: layoutChanged === true,
-        relayoutPass: 0,
+        relayoutPass: 0
       };
     }
 
@@ -231,7 +214,7 @@ describe("RoutePointsTextHtmlWidget", function () {
       },
       html() {
         return mountEl.innerHTML;
-      },
+      }
     };
   }
 
@@ -246,10 +229,10 @@ describe("RoutePointsTextHtmlWidget", function () {
           __stateLabel: "GPS Lost",
           __interactionState: "passive",
           __canActivate: false,
-          __points: [],
+          __points: []
         },
-        { mode: "dispatch", activate },
-      ),
+        { mode: "dispatch", activate }
+      )
     );
 
     expect(mounted.html()).toContain("dyni-state-disconnected");
@@ -257,10 +240,7 @@ describe("RoutePointsTextHtmlWidget", function () {
     expect(mounted.html()).toContain("dyni-route-points-passive");
 
     const wrapper = mounted.mountEl.querySelector(".dyni-route-points-html");
-    wrapper.dispatchEvent(
-      new MouseEvent("click", { bubbles: true, cancelable: true }),
-    );
+    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(activate).not.toHaveBeenCalled();
   });
-
 });

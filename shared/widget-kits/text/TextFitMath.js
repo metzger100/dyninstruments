@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniTextFitMath = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniValueMathApi["toFiniteNumber"]} */
@@ -54,4 +54,4 @@
   }
 
   return { id: "TextFitMath", create: create };
-}));
+});

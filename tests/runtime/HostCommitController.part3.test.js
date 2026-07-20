@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
 describe("runtime/HostCommitController.js", function () {

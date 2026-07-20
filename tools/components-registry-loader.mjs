@@ -18,10 +18,7 @@ const REGISTRY_SCRIPT_CHAIN = [
   "config/components.js"
 ];
 
-const BOOTSTRAP_MANIFEST_SCRIPT_CHAIN = [
-  "runtime/namespace.js",
-  "config/bootstrap-manifest.js"
-];
+const BOOTSTRAP_MANIFEST_SCRIPT_CHAIN = ["runtime/namespace.js", "config/bootstrap-manifest.js"];
 
 function runScriptChain(rootDir, scriptPaths, sandbox) {
   for (const relPath of scriptPaths) {
@@ -41,9 +38,7 @@ export function loadBootstrapManifest(rootDir) {
 
   runScriptChain(rootDir, BOOTSTRAP_MANIFEST_SCRIPT_CHAIN, sandbox);
 
-  return sandbox.DyniPlugin && sandbox.DyniPlugin.config
-    ? sandbox.DyniPlugin.config.bootstrapManifest
-    : null;
+  return sandbox.DyniPlugin && sandbox.DyniPlugin.config ? sandbox.DyniPlugin.config.bootstrapManifest : null;
 }
 
 export function loadComponentsRegistry(rootDir) {
@@ -56,9 +51,7 @@ export function loadComponentsRegistry(rootDir) {
 
   runScriptChain(rootDir, REGISTRY_SCRIPT_CHAIN, sandbox);
 
-  const components = sandbox.DyniPlugin && sandbox.DyniPlugin.config
-    ? sandbox.DyniPlugin.config.components
-    : null;
+  const components = sandbox.DyniPlugin && sandbox.DyniPlugin.config ? sandbox.DyniPlugin.config.components : null;
 
   return components;
 }

@@ -25,7 +25,9 @@ Interior code is: renderers, shared engines, widget-kits, layout modules, fit mo
 
 ### Smell Checklist
 
-Scan every line of your proposed code against these patterns. If you find a match, apply the fix. If you believe the pattern is intentional, add a suppression: `// dyni-lint-disable-next-line <rule-name> -- <reason>`
+Scan every line of your proposed code against these patterns. If you find a match, apply the fix. Generic
+`dyni-lint-disable-*` directives are forbidden in production; use only a checker-owned canonical exception or the
+validated external-boundary marker described below.
 
 #### Category 1: Redundant Guards on Normalized Values (BLOCK)
 
@@ -54,6 +56,24 @@ const speed = Number(props.speed);
 // ✅ FIX: Normalize in mapper, renderer receives finite number or undefined
 const speed = props.speed; // already normalized by mapper
 ```
+
+**`mapper-prop-renormalization`** — Any renderer directly normalizes a numeric or string prop again.
+
+```javascript
+// ❌ SMELL: mapper/editable boundaries already own these contracts
+toOptionalFiniteNumber(p.warningFrom);
+trimText(p.caption);
+String(p.unit);
+p.label.trim();
+
+// ✅ FIX: trust rendererProps in every widget file
+p.warningFrom;
+p.caption;
+p.unit;
+```
+
+The AST rule also follows local aliases/destructuring and rejects delegating the complete `p`/`props` bag to a
+`normalize*` helper. Moving normalization behind another local/shared call does not move the boundary.
 
 #### Category 2: Duplicated Defaults (BLOCK)
 
@@ -108,7 +128,7 @@ const FLAT_THRESHOLD = 3.5;    // already in engine
 // ✅ FIX: Layout keeps only structural safety bounds (0, 1, 2)
 ```
 
-**`css-js-default-duplication`** (WARN) — JS repeats CSS/theme token defaults.
+**`css-js-default-duplication`** (BLOCK) — JS repeats CSS/theme token defaults.
 
 ```javascript
 // ❌ SMELL
@@ -207,7 +227,7 @@ function formatValue(raw) { ... }  // only create() and translate() allowed
 // ✅ FIX: Move to renderer, toolkit, or shared module
 ```
 
-**`mapper-output-complexity`** (WARN >8, BLOCK >12) — Mapper branch returns oversized object literal.
+**`mapper-output-complexity`** (BLOCK >8) — Mapper branch returns oversized object literal.
 
 ```javascript
 // ❌ SMELL: Too many top-level props
@@ -221,6 +241,18 @@ return {
   formatting: { format, style }
 };
 ```
+
+**`absent-numeric-sentinel`** — Optional numeric mapper output uses `NaN`, `Infinity`, or a non-zero numeric sentinel.
+
+```javascript
+// ❌ SMELL
+return { warningFrom: enabled ? num(p.warningFrom) : -1 };
+
+// ✅ FIX
+return { warningFrom: enabled ? num(p.warningFrom) : undefined };
+```
+
+Zero remains valid for real counts and other non-optional numeric values.
 
 #### Category 7: Responsive Ownership Violations (BLOCK)
 
@@ -255,21 +287,21 @@ const result = componentContext.format.applyFormatter(v, opts) || props.default;
 const result = componentContext.format.applyFormatter(v, opts);
 ```
 
-**`catch-fallback-without-suppression`** (WARN) — Non-rethrow catch silently degrades behavior.
+**`catch-fallback-without-suppression`** (BLOCK) — Non-rethrow catch silently degrades behavior.
 
 ```javascript
 // ❌ SMELL
 try { result = compute(); } catch (e) { result = fallback; }
 
-// ✅ FIX: Re-throw, or add suppression with reason
+// ✅ FIX: Re-throw, or mark a genuine external boundary with audited metadata
 try { result = compute(); }
+// dyni-boundary-next-line(category: avnav-host-uncertainty, owner: Metzger100, date: 2026-07-20) -- AvNav host may not expose this API
 catch (e) {
-  // dyni-lint-disable-next-line catch-fallback-without-suppression -- AvNav host may not expose this API
   result = fallback;
 }
 ```
 
-**`premature-legacy-support`** (WARN) — Speculative compat/legacy/fallback naming.
+**`premature-legacy-support`** (BLOCK) — Speculative compat/legacy/fallback naming.
 
 ```javascript
 // ❌ SMELL
@@ -281,20 +313,19 @@ const compatValue = oldApi ? oldApi.get() : newApi.get();
 
 ### After Scanning
 
-1. Fix all BLOCK-severity findings before committing.
-2. For WARN-severity findings, either fix them or document the follow-up in the active task or execution plan.
-3. Run `node tools/check-patterns.mjs` to verify mechanically.
-4. Run `npm run check:all` as the final gate.
+1. Fix every finding before committing; all live rules are blocking.
+2. Run `node tools/check-patterns.mjs` to verify mechanically.
+3. Run `npm run check:all` as the final gate.
 
 ### Suppression Syntax
 
-When an exception is genuinely needed:
+Generic production suppressions are forbidden. The only source marker is for a genuine external catch boundary:
 
 ```javascript
-// dyni-lint-disable-next-line <rule-name> -- <reason>
-/* dyni-lint-disable-line <rule-name> -- <reason> */
+// dyni-boundary-next-line(category: <slug>, owner: <handle>, date: <YYYY-MM-DD>) -- <reason>
+/* dyni-boundary-line(category: <slug>, owner: <handle>, date: <YYYY-MM-DD>, expires: <YYYY-MM-DD>) -- <reason> */
 ```
 
-- Suppress only ONE named rule per directive.
-- Always include a short reason after `--`.
-- Malformed directives or unknown rule names fail via `invalid-lint-suppression`.
+- Boundary markers affect only `catch-fallback-without-suppression`.
+- `category`, `owner`, `date`, and a reason are required; `expires` is optional and fail-closed.
+- Generic `dyni-lint-disable-*`, malformed, missing-field, or expired directives fail via `invalid-lint-suppression`.

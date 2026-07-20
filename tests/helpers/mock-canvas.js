@@ -1,8 +1,12 @@
+/** @typedef {{ charWidth?: number, rectWidth?: number, rectHeight?: number, ctx?: any, ownerDocument?: any }} MockCanvasOptions */
+
+/** @param {MockCanvasOptions} [options] @returns {any} */
 function createMockContext2D(options) {
   const opts = options || {};
-  const charWidth = Number.isFinite(opts.charWidth) ? opts.charWidth : 8;
-  const calls = [];
+  const charWidth = typeof opts.charWidth === "number" && Number.isFinite(opts.charWidth) ? opts.charWidth : 8;
+  const calls = /** @type {any[]} */ ([]);
 
+  /** @param {string} name @param {IArguments} args */
   function rec(name, args) {
     calls.push({ name, args: Array.from(args || []) });
   }
@@ -81,19 +85,21 @@ function createMockContext2D(options) {
     fillText() {
       rec("fillText", arguments);
     },
+    /** @param {any} text */
     measureText(text) {
       rec("measureText", arguments);
       return { width: String(text || "").length * charWidth };
-    },
+    }
   };
 
   return ctx;
 }
 
+/** @param {MockCanvasOptions} [options] @returns {any} */
 function createMockCanvas(options) {
   const opts = options || {};
-  const rectW = Number.isFinite(opts.rectWidth) ? opts.rectWidth : 320;
-  const rectH = Number.isFinite(opts.rectHeight) ? opts.rectHeight : 180;
+  const rectW = typeof opts.rectWidth === "number" && Number.isFinite(opts.rectWidth) ? opts.rectWidth : 320;
+  const rectH = typeof opts.rectHeight === "number" && Number.isFinite(opts.rectHeight) ? opts.rectHeight : 180;
   const ctx = opts.ctx || createMockContext2D(opts);
   const ownerDocument = opts.ownerDocument || createMockOwnerDocument(opts);
 
@@ -106,6 +112,7 @@ function createMockCanvas(options) {
     __ctx: ctx,
     __dyniMarked: false,
     ownerDocument,
+    /** @param {any} type */
     getContext(type) {
       return type === "2d" ? ctx : null;
     },
@@ -116,18 +123,20 @@ function createMockCanvas(options) {
         top: 0,
         left: 0,
         right: rectW,
-        bottom: rectH,
+        bottom: rectH
       };
     },
     closest() {
       return null;
-    },
+    }
   };
 }
 
+/** @param {MockCanvasOptions} [options] @returns {any} */
 function createMockOwnerDocument(options) {
   const opts = options || {};
-  const doc = {};
+  const doc = /** @type {any} */ ({});
+  /** @param {any} tagName @returns {any} */
   doc.createElement = function (tagName) {
     if (String(tagName || "").toLowerCase() !== "canvas") {
       return { tagName: String(tagName || "").toUpperCase() };
@@ -140,6 +149,7 @@ function createMockOwnerDocument(options) {
       __ctx: layerCtx,
       __dyniMarked: false,
       ownerDocument: doc,
+      /** @param {any} type */
       getContext(type) {
         return type === "2d" ? layerCtx : null;
       },
@@ -150,7 +160,7 @@ function createMockOwnerDocument(options) {
       },
       closest() {
         return null;
-      },
+      }
     };
   };
   return doc;
@@ -159,5 +169,5 @@ function createMockOwnerDocument(options) {
 module.exports = {
   createMockCanvas,
   createMockContext2D,
-  createMockOwnerDocument,
+  createMockOwnerDocument
 };

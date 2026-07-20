@@ -2,6 +2,12 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
+/** @param {string} relativePath @returns {Promise<any>} */
+function importTool(relativePath) {
+  return import(relativePath);
+}
+
+/** @param {string} rootDir @param {string} relPath @param {string} content */
 function writeFile(rootDir, relPath, content) {
   const absPath = path.join(rootDir, relPath);
   fs.mkdirSync(path.dirname(absPath), { recursive: true });
@@ -22,7 +28,7 @@ const DEV_TOOLING_FILES = [
 
 describe("release-zip-builder", function () {
   it("builds a sorted runtime-only manifest for the current repository", async function () {
-    const { buildReleaseManifest, isRuntimePath } = await import("../../tools/release-zip-builder.mjs");
+    const { buildReleaseManifest, isRuntimePath } = await importTool("../../tools/release-zip-builder.mjs");
 
     const manifest = buildReleaseManifest(process.cwd());
     const sorted = [...manifest].sort((a, b) => a.localeCompare(b));
@@ -41,20 +47,20 @@ describe("release-zip-builder", function () {
     expect(manifest).toContain("runtime/component-loader.js");
     expect(manifest).toContain("layouts/dyni-motorboat.json");
     expect(manifest).toContain("layouts/dyni-sailboat.json");
-    expect(manifest.some((filePath) => filePath.startsWith("assets/fonts/"))).toBe(true);
+    expect(manifest.some((/** @type {any} */ filePath) => filePath.startsWith("assets/fonts/"))).toBe(true);
 
     const pluginConfig = JSON.parse(fs.readFileSync(path.join(process.cwd(), "plugin.json"), "utf8"));
-    pluginConfig.layouts.forEach(function (layoutDef) {
+    pluginConfig.layouts.forEach(function (/** @type {any} */ layoutDef) {
       expect(manifest).toContain(layoutDef.file);
     });
 
-    expect(manifest.some((filePath) => filePath.startsWith("tests/"))).toBe(false);
-    expect(manifest.some((filePath) => filePath.startsWith("tools/"))).toBe(false);
-    expect(manifest.some((filePath) => filePath.startsWith("documentation/"))).toBe(false);
-    expect(manifest.some((filePath) => filePath.startsWith("exec-plans/"))).toBe(false);
-    expect(manifest.some((filePath) => filePath.startsWith("schemas/"))).toBe(false);
-    expect(manifest.some((filePath) => filePath.startsWith(".github/"))).toBe(false);
-    expect(manifest.some((filePath) => filePath.startsWith("types/"))).toBe(false);
+    expect(manifest.some((/** @type {any} */ filePath) => filePath.startsWith("tests/"))).toBe(false);
+    expect(manifest.some((/** @type {any} */ filePath) => filePath.startsWith("tools/"))).toBe(false);
+    expect(manifest.some((/** @type {any} */ filePath) => filePath.startsWith("documentation/"))).toBe(false);
+    expect(manifest.some((/** @type {any} */ filePath) => filePath.startsWith("exec-plans/"))).toBe(false);
+    expect(manifest.some((/** @type {any} */ filePath) => filePath.startsWith("schemas/"))).toBe(false);
+    expect(manifest.some((/** @type {any} */ filePath) => filePath.startsWith(".github/"))).toBe(false);
+    expect(manifest.some((/** @type {any} */ filePath) => filePath.startsWith("types/"))).toBe(false);
     expect(manifest).not.toContain("package.json");
     expect(manifest).not.toContain("package-lock.json");
     DEV_TOOLING_FILES.forEach(function (filePath) {
@@ -73,7 +79,7 @@ describe("release-zip-builder", function () {
 
   describe("buildBootstrapBundleContent", function () {
     it("concatenates manifest scripts in order with header comment", async function () {
-      const { buildBootstrapBundleContent } = await import("../../tools/release-zip-builder.mjs");
+      const { buildBootstrapBundleContent } = await importTool("../../tools/release-zip-builder.mjs");
 
       const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-bootstrap-bundle-"));
       try {
@@ -85,7 +91,7 @@ describe("release-zip-builder", function () {
         writeFile(
           tempRoot,
           "config/bootstrap-manifest.js",
-          "(function (root) {\n  var config = root.DyniPlugin.config = root.DyniPlugin.config || {};\n  config.bootstrapManifest = [\"scripts/first.js\", \"scripts/second.js\"];\n}(this));\n"
+          '(function (root) {\n  var config = root.DyniPlugin.config = root.DyniPlugin.config || {};\n  config.bootstrapManifest = ["scripts/first.js", "scripts/second.js"];\n}(this));\n'
         );
         writeFile(tempRoot, "scripts/first.js", "first-script();");
         writeFile(tempRoot, "scripts/second.js", "second-script();");
@@ -93,9 +99,7 @@ describe("release-zip-builder", function () {
         const bundle = buildBootstrapBundleContent(tempRoot);
 
         expect(bundle).toBe(
-          "// bootstrap-bundle.js — generated at release time, do not edit\n" +
-          "first-script();\n" +
-          "second-script();"
+          "// bootstrap-bundle.js — generated at release time, do not edit\n" + "first-script();\n" + "second-script();"
         );
       } finally {
         fs.rmSync(tempRoot, { recursive: true, force: true });
@@ -103,7 +107,7 @@ describe("release-zip-builder", function () {
     });
 
     it("throws when a manifest-listed file is missing", async function () {
-      const { buildBootstrapBundleContent } = await import("../../tools/release-zip-builder.mjs");
+      const { buildBootstrapBundleContent } = await importTool("../../tools/release-zip-builder.mjs");
 
       const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-bootstrap-bundle-missing-"));
       try {
@@ -115,7 +119,7 @@ describe("release-zip-builder", function () {
         writeFile(
           tempRoot,
           "config/bootstrap-manifest.js",
-          "(function (root) {\n  var config = root.DyniPlugin.config = root.DyniPlugin.config || {};\n  config.bootstrapManifest = [\"scripts/missing.js\"];\n}(this));\n"
+          '(function (root) {\n  var config = root.DyniPlugin.config = root.DyniPlugin.config || {};\n  config.bootstrapManifest = ["scripts/missing.js"];\n}(this));\n'
         );
 
         expect(function () {
@@ -128,7 +132,7 @@ describe("release-zip-builder", function () {
   });
 
   it("reports missing files during manifest validation", async function () {
-    const { validateManifest } = await import("../../tools/release-zip-builder.mjs");
+    const { validateManifest } = await importTool("../../tools/release-zip-builder.mjs");
 
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-validate-"));
     try {

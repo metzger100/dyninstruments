@@ -10,9 +10,7 @@
 
   /** @param {unknown} target @returns {DyniComposedTreeNode | null} */
   function resolveTargetNode(target) {
-    const candidate = target && typeof target === "object"
-      ? /** @type {DyniComposedTreeTarget} */ (target)
-      : null;
+    const candidate = target && typeof target === "object" ? /** @type {DyniComposedTreeTarget} */ (target) : null;
     if (!candidate) {
       return null;
     }
@@ -87,4 +85,4 @@
     requirePluginRoot: requirePluginRoot,
     getNightModeState: getNightModeState
   });
-}(this));
+})(this);

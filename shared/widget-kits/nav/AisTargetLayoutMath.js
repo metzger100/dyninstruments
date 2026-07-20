@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetLayoutMath = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniValueMathApi["clampNumber"]} */
@@ -23,7 +23,14 @@
    * @param {unknown} frontMinHeight
    * @returns {DyniAisIdentityBandHeights}
    */
-  function resolveIdentityBandHeights(contentHeight, identityGapPx, identityMetricsGapPx, nameShare, frontShare, frontMinHeight) {
+  function resolveIdentityBandHeights(
+    contentHeight,
+    identityGapPx,
+    identityMetricsGapPx,
+    nameShare,
+    frontShare,
+    frontMinHeight
+  ) {
     const safeContentHeight = Math.max(1, Math.floor(Number(contentHeight) || 1));
     const safeIdentityGap = Math.max(0, Math.floor(Number(identityGapPx) || 0));
     const safeIdentityMetricsGap = Math.max(0, Math.floor(Number(identityMetricsGapPx) || 0));
@@ -58,4 +65,4 @@
   }
 
   return { id: "AisTargetLayoutMath", create: create };
-}));
+});

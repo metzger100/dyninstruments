@@ -1,8 +1,5 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./LinearGaugeEngine.harness");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
 describe("LinearGaugeEngine", function () {
   it("uses explicit three-mode text layouts", function () {
@@ -16,15 +13,15 @@ describe("LinearGaugeEngine", function () {
       tickProps: {
         major: "major",
         minor: "minor",
-        showEndLabels: "showEndLabels",
-      },
+        showEndLabels: "showEndLabels"
+      }
     });
 
     renderer(
       createMockCanvas({
         rectWidth: 120,
         rectHeight: 320,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
       {
         value: 10,
@@ -34,8 +31,8 @@ describe("LinearGaugeEngine", function () {
         minor: 5,
         n: 1.1,
         f: 3.5,
-        caption: "SOG",
-      },
+        caption: "SOG"
+      }
     );
     expect(harness.calls.drawCaptionMax).toBe(1);
     expect(harness.calls.drawValueUnitWithFit).toBe(1);
@@ -45,7 +42,7 @@ describe("LinearGaugeEngine", function () {
       createMockCanvas({
         rectWidth: 280,
         rectHeight: 220,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
       {
         value: 10,
@@ -55,8 +52,8 @@ describe("LinearGaugeEngine", function () {
         minor: 5,
         n: 1.1,
         f: 3.5,
-        caption: "SOG",
-      },
+        caption: "SOG"
+      }
     );
     expect(harness.calls.drawInlineCapValUnit).toBe(1);
 
@@ -64,7 +61,7 @@ describe("LinearGaugeEngine", function () {
       createMockCanvas({
         rectWidth: 480,
         rectHeight: 120,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
       {
         value: 10,
@@ -74,11 +71,10 @@ describe("LinearGaugeEngine", function () {
         minor: 5,
         n: 1.1,
         f: 3.5,
-        caption: "SOG",
-      },
+        caption: "SOG"
+      }
     );
     expect(harness.calls.drawCaptionMax).toBe(2);
     expect(harness.calls.drawValueUnitWithFit).toBe(2);
   });
-
 });

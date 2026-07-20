@@ -1,14 +1,9 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("HtmlMeasureUtils", function () {
   function createApi() {
-    return loadFresh("shared/widget-kits/html/HtmlMeasureUtils.js").create(
-      {},
-      createComponentContextMock(),
-    );
+    return loadFresh("shared/widget-kits/html/HtmlMeasureUtils.js").create({}, createComponentContextMock());
   }
 
   it("parses px font values and exposes approximate measure context", function () {
@@ -28,18 +23,20 @@ describe("HtmlMeasureUtils", function () {
     const context2d = {
       measureText() {
         return { width: 0 };
-      },
+      }
     };
     const ownerDocument = {
+      /** @param {any} tag */
       createElement(tag) {
         expect(tag).toBe("canvas");
         return {
+          /** @param {any} type */
           getContext(type) {
             expect(type).toBe("2d");
             return context2d;
-          },
+          }
         };
-      },
+      }
     };
     const targetEl = { ownerDocument: ownerDocument };
     const hostContext = {};
@@ -54,22 +51,20 @@ describe("HtmlMeasureUtils", function () {
   it("measures fitted px with optional maxPx override and style conversion", function () {
     const api = createApi();
     const htmlUtils = {
-      toFiniteNumber: (value) => {
+      toFiniteNumber: (/** @type {any} */ value) => {
         const n = Number(value);
         return Number.isFinite(n) ? n : undefined;
-      },
+      }
     };
     const textApi = { setFont: vi.fn() };
     const ctx = {
+      /** @param {any} text */
       measureText(text) {
         return { width: String(text).length * 10 };
-      },
+      }
     };
     const tileLayout = {
-      measureFittedLine: vi
-        .fn()
-        .mockReturnValueOnce({ px: 22, text: "AB" })
-        .mockReturnValueOnce({ px: 18, text: "CD" }),
+      measureFittedLine: vi.fn().mockReturnValueOnce({ px: 22, text: "AB" }).mockReturnValueOnce({ px: 18, text: "CD" })
     };
 
     const measuredByRatio = api.measurePx(
@@ -80,10 +75,10 @@ describe("HtmlMeasureUtils", function () {
         textApi: textApi,
         ctx: ctx,
         family: "sans-serif",
-        weight: 700,
+        weight: 700
       },
       htmlUtils,
-      tileLayout,
+      tileLayout
     );
     const measuredByMaxPx = api.measurePx(
       {
@@ -94,10 +89,10 @@ describe("HtmlMeasureUtils", function () {
         textApi: textApi,
         ctx: ctx,
         family: "sans-serif",
-        weight: 700,
+        weight: 700
       },
       htmlUtils,
-      tileLayout,
+      tileLayout
     );
 
     expect(tileLayout.measureFittedLine.mock.calls[0][0].maxPx).toBe(20);
@@ -113,15 +108,15 @@ describe("HtmlMeasureUtils", function () {
           textApi: textApi,
           ctx: ctx,
           family: "sans-serif",
-          weight: 700,
+          weight: 700
         },
         htmlUtils,
         {
           measureFittedLine() {
             return { px: 12, text: "CD" };
-          },
-        },
-      ),
+          }
+        }
+      )
     ).toBe("font-size:12px;");
   });
 
@@ -129,12 +124,8 @@ describe("HtmlMeasureUtils", function () {
     const api = createApi();
     const htmlUtils = { toFiniteNumber: () => undefined };
 
-    expect(
-      api.measurePx({ rect: { w: 0, h: 0 }, text: "x" }, htmlUtils, {}),
-    ).toBe(0);
-    expect(
-      api.measurePx({ rect: { w: 10, h: 10 }, text: "" }, htmlUtils, {}),
-    ).toBe(0);
+    expect(api.measurePx({ rect: { w: 0, h: 0 }, text: "x" }, htmlUtils, {})).toBe(0);
+    expect(api.measurePx({ rect: { w: 10, h: 10 }, text: "" }, htmlUtils, {})).toBe(0);
 
     const hostContext = {};
     const first = api.resolveFitCache(hostContext, "__cacheKey");

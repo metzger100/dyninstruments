@@ -9,4 +9,4 @@
   const config = /** @type {DyniPluginConfig} */ (ns.config);
 
   config.widgetDefinitions = /** @type {DyniWidgetDefinition[]} */ (config.clusters);
-}(this));
+})(this);

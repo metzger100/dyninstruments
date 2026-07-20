@@ -16,9 +16,13 @@
   const makeKindCondition = shared.makeKindCondition;
   const kindMaps = shared.kindMaps;
   const catalog = shared.unitFormatFamilies;
-  const valueMathModule = /** @type {{ create?: () => DyniValueMathApi } | undefined} */ (root.DyniComponents && root.DyniComponents.DyniValueMath);
+  const valueMathModule = /** @type {{ create?: () => DyniValueMathApi } | undefined} */ (
+    root.DyniComponents && root.DyniComponents.DyniValueMath
+  );
   if (!valueMathModule || typeof valueMathModule.create !== "function") {
-    throw new Error("dyninstruments: shared/widget-kits/value/ValueMath.js must load before config/shared/unit-editable-utils.js");
+    throw new Error(
+      "dyninstruments: shared/widget-kits/value/ValueMath.js must load before config/shared/unit-editable-utils.js"
+    );
   }
   const valueMath = valueMathModule.create();
   if (!valueMath || typeof valueMath.toText !== "function") {
@@ -31,7 +35,9 @@
   }
 
   if (!catalog || typeof catalog !== "object" || !catalog.families || !catalog.metricBindings) {
-    throw new Error("dyninstruments: shared/unit-format-families.js must load before config/shared/unit-editable-utils.js");
+    throw new Error(
+      "dyninstruments: shared/unit-format-families.js must load before config/shared/unit-editable-utils.js"
+    );
   }
 
   /** @param {unknown} condition @returns {DyniUnitConditionItem[]} */
@@ -39,7 +45,9 @@
     if (!condition) {
       return [];
     }
-    return Array.isArray(condition) ? /** @type {DyniUnitConditionItem[]} */ (condition) : [/** @type {DyniUnitConditionItem} */ (condition)];
+    return Array.isArray(condition)
+      ? /** @type {DyniUnitConditionItem[]} */ (condition)
+      : [/** @type {DyniUnitConditionItem} */ (condition)];
   }
 
   /** @param {unknown} baseCondition @param {unknown} extraCondition @returns {DyniEditableCondition | undefined} */
@@ -179,7 +187,9 @@
     const specDef = fieldSpec || {};
     const baseKey = toText(specDef.baseKey || specDef.key);
     if (!baseKey) {
-      throw new Error("dyninstruments: makePerUnitFloatParams requires fieldSpec.baseKey for metric '" + metricKey + "'");
+      throw new Error(
+        "dyninstruments: makePerUnitFloatParams requires fieldSpec.baseKey for metric '" + metricKey + "'"
+      );
     }
 
     const baseDisplayName = toText(specDef.displayName || specDef.name || baseKey);
@@ -196,9 +206,12 @@
         step: tokenSpec.step,
         default: tokenSpec.default,
         displayName: baseDisplayName + " (" + label + ")",
-        condition: mergeConditions(resolveKindCondition(kindDef, metricKey), mergeConditions(specDef.condition, {
-          ["formatUnit_" + metricKey]: token
-        }))
+        condition: mergeConditions(
+          resolveKindCondition(kindDef, metricKey),
+          mergeConditions(specDef.condition, {
+            ["formatUnit_" + metricKey]: token
+          })
+        )
       });
 
       if (specDef.internal === true || tokenSpec.internal === true) {
@@ -216,4 +229,4 @@
   shared.makeFormatUnitSelectParam = makeFormatUnitSelectParam;
   shared.makePerUnitStringParams = makePerUnitStringParams;
   shared.makePerUnitFloatParams = makePerUnitFloatParams;
-}(this));
+})(this);

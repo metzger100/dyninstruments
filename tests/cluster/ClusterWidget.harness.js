@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { loadFresh } = require("../helpers/load-umd");
 const { flushPromises } = require("../helpers/async");
 const { createComponentContextMock } = require("../helpers/component-context-mock");
@@ -67,9 +68,8 @@ function createSurfaceSessionControllerMock() {
     }),
     reconcileSession: vi.fn(function (payload) {
       state.activeController = state.activeController || { id: "surface-session-controller" };
-      state.shellEl = payload && Object.prototype.hasOwnProperty.call(payload, "shellEl")
-        ? payload.shellEl
-        : state.shellEl;
+      state.shellEl =
+        payload && Object.prototype.hasOwnProperty.call(payload, "shellEl") ? payload.shellEl : state.shellEl;
       return true;
     }),
     destroy: vi.fn(),
@@ -85,9 +85,12 @@ function createSurfaceSessionControllerMock() {
 
 function createActivationControllerMock(resultFactory) {
   return {
-    activateCommittedRoute: vi.fn(resultFactory || function () {
-      return {};
-    }),
+    activateCommittedRoute: vi.fn(
+      resultFactory ||
+        function () {
+          return {};
+        }
+    ),
     invalidateMemoState: vi.fn(),
     destroy: vi.fn()
   };
@@ -102,7 +105,8 @@ function createRuntimeHarness(options) {
   };
   const hostCommitController = opts.hostCommitController || createHostCommitControllerMock("dyni-host-42");
   const surfaceSessionController = opts.surfaceSessionController || createSurfaceSessionControllerMock();
-  const activationController = opts.activationController || createActivationControllerMock(opts.activationResultFactory);
+  const activationController =
+    opts.activationController || createActivationControllerMock(opts.activationResultFactory);
   const shellRenderer = {
     normalizeRouteFrame: vi.fn(function (rawProps, def, routes) {
       const cluster = rawProps && rawProps.cluster ? rawProps.cluster : def.cluster;
@@ -115,7 +119,7 @@ function createRuntimeHarness(options) {
       };
     }),
     renderRouteShell: vi.fn(function () {
-      return opts.shellHtml || "<div class=\"dyni-shell\">shell</div>";
+      return opts.shellHtml || '<div class="dyni-shell">shell</div>';
     })
   };
   const runtime = {
@@ -139,7 +143,7 @@ function createRuntimeHarness(options) {
     surfaces: {
       createController: vi.fn(),
       materializeSurfacePolicyProps: vi.fn()
-    },
+    }
   };
 
   globalThis.DyniPlugin = {
@@ -163,15 +167,15 @@ function createClusterWidget(def) {
   return loadFresh("cluster/ClusterWidget.js").create(def, createComponentContextMock());
 }
 
-  const originalDyniPlugin = globalThis.DyniPlugin;
+const originalDyniPlugin = globalThis.DyniPlugin;
 
-  afterEach(function () {
-    if (typeof originalDyniPlugin === "undefined") {
-      delete globalThis.DyniPlugin;
-    } else {
-      globalThis.DyniPlugin = originalDyniPlugin;
-    }
-  });
+afterEach(function () {
+  if (typeof originalDyniPlugin === "undefined") {
+    delete globalThis.DyniPlugin;
+  } else {
+    globalThis.DyniPlugin = originalDyniPlugin;
+  }
+});
 
 module.exports = {
   originalDyniPlugin,
@@ -180,7 +184,7 @@ module.exports = {
   createSurfaceSessionControllerMock,
   createActivationControllerMock,
   createRuntimeHarness,
-  createClusterWidget,
+  createClusterWidget
 };
 
 globalThis.createDeferred = createDeferred;

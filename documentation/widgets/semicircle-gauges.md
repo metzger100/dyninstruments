@@ -9,28 +9,30 @@ The four semicircle gauges share one renderer implementation:
 - Shared responsive layout ownership in `shared/widget-kits/radial/SemicircleRadialLayout.js`
 - Shared mode-routed text fitting/draw in `shared/widget-kits/radial/SemicircleRadialTextLayout.js`
 - Shared rendering orchestration in `shared/widget-kits/radial/SemicircleRadialEngine.js`
-- Shared helper APIs via `RadialToolkit` (`componentContext.theme.tokens`, `CanvasTextLayout` and `ValueMath` through `GaugeToolkit`, `RadialAngleMath`, `RadialTickMath`, draw utils)
+- Shared helper APIs via `RadialToolkit` (`componentContext.theme.tokens`, `CanvasTextLayout` and `ValueMath` through
+  `GaugeToolkit`, `RadialAngleMath`, `RadialTickMath`, draw utils)
 - Gauge wrappers keep only formatting, tick-profile selection, and sector strategy
 
 ## File Locations
 
-| Role | File |
-|---|---|
-| Shared facade | `shared/widget-kits/radial/RadialToolkit.js` |
-| Generic text helpers | `shared/widget-kits/text/CanvasTextLayout.js` |
-| Generic value helpers | `shared/widget-kits/value/ValueMath.js` |
-| Radial compatibility wrapper (external callers) | `shared/widget-kits/radial/RadialValueMath.js` |
-| Responsive layout owner | `shared/widget-kits/radial/SemicircleRadialLayout.js` |
-| Mode text helper | `shared/widget-kits/radial/SemicircleRadialTextLayout.js` |
-| Shared semicircle renderer | `shared/widget-kits/radial/SemicircleRadialEngine.js` |
-| Speed wrapper | `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js` |
-| Depth wrapper | `widgets/radial/DepthRadialWidget/DepthRadialWidget.js` |
-| Temperature wrapper | `widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js` |
-| Voltage wrapper | `widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js` |
+| Role                                            | File                                                                |
+| ----------------------------------------------- | ------------------------------------------------------------------- |
+| Shared facade                                   | `shared/widget-kits/radial/RadialToolkit.js`                        |
+| Generic text helpers                            | `shared/widget-kits/text/CanvasTextLayout.js`                       |
+| Generic value helpers                           | `shared/widget-kits/value/ValueMath.js`                             |
+| Radial compatibility wrapper (external callers) | `shared/widget-kits/radial/RadialValueMath.js`                      |
+| Responsive layout owner                         | `shared/widget-kits/radial/SemicircleRadialLayout.js`               |
+| Mode text helper                                | `shared/widget-kits/radial/SemicircleRadialTextLayout.js`           |
+| Shared semicircle renderer                      | `shared/widget-kits/radial/SemicircleRadialEngine.js`               |
+| Speed wrapper                                   | `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js`             |
+| Depth wrapper                                   | `widgets/radial/DepthRadialWidget/DepthRadialWidget.js`             |
+| Temperature wrapper                             | `widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js` |
+| Voltage wrapper                                 | `widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js`         |
 
 ## Module Dependencies
 
-In `config/components/registry-widgets-gauge.js` (assembled by `config/components.js`), all four gauges depend on `SemicircleRadialEngine` and `ValueMath`:
+In `config/components/registry-widgets-gauge.js` (assembled by `config/components.js`), all four gauges depend on
+`SemicircleRadialEngine` and `ValueMath`:
 
 ```text
 SpeedRadialWidget/DepthRadialWidget/TemperatureRadialWidget/VoltageRadialWidget
@@ -47,10 +49,12 @@ SpeedRadialWidget/DepthRadialWidget/TemperatureRadialWidget/VoltageRadialWidget
 
 1. Canvas setup + theme resolve + responsive mode detection (`flat`, `normal`, `high`)
 2. One-time theme token read (`const tokens = componentContext.theme.tokens.resolveForRoot(rootEl)`)
-3. `SemicircleRadialLayout.computeInsets()` / `computeLayout()` for shared responsive geometry, label metrics, and mode boxes
+3. `SemicircleRadialLayout.computeInsets()` / `computeLayout()` for shared responsive geometry, label metrics, and mode
+   boxes
 4. Arc ring + sectors + pointer + ticks + labels
 5. `SemicircleRadialTextLayout.drawModeText()` for flat/high/normal caption-value-unit layout
-6. State-screen branch: for non-data kinds (for example `disconnect === true`), clear and draw shared state-screen instead of gauge content
+6. State-screen branch: for non-data kinds (for example `disconnect === true`), clear and draw shared state-screen
+   instead of gauge content
 
 Pointer and sector rendering in shared gauge paths use direct scalar token values passed at callsites.
 
@@ -58,9 +62,12 @@ Responsive ownership:
 
 - `ResponsiveScaleProfile` owns the compact curve (`textFillScale`)
 - `SemicircleRadialLayout` maps that curve into semicircle-family spacing, label metrics, and text boxes
-- `SemicircleRadialTextLayout` consumes layout-owned boxes and `textFillScale`; it does not create a second compaction curve
-- `hideTextualMetrics` suppresses the live value readout while preserving semicircle geometry, ticks, pointer, and state screens
-- Text fitting is fail-safe: caption/value/unit rendering is clamped to stay inside mode-owned boxes, and compact layouts may downscale text further instead of clipping into gauge geometry
+- `SemicircleRadialTextLayout` consumes layout-owned boxes and `textFillScale`; it does not create a second compaction
+  curve
+- `hideTextualMetrics` suppresses the live value readout while preserving semicircle geometry, ticks, pointer, and state
+  screens
+- Text fitting is fail-safe: caption/value/unit rendering is clamped to stay inside mode-owned boxes, and compact
+  layouts may downscale text further instead of clipping into gauge geometry
 - Theme tokens are resolved once per render via `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
 
 ## Gauge-Specific Responsibilities
@@ -71,13 +78,15 @@ Each wrapper defines:
 - Tick profile selection via shared `ValueMath` resolver methods
 - Sector placement strategy (high-end or low-end), with theme colors forwarded as scalar sector colors
 - Wrapper-owned unit/ratio bindings plus config-backed range ownership
-- Migrated wrappers receive formatter tokens separately from display labels; the token drives conversion and the display label stays editable per token.
+- Migrated wrappers receive formatter tokens separately from display labels; the token drives conversion and the display
+  label stays editable per token.
 
 ### SpeedRadialWidget
 
 - High-end sectors
 - Tick profile: `resolveStandardSemicircleTickSteps`
-- Formatter path: `componentContext.format.applyFormatter(raw, { formatter: "formatSpeed", formatterParameters: [formatUnit] })`
+- Formatter path:
+  `componentContext.format.applyFormatter(raw, { formatter: "formatSpeed", formatterParameters: [formatUnit] })`
 - Config-backed range defaults: `0..30`
 - Wrapper defaults/bindings: display unit `kn`, speed ratio props
 
@@ -94,7 +103,8 @@ Each wrapper defines:
 
 - High-end sectors
 - Tick profile: `resolveTemperatureSemicircleTickSteps`
-- Formatter path: `componentContext.format.applyFormatter(raw, { formatter: "formatTemperature", formatterParameters: [formatUnit] })`
+- Formatter path:
+  `componentContext.format.applyFormatter(raw, { formatter: "formatTemperature", formatterParameters: [formatUnit] })`
 - Config-backed range defaults: `0..35`
 - Wrapper defaults/bindings: display unit `°C`, temperature ratio props
 
@@ -102,11 +112,14 @@ Each wrapper defines:
 
 - Low-end sectors
 - Tick profile: `resolveVoltageSemicircleTickSteps`
-- Formatter path: `componentContext.format.applyFormatter(raw, { formatter: "formatDecimal", formatterParameters: [3, 1, true] })`
+- Formatter path:
+  `componentContext.format.applyFormatter(raw, { formatter: "formatDecimal", formatterParameters: [3, 1, true] })`
 - Config-backed range defaults: `7..15`
 - Wrapper defaults/bindings: unit `V`, voltage ratio props
-- Toggle behavior: sectors default to enabled when toggle values are unset; explicit `voltageRadialWarningEnabled: false` and/or `voltageRadialAlarmEnabled: false` suppress corresponding sectors
-- Low-end defaults (`warningFrom=12.2`, `alarmFrom=11.6`) come from the editable/default config boundary; the wrapper forwards only enabled sector props plus theme colors
+- Toggle behavior: sectors default to enabled when toggle values are unset; explicit
+  `voltageRadialWarningEnabled: false` and/or `voltageRadialAlarmEnabled: false` suppress corresponding sectors
+- Low-end defaults (`warningFrom=12.2`, `alarmFrom=11.6`) come from the editable/default config boundary; the wrapper
+  forwards only enabled sector props plus theme colors
 
 ## Removed Duplication
 
@@ -123,14 +136,21 @@ Removed from wrappers:
 
 ## Performance
 
-- Text-fit caching is still owned by the `SemicircleRadialEngine.createRenderer(spec)` closure state (`fitCache`), but the per-mode cache entries are consumed by `SemicircleRadialTextLayout`.
-- Static gauge art (sectors, arc ring, ticks, major labels) is cached via `CanvasLayerCache` and rebuilt only when the static key changes (resize, DPR/buffer, layout geometry, range/tick/sector/theme/font inputs).
+- Text-fit caching is still owned by the `SemicircleRadialEngine.createRenderer(spec)` closure state (`fitCache`), but
+  the per-mode cache entries are consumed by `SemicircleRadialTextLayout`.
+- Static gauge art (sectors, arc ring, ticks, major labels) is cached via `CanvasLayerCache` and rebuilt only when the
+  static key changes (resize, DPR/buffer, layout geometry, range/tick/sector/theme/font inputs).
 - Covered fitting paths: `flat` (compact), `high`, and `normal` layouts.
 - Cache keys include all fitting-relevant inputs:
-  - shared inputs: `W`, `H`, active mode, `caption`, `valueWidthClass` (rounded measured width of `valueText`), `unit`, effective `secScale` (`captionUnitScale` after clamp), resolved font family, and theme font weights.
-  - geometry/layout inputs: mode-specific box dimensions and layout-owned geometry values (`R`, `ringW`, label metrics, placement boxes, and normal-mode `rSafe` / search bounds).
-- Invalidation is automatic by key mismatch: caption and unit text changes invalidate directly, value text invalidates only when its rounded measured `valueWidthClass` changes, and typography, scale, and geometry inputs continue to invalidate as before.
-- Per-frame dynamic draws remain pointer + text/value rendering; pointer now draws after cached static-layer blit (in front of ticks/labels).
+  - shared inputs: `W`, `H`, active mode, `caption`, `valueWidthClass` (rounded measured width of `valueText`), `unit`,
+    effective `secScale` (`captionUnitScale` after clamp), resolved font family, and theme font weights.
+  - geometry/layout inputs: mode-specific box dimensions and layout-owned geometry values (`R`, `ringW`, label metrics,
+    placement boxes, and normal-mode `rSafe` / search bounds).
+- Invalidation is automatic by key mismatch: caption and unit text changes invalidate directly, value text invalidates
+  only when its rounded measured `valueWidthClass` changes, and typography, scale, and geometry inputs continue to
+  invalidate as before.
+- Per-frame dynamic draws remain pointer + text/value rendering; pointer now draws after cached static-layer blit (in
+  front of ticks/labels).
 
 ## Phase 6 Options
 

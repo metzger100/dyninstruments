@@ -1,33 +1,36 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("EditRouteRenderModel", function () {
   function createRenderModel(options) {
     const opts = options || {};
-    const applyFormatter = opts.applyFormatter || function (value, formatterOptions) {
-      const cfg = formatterOptions || {};
-      const defaultText = Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
-      if (value == null || Number.isNaN(value)) {
-        return defaultText;
-      }
+    const applyFormatter =
+      opts.applyFormatter ||
+      function (value, formatterOptions) {
+        const cfg = formatterOptions || {};
+        const defaultText = Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
+        if (value == null || Number.isNaN(value)) {
+          return defaultText;
+        }
 
-      if (cfg.formatter === "formatDecimal") {
-        const precision = Array.isArray(cfg.formatterParameters) ? Number(cfg.formatterParameters[0]) : 0;
-        const places = Number.isFinite(precision) ? Math.max(0, Math.floor(precision)) : 0;
-        return Number(value).toFixed(places);
-      }
-      if (cfg.formatter === "formatDistance") {
-        const unit = Array.isArray(cfg.formatterParameters) ? String(cfg.formatterParameters[0] || "") : "";
-        return "DST(" + unit + "):" + Number(value).toFixed(1);
-      }
-      if (cfg.formatter === "formatTime") {
-        return "TIME:" + String(value);
-      }
-      if (cfg.formatter === "formatClock") {
-        return "CLOCK:" + String(value);
-      }
-      return String(value);
-    };
+        if (cfg.formatter === "formatDecimal") {
+          const precision = Array.isArray(cfg.formatterParameters) ? Number(cfg.formatterParameters[0]) : 0;
+          const places = Number.isFinite(precision) ? Math.max(0, Math.floor(precision)) : 0;
+          return Number(value).toFixed(places);
+        }
+        if (cfg.formatter === "formatDistance") {
+          const unit = Array.isArray(cfg.formatterParameters) ? String(cfg.formatterParameters[0] || "") : "";
+          return "DST(" + unit + "):" + Number(value).toFixed(1);
+        }
+        if (cfg.formatter === "formatTime") {
+          return "TIME:" + String(value);
+        }
+        if (cfg.formatter === "formatClock") {
+          return "CLOCK:" + String(value);
+        }
+        return String(value);
+      };
 
     const componentContext = createComponentContextMock({
       modules: {
@@ -68,37 +71,40 @@ describe("EditRouteRenderModel", function () {
   }
 
   function makeProps(overrides) {
-    return Object.assign({
-      domain: {
-        hasRoute: true,
-        routeName: "Harbor Run",
-        pointCount: 5,
-        totalDistance: 1234.5,
-        remainingDistance: 321.4,
-        rteEta: "2026-03-06T11:45:00Z",
-        isActiveRoute: true,
-        isLocalRoute: true,
-        isServerRoute: false
+    return Object.assign(
+      {
+        domain: {
+          hasRoute: true,
+          routeName: "Harbor Run",
+          pointCount: 5,
+          totalDistance: 1234.5,
+          remainingDistance: 321.4,
+          rteEta: "2026-03-06T11:45:00Z",
+          isActiveRoute: true,
+          isLocalRoute: true,
+          isServerRoute: false
+        },
+        layout: {
+          ratioThresholdNormal: 1.2,
+          ratioThresholdFlat: 3.8
+        },
+        captions: {
+          pts: "PTS",
+          dst: "DST",
+          rte: "RTE",
+          rteEta: "ETA"
+        },
+        units: {
+          dst: "nm",
+          rte: "nm"
+        },
+        formatUnits: {
+          dst: "nm",
+          rte: "nm"
+        }
       },
-      layout: {
-        ratioThresholdNormal: 1.2,
-        ratioThresholdFlat: 3.8
-      },
-      captions: {
-        pts: "PTS",
-        dst: "DST",
-        rte: "RTE",
-        rteEta: "ETA"
-      },
-      units: {
-        dst: "nm",
-        rte: "nm"
-      },
-      formatUnits: {
-        dst: "nm",
-        rte: "nm"
-      }
-    }, overrides || {});
+      overrides || {}
+    );
   }
 
   it("stays passive when capability is unsupported or layout editing is active", function () {
@@ -122,22 +128,25 @@ describe("EditRouteRenderModel", function () {
   it("uses configured caption and DST/RTE units in formatter inputs", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: withSurfacePolicy(makeProps({
-        captions: {
-          pts: "POINTS",
-          dst: "DIST",
-          rte: "LEFT",
-          rteEta: "ARRIVE"
-        },
-        units: {
-          dst: "km",
-          rte: "mi"
-        },
-        formatUnits: {
-          dst: "km",
-          rte: "mi"
-        }
-      }), { mode: "dispatch" }),
+      props: withSurfacePolicy(
+        makeProps({
+          captions: {
+            pts: "POINTS",
+            dst: "DIST",
+            rte: "LEFT",
+            rteEta: "ARRIVE"
+          },
+          units: {
+            dst: "km",
+            rte: "mi"
+          },
+          formatUnits: {
+            dst: "km",
+            rte: "mi"
+          }
+        }),
+        { mode: "dispatch" }
+      ),
       shellRect: { width: 320, height: 210 },
       isVerticalCommitted: false
     });
@@ -157,12 +166,15 @@ describe("EditRouteRenderModel", function () {
   it("does not expose units for ETA/PTS and drops unit slots when DST/RTE units are empty", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: withSurfacePolicy(makeProps({
-        units: {
-          dst: "",
-          rte: ""
-        }
-      }), { mode: "dispatch" }),
+      props: withSurfacePolicy(
+        makeProps({
+          units: {
+            dst: "",
+            rte: ""
+          }
+        }),
+        { mode: "dispatch" }
+      ),
       shellRect: { width: 320, height: 210 },
       isVerticalCommitted: false
     });
@@ -183,24 +195,30 @@ describe("EditRouteRenderModel", function () {
       isVerticalCommitted: false
     });
     const captionChanged = renderModel.buildModel({
-      props: withSurfacePolicy(makeProps({
-        captions: {
-          pts: "PTS",
-          dst: "DISTANCE",
-          rte: "RTE",
-          rteEta: "ETA"
-        }
-      }), { mode: "dispatch" }),
+      props: withSurfacePolicy(
+        makeProps({
+          captions: {
+            pts: "PTS",
+            dst: "DISTANCE",
+            rte: "RTE",
+            rteEta: "ETA"
+          }
+        }),
+        { mode: "dispatch" }
+      ),
       shellRect: { width: 320, height: 210 },
       isVerticalCommitted: false
     });
     const unitChanged = renderModel.buildModel({
-      props: withSurfacePolicy(makeProps({
-        units: {
-          dst: "km",
-          rte: "nm"
-        }
-      }), { mode: "dispatch" }),
+      props: withSurfacePolicy(
+        makeProps({
+          units: {
+            dst: "km",
+            rte: "nm"
+          }
+        }),
+        { mode: "dispatch" }
+      ),
       shellRect: { width: 320, height: 210 },
       isVerticalCommitted: false
     });

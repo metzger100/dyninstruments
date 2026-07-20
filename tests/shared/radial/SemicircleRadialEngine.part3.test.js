@@ -1,3 +1,4 @@
+// @ts-nocheck
 const {
   makeThemeDefaults,
   makeComponentContext,
@@ -5,7 +6,7 @@ const {
   createBaseSequence,
   createValueMath,
   makeBaseSpec,
-  createRenderHarness,
+  createRenderHarness
 } = require("./SemicircleRadialEngine.harness");
 
 describe("SemicircleRadialEngine", function () {
@@ -18,10 +19,10 @@ describe("SemicircleRadialEngine", function () {
             theme: {
               resolveForRoot() {
                 return makeThemeDefaults();
-              },
+              }
             },
             text: {
-              drawDisconnectOverlay() {},
+              drawDisconnectOverlay() {}
             },
             value: createValueMath(),
             draw: {
@@ -29,14 +30,12 @@ describe("SemicircleRadialEngine", function () {
               drawAnnularSector() {},
               drawPointerAtRim() {},
               drawTicksFromAngles() {},
-              drawLabels() {},
-            },
+              drawLabels() {}
+            }
           };
-        },
+        }
       },
-      SemicircleRadialLayout: loadFresh(
-        "shared/widget-kits/radial/SemicircleRadialLayout.js",
-      ),
+      SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
       SemicircleRadialTextLayout: {
         create() {
           return {
@@ -45,19 +44,15 @@ describe("SemicircleRadialEngine", function () {
             },
             drawModeText(state, display) {
               textLayoutCalls.push({ state, display });
-            },
+            }
           };
-        },
+        }
       },
-      ResponsiveScaleProfile: loadFresh(
-        "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-      ),
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
       LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-      GeometryScale: geometryScale,
+      GeometryScale: geometryScale
     };
-    const renderer = loadFresh(
-      "shared/widget-kits/radial/SemicircleRadialEngine.js",
-    )
+    const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
       .create({}, makeComponentContext(modules))
       .createRenderer({
         rawValueKey: "speed",
@@ -65,7 +60,7 @@ describe("SemicircleRadialEngine", function () {
         rangeDefaults: { min: 0, max: 30 },
         ratioProps: {
           normal: "speedRadialRatioThresholdNormal",
-          flat: "speedRadialRatioThresholdFlat",
+          flat: "speedRadialRatioThresholdFlat"
         },
         hideTextualMetricsProp: "speedRadialHideTextualMetrics",
         ratioDefaults: { normal: 1.1, flat: 3.5 },
@@ -74,38 +69,33 @@ describe("SemicircleRadialEngine", function () {
         },
         buildSectors() {
           return [];
-        },
+        }
       });
 
     const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     [null, undefined, "", "   "].forEach(function (rawSpeed) {
       renderer(canvas, {
         speed: rawSpeed,
         default: "---",
         caption: "SPD",
-        unit: "kn",
+        unit: "kn"
       });
 
       expect(textLayoutCalls.length).toBeGreaterThan(0);
-      expect(
-        textLayoutCalls[textLayoutCalls.length - 1].display.valueText,
-      ).toBe("---");
+      expect(textLayoutCalls[textLayoutCalls.length - 1].display.valueText).toBe("---");
     });
 
     renderer(canvas, {
       speed: "4.2",
       default: "---",
       caption: "SPD",
-      unit: "kn",
+      unit: "kn"
     });
     expect(textLayoutCalls.length).toBeGreaterThan(0);
-    expect(textLayoutCalls[textLayoutCalls.length - 1].display.valueText).toBe(
-      "4.2",
-    );
+    expect(textLayoutCalls[textLayoutCalls.length - 1].display.valueText).toBe("4.2");
   });
-
 });

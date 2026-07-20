@@ -1,7 +1,7 @@
 # CONTRIBUTING (Developer + AI Workflow)
 
-This document is for contributors using AI coding tools.
-It describes how to prompt, when to use planning mode, what the AI will do, and what the developer must verify before merge.
+This document is for contributors using AI coding tools. It describes how to prompt, when to use planning mode, what the
+AI will do, and what the developer must verify before merge.
 
 ## 1) Purpose and Audience
 
@@ -28,9 +28,8 @@ cd ~/avnav-master/run/avnavdata/plugins/dyninstruments
 npm run setup
 ```
 
-The supported development runtime is Node 26 with npm 12.0.1. `npm run setup`
-runs the locked install and provisions the checksum-verified actionlint binary
-in the persistent cache outside `node_modules`.
+The supported development runtime is Node 26 with npm 12.0.1. `npm run setup` runs the locked install and provisions the
+checksum-verified actionlint binary in the persistent cache outside `node_modules`.
 
 ### 2.3 Install and watch AvNav viewer
 
@@ -57,11 +56,10 @@ python3 ~/avnav-master/server/avnav_server.py \
 - Enter layout edit mode.
 - Confirm `dyninstruments_*` widgets are visible.
 
-For final manual validation, also verify one radial gauge, one linear gauge,
-and one HTML widget from the bundled layouts; switch day/night appearance; and
-exercise the route/AIS interaction controls. Record the date, AvNav version,
-browser, representative widgets/layouts, and any limitation in the active
-execution plan before declaring the migration complete.
+For final manual validation, also verify one radial gauge, one linear gauge, and one HTML widget from the bundled
+layouts; switch day/night appearance; and exercise the route/AIS interaction controls. Record the date, AvNav version,
+browser, representative widgets/layouts, and any limitation in the active execution plan before declaring the migration
+complete.
 
 ## 3) How to Prompt AI Effectively
 
@@ -114,13 +112,13 @@ Refactor this area without behavior regression:
 
 The AI does not decide whether planning mode should be enabled. The Developer must decide before prompting.
 
-| Situation | Planning Mode |
-|---|---|
-| Single-file fix, low risk, no architecture impact | Optional |
-| Multi-file change with mapper/runtime/shared interactions | Required |
-| Refactor touching boundaries, deps, or checks | Required |
-| Any unclear requirement or high ambiguity | Required |
-| Pure doc typo/text cleanup | Usually not needed |
+| Situation                                                 | Planning Mode      |
+| --------------------------------------------------------- | ------------------ |
+| Single-file fix, low risk, no architecture impact         | Optional           |
+| Multi-file change with mapper/runtime/shared interactions | Required           |
+| Refactor touching boundaries, deps, or checks             | Required           |
+| Any unclear requirement or high ambiguity                 | Required           |
+| Pure doc typo/text cleanup                                | Usually not needed |
 
 If unsure, choose planning mode.
 
@@ -158,8 +156,7 @@ At least one prevention action is required:
 2. Add or strengthen a behavior or contract test when the problem is semantic.
 3. Add focused documentation when the correct design is not discoverable.
 
-New custom checker code is allowed only for irreducible AvNav contracts with a
-documented reason.
+New custom checker code is allowed only for irreducible AvNav contracts with a documented reason.
 
 ## 8) Execution and Validation Workflow
 
@@ -170,9 +167,8 @@ pre-commit install
 pre-commit run --all-files
 ```
 
-The hooks run fast local checks only. The complete local `check:all` gate is the
-quality authority; tag pushes rerun it before GitHub publishes only the locally
-prepared, committed release artifacts.
+The hooks run fast local checks only. The complete local `check:all` gate is the quality authority; tag pushes rerun it
+before GitHub publishes only the locally prepared, committed release artifacts.
 
 Run from repository root after implementation:
 
@@ -190,34 +186,30 @@ npm run test:split
 npm test
 ```
 
-`check:standard` is the standard-tool layer: scoped Prettier config/workflow
-formatting, ESLint, Stylelint, pinned actionlint workflow validation, and jscpd.
-Any clone detected by jscpd fails this layer.
-`check:fast` adds strict type checking and Node-only unit/tool tests without
-the full coverage gate.
-`check:core` includes it plus
-`typecheck`, `package:check`, and `docs:check` before the remaining
-project-specific Dyni gates.
-`test:split` separates Node-only tool tests from jsdom runtime/widget tests.
+`check:standard` is the standard-tool layer: full-repository Prettier formatting (every maintained JS/MJS, CSS, and
+Markdown file plus config/workflow files), ESLint, Stylelint, pinned actionlint workflow validation, and jscpd. Any
+clone detected by jscpd fails this layer. `check:fast` adds strict type checking and Node-only unit/tool tests without
+the full coverage gate. `check:core` includes it plus `typecheck`, `package:check`, `check:complexity` (complexity
+no-regression budget), `check:scaling` (deterministic operation-count contracts, never timing), and `docs:check` before
+the remaining project-specific Dyni gates. `test:split` separates Node-only tool tests from jsdom runtime/widget tests.
 
 Do not merge with failing checks.
 
 ## 9) Releasing
 
-Use the dedicated release guide for the full local-first workflow, SemVer decision rules, and release notes expectations:
+Use the dedicated release guide for the full local-first workflow, SemVer decision rules, and release notes
+expectations:
 
 - [documentation/guides/release-workflow.md](documentation/guides/release-workflow.md)
 
-In short: run `npm run release:prepare`, choose a full SemVer version, write
-notes in `releases/dyninstruments-VERSION.md`, then run
-`npm run release:create -- --version=VERSION`. Prereleases such as
+In short: run `npm run release:prepare`, choose a full SemVer version, write notes in
+`releases/dyninstruments-VERSION.md`, then run `npm run release:create -- --version=VERSION`. Prereleases such as
 `4.0.0-beta.1` use the same flow.
 
-Tag publication uses the committed release artifacts created locally. The
-tag workflow reruns locked setup and `check:all`, validates SemVer, and never
-rebuilds the ZIP. It publishes SemVer prerelease tags as GitHub prereleases and
-stable tags as normal releases. The documented manual AvNav validation
-supplements the blocking jsdom and VM contracts before release creation.
+Tag publication uses the committed release artifacts created locally. The tag workflow reruns locked setup and
+`check:all`, validates SemVer, and never rebuilds the ZIP. It publishes SemVer prerelease tags as GitHub prereleases and
+stable tags as normal releases. The documented manual AvNav validation supplements the blocking jsdom and VM contracts
+before release creation.
 
 ## 10) Pre-Merge Checklist
 

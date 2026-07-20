@@ -1,3 +1,4 @@
+// @ts-nocheck
 const {
   makeThemeDefaults,
   makeComponentContext,
@@ -5,7 +6,7 @@ const {
   createBaseSequence,
   createValueMath,
   makeBaseSpec,
-  createRenderHarness,
+  createRenderHarness
 } = require("./SemicircleRadialEngine.harness");
 
 describe("SemicircleRadialEngine", function () {
@@ -14,19 +15,19 @@ describe("SemicircleRadialEngine", function () {
       {
         a0: 20,
         a1: 40,
-        color: "#e0a92e",
-      },
+        color: "#e0a92e"
+      }
     ]);
     const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.renderer(canvas, {
       value: 12.3,
       caption: "SPD",
-      unit: "kn",
+      unit: "kn"
     });
 
     const sectorIndex = harness.sequence.indexOf("sector");
@@ -46,5 +47,4 @@ describe("SemicircleRadialEngine", function () {
     expect(harness.tickCalls).toHaveLength(1);
     expect(harness.labelCalls).toHaveLength(1);
   });
-
 });

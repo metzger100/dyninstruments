@@ -1,25 +1,18 @@
 const {
-  readCss,
-  escapeRegExp,
-  normalizeRuleBody,
-  readRuleBody,
-  normalizeSelectorList,
-  readCombinedRuleBody,
-  expectDeclaration,
   createHelpers,
   makePayload,
   createRealAlarmRenderer,
   createAisRendererWithRealLayout,
   mountRenderer,
   readStyleFields,
-  createAlarmMeasureContext,
+  createAlarmMeasureContext
 } = require("./AlarmTextHtmlWidget.harness.js");
 
 describe("AlarmTextHtmlWidget", function () {
   it("mounts a committed alarm root and dispatches only when active", function () {
     const h = createHelpers();
     const committed = h.rendererSpec.createCommittedRenderer({
-      hostContext: {},
+      hostContext: {}
     });
     const mountHost = document.createElement("div");
     const payload = makePayload();
@@ -29,28 +22,24 @@ describe("AlarmTextHtmlWidget", function () {
     expect(mountHost.querySelector(".dyni-alarm-root")).toBeTruthy();
     expect(mountHost.querySelector(".dyni-alarm-html")).toBeTruthy();
     expect(
-      mountHost
-        .querySelector(".dyni-alarm-html")
-        .classList.contains("dyni-alarm-open-dispatch"),
+      /** @type {HTMLElement} */ (mountHost.querySelector(".dyni-alarm-html")).classList.contains(
+        "dyni-alarm-open-dispatch"
+      )
     ).toBe(true);
     expect(mountHost.querySelector(".dyni-alarm-main")).toBeTruthy();
     expect(mountHost.querySelector(".dyni-alarm-main-normal")).toBeTruthy();
 
-    mountHost
-      .querySelector(".dyni-alarm-root")
-      .dispatchEvent(
-        new MouseEvent("click", { bubbles: true, cancelable: true }),
-      );
+    /** @type {HTMLElement} */ (mountHost.querySelector(".dyni-alarm-root")).dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true })
+    );
 
-    expect(
-      payload.props.surfacePolicy.actions.alarm.stopAll,
-    ).toHaveBeenCalledTimes(1);
+    expect(payload.props.surfacePolicy.actions.alarm.stopAll).toHaveBeenCalledTimes(1);
   });
 
   it("forwards fontMetricsEpoch into AlarmHtmlFit.compute", function () {
     const h = createHelpers();
     const committed = h.rendererSpec.createCommittedRenderer({
-      hostContext: {},
+      hostContext: {}
     });
     const mountHost = document.createElement("div");
     const payload = makePayload({ fontMetricsEpoch: 7 });
@@ -60,15 +49,15 @@ describe("AlarmTextHtmlWidget", function () {
     expect(h.fit.compute).toHaveBeenCalledTimes(1);
     expect(h.fit.compute.mock.calls[0][0]).toEqual(
       expect.objectContaining({
-        fontMetricsEpoch: 7,
-      }),
+        fontMetricsEpoch: 7
+      })
     );
   });
 
   it("removes dispatch handling when the widget becomes passive or editing is active", function () {
     const h = createHelpers();
     const committed = h.rendererSpec.createCommittedRenderer({
-      hostContext: {},
+      hostContext: {}
     });
     const mountHost = document.createElement("div");
     const payload = makePayload();
@@ -77,22 +66,22 @@ describe("AlarmTextHtmlWidget", function () {
         editing: true,
         surfacePolicy: {
           interaction: {
-            mode: "passive",
+            mode: "passive"
           },
           actions: {
             alarm: {
-              stopAll: payload.props.surfacePolicy.actions.alarm.stopAll,
-            },
-          },
+              stopAll: payload.props.surfacePolicy.actions.alarm.stopAll
+            }
+          }
         },
         domain: {
           state: "idle",
           alarmText: "NONE",
           hasActiveAlarms: false,
           activeCount: 0,
-          alarmNames: [],
-        },
-      },
+          alarmNames: []
+        }
+      }
     });
     const stopAll = payload.props.surfacePolicy.actions.alarm.stopAll;
 
@@ -100,17 +89,15 @@ describe("AlarmTextHtmlWidget", function () {
     committed.update(passivePayload);
 
     expect(
-      mountHost
-        .querySelector(".dyni-alarm-html")
-        .classList.contains("dyni-alarm-open-passive"),
+      /** @type {HTMLElement} */ (mountHost.querySelector(".dyni-alarm-html")).classList.contains(
+        "dyni-alarm-open-passive"
+      )
     ).toBe(true);
     expect(mountHost.querySelector(".dyni-alarm-open-hotspot")).toBeFalsy();
 
-    mountHost
-      .querySelector(".dyni-alarm-root")
-      .dispatchEvent(
-        new MouseEvent("click", { bubbles: true, cancelable: true }),
-      );
+    /** @type {HTMLElement} */ (mountHost.querySelector(".dyni-alarm-root")).dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true })
+    );
 
     expect(stopAll).toHaveBeenCalledTimes(0);
   });
@@ -118,7 +105,7 @@ describe("AlarmTextHtmlWidget", function () {
   it("keeps the active alarm shell passive when the surface policy is passive", function () {
     const h = createHelpers();
     const committed = h.rendererSpec.createCommittedRenderer({
-      hostContext: {},
+      hostContext: {}
     });
     const mountHost = document.createElement("div");
     const stopAll = vi.fn(() => true);
@@ -126,71 +113,69 @@ describe("AlarmTextHtmlWidget", function () {
       props: {
         surfacePolicy: {
           interaction: {
-            mode: "passive",
+            mode: "passive"
           },
           actions: {
             alarm: {
-              stopAll: stopAll,
-            },
-          },
+              stopAll: stopAll
+            }
+          }
         },
         domain: {
           state: "active",
           alarmText: "ENGINE",
           hasActiveAlarms: true,
           activeCount: 1,
-          alarmNames: ["ENGINE"],
-        },
-      },
+          alarmNames: ["ENGINE"]
+        }
+      }
     });
 
     committed.mount(mountHost, payload);
-    mountHost
-      .querySelector(".dyni-alarm-root")
-      .dispatchEvent(
-        new MouseEvent("click", { bubbles: true, cancelable: true }),
-      );
+    /** @type {HTMLElement} */ (mountHost.querySelector(".dyni-alarm-root")).dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true })
+    );
 
     expect(stopAll).not.toHaveBeenCalled();
     expect(mountHost.querySelector(".dyni-alarm-html")).toBeTruthy();
     expect(
-      mountHost
-        .querySelector(".dyni-alarm-html")
-        .classList.contains("dyni-alarm-state-active"),
+      /** @type {HTMLElement} */ (mountHost.querySelector(".dyni-alarm-html")).classList.contains(
+        "dyni-alarm-state-active"
+      )
     ).toBe(true);
     expect(
-      mountHost
-        .querySelector(".dyni-alarm-html")
-        .classList.contains("dyni-alarm-open-passive"),
+      /** @type {HTMLElement} */ (mountHost.querySelector(".dyni-alarm-html")).classList.contains(
+        "dyni-alarm-open-passive"
+      )
     ).toBe(true);
   });
 
   it("renders the idle accent and main content wrapper when the alarm is idle", function () {
     const h = createHelpers();
     const committed = h.rendererSpec.createCommittedRenderer({
-      hostContext: {},
+      hostContext: {}
     });
     const mountHost = document.createElement("div");
     const payload = makePayload({
       props: {
         surfacePolicy: {
           interaction: {
-            mode: "passive",
+            mode: "passive"
           },
           actions: {
             alarm: {
-              stopAll: vi.fn(() => true),
-            },
-          },
+              stopAll: vi.fn(() => true)
+            }
+          }
         },
         domain: {
           state: "idle",
           alarmText: "NONE",
           hasActiveAlarms: false,
           activeCount: 0,
-          alarmNames: [],
-        },
-      },
+          alarmNames: []
+        }
+      }
     });
 
     committed.mount(mountHost, payload);
@@ -199,9 +184,9 @@ describe("AlarmTextHtmlWidget", function () {
     expect(mountHost.querySelector(".dyni-alarm-main")).toBeTruthy();
     expect(mountHost.querySelector(".dyni-alarm-main-normal")).toBeTruthy();
     expect(
-      mountHost
-        .querySelector(".dyni-alarm-html")
-        .classList.contains("dyni-alarm-open-passive"),
+      /** @type {HTMLElement} */ (mountHost.querySelector(".dyni-alarm-html")).classList.contains(
+        "dyni-alarm-open-passive"
+      )
     ).toBe(true);
   });
 
@@ -213,12 +198,11 @@ describe("AlarmTextHtmlWidget", function () {
       { width: 180, height: 100 },
       { width: 220, height: 100 },
       { width: 320, height: 100 },
-      { width: 220, height: 300 },
+      { width: 220, height: 300 }
     ];
 
     sizes.forEach((size) => {
-      const aisNormalThreshold =
-        size.width === 120 && size.height === 100 ? 1.21 : 1.2;
+      const aisNormalThreshold = size.width === 120 && size.height === 100 ? 1.21 : 1.2;
       const alarmMount = mountRenderer(alarmRenderer, {
         rootEl: document.createElement("div"),
         shellEl: document.createElement("div"),
@@ -230,19 +214,19 @@ describe("AlarmTextHtmlWidget", function () {
           ratioThresholdFlat: 3.0,
           surfacePolicy: {
             interaction: { mode: "passive" },
-            actions: { alarm: { stopAll: vi.fn(() => true) } },
+            actions: { alarm: { stopAll: vi.fn(() => true) } }
           },
           domain: {
             state: "idle",
             alarmText: "NONE",
             hasActiveAlarms: false,
             activeCount: 0,
-            alarmNames: [],
-          },
+            alarmNames: []
+          }
         },
         hostContext: {
-          __dyniAlarmMeasureCtx: createAlarmMeasureContext(),
-        },
+          __dyniAlarmMeasureCtx: createAlarmMeasureContext()
+        }
       });
       const aisMount = mountRenderer(aisRenderer, {
         rootEl: document.createElement("div"),
@@ -262,27 +246,27 @@ describe("AlarmTextHtmlWidget", function () {
             distance: 4.2,
             cpa: 0.7,
             tcpa: 42,
-            headingTo: 112,
+            headingTo: 112
           },
           layout: {
             ratioThresholdNormal: aisNormalThreshold,
-            ratioThresholdFlat: 3.8,
+            ratioThresholdFlat: 3.8
           },
           captions: {
             dst: "DST",
             cpa: "DCPA",
             tcpa: "TCPA",
-            brg: "BRG",
+            brg: "BRG"
           },
           units: {
             dst: "nm",
             cpa: "nm",
             tcpa: "min",
-            brg: "°",
+            brg: "°"
           },
           formatUnits: {
             dst: "nm",
-            cpa: "nm",
+            cpa: "nm"
           },
           default: "---",
           surfacePolicy: {
@@ -291,20 +275,16 @@ describe("AlarmTextHtmlWidget", function () {
             interaction: { mode: "dispatch" },
             actions: {
               ais: {
-                showInfo: vi.fn(() => true),
-              },
-            },
-          },
+                showInfo: vi.fn(() => true)
+              }
+            }
+          }
         },
-        hostContext: {},
+        hostContext: {}
       });
 
-      const alarmAccent = alarmMount.mountHost.querySelector(
-        ".dyni-alarm-state-accent",
-      );
-      const aisAccent = aisMount.mountHost.querySelector(
-        ".dyni-ais-target-state-accent",
-      );
+      const alarmAccent = alarmMount.mountHost.querySelector(".dyni-alarm-state-accent");
+      const aisAccent = aisMount.mountHost.querySelector(".dyni-ais-target-state-accent");
       expect(alarmAccent).toBeTruthy();
       expect(aisAccent).toBeTruthy();
       expect(readStyleFields(alarmAccent)).toEqual(readStyleFields(aisAccent));
@@ -314,7 +294,7 @@ describe("AlarmTextHtmlWidget", function () {
   it("uses fit-owned inner geometry for layout signatures", function () {
     const h = createHelpers();
     const committed = h.rendererSpec.createCommittedRenderer({
-      hostContext: {},
+      hostContext: {}
     });
     const payload = makePayload({
       props: {
@@ -323,9 +303,9 @@ describe("AlarmTextHtmlWidget", function () {
           alarmText: "NONE",
           hasActiveAlarms: false,
           activeCount: 0,
-          alarmNames: [],
-        },
-      },
+          alarmNames: []
+        }
+      }
     });
 
     const signature = committed.layoutSignature(payload);
@@ -333,11 +313,10 @@ describe("AlarmTextHtmlWidget", function () {
 
     expect(h.fit.resolveLayout).toHaveBeenCalledWith({
       model: expect.objectContaining({ showStrip: true }),
-      shellRect: payload.shellRect,
+      shellRect: payload.shellRect
     });
     expect(parts[parts.length - 2]).toBe("197");
     expect(parts[parts.length - 1]).toBe("96");
     expect(signature).not.toContain("|220|100");
   });
-
 });

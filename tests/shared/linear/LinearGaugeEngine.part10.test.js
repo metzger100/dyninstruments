@@ -1,8 +1,5 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./LinearGaugeEngine.harness");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
 describe("LinearGaugeEngine", function () {
   it("maps pointer position according to axis mode", function () {
@@ -15,8 +12,8 @@ describe("LinearGaugeEngine", function () {
       tickProps: {
         major: "major",
         minor: "minor",
-        showEndLabels: "showEndLabels",
-      },
+        showEndLabels: "showEndLabels"
+      }
     });
 
     const harnessCentered = createHarness();
@@ -28,8 +25,8 @@ describe("LinearGaugeEngine", function () {
       tickProps: {
         major: "major",
         minor: "minor",
-        showEndLabels: "showEndLabels",
-      },
+        showEndLabels: "showEndLabels"
+      }
     });
 
     const harnessFixed = createHarness();
@@ -41,24 +38,24 @@ describe("LinearGaugeEngine", function () {
       tickProps: {
         major: "major",
         minor: "minor",
-        showEndLabels: "showEndLabels",
-      },
+        showEndLabels: "showEndLabels"
+      }
     });
 
     const rangeCanvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 120,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     const centeredCanvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 120,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     const fixedCanvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 120,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     rangeRenderer(rangeCanvas, {
@@ -66,21 +63,21 @@ describe("LinearGaugeEngine", function () {
       min: 0,
       max: 30,
       major: 10,
-      minor: 5,
+      minor: 5
     });
     centeredRenderer(centeredCanvas, {
       value: 180,
       min: 0,
       max: 30,
       major: 90,
-      minor: 30,
+      minor: 30
     });
     fixedRenderer(fixedCanvas, {
       value: 180,
       min: 0,
       max: 30,
       major: 90,
-      minor: 30,
+      minor: 30
     });
 
     const xRange = harnessRange.calls.pointer[0].x;
@@ -90,5 +87,4 @@ describe("LinearGaugeEngine", function () {
     expect(xRange).toBeCloseTo(xFixed, 0);
     expect(xCentered).toBeGreaterThan(xFixed);
   });
-
 });

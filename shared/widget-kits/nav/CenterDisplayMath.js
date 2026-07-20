@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniCenterDisplayMath = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const EARTH_RADIUS_M = 6371000;
@@ -18,12 +18,12 @@
 
   /** @param {number} value @returns {number} */
   function toRadians(value) {
-    return value * Math.PI / 180;
+    return (value * Math.PI) / 180;
   }
 
   /** @param {number} value @returns {number} */
   function toDegrees(value) {
-    return value * 180 / Math.PI;
+    return (value * 180) / Math.PI;
   }
 
   /** @param {number} value @returns {number} */
@@ -65,12 +65,10 @@
     const dLambda = wrapRadians(toRadians(dst.lon - src.lon));
     const sinHalfPhi = Math.sin(dPhi / 2);
     const sinHalfLambda = Math.sin(dLambda / 2);
-    const a = sinHalfPhi * sinHalfPhi +
-      Math.cos(phi1) * Math.cos(phi2) * sinHalfLambda * sinHalfLambda;
+    const a = sinHalfPhi * sinHalfPhi + Math.cos(phi1) * Math.cos(phi2) * sinHalfLambda * sinHalfLambda;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(Math.max(0, 1 - a)));
     const y = Math.sin(dLambda) * Math.cos(phi2);
-    const x = Math.cos(phi1) * Math.sin(phi2) -
-      Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLambda);
+    const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dLambda);
     let course = toDegrees(Math.atan2(y, x));
     if (!Number.isFinite(course)) {
       course = 0;
@@ -92,7 +90,7 @@
     const psi1 = Math.log(Math.tan(Math.PI / 4 + phi1 / 2));
     const psi2 = Math.log(Math.tan(Math.PI / 4 + phi2 / 2));
     const dPsi = psi2 - psi1;
-    const q = Math.abs(dPsi) > 1e-12 ? (dPhi / dPsi) : Math.cos(phi1);
+    const q = Math.abs(dPsi) > 1e-12 ? dPhi / dPsi : Math.cos(phi1);
     let course = toDegrees(Math.atan2(dLambda, dPsi));
     if (!Number.isFinite(course)) {
       course = 0;
@@ -146,4 +144,4 @@
   }
 
   return { id: "CenterDisplayMath", create: create };
-}));
+});

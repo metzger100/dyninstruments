@@ -2,42 +2,51 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
 const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
+/** @param {Record<string, any>} [overrides] @param {Record<string, any>} [bindingOverrides] */
 function makeToolkit(overrides, bindingOverrides) {
   installUnitFormatFamilies(bindingOverrides);
-  return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit(Object.assign({
-    caption_angleTrue: "TWA",
-    unit_angleTrue: "°",
-    caption_speedTrue: "TWS",
-    formatUnit_speedTrue: "kn",
-    unit_speedTrue_kn: "kn",
-    caption_speedApparent: "AWS",
-    formatUnit_speedApparent: "kn",
-    unit_speedApparent_kn: "kn",
-    caption_angleApparent: "AWA",
-    unit_angleApparent: "°",
-    caption_angleTrueRadialAngle: "TWA G",
-    unit_angleTrueRadialAngle: "°T",
-    caption_angleTrueRadialSpeed: "TWS G",
-    formatUnit_angleTrueRadialSpeed: "kn",
-    unit_angleTrueRadialSpeed_kn: "knT",
-    caption_angleApparentRadialAngle: "AWA G",
-    unit_angleApparentRadialAngle: "°A",
-    caption_angleApparentRadialSpeed: "AWS G",
-    formatUnit_angleApparentRadialSpeed: "kn",
-    unit_angleApparentRadialSpeed_kn: "knA",
-    caption_angleTrueLinearAngle: "TWA L",
-    unit_angleTrueLinearAngle: "°LT",
-    caption_angleTrueLinearSpeed: "TWS L",
-    formatUnit_angleTrueLinearSpeed: "kn",
-    unit_angleTrueLinearSpeed_kn: "knLT",
-    caption_angleApparentLinearAngle: "AWA L",
-    unit_angleApparentLinearAngle: "°LA",
-    caption_angleApparentLinearSpeed: "AWS L",
-    formatUnit_angleApparentLinearSpeed: "kn",
-    unit_angleApparentLinearSpeed_kn: "knLA"
-  }, overrides || {}));
+  return loadFresh("cluster/mappers/ClusterMapperToolkit.js")
+    .create()
+    .createToolkit(
+      Object.assign(
+        {
+          caption_angleTrue: "TWA",
+          unit_angleTrue: "°",
+          caption_speedTrue: "TWS",
+          formatUnit_speedTrue: "kn",
+          unit_speedTrue_kn: "kn",
+          caption_speedApparent: "AWS",
+          formatUnit_speedApparent: "kn",
+          unit_speedApparent_kn: "kn",
+          caption_angleApparent: "AWA",
+          unit_angleApparent: "°",
+          caption_angleTrueRadialAngle: "TWA G",
+          unit_angleTrueRadialAngle: "°T",
+          caption_angleTrueRadialSpeed: "TWS G",
+          formatUnit_angleTrueRadialSpeed: "kn",
+          unit_angleTrueRadialSpeed_kn: "knT",
+          caption_angleApparentRadialAngle: "AWA G",
+          unit_angleApparentRadialAngle: "°A",
+          caption_angleApparentRadialSpeed: "AWS G",
+          formatUnit_angleApparentRadialSpeed: "kn",
+          unit_angleApparentRadialSpeed_kn: "knA",
+          caption_angleTrueLinearAngle: "TWA L",
+          unit_angleTrueLinearAngle: "°LT",
+          caption_angleTrueLinearSpeed: "TWS L",
+          formatUnit_angleTrueLinearSpeed: "kn",
+          unit_angleTrueLinearSpeed_kn: "knLT",
+          caption_angleApparentLinearAngle: "AWA L",
+          unit_angleApparentLinearAngle: "°LA",
+          caption_angleApparentLinearSpeed: "AWS L",
+          formatUnit_angleApparentLinearSpeed: "kn",
+          unit_angleApparentLinearSpeed_kn: "knLA"
+        },
+        overrides || {}
+      )
+    );
 }
 
+/** @param {any} kind @param {any} activeToolkit */
 function routeContext(kind, activeToolkit) {
   return makeRouteContext({
     routeId: "wind:" + kind,
@@ -50,19 +59,22 @@ function routeContext(kind, activeToolkit) {
 describe("WindMapper", function () {
   it("maps radial true wind to WindRadialWidget props", function () {
     const mapper = loadFresh("cluster/mappers/WindMapper.js").create();
-    const out = mapper.translate({
-      kind: "angleTrueRadial",
-      twa: -32,
-      tws: 6.1,
-      windRadialLayEnabled: true,
-      windRadialLayMin: "20",
-      windRadialLayMax: "42",
-      windRadialRatioThresholdNormal: "0.7",
-      windRadialRatioThresholdFlat: "2.1",
-      captionUnitScale: "0.8",
-      leadingZero: true,
-      windRadialHideTextualMetrics: "yes"
-    }, routeContext("angleTrueRadial", makeToolkit()));
+    const out = mapper.translate(
+      {
+        kind: "angleTrueRadial",
+        twa: -32,
+        tws: 6.1,
+        windRadialLayEnabled: true,
+        windRadialLayMin: "20",
+        windRadialLayMax: "42",
+        windRadialRatioThresholdNormal: "0.7",
+        windRadialRatioThresholdFlat: "2.1",
+        captionUnitScale: "0.8",
+        leadingZero: true,
+        windRadialHideTextualMetrics: "yes"
+      },
+      routeContext("angleTrueRadial", makeToolkit())
+    );
 
     expect(out).not.toHaveProperty("renderer");
     expect(out.angle).toBe(-32);
@@ -82,12 +94,15 @@ describe("WindMapper", function () {
 
   it("maps numeric true angle via angle formatter function", function () {
     const mapper = loadFresh("cluster/mappers/WindMapper.js").create();
-    const out = mapper.translate({
-      kind: "angleTrue",
-      twa: -181,
-      leadingZero: true,
-      default: "---"
-    }, routeContext("angleTrue", makeToolkit()));
+    const out = mapper.translate(
+      {
+        kind: "angleTrue",
+        twa: -181,
+        leadingZero: true,
+        default: "---"
+      },
+      routeContext("angleTrue", makeToolkit())
+    );
 
     expect(typeof out.formatter).toBe("function");
     expect(out.caption).toBe("TWA");
@@ -97,11 +112,14 @@ describe("WindMapper", function () {
 
   it("maps radial apparent wind to apparent composite caption/unit keys", function () {
     const mapper = loadFresh("cluster/mappers/WindMapper.js").create();
-    const out = mapper.translate({
-      kind: "angleApparentRadial",
-      awa: 18,
-      aws: 8.5
-    }, routeContext("angleApparentRadial", makeToolkit()));
+    const out = mapper.translate(
+      {
+        kind: "angleApparentRadial",
+        awa: 18,
+        aws: 8.5
+      },
+      routeContext("angleApparentRadial", makeToolkit())
+    );
 
     expect(out.angle).toBe(18);
     expect(out.speed).toBe(8.5);
@@ -114,22 +132,25 @@ describe("WindMapper", function () {
 
   it("maps linear true wind to WindLinearWidget props", function () {
     const mapper = loadFresh("cluster/mappers/WindMapper.js").create();
-    const out = mapper.translate({
-      kind: "angleTrueLinear",
-      twa: -28,
-      tws: 5.4,
-      windLinearRatioThresholdNormal: "2",
-      windLinearRatioThresholdFlat: "3",
-      windLinearTickMajor: "30",
-      windLinearTickMinor: "10",
-      windLinearShowEndLabels: false,
-      windLinearLayEnabled: true,
-      windLinearLayMin: "25",
-      windLinearLayMax: "45",
-      captionUnitScale: "0.8",
-      leadingZero: true,
-      windLinearHideTextualMetrics: 0
-    }, routeContext("angleTrueLinear", makeToolkit()));
+    const out = mapper.translate(
+      {
+        kind: "angleTrueLinear",
+        twa: -28,
+        tws: 5.4,
+        windLinearRatioThresholdNormal: "2",
+        windLinearRatioThresholdFlat: "3",
+        windLinearTickMajor: "30",
+        windLinearTickMinor: "10",
+        windLinearShowEndLabels: false,
+        windLinearLayEnabled: true,
+        windLinearLayMin: "25",
+        windLinearLayMax: "45",
+        captionUnitScale: "0.8",
+        leadingZero: true,
+        windLinearHideTextualMetrics: 0
+      },
+      routeContext("angleTrueLinear", makeToolkit())
+    );
 
     expect(out).not.toHaveProperty("renderer");
     expect(out.angle).toBe(-28);
@@ -154,27 +175,30 @@ describe("WindMapper", function () {
 
   it("resolves alternate speed tokens for numeric and composite wind speeds", function () {
     const mapper = loadFresh("cluster/mappers/WindMapper.js").create();
-    const customToolkit = makeToolkit({
-      formatUnit_speedTrue: undefined,
-      unit_speedTrue_ms: "m/s true",
-      formatUnit_speedApparent: undefined,
-      unit_speedApparent_kmh: "km/h apparent",
-      formatUnit_angleTrueRadialSpeed: undefined,
-      unit_angleTrueRadialSpeed_ms: "m/s TWS G",
-      formatUnit_angleApparentRadialSpeed: undefined,
-      unit_angleApparentRadialSpeed_kmh: "km/h AWS G",
-      formatUnit_angleTrueLinearSpeed: undefined,
-      unit_angleTrueLinearSpeed_ms: "m/s TWS L",
-      formatUnit_angleApparentLinearSpeed: undefined,
-      unit_angleApparentLinearSpeed_kmh: "km/h AWS L"
-    }, {
-      speedTrue: { defaultToken: "ms" },
-      speedApparent: { defaultToken: "kmh" },
-      angleTrueRadialSpeed: { defaultToken: "ms" },
-      angleApparentRadialSpeed: { defaultToken: "kmh" },
-      angleTrueLinearSpeed: { defaultToken: "ms" },
-      angleApparentLinearSpeed: { defaultToken: "kmh" }
-    });
+    const customToolkit = makeToolkit(
+      {
+        formatUnit_speedTrue: undefined,
+        unit_speedTrue_ms: "m/s true",
+        formatUnit_speedApparent: undefined,
+        unit_speedApparent_kmh: "km/h apparent",
+        formatUnit_angleTrueRadialSpeed: undefined,
+        unit_angleTrueRadialSpeed_ms: "m/s TWS G",
+        formatUnit_angleApparentRadialSpeed: undefined,
+        unit_angleApparentRadialSpeed_kmh: "km/h AWS G",
+        formatUnit_angleTrueLinearSpeed: undefined,
+        unit_angleTrueLinearSpeed_ms: "m/s TWS L",
+        formatUnit_angleApparentLinearSpeed: undefined,
+        unit_angleApparentLinearSpeed_kmh: "km/h AWS L"
+      },
+      {
+        speedTrue: { defaultToken: "ms" },
+        speedApparent: { defaultToken: "kmh" },
+        angleTrueRadialSpeed: { defaultToken: "ms" },
+        angleApparentRadialSpeed: { defaultToken: "kmh" },
+        angleTrueLinearSpeed: { defaultToken: "ms" },
+        angleApparentLinearSpeed: { defaultToken: "kmh" }
+      }
+    );
 
     expect(mapper.translate({ kind: "speedTrue", tws: 7.2 }, routeContext("speedTrue", customToolkit))).toEqual({
       value: 7.2,
@@ -184,43 +208,57 @@ describe("WindMapper", function () {
       formatterParameters: ["ms"]
     });
 
-    expect(mapper.translate({ kind: "speedApparent", aws: 8.4 }, routeContext("speedApparent", customToolkit))).toEqual({
-      value: 8.4,
-      caption: "AWS",
-      unit: "km/h apparent",
-      formatter: "formatSpeed",
-      formatterParameters: ["kmh"]
-    });
+    expect(mapper.translate({ kind: "speedApparent", aws: 8.4 }, routeContext("speedApparent", customToolkit))).toEqual(
+      {
+        value: 8.4,
+        caption: "AWS",
+        unit: "km/h apparent",
+        formatter: "formatSpeed",
+        formatterParameters: ["kmh"]
+      }
+    );
 
-    const radialTrue = mapper.translate({
-      kind: "angleTrueRadial",
-      twa: -32,
-      tws: 6.1
-    }, routeContext("angleTrueRadial", customToolkit));
+    const radialTrue = mapper.translate(
+      {
+        kind: "angleTrueRadial",
+        twa: -32,
+        tws: 6.1
+      },
+      routeContext("angleTrueRadial", customToolkit)
+    );
     expect(radialTrue.rendererProps.speedUnit).toBe("m/s TWS G");
     expect(radialTrue.rendererProps.formatterParameters).toEqual(["ms"]);
 
-    const radialApp = mapper.translate({
-      kind: "angleApparentRadial",
-      awa: 18,
-      aws: 8.5
-    }, routeContext("angleApparentRadial", customToolkit));
+    const radialApp = mapper.translate(
+      {
+        kind: "angleApparentRadial",
+        awa: 18,
+        aws: 8.5
+      },
+      routeContext("angleApparentRadial", customToolkit)
+    );
     expect(radialApp.rendererProps.speedUnit).toBe("km/h AWS G");
     expect(radialApp.rendererProps.formatterParameters).toEqual(["kmh"]);
 
-    const linearTrue = mapper.translate({
-      kind: "angleTrueLinear",
-      twa: -28,
-      tws: 5.4
-    }, routeContext("angleTrueLinear", customToolkit));
+    const linearTrue = mapper.translate(
+      {
+        kind: "angleTrueLinear",
+        twa: -28,
+        tws: 5.4
+      },
+      routeContext("angleTrueLinear", customToolkit)
+    );
     expect(linearTrue.rendererProps.speedUnit).toBe("m/s TWS L");
     expect(linearTrue.rendererProps.formatterParameters).toEqual(["ms"]);
 
-    const linearApp = mapper.translate({
-      kind: "angleApparentLinear",
-      awa: 21,
-      aws: 5.8
-    }, routeContext("angleApparentLinear", customToolkit));
+    const linearApp = mapper.translate(
+      {
+        kind: "angleApparentLinear",
+        awa: 21,
+        aws: 5.8
+      },
+      routeContext("angleApparentLinear", customToolkit)
+    );
     expect(linearApp.rendererProps.speedUnit).toBe("km/h AWS L");
     expect(linearApp.rendererProps.formatterParameters).toEqual(["kmh"]);
   });

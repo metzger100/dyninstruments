@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniGaugeToolkit = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -33,4 +33,4 @@
   }
 
   return { id: "GaugeToolkit", create: create };
-}));
+});

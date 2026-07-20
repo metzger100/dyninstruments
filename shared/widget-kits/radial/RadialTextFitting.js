@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRadialTextFitting = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -22,4 +22,4 @@
   }
 
   return { id: "RadialTextFitting", create: create };
-}));
+});

@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetLayoutSizing = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniAisTargetMetricId[]} */
@@ -105,9 +105,7 @@
         1,
         Math.floor((width * VERTICAL_ASPECT_RATIO.height) / VERTICAL_ASPECT_RATIO.width)
       );
-      const effectiveLayoutHeight = Number.isFinite(explicitHeight)
-        ? Math.floor(explicitHeight)
-        : widthDrivenHeight;
+      const effectiveLayoutHeight = Number.isFinite(explicitHeight) ? Math.floor(explicitHeight) : widthDrivenHeight;
 
       return {
         isVerticalCommitted: true,
@@ -166,19 +164,29 @@
       const isHigh = mode === "high";
       const shellPadXRatio = isVertical
         ? VERTICAL_SHELL_PAD_X_RATIO
-        : (isHigh ? HIGH_SHELL_PAD_X_RATIO : DEFAULT_SHELL_PAD_X_RATIO);
+        : isHigh
+          ? HIGH_SHELL_PAD_X_RATIO
+          : DEFAULT_SHELL_PAD_X_RATIO;
       const shellPadYRatio = isVertical
         ? VERTICAL_SHELL_PAD_Y_RATIO
-        : (isHigh ? HIGH_SHELL_PAD_Y_RATIO : DEFAULT_SHELL_PAD_Y_RATIO);
+        : isHigh
+          ? HIGH_SHELL_PAD_Y_RATIO
+          : DEFAULT_SHELL_PAD_Y_RATIO;
       const identityGapRatio = isVertical
         ? VERTICAL_IDENTITY_GAP_RATIO
-        : (isHigh ? HIGH_IDENTITY_GAP_RATIO : DEFAULT_IDENTITY_GAP_RATIO);
+        : isHigh
+          ? HIGH_IDENTITY_GAP_RATIO
+          : DEFAULT_IDENTITY_GAP_RATIO;
       const identityMetricsGapRatio = isVertical
         ? VERTICAL_IDENTITY_METRICS_GAP_RATIO
-        : (isHigh ? HIGH_IDENTITY_METRICS_GAP_RATIO : DEFAULT_IDENTITY_METRICS_GAP_RATIO);
+        : isHigh
+          ? HIGH_IDENTITY_METRICS_GAP_RATIO
+          : DEFAULT_IDENTITY_METRICS_GAP_RATIO;
       const metricGridGapRatio = isVertical
         ? VERTICAL_METRIC_GRID_GAP_RATIO
-        : (isHigh ? HIGH_METRIC_GRID_GAP_RATIO : DEFAULT_METRIC_GRID_GAP_RATIO);
+        : isHigh
+          ? HIGH_METRIC_GRID_GAP_RATIO
+          : DEFAULT_METRIC_GRID_GAP_RATIO;
       const accentChrome = resolveAccentChrome(safeW, hasAccent, clampNumber);
       return {
         padX: profileApi.computeInsetPx(responsive, shellPadXRatio, 1),
@@ -307,4 +315,4 @@
   }
 
   return { id: "AisTargetLayoutSizing", create: create };
-}));
+});

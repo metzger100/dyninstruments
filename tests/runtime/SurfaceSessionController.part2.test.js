@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
 describe("runtime/SurfaceSessionController.js", function () {
@@ -65,11 +66,19 @@ describe("runtime/SurfaceSessionController.js", function () {
     const opts = overrides || {};
     const surface = Object.prototype.hasOwnProperty.call(opts, "surface") ? opts.surface : "html";
     const routeId = Object.prototype.hasOwnProperty.call(opts, "routeId") ? opts.routeId : "nav/activeRoute";
-    const rendererId = Object.prototype.hasOwnProperty.call(opts, "rendererId") ? opts.rendererId : "ActiveRouteTextHtmlWidget";
-    const rootEl = Object.prototype.hasOwnProperty.call(opts, "rootEl") ? opts.rootEl : { id: "root-" + String(routeId) };
-    const shellEl = Object.prototype.hasOwnProperty.call(opts, "shellEl") ? opts.shellEl : { id: "shell-" + String(routeId) };
+    const rendererId = Object.prototype.hasOwnProperty.call(opts, "rendererId")
+      ? opts.rendererId
+      : "ActiveRouteTextHtmlWidget";
+    const rootEl = Object.prototype.hasOwnProperty.call(opts, "rootEl")
+      ? opts.rootEl
+      : { id: "root-" + String(routeId) };
+    const shellEl = Object.prototype.hasOwnProperty.call(opts, "shellEl")
+      ? opts.shellEl
+      : { id: "shell-" + String(routeId) };
     const revision = Object.prototype.hasOwnProperty.call(opts, "revision") ? opts.revision : 1;
-    const hostContext = Object.prototype.hasOwnProperty.call(opts, "hostContext") ? opts.hostContext : { id: "host-context" };
+    const hostContext = Object.prototype.hasOwnProperty.call(opts, "hostContext")
+      ? opts.hostContext
+      : { id: "host-context" };
     const props = Object.prototype.hasOwnProperty.call(opts, "props") ? opts.props : { routeId: routeId };
     const rendererSpec = Object.prototype.hasOwnProperty.call(opts, "rendererSpec")
       ? opts.rendererSpec
@@ -128,12 +137,18 @@ describe("runtime/SurfaceSessionController.js", function () {
     expect(canvasController.attach).toHaveBeenCalledTimes(1);
     expect(canvasController.attach).toHaveBeenCalledWith(secondPayload);
     expect(surfaces.createController).toHaveBeenCalledTimes(2);
-    expect(surfaces.createController).toHaveBeenNthCalledWith(1, expect.objectContaining({
-      surface: "html"
-    }));
-    expect(surfaces.createController).toHaveBeenNthCalledWith(2, expect.objectContaining({
-      surface: "canvas-dom"
-    }));
+    expect(surfaces.createController).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        surface: "html"
+      })
+    );
+    expect(surfaces.createController).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        surface: "canvas-dom"
+      })
+    );
     expect(session.getState()).toMatchObject({
       mountedRouteId: "speed/sog",
       mountedRendererId: "ThreeValueTextWidget",
@@ -220,10 +235,12 @@ describe("runtime/SurfaceSessionController.js", function () {
       surfaces: surfaces
     });
 
-    session.reconcileSession(createPayload({
-      revision: 7,
-      props: { value: 7 }
-    }));
+    session.reconcileSession(
+      createPayload({
+        revision: 7,
+        props: { value: 7 }
+      })
+    );
 
     expect(session.isCurrentRevision(7)).toBe(true);
     expect(session.isCurrentRevision(6)).toBe(false);
@@ -240,10 +257,12 @@ describe("runtime/SurfaceSessionController.js", function () {
       surfaces: surfaces
     });
 
-    session.reconcileSession(createPayload({
-      revision: 2,
-      props: { value: 2 }
-    }));
+    session.reconcileSession(
+      createPayload({
+        revision: 2,
+        props: { value: 2 }
+      })
+    );
     session.destroy();
     session.destroy();
 
@@ -258,5 +277,4 @@ describe("runtime/SurfaceSessionController.js", function () {
       committedRevisionFloor: 0
     });
   });
-
 });

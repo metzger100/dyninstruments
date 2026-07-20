@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniWindLinearWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {DyniLinearGaugeProps & { angleUnit?: unknown, speedUnit?: unknown, angleCaption?: unknown, speedCaption?: unknown, speed?: unknown, leadingZero?: boolean, captionUnitScale?: unknown, stableDigits?: boolean, windLinearLayEnabled?: boolean, windLinearLayMin?: number, windLinearLayMax?: number, formatter?: unknown, formatterParameters?: unknown, default?: unknown }} DyniWindLinearProps */
   /** @typedef {{ num: number, text: unknown, secScale: number, left: DyniLinearMetricDisplay, right: DyniLinearMetricDisplay }} DyniWindLinearDisplay */
@@ -44,14 +44,17 @@
       }
       const p = props || {};
       const formatter = hasOwn.call(p, "formatter") ? p.formatter : "formatSpeed";
-      const formatterParameters = hasOwn.call(p, "formatterParameters")
-        ? p.formatterParameters
-        : [speedUnit];
-      const out = placeholderNormalize.normalize(String(componentContext.format.applyFormatter(n, {
-        formatter: formatter,
-        formatterParameters: formatterParameters,
-        default: defaultText
-      })), defaultText);
+      const formatterParameters = hasOwn.call(p, "formatterParameters") ? p.formatterParameters : [speedUnit];
+      const out = placeholderNormalize.normalize(
+        String(
+          componentContext.format.applyFormatter(n, {
+            formatter: formatter,
+            formatterParameters: formatterParameters,
+            default: defaultText
+          })
+        ),
+        defaultText
+      );
       const trimmed = out.trim();
       return trimmed || defaultText;
     }
@@ -63,9 +66,7 @@
         ? placeholderNormalize.normalize(p.default, undefined)
         : placeholderNormalize.normalize(undefined, undefined);
       const angle = toOptionalFiniteNumber(rawAngle);
-      const angleText = typeof angle === "number"
-        ? valueMath.formatAngle180(angle, !!p.leadingZero)
-        : defaultText;
+      const angleText = typeof angle === "number" ? valueMath.formatAngle180(angle, !!p.leadingZero) : defaultText;
       const angleNum = Number(angleText);
       const angleUnit = p.angleUnit;
       const speedUnit = p.speedUnit;
@@ -74,15 +75,15 @@
       const stableDigitsEnabled = p.stableDigits === true;
       const angleValueText = stableDigitsEnabled
         ? stableDigits.normalize(angleText, {
-          integerWidth: stableDigits.resolveIntegerWidth(angleText, 2),
-          reserveSignSlot: true
-        }).padded
+            integerWidth: stableDigits.resolveIntegerWidth(angleText, 2),
+            reserveSignSlot: true
+          }).padded
         : angleText;
       const speedValueText = stableDigitsEnabled
         ? stableDigits.normalize(speedRawText, {
-          integerWidth: stableDigits.resolveIntegerWidth(speedRawText, 2),
-          reserveSignSlot: true
-        }).padded
+            integerWidth: stableDigits.resolveIntegerWidth(speedRawText, 2),
+            reserveSignSlot: true
+          }).padded
         : speedRawText;
 
       return {
@@ -103,7 +104,18 @@
     }
 
     /** @param {DyniLinearGaugeDrawingState} state @param {DyniCanvasTextLayoutApi} textApi @param {DyniLinearGaugeTextLayoutApi} textLayoutApi @param {DyniLinearMetricDisplay} left @param {DyniLinearMetricDisplay} right @param {DyniRect | null | undefined} captionBox @param {DyniRect | null | undefined} valueBox @param {unknown} secScale @param {unknown} leftAlign @param {unknown} rightAlign */
-    function drawDualRows(state, textApi, textLayoutApi, left, right, captionBox, valueBox, secScale, leftAlign, rightAlign) {
+    function drawDualRows(
+      state,
+      textApi,
+      textLayoutApi,
+      left,
+      right,
+      captionBox,
+      valueBox,
+      secScale,
+      leftAlign,
+      rightAlign
+    ) {
       if (!captionBox || !valueBox) {
         return;
       }
@@ -176,7 +188,9 @@
       buildSectors: buildSectors,
       drawMode: {
         flat: function (state, props, display, api) {
-          const parsed = display.parsed;
+          const parsed = /** @type {{ left: DyniLinearMetricDisplay, right: DyniLinearMetricDisplay }} */ (
+            display.parsed
+          );
           drawDualRows(
             state,
             api.text,
@@ -191,7 +205,9 @@
           );
         },
         normal: function (state, props, display, api) {
-          const parsed = display.parsed;
+          const parsed = /** @type {{ left: DyniLinearMetricDisplay, right: DyniLinearMetricDisplay }} */ (
+            display.parsed
+          );
           drawDualRows(
             state,
             api.text,
@@ -206,7 +222,9 @@
           );
         },
         high: function (state, props, display, api) {
-          const parsed = display.parsed;
+          const parsed = /** @type {{ left: DyniLinearMetricDisplay, right: DyniLinearMetricDisplay }} */ (
+            display.parsed
+          );
           drawMetricInline(
             state,
             api.text,
@@ -240,4 +258,4 @@
   }
 
   return { id: "WindLinearWidget", create: create };
-}));
+});

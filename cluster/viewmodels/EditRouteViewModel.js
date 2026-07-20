@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniEditRouteViewModel = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const LOCAL_ROUTE_PREFIX = "local@";
@@ -70,19 +70,23 @@
   function computeTotalDistance(sourceRoute, points, useRhumbLine, centerMath) {
     if (isObject(sourceRoute) && typeof sourceRoute.computeLength === "function") {
       try {
-        const computeLength = /** @type {(fromIndex: number, useRhumbLine: boolean) => unknown} */ (sourceRoute.computeLength);
+        const computeLength = /** @type {(fromIndex: number, useRhumbLine: boolean) => unknown} */ (
+          sourceRoute.computeLength
+        );
         const computed = toOptionalFiniteNumber(computeLength(0, useRhumbLine === true));
         if (typeof computed === "number") {
           return computed;
         }
-      } catch (err) { /* dyni-lint-disable-line catch-fallback-without-suppression -- Host-provided route objects may throw from computeLength; fail closed to leg-sum math. */
+        // dyni-boundary-next-line(category: avnav-host-boundary, owner: Metzger100, date: 2026-07-17) -- Host-provided route objects may throw from computeLength; fail closed to leg-sum math.
+      } catch (err) {
         // Ignore computeLength failures and fail closed via leg-sum fallback.
       }
     }
 
     try {
       return computeLegSumDistance(points, useRhumbLine, centerMath);
-    } catch (err) { /* dyni-lint-disable-line catch-fallback-without-suppression -- Malformed point payloads must fail closed and keep summary rendering alive. */
+      // dyni-boundary-next-line(category: avnav-host-boundary, owner: Metzger100, date: 2026-07-17) -- Malformed point payloads must fail closed and keep summary rendering alive.
+    } catch (err) {
       return 0;
     }
   }
@@ -143,4 +147,4 @@
   }
 
   return { id: "EditRouteViewModel", create: create };
-}));
+});

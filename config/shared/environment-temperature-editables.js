@@ -140,7 +140,8 @@
       ...linearTickMajor,
       ...linearTickMinor,
       tempLinearShowEndLabels: {
-        type: "BOOLEAN", default: false,
+        type: "BOOLEAN",
+        default: false,
         name: "Show min/max labels",
         condition: { kind: "tempLinear" }
       },
@@ -159,13 +160,21 @@
       ...linearWarning,
       ...linearAlarm,
       tempLinearRatioThresholdNormal: {
-        type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+        type: "FLOAT",
+        min: 0.5,
+        max: 2.0,
+        step: 0.05,
+        default: 1.1,
         internal: true,
         name: "TempLinearWidget: Normal Threshold",
         condition: { kind: "tempLinear" }
       },
       tempLinearRatioThresholdFlat: {
-        type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+        type: "FLOAT",
+        min: 1.0,
+        max: 6.0,
+        step: 0.05,
+        default: 3.5,
         internal: true,
         name: "TempLinearWidget: Flat Threshold",
         condition: { kind: "tempLinear" }
@@ -175,7 +184,8 @@
       ...radialTickMajor,
       ...radialTickMinor,
       tempRadialShowEndLabels: {
-        type: "BOOLEAN", default: false,
+        type: "BOOLEAN",
+        default: false,
         name: "Show min/max labels",
         condition: { kind: "tempRadial" }
       },
@@ -194,17 +204,25 @@
       ...radialWarning,
       ...radialAlarm,
       tempRadialRatioThresholdNormal: {
-        type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+        type: "FLOAT",
+        min: 0.5,
+        max: 2.0,
+        step: 0.05,
+        default: 1.1,
         internal: true,
         name: "TempGauge: Normal Threshold",
         condition: { kind: "tempRadial" }
       },
       tempRadialRatioThresholdFlat: {
-        type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+        type: "FLOAT",
+        min: 1.0,
+        max: 6.0,
+        step: 0.05,
+        default: 3.5,
         internal: true,
         name: "TempGauge: Flat Threshold",
         condition: { kind: "tempRadial" }
       }
     };
   };
-}(this));
+})(this);

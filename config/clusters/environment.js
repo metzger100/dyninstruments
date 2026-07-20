@@ -41,14 +41,12 @@
         if (kind === "pressure") {
           if (typeof out.value === "string" && out.value.trim()) {
             out.storeKeys = { ...out.storeKeys, value: out.value.trim() };
-          }
-          else if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
+          } else if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
             const sk = { ...out.storeKeys };
             delete sk.value;
             out.storeKeys = sk;
           }
-        }
-        else {
+        } else {
           if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
             const sk = { ...out.storeKeys };
             delete sk.value;
@@ -63,8 +61,7 @@
 
           if (typeof out.depthKey === "string" && out.depthKey.trim()) {
             out.storeKeys = { ...out.storeKeys, depth: out.depthKey.trim() };
-          }
-          else {
+          } else {
             out.storeKeys = { ...out.storeKeys, depth: DEFAULT_DEPTH_KEY };
           }
         }
@@ -77,8 +74,7 @@
 
           if (typeof out.tempKey === "string" && out.tempKey.trim()) {
             out.storeKeys = { ...out.storeKeys, temp: out.tempKey.trim() };
-          }
-          else {
+          } else {
             out.storeKeys = { ...out.storeKeys, temp: "nav.gps.waterTemp" };
           }
         }
@@ -87,4 +83,4 @@
       }
     }
   });
-}(this));
+})(this);

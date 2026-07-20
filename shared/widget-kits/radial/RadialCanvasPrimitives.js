@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRadialCanvasPrimitives = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
   const POINTER_TIP_INSET_FACTOR = 0.013;
@@ -53,16 +53,20 @@
      */
     function drawRing(ctx, cx, cy, r, opts) {
       opts = opts || {};
-      withCtx(ctx, function () {
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2, false);
-        ctx.stroke();
-      }, {
-        strokeStyle: opts.strokeStyle,
-        lineWidth: (opts.lineWidth != null) ? opts.lineWidth : 1,
-        alpha: (opts.alpha != null) ? opts.alpha : 1,
-        dash: opts.dash
-      });
+      withCtx(
+        ctx,
+        function () {
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI * 2, false);
+          ctx.stroke();
+        },
+        {
+          strokeStyle: opts.strokeStyle,
+          lineWidth: opts.lineWidth != null ? opts.lineWidth : 1,
+          alpha: opts.alpha != null ? opts.alpha : 1,
+          dash: opts.dash
+        }
+      );
     }
 
     /**
@@ -81,16 +85,20 @@
       const a0 = toCanvas(startDeg, opts.angleCfg, rotationDeg);
       const a1 = toCanvas(endDeg, opts.angleCfg, rotationDeg);
 
-      withCtx(ctx, function () {
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, a0, a1, false);
-        ctx.stroke();
-      }, {
-        strokeStyle: opts.strokeStyle,
-        lineWidth: (opts.lineWidth != null) ? opts.lineWidth : 1,
-        alpha: (opts.alpha != null) ? opts.alpha : 1,
-        dash: opts.dash
-      });
+      withCtx(
+        ctx,
+        function () {
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, a0, a1, false);
+          ctx.stroke();
+        },
+        {
+          strokeStyle: opts.strokeStyle,
+          lineWidth: opts.lineWidth != null ? opts.lineWidth : 1,
+          alpha: opts.alpha != null ? opts.alpha : 1,
+          dash: opts.dash
+        }
+      );
     }
 
     /**
@@ -118,23 +126,27 @@
       const a0 = toCanvas(startDeg, cfg, rot);
       const a1 = toCanvas(endDeg, cfg, rot);
 
-      withCtx(ctx, function () {
-        ctx.beginPath();
-        ctx.arc(cx, cy, rOuter, a0, a1, false);
-        ctx.arc(cx, cy, rInner, a1, a0, true);
-        ctx.closePath();
-        ctx.fill();
+      withCtx(
+        ctx,
+        function () {
+          ctx.beginPath();
+          ctx.arc(cx, cy, rOuter, a0, a1, false);
+          ctx.arc(cx, cy, rInner, a1, a0, true);
+          ctx.closePath();
+          ctx.fill();
 
-        const lw = hasOwn.call(opts, "lineWidth") ? Number(opts.lineWidth) : 0;
-        if (lw > 0) {
-          ctx.lineWidth = lw;
-          ctx.stroke();
+          const lw = hasOwn.call(opts, "lineWidth") ? Number(opts.lineWidth) : 0;
+          if (lw > 0) {
+            ctx.lineWidth = lw;
+            ctx.stroke();
+          }
+        },
+        {
+          fillStyle: opts.fillStyle,
+          strokeStyle: opts.strokeStyle,
+          alpha: opts.alpha != null ? opts.alpha : 1
         }
-      }, {
-        fillStyle: opts.fillStyle,
-        strokeStyle: opts.strokeStyle,
-        alpha: (opts.alpha != null) ? opts.alpha : 1
-      });
+      );
     }
 
     /**
@@ -161,29 +173,33 @@
       const x1 = cx + Math.cos(t) * tail;
       const y1 = cy + Math.sin(t) * tail;
 
-      withCtx(ctx, function () {
-        ctx.lineWidth = width;
-        ctx.lineCap = "round";
+      withCtx(
+        ctx,
+        function () {
+          ctx.lineWidth = width;
+          ctx.lineCap = "round";
 
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
 
-        const ah = Math.atan2(y2 - y1, x2 - x1);
-        const left = ah + Math.PI * 0.85;
-        const right = ah - Math.PI * 0.85;
+          const ah = Math.atan2(y2 - y1, x2 - x1);
+          const left = ah + Math.PI * 0.85;
+          const right = ah - Math.PI * 0.85;
 
-        ctx.beginPath();
-        ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 + Math.cos(left) * head, y2 + Math.sin(left) * head);
-        ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 + Math.cos(right) * head, y2 + Math.sin(right) * head);
-        ctx.stroke();
-      }, {
-        strokeStyle: opts.strokeStyle,
-        alpha: (opts.alpha != null) ? opts.alpha : 1
-      });
+          ctx.beginPath();
+          ctx.moveTo(x2, y2);
+          ctx.lineTo(x2 + Math.cos(left) * head, y2 + Math.sin(left) * head);
+          ctx.moveTo(x2, y2);
+          ctx.lineTo(x2 + Math.cos(right) * head, y2 + Math.sin(right) * head);
+          ctx.stroke();
+        },
+        {
+          strokeStyle: opts.strokeStyle,
+          alpha: opts.alpha != null ? opts.alpha : 1
+        }
+      );
     }
 
     /**
@@ -219,17 +235,21 @@
       const l = axis + Math.PI / 2;
       const r = axis - Math.PI / 2;
 
-      withCtx(ctx, function () {
-        ctx.beginPath();
-        ctx.moveTo(tipX, tipY);
-        ctx.lineTo(baseX + Math.cos(l) * halfWidth, baseY + Math.sin(l) * halfWidth);
-        ctx.lineTo(baseX + Math.cos(r) * halfWidth, baseY + Math.sin(r) * halfWidth);
-        ctx.closePath();
-        ctx.fill();
-      }, {
-        fillStyle: opts.fillStyle || opts.color,
-        alpha: (opts.alpha != null) ? opts.alpha : 1
-      });
+      withCtx(
+        ctx,
+        function () {
+          ctx.beginPath();
+          ctx.moveTo(tipX, tipY);
+          ctx.lineTo(baseX + Math.cos(l) * halfWidth, baseY + Math.sin(l) * halfWidth);
+          ctx.lineTo(baseX + Math.cos(r) * halfWidth, baseY + Math.sin(r) * halfWidth);
+          ctx.closePath();
+          ctx.fill();
+        },
+        {
+          fillStyle: opts.fillStyle || opts.color,
+          alpha: opts.alpha != null ? opts.alpha : 1
+        }
+      );
     }
 
     /**
@@ -258,16 +278,20 @@
       const x2 = cx + Math.cos(t) * rOuter;
       const y2 = cy + Math.sin(t) * rOuter;
 
-      withCtx(ctx, function () {
-        ctx.lineWidth = width;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-      }, {
-        strokeStyle: opts.strokeStyle,
-        alpha: (opts.alpha != null) ? opts.alpha : 1
-      });
+      withCtx(
+        ctx,
+        function () {
+          ctx.lineWidth = width;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+        },
+        {
+          strokeStyle: opts.strokeStyle,
+          alpha: opts.alpha != null ? opts.alpha : 1
+        }
+      );
     }
 
     return {
@@ -283,4 +307,4 @@
   }
 
   return { id: "RadialCanvasPrimitives", create };
-}));
+});

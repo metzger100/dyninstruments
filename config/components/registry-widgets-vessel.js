@@ -7,7 +7,7 @@
 
   const ns = root.DyniPlugin;
   const config = ns.config;
-  const shared = config.shared = config.shared || {};
+  const shared = (config.shared = config.shared || {});
   const BASE = ns.baseUrl;
 
   if (typeof BASE !== "string" || !BASE) {
@@ -16,149 +16,144 @@
 
   const SHARED_HTML_SHADOW_CSS = BASE + "shared/html/HtmlShadowCommon.css";
 
-  const groups = shared.componentRegistryGroups = shared.componentRegistryGroups || {};
-  var w = groups.widgets = groups.widgets || {};
+  const groups = (shared.componentRegistryGroups = shared.componentRegistryGroups || {});
+  var w = (groups.widgets = groups.widgets || {});
 
   w.AlarmRenderModel = {
-      js: BASE + "shared/widget-kits/vessel/AlarmRenderModel.js",
-      css: undefined,
-      globalKey: "DyniAlarmRenderModel",
-      deps: ["HtmlWidgetUtils", "ValueMath"]
+    js: BASE + "shared/widget-kits/vessel/AlarmRenderModel.js",
+    css: undefined,
+    globalKey: "DyniAlarmRenderModel",
+    deps: ["HtmlWidgetUtils", "ValueMath"]
   };
 
   w.AlarmTextHtmlWidget = {
-      js: BASE + "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js",
-      css: undefined,
-      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css"],
-      globalKey: "DyniAlarmTextHtmlWidget",
-      deps: [
-        "AlarmHtmlFit",
-        "HtmlWidgetUtils",
-        "AlarmRenderModel",
-        "AlarmMarkup",
-        "ValueMath"
-      ]
+    js: BASE + "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js",
+    css: undefined,
+    shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css"],
+    globalKey: "DyniAlarmTextHtmlWidget",
+    deps: ["AlarmHtmlFit", "HtmlWidgetUtils", "AlarmRenderModel", "AlarmMarkup", "ValueMath"]
   };
 
   w.AlarmMarkup = {
-      js: BASE + "shared/widget-kits/vessel/AlarmMarkup.js",
-      css: undefined,
-      globalKey: "DyniAlarmMarkup",
-      deps: ["HtmlWidgetUtils", "ValueMath"]
+    js: BASE + "shared/widget-kits/vessel/AlarmMarkup.js",
+    css: undefined,
+    globalKey: "DyniAlarmMarkup",
+    deps: ["HtmlWidgetUtils", "ValueMath"]
   };
 
   w.RegattaTimerModel = {
-      js: BASE + "shared/widget-kits/vessel/RegattaTimerModel.js",
-      css: undefined,
-      globalKey: "DyniRegattaTimerModel",
-      deps: []
+    js: BASE + "shared/widget-kits/vessel/RegattaTimerModel.js",
+    css: undefined,
+    globalKey: "DyniRegattaTimerModel",
+    deps: []
   };
 
   w.RegattaTimerAudio = {
-      js: BASE + "shared/widget-kits/vessel/RegattaTimerAudio.js",
-      css: undefined,
-      globalKey: "DyniRegattaTimerAudio",
-      deps: []
+    js: BASE + "shared/widget-kits/vessel/RegattaTimerAudio.js",
+    css: undefined,
+    globalKey: "DyniRegattaTimerAudio",
+    deps: []
   };
 
   w.RegattaTimerSessionStore = {
-      js: BASE + "shared/widget-kits/vessel/RegattaTimerSessionStore.js",
-      css: undefined,
-      globalKey: "DyniRegattaTimerSessionStore",
-      deps: ["ValueMath"]
+    js: BASE + "shared/widget-kits/vessel/RegattaTimerSessionStore.js",
+    css: undefined,
+    globalKey: "DyniRegattaTimerSessionStore",
+    deps: ["ValueMath"]
   };
 
   w.RegattaTimerMarkup = {
-      js: BASE + "shared/widget-kits/vessel/RegattaTimerMarkup.js",
-      css: undefined,
-      globalKey: "DyniRegattaTimerMarkup",
-      deps: ["HtmlWidgetUtils", "RegattaTimerPhase"]
+    js: BASE + "shared/widget-kits/vessel/RegattaTimerMarkup.js",
+    css: undefined,
+    globalKey: "DyniRegattaTimerMarkup",
+    deps: ["HtmlWidgetUtils", "RegattaTimerPhase"]
   };
 
   w.RegattaTimerTextHtmlWidget = {
-      js: BASE + "widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.js",
-      css: undefined,
-      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.css"],
-      globalKey: "DyniRegattaTimerTextHtmlWidget",
-      deps: [
-        "RegattaTimerModel",
-        "RegattaTimerAudio",
-        "RegattaTimerSessionStore",
-        "RegattaTimerMarkup",
-        "RegattaTimerHtmlFit",
-        "HtmlWidgetUtils",
-        "ValueMath"
-      ]
+    js: BASE + "widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.js",
+    css: undefined,
+    shadowCss: [
+      SHARED_HTML_SHADOW_CSS,
+      BASE + "widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.css"
+    ],
+    globalKey: "DyniRegattaTimerTextHtmlWidget",
+    deps: [
+      "RegattaTimerModel",
+      "RegattaTimerAudio",
+      "RegattaTimerSessionStore",
+      "RegattaTimerMarkup",
+      "RegattaTimerHtmlFit",
+      "HtmlWidgetUtils",
+      "ValueMath"
+    ]
   };
 
   w.PositionCoordinateWidget = {
-      js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-      css: undefined,
-      globalKey: "DyniPositionCoordinateWidget",
-      deps: [
-        "TextLayoutEngine",
-        "ValueMath",
-        "PlaceholderNormalize",
-        "StateScreenLabels",
-        "StateScreenPrecedence",
-        "StateScreenCanvasOverlay"
-      ]
+    js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
+    css: undefined,
+    globalKey: "DyniPositionCoordinateWidget",
+    deps: [
+      "TextLayoutEngine",
+      "ValueMath",
+      "PlaceholderNormalize",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenCanvasOverlay",
+      "PositionCoordinateFormatting"
+    ]
   };
 
   w.ThreeValueTextWidget = {
-      js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
-      css: undefined,
-      globalKey: "DyniThreeValueTextWidget",
-      deps: [
-        "TextLayoutEngine",
-        "PlaceholderNormalize",
-        "StableDigits",
-        "StateScreenLabels",
-        "StateScreenPrecedence",
-        "StateScreenCanvasOverlay"
-      ]
+    js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
+    css: undefined,
+    globalKey: "DyniThreeValueTextWidget",
+    deps: [
+      "TextLayoutEngine",
+      "PlaceholderNormalize",
+      "StableDigits",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenCanvasOverlay"
+    ]
   };
 
   w.XteDisplayWidget = {
-      js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
-      css: undefined,
-      globalKey: "DyniXteDisplayWidget",
-      deps: [
-        "GaugeToolkit",
-        "CanvasLayerCache",
-        "XteHighwayPrimitives",
-        "XteHighwayLayout",
-        "TextTileLayout",
-        "SpringEasing",
-        "PlaceholderNormalize",
-        "StableDigits",
-        "UnitAwareFormatter",
-        "StateScreenLabels",
-        "StateScreenPrecedence",
-        "StateScreenCanvasOverlay"
-      ]
+    js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
+    css: undefined,
+    globalKey: "DyniXteDisplayWidget",
+    deps: [
+      "GaugeToolkit",
+      "CanvasLayerCache",
+      "XteHighwayPrimitives",
+      "XteDisplayPropsNormalize",
+      "XteDisplayRenderSetup",
+      "XteHighwayLayout",
+      "TextTileLayout",
+      "SpringEasing",
+      "XteDisplayMetrics",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenCanvasOverlay"
+    ]
   };
 
   w.XteDisplayLinearWidget = {
-      js: BASE + "widgets/text/XteDisplayLinearWidget/XteDisplayLinearWidget.js",
-      css: undefined,
-      globalKey: "DyniXteDisplayLinearWidget",
-      deps: [
-        "GaugeToolkit",
-        "CanvasLayerCache",
-        "LinearCanvasPrimitives",
-        "LinearGaugeMath",
-        "GeometryScale",
-        "XteLinearLayout",
-        "TextTileLayout",
-        "SpringEasing",
-        "PlaceholderNormalize",
-        "StableDigits",
-        "UnitAwareFormatter",
-        "StateScreenLabels",
-        "StateScreenPrecedence",
-        "StateScreenCanvasOverlay"
-      ]
+    js: BASE + "widgets/text/XteDisplayLinearWidget/XteDisplayLinearWidget.js",
+    css: undefined,
+    globalKey: "DyniXteDisplayLinearWidget",
+    deps: [
+      "GaugeToolkit",
+      "CanvasLayerCache",
+      "LinearGaugeMath",
+      "XteLinearPrimitives",
+      "XteDisplayPropsNormalize",
+      "XteDisplayRenderSetup",
+      "XteLinearLayout",
+      "TextTileLayout",
+      "XteLinearDynamicMetrics",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenCanvasOverlay"
+    ]
   };
-
-}(this));
+})(this);

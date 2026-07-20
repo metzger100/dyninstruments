@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniClockRadialWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {{ hours: number, minutes: number, seconds: number }} DyniClockTime */
   /** @typedef {{ hourAngle: number, minuteAngle: number, secondAngle: number }} DyniClockHandAngles */
@@ -123,16 +123,16 @@
       api.drawCachedLayer("face");
       if (hands) {
         var rOuter = state.geom.rOuter;
-        drawHand(state, hands.hourAngle, rOuter * 0.45,
-          gs.scale(rOuter, HOUR_HAND_WIDTH_FACTOR, 2),
-          state.color);
-        drawHand(state, hands.minuteAngle, rOuter * 0.65,
-          gs.scale(rOuter, MINUTE_HAND_WIDTH_FACTOR, 1),
-          state.color);
+        drawHand(state, hands.hourAngle, rOuter * 0.45, gs.scale(rOuter, HOUR_HAND_WIDTH_FACTOR, 2), state.color);
+        drawHand(state, hands.minuteAngle, rOuter * 0.65, gs.scale(rOuter, MINUTE_HAND_WIDTH_FACTOR, 1), state.color);
         if (!props.hideSeconds) {
-          drawHand(state, hands.secondAngle, rOuter * 0.80,
+          drawHand(
+            state,
+            hands.secondAngle,
+            rOuter * 0.8,
             gs.scale(rOuter, SECOND_HAND_WIDTH_FACTOR, 1),
-            state.theme.colors.pointer);
+            state.theme.colors.pointer
+          );
         }
       }
       var ctx = state.ctx;
@@ -169,4 +169,4 @@
   }
 
   return { id: "ClockRadialWidget", create: create };
-}));
+});

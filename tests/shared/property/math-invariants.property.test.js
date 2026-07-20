@@ -18,11 +18,12 @@ function radialTickMath() {
   const angle = radialAngleMath();
   const componentContext = {
     components: {
+      /** @param {string} id @returns {any} */
       require: function (id) {
         if (id === "RadialAngleMath") return angle;
         throw new Error("unexpected require: " + id);
-      },
-    },
+      }
+    }
   };
   return loadFresh("shared/widget-kits/radial/RadialTickMath.js").create({}, componentContext);
 }
@@ -32,7 +33,7 @@ const finite = () =>
     min: -1e6,
     max: 1e6,
     noNaN: true,
-    noDefaultInfinity: true,
+    noDefaultInfinity: true
   });
 
 describe("shared math property invariants", function () {
@@ -46,7 +47,7 @@ describe("shared math property invariants", function () {
         expect(Number.isFinite(out)).toBe(true);
         expect(out).toBeGreaterThanOrEqual(lo);
         expect(out).toBeLessThanOrEqual(hi);
-      }),
+      })
     );
   });
 
@@ -58,7 +59,7 @@ describe("shared math property invariants", function () {
         expect(Number.isFinite(out)).toBe(true);
         expect(out).toBeGreaterThanOrEqual(Math.min(from, to) - 1e-6);
         expect(out).toBeLessThanOrEqual(Math.max(from, to) + 1e-6);
-      }),
+      })
     );
     expect(value.lerp(3, 9, 0)).toBeCloseTo(3, 10);
     expect(value.lerp(3, 9, 1)).toBeCloseTo(9, 10);
@@ -72,7 +73,7 @@ describe("shared math property invariants", function () {
         expect(Number.isFinite(out)).toBe(true);
         expect(out).toBeGreaterThanOrEqual(0);
         expect(out).toBeLessThan(360);
-      }),
+      })
     );
   });
 
@@ -84,7 +85,7 @@ describe("shared math property invariants", function () {
         expect(Number.isFinite(out)).toBe(true);
         expect(out).toBeGreaterThanOrEqual(0);
         expect(out).toBeLessThan(m);
-      }),
+      })
     );
   });
 
@@ -96,17 +97,17 @@ describe("shared math property invariants", function () {
       fc.integer(),
       fc.boolean(),
       fc.constant(null),
-      fc.constant(undefined),
+      fc.constant(undefined)
     );
     fc.assert(
       fc.property(realisticInput, function (input) {
         expect(typeof placeholder.normalize(input, "--")).toBe("string");
-      }),
+      })
     );
     fc.assert(
       fc.property(fc.constantFrom("", "   ", "-", "--", "---"), function (input) {
         expect(placeholder.normalize(input, "DEFAULT")).toBe("DEFAULT");
-      }),
+      })
     );
   });
 
@@ -124,13 +125,13 @@ describe("shared math property invariants", function () {
             endDeg,
             stepMajor,
             stepMinor,
-            includeEnd: true,
+            includeEnd: true
           });
           for (const a of out.majors.concat(out.minors)) {
             expect(Number.isFinite(a)).toBe(true);
           }
-        },
-      ),
+        }
+      )
     );
   });
 });

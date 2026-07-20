@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniFullCircleRadialLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const STRUCTURAL_RATIO_THRESHOLD_NORMAL = 1.0;
@@ -16,7 +16,7 @@
   const PAD_RATIO = 0.04;
   const GAP_RATIO = 0.03;
   const MARKER_LENGTH_FACTOR = 0.75;
-  const MARKER_WIDTH_FACTOR = 0.20;
+  const MARKER_WIDTH_FACTOR = 0.2;
   const LABEL_SPRITE_RADIUS_FACTOR = 2.2;
   const NORMAL_SAFE_EXTRA_FACTOR = 0.06;
   const NORMAL_COMPACT_CENTER_HEIGHT_FACTOR = 0.9;
@@ -57,12 +57,37 @@
     const eFloor = gs.extentFloor(strokeWeight);
     const ringW = gs.scale(radius, ringWidthFactor, eFloor);
     const majorTickLen = gs.scale(radius, clampNumber(ticks.majorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.08), eFloor);
-    const majorTickWidth = gs.scaleStroke(radius, clampNumber(ticks.majorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.02), strokeWeight, sFloor);
+    const majorTickWidth = gs.scaleStroke(
+      radius,
+      clampNumber(ticks.majorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.02),
+      strokeWeight,
+      sFloor
+    );
     const minorTickLen = gs.scale(radius, clampNumber(ticks.minorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.047), eFloor);
-    const minorTickWidth = gs.scaleStroke(radius, clampNumber(ticks.minorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.01), strokeWeight, sFloor);
-    const arcLineWidth = gs.scaleStroke(radius, clampNumber(ring.arcLineWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.013), strokeWeight, sFloor);
-    const pointerDepth = gs.scalePointer(radius, clampNumber(pointer.depthFactor, 0, Number.MAX_SAFE_INTEGER, 0.22), pointerDepthWeight, eFloor);
-    const pointerSide = gs.scalePointer(radius, clampNumber(pointer.sideFactor, 0, Number.MAX_SAFE_INTEGER, 0.11), pointerSideWeight, eFloor);
+    const minorTickWidth = gs.scaleStroke(
+      radius,
+      clampNumber(ticks.minorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.01),
+      strokeWeight,
+      sFloor
+    );
+    const arcLineWidth = gs.scaleStroke(
+      radius,
+      clampNumber(ring.arcLineWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.013),
+      strokeWeight,
+      sFloor
+    );
+    const pointerDepth = gs.scalePointer(
+      radius,
+      clampNumber(pointer.depthFactor, 0, Number.MAX_SAFE_INTEGER, 0.22),
+      pointerDepthWeight,
+      eFloor
+    );
+    const pointerSide = gs.scalePointer(
+      radius,
+      clampNumber(pointer.sideFactor, 0, Number.MAX_SAFE_INTEGER, 0.11),
+      pointerSideWeight,
+      eFloor
+    );
     const labelInsetFactor = clampNumber(labels.insetFactor, 0, Number.MAX_SAFE_INTEGER, 1.8);
     const labelRadiusOffset = Math.max(1, Math.floor(ringW * labelInsetFactor * compactGeometryScale));
     const labelFontFactor = clampNumber(labels.fontFactor, 0.18, Number.MAX_SAFE_INTEGER, 0.18);
@@ -72,7 +97,10 @@
     const markerWidth = gs.scalePointer(radius, MARKER_WIDTH_FACTOR * ringWidthFactor, pointerSideWeight, eFloor);
     const leftStrip = Math.max(0, Math.floor((width - radius * 2) / 2));
     const topStrip = Math.max(0, Math.floor((height - radius * 2) / 2));
-    const labelRadius = Math.max(0, radius - Math.max(1, Math.floor(ringW * LABEL_SPRITE_RADIUS_FACTOR * compactGeometryScale)));
+    const labelRadius = Math.max(
+      0,
+      radius - Math.max(1, Math.floor(ringW * LABEL_SPRITE_RADIUS_FACTOR * compactGeometryScale))
+    );
 
     return {
       D: radius * 2,
@@ -151,12 +179,7 @@
       rightTop: null,
       rightBottom: null,
       top: makeRect(contentRect.x, contentRect.y, contentRect.w, topHeight),
-      bottom: makeRect(
-        contentRect.x,
-        contentRect.y + contentRect.h - bottomHeight,
-        contentRect.w,
-        bottomHeight
-      )
+      bottom: makeRect(contentRect.x, contentRect.y + contentRect.h - bottomHeight, contentRect.w, bottomHeight)
     };
   }
 
@@ -168,14 +191,17 @@
    */
   function computeNormalLayout(contentRect, geom, compactGeometryScale) {
     return {
-      safeRadius: Math.max(1, geom.rOuter - (geom.labelInsetVal + Math.max(1, Math.floor(
-        geom.R * NORMAL_SAFE_EXTRA_FACTOR * compactGeometryScale
-      )))),
-      compactCenterHeight: Math.max(1, Math.floor((contentRect.y + geom.topStrip) * NORMAL_COMPACT_CENTER_HEIGHT_FACTOR)),
+      safeRadius: Math.max(
+        1,
+        geom.rOuter -
+          (geom.labelInsetVal + Math.max(1, Math.floor(geom.R * NORMAL_SAFE_EXTRA_FACTOR * compactGeometryScale)))
+      ),
+      compactCenterHeight: Math.max(
+        1,
+        Math.floor((contentRect.y + geom.topStrip) * NORMAL_COMPACT_CENTER_HEIGHT_FACTOR)
+      ),
       dualCompactWidth: Math.max(1, Math.floor(geom.rOuter * NORMAL_DUAL_COMPACT_WIDTH_FACTOR)),
-      dualCompactInset: Math.max(1, Math.floor(
-        geom.R * NORMAL_DUAL_COMPACT_INSET_FACTOR * compactGeometryScale
-      )),
+      dualCompactInset: Math.max(1, Math.floor(geom.R * NORMAL_DUAL_COMPACT_INSET_FACTOR * compactGeometryScale)),
       dualCompactHeight: Math.max(1, Math.floor(geom.rOuter * NORMAL_DUAL_COMPACT_HEIGHT_FACTOR))
     };
   }
@@ -247,7 +273,8 @@
       const W = Math.max(1, Math.floor(Number(cfg.W) || 0));
       const H = Math.max(1, Math.floor(Number(cfg.H) || 0));
       const insets = cfg.insets || computeInsets(W, H);
-      const responsive = cfg.responsive || insets.responsive || profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
+      const responsive =
+        cfg.responsive || insets.responsive || profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
       const textFillScale = scaleHelpers.resolveTextFillScale(responsive);
       const compactGeometryScale = scaleHelpers.resolveCompactGeometryScale(textFillScale);
       const mode = cfg.mode === "flat" || cfg.mode === "high" ? cfg.mode : "normal";
@@ -263,16 +290,19 @@
         fontPx: geom.labelPx,
         spriteRadius: geom.labelRadius
       };
-      const slots = mode === "flat"
-        ? computeFlatSlots(contentRect, geom)
-        : (mode === "high" ? computeHighSlots(contentRect, geom, insets.pad, cfg.layoutConfig) : {
-          leftTop: null,
-          leftBottom: null,
-          rightTop: null,
-          rightBottom: null,
-          top: null,
-          bottom: null
-        });
+      const slots =
+        mode === "flat"
+          ? computeFlatSlots(contentRect, geom)
+          : mode === "high"
+            ? computeHighSlots(contentRect, geom, insets.pad, cfg.layoutConfig)
+            : {
+                leftTop: null,
+                leftBottom: null,
+                rightTop: null,
+                rightBottom: null,
+                top: null,
+                bottom: null
+              };
 
       return {
         mode: mode,
@@ -285,16 +315,22 @@
         geom: geom,
         labels: labels,
         slots: slots,
-        flat: mode === "flat" ? {
-          leftTop: slots.leftTop,
-          leftBottom: slots.leftBottom,
-          rightTop: slots.rightTop,
-          rightBottom: slots.rightBottom
-        } : null,
-        high: mode === "high" ? {
-          top: slots.top,
-          bottom: slots.bottom
-        } : null,
+        flat:
+          mode === "flat"
+            ? {
+                leftTop: slots.leftTop,
+                leftBottom: slots.leftBottom,
+                rightTop: slots.rightTop,
+                rightBottom: slots.rightBottom
+              }
+            : null,
+        high:
+          mode === "high"
+            ? {
+                top: slots.top,
+                bottom: slots.bottom
+              }
+            : null,
         normal: computeNormalLayout(contentRect, geom, compactGeometryScale)
       };
     }
@@ -308,4 +344,4 @@
   }
 
   return { id: "FullCircleRadialLayout", create: create };
-}));
+});

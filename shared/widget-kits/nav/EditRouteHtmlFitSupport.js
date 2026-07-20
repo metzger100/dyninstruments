@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniEditRouteHtmlFitSupport = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const NAME_MAX_PX_RATIO = {
@@ -25,9 +25,7 @@
    * @returns {DyniEditRouteMetricEntry}
    */
   function toMetricEntry(model, id) {
-    const m = model && typeof model === "object"
-      ? model
-      : /** @type {DyniEditRouteMetricModel} */ ({});
+    const m = model && typeof model === "object" ? model : /** @type {DyniEditRouteMetricModel} */ ({});
     const groups = [m.metrics, m.metricTexts];
     for (let i = 0; i < groups.length; i += 1) {
       const group = groups[i];
@@ -147,17 +145,19 @@
     const ratio = /** @type {number} */ (cfg.htmlUtils.toFiniteNumber(cfg.maxPxRatio));
     const ratioMaxPx = Math.max(1, Math.floor(rect.h * (ratio > 0 ? ratio : 1)));
     const requestedMaxPx = explicitMaxPx > 0 ? explicitMaxPx : ratioMaxPx;
-    return /** @type {DyniEditRouteLineFit | null} */ (cfg.tileLayout.measureFittedLine({
-      textApi: cfg.textApi,
-      ctx: cfg.ctx,
-      text: cfg.text,
-      maxW: Math.max(1, Math.floor(rect.w)),
-      maxH: Math.max(1, Math.floor(rect.h)),
-      maxPx: Math.max(1, Math.floor(requestedMaxPx)),
-      textFillScale: cfg.textFillScale,
-      family: cfg.family,
-      weight: cfg.weight
-    }));
+    return /** @type {DyniEditRouteLineFit | null} */ (
+      cfg.tileLayout.measureFittedLine({
+        textApi: cfg.textApi,
+        ctx: cfg.ctx,
+        text: cfg.text,
+        maxW: Math.max(1, Math.floor(rect.w)),
+        maxH: Math.max(1, Math.floor(rect.h)),
+        maxPx: Math.max(1, Math.floor(requestedMaxPx)),
+        textFillScale: cfg.textFillScale,
+        family: cfg.family,
+        weight: cfg.weight
+      })
+    );
   }
 
   /**
@@ -195,7 +195,8 @@
       textFillScale: cfg.textFillScale,
       htmlUtils: cfg.htmlUtils
     });
-    const usePlain = cfg.stableDigitsEnabled === true &&
+    const usePlain =
+      cfg.stableDigitsEnabled === true &&
       plainText &&
       plainText !== primaryText &&
       isLineTrimmed(primaryFit, primaryText);
@@ -290,4 +291,4 @@
     id: "EditRouteHtmlFitSupport",
     create: create
   };
-}));
+});

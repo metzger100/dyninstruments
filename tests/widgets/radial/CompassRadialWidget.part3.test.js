@@ -1,15 +1,8 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createMockCanvas,
-  createMockContext2D,
-} = require("../../helpers/mock-canvas");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
-const {
-  createCompassCachingHarness,
-  makeCompassProps,
-} = require("./CompassRadialWidget.caching.harness.js");
+const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const { createCompassCachingHarness, makeCompassProps } = require("./CompassRadialWidget.caching.harness.js");
 
 describe("CompassRadialWidget", function () {
   it("uses theme pointer color for the fixed lubber marker", function () {
@@ -18,32 +11,28 @@ describe("CompassRadialWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      ctx,
+      ctx
     });
 
     harness.spec.renderCanvas(canvas, makeCompassProps());
     const layout = harness.computeLayout(480, 110);
 
-    expect(harness.calls.pointer[0].fillStyle).toBe(
-      harness.theme.colors.pointer,
-    );
+    expect(harness.calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
     expect(harness.calls.pointer[0].depth).toBe(layout.geom.fixedPointerDepth);
-    expect(harness.calls.pointer[0].halfWidth).toBe(
-      Math.max(1, Math.floor(layout.geom.pointerSide / 2)),
-    );
+    expect(harness.calls.pointer[0].halfWidth).toBe(Math.max(1, Math.floor(layout.geom.pointerSide / 2)));
     expect(harness.calls.rimMarker[0].opts).toEqual({
       len: layout.geom.markerLen,
       width: layout.geom.markerWidth,
-      strokeStyle: harness.theme.colors.pointer,
+      strokeStyle: harness.theme.colors.pointer
     });
     expect(harness.calls.ring[0].lineWidth).toBe(layout.geom.arcLineWidth);
     expect(harness.calls.ticks[0].major).toEqual({
       len: layout.geom.majorTickLen,
-      width: layout.geom.majorTickWidth,
+      width: layout.geom.majorTickWidth
     });
     expect(harness.calls.ticks[0].minor).toEqual({
       len: layout.geom.minorTickLen,
-      width: layout.geom.minorTickWidth,
+      width: layout.geom.minorTickWidth
     });
   });
 
@@ -52,7 +41,7 @@ describe("CompassRadialWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(canvas, makeCompassProps({ heading: 12 }));
@@ -69,12 +58,12 @@ describe("CompassRadialWidget", function () {
     const canvasA = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     const canvasB = createMockCanvas({
       rectWidth: 520,
       rectHeight: 110,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     const props = makeCompassProps();
 
@@ -95,7 +84,7 @@ describe("CompassRadialWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     const props = makeCompassProps();
 
@@ -112,38 +101,29 @@ describe("CompassRadialWidget", function () {
     const canvasA = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     const canvasB = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     const nowSpy = vi.spyOn(Date, "now");
 
     try {
       nowSpy.mockReturnValue(0);
-      expect(
-        harness.spec.renderCanvas(canvasA, makeCompassProps({ heading: 12 })),
-      ).toBeUndefined();
+      expect(harness.spec.renderCanvas(canvasA, makeCompassProps({ heading: 12 }))).toBeUndefined();
 
       nowSpy.mockReturnValue(16);
-      expect(
-        harness.spec.renderCanvas(canvasA, makeCompassProps({ heading: 42 })),
-      ).toEqual({ wantsFollowUpFrame: true });
+      expect(harness.spec.renderCanvas(canvasA, makeCompassProps({ heading: 42 }))).toEqual({
+        wantsFollowUpFrame: true
+      });
 
       nowSpy.mockReturnValue(16);
-      expect(
-        harness.spec.renderCanvas(canvasB, makeCompassProps({ heading: 42 })),
-      ).toBeUndefined();
+      expect(harness.spec.renderCanvas(canvasB, makeCompassProps({ heading: 42 }))).toBeUndefined();
 
       nowSpy.mockReturnValue(32);
-      expect(
-        harness.spec.renderCanvas(
-          canvasA,
-          makeCompassProps({ heading: 42, easing: false }),
-        ),
-      ).toBeUndefined();
+      expect(harness.spec.renderCanvas(canvasA, makeCompassProps({ heading: 42, easing: false }))).toBeUndefined();
     } finally {
       nowSpy.mockRestore();
     }

@@ -87,8 +87,11 @@
     widget: "ClusterWidget",
     def: {
       name: "dyni_Nav_Instruments",
-      description: "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Active route / Edit route / Route points / Positions / XTE display / XTE linear gauge)",
-      caption: "", unit: "", default: "---",
+      description:
+        "Navigation values (ETA / Route ETA / DST / Route distance / VMG / Active route / Edit route / Route points / Positions / XTE display / XTE linear gauge)",
+      caption: "",
+      unit: "",
+      default: "---",
       cluster: "nav",
       storeKeys: {
         wpEta: "nav.wp.eta",
@@ -147,54 +150,7 @@
           name: "Leading zero for headings",
           condition: { kind: "xteDisplayLinear" }
         },
-        xteRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.85,
-          internal: true,
-          name: "XTE 3-Rows Threshold",
-          condition: { kind: "xteDisplay" }
-        },
-        xteRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.3,
-          internal: true,
-          name: "XTE 1-Row Threshold",
-          condition: { kind: "xteDisplay" }
-        },
-        xteLinearRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.85,
-          internal: true,
-          name: "XTE Linear 3-Rows Threshold",
-          condition: { kind: "xteDisplayLinear" }
-        },
-        xteLinearRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.3,
-          internal: true,
-          name: "XTE Linear 1-Row Threshold",
-          condition: { kind: "xteDisplayLinear" }
-        },
-        activeRouteRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.2,
-          internal: true,
-          name: "ActiveRoute: 3-Rows Threshold",
-          condition: { kind: "activeRoute" }
-        },
-        activeRouteRatioThresholdFlat: {
-          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.8,
-          internal: true,
-          name: "ActiveRoute: 1-Row Threshold",
-          condition: { kind: "activeRoute" }
-        },
-        editRouteRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.2,
-          internal: true,
-          name: "EditRoute: 3-Rows Threshold",
-          condition: { kind: "editRoute" }
-        },
-        editRouteRatioThresholdFlat: {
-          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.8,
-          internal: true,
-          name: "EditRoute: 1-Row Threshold",
-          condition: { kind: "editRoute" }
-        },
+        ...shared.buildNavRatioThresholdEditableParameters(),
         caption_editRoutePts: {
           type: "STRING",
           default: "PTS",
@@ -224,13 +180,21 @@
           condition: { kind: "editRoute" }
         },
         routePointsRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.0,
           internal: true,
           name: "RoutePoints: 3-Rows Threshold",
           condition: { kind: "routePoints" }
         },
         routePointsRatioThresholdFlat: {
-          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.5,
+          type: "FLOAT",
+          min: 1.5,
+          max: 6.0,
+          step: 0.05,
+          default: 3.5,
           internal: true,
           name: "RoutePoints: 1-Row Threshold",
           condition: { kind: "routePoints" }
@@ -271,11 +235,7 @@
           type: "BOOLEAN",
           default: true,
           name: "Tabular coordinates",
-          condition: [
-            { kind: "routePoints" },
-            { kind: "positionBoat" },
-            { kind: "positionWp" }
-          ]
+          condition: [{ kind: "routePoints" }, { kind: "positionBoat" }, { kind: "positionWp" }]
         },
         stableDigits: {
           type: "BOOLEAN",
@@ -350,12 +310,7 @@
           type: "BOOLEAN",
           default: false,
           name: "Hide seconds",
-          condition: [
-            { kind: "wpEta" },
-            { kind: "rteEta" },
-            { kind: "activeRoute" },
-            { kind: "editRoute" }
-          ]
+          condition: [{ kind: "wpEta" }, { kind: "rteEta" }, { kind: "activeRoute" }, { kind: "editRoute" }]
         },
         caption: false,
         unit: false,
@@ -384,7 +339,7 @@
       updateFunction: function (values) {
         const out = /** @type {DyniClusterConfigValues} */ (values ? { ...values } : {});
         const kind = (values && values.kind) || "wpEta";
-        const needsWp = (kind === "dst" || kind === "positionWp" || kind === "xteDisplay" || kind === "xteDisplayLinear");
+        const needsWp = kind === "dst" || kind === "positionWp" || kind === "xteDisplay" || kind === "xteDisplayLinear";
         if (needsWp && values && values.wpServer === false) out.disconnect = true;
         else if (Object.prototype.hasOwnProperty.call(out, "disconnect")) delete out.disconnect;
         if (Object.prototype.hasOwnProperty.call(out, "visible")) {
@@ -394,4 +349,4 @@
       }
     }
   });
-}(this));
+})(this);

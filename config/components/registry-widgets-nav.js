@@ -7,7 +7,7 @@
 
   const ns = root.DyniPlugin;
   const config = ns.config;
-  const shared = config.shared = config.shared || {};
+  const shared = (config.shared = config.shared || {});
   const BASE = ns.baseUrl;
 
   if (typeof BASE !== "string" || !BASE) {
@@ -16,203 +16,197 @@
 
   const SHARED_HTML_SHADOW_CSS = BASE + "shared/html/HtmlShadowCommon.css";
 
-  const groups = shared.componentRegistryGroups = shared.componentRegistryGroups || {};
-  var w = groups.widgets = groups.widgets || {};
+  const groups = (shared.componentRegistryGroups = shared.componentRegistryGroups || {});
+  var w = (groups.widgets = groups.widgets || {});
 
   w.NavInteractionPolicy = {
-      js: BASE + "shared/widget-kits/nav/NavInteractionPolicy.js",
-      css: undefined,
-      globalKey: "DyniNavInteractionPolicy",
-      deps: ["HtmlWidgetUtils", "ValueMath"]
+    js: BASE + "shared/widget-kits/nav/NavInteractionPolicy.js",
+    css: undefined,
+    globalKey: "DyniNavInteractionPolicy",
+    deps: ["HtmlWidgetUtils", "ValueMath"]
   };
 
   w.AisTargetRenderModel = {
-      js: BASE + "shared/widget-kits/nav/AisTargetRenderModel.js",
-      css: undefined,
-      globalKey: "DyniAisTargetRenderModel",
-      deps: [
-        "AisTargetLayout",
-        "HtmlWidgetUtils",
-        "PlaceholderNormalize",
-        "StableDigits",
-        "StateScreenLabels",
-        "StateScreenPrecedence",
-        "StateScreenInteraction",
-        "UnitAwareFormatter",
-        "ValueMath"
-      ]
+    js: BASE + "shared/widget-kits/nav/AisTargetRenderModel.js",
+    css: undefined,
+    globalKey: "DyniAisTargetRenderModel",
+    deps: [
+      "AisTargetLayout",
+      "HtmlWidgetUtils",
+      "PlaceholderNormalize",
+      "StableDigits",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenInteraction",
+      "UnitAwareFormatter",
+      "ValueMath"
+    ]
   };
 
   w.AisTargetMarkup = {
-      js: BASE + "shared/widget-kits/nav/AisTargetMarkup.js",
-      css: undefined,
-      globalKey: "DyniAisTargetMarkup",
-      deps: ["StateScreenMarkup", "ValueMath"]
+    js: BASE + "shared/widget-kits/nav/AisTargetMarkup.js",
+    css: undefined,
+    globalKey: "DyniAisTargetMarkup",
+    deps: ["StateScreenMarkup", "ValueMath"]
   };
 
   w.AisTargetTextHtmlWidget = {
-      js: BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js",
-      css: undefined,
-      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"],
-      globalKey: "DyniAisTargetTextHtmlWidget",
-      deps: [
-        "AisTargetHtmlFit",
-        "HtmlWidgetUtils",
-        "HtmlWidgetLifecycle",
-        "AisTargetRenderModel",
-        "AisTargetMarkup",
-        "ValueMath"
-      ]
+    js: BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js",
+    css: undefined,
+    shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"],
+    globalKey: "DyniAisTargetTextHtmlWidget",
+    deps: [
+      "AisTargetHtmlFit",
+      "HtmlWidgetUtils",
+      "HtmlWidgetLifecycle",
+      "AisTargetRenderModel",
+      "AisTargetMarkup",
+      "ValueMath"
+    ]
   };
 
   w.ActiveRouteTextHtmlWidget = {
-      js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
-      css: undefined,
-      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"],
-      globalKey: "DyniActiveRouteTextHtmlWidget",
-      deps: [
-        "ActiveRouteHtmlFit",
-        "HtmlWidgetUtils",
-        "HtmlWidgetLifecycle",
-        "PreparedPayloadModelCache",
-        "PlaceholderNormalize",
-        "StableDigits",
-        "StateScreenLabels",
-        "StateScreenPrecedence",
-        "StateScreenInteraction",
-        "StateScreenMarkup"
-      ]
+    js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+    css: undefined,
+    shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"],
+    globalKey: "DyniActiveRouteTextHtmlWidget",
+    deps: [
+      "ActiveRouteHtmlFit",
+      "HtmlWidgetUtils",
+      "NavInteractionPolicy",
+      "HtmlWidgetLifecycle",
+      "PreparedPayloadModelCache",
+      "PlaceholderNormalize",
+      "StableDigits",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenInteraction",
+      "StateScreenMarkup"
+    ]
   };
 
   w.EditRouteRenderModel = {
-      js: BASE + "shared/widget-kits/nav/EditRouteRenderModel.js",
-      css: undefined,
-      globalKey: "DyniEditRouteRenderModel",
-      deps: [
-        "EditRouteLayout",
-        "HtmlWidgetUtils",
-        "NavInteractionPolicy",
-        "PlaceholderNormalize",
-        "StableDigits",
-        "StateScreenLabels",
-        "StateScreenPrecedence",
-        "StateScreenInteraction",
-        "UnitAwareFormatter",
-        "ValueMath"
-      ]
+    js: BASE + "shared/widget-kits/nav/EditRouteRenderModel.js",
+    css: undefined,
+    globalKey: "DyniEditRouteRenderModel",
+    deps: [
+      "EditRouteLayout",
+      "HtmlWidgetUtils",
+      "NavInteractionPolicy",
+      "PlaceholderNormalize",
+      "StableDigits",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenInteraction",
+      "UnitAwareFormatter",
+      "ValueMath"
+    ]
   };
 
   w.EditRouteMarkup = {
-      js: BASE + "shared/widget-kits/nav/EditRouteMarkup.js",
-      css: undefined,
-      globalKey: "DyniEditRouteMarkup",
-      deps: ["StateScreenMarkup", "ValueMath"]
+    js: BASE + "shared/widget-kits/nav/EditRouteMarkup.js",
+    css: undefined,
+    globalKey: "DyniEditRouteMarkup",
+    deps: ["StateScreenMarkup", "ValueMath"]
   };
 
   w.EditRouteTextHtmlWidget = {
-      js: BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js",
-      css: undefined,
-      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"],
-      globalKey: "DyniEditRouteTextHtmlWidget",
-      deps: [
-        "EditRouteHtmlFit",
-        "HtmlWidgetUtils",
-        "HtmlWidgetLifecycle",
-        "EditRouteRenderModel",
-        "EditRouteMarkup"
-      ]
+    js: BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js",
+    css: undefined,
+    shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"],
+    globalKey: "DyniEditRouteTextHtmlWidget",
+    deps: ["EditRouteHtmlFit", "HtmlWidgetUtils", "HtmlWidgetLifecycle", "EditRouteRenderModel", "EditRouteMarkup"]
   };
 
   w.RoutePointsRenderModel = {
-      js: BASE + "shared/widget-kits/nav/RoutePointsRenderModel.js",
-      css: undefined,
-      globalKey: "DyniRoutePointsRenderModel",
-      deps: [
-        "CenterDisplayMath",
-        "RoutePointsHtmlFit",
-        "RoutePointsLayout",
-        "HtmlWidgetUtils",
-        "NavInteractionPolicy",
-        "PlaceholderNormalize",
-        "StableDigits",
-        "StateScreenLabels",
-        "StateScreenPrecedence",
-        "StateScreenInteraction",
-        "ValueMath"
-      ]
+    js: BASE + "shared/widget-kits/nav/RoutePointsRenderModel.js",
+    css: undefined,
+    globalKey: "DyniRoutePointsRenderModel",
+    deps: [
+      "CenterDisplayMath",
+      "RoutePointsHtmlFit",
+      "RoutePointsLayout",
+      "HtmlWidgetUtils",
+      "NavInteractionPolicy",
+      "PlaceholderNormalize",
+      "StableDigits",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenInteraction",
+      "ValueMath"
+    ]
   };
 
   w.RoutePointsMarkup = {
-      js: BASE + "shared/widget-kits/nav/RoutePointsMarkup.js",
-      css: undefined,
-      globalKey: "DyniRoutePointsMarkup",
-      deps: ["StateScreenMarkup", "ValueMath"]
+    js: BASE + "shared/widget-kits/nav/RoutePointsMarkup.js",
+    css: undefined,
+    globalKey: "DyniRoutePointsMarkup",
+    deps: ["StateScreenMarkup", "ValueMath"]
   };
 
   w.RoutePointsDomEffects = {
-      js: BASE + "shared/widget-kits/nav/RoutePointsDomEffects.js",
-      css: undefined,
-      globalKey: "DyniRoutePointsDomEffects",
-      deps: ["HtmlWidgetUtils", "ValueMath"]
+    js: BASE + "shared/widget-kits/nav/RoutePointsDomEffects.js",
+    css: undefined,
+    globalKey: "DyniRoutePointsDomEffects",
+    deps: ["HtmlWidgetUtils", "ValueMath"]
   };
 
   w.RoutePointsTextHtmlWidget = {
-      js: BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js",
-      css: undefined,
-      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css"],
-      globalKey: "DyniRoutePointsTextHtmlWidget",
-      deps: [
-        "RoutePointsHtmlFit",
-        "HtmlWidgetUtils",
-        "HtmlWidgetLifecycle",
-        "RoutePointsRenderModel",
-        "RoutePointsLayout",
-        "RoutePointsMarkup",
-        "RoutePointsDomEffects"
-      ]
+    js: BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js",
+    css: undefined,
+    shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css"],
+    globalKey: "DyniRoutePointsTextHtmlWidget",
+    deps: [
+      "RoutePointsHtmlFit",
+      "HtmlWidgetUtils",
+      "HtmlWidgetLifecycle",
+      "RoutePointsRenderModel",
+      "RoutePointsLayout",
+      "RoutePointsMarkup",
+      "RoutePointsDomEffects"
+    ]
   };
 
   w.MapZoomMarkup = {
-      js: BASE + "shared/widget-kits/nav/MapZoomMarkup.js",
-      css: undefined,
-      globalKey: "DyniMapZoomMarkup",
-      deps: ["HtmlWidgetUtils", "StateScreenLabels", "StateScreenMarkup"]
+    js: BASE + "shared/widget-kits/nav/MapZoomMarkup.js",
+    css: undefined,
+    globalKey: "DyniMapZoomMarkup",
+    deps: ["HtmlWidgetUtils", "StateScreenLabels", "StateScreenMarkup"]
   };
 
   w.MapZoomTextHtmlWidget = {
-      js: BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
-      css: undefined,
-      shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css"],
-      globalKey: "DyniMapZoomTextHtmlWidget",
-      deps: [
-        "MapZoomHtmlFit",
-        "HtmlWidgetUtils",
-        "HtmlWidgetLifecycle",
-        "MapZoomMarkup",
-        "ValueMath",
-        "PlaceholderNormalize",
-        "PreparedPayloadModelCache",
-        "StableDigits",
-        "StateScreenLabels",
-        "StateScreenPrecedence",
-        "StateScreenInteraction"
-      ]
+    js: BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
+    css: undefined,
+    shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css"],
+    globalKey: "DyniMapZoomTextHtmlWidget",
+    deps: [
+      "MapZoomHtmlFit",
+      "HtmlWidgetUtils",
+      "HtmlWidgetLifecycle",
+      "MapZoomMarkup",
+      "ValueMath",
+      "PlaceholderNormalize",
+      "PreparedPayloadModelCache",
+      "StableDigits",
+      "StateScreenLabels",
+      "StateScreenPrecedence",
+      "StateScreenInteraction"
+    ]
   };
 
   w.CenterDisplayTextWidget = {
-      js: BASE + "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
-      css: undefined,
-      globalKey: "DyniCenterDisplayTextWidget",
-      deps: [
-        "TextLayoutEngine",
-        "CanvasTextLayout",
-        "TextTileLayout",
-        "TextLayoutScaleHelpers",
-        "CenterDisplayLayout",
-        "CenterDisplayMath",
-        "CenterDisplayStateAdapter",
-        "CenterDisplayRenderModel"
-      ]
+    js: BASE + "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+    css: undefined,
+    globalKey: "DyniCenterDisplayTextWidget",
+    deps: [
+      "TextLayoutEngine",
+      "CanvasTextLayout",
+      "TextTileLayout",
+      "TextLayoutScaleHelpers",
+      "CenterDisplayLayout",
+      "CenterDisplayMath",
+      "CenterDisplayStateAdapter",
+      "CenterDisplayRenderModel"
+    ]
   };
-
-}(this));
+})(this);

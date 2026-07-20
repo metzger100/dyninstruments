@@ -162,7 +162,6 @@
     if (raw) {
       return parseOverride(raw, tokenDef);
     }
-    // dyni-lint-disable-next-line premature-legacy-support -- Regatta camelCase CSS aliases remain supported for existing user.css files.
     const deprecatedAliasInputVar = tokenDef.deprecatedInputVar;
     if (deprecatedAliasInputVar) {
       const aliasRaw = inputReader(style, deprecatedAliasInputVar);

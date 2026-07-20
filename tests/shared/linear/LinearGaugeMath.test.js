@@ -2,11 +2,14 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("LinearGaugeMath", function () {
-  const math = loadFresh("shared/widget-kits/linear/LinearGaugeMath.js").create({}, createComponentContextMock({
-    modules: {
-      ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
-    }
-  }));
+  const math = loadFresh("shared/widget-kits/linear/LinearGaugeMath.js").create(
+    {},
+    createComponentContextMock({
+      modules: {
+        ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
+      }
+    })
+  );
 
   it("maps values into axis coordinates with optional clamping", function () {
     expect(math.mapValueToX(15, 0, 30, 10, 110, true)).toBe(60);

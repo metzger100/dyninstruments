@@ -1,18 +1,30 @@
 const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 
 describe("RegattaTimerAudio", function () {
+  it("registers itself on the global DyniComponents root in a non-module browser load", function () {
+    const context = createScriptContext();
+
+    runIifeScript("shared/widget-kits/vessel/RegattaTimerAudio.js", context);
+
+    expect(context.DyniComponents.DyniRegattaTimerAudio).toBeTruthy();
+    expect(context.DyniComponents.DyniRegattaTimerAudio.id).toBe("RegattaTimerAudio");
+  });
+
+  /** @type {any} */
   let originalAudioContext;
+  /** @type {any} */
   let originalWebkitAudioContext;
 
   function installAudioContextMock() {
-    const instances = [];
+    const instances = /** @type {any[]} */ ([]);
     const AudioContextMock = vi.fn().mockImplementation(function () {
       const instance = {
         currentTime: 10,
         destination: { id: "destination" },
-        oscillatorNodes: [],
-        gainNodes: [],
+        oscillatorNodes: /** @type {any[]} */ ([]),
+        gainNodes: /** @type {any[]} */ ([]),
         close: vi.fn().mockResolvedValue(undefined),
         createOscillator: vi.fn(function () {
           const oscillator = {
@@ -43,7 +55,7 @@ describe("RegattaTimerAudio", function () {
       return instance;
     });
 
-    globalThis.AudioContext = AudioContextMock;
+    /** @type {any} */ (globalThis).AudioContext = AudioContextMock;
     return { AudioContextMock: AudioContextMock, instances: instances };
   }
 
@@ -54,23 +66,23 @@ describe("RegattaTimerAudio", function () {
   }
 
   beforeEach(function () {
-    originalAudioContext = globalThis.AudioContext;
-    originalWebkitAudioContext = globalThis.webkitAudioContext;
-    delete globalThis.AudioContext;
-    delete globalThis.webkitAudioContext;
+    originalAudioContext = /** @type {any} */ (globalThis).AudioContext;
+    originalWebkitAudioContext = /** @type {any} */ (globalThis).webkitAudioContext;
+    delete (/** @type {any} */ (globalThis).AudioContext);
+    delete (/** @type {any} */ (globalThis).webkitAudioContext);
   });
 
   afterEach(function () {
     if (typeof originalAudioContext === "undefined") {
-      delete globalThis.AudioContext;
+      delete (/** @type {any} */ (globalThis).AudioContext);
     } else {
-      globalThis.AudioContext = originalAudioContext;
+      /** @type {any} */ (globalThis).AudioContext = originalAudioContext;
     }
 
     if (typeof originalWebkitAudioContext === "undefined") {
-      delete globalThis.webkitAudioContext;
+      delete (/** @type {any} */ (globalThis).webkitAudioContext);
     } else {
-      globalThis.webkitAudioContext = originalWebkitAudioContext;
+      /** @type {any} */ (globalThis).webkitAudioContext = originalWebkitAudioContext;
     }
   });
 
@@ -109,7 +121,7 @@ describe("RegattaTimerAudio", function () {
   });
 
   it("playTone is a no-op when context creation failed", function () {
-    globalThis.AudioContext = vi.fn().mockImplementation(function () {
+    /** @type {any} */ (globalThis).AudioContext = vi.fn().mockImplementation(function () {
       throw new Error("unavailable");
     });
     const engine = createAudioEngine();
@@ -139,5 +151,96 @@ describe("RegattaTimerAudio", function () {
     engine.destroy();
 
     expect(harness.instances[0].close).toHaveBeenCalledTimes(1);
+  });
+
+  it("ensureContext falls back to webkitAudioContext when AudioContext is unavailable", function () {
+    const harness = installAudioContextMock();
+    /** @type {any} */ (globalThis).webkitAudioContext = harness.AudioContextMock;
+    delete (/** @type {any} */ (globalThis).AudioContext);
+    const engine = createAudioEngine();
+
+    expect(engine.ensureContext()).toBe(true);
+    expect(harness.AudioContextMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("ensureContext keeps returning false once marked unavailable without retrying construction", function () {
+    const engine = createAudioEngine();
+
+    expect(engine.ensureContext()).toBe(false);
+    expect(engine.ensureContext()).toBe(false);
+  });
+
+  it("playTone is a no-op for non-positive or non-finite frequency and duration", function () {
+    const harness = installAudioContextMock();
+    const engine = createAudioEngine();
+    engine.ensureContext();
+
+    engine.playTone(0, 300);
+    engine.playTone(-10, 300);
+    engine.playTone(NaN, 300);
+    engine.playTone(440, 0);
+    engine.playTone(440, -50);
+    engine.playTone(440, NaN);
+
+    expect(harness.instances[0].createOscillator).not.toHaveBeenCalled();
+  });
+
+  it("playTone swallows errors thrown while wiring the oscillator graph", function () {
+    const harness = installAudioContextMock();
+    const engine = createAudioEngine();
+    engine.ensureContext();
+    harness.instances[0].createOscillator.mockImplementation(function () {
+      throw new Error("graph failure");
+    });
+
+    expect(function () {
+      engine.playTone(440, 300);
+    }).not.toThrow();
+  });
+
+  it("destroy is a no-op when no context was ever created", function () {
+    const engine = createAudioEngine();
+
+    expect(function () {
+      engine.destroy();
+    }).not.toThrow();
+  });
+
+  it("destroy tolerates a close() result that is not a thenable", function () {
+    /** @type {any} */ (globalThis).AudioContext = vi.fn().mockImplementation(function () {
+      return {
+        currentTime: 10,
+        destination: {},
+        close: vi.fn().mockReturnValue(undefined),
+        createOscillator: vi.fn(),
+        createGain: vi.fn()
+      };
+    });
+    const engine = createAudioEngine();
+    engine.ensureContext();
+
+    expect(function () {
+      engine.destroy();
+    }).not.toThrow();
+  });
+
+  it("destroy swallows errors thrown while closing the context", function () {
+    /** @type {any} */ (globalThis).AudioContext = vi.fn().mockImplementation(function () {
+      return {
+        currentTime: 10,
+        destination: {},
+        close: vi.fn().mockImplementation(function () {
+          throw new Error("close failure");
+        }),
+        createOscillator: vi.fn(),
+        createGain: vi.fn()
+      };
+    });
+    const engine = createAudioEngine();
+    engine.ensureContext();
+
+    expect(function () {
+      engine.destroy();
+    }).not.toThrow();
   });
 });

@@ -12,6 +12,10 @@ describe("AlarmRenderModel", function () {
     return loadFresh("shared/widget-kits/vessel/AlarmRenderModel.js").create({}, componentContext);
   }
 
+  /**
+   * @param {Record<string, any>} [props]
+   * @param {string} [mode]
+   */
   function withSurfacePolicy(props, mode) {
     return Object.assign({}, props || {}, {
       surfacePolicy: {
@@ -93,10 +97,13 @@ describe("AlarmRenderModel", function () {
   it("forces passive interaction in editing mode", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: withSurfacePolicy({
-        caption: "ALARM",
-        editing: true
-      }, "dispatch"),
+      props: withSurfacePolicy(
+        {
+          caption: "ALARM",
+          editing: true
+        },
+        "dispatch"
+      ),
       domain: {
         state: "active",
         alarmText: "ENGINE"

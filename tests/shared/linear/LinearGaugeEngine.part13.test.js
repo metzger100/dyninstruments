@@ -1,8 +1,5 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./LinearGaugeEngine.harness");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
 describe("LinearGaugeEngine", function () {
   it("passes layout variants and split-high row boxes to mode overrides", function () {
@@ -20,7 +17,7 @@ describe("LinearGaugeEngine", function () {
       tickProps: {
         major: "major",
         minor: "minor",
-        showEndLabels: "showEndLabels",
+        showEndLabels: "showEndLabels"
       },
       layout: { normalVariant: "stacked", highVariant: "split" },
       drawMode: {
@@ -31,15 +28,15 @@ describe("LinearGaugeEngine", function () {
         high(state, props, display) {
           highState = state;
           highDisplay = display;
-        },
-      },
+        }
+      }
     });
 
     renderer(
       createMockCanvas({
         rectWidth: 280,
         rectHeight: 220,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
       {
         value: 10,
@@ -50,14 +47,14 @@ describe("LinearGaugeEngine", function () {
         n: 1.1,
         f: 3.5,
         caption: "AWA",
-        captionUnitScale: 0.8,
-      },
+        captionUnitScale: 0.8
+      }
     );
     renderer(
       createMockCanvas({
         rectWidth: 120,
         rectHeight: 320,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
       {
         value: 10,
@@ -68,8 +65,8 @@ describe("LinearGaugeEngine", function () {
         n: 1.1,
         f: 3.5,
         caption: "AWA",
-        captionUnitScale: 0.8,
-      },
+        captionUnitScale: 0.8
+      }
     );
 
     expect(normalState.layout.normalVariant).toBe("stacked");
@@ -86,5 +83,4 @@ describe("LinearGaugeEngine", function () {
     expect(highDisplay.rowBoxes.bottom.captionBox).toBeTruthy();
     expect(highDisplay.rowBoxes.bottom.valueBox).toBeTruthy();
   });
-
 });

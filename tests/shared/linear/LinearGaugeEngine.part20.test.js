@@ -1,8 +1,5 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./LinearGaugeEngine.harness");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
 describe("LinearGaugeEngine", function () {
   it("supports axis/tick/frame/mode hooks without breaking default rendering pipeline", function () {
@@ -41,14 +38,14 @@ describe("LinearGaugeEngine", function () {
               top: 0,
               left: 0,
               right: width,
-              bottom: height,
+              bottom: height
             };
           },
           closest() {
             return null;
-          },
+          }
         };
-      },
+      }
     };
 
     const renderer = harness.engine.createRenderer({
@@ -58,7 +55,7 @@ describe("LinearGaugeEngine", function () {
       tickProps: {
         major: "major",
         minor: "minor",
-        showEndLabels: "showEndLabels",
+        showEndLabels: "showEndLabels"
       },
       resolveAxis(props, range, defaultAxis, api) {
         resolveAxisCalls += 1;
@@ -84,15 +81,15 @@ describe("LinearGaugeEngine", function () {
         api.drawMarkerAtValue(45, {
           lineWidth: 7,
           len: 9,
-          strokeStyle: "#00ff00",
+          strokeStyle: "#00ff00"
         });
         api.drawMarkerAtValue(75, { strokeStyle: "#3366cc" });
       },
       drawMode: {
         normal(state, props, display, api) {
           drawModeCalls += 1;
-        },
-      },
+        }
+      }
     });
 
     renderer(
@@ -100,7 +97,7 @@ describe("LinearGaugeEngine", function () {
         rectWidth: 280,
         rectHeight: 220,
         ctx: createMockContext2D(),
-        ownerDocument: ownerDocument,
+        ownerDocument: ownerDocument
       }),
       {
         value: 15,
@@ -108,8 +105,8 @@ describe("LinearGaugeEngine", function () {
         max: 360,
         major: 30,
         minor: 10,
-        showEndLabels: true,
-      },
+        showEndLabels: true
+      }
     );
 
     expect(resolveAxisCalls).toBe(1);
@@ -128,42 +125,32 @@ describe("LinearGaugeEngine", function () {
         len: 9,
         opts: expect.objectContaining({
           lineWidth: 7,
-          strokeStyle: "#00ff00",
-        }),
-      }),
+          strokeStyle: "#00ff00"
+        })
+      })
     );
     expect(defaultMarker).toEqual(
       expect.objectContaining({
         opts: expect.objectContaining({
           lineCap: "butt",
-          strokeStyle: "#3366cc",
-        }),
-      }),
+          strokeStyle: "#3366cc"
+        })
+      })
     );
     expect(markerTrackLayout).toBeTruthy();
-    expect(
-      harness.calls.pointer[0] &&
-        harness.calls.pointer[0].opts &&
-        harness.calls.pointer[0].opts.depth,
-    ).toBe(markerTrackLayout.pointerDepth);
-    expect(
-      harness.calls.pointer[0] &&
-        harness.calls.pointer[0].opts &&
-        harness.calls.pointer[0].opts.side,
-    ).toBe(Math.max(1, Math.floor(markerTrackLayout.pointerSide / 2)));
-    expect(defaultMarker && defaultMarker.len).toBe(
-      Math.max(1, Math.floor(markerTrackLayout.pointerDepth * 0.45)),
+    expect(harness.calls.pointer[0] && harness.calls.pointer[0].opts && harness.calls.pointer[0].opts.depth).toBe(
+      markerTrackLayout.pointerDepth
     );
-    expect(
-      defaultMarker && defaultMarker.opts && defaultMarker.opts.lineWidth,
-    ).toBe(Math.max(1, Math.floor(markerTrackLayout.pointerDepth * 0.2)));
-    expect(defaultMarker && defaultMarker.y - defaultMarker.len).toBe(
-      markerTrackY,
+    expect(harness.calls.pointer[0] && harness.calls.pointer[0].opts && harness.calls.pointer[0].opts.side).toBe(
+      Math.max(1, Math.floor(markerTrackLayout.pointerSide / 2))
     );
+    expect(defaultMarker && defaultMarker.len).toBe(Math.max(1, Math.floor(markerTrackLayout.pointerDepth * 0.45)));
+    expect(defaultMarker && defaultMarker.opts && defaultMarker.opts.lineWidth).toBe(
+      Math.max(1, Math.floor(markerTrackLayout.pointerDepth * 0.2))
+    );
+    expect(defaultMarker && defaultMarker.y - defaultMarker.len).toBe(markerTrackY);
     expect(explicitMarker && explicitMarker.len).toBe(9);
-    expect(
-      explicitMarker && explicitMarker.opts && explicitMarker.opts.lineWidth,
-    ).toBe(7);
+    expect(explicitMarker && explicitMarker.opts && explicitMarker.opts.lineWidth).toBe(7);
     expect(harness.calls.drawCaptionMax).toBe(0);
     expect(harness.calls.drawValueUnitWithFit).toBe(0);
     expect(harness.calls.drawInlineCapValUnit).toBe(0);
@@ -174,5 +161,4 @@ describe("LinearGaugeEngine", function () {
     const labels = fillTextCalls.map((entry) => entry.args[0]);
     expect(labels).toContain("L0");
   });
-
 });

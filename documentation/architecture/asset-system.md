@@ -4,10 +4,13 @@
 
 ## Overview
 
-dyninstruments can declare runtime assets on component registry entries. The component loader preloads those assets on demand and exposes them through `runtime.getAsset(key)`.
+dyninstruments can declare runtime assets on component registry entries. The component loader preloads those assets on
+demand and exposes them through `runtime.getAsset(key)`.
 
-This system is for widget-specific assets only. Plugin-wide fonts still live in `plugin.css` and are shipped from `assets/fonts/`.
-Release builds also include `bootstrap-bundle.js`, a concatenation of all bootstrap manifest scripts, which the shared bootstrap core (`runtime/plugin-bootstrap-core.js`) loads as a single request when available from either `plugin.js` (legacy) or `plugin.mjs` (module) startup.
+This system is for widget-specific assets only. Plugin-wide fonts still live in `plugin.css` and are shipped from
+`assets/fonts/`. Release builds also include `bootstrap-bundle.js`, a concatenation of all bootstrap manifest scripts,
+which the shared bootstrap core (`runtime/plugin-bootstrap-core.js`) loads as a single request when available from
+either `plugin.js` (legacy) or `plugin.mjs` (module) startup.
 
 ## Registry Schema
 
@@ -32,7 +35,8 @@ Field contract:
 - `path` is relative to the plugin root and must not include the `BASE` prefix
 - `type` must be one of `svg`, `image`, `audio`, `json`, or `font`
 
-The asset path stays relative in the registry so both browser runtime and Node-based tooling can resolve it consistently at consumption time.
+The asset path stays relative in the registry so both browser runtime and Node-based tooling can resolve it consistently
+at consumption time.
 
 ## Preload Contract
 
@@ -55,7 +59,8 @@ Error contract:
 
 The component loader preloads declared assets after JS/CSS load completion and before component API validation.
 
-Route-specific assets are component-owned: they are loaded during route activation, not startup, and the loaded results stay cached for the plugin session.
+Route-specific assets are component-owned: they are loaded during route activation, not startup, and the loaded results
+stay cached for the plugin session.
 
 ## Plugin-Wide Fonts
 

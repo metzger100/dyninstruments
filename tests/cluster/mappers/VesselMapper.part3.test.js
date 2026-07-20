@@ -1,20 +1,17 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
 const { makeRouteContext } = require("../../helpers/mapper-route-context");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js")
   .create(
     {},
     createComponentContextMock({
       modules: {
-        RadialAngleMath: loadFresh(
-          "shared/widget-kits/radial/RadialAngleMath.js",
-        ),
-        ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js"),
-      },
-    }),
+        RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js"),
+        ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
+      }
+    })
   )
   .createToolkit({
     caption_voltageLinear: "VOLT",
@@ -36,7 +33,7 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js")
     caption_roll: "ROLL",
     unit_roll: "°",
     caption_alarm: "ALARM",
-    unit_alarm: "",
+    unit_alarm: ""
   });
 
 function routeContext(kind, activeToolkit, viewModel) {
@@ -45,7 +42,7 @@ function routeContext(kind, activeToolkit, viewModel) {
     cluster: "vessel",
     kind: kind,
     toolkit: activeToolkit,
-    viewModel: viewModel,
+    viewModel: viewModel
   });
 }
 
@@ -62,9 +59,7 @@ function trimText(value) {
 }
 
 function toMaybeNumber(value) {
-  return typeof value === "undefined" || value === null || value === ""
-    ? undefined
-    : Number(value);
+  return typeof value === "undefined" || value === null || value === "" ? undefined : Number(value);
 }
 
 function makeAlarmViewModel() {
@@ -91,19 +86,17 @@ function makeAlarmViewModel() {
             name: name,
             category: alarm.category,
             repeat: alarm.repeat === true,
-            index: index,
+            index: index
           };
         })
         .sort(function (a, b) {
-          return (
-            priority(a.category) - priority(b.category) || a.index - b.index
-          );
+          return priority(a.category) - priority(b.category) || a.index - b.index;
         })
         .map(function (alarm) {
           return {
             name: alarm.name,
             category: alarm.category,
-            repeat: alarm.repeat,
+            repeat: alarm.repeat
           };
         });
       const alarmNames = activeAlarms.map(function (alarm) {
@@ -122,9 +115,9 @@ function makeAlarmViewModel() {
             : activeCount > 2
               ? alarmNames.slice(0, 2).join(", ") + " +" + (activeCount - 2)
               : alarmNames.join(", "),
-        state: activeCount > 0 ? "active" : "idle",
+        state: activeCount > 0 ? "active" : "idle"
       };
-    },
+    }
   };
 }
 
@@ -139,7 +132,7 @@ describe("VesselMapper", function () {
         return "U:" + name;
       },
       out: toolkit.out,
-      makeAngleFormatter: toolkit.makeAngleFormatter,
+      makeAngleFormatter: toolkit.makeAngleFormatter
     };
 
     expect(function () {
@@ -150,18 +143,13 @@ describe("VesselMapper", function () {
           voltageRadialMinValue: "7",
           voltageRadialMaxValue: "15",
           voltageRadialTickMajor: "1",
-          voltageRadialTickMinor: "0.2",
+          voltageRadialTickMinor: "0.2"
         },
-        routeContext("voltageRadial", toolkitWithoutNum),
+        routeContext("voltageRadial", toolkitWithoutNum)
       );
     }).toThrow(/num is not a function/);
 
-    expect(
-      mapper.translate(
-        { kind: "unknownKind" },
-        routeContext("unknownKind", toolkitWithoutNum),
-      ),
-    ).toEqual({});
+    expect(mapper.translate({ kind: "unknownKind" }, routeContext("unknownKind", toolkitWithoutNum))).toEqual({});
   });
 
   it("uses toolkit.num directly when it is available", function () {
@@ -177,7 +165,7 @@ describe("VesselMapper", function () {
       makeAngleFormatter: toolkit.makeAngleFormatter,
       num(value) {
         return Number(value);
-      },
+      }
     };
 
     const out = mapper.translate(
@@ -187,9 +175,9 @@ describe("VesselMapper", function () {
         voltageRadialMinValue: "7",
         voltageRadialMaxValue: "15",
         voltageRadialTickMajor: "1",
-        voltageRadialTickMinor: "0.2",
+        voltageRadialTickMinor: "0.2"
       },
-      routeContext("voltageRadial", toolkitWithNum),
+      routeContext("voltageRadial", toolkitWithNum)
     );
 
     expect(out.rendererProps.voltageRadialMinValue).toBe(7);
@@ -207,23 +195,23 @@ describe("VesselMapper", function () {
           secondAlarm: {
             running: true,
             category: "info",
-            repeat: false,
+            repeat: false
           },
           firstAlarm: {
             running: true,
             category: "critical",
-            repeat: true,
+            repeat: true
           },
           ignoredAlarm: {
             running: false,
             category: "critical",
-            repeat: true,
-          },
+            repeat: true
+          }
         },
         alarmRatioThresholdNormal: "1.25",
-        alarmRatioThresholdFlat: "3.75",
+        alarmRatioThresholdFlat: "3.75"
       },
-      routeContext("alarm", toolkit, makeAlarmViewModel()),
+      routeContext("alarm", toolkit, makeAlarmViewModel())
     );
 
     expect(out).toEqual({
@@ -233,16 +221,16 @@ describe("VesselMapper", function () {
       domain: {
         activeAlarms: [
           { name: "firstAlarm", category: "critical", repeat: true },
-          { name: "secondAlarm", category: "info", repeat: false },
+          { name: "secondAlarm", category: "info", repeat: false }
         ],
         hasActiveAlarms: true,
         activeCount: 2,
         alarmNames: ["firstAlarm", "secondAlarm"],
         alarmText: "firstAlarm, secondAlarm",
-        state: "active",
+        state: "active"
       },
       ratioThresholdNormal: 1.25,
-      ratioThresholdFlat: 3.75,
+      ratioThresholdFlat: 3.75
     });
   });
 
@@ -254,23 +242,23 @@ describe("VesselMapper", function () {
         alarmInfo: {
           earlyUndefined: { running: true, repeat: false },
           laterCritical: { running: true, category: "critical", repeat: true },
-          laterInfo: { running: true, category: "info", repeat: false },
-        },
+          laterInfo: { running: true, category: "info", repeat: false }
+        }
       },
-      routeContext("alarm", toolkit, makeAlarmViewModel()),
+      routeContext("alarm", toolkit, makeAlarmViewModel())
     );
 
     expect(out.domain).toEqual({
       activeAlarms: [
         { name: "laterCritical", category: "critical", repeat: true },
         { name: "laterInfo", category: "info", repeat: false },
-        { name: "earlyUndefined", category: undefined, repeat: false },
+        { name: "earlyUndefined", category: undefined, repeat: false }
       ],
       hasActiveAlarms: true,
       activeCount: 3,
       alarmNames: ["laterCritical", "laterInfo", "earlyUndefined"],
       alarmText: "laterCritical, laterInfo +1",
-      state: "active",
+      state: "active"
     });
   });
 
@@ -279,9 +267,9 @@ describe("VesselMapper", function () {
     const out = mapper.translate(
       {
         kind: "alarm",
-        alarmInfo: null,
+        alarmInfo: null
       },
-      routeContext("alarm", toolkit, makeAlarmViewModel()),
+      routeContext("alarm", toolkit, makeAlarmViewModel())
     );
 
     expect(out.caption).toBe("ALARM");
@@ -293,7 +281,7 @@ describe("VesselMapper", function () {
       activeCount: 0,
       alarmNames: [],
       alarmText: "NONE",
-      state: "idle",
+      state: "idle"
     });
     expect(out.ratioThresholdNormal).toBeUndefined();
     expect(out.ratioThresholdFlat).toBeUndefined();

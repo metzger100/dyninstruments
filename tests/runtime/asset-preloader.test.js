@@ -1,5 +1,6 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
+/** @param {any} kind @param {any} value @param {any} [ok] */
 function createFetchResponse(kind, value, ok) {
   return {
     ok: ok !== false,
@@ -15,14 +16,15 @@ function createFetchResponse(kind, value, ok) {
     arrayBuffer:
       kind === "arrayBuffer"
         ? vi.fn(() => Promise.resolve(value))
-        : vi.fn(() => Promise.reject(new Error("unexpected arrayBuffer()"))),
+        : vi.fn(() => Promise.reject(new Error("unexpected arrayBuffer()")))
   };
 }
 
+/** @param {Record<string, any>} [options] */
 function setup(options) {
   const opts = options || {};
   const fontsAdd = vi.fn();
-  const fetchMock = vi.fn((url) => {
+  const fetchMock = vi.fn((/** @type {any} */ url) => {
     const entry = opts.responses[url];
     if (entry instanceof Error) {
       return Promise.reject(entry);
@@ -32,11 +34,13 @@ function setup(options) {
 
   class FakeImage {
     constructor() {
+      /** @type {any} */
       this.onload = null;
       this.onerror = null;
       this.srcValue = "";
     }
 
+    /** @param {any} value */
     set src(value) {
       this.srcValue = value;
       Promise.resolve().then(() => {
@@ -48,6 +52,7 @@ function setup(options) {
   }
 
   class FakeFontFace {
+    /** @param {any} family @param {any} source */
     constructor(family, source) {
       this.family = family;
       this.source = source;
@@ -60,13 +65,13 @@ function setup(options) {
     FontFace: FakeFontFace,
     document: {
       fonts: {
-        add: fontsAdd,
-      },
+        add: fontsAdd
+      }
     },
     DyniPlugin: {
       baseUrl: "http://host/plugins/dyninstruments/",
-      runtime: {},
-    },
+      runtime: {}
+    }
   });
 
   runIifeScript("runtime/asset-preloader.js", context);
@@ -74,7 +79,7 @@ function setup(options) {
   return {
     context,
     fetchMock,
-    fontsAdd,
+    fontsAdd
   };
 }
 
@@ -96,20 +101,18 @@ describe("runtime/asset-preloader.js", function () {
         [svgUrl]: svgResponse,
         [audioUrl]: audioResponse,
         [jsonUrl]: jsonResponse,
-        [fontUrl]: createFetchResponse("arrayBuffer", new ArrayBuffer(16)),
-      },
+        [fontUrl]: createFetchResponse("arrayBuffer", new ArrayBuffer(16))
+      }
     });
 
-    const preloader = context.DyniPlugin.runtime.createAssetPreloader(
-      context.DyniPlugin.baseUrl,
-    );
+    const preloader = context.DyniPlugin.runtime.createAssetPreloader(context.DyniPlugin.baseUrl);
 
     await preloader.preloadAssets([
       { key: "icon", path: "assets/icon.svg", type: "svg" },
       { key: "image", path: "assets/image.png", type: "image" },
       { key: "tone", path: "assets/tone.mp3", type: "audio" },
       { key: "meta", path: "assets/meta.json", type: "json" },
-      { key: "font", path: "assets/font.woff2", type: "font" },
+      { key: "font", path: "assets/font.woff2", type: "font" }
     ]);
 
     expect(fetchMock).toHaveBeenCalledWith(svgUrl);
@@ -134,22 +137,18 @@ describe("runtime/asset-preloader.js", function () {
     const { context } = setup({
       responses: {
         [failedUrl]: createFetchResponse("text", "nope", false),
-        [dupOneUrl]: createFetchResponse("text", "<svg></svg>"),
-      },
+        [dupOneUrl]: createFetchResponse("text", "<svg></svg>")
+      }
     });
 
-    const preloader = context.DyniPlugin.runtime.createAssetPreloader(
-      context.DyniPlugin.baseUrl,
-    );
-    await preloader.preloadAssets([
-      { key: "failed", path: "assets/fail.svg", type: "svg" },
-    ]);
+    const preloader = context.DyniPlugin.runtime.createAssetPreloader(context.DyniPlugin.baseUrl);
+    await preloader.preloadAssets([{ key: "failed", path: "assets/fail.svg", type: "svg" }]);
 
     expect(preloader.getAsset("failed")).toBeNull();
     expect(function () {
       preloader.preloadAssets([
         { key: "dup", path: "assets/one.svg", type: "svg" },
-        { key: "dup", path: "assets/two.svg", type: "svg" },
+        { key: "dup", path: "assets/two.svg", type: "svg" }
       ]);
     }).toThrow("duplicate asset key");
     warn.mockRestore();

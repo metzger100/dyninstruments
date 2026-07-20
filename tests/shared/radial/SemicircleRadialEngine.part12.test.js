@@ -1,3 +1,4 @@
+// @ts-nocheck
 const {
   makeThemeDefaults,
   makeComponentContext,
@@ -5,7 +6,7 @@ const {
   createBaseSequence,
   createValueMath,
   makeBaseSpec,
-  createRenderHarness,
+  createRenderHarness
 } = require("./SemicircleRadialEngine.harness");
 
 describe("SemicircleRadialEngine", function () {
@@ -20,9 +21,9 @@ describe("SemicircleRadialEngine", function () {
               resolveForRoot() {
                 return makeThemeDefaults({
                   colors: { pointer: "#3366cc" },
-                  font: { labelWeight: 650 },
+                  font: { labelWeight: 650 }
                 });
-              },
+              }
             },
             text: {},
             value: createValueMath(),
@@ -33,10 +34,10 @@ describe("SemicircleRadialEngine", function () {
               drawAnnularSector() {},
               drawPointerAtRim() {},
               drawTicksFromAngles() {},
-              drawLabels() {},
-            },
+              drawLabels() {}
+            }
           };
-        },
+        }
       },
       SemicircleRadialLayout: {
         create() {
@@ -49,12 +50,10 @@ describe("SemicircleRadialEngine", function () {
               return { responsive: { textFillScale: 1 } };
             },
             computeLayout() {
-              throw new Error(
-                "layout should not run for disconnected state-screen",
-              );
-            },
+              throw new Error("layout should not run for disconnected state-screen");
+            }
           };
-        },
+        }
       },
       SemicircleRadialTextLayout: {
         create() {
@@ -64,37 +63,33 @@ describe("SemicircleRadialEngine", function () {
             },
             drawModeText() {
               drawCalls.modeText += 1;
-            },
+            }
           };
-        },
-      },
+        }
+      }
     };
-    const renderer = loadFresh(
-      "shared/widget-kits/radial/SemicircleRadialEngine.js",
-    )
+    const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
       .create({}, makeComponentContext(modules))
       .createRenderer(makeBaseSpec());
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({
       rectWidth: 220,
       rectHeight: 140,
-      ctx: ctx,
+      ctx: ctx
     });
 
     renderer(canvas, {
       disconnect: true,
       value: 12.3,
       caption: "SPD",
-      unit: "kn",
+      unit: "kn"
     });
 
     expect(layoutCalls.computeMode).toBe(0);
     expect(drawCalls.arc).toBe(0);
     expect(drawCalls.modeText).toBe(0);
-    expect(
-      ctx.calls
-        .filter((entry) => entry.name === "fillText")
-        .map((entry) => String(entry.args[0])),
-    ).toContain("GPS Lost");
+    expect(ctx.calls.filter((entry) => entry.name === "fillText").map((entry) => String(entry.args[0]))).toContain(
+      "GPS Lost"
+    );
   });
 });

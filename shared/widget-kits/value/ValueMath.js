@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniValueMath = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -160,7 +160,7 @@
 
   /** @param {number} from @param {number} to @param {number} t @returns {number} */
   function lerp(from, to, t) {
-    return from + ((to - from) * t);
+    return from + (to - from) * t;
   }
 
   /** @param {number} value @param {unknown} eps @returns {boolean} */
@@ -227,13 +227,17 @@
     }
 
     const formatter = hasOwn.call(p, "formatter") ? p.formatter : defaultFormatter;
-    const formatterParameters = hasOwn.call(p, "formatterParameters") ? p.formatterParameters : defaultFormatterParameters;
+    const formatterParameters = hasOwn.call(p, "formatterParameters")
+      ? p.formatterParameters
+      : defaultFormatterParameters;
     const formatted = normalize(
-      String(applyFormatter(numericRaw, {
-        formatter: formatter,
-        formatterParameters: formatterParameters,
-        default: defaultText
-      })),
+      String(
+        applyFormatter(numericRaw, {
+          formatter: formatter,
+          formatterParameters: formatterParameters,
+          default: defaultText
+        })
+      ),
       defaultText
     );
     const numberText = extractNumberText(formatted);
@@ -316,7 +320,7 @@
     if (typeof n !== "number") {
       return "";
     }
-    let a = ((n + 180) % 360 + 360) % 360 - 180;
+    let a = ((((n + 180) % 360) + 360) % 360) - 180;
     if (a === 180) a = -180;
     const rounded = Math.round(Math.abs(a));
     let out = String(rounded);
@@ -396,4 +400,4 @@
   }
 
   return { id: "ValueMath", create: create };
-}));
+});

@@ -9,6 +9,7 @@ describe("DepthDisplayFormatter", function () {
       extractNumericDisplay: vi.fn()
     };
     const placeholderNormalize = {
+      /** @param {any} value @param {any} defaultText */
       normalize(value, defaultText) {
         return value == null ? (defaultText == null ? "---" : defaultText) : String(value);
       }
@@ -30,6 +31,7 @@ describe("DepthDisplayFormatter", function () {
       extractNumericDisplay: vi.fn()
     };
     const placeholderNormalize = {
+      /** @param {any} value @param {any} defaultText */
       normalize(value, defaultText) {
         return value == null ? (defaultText == null ? "---" : defaultText) : String(value);
       }
@@ -53,6 +55,7 @@ describe("DepthDisplayFormatter", function () {
       extractNumericDisplay: vi.fn(() => 4.2)
     };
     const placeholderNormalize = {
+      /** @param {any} value @param {any} defaultText */
       normalize(value, defaultText) {
         return value == null ? (defaultText == null ? "---" : defaultText) : String(value);
       }

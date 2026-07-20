@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
 describe("runtime/SurfaceSessionController.js", function () {
@@ -65,11 +66,19 @@ describe("runtime/SurfaceSessionController.js", function () {
     const opts = overrides || {};
     const surface = Object.prototype.hasOwnProperty.call(opts, "surface") ? opts.surface : "html";
     const routeId = Object.prototype.hasOwnProperty.call(opts, "routeId") ? opts.routeId : "nav/activeRoute";
-    const rendererId = Object.prototype.hasOwnProperty.call(opts, "rendererId") ? opts.rendererId : "ActiveRouteTextHtmlWidget";
-    const rootEl = Object.prototype.hasOwnProperty.call(opts, "rootEl") ? opts.rootEl : { id: "root-" + String(routeId) };
-    const shellEl = Object.prototype.hasOwnProperty.call(opts, "shellEl") ? opts.shellEl : { id: "shell-" + String(routeId) };
+    const rendererId = Object.prototype.hasOwnProperty.call(opts, "rendererId")
+      ? opts.rendererId
+      : "ActiveRouteTextHtmlWidget";
+    const rootEl = Object.prototype.hasOwnProperty.call(opts, "rootEl")
+      ? opts.rootEl
+      : { id: "root-" + String(routeId) };
+    const shellEl = Object.prototype.hasOwnProperty.call(opts, "shellEl")
+      ? opts.shellEl
+      : { id: "shell-" + String(routeId) };
     const revision = Object.prototype.hasOwnProperty.call(opts, "revision") ? opts.revision : 1;
-    const hostContext = Object.prototype.hasOwnProperty.call(opts, "hostContext") ? opts.hostContext : { id: "host-context" };
+    const hostContext = Object.prototype.hasOwnProperty.call(opts, "hostContext")
+      ? opts.hostContext
+      : { id: "host-context" };
     const props = Object.prototype.hasOwnProperty.call(opts, "props") ? opts.props : { routeId: routeId };
     const rendererSpec = Object.prototype.hasOwnProperty.call(opts, "rendererSpec")
       ? opts.rendererSpec
@@ -122,12 +131,14 @@ describe("runtime/SurfaceSessionController.js", function () {
     });
 
     expect(function () {
-      strictSurfaceSession.reconcileSession(createPayload({
-        surface: "legacy-html",
-        routeId: "legacy/html",
-        rendererId: "LegacyHtmlWidget",
-        rendererSpec: { id: "LegacyHtmlWidget", createCommittedRenderer: vi.fn() }
-      }));
+      strictSurfaceSession.reconcileSession(
+        createPayload({
+          surface: "legacy-html",
+          routeId: "legacy/html",
+          rendererId: "LegacyHtmlWidget",
+          rendererSpec: { id: "LegacyHtmlWidget", createCommittedRenderer: vi.fn() }
+        })
+      );
     }).toThrow("unsupported surface");
   });
 
@@ -139,26 +150,32 @@ describe("runtime/SurfaceSessionController.js", function () {
     });
 
     expect(function () {
-      session.reconcileSession(createPayload({
-        routeId: "",
-        rendererId: "ActiveRouteTextHtmlWidget"
-      }));
+      session.reconcileSession(
+        createPayload({
+          routeId: "",
+          rendererId: "ActiveRouteTextHtmlWidget"
+        })
+      );
     }).toThrow("requires routeId");
 
     expect(function () {
-      session.reconcileSession(createPayload({
-        routeId: "nav/activeRoute",
-        rendererId: "",
-        rendererSpec: { id: "ActiveRouteTextHtmlWidget", createCommittedRenderer: vi.fn() }
-      }));
+      session.reconcileSession(
+        createPayload({
+          routeId: "nav/activeRoute",
+          rendererId: "",
+          rendererSpec: { id: "ActiveRouteTextHtmlWidget", createCommittedRenderer: vi.fn() }
+        })
+      );
     }).toThrow("requires rendererId");
 
     expect(function () {
-      session.reconcileSession(createPayload({
-        routeId: "nav/activeRoute",
-        rendererId: "ActiveRouteTextHtmlWidget",
-        rendererSpec: null
-      }));
+      session.reconcileSession(
+        createPayload({
+          routeId: "nav/activeRoute",
+          rendererId: "ActiveRouteTextHtmlWidget",
+          rendererSpec: null
+        })
+      );
     }).toThrow("requires rendererSpec");
   });
 });

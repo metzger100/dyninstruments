@@ -1,8 +1,5 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./LinearGaugeEngine.harness");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
 describe("LinearGaugeEngine", function () {
   it("uses linear.labels.insetFactor to position tick labels", function () {
@@ -16,8 +13,8 @@ describe("LinearGaugeEngine", function () {
         tickProps: {
           major: "major",
           minor: "minor",
-          showEndLabels: "showEndLabels",
-        },
+          showEndLabels: "showEndLabels"
+        }
       });
 
       const layerContexts = [];
@@ -46,14 +43,14 @@ describe("LinearGaugeEngine", function () {
                 top: 0,
                 left: 0,
                 right: width,
-                bottom: height,
+                bottom: height
               };
             },
             closest() {
               return null;
-            },
+            }
           };
-        },
+        }
       };
 
       renderer(
@@ -61,7 +58,7 @@ describe("LinearGaugeEngine", function () {
           rectWidth: 480,
           rectHeight: 120,
           ctx: createMockContext2D(),
-          ownerDocument: ownerDocument,
+          ownerDocument: ownerDocument
         }),
         {
           value: 12,
@@ -69,8 +66,8 @@ describe("LinearGaugeEngine", function () {
           max: 30,
           major: 10,
           minor: 5,
-          showEndLabels: true,
-        },
+          showEndLabels: true
+        }
       );
 
       const fillTextCalls = layerContexts
@@ -85,5 +82,4 @@ describe("LinearGaugeEngine", function () {
     const yHighInset = renderLabelY(3.0);
     expect(yHighInset).toBeGreaterThan(yLowInset);
   });
-
 });

@@ -4,7 +4,10 @@
 
 ## Overview
 
-`runtime/SurfaceSessionController.js` coordinates per-instance surface lifecycle transitions after host commit resolution. `cluster/ClusterWidget.js` records the latest committed revision floor there, then uses it to reconcile attach/update/remount/surface-switch transitions against the mounted shell through the runtime surfaces service. The mounted route and renderer identities come from `config.clusterRoutes.byRouteId`.
+`runtime/SurfaceSessionController.js` coordinates per-instance surface lifecycle transitions after host commit
+resolution. `cluster/ClusterWidget.js` records the latest committed revision floor there, then uses it to reconcile
+attach/update/remount/surface-switch transitions against the mounted shell through the runtime surfaces service. The
+mounted route and renderer identities come from `config.clusterRoutes.byRouteId`.
 
 ## Key Details
 
@@ -18,22 +21,29 @@
   - throws for unsupported surface IDs
   - throws when the surfaces service is missing or does not expose `createController`
   - throws when returned controllers do not implement `attach`/`update`/`detach`/`destroy`
-- Committed-revision floor guard: `recordCommittedRevision(revision)` stores the latest committed shell revision floor and `reconcileSession(payload)` returns `false` when `payload.revision < committedRevisionFloor`
+- Committed-revision floor guard: `recordCommittedRevision(revision)` stores the latest committed shell revision floor
+  and `reconcileSession(payload)` returns `false` when `payload.revision < committedRevisionFloor`
 - Return value: `reconcileSession(payload)` returns `true` when the session is accepted and processed
-- Called from the Phase 6 live flow (`HostCommitController.onCommit` -> `ClusterWidget` applies `runtime.theme` -> `SurfaceSessionController.recordCommittedRevision(revision)` -> conditional `SurfaceSessionController.detachForShellReplacement()` when the shell identity changed or the route became invalid -> `RouteActivationController` builds an activated payload -> `SurfaceSessionController.reconcileSession(payload)`)
+- Called from the Phase 6 live flow (`HostCommitController.onCommit` -> `ClusterWidget` applies `runtime.theme` ->
+  `SurfaceSessionController.recordCommittedRevision(revision)` -> conditional
+  `SurfaceSessionController.detachForShellReplacement()` when the shell identity changed or the route became invalid ->
+  `RouteActivationController` builds an activated payload -> `SurfaceSessionController.reconcileSession(payload)`)
 - Same-surface transitions:
   - no active controller: create controller and attach
   - same route + same renderer + same surface + same shell: `update(payload)`
   - same route + same renderer + same surface + different shell: `detach("remount")` then `attach(payload)`
-  - different route or renderer on the same surface: destroy the old controller, create a new controller, and attach the new payload
-  - different surface: `detach("surface-switch")`, `destroy()` old controller, create new controller, then `attach(payload)`
+  - different route or renderer on the same surface: destroy the old controller, create a new controller, and attach the
+    new payload
+  - different surface: `detach("surface-switch")`, `destroy()` old controller, create new controller, then
+    `attach(payload)`
 - Shell replacement transition:
   - `detachForShellReplacement()` is a no-arg method
   - no active controller: silently no-op
   - active controller: `detach("shell-replacement")`
   - clears only `shellEl`
   - preserves `activeController` plus mounted route/renderer/surface/revision identity
-  - ClusterWidget should call it only when the committed shell was replaced or the route is invalid/diagnostic and a mounted controller exists
+  - ClusterWidget should call it only when the committed shell was replaced or the route is invalid/diagnostic and a
+    mounted controller exists
 - Shell sizing ownership:
   - `SurfaceSessionController` must not mutate shell sizing styles
   - shell sizing remains owned outside the session controller
@@ -67,37 +77,38 @@ session.getState();
 
 ### `recordCommittedRevision(revision)` Input
 
-| Key | Type | Required | Notes |
-|---|---|---|---|
-| `revision` | `number` | yes | Finite host-commit revision that becomes the stale floor for async activation payloads |
+| Key        | Type     | Required | Notes                                                                                  |
+| ---------- | -------- | -------- | -------------------------------------------------------------------------------------- |
+| `revision` | `number` | yes      | Finite host-commit revision that becomes the stale floor for async activation payloads |
 
 ### `reconcileSession(payload)` Input
 
-| Key | Type | Required | Notes |
-|---|---|---|---|
-| `routeId` | `string` | yes | Mounted route identity resolved from route metadata and used for route comparisons |
-| `rendererId` | `string` | yes | Mounted renderer identity copied from route metadata and used for renderer comparisons |
-| `surface` | `string` | yes | Must be `html` or `canvas-dom` |
-| `rootEl` | `Element` | yes | Host root for active session |
-| `shellEl` | `Element` | yes | Session shell element |
-| `hostContext` | `object` | yes | Host context passed to the renderer controller |
-| `props` | `object` | yes | Last mapped props snapshot |
-| `revision` | `number` | yes | Finite revision used for stale guard + async checks |
-| `rendererSpec` | `object` | yes | Renderer spec used to build the controller |
-| `shadowCssUrls` | `string[]` | yes | Shadow DOM stylesheet URLs for the session controller |
+| Key             | Type       | Required | Notes                                                                                  |
+| --------------- | ---------- | -------- | -------------------------------------------------------------------------------------- |
+| `routeId`       | `string`   | yes      | Mounted route identity resolved from route metadata and used for route comparisons     |
+| `rendererId`    | `string`   | yes      | Mounted renderer identity copied from route metadata and used for renderer comparisons |
+| `surface`       | `string`   | yes      | Must be `html` or `canvas-dom`                                                         |
+| `rootEl`        | `Element`  | yes      | Host root for active session                                                           |
+| `shellEl`       | `Element`  | yes      | Session shell element                                                                  |
+| `hostContext`   | `object`   | yes      | Host context passed to the renderer controller                                         |
+| `props`         | `object`   | yes      | Last mapped props snapshot                                                             |
+| `revision`      | `number`   | yes      | Finite revision used for stale guard + async checks                                    |
+| `rendererSpec`  | `object`   | yes      | Renderer spec used to build the controller                                             |
+| `shadowCssUrls` | `string[]` | yes      | Shadow DOM stylesheet URLs for the session controller                                  |
 
 ### `surfaces.createController(payload)` Input
 
-| Key | Type | Required | Notes |
-|---|---|---|---|
-| `surface` | `string` | yes | Target surface ID |
-| `rendererSpec` | `object` | yes | Renderer spec for controller construction |
-| `hostContext` | `object` | yes | Host context passed through to the controller |
-| `shadowCssUrls` | `string[]` | yes | Shadow DOM stylesheet URLs for the controller |
+| Key             | Type       | Required | Notes                                         |
+| --------------- | ---------- | -------- | --------------------------------------------- |
+| `surface`       | `string`   | yes      | Target surface ID                             |
+| `rendererSpec`  | `object`   | yes      | Renderer spec for controller construction     |
+| `hostContext`   | `object`   | yes      | Host context passed through to the controller |
+| `shadowCssUrls` | `string[]` | yes      | Shadow DOM stylesheet URLs for the controller |
 
 ### State Shape (`getState`)
 
-`mountedRouteId`, `mountedRendererId`, `mountedSurface`, `mountedRevision`, `committedRevisionFloor`, `activeController`, `shellEl`
+`mountedRouteId`, `mountedRendererId`, `mountedSurface`, `mountedRevision`, `committedRevisionFloor`,
+`activeController`, `shellEl`
 
 ## Related
 

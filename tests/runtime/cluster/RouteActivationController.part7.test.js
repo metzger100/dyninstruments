@@ -1,9 +1,10 @@
+// @ts-nocheck
 const {
   originalDyniPlugin,
   createDeferred,
   createLoaderHarness,
   loadController,
-  createBaseContext,
+  createBaseContext
 } = require("./RouteActivationController.harness.js");
 
 describe("runtime/cluster/RouteActivationController.js", function () {
@@ -13,8 +14,8 @@ describe("runtime/cluster/RouteActivationController.js", function () {
         rendererProps: {
           routeLabel: "active",
           routeId: routeContext.routeId,
-          marker: props.marker,
-        },
+          marker: props.marker
+        }
       };
     });
     const secondaryMapperTranslate = vi.fn(function (props, routeContext) {
@@ -22,14 +23,14 @@ describe("runtime/cluster/RouteActivationController.js", function () {
         rendererProps: {
           routeLabel: "secondary",
           routeId: routeContext.routeId,
-          marker: props.marker,
-        },
+          marker: props.marker
+        }
       };
     });
     const toolkitCreate = vi.fn(function (props) {
       return {
         fromToolkit: props.marker,
-        snapshot: props,
+        snapshot: props
       };
     });
     const deferredLoads = {
@@ -39,7 +40,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       SecondaryRouteMapper: createDeferred(),
       SecondaryRouteViewModel: createDeferred(),
       SecondaryRouteTextHtmlWidget: createDeferred(),
-      ClusterMapperToolkit: createDeferred(),
+      ClusterMapperToolkit: createDeferred()
     };
     const loader = createLoaderHarness({
       deferredLoads: deferredLoads,
@@ -47,27 +48,27 @@ describe("runtime/cluster/RouteActivationController.js", function () {
         ClusterMapperToolkit: {
           create: function () {
             return {
-              createToolkit: toolkitCreate,
+              createToolkit: toolkitCreate
             };
-          },
+          }
         },
         ActiveRouteMapper: {
           create: function () {
             return {
-              translate: activeMapperTranslate,
+              translate: activeMapperTranslate
             };
-          },
+          }
         },
         ActiveRouteViewModel: {
           create: function () {
             return {
               build: vi.fn(function (props) {
                 return {
-                  marker: props.marker,
+                  marker: props.marker
                 };
-              }),
+              })
             };
-          },
+          }
         },
         ActiveRouteTextHtmlWidget: {
           create: function () {
@@ -78,29 +79,29 @@ describe("runtime/cluster/RouteActivationController.js", function () {
                   update: vi.fn(),
                   postPatch: vi.fn(() => false),
                   detach: vi.fn(),
-                  destroy: vi.fn(),
+                  destroy: vi.fn()
                 };
-              }),
+              })
             };
-          },
+          }
         },
         SecondaryRouteMapper: {
           create: function () {
             return {
-              translate: secondaryMapperTranslate,
+              translate: secondaryMapperTranslate
             };
-          },
+          }
         },
         SecondaryRouteViewModel: {
           create: function () {
             return {
               build: vi.fn(function (props) {
                 return {
-                  marker: props.marker,
+                  marker: props.marker
                 };
-              }),
+              })
             };
-          },
+          }
         },
         SecondaryRouteTextHtmlWidget: {
           create: function () {
@@ -111,19 +112,19 @@ describe("runtime/cluster/RouteActivationController.js", function () {
                   update: vi.fn(),
                   postPatch: vi.fn(() => false),
                   detach: vi.fn(),
-                  destroy: vi.fn(),
+                  destroy: vi.fn()
                 };
-              }),
+              })
             };
-          },
-        },
-      },
+          }
+        }
+      }
     });
     const themeRuntime = {
       preloadShadowCssUrls: vi.fn(function (urls) {
         return Promise.resolve(urls);
       }),
-      hasShadowCssText: vi.fn(() => false),
+      hasShadowCssText: vi.fn(() => false)
     };
     const widgetDef = { cluster: "nav" };
     const context = createBaseContext({
@@ -134,18 +135,18 @@ describe("runtime/cluster/RouteActivationController.js", function () {
           materializeSurfacePolicyProps: vi.fn(function (options) {
             options.props.surfacePolicy = { rendererId: options.rendererId };
             return options.props;
-          }),
-        },
+          })
+        }
       },
       config: {
         shared: {},
         components: {
           ActiveRouteTextHtmlWidget: {
-            shadowCss: ["/css/active-route.css"],
+            shadowCss: ["/css/active-route.css"]
           },
           SecondaryRouteTextHtmlWidget: {
-            shadowCss: ["/css/secondary-route.css"],
-          },
+            shadowCss: ["/css/secondary-route.css"]
+          }
         },
         clusterRoutes: {
           byRouteId: {
@@ -157,7 +158,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
               viewModelId: "ActiveRouteViewModel",
               rendererId: "ActiveRouteTextHtmlWidget",
               surface: "html",
-              shellSizing: { kind: "ratio", aspectRatio: 2 },
+              shellSizing: { kind: "ratio", aspectRatio: 2 }
             },
             "nav/secondaryRoute": {
               routeId: "nav/secondaryRoute",
@@ -167,11 +168,11 @@ describe("runtime/cluster/RouteActivationController.js", function () {
               viewModelId: "SecondaryRouteViewModel",
               rendererId: "SecondaryRouteTextHtmlWidget",
               surface: "html",
-              shellSizing: { kind: "ratio", aspectRatio: 2 },
-            },
-          },
-        },
-      },
+              shellSizing: { kind: "ratio", aspectRatio: 2 }
+            }
+          }
+        }
+      }
     });
     const routeActivation = loadController(context);
     const controller = routeActivation.createWidgetController(widgetDef);
@@ -180,7 +181,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       kind: "activeRoute",
       marker: "first",
       __dyniRouteId: "nav/activeRoute",
-      __dyniRawProps: { cluster: "nav", kind: "activeRoute", marker: "first" },
+      __dyniRawProps: { cluster: "nav", kind: "activeRoute", marker: "first" }
     };
     const secondRouteFrame = {
       cluster: "nav",
@@ -190,8 +191,8 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       __dyniRawProps: {
         cluster: "nav",
         kind: "secondaryRoute",
-        marker: "second",
-      },
+        marker: "second"
+      }
     };
 
     const first = controller.activateCommittedRoute({
@@ -199,14 +200,14 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       revision: 1,
       rootEl: { id: "root-a" },
       shellEl: { id: "shell-a" },
-      hostContext: { marker: "a" },
+      hostContext: { marker: "a" }
     });
     const second = controller.activateCommittedRoute({
       routeFrame: secondRouteFrame,
       revision: 2,
       rootEl: { id: "root-b" },
       shellEl: { id: "shell-b" },
-      hostContext: { marker: "b" },
+      hostContext: { marker: "b" }
     });
 
     expect(first).toBe(second);
@@ -229,7 +230,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       "SecondaryRouteMapper",
       "SecondaryRouteViewModel",
       "SecondaryRouteTextHtmlWidget",
-      "ClusterMapperToolkit",
+      "ClusterMapperToolkit"
     ]);
 
     deferredLoads.SecondaryRouteMapper.resolve();
@@ -242,7 +243,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
     expect(
       loader.createRecords.every(function (entry) {
         return entry.def === widgetDef;
-      }),
+      })
     ).toBe(true);
     expect(payload).toMatchObject({
       routeId: "nav/secondaryRoute",
@@ -253,37 +254,35 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       rawProps: {
         cluster: "nav",
         kind: "secondaryRoute",
-        marker: "second",
-      },
+        marker: "second"
+      }
     });
     expect(payload.props).toMatchObject({
       marker: "second",
       routeId: "nav/secondaryRoute",
       routeLabel: "secondary",
       surfacePolicy: {
-        rendererId: "SecondaryRouteTextHtmlWidget",
-      },
+        rendererId: "SecondaryRouteTextHtmlWidget"
+      }
     });
     expect(themeRuntime.preloadShadowCssUrls).toHaveBeenCalledTimes(1);
-    expect(themeRuntime.preloadShadowCssUrls).toHaveBeenCalledWith([
-      "/css/secondary-route.css",
-    ]);
+    expect(themeRuntime.preloadShadowCssUrls).toHaveBeenCalledWith(["/css/secondary-route.css"]);
     expect(
       loader.createRecords.map(function (entry) {
         return entry.id;
-      }),
+      })
     ).toEqual([
       "SecondaryRouteMapper",
       "SecondaryRouteViewModel",
       "SecondaryRouteTextHtmlWidget",
-      "ClusterMapperToolkit",
+      "ClusterMapperToolkit"
     ]);
     expect(secondaryMapperTranslate).toHaveBeenCalledTimes(1);
     expect(activeMapperTranslate).not.toHaveBeenCalled();
     expect(toolkitCreate).toHaveBeenCalledWith({
       cluster: "nav",
       kind: "secondaryRoute",
-      marker: "second",
+      marker: "second"
     });
   });
 });

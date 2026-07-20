@@ -4,9 +4,11 @@
 
 ## Overview
 
-Responsive canvas-dom XTE widget that replaces the highway perspective with a horizontal linear gauge bar and keeps the same four nav metrics (`COG`, `XTE`, `DST`, `BRG`) plus optional waypoint name rendering.
+Responsive canvas-dom XTE widget that replaces the highway perspective with a horizontal linear gauge bar and keeps the
+same four nav metrics (`COG`, `XTE`, `DST`, `BRG`) plus optional waypoint name rendering.
 
-State-screen ownership and metric formatting match the existing XTE family: disconnected/no-target overlays are rendered first, then gauge + metrics in `data` state.
+State-screen ownership and metric formatting match the existing XTE family: disconnected/no-target overlays are rendered
+first, then gauge + metrics in `data` state.
 
 ## Module Registration
 
@@ -38,35 +40,35 @@ XteDisplayLinearWidget: {
 
 The mapper passes nested payload objects.
 
-| Prop path | Type | Default | Description |
-|---|---|---|---|
-| `display.xte` | number | — | Cross-track error |
-| `display.cog` | number | — | Course over ground |
-| `display.dtw` | number | — | Distance to waypoint |
-| `display.btw` | number | — | Bearing to waypoint |
-| `display.wpName` | string | `""` | Waypoint name |
-| `display.disconnect` | boolean | `false` | Renders `disconnected` state-screen |
-| `captions.xte` | string | `"XTE"` | XTE caption |
-| `captions.track` | string | `"COG"` | Track caption |
-| `captions.dtw` | string | `"DST"` | Distance caption |
-| `captions.brg` | string | `"BRG"` | Bearing caption |
-| `units.xte` | string | `"nm"` | XTE unit display label |
-| `units.track` | string | `"°"` | Heading unit display label |
-| `units.dtw` | string | `"nm"` | Distance unit display label |
-| `units.brg` | string | `"°"` | Bearing unit display label |
-| `formatUnits.xte` | string | `"nm"` | Formatter token for XTE |
-| `formatUnits.dtw` | string | `"nm"` | Formatter token for distance |
-| `xteScale` | number | `1` | Symmetric gauge bounds (`-xteScale..+xteScale`) |
-| `layout.leadingZero` | boolean | `true` | Zero-pad COG/BRG |
-| `layout.showWpName` | boolean | `false` | Show waypoint header when space allows |
-| `layout.hideTextualMetrics` | boolean | `false` | Gauge-only mode (metrics + name hidden) |
-| `layout.easing` | boolean | `true` | Spring easing toggle for pointer motion |
-| `layout.ratioThresholdNormal` | number | `0.85` | Ratio below -> `high` |
-| `layout.ratioThresholdFlat` | number | `2.3` | Ratio above -> `flat` |
-| `layout.tickMajor` | number | `1.0` | Major tick step |
-| `layout.tickMinor` | number | `0.25` | Minor tick step |
-| `layout.showEndLabels` | boolean | `true` | Show only min/max labels |
-| `stableDigits` | boolean | `false` | Enables XTE stable-digit normalization |
+| Prop path                     | Type    | Default | Description                                     |
+| ----------------------------- | ------- | ------- | ----------------------------------------------- |
+| `display.xte`                 | number  | —       | Cross-track error                               |
+| `display.cog`                 | number  | —       | Course over ground                              |
+| `display.dtw`                 | number  | —       | Distance to waypoint                            |
+| `display.btw`                 | number  | —       | Bearing to waypoint                             |
+| `display.wpName`              | string  | `""`    | Waypoint name                                   |
+| `display.disconnect`          | boolean | `false` | Renders `disconnected` state-screen             |
+| `captions.xte`                | string  | `"XTE"` | XTE caption                                     |
+| `captions.track`              | string  | `"COG"` | Track caption                                   |
+| `captions.dtw`                | string  | `"DST"` | Distance caption                                |
+| `captions.brg`                | string  | `"BRG"` | Bearing caption                                 |
+| `units.xte`                   | string  | `"nm"`  | XTE unit display label                          |
+| `units.track`                 | string  | `"°"`   | Heading unit display label                      |
+| `units.dtw`                   | string  | `"nm"`  | Distance unit display label                     |
+| `units.brg`                   | string  | `"°"`   | Bearing unit display label                      |
+| `formatUnits.xte`             | string  | `"nm"`  | Formatter token for XTE                         |
+| `formatUnits.dtw`             | string  | `"nm"`  | Formatter token for distance                    |
+| `xteScale`                    | number  | `1`     | Symmetric gauge bounds (`-xteScale..+xteScale`) |
+| `layout.leadingZero`          | boolean | `true`  | Zero-pad COG/BRG                                |
+| `layout.showWpName`           | boolean | `false` | Show waypoint header when space allows          |
+| `layout.hideTextualMetrics`   | boolean | `false` | Gauge-only mode (metrics + name hidden)         |
+| `layout.easing`               | boolean | `true`  | Spring easing toggle for pointer motion         |
+| `layout.ratioThresholdNormal` | number  | `0.85`  | Ratio below -> `high`                           |
+| `layout.ratioThresholdFlat`   | number  | `2.3`   | Ratio above -> `flat`                           |
+| `layout.tickMajor`            | number  | `1.0`   | Major tick step                                 |
+| `layout.tickMinor`            | number  | `0.25`  | Minor tick step                                 |
+| `layout.showEndLabels`        | boolean | `true`  | Show only min/max labels                        |
+| `stableDigits`                | boolean | `false` | Enables XTE stable-digit normalization          |
 
 ## State-Screen Contract
 
@@ -80,17 +82,17 @@ State screens render through `StateScreenCanvasOverlay` on a cleared canvas befo
 
 Resolved theme tokens are read once per frame via `const theme = toolkit.theme.resolveForRoot(rootEl)`.
 
-| Visual element | Token / source |
-|---|---|
-| Track/ticks/labels + metric text color | `theme.surface.fg` |
-| In-range pointer color | `theme.colors.pointer` |
-| Overflow/clamped pointer color | `theme.colors.alarm` |
-| Track/tick geometry factors | `theme.linear.track.*`, `theme.linear.ticks.*` |
-| Pointer geometry factors | `theme.linear.pointer.*` |
-| End-label spacing/font | `theme.linear.labels.*` |
-| Stroke/pointer weights | `theme.strokeWeight`, `theme.pointerDepthWeight`, `theme.pointerSideWeight` |
-| Font family/weights | `theme.font.family`, `theme.font.familyMono`, `theme.font.weight`, `theme.font.labelWeight` |
-| Caption/unit opacity | `theme.opacity.caption`, `theme.opacity.unit` |
+| Visual element                         | Token / source                                                                              |
+| -------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Track/ticks/labels + metric text color | `theme.surface.fg`                                                                          |
+| In-range pointer color                 | `theme.colors.pointer`                                                                      |
+| Overflow/clamped pointer color         | `theme.colors.alarm`                                                                        |
+| Track/tick geometry factors            | `theme.linear.track.*`, `theme.linear.ticks.*`                                              |
+| Pointer geometry factors               | `theme.linear.pointer.*`                                                                    |
+| End-label spacing/font                 | `theme.linear.labels.*`                                                                     |
+| Stroke/pointer weights                 | `theme.strokeWeight`, `theme.pointerDepthWeight`, `theme.pointerSideWeight`                 |
+| Font family/weights                    | `theme.font.family`, `theme.font.familyMono`, `theme.font.weight`, `theme.font.labelWeight` |
+| Caption/unit opacity                   | `theme.opacity.caption`, `theme.opacity.unit`                                               |
 
 ## Layout Modes
 
@@ -123,7 +125,8 @@ When `hideTextualMetrics === true`, layout returns gauge-focused rectangles (no 
 
 ## Caching
 
-`CanvasLayerCache` owns two static layers: `back` (track) and `front` (ticks + end labels), composited via `blitLayer()` with the live pointer drawn between them (`back` → pointer → `front`), matching the shared gauge z-order.
+`CanvasLayerCache` owns two static layers: `back` (track) and `front` (ticks + end labels), composited via `blitLayer()`
+with the live pointer drawn between them (`back` → pointer → `front`), matching the shared gauge z-order.
 
 Static cache key fields:
 

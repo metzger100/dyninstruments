@@ -4,10 +4,11 @@
 
 ## Overview
 
-Full-circle wind dial showing angle (AWA/TWA) and speed (AWS/TWS) together. Uses `RadialToolkit.draw` for dial primitives and `RadialToolkit.text/value` for text fitting and value handling.
-Theme colors are resolved once per render via `FullCircleRadialEngine`.
-Dial background rendering uses shared `CanvasLayerCache` via `FullCircleRadialEngine` (`back` + `front` layers).
-Responsive ring, label, and pointer geometry come from `FullCircleRadialLayout` through the shared engine state.
+Full-circle wind dial showing angle (AWA/TWA) and speed (AWS/TWS) together. Uses `RadialToolkit.draw` for dial
+primitives and `RadialToolkit.text/value` for text fitting and value handling. Theme colors are resolved once per render
+via `FullCircleRadialEngine`. Dial background rendering uses shared `CanvasLayerCache` via `FullCircleRadialEngine`
+(`back` + `front` layers). Responsive ring, label, and pointer geometry come from `FullCircleRadialLayout` through the
+shared engine state.
 
 ## Module Registration
 
@@ -23,34 +24,34 @@ WindRadialWidget: {
 
 ## Props
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `angle` | number | — | Wind angle in degrees (±180 display) |
-| `speed` | number | — | Wind speed raw value |
-| `angleCaption` | string | `""` | Angle caption (`AWA`/`TWA`) |
-| `speedCaption` | string | `""` | Speed caption (`AWS`/`TWS`) |
-| `angleUnit` | string | `"°"` | Angle display unit |
-| `speedUnit` | string | `"kn"` | Speed display unit only |
-| `formatter` | string/function | `"formatSpeed"` | Speed formatter passed to `componentContext.format.applyFormatter` |
-| `formatterParameters` | array/string | `[resolved token]` | Speed formatter token from the mapper (`kn`, `ms`, `kmh`) |
-| `leadingZero` | boolean | `false` | Angle pad to 3 digits |
-| `layEnabled` | boolean | `true` | Enable layline sectors |
-| `windRadialLayMin` | number | `0` | Layline inner bound (0..180) |
-| `windRadialLayMax` | number | `0` | Layline outer bound (0..180) |
-| `windRadialRatioThresholdNormal` | number | `0.7` | Ratio below -> `high` |
-| `windRadialRatioThresholdFlat` | number | `2.0` | Ratio above -> `flat` |
-| `captionUnitScale` | number | `0.8` | Caption/unit ratio vs value |
+| Prop                             | Type            | Default            | Description                                                        |
+| -------------------------------- | --------------- | ------------------ | ------------------------------------------------------------------ |
+| `angle`                          | number          | —                  | Wind angle in degrees (±180 display)                               |
+| `speed`                          | number          | —                  | Wind speed raw value                                               |
+| `angleCaption`                   | string          | `""`               | Angle caption (`AWA`/`TWA`)                                        |
+| `speedCaption`                   | string          | `""`               | Speed caption (`AWS`/`TWS`)                                        |
+| `angleUnit`                      | string          | `"°"`              | Angle display unit                                                 |
+| `speedUnit`                      | string          | `"kn"`             | Speed display unit only                                            |
+| `formatter`                      | string/function | `"formatSpeed"`    | Speed formatter passed to `componentContext.format.applyFormatter` |
+| `formatterParameters`            | array/string    | `[resolved token]` | Speed formatter token from the mapper (`kn`, `ms`, `kmh`)          |
+| `leadingZero`                    | boolean         | `false`            | Angle pad to 3 digits                                              |
+| `layEnabled`                     | boolean         | `true`             | Enable layline sectors                                             |
+| `windRadialLayMin`               | number          | `0`                | Layline inner bound (0..180)                                       |
+| `windRadialLayMax`               | number          | `0`                | Layline outer bound (0..180)                                       |
+| `windRadialRatioThresholdNormal` | number          | `0.7`              | Ratio below -> `high`                                              |
+| `windRadialRatioThresholdFlat`   | number          | `2.0`              | Ratio above -> `flat`                                              |
+| `captionUnitScale`               | number          | `0.8`              | Caption/unit ratio vs value                                        |
 
 ## Dial Drawing (via `RadialToolkit.draw`)
 
-| Element | Draw Function | Parameters |
-|---|---|---|
-| Ring | `draw.drawRing` | full circle |
-| Layline starboard | `draw.drawAnnularSector` | `windRadialLayMin..windRadialLayMax`, `tokens.colors.laylineStb` (inherits `colors.ok`, default `#2e9e6b`) |
-| Layline port | `draw.drawAnnularSector` | `-windRadialLayMax..-windRadialLayMin`, `tokens.colors.laylinePort` (inherits `colors.alarm`, default `#d9534a`) |
-| Wind pointer | `draw.drawPointerAtRim` | long pointer at `angle`, with layout-owned `needleDepth` and `fillStyle: tokens.colors.pointer` (inherits `colors.info`, default `#3366cc`) |
-| Ticks | `draw.drawTicks` | `-180..180`, major 30, minor 10 |
-| Labels | `draw.drawLabels` | `-180..180`, step 30, endpoints filtered, with layout-owned `radiusOffset` / `fontPx` |
+| Element           | Draw Function            | Parameters                                                                                                                                  |
+| ----------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ring              | `draw.drawRing`          | full circle                                                                                                                                 |
+| Layline starboard | `draw.drawAnnularSector` | `windRadialLayMin..windRadialLayMax`, `tokens.colors.laylineStb` (inherits `colors.ok`, default `#2e9e6b`)                                  |
+| Layline port      | `draw.drawAnnularSector` | `-windRadialLayMax..-windRadialLayMin`, `tokens.colors.laylinePort` (inherits `colors.alarm`, default `#d9534a`)                            |
+| Wind pointer      | `draw.drawPointerAtRim`  | long pointer at `angle`, with layout-owned `needleDepth` and `fillStyle: tokens.colors.pointer` (inherits `colors.info`, default `#3366cc`) |
+| Ticks             | `draw.drawTicks`         | `-180..180`, major 30, minor 10                                                                                                             |
+| Labels            | `draw.drawLabels`        | `-180..180`, step 30, endpoints filtered, with layout-owned `radiusOffset` / `fontPx`                                                       |
 
 ## Background Cache Behavior
 
@@ -105,6 +106,7 @@ otherwise -> normal
 `flat` uses side strips, `normal` uses two inner columns, `high` uses inline top/bottom rows.
 
 Responsive ownership:
+
 - `FullCircleRadialLayout` owns mode routing, compact insets, dial geometry, label metrics, and slot bounds.
 - `FullCircleRadialEngine` owns cache lifecycle and shared callback state.
 - `WindRadialWidget` only owns wind-specific layline, pointer, and formatter behavior.
@@ -112,9 +114,9 @@ Responsive ownership:
 
 ## Internal Value Formatting
 
-| Function | Input | Output |
-|---|---|---|
-| `ValueMath.formatAngle180(v, leadingZero)` | angle deg | `-180..180` string |
+| Function                                                                        | Input       | Output                                                                                            |
+| ------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------- |
+| `ValueMath.formatAngle180(v, leadingZero)`                                      | angle deg   | `-180..180` string                                                                                |
 | `componentContext.format.applyFormatter(v, { formatter, formatterParameters })` | speed value | formatted speed string; formatter parameters must carry the selected token, not the display label |
 
 ## Phase 6 Options

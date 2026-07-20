@@ -8,14 +8,7 @@ describe("AlarmViewModel", function () {
   it("returns idle state for missing, non-object, and empty alarm payloads", function () {
     const vm = createViewModel();
 
-    [
-      undefined,
-      null,
-      "bad",
-      [],
-      {},
-      { first: { running: false } }
-    ].forEach(function (alarmInfo) {
+    [undefined, null, "bad", [], {}, { first: { running: false } }].forEach(function (alarmInfo) {
       expect(vm.build({ alarmInfo: alarmInfo })).toEqual({
         activeAlarms: [],
         hasActiveAlarms: false,
@@ -126,12 +119,13 @@ describe("AlarmViewModel", function () {
       }
     });
 
-    expect(out.activeAlarms.map(function (entry) { return entry.name; })).toEqual([
-      "alpha",
-      "beta",
-      "gamma",
-      "delta"
-    ]);
+    expect(
+      out.activeAlarms.map(
+        /** @param {{ name: string }} entry */ function (entry) {
+          return entry.name;
+        }
+      )
+    ).toEqual(["alpha", "beta", "gamma", "delta"]);
     expect(out.activeAlarms[0]).toEqual({ name: "alpha", category: "critical", repeat: true });
     expect(out.activeAlarms[1]).toEqual({ name: "beta", category: "critical", repeat: false });
     expect(out.activeAlarms[2]).toEqual({ name: "gamma", category: "info", repeat: true });

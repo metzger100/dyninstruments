@@ -12,87 +12,89 @@ It maps `storeKeys` and dynamic key overrides to formatter/unit expectations.
 - This catalog covers all current cluster definitions in `config/clusters/*.js`.
 - Not all dynamic SignalK paths are listed in core `viewer/util/keys.jsx`; plugin-maintained contracts are required.
 - `nav.gps.signalk.*` paths are raw SignalK passthrough values in plugin runtime flow.
-- Migrated metrics use `formatUnit_<metricKey>` selectors for formatter tokens and `unit_<metricKey>_<token>` for editable display labels.
-- Renderer-facing aliases such as `formatUnits.remain` are documented in the renderer module docs, not in the store-key inventory.
+- Migrated metrics use `formatUnit_<metricKey>` selectors for formatter tokens and `unit_<metricKey>_<token>` for
+  editable display labels.
+- Renderer-facing aliases such as `formatUnits.remain` are documented in the renderer module docs, not in the store-key
+  inventory.
 
 ## API/Interfaces
 
 ### Fixed Store Key Inventory
 
-| Cluster | Store field | Default key path | Used by kind(s) |
-|---|---|---|---|
-| `speed` | `sog` | `nav.gps.speed` | `sog`, `sogLinear`, `sogRadial` |
-| `speed` | `stw` | `nav.gps.waterSpeed` | `stw`, `stwLinear`, `stwRadial` |
-| `wind` | `awa` | `nav.gps.windAngle` | `angleApparent`, `angleApparentRadial` |
-| `wind` | `twa` | `nav.gps.trueWindAngle` | `angleTrue`, `angleTrueRadial` |
-| `wind` | `twd` | `nav.gps.trueWindDirection` | `angleTrueDirection` |
-| `wind` | `aws` | `nav.gps.windSpeed` | `speedApparent`, `angleApparentRadial` |
-| `wind` | `tws` | `nav.gps.trueWindSpeed` | `speedTrue`, `angleTrueRadial` |
-| `environment` | `depth` | `nav.gps.depthBelowKeel` | `depth`, `depthLinear`, `depthRadial` |
-| `environment` | `temp` | `nav.gps.waterTemp` | `temp`, `tempLinear`, `tempRadial` (if no override) |
-| `courseHeading` | `cog` | `nav.gps.course` | `cog` |
-| `courseHeading` | `hdt` | `nav.gps.headingTrue` | `hdt`, `hdtRadial` |
-| `courseHeading` | `hdm` | `nav.gps.headingMag` | `hdm`, `hdmRadial` |
-| `courseHeading` | `brg` | `nav.wp.course` | `brg`, compass marker in radial kinds |
-| `nav` | `wpEta` | `nav.wp.eta` | `wpEta` |
-| `nav` | `rteEta` | `nav.route.eta` | `rteEta` |
-| `nav` | `dst` | `nav.wp.distance` | `dst` |
-| `nav` | `dtw` | `nav.wp.distance` | `xteDisplay` |
-| `nav` | `xte` | `nav.wp.xte` | `xteDisplay` |
-| `nav` | `cog` | `nav.gps.course` | `xteDisplay` |
-| `nav` | `btw` | `nav.wp.course` | `xteDisplay` |
-| `nav` | `wpName` | `nav.wp.name` | `xteDisplay` |
-| `nav` | `wpServer` | `nav.wp.server` | disconnect state for `dst`, `positionWp`, `xteDisplay`, `activeRoute` |
-| `nav` | `activeRouteName` | `nav.route.name` | `activeRoute` |
-| `nav` | `activeRouteRemain` | `nav.route.remain` | `activeRoute` |
-| `nav` | `activeRouteEta` | `nav.route.eta` | `activeRoute` |
-| `nav` | `activeRouteNextCourse` | `nav.route.nextCourse` | `activeRoute` |
-| `nav` | `activeRouteApproaching` | `nav.route.isApproaching` | `activeRoute` |
-| `nav` | `rteDistance` | `nav.route.remain` | `rteDistance` |
-| `nav` | `vmg` | `nav.wp.vmg` | `vmg` |
-| `nav` | `positionBoat` | `nav.gps.position` | `positionBoat` |
-| `nav` | `positionWp` | `nav.wp.position` | `positionWp` |
-| `map` | `zoom` | `map.currentZoom` | `zoom` |
-| `map` | `requiredZoom` | `map.requiredZoom` | `zoom` |
-| `map` | `centerCourse` | `nav.center.course` | `centerDisplay` |
-| `map` | `centerDistance` | `nav.center.distance` | `centerDisplay` |
-| `map` | `centerMarkerCourse` | `nav.center.markerCourse` | `centerDisplay` |
-| `map` | `centerMarkerDistance` | `nav.center.markerDistance` | `centerDisplay` |
-| `map` | `centerPosition` | `map.centerPosition` | `centerDisplay` |
-| `map` | `activeMeasure` | `map.activeMeasure` | `centerDisplay` |
-| `map` | `measureRhumbLine` | `properties.measureRhumbLine` | `centerDisplay` |
-| `map` | `lockPosition` | `map.lockPosition` | `centerDisplay` visibility |
-| `map` | `target` | `nav.ais.nearest` | `aisTarget` |
-| `map` | `trackedMmsi` | `nav.ais.trackedMmsi` | `aisTarget` |
-| `map` | `aisMarkAllWarning` | `properties.aisMarkAllWarning` | `aisTarget` |
-| `anchor` | `distance` | `nav.anchor.distance` | `anchorDistance` |
-| `anchor` | `watch` | `nav.anchor.watchDistance` | `anchorWatch` |
-| `anchor` | `bearing` | `nav.anchor.direction` | `anchorBearing` |
-| `vessel` | `clock` | `nav.gps.rtime` | `clock`, `dateTime`, `timeStatus` |
-| `vessel` | `gpsValid` | `nav.gps.valid` | `timeStatus` |
-| `vessel` | `pitch` | `nav.gps.signalk.navigation.attitude.pitch` | `pitch` |
-| `vessel` | `roll` | `nav.gps.signalk.navigation.attitude.roll` | `roll` |
+| Cluster         | Store field              | Default key path                            | Used by kind(s)                                                       |
+| --------------- | ------------------------ | ------------------------------------------- | --------------------------------------------------------------------- |
+| `speed`         | `sog`                    | `nav.gps.speed`                             | `sog`, `sogLinear`, `sogRadial`                                       |
+| `speed`         | `stw`                    | `nav.gps.waterSpeed`                        | `stw`, `stwLinear`, `stwRadial`                                       |
+| `wind`          | `awa`                    | `nav.gps.windAngle`                         | `angleApparent`, `angleApparentRadial`                                |
+| `wind`          | `twa`                    | `nav.gps.trueWindAngle`                     | `angleTrue`, `angleTrueRadial`                                        |
+| `wind`          | `twd`                    | `nav.gps.trueWindDirection`                 | `angleTrueDirection`                                                  |
+| `wind`          | `aws`                    | `nav.gps.windSpeed`                         | `speedApparent`, `angleApparentRadial`                                |
+| `wind`          | `tws`                    | `nav.gps.trueWindSpeed`                     | `speedTrue`, `angleTrueRadial`                                        |
+| `environment`   | `depth`                  | `nav.gps.depthBelowKeel`                    | `depth`, `depthLinear`, `depthRadial`                                 |
+| `environment`   | `temp`                   | `nav.gps.waterTemp`                         | `temp`, `tempLinear`, `tempRadial` (if no override)                   |
+| `courseHeading` | `cog`                    | `nav.gps.course`                            | `cog`                                                                 |
+| `courseHeading` | `hdt`                    | `nav.gps.headingTrue`                       | `hdt`, `hdtRadial`                                                    |
+| `courseHeading` | `hdm`                    | `nav.gps.headingMag`                        | `hdm`, `hdmRadial`                                                    |
+| `courseHeading` | `brg`                    | `nav.wp.course`                             | `brg`, compass marker in radial kinds                                 |
+| `nav`           | `wpEta`                  | `nav.wp.eta`                                | `wpEta`                                                               |
+| `nav`           | `rteEta`                 | `nav.route.eta`                             | `rteEta`                                                              |
+| `nav`           | `dst`                    | `nav.wp.distance`                           | `dst`                                                                 |
+| `nav`           | `dtw`                    | `nav.wp.distance`                           | `xteDisplay`                                                          |
+| `nav`           | `xte`                    | `nav.wp.xte`                                | `xteDisplay`                                                          |
+| `nav`           | `cog`                    | `nav.gps.course`                            | `xteDisplay`                                                          |
+| `nav`           | `btw`                    | `nav.wp.course`                             | `xteDisplay`                                                          |
+| `nav`           | `wpName`                 | `nav.wp.name`                               | `xteDisplay`                                                          |
+| `nav`           | `wpServer`               | `nav.wp.server`                             | disconnect state for `dst`, `positionWp`, `xteDisplay`, `activeRoute` |
+| `nav`           | `activeRouteName`        | `nav.route.name`                            | `activeRoute`                                                         |
+| `nav`           | `activeRouteRemain`      | `nav.route.remain`                          | `activeRoute`                                                         |
+| `nav`           | `activeRouteEta`         | `nav.route.eta`                             | `activeRoute`                                                         |
+| `nav`           | `activeRouteNextCourse`  | `nav.route.nextCourse`                      | `activeRoute`                                                         |
+| `nav`           | `activeRouteApproaching` | `nav.route.isApproaching`                   | `activeRoute`                                                         |
+| `nav`           | `rteDistance`            | `nav.route.remain`                          | `rteDistance`                                                         |
+| `nav`           | `vmg`                    | `nav.wp.vmg`                                | `vmg`                                                                 |
+| `nav`           | `positionBoat`           | `nav.gps.position`                          | `positionBoat`                                                        |
+| `nav`           | `positionWp`             | `nav.wp.position`                           | `positionWp`                                                          |
+| `map`           | `zoom`                   | `map.currentZoom`                           | `zoom`                                                                |
+| `map`           | `requiredZoom`           | `map.requiredZoom`                          | `zoom`                                                                |
+| `map`           | `centerCourse`           | `nav.center.course`                         | `centerDisplay`                                                       |
+| `map`           | `centerDistance`         | `nav.center.distance`                       | `centerDisplay`                                                       |
+| `map`           | `centerMarkerCourse`     | `nav.center.markerCourse`                   | `centerDisplay`                                                       |
+| `map`           | `centerMarkerDistance`   | `nav.center.markerDistance`                 | `centerDisplay`                                                       |
+| `map`           | `centerPosition`         | `map.centerPosition`                        | `centerDisplay`                                                       |
+| `map`           | `activeMeasure`          | `map.activeMeasure`                         | `centerDisplay`                                                       |
+| `map`           | `measureRhumbLine`       | `properties.measureRhumbLine`               | `centerDisplay`                                                       |
+| `map`           | `lockPosition`           | `map.lockPosition`                          | `centerDisplay` visibility                                            |
+| `map`           | `target`                 | `nav.ais.nearest`                           | `aisTarget`                                                           |
+| `map`           | `trackedMmsi`            | `nav.ais.trackedMmsi`                       | `aisTarget`                                                           |
+| `map`           | `aisMarkAllWarning`      | `properties.aisMarkAllWarning`              | `aisTarget`                                                           |
+| `anchor`        | `distance`               | `nav.anchor.distance`                       | `anchorDistance`                                                      |
+| `anchor`        | `watch`                  | `nav.anchor.watchDistance`                  | `anchorWatch`                                                         |
+| `anchor`        | `bearing`                | `nav.anchor.direction`                      | `anchorBearing`                                                       |
+| `vessel`        | `clock`                  | `nav.gps.rtime`                             | `clock`, `dateTime`, `timeStatus`                                     |
+| `vessel`        | `gpsValid`               | `nav.gps.valid`                             | `timeStatus`                                                          |
+| `vessel`        | `pitch`                  | `nav.gps.signalk.navigation.attitude.pitch` | `pitch`                                                               |
+| `vessel`        | `roll`                   | `nav.gps.signalk.navigation.attitude.roll`  | `roll`                                                                |
 
 ### Dynamic Key Override Contracts
 
-| Cluster | Editable key field | Store field affected | Active kind(s) | Behavior |
-|---|---|---|---|---|
-| `environment` | `depthKey` | `depth` | `depth`, `depthLinear`, `depthRadial` | selected path is read as live `depthKey` and aliased to `depth`; empty falls back to `nav.gps.depthBelowKeel`; AvNav surface depth is `nav.gps.depthBelowWaterline` |
-| `environment` | `tempKey` | `temp` | `temp`, `tempLinear`, `tempRadial` | selected path is read as live `tempKey` and aliased to `temp`; empty falls back to `nav.gps.waterTemp` |
-| `environment` | `value` | `value` | `pressure` | non-empty key stored for pressure source; removed when not pressure |
-| `vessel` | `value` | `value` | `voltage`, `voltageLinear`, `voltageRadial` | non-empty key stored for voltage source; removed for other kinds |
-| `vessel` | `pitchKey` | `pitch` | `pitch` | non-empty override is used; empty falls back to default pitch key |
-| `vessel` | `rollKey` | `roll` | `roll` | non-empty override is used; empty falls back to default roll key |
+| Cluster       | Editable key field | Store field affected | Active kind(s)                              | Behavior                                                                                                                                                            |
+| ------------- | ------------------ | -------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `environment` | `depthKey`         | `depth`              | `depth`, `depthLinear`, `depthRadial`       | selected path is read as live `depthKey` and aliased to `depth`; empty falls back to `nav.gps.depthBelowKeel`; AvNav surface depth is `nav.gps.depthBelowWaterline` |
+| `environment` | `tempKey`          | `temp`               | `temp`, `tempLinear`, `tempRadial`          | selected path is read as live `tempKey` and aliased to `temp`; empty falls back to `nav.gps.waterTemp`                                                              |
+| `environment` | `value`            | `value`              | `pressure`                                  | non-empty key stored for pressure source; removed when not pressure                                                                                                 |
+| `vessel`      | `value`            | `value`              | `voltage`, `voltageLinear`, `voltageRadial` | non-empty key stored for voltage source; removed for other kinds                                                                                                    |
+| `vessel`      | `pitchKey`         | `pitch`              | `pitch`                                     | non-empty override is used; empty falls back to default pitch key                                                                                                   |
+| `vessel`      | `rollKey`          | `roll`               | `roll`                                      | non-empty override is used; empty falls back to default roll key                                                                                                    |
 
 ### XTE Highway Scale Contract
 
-| Editable key | Meaning | Visible when |
-|---|---|---|
+| Editable key         | Meaning                                        | Visible when                    |
+| -------------------- | ---------------------------------------------- | ------------------------------- |
 | `xteDisplayScale_nm` | Full-scale XTE highway range in nautical miles | `formatUnit_xteDisplayXte = nm` |
-| `xteDisplayScale_m` | Full-scale XTE highway range in meters | `formatUnit_xteDisplayXte = m` |
-| `xteDisplayScale_km` | Full-scale XTE highway range in kilometers | `formatUnit_xteDisplayXte = km` |
-| `xteDisplayScale_ft` | Full-scale XTE highway range in feet | `formatUnit_xteDisplayXte = ft` |
-| `xteDisplayScale_yd` | Full-scale XTE highway range in yards | `formatUnit_xteDisplayXte = yd` |
+| `xteDisplayScale_m`  | Full-scale XTE highway range in meters         | `formatUnit_xteDisplayXte = m`  |
+| `xteDisplayScale_km` | Full-scale XTE highway range in kilometers     | `formatUnit_xteDisplayXte = km` |
+| `xteDisplayScale_ft` | Full-scale XTE highway range in feet           | `formatUnit_xteDisplayXte = ft` |
+| `xteDisplayScale_yd` | Full-scale XTE highway range in yards          | `formatUnit_xteDisplayXte = yd` |
 
 ### Kind -> Formatter -> Key Contracts (Numeric/Text Paths)
 
@@ -102,61 +104,63 @@ Migrated metrics use formatter-token selectors, not display labels:
 - `unit_<metricKey>_<token>` resolves the display label for that token
 - renderer-facing aliases like `formatUnits.remain` and `units.remain` are documented in the renderer module docs
 
-| Kind | Primary store field(s) | Formatter contract | Unit/typing note |
-|---|---|---|---|
-| `sog`, `stw` | `sog` / `stw` | `formatSpeed` + `[formatUnit_sog]` / `[formatUnit_stw]` | display label comes from `unit_sog_<token>` / `unit_stw_<token>` |
-| `sogLinear`, `stwLinear` | `sog` / `stw` | `formatSpeed` + `[formatUnit_sogLinear]` / `[formatUnit_stwLinear]` | linear speed gauge kinds use the same token/display split |
-| `sogRadial`, `stwRadial` | `sog` / `stw` | `formatSpeed` + `[formatUnit_sogRadial]` / `[formatUnit_stwRadial]` | radial speed gauge kinds use the same token/display split |
-| `angleTrue`, `angleApparent` | `twa` / `awa` | `makeAngleFormatter(false, leadingZero, default)` | signed angle formatting in mapper toolkit |
-| `angleTrueDirection` | `twd` | `makeAngleFormatter(true, leadingZero, default)` | direction formatting in mapper toolkit |
-| `speedTrue`, `speedApparent` | `tws` / `aws` | `formatSpeed` + `[formatUnit_speedTrue]` / `[formatUnit_speedApparent]` | display label comes from `unit_speedTrue_<token>` / `unit_speedApparent_<token>` |
-| `depth` | `depth` | `formatDistance` + `[formatUnit_depth]` | depth text uses distance tokens, not raw meters |
-| `depthLinear`, `depthRadial` | `depth` | `formatDistance` + `[formatUnit_depthLinear]` / `[formatUnit_depthRadial]` | axis defaults and warning/alarm values resolve per selected unit token |
-| `temp` | `temp` | `formatTemperature` + `[formatUnit_temp]` | input source is water temperature key |
-| `tempLinear`, `tempRadial` | `temp` | `formatTemperature` + `[formatUnit_tempLinear]` / `[formatUnit_tempRadial]` | temperature gauges use the same token/display split |
-| `pressure` | `value` (dynamic) | `formatPressure` + `[formatUnit_pressure]` | canonical pressure formatter with lowercase tokens |
-| `cog`, `hdt`, `hdm`, `brg` | `cog`/`hdt`/`hdm`/`brg` | `formatDirection360` + `[leadingZero]` | heading/course/bearing text |
-| `wpEta`, `rteEta` | `wpEta` / `rteEta` | `formatTime` + `[]` | Date/time value path |
-| `dst`, `rteDistance` | `dst` / `rteDistance` | `formatDistance` + `[formatUnit_dst]` / `[formatUnit_rteDistance]` | distance text uses selector tokens, not display labels |
-| `activeRoute` | `activeRouteName`, `activeRouteRemain`, `activeRouteEta`, `activeRouteNextCourse`, `activeRouteApproaching` | renderer wrapper (`ActiveRouteTextHtmlWidget`, html surface) using `formatDistance` (`activeRouteRemain`) + `formatUnits.remain`, `formatTime` (`activeRouteEta`) + `[]`, `formatDirection` (`activeRouteNextCourse`) + `[]` | next course is degree-based; `units.remain` stays display-only and the selector token comes from `formatUnit_activeRouteRemain` |
-| `zoom` | `zoom`, `requiredZoom` | renderer wrapper (`MapZoomTextHtmlWidget`, html surface) using `formatDecimalOpt` (`zoom`, `requiredZoom`) + `[2, 1]` | `requiredZoom` is shown as parenthesized secondary text only when different from `zoom` |
-| `centerDisplay` | `centerPosition`, `centerMarkerCourse`, `centerMarkerDistance`, `centerCourse`, `centerDistance`, `activeMeasure`, `measureRhumbLine`, `lockPosition` | renderer wrapper (`CenterDisplayTextWidget`) using `formatLonLatsDecimal` (center coordinates) + `formatDirection` (relation courses) + `formatDistance` (relation distances) | map-cluster kind; `formatUnits.marker` / `formatUnits.boat` / `formatUnits.measure` carry the formatter tokens while `units.*` stay display-only |
-| `aisTarget` | `target`, `trackedMmsi`, `aisMarkAllWarning` | renderer wrapper (`AisTargetTextHtmlWidget`, html surface) using `formatDistance` (`distance`, `cpa`) + `formatUnits.dst` / `formatUnits.cpa`, `formatDecimal` (`tcpa / 60`) + `[3, Math.abs(tcpa) > 60 ? 0 : 2]`, `formatDirection` (`headingTo`) + `[]` | branch rule is `tcpa > 0` (`DST + DCPA + TCPA`) else `DST + BRG`; `trackedMmsi` raw equality is used for tracking role while dispatch uses normalized MMSI |
-| `xteDisplay` | `xte`, `cog`, `dtw`, `btw`, `wpName` | renderer wrapper (`XteDisplayWidget`) using `formatDistance` (`xte`, `dtw`) + `formatUnits.xte` / `formatUnits.dtw`, `formatDirection360` (`cog`, `btw`) | In data state, the static highway frame renders. The moving XTE indicator renders only when `display.xte` is finite. Missing `cog`, `dtw`, or `btw` values affect only their textual placeholder rows when textual metrics are visible. `xteDisplayScale_<token>` resolves the highway scale prop |
-| `vmg` | `vmg` | `formatSpeed` + `[formatUnit_vmg]` | speed text uses selector tokens, not display labels |
-| `positionBoat`, `positionWp` | `positionBoat` / `positionWp` | `formatLonLats` + coordinate formatter `formatLonLatsDecimal` | position object expected |
-| `anchorDistance`, `anchorWatch` | `distance` / `watch` | `formatDistance` + `[formatUnit_anchorDistance]` / `[formatUnit_anchorWatch]` | anchor distances use prefixed editable keys and selector tokens |
-| `anchorBearing` | `bearing` | `formatDirection360` + `[leadingZero]` | anchor bearing |
-| `voltage` | `value` (dynamic) | `formatDecimal` + `[3, 1, true]` | numeric voltage |
-| `voltageLinear` | `value` (dynamic) | `formatDecimal` + `[3, 1, true]` | linear voltage gauge kind |
-| `clock` | `clock` | `formatTime` + `[]` | Date/time value |
-| `dateTime` | `clock` | `PositionCoordinateWidget` with `displayVariant: "dateTime"` | date/time split formatting |
-| `timeStatus` | `gpsValid`, `clock` | `PositionCoordinateWidget` with `displayVariant: "timeStatus"` | status + time split formatting |
-| `pitch` | `pitch` | `formatDirection` + `[true, true, false]` | raw radians required |
-| `roll` | `roll` | `formatDirection` + `[true, true, false]` | raw radians required |
+| Kind                            | Primary store field(s)                                                                                                                                | Formatter contract                                                                                                                                                                                                                                        | Unit/typing note                                                                                                                                                                                                                                                                                  |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sog`, `stw`                    | `sog` / `stw`                                                                                                                                         | `formatSpeed` + `[formatUnit_sog]` / `[formatUnit_stw]`                                                                                                                                                                                                   | display label comes from `unit_sog_<token>` / `unit_stw_<token>`                                                                                                                                                                                                                                  |
+| `sogLinear`, `stwLinear`        | `sog` / `stw`                                                                                                                                         | `formatSpeed` + `[formatUnit_sogLinear]` / `[formatUnit_stwLinear]`                                                                                                                                                                                       | linear speed gauge kinds use the same token/display split                                                                                                                                                                                                                                         |
+| `sogRadial`, `stwRadial`        | `sog` / `stw`                                                                                                                                         | `formatSpeed` + `[formatUnit_sogRadial]` / `[formatUnit_stwRadial]`                                                                                                                                                                                       | radial speed gauge kinds use the same token/display split                                                                                                                                                                                                                                         |
+| `angleTrue`, `angleApparent`    | `twa` / `awa`                                                                                                                                         | `makeAngleFormatter(false, leadingZero, default)`                                                                                                                                                                                                         | signed angle formatting in mapper toolkit                                                                                                                                                                                                                                                         |
+| `angleTrueDirection`            | `twd`                                                                                                                                                 | `makeAngleFormatter(true, leadingZero, default)`                                                                                                                                                                                                          | direction formatting in mapper toolkit                                                                                                                                                                                                                                                            |
+| `speedTrue`, `speedApparent`    | `tws` / `aws`                                                                                                                                         | `formatSpeed` + `[formatUnit_speedTrue]` / `[formatUnit_speedApparent]`                                                                                                                                                                                   | display label comes from `unit_speedTrue_<token>` / `unit_speedApparent_<token>`                                                                                                                                                                                                                  |
+| `depth`                         | `depth`                                                                                                                                               | `formatDistance` + `[formatUnit_depth]`                                                                                                                                                                                                                   | depth text uses distance tokens, not raw meters                                                                                                                                                                                                                                                   |
+| `depthLinear`, `depthRadial`    | `depth`                                                                                                                                               | `formatDistance` + `[formatUnit_depthLinear]` / `[formatUnit_depthRadial]`                                                                                                                                                                                | axis defaults and warning/alarm values resolve per selected unit token                                                                                                                                                                                                                            |
+| `temp`                          | `temp`                                                                                                                                                | `formatTemperature` + `[formatUnit_temp]`                                                                                                                                                                                                                 | input source is water temperature key                                                                                                                                                                                                                                                             |
+| `tempLinear`, `tempRadial`      | `temp`                                                                                                                                                | `formatTemperature` + `[formatUnit_tempLinear]` / `[formatUnit_tempRadial]`                                                                                                                                                                               | temperature gauges use the same token/display split                                                                                                                                                                                                                                               |
+| `pressure`                      | `value` (dynamic)                                                                                                                                     | `formatPressure` + `[formatUnit_pressure]`                                                                                                                                                                                                                | canonical pressure formatter with lowercase tokens                                                                                                                                                                                                                                                |
+| `cog`, `hdt`, `hdm`, `brg`      | `cog`/`hdt`/`hdm`/`brg`                                                                                                                               | `formatDirection360` + `[leadingZero]`                                                                                                                                                                                                                    | heading/course/bearing text                                                                                                                                                                                                                                                                       |
+| `wpEta`, `rteEta`               | `wpEta` / `rteEta`                                                                                                                                    | `formatTime` + `[]`                                                                                                                                                                                                                                       | Date/time value path                                                                                                                                                                                                                                                                              |
+| `dst`, `rteDistance`            | `dst` / `rteDistance`                                                                                                                                 | `formatDistance` + `[formatUnit_dst]` / `[formatUnit_rteDistance]`                                                                                                                                                                                        | distance text uses selector tokens, not display labels                                                                                                                                                                                                                                            |
+| `activeRoute`                   | `activeRouteName`, `activeRouteRemain`, `activeRouteEta`, `activeRouteNextCourse`, `activeRouteApproaching`                                           | renderer wrapper (`ActiveRouteTextHtmlWidget`, html surface) using `formatDistance` (`activeRouteRemain`) + `formatUnits.remain`, `formatTime` (`activeRouteEta`) + `[]`, `formatDirection` (`activeRouteNextCourse`) + `[]`                              | next course is degree-based; `units.remain` stays display-only and the selector token comes from `formatUnit_activeRouteRemain`                                                                                                                                                                   |
+| `zoom`                          | `zoom`, `requiredZoom`                                                                                                                                | renderer wrapper (`MapZoomTextHtmlWidget`, html surface) using `formatDecimalOpt` (`zoom`, `requiredZoom`) + `[2, 1]`                                                                                                                                     | `requiredZoom` is shown as parenthesized secondary text only when different from `zoom`                                                                                                                                                                                                           |
+| `centerDisplay`                 | `centerPosition`, `centerMarkerCourse`, `centerMarkerDistance`, `centerCourse`, `centerDistance`, `activeMeasure`, `measureRhumbLine`, `lockPosition` | renderer wrapper (`CenterDisplayTextWidget`) using `formatLonLatsDecimal` (center coordinates) + `formatDirection` (relation courses) + `formatDistance` (relation distances)                                                                             | map-cluster kind; `formatUnits.marker` / `formatUnits.boat` / `formatUnits.measure` carry the formatter tokens while `units.*` stay display-only                                                                                                                                                  |
+| `aisTarget`                     | `target`, `trackedMmsi`, `aisMarkAllWarning`                                                                                                          | renderer wrapper (`AisTargetTextHtmlWidget`, html surface) using `formatDistance` (`distance`, `cpa`) + `formatUnits.dst` / `formatUnits.cpa`, `formatDecimal` (`tcpa / 60`) + `[3, Math.abs(tcpa) > 60 ? 0 : 2]`, `formatDirection` (`headingTo`) + `[]` | branch rule is `tcpa > 0` (`DST + DCPA + TCPA`) else `DST + BRG`; `trackedMmsi` raw equality is used for tracking role while dispatch uses normalized MMSI                                                                                                                                        |
+| `xteDisplay`                    | `xte`, `cog`, `dtw`, `btw`, `wpName`                                                                                                                  | renderer wrapper (`XteDisplayWidget`) using `formatDistance` (`xte`, `dtw`) + `formatUnits.xte` / `formatUnits.dtw`, `formatDirection360` (`cog`, `btw`)                                                                                                  | In data state, the static highway frame renders. The moving XTE indicator renders only when `display.xte` is finite. Missing `cog`, `dtw`, or `btw` values affect only their textual placeholder rows when textual metrics are visible. `xteDisplayScale_<token>` resolves the highway scale prop |
+| `vmg`                           | `vmg`                                                                                                                                                 | `formatSpeed` + `[formatUnit_vmg]`                                                                                                                                                                                                                        | speed text uses selector tokens, not display labels                                                                                                                                                                                                                                               |
+| `positionBoat`, `positionWp`    | `positionBoat` / `positionWp`                                                                                                                         | `formatLonLats` + coordinate formatter `formatLonLatsDecimal`                                                                                                                                                                                             | position object expected                                                                                                                                                                                                                                                                          |
+| `anchorDistance`, `anchorWatch` | `distance` / `watch`                                                                                                                                  | `formatDistance` + `[formatUnit_anchorDistance]` / `[formatUnit_anchorWatch]`                                                                                                                                                                             | anchor distances use prefixed editable keys and selector tokens                                                                                                                                                                                                                                   |
+| `anchorBearing`                 | `bearing`                                                                                                                                             | `formatDirection360` + `[leadingZero]`                                                                                                                                                                                                                    | anchor bearing                                                                                                                                                                                                                                                                                    |
+| `voltage`                       | `value` (dynamic)                                                                                                                                     | `formatDecimal` + `[3, 1, true]`                                                                                                                                                                                                                          | numeric voltage                                                                                                                                                                                                                                                                                   |
+| `voltageLinear`                 | `value` (dynamic)                                                                                                                                     | `formatDecimal` + `[3, 1, true]`                                                                                                                                                                                                                          | linear voltage gauge kind                                                                                                                                                                                                                                                                         |
+| `clock`                         | `clock`                                                                                                                                               | `formatTime` + `[]`                                                                                                                                                                                                                                       | Date/time value                                                                                                                                                                                                                                                                                   |
+| `dateTime`                      | `clock`                                                                                                                                               | `PositionCoordinateWidget` with `displayVariant: "dateTime"`                                                                                                                                                                                              | date/time split formatting                                                                                                                                                                                                                                                                        |
+| `timeStatus`                    | `gpsValid`, `clock`                                                                                                                                   | `PositionCoordinateWidget` with `displayVariant: "timeStatus"`                                                                                                                                                                                            | status + time split formatting                                                                                                                                                                                                                                                                    |
+| `pitch`                         | `pitch`                                                                                                                                               | `formatDirection` + `[true, true, false]`                                                                                                                                                                                                                 | raw radians required                                                                                                                                                                                                                                                                              |
+| `roll`                          | `roll`                                                                                                                                                | `formatDirection` + `[true, true, false]`                                                                                                                                                                                                                 | raw radians required                                                                                                                                                                                                                                                                              |
 
 ### Core-Backed Key Semantics
 
-| Key path | Semantic | Confidence | Source (verified 2026-02-22) |
-|---|---|---|---|
-| `nav.gps.rtime` | Date/time value for `formatTime`/`formatDate`/`formatDateTime` family | high | `viewer/util/keys.jsx`, mapper usage |
-| `nav.gps.valid` | GPS validity bool-like flag | high | `viewer/util/keys.jsx`, vessel mapper usage |
-| `map.currentZoom` | Current map zoom level value | high | `viewer/util/keys.jsx`, `viewer/nav/navpage.jsx` (2026-03-08) |
-| `map.requiredZoom` | Target zoom value used by auto-zoom parity checks | medium | `viewer/util/keys.jsx`, map zoom item behavior in `viewer/nav/navpage.jsx` (2026-03-08) |
-| `map.centerPosition` | Current map center position object | high | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08) |
-| `map.activeMeasure` | Current measure object passed through live store state | medium | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08) |
-| `properties.measureRhumbLine` | Measure mode toggle for rhumb-line vs great-circle calculations | high | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08) |
-| `map.lockPosition` | Map lock state used to hide/show `CenterDisplay` | high | `viewer/components/MapPage.jsx` (2026-03-08) |
-| `nav.ais.nearest` | Host-selected AIS target summary object (`mmsi`, distance/CPA/TCPA/BRG fields, warning/nearest flags) | high | `viewer/components/AisTargetWidget.jsx` (2026-04-06) |
-| `nav.ais.trackedMmsi` | Host tracked AIS target identifier used for tracking-color precedence | high | `viewer/components/AisTargetWidget.jsx`, `viewer/util/propertyhandler.js` (2026-04-06) |
-| `properties.aisMarkAllWarning` | AIS warning policy toggle participating in warning-color precedence | high | `viewer/util/propertyhandler.js` (2026-04-06) |
-| `nav.gps.signalk.navigation.attitude.pitch` | SignalK pitch (radians) | medium | `config/clusters/vessel.js`, `server/handler/signalkhandler.py`, vessel mapper |
-| `nav.gps.signalk.navigation.attitude.roll` | SignalK roll (radians) | medium | `config/clusters/vessel.js`, `server/handler/signalkhandler.py`, vessel mapper |
+| Key path                                    | Semantic                                                                                              | Confidence | Source (verified 2026-02-22)                                                            |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------- |
+| `nav.gps.rtime`                             | Date/time value for `formatTime`/`formatDate`/`formatDateTime` family                                 | high       | `viewer/util/keys.jsx`, mapper usage                                                    |
+| `nav.gps.valid`                             | GPS validity bool-like flag                                                                           | high       | `viewer/util/keys.jsx`, vessel mapper usage                                             |
+| `map.currentZoom`                           | Current map zoom level value                                                                          | high       | `viewer/util/keys.jsx`, `viewer/nav/navpage.jsx` (2026-03-08)                           |
+| `map.requiredZoom`                          | Target zoom value used by auto-zoom parity checks                                                     | medium     | `viewer/util/keys.jsx`, map zoom item behavior in `viewer/nav/navpage.jsx` (2026-03-08) |
+| `map.centerPosition`                        | Current map center position object                                                                    | high       | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08)        |
+| `map.activeMeasure`                         | Current measure object passed through live store state                                                | medium     | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08)        |
+| `properties.measureRhumbLine`               | Measure mode toggle for rhumb-line vs great-circle calculations                                       | high       | `viewer/util/keys.jsx`, `viewer/components/CenterDisplayWidget.jsx` (2026-03-08)        |
+| `map.lockPosition`                          | Map lock state used to hide/show `CenterDisplay`                                                      | high       | `viewer/components/MapPage.jsx` (2026-03-08)                                            |
+| `nav.ais.nearest`                           | Host-selected AIS target summary object (`mmsi`, distance/CPA/TCPA/BRG fields, warning/nearest flags) | high       | `viewer/components/AisTargetWidget.jsx` (2026-04-06)                                    |
+| `nav.ais.trackedMmsi`                       | Host tracked AIS target identifier used for tracking-color precedence                                 | high       | `viewer/components/AisTargetWidget.jsx`, `viewer/util/propertyhandler.js` (2026-04-06)  |
+| `properties.aisMarkAllWarning`              | AIS warning policy toggle participating in warning-color precedence                                   | high       | `viewer/util/propertyhandler.js` (2026-04-06)                                           |
+| `nav.gps.signalk.navigation.attitude.pitch` | SignalK pitch (radians)                                                                               | medium     | `config/clusters/vessel.js`, `server/handler/signalkhandler.py`, vessel mapper          |
+| `nav.gps.signalk.navigation.attitude.roll`  | SignalK roll (radians)                                                                                | medium     | `config/clusters/vessel.js`, `server/handler/signalkhandler.py`, vessel mapper          |
 
 ## Notes
 
-- Confidence for pitch/roll unit is `medium` because core key metadata does not annotate unit for every dynamic `gps.signalk.*` path; contract is derived from SignalK semantics plus formatter behavior.
-- Any mapper change that edits key binding, formatter, or formatterParameters must update this file and [core-formatter-catalog.md](core-formatter-catalog.md) in the same PR.
+- Confidence for pitch/roll unit is `medium` because core key metadata does not annotate unit for every dynamic
+  `gps.signalk.*` path; contract is derived from SignalK semantics plus formatter behavior.
+- Any mapper change that edits key binding, formatter, or formatterParameters must update this file and
+  [core-formatter-catalog.md](core-formatter-catalog.md) in the same PR.
 
 ## Related
 

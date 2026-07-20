@@ -1,11 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import {
-  SENTINEL_BASE,
-  loadBootstrapManifest,
-  loadComponentsRegistry
-} from "./components-registry-loader.mjs";
+import { SENTINEL_BASE, loadBootstrapManifest, loadComponentsRegistry } from "./components-registry-loader.mjs";
 
 const FIXED_RUNTIME_FILES = [
   "plugin.js",
@@ -16,15 +12,7 @@ const FIXED_RUNTIME_FILES = [
   "runtime/plugin-bootstrap-core.js"
 ];
 
-const RUNTIME_PREFIXES = [
-  "runtime/",
-  "cluster/",
-  "config/",
-  "shared/",
-  "widgets/",
-  "assets/",
-  "layouts/"
-];
+const RUNTIME_PREFIXES = ["runtime/", "cluster/", "config/", "shared/", "widgets/", "assets/", "layouts/"];
 
 export function isRuntimePath(filePath) {
   if (typeof filePath !== "string" || filePath.trim() === "") {
@@ -139,11 +127,7 @@ function addIfPresent(files, rawPath) {
 }
 
 function normalizeRelativePath(rawPath) {
-  return rawPath
-    .replace(/\\/g, "/")
-    .replace(/^\//, "")
-    .replace(/^\.\//, "")
-    .trim();
+  return rawPath.replace(/\\/g, "/").replace(/^\//, "").replace(/^\.\//, "").trim();
 }
 
 function collectFontAssetPaths(rootDir) {

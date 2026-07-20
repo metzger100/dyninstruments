@@ -1,8 +1,5 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./LinearGaugeEngine.harness");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
 describe("LinearGaugeEngine", function () {
   it("reuses static cache for identical key while keeping pointer and text dynamic", function () {
@@ -14,17 +11,17 @@ describe("LinearGaugeEngine", function () {
       tickProps: {
         major: "major",
         minor: "minor",
-        showEndLabels: "showEndLabels",
+        showEndLabels: "showEndLabels"
       },
       buildStaticKey(state, props) {
         return { style: props.style || "a" };
-      },
+      }
     });
 
     const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 120,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     renderer(canvas, {
@@ -34,7 +31,7 @@ describe("LinearGaugeEngine", function () {
       major: 10,
       minor: 5,
       style: "a",
-      caption: "SOG",
+      caption: "SOG"
     });
     renderer(canvas, {
       value: 20,
@@ -43,7 +40,7 @@ describe("LinearGaugeEngine", function () {
       major: 10,
       minor: 5,
       style: "a",
-      caption: "SOG",
+      caption: "SOG"
     });
     renderer(canvas, {
       value: 25,
@@ -52,7 +49,7 @@ describe("LinearGaugeEngine", function () {
       major: 10,
       minor: 5,
       style: "b",
-      caption: "SOG",
+      caption: "SOG"
     });
 
     expect(harness.calls.track).toHaveLength(2);
@@ -61,5 +58,4 @@ describe("LinearGaugeEngine", function () {
     expect(harness.calls.drawValueUnitWithFit).toBe(3);
     expect(harness.calls.drawInlineCapValUnit).toBe(0);
   });
-
 });

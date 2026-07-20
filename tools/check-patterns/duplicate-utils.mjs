@@ -108,7 +108,7 @@ export function tokenizeDuplicationBody(text, startLine) {
       continue;
     }
 
-    if (ch === "'" || ch === "\"" || ch === "`") {
+    if (ch === "'" || ch === '"' || ch === "`") {
       const tokenLine = line;
       const quote = ch;
       let raw = ch;
@@ -133,7 +133,9 @@ export function tokenizeDuplicationBody(text, startLine) {
       continue;
     }
 
-    const numberMatch = text.slice(i).match(/^(?:0[xX][0-9a-fA-F]+|0[bB][01]+|0[oO][0-7]+|(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?)/);
+    const numberMatch = text
+      .slice(i)
+      .match(/^(?:0[xX][0-9a-fA-F]+|0[bB][01]+|0[oO][0-7]+|(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?)/);
     if (numberMatch) {
       tokens.push({ value: numberMatch[0], type: "number", line });
       i += numberMatch[0].length;

@@ -3,6 +3,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 const { loadFresh } = require("./load-umd");
 
+/** @param {Record<string, any>} [overrides] @returns {import("node:vm").Context} */
 function createScriptContext(overrides) {
   const options = overrides || {};
   const skipDefaultDyniComponents = options.__skipDefaultDyniComponents === true;
@@ -32,7 +33,8 @@ function createScriptContext(overrides) {
   delete ctx.__skipDefaultDyniComponents;
   if (!skipDefaultDyniComponents) {
     ctx.DyniComponents = ctx.DyniComponents || {};
-    ctx.DyniComponents.DyniValueMath = ctx.DyniComponents.DyniValueMath || loadFresh("shared/widget-kits/value/ValueMath.js");
+    ctx.DyniComponents.DyniValueMath =
+      ctx.DyniComponents.DyniValueMath || loadFresh("shared/widget-kits/value/ValueMath.js");
   }
 
   if (!ctx.window) ctx.window = {};
@@ -51,6 +53,7 @@ function createScriptContext(overrides) {
   return vm.createContext(ctx);
 }
 
+/** @param {string} relPath @param {import("node:vm").Context} context @returns {import("node:vm").Context} */
 function runIifeScript(relPath, context) {
   const abs = path.resolve(process.cwd(), relPath);
   const src = fs.readFileSync(abs, "utf8");

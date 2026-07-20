@@ -1,7 +1,6 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  installUnitFormatFamilies,
-} = require("../../helpers/unit-format-families");
+const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
 const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
 function makeToolkit(overrides, bindingOverrides) {
@@ -57,10 +56,10 @@ function makeToolkit(overrides, bindingOverrides) {
           caption_editRouteRte: "RTE CAP",
           formatUnit_editRouteRte: "km",
           unit_editRouteRte_km: "kmR",
-          caption_editRouteEta: "ETA CAP",
+          caption_editRouteEta: "ETA CAP"
         },
-        overrides || {},
-      ),
+        overrides || {}
+      )
     );
 }
 
@@ -76,7 +75,7 @@ function routeContext(kind, activeToolkit, viewModel) {
     cluster: "nav",
     kind: kind,
     toolkit: activeToolkit,
-    viewModel: viewModel,
+    viewModel: viewModel
   });
 }
 
@@ -103,25 +102,25 @@ function makeActiveRouteViewModel() {
           remain: toMaybeNumber(props.activeRouteRemain),
           rteEta: props.activeRouteEta,
           nextCourse: toMaybeNumber(props.activeRouteNextCourse),
-          isApproaching: props.activeRouteApproaching === true,
+          isApproaching: props.activeRouteApproaching === true
         },
         routeName: trimText(props.activeRouteName),
         captions: {
           remain: "RTE CAP",
           rteEta: "ETA CAP",
-          nextCourse: "NEXT CAP",
+          nextCourse: "NEXT CAP"
         },
         units: {
           remain: "nmA",
           rteEta: "",
-          nextCourse: "degN",
+          nextCourse: "degN"
         },
         formatUnits: {
-          remain: "nm",
+          remain: "nm"
         },
-        hideSeconds: props.hideSeconds === true,
+        hideSeconds: props.hideSeconds === true
       };
-    },
+    }
   };
 }
 
@@ -136,7 +135,7 @@ function makeRoutePointsViewModel() {
               return {
                 name: trimText(point.name) || String(index),
                 lat: toMaybeNumber(point.lat),
-                lon: toMaybeNumber(point.lon),
+                lon: toMaybeNumber(point.lon)
               };
             })
           : [];
@@ -146,18 +145,15 @@ function makeRoutePointsViewModel() {
           ? {
               name: routeName,
               points: points,
-              sourceRoute: editingRoute,
+              sourceRoute: editingRoute
             }
           : null,
-        selectedIndex:
-          typeof props.editingIndex === "undefined"
-            ? undefined
-            : Number(props.editingIndex),
+        selectedIndex: typeof props.editingIndex === "undefined" ? undefined : Number(props.editingIndex),
         isActiveRoute: trimText(props.activeName) === routeName,
         showLatLon: props.routeShowLL === true,
-        useRhumbLine: props.useRhumbLine === true,
+        useRhumbLine: props.useRhumbLine === true
       };
-    },
+    }
   };
 }
 
@@ -165,19 +161,10 @@ function makeEditRouteViewModel() {
   return {
     build(props) {
       const editingRoute = props.editingRoute;
-      const routeName = editingRoute
-        ? trimText(editingRoute.name).replace(/^local@/, "")
-        : "";
-      const pointCount =
-        editingRoute && Array.isArray(editingRoute.points)
-          ? editingRoute.points.length
-          : 0;
-      const isLocalRoute = !!(
-        editingRoute && /^local@/.test(editingRoute.name)
-      );
-      const isServerRoute = !!(
-        editingRoute && /^server@/.test(editingRoute.name)
-      );
+      const routeName = editingRoute ? trimText(editingRoute.name).replace(/^local@/, "") : "";
+      const pointCount = editingRoute && Array.isArray(editingRoute.points) ? editingRoute.points.length : 0;
+      const isLocalRoute = !!(editingRoute && /^local@/.test(editingRoute.name));
+      const isServerRoute = !!(editingRoute && /^server@/.test(editingRoute.name));
 
       return {
         hasRoute: !!editingRoute,
@@ -190,36 +177,31 @@ function makeEditRouteViewModel() {
                   ? editingRoute.computeLength()
                   : undefined,
               isLocalRoute: isLocalRoute,
-              isServerRoute: isServerRoute,
+              isServerRoute: isServerRoute
             }
           : null,
         remainingDistance: toMaybeNumber(props.rteDistance),
         rteEta: props.rteEta,
         hideSeconds: props.hideSeconds === true,
-        isActiveRoute:
-          !!editingRoute &&
-          trimText(props.activeName) === trimText(editingRoute.name),
+        isActiveRoute: !!editingRoute && trimText(props.activeName) === trimText(editingRoute.name),
         isLocalRoute: isLocalRoute,
-        isServerRoute: isServerRoute,
+        isServerRoute: isServerRoute
       };
-    },
+    }
   };
 }
 
 describe("NavMapper", function () {
   it("maps VMG using speed formatter and unit parameter", function () {
     const mapper = createMapper();
-    const out = mapper.translate(
-      { kind: "vmg", vmg: 4.2 },
-      routeContext("vmg", toolkit),
-    );
+    const out = mapper.translate({ kind: "vmg", vmg: 4.2 }, routeContext("vmg", toolkit));
 
     expect(out).toEqual({
       value: 4.2,
       caption: "VMG",
       unit: "kn",
       formatter: "formatSpeed",
-      formatterParameters: ["kn"],
+      formatterParameters: ["kn"]
     });
   });
 
@@ -239,9 +221,9 @@ describe("NavMapper", function () {
         activeRouteRatioThresholdFlat: "4.4",
         wpServer: true,
         disconnect: true,
-        hideSeconds: true,
+        hideSeconds: true
       },
-      routeContext("activeRoute", toolkit, activeRouteViewModel),
+      routeContext("activeRoute", toolkit, activeRouteViewModel)
     );
 
     expect(out).toEqual({
@@ -253,23 +235,23 @@ describe("NavMapper", function () {
         isApproaching: true,
         routeName: "Harbor Run",
         disconnect: true,
-        hideSeconds: true,
+        hideSeconds: true
       },
       captions: {
         remain: "RTE CAP",
         rteEta: "ETA CAP",
-        nextCourse: "NEXT CAP",
+        nextCourse: "NEXT CAP"
       },
       units: {
         remain: "nmA",
         rteEta: "",
-        nextCourse: "degN",
+        nextCourse: "degN"
       },
       formatUnits: {
-        remain: "nm",
+        remain: "nm"
       },
       ratioThresholdNormal: 1.25,
-      ratioThresholdFlat: 4.4,
+      ratioThresholdFlat: 4.4
     });
   });
 
@@ -283,9 +265,9 @@ describe("NavMapper", function () {
         activeRouteRemain: 12,
         activeRouteEta: new Date("2026-03-06T11:45:00Z"),
         activeRouteNextCourse: 91,
-        activeRouteApproaching: false,
+        activeRouteApproaching: false
       },
-      routeContext("activeRoute", toolkit, activeRouteViewModel),
+      routeContext("activeRoute", toolkit, activeRouteViewModel)
     );
 
     expect(out).not.toHaveProperty("renderer");
@@ -304,13 +286,12 @@ describe("NavMapper", function () {
         activeRouteName: "Harbor Run",
         activeRouteRemain: null,
         activeRouteEta: new Date("2026-03-06T11:45:00Z"),
-        activeRouteNextCourse: "   ",
+        activeRouteNextCourse: "   "
       },
-      routeContext("activeRoute", toolkit, activeRouteViewModel),
+      routeContext("activeRoute", toolkit, activeRouteViewModel)
     );
 
     expect(out.display.remain).toBeUndefined();
     expect(out.display.nextCourse).toBeUndefined();
   });
-
 });

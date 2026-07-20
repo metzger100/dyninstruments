@@ -7,6 +7,7 @@ describe("RoutePointsViewModel", function () {
 
   function createToolkit() {
     return {
+      /** @param {any} value @returns {number | undefined} */
       num(value) {
         const n = Number(value);
         return Number.isFinite(n) ? n : undefined;
@@ -25,13 +26,16 @@ describe("RoutePointsViewModel", function () {
       ]
     };
 
-    const out = vm.build({
-      editingRoute: editingRoute,
-      editingIndex: "2",
-      activeName: "  Harbor Run  ",
-      routeShowLL: true,
-      useRhumbLine: false
-    }, createToolkit());
+    const out = vm.build(
+      {
+        editingRoute: editingRoute,
+        editingIndex: "2",
+        activeName: "  Harbor Run  ",
+        routeShowLL: true,
+        useRhumbLine: false
+      },
+      createToolkit()
+    );
 
     expect(out.route).toEqual({
       name: "Harbor Run",
@@ -55,16 +59,24 @@ describe("RoutePointsViewModel", function () {
     expect(vm.build({}, createToolkit()).route).toBeNull();
     expect(vm.build({ editingRoute: null }, createToolkit()).route).toBeNull();
     expect(vm.build({ editingRoute: "bad" }, createToolkit()).route).toBeNull();
-    expect(vm.build({
-      editingRoute: { name: "Harbor Run", points: "bad" }
-    }, createToolkit()).route).toBeNull();
+    expect(
+      vm.build(
+        {
+          editingRoute: { name: "Harbor Run", points: "bad" }
+        },
+        createToolkit()
+      ).route
+    ).toBeNull();
   });
 
   it("keeps an empty points array as a valid empty route", function () {
     const vm = createViewModel();
-    const out = vm.build({
-      editingRoute: { name: "  Empty Route  ", points: [] }
-    }, createToolkit());
+    const out = vm.build(
+      {
+        editingRoute: { name: "  Empty Route  ", points: [] }
+      },
+      createToolkit()
+    );
 
     expect(out.route).toEqual({
       name: "Empty Route",
@@ -86,15 +98,18 @@ describe("RoutePointsViewModel", function () {
 
   it("keeps missing and blank point coordinates undefined", function () {
     const vm = createViewModel();
-    const out = vm.build({
-      editingRoute: {
-        name: "Route",
-        points: [
-          { name: "A", lat: null, lon: undefined },
-          { name: "B", lat: "", lon: "   " }
-        ]
-      }
-    }, createToolkit());
+    const out = vm.build(
+      {
+        editingRoute: {
+          name: "Route",
+          points: [
+            { name: "A", lat: null, lon: undefined },
+            { name: "B", lat: "", lon: "   " }
+          ]
+        }
+      },
+      createToolkit()
+    );
 
     expect(out.route.points[0]).toEqual({ name: "A", lat: undefined, lon: undefined });
     expect(out.route.points[1]).toEqual({ name: "B", lat: undefined, lon: undefined });
@@ -104,42 +119,72 @@ describe("RoutePointsViewModel", function () {
     const vm = createViewModel();
     const editingRoute = { name: "Harbor Run", points: [] };
 
-    expect(vm.build({
-      editingRoute: editingRoute,
-      activeName: "Harbor Run"
-    }, createToolkit()).isActiveRoute).toBe(true);
+    expect(
+      vm.build(
+        {
+          editingRoute: editingRoute,
+          activeName: "Harbor Run"
+        },
+        createToolkit()
+      ).isActiveRoute
+    ).toBe(true);
 
-    expect(vm.build({
-      editingRoute: editingRoute,
-      activeName: "Harbor run"
-    }, createToolkit()).isActiveRoute).toBe(false);
+    expect(
+      vm.build(
+        {
+          editingRoute: editingRoute,
+          activeName: "Harbor run"
+        },
+        createToolkit()
+      ).isActiveRoute
+    ).toBe(false);
 
-    expect(vm.build({
-      editingRoute: editingRoute,
-      activeName: ""
-    }, createToolkit()).isActiveRoute).toBe(false);
+    expect(
+      vm.build(
+        {
+          editingRoute: editingRoute,
+          activeName: ""
+        },
+        createToolkit()
+      ).isActiveRoute
+    ).toBe(false);
 
-    expect(vm.build({
-      editingRoute: null,
-      activeName: "Harbor Run"
-    }, createToolkit()).isActiveRoute).toBe(false);
+    expect(
+      vm.build(
+        {
+          editingRoute: null,
+          activeName: "Harbor Run"
+        },
+        createToolkit()
+      ).isActiveRoute
+    ).toBe(false);
   });
 
   it("passes showLatLon and useRhumbLine as strict booleans", function () {
     const vm = createViewModel();
 
-    expect(vm.build({
-      routeShowLL: true,
-      useRhumbLine: true
-    }, createToolkit())).toMatchObject({
+    expect(
+      vm.build(
+        {
+          routeShowLL: true,
+          useRhumbLine: true
+        },
+        createToolkit()
+      )
+    ).toMatchObject({
       showLatLon: true,
       useRhumbLine: true
     });
 
-    expect(vm.build({
-      routeShowLL: 1,
-      useRhumbLine: "yes"
-    }, createToolkit())).toMatchObject({
+    expect(
+      vm.build(
+        {
+          routeShowLL: 1,
+          useRhumbLine: "yes"
+        },
+        createToolkit()
+      )
+    ).toMatchObject({
       showLatLon: false,
       useRhumbLine: false
     });

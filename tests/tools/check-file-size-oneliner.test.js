@@ -1,11 +1,8 @@
-const {
-  loadRunFileSizeCheck,
-  createWorkspaceManager,
-  runCheck
-} = require("./check-file-size-test-utils");
+const { loadRunFileSizeCheck, createWorkspaceManager, runCheck } = require("./check-file-size-test-utils");
 
 describe("tools/check-file-size.mjs oneliner heuristics", function () {
   const workspaces = createWorkspaceManager();
+  /** @type {any} */
   let runFileSizeCheck;
 
   beforeAll(async function () {
@@ -16,20 +13,17 @@ describe("tools/check-file-size.mjs oneliner heuristics", function () {
     workspaces.cleanup();
   });
 
+  /** @param {string} snippet @param {Record<string, any>} [options] */
   function runSnippet(snippet, options = {}) {
     const cwd = workspaces.createWorkspace({
-      "widgets/example.js": [
-        "(function () {",
-        '  "use strict";',
-        `  ${snippet}`,
-        "}());"
-      ].join("\n")
+      "widgets/example.js": ["(function () {", '  "use strict";', `  ${snippet}`, "}());"].join("\n")
     });
 
     const checkOptions = Object.assign({ onelinerMode: "warn" }, options);
     return runCheck(runFileSizeCheck, cwd, checkOptions);
   }
 
+  /** @param {any} summary @param {string} output */
   function expectNoOneliner(summary, output) {
     expect(summary.ok).toBe(true);
     expect(summary.onelinerFindings).toBe(0);
@@ -75,9 +69,7 @@ describe("tools/check-file-size.mjs oneliner heuristics", function () {
     const summary = result.summary;
 
     expect(summary.onelinerFindings).toBe(1);
-    expect(
-      summary.onelinerByKind.dense + summary.onelinerByKind["collapsed-block"],
-    ).toBe(1);
+    expect(summary.onelinerByKind.dense + summary.onelinerByKind["collapsed-block"]).toBe(1);
   });
 
   it("flags stacked function declarations", function () {
@@ -105,12 +97,12 @@ describe("tools/check-file-size.mjs oneliner heuristics", function () {
     expect(summary.onelinerByKind.dense).toBe(1);
   });
 
-  it("flags large single-destructuring declarations", function () {
+  it("does not flag large single-destructuring declarations (Prettier owns destructuring-pattern wrapping)", function () {
     const { result } = runSnippet("const { a, b, c, d } = source;");
     const summary = result.summary;
 
-    expect(summary.onelinerFindings).toBe(1);
-    expect(summary.onelinerByKind.dense).toBe(1);
+    expect(summary.onelinerFindings).toBe(0);
+    expect(summary.onelinerByKind.dense).toBe(0);
   });
 
   it("flags very long packed lines", function () {
@@ -221,13 +213,11 @@ describe("tools/check-file-size.mjs oneliner heuristics", function () {
     expect(summary.onelinerByKind["collapsed-literal"]).toBe(1);
   });
 
-  it("flags collapsed array literals with 4+ entries over 80 chars", function () {
-    const literal = "const arr = [\"alphaaaaaaaaaaa\", \"bravoooooooooo\", \"charlieeeeeeee\", \"deltaaaaaaaaaa\", \"echoooooooooooo\"];";
-    const { result } = runSnippet(literal);
-    const summary = result.summary;
-
-    expect(summary.onelinerFindings).toBe(1);
-    expect(summary.onelinerByKind["collapsed-literal"]).toBe(1);
+  it("does not flag collapsed array literals (Prettier owns array-literal wrapping, unlike objectWrap:preserve for objects)", function () {
+    const literal =
+      'const arr = ["alphaaaaaaaaaaa", "bravoooooooooo", "charlieeeeeeee", "deltaaaaaaaaaa", "echoooooooooooo"];';
+    const { result, output } = runSnippet(literal);
+    expectNoOneliner(result.summary, output);
   });
 
   it("does not flag short object literals", function () {

@@ -1,9 +1,10 @@
 const {
+  loadFresh,
+  createMockCanvas,
+  createMockContext2D,
   makeComponentContext,
   fillTextValues,
-  captureTextCalls,
-  parseFontPx,
-  findTextCall,
+  captureTextCalls
 } = require("./PositionCoordinateWidget.harness.js");
 
 describe("PositionCoordinateWidget", function () {
@@ -12,18 +13,16 @@ describe("PositionCoordinateWidget", function () {
       if (!value || typeof value !== "object") return "NA";
       return Number(value.lat).toFixed(2) + "," + Number(value.lon).toFixed(2);
     });
-    globalThis.avnav = { api: { formatter: { formatLonLats: flatFormatter } } };
+    /** @type {any} */ (globalThis).avnav = { api: { formatter: { formatLonLats: flatFormatter } } };
 
     const helpers = makeComponentContext();
-    const spec = loadFresh(
-      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-    ).create({}, helpers);
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
 
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({
       rectWidth: 420,
       rectHeight: 100,
-      ctx,
+      ctx
     });
     const props = {
       value: { lat: 53.5, lon: 8.2 },
@@ -31,7 +30,7 @@ describe("PositionCoordinateWidget", function () {
       unit: "",
       formatter: "formatLonLats",
       ratioThresholdNormal: 1.0,
-      ratioThresholdFlat: 3.0,
+      ratioThresholdFlat: 3.0
     };
 
     spec.renderCanvas(canvas, props);
@@ -44,6 +43,7 @@ describe("PositionCoordinateWidget", function () {
   });
 
   it("uses mono coordinate font when coordinatesTabular is enabled", function () {
+    /** @param {any} raw @param {any} formatterOptions */
     function coordinateFormatter(raw, formatterOptions) {
       const cfg = formatterOptions || {};
       if (cfg.formatter === "formatLonLatsDecimal") {
@@ -56,49 +56,47 @@ describe("PositionCoordinateWidget", function () {
     }
 
     const helpersTabular = makeComponentContext({
-      applyFormatter: coordinateFormatter,
+      applyFormatter: coordinateFormatter
     });
-    const specTabular = loadFresh(
-      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-    ).create({}, helpersTabular);
+    const specTabular = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create(
+      {},
+      helpersTabular
+    );
     const tabularCtx = createMockContext2D();
     const tabularCanvas = createMockCanvas({
       rectWidth: 220,
       rectHeight: 140,
-      ctx: tabularCtx,
+      ctx: tabularCtx
     });
     const tabularCaptured = captureTextCalls(tabularCtx);
     specTabular.renderCanvas(tabularCanvas, {
       value: { lat: 54.1, lon: 10.2 },
       caption: "POS",
-      coordinatesTabular: true,
+      coordinatesTabular: true
     });
 
     const helpersPlain = makeComponentContext({
-      applyFormatter: coordinateFormatter,
+      applyFormatter: coordinateFormatter
     });
-    const specPlain = loadFresh(
-      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-    ).create({}, helpersPlain);
+    const specPlain = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create(
+      {},
+      helpersPlain
+    );
     const plainCtx = createMockContext2D();
     const plainCanvas = createMockCanvas({
       rectWidth: 220,
       rectHeight: 140,
-      ctx: plainCtx,
+      ctx: plainCtx
     });
     const plainCaptured = captureTextCalls(plainCtx);
     specPlain.renderCanvas(plainCanvas, {
       value: { lat: 54.1, lon: 10.2 },
       caption: "POS",
-      coordinatesTabular: false,
+      coordinatesTabular: false
     });
 
-    const tabularLat = tabularCaptured.find(
-      (entry) => entry.text.indexOf("LAT:54.1") === 0,
-    );
-    const plainLat = plainCaptured.find(
-      (entry) => entry.text.indexOf("LAT:54.1") === 0,
-    );
+    const tabularLat = tabularCaptured.find((entry) => entry.text.indexOf("LAT:54.1") === 0);
+    const plainLat = plainCaptured.find((entry) => entry.text.indexOf("LAT:54.1") === 0);
 
     expect(tabularLat).toBeTruthy();
     expect(plainLat).toBeTruthy();
@@ -107,30 +105,25 @@ describe("PositionCoordinateWidget", function () {
   });
 
   it("right-aligns tabular stacked coordinates and keys the fit by alignment", function () {
-    const fitKeyCalls = [];
+    const fitKeyCalls = /** @type {any[]} */ ([]);
     const helpers = makeComponentContext({ fitKeyCalls: fitKeyCalls });
-    const spec = loadFresh(
-      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-    ).create({}, helpers);
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
 
     const tabularCtx = createMockContext2D();
     const tabularCanvas = createMockCanvas({
       rectWidth: 220,
       rectHeight: 140,
-      ctx: tabularCtx,
+      ctx: tabularCtx
     });
     spec.renderCanvas(tabularCanvas, {
       value: { lat: 54.1, lon: 10.2 },
       caption: "POS",
-      coordinatesTabular: true,
+      coordinatesTabular: true
     });
 
-    const tabularKey = fitKeyCalls.find(
-      (entry) =>
-        entry && Object.prototype.hasOwnProperty.call(entry, "latText"),
-    );
+    const tabularKey = fitKeyCalls.find((entry) => entry && Object.prototype.hasOwnProperty.call(entry, "latText"));
     const tabularLat = tabularCtx.calls.find(
-      (entry) => entry.name === "fillText" && String(entry.args[0]) === "54.1",
+      (/** @type {any} */ entry) => entry.name === "fillText" && String(entry.args[0]) === "54.1"
     );
 
     expect(tabularKey.align).toBe("right");
@@ -142,20 +135,17 @@ describe("PositionCoordinateWidget", function () {
     const plainCanvas = createMockCanvas({
       rectWidth: 220,
       rectHeight: 140,
-      ctx: plainCtx,
+      ctx: plainCtx
     });
     spec.renderCanvas(plainCanvas, {
       value: { lat: 54.1, lon: 10.2 },
       caption: "POS",
-      coordinatesTabular: false,
+      coordinatesTabular: false
     });
 
-    const plainKey = fitKeyCalls.find(
-      (entry) =>
-        entry && Object.prototype.hasOwnProperty.call(entry, "latText"),
-    );
+    const plainKey = fitKeyCalls.find((entry) => entry && Object.prototype.hasOwnProperty.call(entry, "latText"));
     const plainLat = plainCtx.calls.find(
-      (entry) => entry.name === "fillText" && String(entry.args[0]) === "54.1",
+      (/** @type {any} */ entry) => entry.name === "fillText" && String(entry.args[0]) === "54.1"
     );
 
     expect(plainKey.align).toBe("center");
@@ -165,29 +155,29 @@ describe("PositionCoordinateWidget", function () {
 
   it("supports axis-specific formatters and flat rendering from stacked axes", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
-    globalThis.avnav = {
+    /** @type {any} */ (globalThis).avnav = {
       api: {
         formatter: {
+          /** @param {any} value */
           formatDate(value) {
             return value === rawClock ? "DATE" : "DATE_BAD";
           },
+          /** @param {any} value */
           formatTime(value) {
             return value === rawClock ? "TIME" : "TIME_BAD";
-          },
-        },
-      },
+          }
+        }
+      }
     };
 
     const helpers = makeComponentContext();
-    const spec = loadFresh(
-      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-    ).create({}, helpers);
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
 
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({
       rectWidth: 420,
       rectHeight: 100,
-      ctx,
+      ctx
     });
 
     spec.renderCanvas(canvas, {
@@ -198,7 +188,7 @@ describe("PositionCoordinateWidget", function () {
       coordinateFormatterLon: "formatTime",
       ratioThresholdNormal: 1.0,
       ratioThresholdFlat: 3.0,
-      default: "NA",
+      default: "NA"
     });
 
     expect(fillTextValues(ctx)).toContain("DATE TIME");
@@ -206,43 +196,43 @@ describe("PositionCoordinateWidget", function () {
       rawClock,
       expect.objectContaining({
         formatter: "formatDate",
-        formatterParameters: [],
-      }),
+        formatterParameters: []
+      })
     );
     expect(helpers.format.applyFormatter).toHaveBeenCalledWith(
       rawClock,
       expect.objectContaining({
         formatter: "formatTime",
-        formatterParameters: [],
-      }),
+        formatterParameters: []
+      })
     );
   });
 
   it("supports the dateTime display variant without wrapper props", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
-    globalThis.avnav = {
+    /** @type {any} */ (globalThis).avnav = {
       api: {
         formatter: {
+          /** @param {any} value */
           formatDate(value) {
             return value === rawClock ? "DATE" : "DATE_BAD";
           },
+          /** @param {any} value */
           formatTime(value) {
             return value === rawClock ? "TIME" : "TIME_BAD";
-          },
-        },
-      },
+          }
+        }
+      }
     };
 
     const helpers = makeComponentContext();
-    const spec = loadFresh(
-      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-    ).create({}, helpers);
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
 
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({
       rectWidth: 420,
       rectHeight: 100,
-      ctx,
+      ctx
     });
 
     spec.renderCanvas(canvas, {
@@ -250,7 +240,7 @@ describe("PositionCoordinateWidget", function () {
       displayVariant: "dateTime",
       ratioThresholdNormal: 1.35,
       ratioThresholdFlat: 3.0,
-      default: "NA",
+      default: "NA"
     });
 
     expect(fillTextValues(ctx)).toContain("DATE TIME");
@@ -258,46 +248,47 @@ describe("PositionCoordinateWidget", function () {
       rawClock,
       expect.objectContaining({
         formatter: "formatDate",
-        formatterParameters: [],
-      }),
+        formatterParameters: []
+      })
     );
     expect(helpers.format.applyFormatter).toHaveBeenCalledWith(
       rawClock,
       expect.objectContaining({
         formatter: "formatTime",
-        formatterParameters: [],
-      }),
+        formatterParameters: []
+      })
     );
   });
 
   it("uses formatClock on the lon axis for dateTime when hideSeconds is enabled", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
-    globalThis.avnav = {
+    /** @type {any} */ (globalThis).avnav = {
       api: {
         formatter: {
+          /** @param {any} value */
           formatDate(value) {
             return value === rawClock ? "DATE" : "DATE_BAD";
           },
+          /** @param {any} value */
           formatTime(value) {
             return value === rawClock ? "TIME" : "TIME_BAD";
           },
+          /** @param {any} value */
           formatClock(value) {
             return value === rawClock ? "CLOCK" : "CLOCK_BAD";
-          },
-        },
-      },
+          }
+        }
+      }
     };
 
     const helpers = makeComponentContext();
-    const spec = loadFresh(
-      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-    ).create({}, helpers);
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
 
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({
       rectWidth: 420,
       rectHeight: 100,
-      ctx,
+      ctx
     });
 
     spec.renderCanvas(canvas, {
@@ -306,7 +297,7 @@ describe("PositionCoordinateWidget", function () {
       hideSeconds: true,
       ratioThresholdNormal: 1.35,
       ratioThresholdFlat: 3.0,
-      default: "NA",
+      default: "NA"
     });
 
     expect(fillTextValues(ctx)).toContain("DATE CLOCK");
@@ -314,9 +305,8 @@ describe("PositionCoordinateWidget", function () {
       rawClock,
       expect.objectContaining({
         formatter: "formatClock",
-        formatterParameters: [],
-      }),
+        formatterParameters: []
+      })
     );
   });
-
 });

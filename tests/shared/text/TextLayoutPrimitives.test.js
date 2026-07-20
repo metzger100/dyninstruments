@@ -4,38 +4,50 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 describe("TextLayoutPrimitives", function () {
   function createHarness() {
     const canvasTextLayout = {
+      /** @param {any} family @param {any} [options] */
       resolveFamily(family, options) {
         if (options && options.useMono === true) {
           return options.monoFamily || family;
         }
         return family;
       },
+      /** @param {any} ctx @param {any} px @param {any} weight @param {any} family */
       setFont(ctx, px, weight, family) {
-        ctx.font = Math.floor(Number(weight) || 0) + " " + Math.max(1, Math.floor(Number(px) || 0)) + "px " + (family || "sans-serif");
+        ctx.font =
+          Math.floor(Number(weight) || 0) +
+          " " +
+          Math.max(1, Math.floor(Number(px) || 0)) +
+          "px " +
+          (family || "sans-serif");
       }
     };
     const moduleApi = loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js");
-    return moduleApi.create({}, createComponentContextMock({
-      modules: {
-        CanvasTextLayout: {
-          create() {
-            return canvasTextLayout;
+    return moduleApi.create(
+      {},
+      createComponentContextMock({
+        modules: {
+          CanvasTextLayout: {
+            create() {
+              return canvasTextLayout;
+            }
           }
         }
-      }
-    }));
+      })
+    );
   }
 
+  /** @returns {any} */
   function createCtx() {
-    const fillCalls = [];
-    const ctx = {
+    const fillCalls = /** @type {any[]} */ ([]);
+    const ctx = /** @type {any} */ ({
       globalAlpha: 1,
       textAlign: "left",
       textBaseline: "alphabetic",
+      /** @param {any} text */
       fillText(text) {
         fillCalls.push({ text: String(text), alpha: this.globalAlpha });
       }
-    };
+    });
     ctx.fillCalls = fillCalls;
     return ctx;
   }

@@ -20,21 +20,20 @@
     const clientWidth = canvas.clientWidth;
     const clientHeight = canvas.clientHeight;
     const cachedLayout = layoutByCanvas.get(canvas);
-    const layout = cachedLayout &&
-      cachedLayout.clientWidth === clientWidth &&
-      cachedLayout.clientHeight === clientHeight
-      ? cachedLayout
-      : (function () {
-        const rect = canvas.getBoundingClientRect();
-        const nextLayout = {
-          clientWidth: clientWidth,
-          clientHeight: clientHeight,
-          cssWidth: rect.width,
-          cssHeight: rect.height
-        };
-        layoutByCanvas.set(canvas, nextLayout);
-        return nextLayout;
-      }());
+    const layout =
+      cachedLayout && cachedLayout.clientWidth === clientWidth && cachedLayout.clientHeight === clientHeight
+        ? cachedLayout
+        : (function () {
+            const rect = canvas.getBoundingClientRect();
+            const nextLayout = {
+              clientWidth: clientWidth,
+              clientHeight: clientHeight,
+              cssWidth: rect.width,
+              cssHeight: rect.height
+            };
+            layoutByCanvas.set(canvas, nextLayout);
+            return nextLayout;
+          })();
 
     const w = Math.max(1, Math.round(layout.cssWidth * dpr));
     const h = Math.max(1, Math.round(layout.cssHeight * dpr));
@@ -53,4 +52,4 @@
   runtime.canvas = Object.freeze({
     setupCanvas: setupCanvas
   });
-}(this));
+})(this);

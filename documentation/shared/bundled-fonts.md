@@ -4,7 +4,8 @@
 
 ## Overview
 
-dyninstruments ships font binaries in `assets/fonts/` so the plugin can render consistent typography without network access.
+dyninstruments ships font binaries in `assets/fonts/` so the plugin can render consistent typography without network
+access.
 
 ## Key Details
 

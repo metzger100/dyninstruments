@@ -111,10 +111,24 @@
         const uniqueLoadIds = Array.from(new Set(routeRoots));
         const shadowCssUrls = deps.resolveShadowCssUrls(routeMeta.rendererId);
 
-        return Promise.all(uniqueLoadIds.map(function (id) {
-          return deps.loader.loadComponent(id);
-        }))
-          .then(function () {
+        return Promise.all(
+          uniqueLoadIds.map(function (id) {
+            return deps.loader.loadComponent(id);
+          })
+        ).then(function () {
+          if (destroyed) {
+            entry.resolve(discardedActivation);
+            return null;
+          }
+          if (entry.latestRouteMeta !== routeMeta) {
+            return runLoadCycle();
+          }
+          if (routeMeta.surface !== "html") {
+            const payload = deps.buildPayload(entry.latestSnapshot, routeMeta);
+            entry.resolve(payload);
+            return null;
+          }
+          return deps.themeRuntime.preloadShadowCssUrls(shadowCssUrls).then(function () {
             if (destroyed) {
               entry.resolve(discardedActivation);
               return null;
@@ -122,33 +136,20 @@
             if (entry.latestRouteMeta !== routeMeta) {
               return runLoadCycle();
             }
-            if (routeMeta.surface !== "html") {
-              const payload = deps.buildPayload(entry.latestSnapshot, routeMeta);
-              entry.resolve(payload);
-              return null;
-            }
-            return deps.themeRuntime.preloadShadowCssUrls(shadowCssUrls).then(function () {
-              if (destroyed) {
-                entry.resolve(discardedActivation);
-                return null;
-              }
-              if (entry.latestRouteMeta !== routeMeta) {
-                return runLoadCycle();
-              }
-              const payload = deps.buildPayload(entry.latestSnapshot, routeMeta);
-              entry.resolve(payload);
-              return null;
-            });
+            const payload = deps.buildPayload(entry.latestSnapshot, routeMeta);
+            entry.resolve(payload);
+            return null;
           });
+        });
       }
 
-      // dyni-lint-disable-next-line catch-fallback-without-suppression -- Load failures reject the activation promise; destroy resolves through the sentinel path.
+      // dyni-boundary-next-line(category: avnav-host-boundary, owner: Metzger100, date: 2026-07-17) -- Load failures reject the activation promise; destroy resolves through the sentinel path.
       runLoadCycle().catch(function (error) {
-          if (entry.settled) {
-            return;
-          }
-          entry.reject(error);
-        });
+        if (entry.settled) {
+          return;
+        }
+        entry.reject(error);
+      });
 
       return entry.promise;
     }
@@ -178,4 +179,4 @@
   /** @type {DyniRuntimeNamespace & Record<string, unknown>} */ (runtime).routeActivationLatestWins = Object.freeze({
     createLatestWinsState: createLatestWinsState
   });
-}(this));
+})(this);

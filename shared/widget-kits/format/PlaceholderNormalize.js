@@ -8,18 +8,12 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniPlaceholderNormalize = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
-  // dyni-lint-disable-next-line hardcoded-runtime-default -- PlaceholderNormalize owns the shared fallback token.
   const DEFAULT_PLACEHOLDER = "---";
   const DASH_ONLY_RE = /^\s*-+\s*$/;
-  const PLACEHOLDER_PATTERNS = Object.freeze([
-    "--:--",
-    "--:--:--",
-    "----/--/--",
-    "NO DATA" /* dyni-lint-disable-line hardcoded-runtime-default -- PlaceholderNormalize must match the legacy overlay fallback token for cleanup. */
-  ]);
+  const PLACEHOLDER_PATTERNS = Object.freeze(["--:--", "--:--:--", "----/--/--", "NO DATA"]);
 
   /**
    * @param {unknown} defaultText
@@ -89,4 +83,4 @@
     id: "PlaceholderNormalize",
     create: create
   };
-}));
+});

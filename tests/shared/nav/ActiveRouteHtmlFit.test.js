@@ -1,30 +1,30 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("ActiveRouteHtmlFit", function () {
+  /** @returns {any} */
   function createMeasureContext() {
-    const ctx = {
+    const ctx = /** @type {any} */ ({
       fonts: [],
-      calls: [],
-    };
+      calls: []
+    });
     Object.defineProperty(ctx, "font", {
       enumerable: true,
       configurable: true,
       get() {
         return this._font || "700 12px sans-serif";
       },
+      /** @param {any} value */
       set(value) {
         this._font = String(value || "");
         this.fonts.push(this._font);
-      },
+      }
     });
     ctx.font = "700 12px sans-serif";
-    ctx.measureText = function (text) {
+    ctx.measureText = function (/** @type {any} */ text) {
       this.calls.push({
         text: String(text),
-        font: String(this.font || ""),
+        font: String(this.font || "")
       });
       const source = String(this.font || "");
       const match = source.match(/(\d+(?:\.\d+)?)px/);
@@ -35,91 +35,73 @@ describe("ActiveRouteHtmlFit", function () {
     return ctx;
   }
 
+  /** @param {Record<string, any>} [themeOverrides] */
   function createHarness(themeOverrides) {
-    const htmlUtilsModule = loadFresh(
-      "shared/widget-kits/html/HtmlWidgetUtils.js",
-    );
-    const textTileLayoutModule = loadFresh(
-      "shared/widget-kits/text/TextTileLayout.js",
-    );
-    const activeRouteLayoutModule = loadFresh(
-      "shared/widget-kits/nav/ActiveRouteLayout.js",
-    );
-    const radialTextLayoutModule = loadFresh(
-      "shared/widget-kits/text/CanvasTextLayout.js",
-    );
-    const radialTextFittingModule = loadFresh(
-      "shared/widget-kits/radial/RadialTextFitting.js",
-    );
-    const responsiveScaleProfileModule = loadFresh(
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-    );
-    const layoutRectMathModule = loadFresh(
-      "shared/widget-kits/layout/LayoutRectMath.js",
-    );
+    const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+    const textTileLayoutModule = loadFresh("shared/widget-kits/text/TextTileLayout.js");
+    const activeRouteLayoutModule = loadFresh("shared/widget-kits/nav/ActiveRouteLayout.js");
+    const radialTextLayoutModule = loadFresh("shared/widget-kits/text/CanvasTextLayout.js");
+    const radialTextFittingModule = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
+    const responsiveScaleProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMathModule = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
     const themeTokens = Object.assign(
       {
         font: {
           weight: 720,
           labelWeight: 610,
           family: "sans-serif",
-          familyMono: "mono-serif",
-        },
+          familyMono: "mono-serif"
+        }
       },
-      themeOverrides || {},
+      themeOverrides || {}
     );
     if (!themeTokens.font || typeof themeTokens.font !== "object") {
       themeTokens.font = {
         weight: 720,
         labelWeight: 610,
         family: "sans-serif",
-        familyMono: "mono-serif",
+        familyMono: "mono-serif"
       };
     }
     const themeApi = {
-      resolveForRoot: vi.fn(() => themeTokens),
+      resolveForRoot: vi.fn(() => themeTokens)
     };
 
     const componentContext = createComponentContextMock({
       modules: {
         HtmlWidgetUtils: htmlUtilsModule,
-        PlaceholderNormalize: loadFresh(
-          "shared/widget-kits/format/PlaceholderNormalize.js",
-        ),
-        UnitAwareFormatter: loadFresh(
-          "shared/widget-kits/format/UnitAwareFormatter.js",
-        ),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
         TextTileLayout: textTileLayoutModule,
         ActiveRouteLayout: activeRouteLayoutModule,
         CanvasTextLayout: radialTextLayoutModule,
         RadialTextFitting: radialTextFittingModule,
         ResponsiveScaleProfile: responsiveScaleProfileModule,
-        LayoutRectMath: layoutRectMathModule,
+        LayoutRectMath: layoutRectMathModule
       },
       services: {
         themeTokens: {
-          resolveForRoot: themeApi.resolveForRoot,
+          resolveForRoot: themeApi.resolveForRoot
         },
         dom: {
+          /** @param {any} target @returns {any} */
           requirePluginRoot(target) {
             return target || null;
           },
           getNightModeState() {
             return false;
-          },
-        },
-      },
+          }
+        }
+      }
     });
 
     return {
-      fit: loadFresh("shared/widget-kits/nav/ActiveRouteHtmlFit.js").create(
-        {},
-        componentContext,
-      ),
-      themeTokens: themeTokens,
+      fit: loadFresh("shared/widget-kits/nav/ActiveRouteHtmlFit.js").create({}, componentContext),
+      themeTokens: themeTokens
     };
   }
 
+  /** @param {Record<string, any>} [overrides] */
   function makeModel(overrides) {
     return Object.assign(
       {
@@ -138,17 +120,19 @@ describe("ActiveRouteHtmlFit", function () {
         nextCourseCaption: "NEXT",
         nextCourseText: "093",
         nextCoursePlainText: "093",
-        nextCourseUnit: "deg",
+        nextCourseUnit: "deg"
       },
-      overrides || {},
+      overrides || {}
     );
   }
 
+  /** @param {any} style */
   function extractPx(style) {
     const match = String(style || "").match(new RegExp("^font-size:(\\d+)px\\x3b$"));
     return match ? Number(match[1]) : 0;
   }
 
+  /** @param {any} style */
   function expectStyleFormat(style) {
     expect(typeof style).toBe("string");
     expect(style).toMatch(new RegExp("^font-size:\\d+px\\x3b$"));
@@ -156,12 +140,12 @@ describe("ActiveRouteHtmlFit", function () {
 
   it("returns caption/value/unit style payload for all visible metrics", function () {
     const h = createHarness();
-    const hostContext = { __dyniHtmlMeasureUtilsCtx: createMeasureContext() };
+    const hostContext = /** @type {any} */ ({ __dyniHtmlMeasureUtilsCtx: createMeasureContext() });
     const out = h.fit.compute({
       model: makeModel(),
       shellRect: { width: 320, height: 180 },
       targetEl: document.createElement("div"),
-      hostContext: hostContext,
+      hostContext: hostContext
     });
 
     expectStyleFormat(out.routeNameStyle);
@@ -178,18 +162,18 @@ describe("ActiveRouteHtmlFit", function () {
     const h = createHarness();
     const model = makeModel({ isApproaching: false });
     const targetEl = document.createElement("div");
-    const hostContext = { __dyniHtmlMeasureUtilsCtx: createMeasureContext() };
+    const hostContext = /** @type {any} */ ({ __dyniHtmlMeasureUtilsCtx: createMeasureContext() });
     const relaxedOut = h.fit.compute({
       model: model,
       shellRect: { width: 620, height: 220 },
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
     const tightOut = h.fit.compute({
       model: model,
       shellRect: { width: 180, height: 90 },
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
 
     const relaxedCaptionPx = extractPx(relaxedOut.metrics.remain.captionStyle);
@@ -208,29 +192,29 @@ describe("ActiveRouteHtmlFit", function () {
       h.fit.compute({
         shellRect: { width: 320, height: 180 },
         targetEl: targetEl,
-        hostContext: {},
-      }),
+        hostContext: {}
+      })
     ).toBeNull();
     expect(
       h.fit.compute({
         model: model,
         targetEl: targetEl,
-        hostContext: {},
-      }),
+        hostContext: {}
+      })
     ).toBeNull();
     expect(
       h.fit.compute({
         model: model,
         shellRect: { width: 320, height: 180 },
-        hostContext: {},
-      }),
+        hostContext: {}
+      })
     ).toBeNull();
   });
 
   it("reuses identical fit requests and misses when semantic or geometric inputs change", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
-    const hostContext = { __dyniHtmlMeasureUtilsCtx: createMeasureContext() };
+    const hostContext = /** @type {any} */ ({ __dyniHtmlMeasureUtilsCtx: createMeasureContext() });
     const baseModel = makeModel({ routeNameText: "Coastal Route" });
     const stableRect = { width: 320, height: 180 };
 
@@ -238,13 +222,13 @@ describe("ActiveRouteHtmlFit", function () {
       model: baseModel,
       shellRect: stableRect,
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
     const second = h.fit.compute({
       model: baseModel,
       shellRect: stableRect,
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
     expect(second).toBe(first);
     expect(hostContext.__dyniActiveRouteHtmlFitCache).toBeTruthy();
@@ -253,7 +237,7 @@ describe("ActiveRouteHtmlFit", function () {
       model: makeModel({ routeNameText: "Ocean Crossing" }),
       shellRect: stableRect,
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
     expect(semanticMiss).not.toBe(first);
 
@@ -261,7 +245,7 @@ describe("ActiveRouteHtmlFit", function () {
       model: baseModel,
       shellRect: { width: 360, height: 180 },
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
     expect(geometryMiss).not.toBe(semanticMiss);
   });
@@ -270,39 +254,35 @@ describe("ActiveRouteHtmlFit", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
     const measureCtx = createMeasureContext();
-    const hostContext = { __dyniHtmlMeasureUtilsCtx: measureCtx };
+    const hostContext = /** @type {any} */ ({ __dyniHtmlMeasureUtilsCtx: measureCtx });
     const shellRect = { width: 320, height: 180 };
 
     const proportional = h.fit.compute({
       model: makeModel({ stableDigitsEnabled: false }),
       shellRect: shellRect,
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
     const mono = h.fit.compute({
       model: makeModel({ stableDigitsEnabled: true }),
       shellRect: shellRect,
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
     const monoRepeat = h.fit.compute({
       model: makeModel({ stableDigitsEnabled: true }),
       shellRect: shellRect,
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
 
     expect(mono).not.toBe(proportional);
     expect(monoRepeat).toBe(mono);
     expect(
-      measureCtx.calls.some(
-        (call) => call.text === "12.4" && call.font.includes("mono-serif"),
-      ),
+      measureCtx.calls.some((/** @type {any} */ call) => call.text === "12.4" && call.font.includes("mono-serif"))
     ).toBe(true);
     expect(
-      measureCtx.calls.some(
-        (call) => call.text === "nm" && call.font.includes("sans-serif"),
-      ),
+      measureCtx.calls.some((/** @type {any} */ call) => call.text === "nm" && call.font.includes("sans-serif"))
     ).toBe(true);
   });
 
@@ -312,11 +292,11 @@ describe("ActiveRouteHtmlFit", function () {
         weight: 720,
         labelWeight: 610,
         family: "sans-serif",
-        familyMono: "mono-a",
-      },
+        familyMono: "mono-a"
+      }
     });
     const targetEl = document.createElement("div");
-    const hostContext = { __dyniHtmlMeasureUtilsCtx: createMeasureContext() };
+    const hostContext = /** @type {any} */ ({ __dyniHtmlMeasureUtilsCtx: createMeasureContext() });
     const shellRect = { width: 320, height: 180 };
     const model = makeModel({ stableDigitsEnabled: true });
 
@@ -324,14 +304,14 @@ describe("ActiveRouteHtmlFit", function () {
       model: model,
       shellRect: shellRect,
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
     h.themeTokens.font.familyMono = "mono-b";
     const second = h.fit.compute({
       model: model,
       shellRect: shellRect,
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
 
     expect(second).not.toBe(first);
@@ -340,28 +320,28 @@ describe("ActiveRouteHtmlFit", function () {
   it("avoids cache collisions when semantic text contains delimiter characters", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
-    const hostContext = { __dyniHtmlMeasureUtilsCtx: createMeasureContext() };
+    const hostContext = /** @type {any} */ ({ __dyniHtmlMeasureUtilsCtx: createMeasureContext() });
     const shellRect = { width: 320, height: 180 };
     const modelA = makeModel({
       routeNameText: "A|B",
-      remainCaption: "C",
+      remainCaption: "C"
     });
     const modelB = makeModel({
       routeNameText: "A",
-      remainCaption: "B|C",
+      remainCaption: "B|C"
     });
 
     const first = h.fit.compute({
       model: modelA,
       shellRect: shellRect,
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
     const second = h.fit.compute({
       model: modelB,
       shellRect: shellRect,
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
     expect(second).not.toBe(first);
 
@@ -369,7 +349,7 @@ describe("ActiveRouteHtmlFit", function () {
       model: modelB,
       shellRect: shellRect,
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
     expect(secondRepeat).toBe(second);
   });
@@ -377,7 +357,7 @@ describe("ActiveRouteHtmlFit", function () {
   it("switches to plain metric value when padded stable-digits text clips", function () {
     const h = createHarness();
     const targetEl = document.createElement("div");
-    const hostContext = { __dyniHtmlMeasureUtilsCtx: createMeasureContext() };
+    const hostContext = /** @type {any} */ ({ __dyniHtmlMeasureUtilsCtx: createMeasureContext() });
     const out = h.fit.compute({
       model: makeModel({
         stableDigitsEnabled: true,
@@ -385,25 +365,24 @@ describe("ActiveRouteHtmlFit", function () {
         remainText: " 00012345.6",
         remainPlainText: "12345.6",
         etaText: " 0012:34",
-        etaPlainText: "12:34",
+        etaPlainText: "12:34"
       }),
       shellRect: { width: 12, height: 36 },
       targetEl: targetEl,
-      hostContext: hostContext,
+      hostContext: hostContext
     });
 
     expect(out.metricValues.remain).toBe("12345.6");
     expect(out.metricValues.rteEta).toBe("12:34");
     expect(
       hostContext.__dyniHtmlMeasureUtilsCtx.calls.some(
-        (call) =>
-          call.text === " 00012345.6" && call.font.includes("mono-serif"),
-      ),
+        (/** @type {any} */ call) => call.text === " 00012345.6" && call.font.includes("mono-serif")
+      )
     ).toBe(true);
     expect(
       hostContext.__dyniHtmlMeasureUtilsCtx.calls.some(
-        (call) => call.text === "nm" && call.font.includes("sans-serif"),
-      ),
+        (/** @type {any} */ call) => call.text === "nm" && call.font.includes("sans-serif")
+      )
     ).toBe(true);
   });
 });

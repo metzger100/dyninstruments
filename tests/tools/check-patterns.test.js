@@ -1,11 +1,4 @@
-const {
-  toolPath,
-  tempDirs,
-  runPatternCheck,
-  createWorkspace,
-  joinMessages,
-  joinWarningMessages,
-} = require("./check-patterns.harness.js");
+const { runPatternCheck, createWorkspace, joinMessages } = require("./check-patterns.harness.js");
 
 describe("tools/check-patterns.mjs", function () {
   it("blocks renamed but identical function bodies across files", function () {
@@ -343,5 +336,4 @@ tiny();
     expect(result.summary.ok).toBe(true);
     expect(result.findings).toHaveLength(0);
   });
-
 });

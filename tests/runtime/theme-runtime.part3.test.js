@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 const { flushPromises } = require("../helpers/async");
 const hasOwn = Object.prototype.hasOwnProperty;
@@ -12,23 +13,24 @@ describe("runtime/theme-runtime.js", function () {
               dom: {
                 getNightModeState() {
                   return false;
-                },
-              },
+                }
+              }
             },
             state: {},
-            config: { shared: {}, clusters: [] },
-          },
+            config: { shared: {}, clusters: [] }
+          }
         },
-        overrides || {},
-      ),
+        overrides || {}
+      )
     );
 
     runIifeScript("runtime/namespace.js", context);
     context.DyniPlugin.runtime.dom = context.DyniPlugin.runtime.dom || {
       getNightModeState() {
         return false;
-      },
+      }
     };
+    runIifeScript("runtime/theme/token-catalog.js", context);
     runIifeScript("runtime/theme/model.js", context);
     runIifeScript("runtime/theme/resolver.js", context);
     runIifeScript("runtime/theme-runtime.js", context);
@@ -42,7 +44,7 @@ describe("runtime/theme-runtime.js", function () {
       classList: {
         contains(name) {
           return name === "widget" || name === "dyniplugin";
-        },
+        }
       },
       closest() {
         return null;
@@ -51,8 +53,8 @@ describe("runtime/theme-runtime.js", function () {
         getPropertyValue() {
           return "";
         },
-        setProperty: vi.fn(),
-      },
+        setProperty: vi.fn()
+      }
     };
   }
 
@@ -68,7 +70,7 @@ describe("runtime/theme-runtime.js", function () {
 
   it("resolves deprecated camelCase regatta alias input var with one warning", function () {
     const cssVars = {
-      "--dyni-regatta-barWarning": "#654321",
+      "--dyni-regatta-barWarning": "#654321"
     };
     const warn = vi.fn();
     const context = setupContext({
@@ -77,15 +79,14 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue(name) {
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
     const secondRootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.tokens.resolveForRoot(secondRootEl);
 
@@ -101,17 +102,16 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({
-      activePresetName: "darkmode",
+      activePresetName: "darkmode"
     });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.surface.fg).toBe("#ffffff");
     expect(resolved.surface.bg).toBe("#000000");
@@ -143,20 +143,19 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.dom.getNightModeState = function () {
       return true;
     };
     context.DyniPlugin.runtime.theme.configure({
-      activePresetName: "darkmode",
+      activePresetName: "darkmode"
     });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.surface.fg).toBe("rgba(252, 11, 11, 0.60)");
     expect(resolved.surface.bg).toBe("black");
@@ -182,20 +181,19 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.dom.getNightModeState = function () {
       return true;
     };
     context.DyniPlugin.runtime.theme.configure({
-      activePresetName: "highcontrast",
+      activePresetName: "highcontrast"
     });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.colors.pointer).toBe("#cc2222");
     expect(resolved.colors.warning).toBe("#8b6914");
@@ -219,15 +217,14 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.opacity.caption).toBe(1);
   });
@@ -238,15 +235,14 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.opacity.unit).toBe(1);
   });
@@ -258,15 +254,14 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue(name) {
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.opacity.caption).toBe(0.6);
   });
@@ -278,15 +273,14 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue(name) {
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.opacity.unit).toBe(0.4);
   });
@@ -297,9 +291,9 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
@@ -308,5 +302,4 @@ describe("runtime/theme-runtime.js", function () {
 
     expect(getAppliedOutput(rootEl, "--dyni-theme-opacity-caption")).toBe("1");
   });
-
 });

@@ -16,7 +16,7 @@ describe("config/clusters/map.js", function () {
     runIifeScript("config/shared/unit-editable-utils.js", context);
     runIifeScript("config/clusters/map.js", context);
 
-    return context.DyniPlugin.config.clusters.find((c) => c.def && c.def.cluster === "map").def;
+    return context.DyniPlugin.config.clusters.find((/** @type {any} */ c) => c.def && c.def.cluster === "map").def;
   }
 
   it("registers map cluster definition", function () {

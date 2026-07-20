@@ -4,8 +4,9 @@
 
 ## Overview
 
-Formatters convert raw store values to display strings. AvNav provides built-in formatters and supports custom registration via `avnav.api.registerFormatter()`.
-Authoritative core formatter signatures and parameter-order details are maintained only in [core-formatter-catalog.md](core-formatter-catalog.md).
+Formatters convert raw store values to display strings. AvNav provides built-in formatters and supports custom
+registration via `avnav.api.registerFormatter()`. Authoritative core formatter signatures and parameter-order details
+are maintained only in [core-formatter-catalog.md](core-formatter-catalog.md).
 
 ## Registering Custom Formatters (AvNav API)
 
@@ -20,10 +21,11 @@ avnav.api.registerFormatter("myFormatterName", formatterFunction);
 
 ### Formatter Parameters Property
 
-Each formatter function should have a `.parameters` property describing its Layout Editor params (same syntax as [editable-parameters.md](editable-parameters.md)):
+Each formatter function should have a `.parameters` property describing its Layout Editor params (same syntax as
+[editable-parameters.md](editable-parameters.md)):
 
 ```javascript
-const formatTemperature = function(data, opt_unit) {
+const formatTemperature = function (data, opt_unit) {
   try {
     if (!opt_unit || opt_unit.toLowerCase().match(/^k/)) {
       return avnav.api.formatter.formatDecimal(data, 3, 1);
@@ -31,11 +33,11 @@ const formatTemperature = function(data, opt_unit) {
     if (opt_unit.toLowerCase().match(/^c/)) {
       return avnav.api.formatter.formatDecimal(parseFloat(data) - 273.15, 3, 1);
     }
-  } catch(e) { return "-----"; }
+  } catch (e) {
+    return "-----";
+  }
 };
-formatTemperature.parameters = [
-  { name: 'unit', type: 'SELECT', list: ['celsius', 'kelvin'], default: 'celsius' }
-];
+formatTemperature.parameters = [{ name: "unit", type: "SELECT", list: ["celsius", "kelvin"], default: "celsius" }];
 avnav.api.registerFormatter("mySpecialTemperature", formatTemperature);
 ```
 
@@ -44,7 +46,7 @@ avnav.api.registerFormatter("mySpecialTemperature", formatTemperature);
 For formatting overlay/feature data:
 
 ```javascript
-avnav.api.registerFeatureFormatter('myHtmlInfo', myHtmlInfoFunction);
+avnav.api.registerFeatureFormatter("myHtmlInfo", myHtmlInfoFunction);
 ```
 
 ## Built-in Formatters (Canonical List)
@@ -52,6 +54,7 @@ avnav.api.registerFeatureFormatter('myHtmlInfo', myHtmlInfoFunction);
 This file intentionally does not duplicate core formatter signatures.
 
 Use [core-formatter-catalog.md](core-formatter-catalog.md) for:
+
 - canonical signature and positional parameter order
 - core alias mapping (`skPressure`, `skTemperature`)
 - normative roll/pitch tuple contract and common failure cases
@@ -59,14 +62,16 @@ Use [core-formatter-catalog.md](core-formatter-catalog.md) for:
 ---
 
 For strict integration contracts (including roll/pitch tuple requirements), use:
+
 - [core-formatter-catalog.md](core-formatter-catalog.md)
 - [core-key-catalog.md](core-key-catalog.md)
 - [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md)
 
 ### Compatibility Note: Date/Time Formatter Inputs
 
-`formatTime`, `formatDate`, and `formatDateTime` should receive the raw store value (Date/time object/value) from AvNav.  
-Do not pre-coerce these inputs with `Number(...)` in mapper/widget boundaries, or formatter behavior can diverge from core AvNav widgets.
+`formatTime`, `formatDate`, and `formatDateTime` should receive the raw store value (Date/time object/value) from AvNav.
+Do not pre-coerce these inputs with `Number(...)` in mapper/widget boundaries, or formatter behavior can diverge from
+core AvNav widgets.
 
 ### Dyninstruments Unit Selectors
 
@@ -75,7 +80,8 @@ Migrated dyninstruments metrics split formatter tokens from display labels:
 - `formatUnit_<metricKey>` stores the formatter-conversion token
 - `unit_<metricKey>_<token>` stores the editable display label for that token
 - blank display labels are intentional and must be preserved
-- formatter parameters must receive tokens such as `ms`, `celsius`, or `hpa`, not display labels such as `m/s`, `°C`, or `hPa`
+- formatter parameters must receive tokens such as `ms`, `celsius`, or `hpa`, not display labels such as `m/s`, `°C`, or
+  `hPa`
 
 Use the selector token for conversion and the matching display label for rendered unit text.
 
@@ -103,18 +109,18 @@ Used by text and graphic widgets via `componentContext.format.applyFormatter(...
 
 ### Formatter Names Currently Used by dyninstruments
 
-| Context | Formatter |
-|---|---|
-| Speed/Wind/VMG | `formatSpeed` |
-| Navigation and anchor distances | `formatDistance` |
-| Course/bearing | `formatDirection360` |
-| Vessel roll/pitch | `formatDirection` with `[true, true, false]` (radian input, signed `±180`) |
-| Temperature | `formatTemperature` |
-| Depth text/gauge formatting | `formatDistance` with the selected distance token |
-| Voltage numeric/gauge formatting | `formatDecimal` |
-| ETA/clock display | `formatTime` |
-| Position display | `formatLonLats`, `formatLonLatsDecimal` |
-| Environment pressure mapper | `formatPressure` |
+| Context                          | Formatter                                                                  |
+| -------------------------------- | -------------------------------------------------------------------------- |
+| Speed/Wind/VMG                   | `formatSpeed`                                                              |
+| Navigation and anchor distances  | `formatDistance`                                                           |
+| Course/bearing                   | `formatDirection360`                                                       |
+| Vessel roll/pitch                | `formatDirection` with `[true, true, false]` (radian input, signed `±180`) |
+| Temperature                      | `formatTemperature`                                                        |
+| Depth text/gauge formatting      | `formatDistance` with the selected distance token                          |
+| Voltage numeric/gauge formatting | `formatDecimal`                                                            |
+| ETA/clock display                | `formatTime`                                                               |
+| Position display                 | `formatLonLats`, `formatLonLatsDecimal`                                    |
+| Environment pressure mapper      | `formatPressure`                                                           |
 
 ### Compatibility Note: Pressure Formatter Name
 
@@ -127,7 +133,7 @@ ClusterWidget creates angle formatters for wind kinds:
 
 ```javascript
 function makeAngleFormatter(isDirection, leadingZero, fallback) {
-  return function(raw) {
+  return function (raw) {
     // isDirection=true  → 0..360 (TWD)
     // isDirection=false → -180..+180 (TWA, AWA)
   };
@@ -136,22 +142,27 @@ function makeAngleFormatter(isDirection, leadingZero, fallback) {
 
 ### Gauge-Internal Formatting (dyninstruments-internal)
 
-Graphic gauges use mapper-provided formatter metadata and resolve formatter calls via `componentContext.format.applyFormatter(...)`. This keeps formatter guards/try-catch/fallback logic centralized in the component-context boundary while still returning numeric + display outputs needed for pointer positioning:
+Graphic gauges use mapper-provided formatter metadata and resolve formatter calls via
+`componentContext.format.applyFormatter(...)`. This keeps formatter guards/try-catch/fallback logic centralized in the
+component-context boundary while still returning numeric + display outputs needed for pointer positioning:
 
 - `displaySpeedFromRaw(raw, props, unit)` -> `{ num, text }` via `formatSpeed`
 - `displayDepthFromRaw(raw, decimals)` -> `{ num, text }` via local fixed-decimal formatting (`toFixed`)
 - `displayTemperatureFromRaw(raw, props)` -> `{ num, text }` via `formatTemperature`
 - `displayVoltageFromRaw(raw, props)` -> `{ num, text }` via `formatDecimal`
-- `PositionCoordinateWidget` stacked mode formats per-line lat/lon via `componentContext.format.applyFormatter(raw, { formatter: "formatLonLatsDecimal", formatterParameters: [axis] })`
+- `PositionCoordinateWidget` stacked mode formats per-line lat/lon via
+  `componentContext.format.applyFormatter(raw, { formatter: "formatLonLatsDecimal", formatterParameters: [axis] })`
 
-When a renderer helper receives mapper-resolved tokens, it must trust those resolved tokens and must not repeat mapper fallback or token-validation logic.
+When a renderer helper receives mapper-resolved tokens, it must trust those resolved tokens and must not repeat mapper
+fallback or token-validation logic.
 
 ## Related
 
 - [plugin-lifecycle.md](plugin-lifecycle.md) — How translateFunction sets formatters
 - [core-formatter-catalog.md](core-formatter-catalog.md) — Authoritative signatures and parameter order
 - [core-key-catalog.md](core-key-catalog.md) — Key/unit contracts used for formatter selection
-- [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md) — Contract tuple schema and roll/pitch incident notes
+- [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md) — Contract tuple schema and
+  roll/pitch incident notes
 - [editable-parameters.md](editable-parameters.md) — formatterParameters in Layout Editor
 - [../shared/helpers.md](../shared/helpers.md) — `componentContext.format.applyFormatter` behavior
 - [../architecture/cluster-widget-system.md](../architecture/cluster-widget-system.md) — Which formatter per kind

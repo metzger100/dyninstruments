@@ -15,41 +15,54 @@ describe("RegattaTimerMarkup", function () {
     return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js").create();
   }
 
+  /** @param {any} html */
   function parseHtml(html) {
     const host = document.createElement("div");
     host.innerHTML = html;
     return host;
   }
 
+  /** @param {any} [overrides] */
   function makeFit(overrides) {
-    return Object.assign({
-      wrapperStyle: "padding:4px;",
-      displayStyle: "row-gap:2px;",
-      timerStyle: "font-size:30px;",
-      controlsStyle: "column-gap:4px;",
-      barStyle: "height:3px;",
-      buttonStyle: "min-height:24px;",
-      startButtonStyle: "border-radius:4px;",
-      syncButtonStyle: "border-radius:4px;",
-      resetButtonStyle: "border-radius:4px;"
-    }, overrides || {});
+    return Object.assign(
+      {
+        wrapperStyle: "padding:4px;",
+        displayStyle: "row-gap:2px;",
+        timerStyle: "font-size:30px;",
+        controlsStyle: "column-gap:4px;",
+        barStyle: "height:3px;",
+        buttonStyle: "min-height:24px;",
+        startButtonStyle: "border-radius:4px;",
+        syncButtonStyle: "border-radius:4px;",
+        resetButtonStyle: "border-radius:4px;"
+      },
+      overrides || {}
+    );
   }
 
+  /** @param {any} [overrides] */
   function makeModel(overrides) {
-    return Object.assign({
-      phase: "idle",
-      displayTime: "05:00",
-      colorPhase: "normal",
-      remainingMs: 300000
-    }, overrides || {});
+    return Object.assign(
+      {
+        phase: "idle",
+        displayTime: "05:00",
+        colorPhase: "normal",
+        remainingMs: 300000
+      },
+      overrides || {}
+    );
   }
 
+  /** @param {any} [overrides] */
   function makeConfig(overrides) {
-    return Object.assign({
-      soundEnabled: true,
-      progressBarEnabled: true,
-      durationMinutes: 5
-    }, overrides || {});
+    return Object.assign(
+      {
+        soundEnabled: true,
+        progressBarEnabled: true,
+        durationMinutes: 5
+      },
+      overrides || {}
+    );
   }
 
   it("renders wrapper classes, escaped display text, and action buttons", function () {
@@ -63,14 +76,16 @@ describe("RegattaTimerMarkup", function () {
       stableDigitsEnabled: false,
       htmlUtils: createHtmlUtils()
     });
-    const root = parseHtml(html).querySelector(".dyni-regatta-html");
+    const root = /** @type {Element} */ (parseHtml(html).querySelector(".dyni-regatta-html"));
 
     expect(html).toContain("dyni-regatta-mode-flat");
     expect(html).toContain("dyni-regatta-phase-idle");
     expect(html).toContain("dyni-regatta-color-normal");
     expect(html).toContain("dyni-regatta-open-dispatch");
-    expect(root.querySelector(".dyni-regatta-time").innerHTML).toBe("&lt;05:00&gt;");
-    expect(root.querySelector(".dyni-regatta-time").classList.contains("dyni-tabular")).toBe(false);
+    expect(/** @type {Element} */ (root.querySelector(".dyni-regatta-time")).innerHTML).toBe("&lt;05:00&gt;");
+    expect(/** @type {Element} */ (root.querySelector(".dyni-regatta-time")).classList.contains("dyni-tabular")).toBe(
+      false
+    );
     expect(root.querySelector('[data-dyni-action="regatta-start"]')).toBeTruthy();
     expect(root.querySelector('[data-dyni-action="regatta-sync"]')).toBeTruthy();
     expect(root.querySelector('[data-dyni-action="regatta-reset"]')).toBeTruthy();
@@ -87,7 +102,7 @@ describe("RegattaTimerMarkup", function () {
       stableDigitsEnabled: true,
       htmlUtils: createHtmlUtils()
     });
-    const timeEl = parseHtml(html).querySelector(".dyni-regatta-time");
+    const timeEl = /** @type {Element} */ (parseHtml(html).querySelector(".dyni-regatta-time"));
 
     expect(timeEl.classList.contains("dyni-tabular")).toBe(true);
   });
@@ -132,7 +147,7 @@ describe("RegattaTimerMarkup", function () {
       stableDigitsEnabled: false,
       htmlUtils: createHtmlUtils()
     });
-    const bar = parseHtml(html).querySelector(".dyni-regatta-bar");
+    const bar = /** @type {Element} */ (parseHtml(html).querySelector(".dyni-regatta-bar"));
 
     expect(bar.getAttribute("style")).toContain("width:50%");
     expect(html).toContain("dyni-regatta-phase-countdown");
@@ -154,7 +169,7 @@ describe("RegattaTimerMarkup", function () {
       stableDigitsEnabled: false,
       htmlUtils: createHtmlUtils()
     });
-    const bar = parseHtml(html).querySelector(".dyni-regatta-bar");
+    const bar = /** @type {Element} */ (parseHtml(html).querySelector(".dyni-regatta-bar"));
 
     expect(bar.getAttribute("style")).toContain("width:0%");
     expect(html).toContain("dyni-regatta-phase-elapsed");
@@ -171,9 +186,9 @@ describe("RegattaTimerMarkup", function () {
       stableDigitsEnabled: false,
       htmlUtils: createHtmlUtils()
     });
-    const root = parseHtml(html).querySelector(".dyni-regatta-html");
-    const bar = root.querySelector(".dyni-regatta-bar");
-    const display = root.querySelector(".dyni-regatta-display");
+    const root = /** @type {Element} */ (parseHtml(html).querySelector(".dyni-regatta-html"));
+    const bar = /** @type {Element} */ (root.querySelector(".dyni-regatta-bar"));
+    const display = /** @type {Element} */ (root.querySelector(".dyni-regatta-display"));
 
     expect(bar).toBeTruthy();
     expect(bar.parentElement).toBe(root);

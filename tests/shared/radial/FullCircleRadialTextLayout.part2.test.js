@@ -1,7 +1,6 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("FullCircleRadialTextLayout", function () {
   function createRadialTextApi() {
@@ -10,9 +9,9 @@ describe("FullCircleRadialTextLayout", function () {
       {},
       createComponentContextMock({
         modules: {
-          RadialTextFitting: fitting,
-        },
-      }),
+          RadialTextFitting: fitting
+        }
+      })
     );
   }
 
@@ -21,7 +20,7 @@ describe("FullCircleRadialTextLayout", function () {
     const calls = {
       threeRows: [],
       valueUnit: [],
-      inline: [],
+      inline: []
     };
     const state = {
       ctx: {},
@@ -38,9 +37,9 @@ describe("FullCircleRadialTextLayout", function () {
           R: 120,
           rOuter: 120,
           cx: 150,
-          cy: 150,
+          cy: 150
         },
-        cfg.geom || {},
+        cfg.geom || {}
       ),
       layout: Object.assign(
         {
@@ -50,10 +49,10 @@ describe("FullCircleRadialTextLayout", function () {
             compactCenterHeight: 14,
             dualCompactWidth: 120,
             dualCompactInset: 5,
-            dualCompactHeight: 55,
-          },
+            dualCompactHeight: 55
+          }
         },
-        cfg.layout || {},
+        cfg.layout || {}
       ),
       slots: Object.assign(
         {
@@ -62,56 +61,26 @@ describe("FullCircleRadialTextLayout", function () {
           rightTop: { x: 256, y: 90, w: 36, h: 42 },
           rightBottom: { x: 256, y: 132, w: 36, h: 42 },
           top: { x: 8, y: 8, w: 284, h: 26 },
-          bottom: { x: 8, y: 266, w: 284, h: 26 },
+          bottom: { x: 8, y: 266, w: 284, h: 26 }
         },
-        cfg.slots || {},
+        cfg.slots || {}
       ),
       text: {
         measureValueUnitFit(ctx, family, valueText, unitText, maxW, maxH) {
           return {
             vPx: Math.max(1, Math.floor(maxH * 0.7)),
             uPx: Math.max(1, Math.floor(maxH * 0.45)),
-            gap: 4,
+            gap: 4
           };
         },
-        drawValueUnitWithFit(
-          ctx,
-          family,
-          x,
-          y,
-          w,
-          h,
-          valueText,
-          unitText,
-          fit,
-          align,
-        ) {
+        drawValueUnitWithFit(ctx, family, x, y, w, h, valueText, unitText, fit, align) {
           calls.valueUnit.push({ x, y, w, h, valueText, unitText, fit, align });
         },
         fitTextPx(ctx, text, maxW, maxH) {
           const len = Math.max(1, String(text || "").length);
-          return Math.max(
-            1,
-            Math.min(
-              Math.floor(maxW / len),
-              Math.max(1, Math.floor(maxH * 0.8)),
-            ),
-          );
+          return Math.max(1, Math.min(Math.floor(maxW / len), Math.max(1, Math.floor(maxH * 0.8))));
         },
-        drawThreeRowsBlock(
-          ctx,
-          family,
-          x,
-          y,
-          w,
-          h,
-          caption,
-          value,
-          unit,
-          secScale,
-          align,
-          sizes,
-        ) {
+        drawThreeRowsBlock(ctx, family, x, y, w, h, caption, value, unit, secScale, align, sizes) {
           calls.threeRows.push({
             x,
             y,
@@ -122,43 +91,24 @@ describe("FullCircleRadialTextLayout", function () {
             unit,
             secScale,
             align,
-            sizes,
+            sizes
           });
         },
         drawCaptionMax() {},
-        fitInlineCapValUnit(
-          ctx,
-          family,
-          caption,
-          valueText,
-          unitText,
-          maxW,
-          maxH,
-        ) {
+        fitInlineCapValUnit(ctx, family, caption, valueText, unitText, maxW, maxH) {
           return {
             cPx: Math.max(1, Math.floor(maxH * 0.4)),
             vPx: Math.max(1, Math.floor(maxH * 0.7)),
             uPx: Math.max(1, Math.floor(maxH * 0.45)),
             g1: 4,
             g2: 4,
-            total: maxW,
+            total: maxW
           };
         },
-        drawInlineCapValUnit(
-          ctx,
-          family,
-          x,
-          y,
-          w,
-          h,
-          caption,
-          valueText,
-          unitText,
-          fit,
-        ) {
+        drawInlineCapValUnit(ctx, family, x, y, w, h, caption, valueText, unitText, fit) {
           calls.inline.push({ x, y, w, h, caption, valueText, unitText, fit });
-        },
-      },
+        }
+      }
     };
 
     return { state, calls };
@@ -174,16 +124,16 @@ describe("FullCircleRadialTextLayout", function () {
         caption: "HDM",
         value: "185",
         unit: "deg",
-        secScale: 0.8,
+        secScale: 0.8
       },
-      overrides || {},
+      overrides || {}
     );
   }
 
   function makeDualDisplay() {
     return {
       left: { caption: "AWA", value: "041", unit: "deg", secScale: 0.8 },
-      right: { caption: "AWS", value: "15.3", unit: "kn", secScale: 0.8 },
+      right: { caption: "AWS", value: "15.3", unit: "kn", secScale: 0.8 }
     };
   }
 
@@ -191,7 +141,7 @@ describe("FullCircleRadialTextLayout", function () {
     const text = createRadialTextApi();
     const captures = {
       valueUnit: [],
-      threeRows: [],
+      threeRows: []
     };
     const ctx = {
       calls: [],
@@ -218,7 +168,7 @@ describe("FullCircleRadialTextLayout", function () {
         const match = String(this.font || "").match(/([0-9]+(?:\.[0-9]+)?)px/);
         const px = match ? Number(match[1]) : 10;
         return { width: String(label || "").length * px * 0.62 };
-      },
+      }
     };
     const harness = createHarness(overrides);
     harness.state.ctx = ctx;
@@ -231,20 +181,7 @@ describe("FullCircleRadialTextLayout", function () {
       drawCaptionMax: text.drawCaptionMax,
       drawInlineCapValUnit: text.drawInlineCapValUnit,
       drawDisconnectOverlay: text.drawDisconnectOverlay,
-      drawValueUnitWithFit(
-        ctxArg,
-        family,
-        x,
-        y,
-        w,
-        h,
-        valueText,
-        unitText,
-        fit,
-        align,
-        valueWeight,
-        labelWeight,
-      ) {
+      drawValueUnitWithFit(ctxArg, family, x, y, w, h, valueText, unitText, fit, align, valueWeight, labelWeight) {
         const start = ctxArg.calls.length;
         text.drawValueUnitWithFit(
           ctxArg,
@@ -258,11 +195,9 @@ describe("FullCircleRadialTextLayout", function () {
           fit,
           align,
           valueWeight,
-          labelWeight,
+          labelWeight
         );
-        const scaled = ctxArg.calls
-          .slice(start)
-          .some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
+        const scaled = ctxArg.calls.slice(start).some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
         captures.valueUnit.push({ w, valueText, unitText, fit, scaled });
       },
       drawThreeRowsBlock(
@@ -279,7 +214,7 @@ describe("FullCircleRadialTextLayout", function () {
         align,
         sizes,
         valueWeight,
-        labelWeight,
+        labelWeight
       ) {
         const start = ctxArg.calls.length;
         text.drawThreeRowsBlock(
@@ -296,20 +231,18 @@ describe("FullCircleRadialTextLayout", function () {
           align,
           sizes,
           valueWeight,
-          labelWeight,
+          labelWeight
         );
-        const scaled = ctxArg.calls
-          .slice(start)
-          .some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
+        const scaled = ctxArg.calls.slice(start).some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
         captures.threeRows.push({
           w,
           caption,
           valueText,
           unitText,
           sizes,
-          scaled,
+          scaled
         });
-      },
+      }
     };
     harness.captures = captures;
     harness.realText = text;
@@ -317,18 +250,14 @@ describe("FullCircleRadialTextLayout", function () {
   }
 
   it("packs dual normal text with a theme-driven column gap and mirrored alignment", function () {
-    const layout = loadFresh(
-      "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
-    ).create({}, createComponentContextMock());
+    const layout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js").create(
+      {},
+      createComponentContextMock()
+    );
     const harness = createHarness();
     const display = makeDualDisplay();
 
-    layout.drawDualModeText(
-      harness.state,
-      "normal",
-      display.left,
-      display.right,
-    );
+    layout.drawDualModeText(harness.state, "normal", display.left, display.right);
 
     expect(harness.calls.threeRows).toHaveLength(2);
     const leftBlock = harness.calls.threeRows[0];
@@ -339,5 +268,4 @@ describe("FullCircleRadialTextLayout", function () {
     expect(leftBlock.align).toBe("right");
     expect(rightBlock.align).toBe("left");
   });
-
 });

@@ -52,8 +52,7 @@
     return pointValue && typeof pointValue === "object" ? /** @type {DyniRoutePointRecord} */ (pointValue) : {};
   }
 
-  const PLACEHOLDER_VALUE =
-    "--"; /* dyni-lint-disable-line hardcoded-runtime-default -- RoutePoints segment info contract requires a fixed placeholder token. */
+  const PLACEHOLDER_VALUE = "--";
 
   /** @param {DyniRoutePointRecord | null} point @returns {boolean} */
   function hasFiniteCoordinates(point) {

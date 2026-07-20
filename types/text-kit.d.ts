@@ -428,6 +428,34 @@ interface DyniCenterDisplayStateAdapterApi {
   renderStateScreenIfNeeded(args: unknown): boolean;
 }
 
+interface DyniPositionCoordinateFormatServices {
+  componentContext: DyniComponentContext;
+  placeholderNormalize: DyniPlaceholderNormalizeApi;
+  toOptionalFiniteNumber: DyniValueMathApi["toOptionalFiniteNumber"];
+}
+
+interface DyniPositionCoordinateFormattingApi {
+  id: "PositionCoordinateFormatting";
+  DISPLAY_VARIANT_POSITION: "position";
+  TIME_STATUS_SCALE_LIMIT: number;
+  normalizeDisplayVariant(value: unknown): string;
+  readCoordinatePair(
+    value: unknown,
+    rawMode: boolean,
+    toOptionalFiniteNumber: DyniValueMathApi["toOptionalFiniteNumber"]
+  ): { lat: unknown; lon: unknown } | null;
+  resolveVariantProps(props: DyniWidgetValues): DyniWidgetValues;
+  formatAxisValue(
+    rawValue: unknown,
+    axis: "lat" | "lon",
+    defaultText: string,
+    props: DyniWidgetValues,
+    services: DyniPositionCoordinateFormatServices
+  ): string;
+  isTimeStatusMarker(text: string): boolean;
+  readActualTextHeight(metrics: unknown): number | null;
+}
+
 interface DyniComponentRequire {
   (id: "CanvasTextFitting"): DyniCanvasTextFittingApi;
   (id: "CanvasTextLayout"): DyniCanvasTextLayoutApi;
@@ -438,4 +466,5 @@ interface DyniComponentRequire {
   (id: "TextTileLayout"): DyniTextTileLayoutApi;
   (id: "StateScreenCanvasOverlay"): DyniStateScreenCanvasOverlayApi;
   (id: "CenterDisplayStateAdapter"): DyniCenterDisplayStateAdapterApi;
+  (id: "PositionCoordinateFormatting"): DyniPositionCoordinateFormattingApi;
 }

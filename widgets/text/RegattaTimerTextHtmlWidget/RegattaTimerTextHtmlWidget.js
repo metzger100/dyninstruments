@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRegattaTimerTextHtmlWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const ROOT_CLASS_NAME = "dyni-regatta-root";
@@ -125,7 +125,7 @@
         if (className && className.indexOf(ROOT_CLASS_NAME) >= 0) {
           return;
         }
-        rootEl.className = className ? (className + " " + ROOT_CLASS_NAME) : ROOT_CLASS_NAME;
+        rootEl.className = className ? className + " " + ROOT_CLASS_NAME : ROOT_CLASS_NAME;
       }
       function unbindClickHandler() {
         if (wrapperEl && clickHandler) {
@@ -181,12 +181,12 @@
         const nextShellRectHeight = lastShellRect && lastShellRect.height ? lastShellRect.height : 0;
 
         if (
-          nextDisplayTime === lastRenderedDisplayTime
-          && nextColorPhase === lastRenderedColorPhase
-          && nextPhase === lastRenderedPhase
-          && nextShellRectWidth === lastRenderedShellRectWidth
-          && nextShellRectHeight === lastRenderedShellRectHeight
-          && lastFit !== BASELINE_FIT
+          nextDisplayTime === lastRenderedDisplayTime &&
+          nextColorPhase === lastRenderedColorPhase &&
+          nextPhase === lastRenderedPhase &&
+          nextShellRectWidth === lastRenderedShellRectWidth &&
+          nextShellRectHeight === lastRenderedShellRectHeight &&
+          lastFit !== BASELINE_FIT
         ) {
           return;
         }
@@ -203,14 +203,17 @@
           themeResolver.resolveForRoot(lastHostRootEl);
         }
 
-        const fit = htmlFit.compute({
-          model: modelState,
-          shellRect: lastShellRect,
-          mode: mode,
-          stableDigitsEnabled: stableDigitsEnabled,
-          hostContext: hostContext,
-          targetEl: lastHostRootEl
-        }) || lastFit || BASELINE_FIT;
+        const fit =
+          htmlFit.compute({
+            model: modelState,
+            shellRect: lastShellRect,
+            mode: mode,
+            stableDigitsEnabled: stableDigitsEnabled,
+            hostContext: hostContext,
+            targetEl: lastHostRootEl
+          }) ||
+          lastFit ||
+          BASELINE_FIT;
 
         const markupHtml = markup.render({
           model: modelState,
@@ -237,9 +240,8 @@
               ev.stopPropagation();
 
               const target = /** @type {Element | null} */ (ev.target);
-              const actionEl = target && typeof target.closest === "function"
-                ? target.closest("[data-dyni-action]")
-                : null;
+              const actionEl =
+                target && typeof target.closest === "function" ? target.closest("[data-dyni-action]") : null;
 
               if (!actionEl || !timerModel) {
                 return;
@@ -342,7 +344,11 @@
         config = nextConfig;
         lastFit = BASELINE_FIT;
 
-        if (timerModel && timerModel.getState().phase === "idle" && nextConfig.durationMinutes !== previousDurationMinutes) {
+        if (
+          timerModel &&
+          timerModel.getState().phase === "idle" &&
+          nextConfig.durationMinutes !== previousDurationMinutes
+        ) {
           timerModel.destroy();
           timerModel = null;
           createTimerModelInstance(nextConfig.durationMinutes);
@@ -401,11 +407,13 @@
         const height = shellRect && shellRect.height ? shellRect.height : 0;
         const durationMinutes = toDurationMinutes(p.regattaDuration);
         const mode = resolveMode(p, shellRect);
-        const activeState = timerModel ? timerModel.getState() : {
-          phase: "idle",
-          colorPhase: "normal",
-          displayTime: formatDurationDisplay(durationMinutes)
-        };
+        const activeState = timerModel
+          ? timerModel.getState()
+          : {
+              phase: "idle",
+              colorPhase: "normal",
+              displayTime: formatDurationDisplay(durationMinutes)
+            };
         const soundEnabled = p.regattaSoundEnabled !== false;
         const progressBarEnabled = p.regattaProgressBar !== false;
         const stableDigitsEnabled = p.stableDigits === true;
@@ -442,4 +450,4 @@
   }
 
   return { id: "RegattaTimerTextHtmlWidget", create: create };
-}));
+});

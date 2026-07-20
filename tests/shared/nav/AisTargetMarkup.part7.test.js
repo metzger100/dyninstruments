@@ -1,46 +1,28 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("AisTargetMarkup", function () {
   function createMarkup() {
-    const stateScreenMarkup = loadFresh(
-      "shared/widget-kits/state/StateScreenMarkup.js",
-    ).create(
+    const stateScreenMarkup = loadFresh("shared/widget-kits/state/StateScreenMarkup.js").create(
       {},
       createComponentContextMock({
         modules: {
-          HtmlWidgetUtils: loadFresh(
-            "shared/widget-kits/html/HtmlWidgetUtils.js",
-          ),
-          StateScreenLabels: loadFresh(
-            "shared/widget-kits/state/StateScreenLabels.js",
-          ),
-          StateScreenTextFit: loadFresh(
-            "shared/widget-kits/state/StateScreenTextFit.js",
-          ),
-        },
-      }),
+          HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+          StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+          StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js")
+        }
+      })
     );
     const componentContext = createComponentContextMock({
       modules: {
         StateScreenMarkup: stateScreenMarkup,
-        StateScreenTextFit: loadFresh(
-          "shared/widget-kits/state/StateScreenTextFit.js",
-        ),
-        StateScreenLabels: loadFresh(
-          "shared/widget-kits/state/StateScreenLabels.js",
-        ),
-        HtmlWidgetUtils: loadFresh(
-          "shared/widget-kits/html/HtmlWidgetUtils.js",
-        ),
-      },
+        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js")
+      }
     });
-    return loadFresh("shared/widget-kits/nav/AisTargetMarkup.js").create(
-      {},
-      componentContext,
-    );
+    return loadFresh("shared/widget-kits/nav/AisTargetMarkup.js").create({}, componentContext);
   }
 
   function createHtmlUtils() {
@@ -70,40 +52,31 @@ describe("AisTargetMarkup", function () {
           "dyni-ais-target-data",
           "dyni-ais-target-open-dispatch",
           "dyni-ais-target-branch-tcpa",
-          "dyni-ais-target-color-warning",
+          "dyni-ais-target-color-warning"
         ],
         inlineGeometry: {
           wrapperStyle: "padding:4px 4px 4px 21px;",
           identityStyle: "grid-template-rows:minmax(0,12px) minmax(0,10px);",
-          metricsStyle:
-            "grid-template-columns:minmax(0,100px) minmax(0,100px);",
+          metricsStyle: "grid-template-columns:minmax(0,100px) minmax(0,100px);",
           accentStyle: "left:4px;top:4px;bottom:4px;width:14px;",
           metricStyles: {
             dst: {
-              metricStyle:
-                "grid-template-columns:minmax(0,30px) minmax(0,70px);",
-              valueRowStyle:
-                "grid-template-columns:minmax(0,50px) minmax(0,20px);",
+              metricStyle: "grid-template-columns:minmax(0,30px) minmax(0,70px);",
+              valueRowStyle: "grid-template-columns:minmax(0,50px) minmax(0,20px);"
             },
             cpa: {
-              metricStyle:
-                "grid-template-columns:minmax(0,30px) minmax(0,70px);",
-              valueRowStyle:
-                "grid-template-columns:minmax(0,50px) minmax(0,20px);",
+              metricStyle: "grid-template-columns:minmax(0,30px) minmax(0,70px);",
+              valueRowStyle: "grid-template-columns:minmax(0,50px) minmax(0,20px);"
             },
             tcpa: {
-              metricStyle:
-                "grid-template-columns:minmax(0,30px) minmax(0,70px);",
-              valueRowStyle:
-                "grid-template-columns:minmax(0,50px) minmax(0,20px);",
+              metricStyle: "grid-template-columns:minmax(0,30px) minmax(0,70px);",
+              valueRowStyle: "grid-template-columns:minmax(0,50px) minmax(0,20px);"
             },
             brg: {
-              metricStyle:
-                "grid-template-columns:minmax(0,30px) minmax(0,70px);",
-              valueRowStyle:
-                "grid-template-columns:minmax(0,50px) minmax(0,20px);",
-            },
-          },
+              metricStyle: "grid-template-columns:minmax(0,30px) minmax(0,70px);",
+              valueRowStyle: "grid-template-columns:minmax(0,50px) minmax(0,20px);"
+            }
+          }
         },
         nameText: "Poseidon",
         frontText: "Front",
@@ -112,10 +85,10 @@ describe("AisTargetMarkup", function () {
           dst: { captionText: "DST", valueText: "4.2", unitText: "nm" },
           cpa: { captionText: "DCPA", valueText: "0.7", unitText: "nm" },
           tcpa: { captionText: "TCPA", valueText: "0.5", unitText: "min" },
-          brg: { captionText: "BRG", valueText: "112", unitText: "°" },
-        },
+          brg: { captionText: "BRG", valueText: "112", unitText: "°" }
+        }
       },
-      overrides || {},
+      overrides || {}
     );
   }
 
@@ -131,29 +104,29 @@ describe("AisTargetMarkup", function () {
             captionStyle: "font-size:8px;",
             valueRowStyle: "",
             valueStyle: "font-size:12px;",
-            unitStyle: "font-size:9px;",
+            unitStyle: "font-size:9px;"
           },
           cpa: {
             captionStyle: "font-size:8px;",
             valueRowStyle: "",
             valueStyle: "font-size:12px;",
-            unitStyle: "font-size:9px;",
+            unitStyle: "font-size:9px;"
           },
           tcpa: {
             captionStyle: "font-size:8px;",
             valueRowStyle: "",
             valueStyle: "font-size:12px;",
-            unitStyle: "font-size:9px;",
+            unitStyle: "font-size:9px;"
           },
           brg: {
             captionStyle: "font-size:8px;",
             valueRowStyle: "",
             valueStyle: "font-size:12px;",
-            unitStyle: "font-size:9px;",
-          },
-        },
+            unitStyle: "font-size:9px;"
+          }
+        }
       },
-      overrides || {},
+      overrides || {}
     );
     out.metrics = Object.assign(
       {},
@@ -162,28 +135,28 @@ describe("AisTargetMarkup", function () {
           captionStyle: "font-size:8px;",
           valueRowStyle: "",
           valueStyle: "font-size:12px;",
-          unitStyle: "font-size:9px;",
+          unitStyle: "font-size:9px;"
         },
         cpa: {
           captionStyle: "font-size:8px;",
           valueRowStyle: "",
           valueStyle: "font-size:12px;",
-          unitStyle: "font-size:9px;",
+          unitStyle: "font-size:9px;"
         },
         tcpa: {
           captionStyle: "font-size:8px;",
           valueRowStyle: "",
           valueStyle: "font-size:12px;",
-          unitStyle: "font-size:9px;",
+          unitStyle: "font-size:9px;"
         },
         brg: {
           captionStyle: "font-size:8px;",
           valueRowStyle: "",
           valueStyle: "font-size:12px;",
-          unitStyle: "font-size:9px;",
-        },
+          unitStyle: "font-size:9px;"
+        }
       },
-      overrides && overrides.metrics ? overrides.metrics : {},
+      overrides && overrides.metrics ? overrides.metrics : {}
     );
     return out;
   }
@@ -192,33 +165,21 @@ describe("AisTargetMarkup", function () {
     const metric = root.querySelector(".dyni-ais-target-metric-" + id);
     expect(metric).toBeTruthy();
     expect(metric.children).toHaveLength(3);
-    expect(metric.children[0].className).toContain(
-      "dyni-ais-target-metric-caption",
-    );
-    expect(metric.children[1].className).toContain(
-      "dyni-ais-target-metric-value",
-    );
-    expect(metric.children[2].className).toContain(
-      "dyni-ais-target-metric-unit",
-    );
+    expect(metric.children[0].className).toContain("dyni-ais-target-metric-caption");
+    expect(metric.children[1].className).toContain("dyni-ais-target-metric-value");
+    expect(metric.children[2].className).toContain("dyni-ais-target-metric-unit");
   }
 
   function expectInlineMetricStructure(root, id) {
     const metric = root.querySelector(".dyni-ais-target-metric-" + id);
     expect(metric).toBeTruthy();
     expect(metric.children).toHaveLength(2);
-    expect(metric.children[0].className).toContain(
-      "dyni-ais-target-metric-caption",
-    );
-    expect(metric.children[1].className).toContain(
-      "dyni-ais-target-metric-value-row",
-    );
+    expect(metric.children[0].className).toContain("dyni-ais-target-metric-caption");
+    expect(metric.children[1].className).toContain("dyni-ais-target-metric-value-row");
 
     const row = metric.children[1];
     expect(row.children).toHaveLength(2);
-    expect(row.children[0].className).toContain(
-      "dyni-ais-target-metric-value-text",
-    );
+    expect(row.children[0].className).toContain("dyni-ais-target-metric-value-text");
     expect(row.children[1].className).toContain("dyni-ais-target-metric-unit");
   }
 
@@ -227,26 +188,24 @@ describe("AisTargetMarkup", function () {
     const html = markup.render({
       model: makeModel(),
       fit: makeFit(),
-      htmlUtils: createHtmlUtils(),
+      htmlUtils: createHtmlUtils()
     });
 
+    expect(html).toContain('style="height:auto;aspect-ratio:7/8;min-height:8em;padding:4px 4px 4px 21px;"');
     expect(html).toContain(
-      'style="height:auto;aspect-ratio:7/8;min-height:8em;padding:4px 4px 4px 21px;"',
+      'class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:14px;background-color:#d9534a;"'
     );
     expect(html).toContain(
-      'class="dyni-ais-target-state-accent" style="left:4px;top:4px;bottom:4px;width:14px;background-color:#d9534a;"',
+      'class="dyni-ais-target-identity" style="grid-template-rows:minmax(0,12px) minmax(0,10px);"'
     );
     expect(html).toContain(
-      'class="dyni-ais-target-identity" style="grid-template-rows:minmax(0,12px) minmax(0,10px);"',
+      'class="dyni-ais-target-metrics" style="grid-template-columns:minmax(0,100px) minmax(0,100px);"'
     );
     expect(html).toContain(
-      'class="dyni-ais-target-metrics" style="grid-template-columns:minmax(0,100px) minmax(0,100px);"',
+      'class="dyni-ais-target-metric dyni-ais-target-metric-cpa" style="grid-template-columns:minmax(0,30px) minmax(0,70px);"'
     );
     expect(html).toContain(
-      'class="dyni-ais-target-metric dyni-ais-target-metric-cpa" style="grid-template-columns:minmax(0,30px) minmax(0,70px);"',
-    );
-    expect(html).toContain(
-      'class="dyni-ais-target-metric-value-row" style="grid-template-columns:minmax(0,50px) minmax(0,20px);"',
+      'class="dyni-ais-target-metric-value-row" style="grid-template-columns:minmax(0,50px) minmax(0,20px);"'
     );
   });
 });

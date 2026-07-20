@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRoutePointsViewModel = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniValueMathApi["isObject"]} */
@@ -60,20 +60,18 @@
     function build(props, toolkit) {
       const p = /** @type {DyniMapperProps} */ (props || {});
       const num = (toolkit && toolkit.num) || toFiniteNumber;
-      const selectedIndex = (
+      const selectedIndex =
         p.editingIndex == null || (typeof p.editingIndex === "string" && p.editingIndex.trim() === "")
-      )
-        ? undefined
-        : num(p.editingIndex);
+          ? undefined
+          : num(p.editingIndex);
       const route = normalizeRoute(p.editingRoute);
       const activeName = p.activeName;
       const editingRoute = p.editingRoute;
-      const isActiveRoute = (
+      const isActiveRoute =
         isObject(editingRoute) &&
         typeof activeName === "string" &&
         activeName !== "" &&
-        editingRoute.name === activeName
-      );
+        editingRoute.name === activeName;
 
       return {
         route: route,
@@ -91,4 +89,4 @@
   }
 
   return { id: "RoutePointsViewModel", create: create };
-}));
+});

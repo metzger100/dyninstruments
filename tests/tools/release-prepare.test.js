@@ -1,6 +1,11 @@
+/** @param {string} relativePath @returns {Promise<any>} */
+function importTool(relativePath) {
+  return import(relativePath);
+}
+
 describe("release-prepare", function () {
   it("parses help and rejects unknown arguments without repository reads", async function () {
-    const { parseReleasePrepareArgs, runReleasePrepare } = await import("../../tools/release-prepare.mjs");
+    const { parseReleasePrepareArgs, runReleasePrepare } = await importTool("../../tools/release-prepare.mjs");
 
     expect(parseReleasePrepareArgs(["--help"])).toEqual({ help: true, unknown: [] });
     expect(runReleasePrepare(["--help"])).toEqual(expect.objectContaining({ help: expect.stringContaining("Usage") }));
@@ -8,7 +13,7 @@ describe("release-prepare", function () {
   });
 
   it("fails closed for every tracked, untracked, and renamed path", async function () {
-    const { ensureCleanReleasePreparation } = await import("../../tools/release-prepare.mjs");
+    const { ensureCleanReleasePreparation } = await importTool("../../tools/release-prepare.mjs");
 
     expect(() =>
       ensureCleanReleasePreparation(() => " M plugin.js\0?? new-file.js\0R  releases/new.js\0old.js\0")
@@ -25,7 +30,7 @@ describe("release-prepare", function () {
   });
 
   it("allows only explicitly named dirty paths", async function () {
-    const { getUnexpectedDirtyPaths } = await import("../../tools/release-git.mjs");
+    const { getUnexpectedDirtyPaths } = await importTool("../../tools/release-git.mjs");
     const status =
       [
         "?? releases/dyninstruments-1.2.3.md",
@@ -42,7 +47,7 @@ describe("release-prepare", function () {
   });
 
   it("builds JSON payload with commit/file summary and semver review support", async function () {
-    const { buildReleasePreparePayload } = await import("../../tools/release-prepare.mjs");
+    const { buildReleasePreparePayload } = await importTool("../../tools/release-prepare.mjs");
 
     const responses = new Map([
       ["describe --tags --abbrev=0 --match v*", "v0.3.0\n"],
@@ -67,7 +72,7 @@ describe("release-prepare", function () {
     ]);
 
     const payload = buildReleasePreparePayload({
-      runGit(args) {
+      runGit(/** @type {string[]} */ args) {
         const key = args.join(" ");
         if (!responses.has(key)) {
           throw new Error(`unexpected git command: ${key}`);
@@ -115,10 +120,10 @@ describe("release-prepare", function () {
   });
 
   it("supports repositories without a prior v-tag release", async function () {
-    const { buildReleasePreparePayload } = await import("../../tools/release-prepare.mjs");
+    const { buildReleasePreparePayload } = await importTool("../../tools/release-prepare.mjs");
 
     const payload = buildReleasePreparePayload({
-      runGit(args) {
+      runGit(/** @type {string[]} */ args) {
         const key = args.join(" ");
         if (key === "describe --tags --abbrev=0 --match v*") {
           throw new Error("no tag");
@@ -158,10 +163,10 @@ describe("release-prepare", function () {
   });
 
   it("does not treat Conventional Commit prefixes as semver signals", async function () {
-    const { buildReleasePreparePayload } = await import("../../tools/release-prepare.mjs");
+    const { buildReleasePreparePayload } = await importTool("../../tools/release-prepare.mjs");
 
     const payload = buildReleasePreparePayload({
-      runGit(args) {
+      runGit(/** @type {string[]} */ args) {
         const key = args.join(" ");
         if (key === "describe --tags --abbrev=0 --match v*") {
           throw new Error("no tag");

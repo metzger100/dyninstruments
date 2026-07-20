@@ -4,12 +4,15 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 describe("RadialValueMath", function () {
   function create() {
     const mod = loadFresh("shared/widget-kits/radial/RadialValueMath.js");
-    return mod.create({}, createComponentContextMock({
-      modules: {
-        RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js"),
-        ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
-      }
-    }));
+    return mod.create(
+      {},
+      createComponentContextMock({
+        modules: {
+          RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js"),
+          ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
+        }
+      })
+    );
   }
 
   it("normalizes ranges and does not expose legacy semicircle geometry helpers", function () {
@@ -63,20 +66,24 @@ describe("RadialValueMath", function () {
     expect(v.formatAngle180(181, true)).toBe("-179");
     expect(v.formatDirection360(-1, true)).toBe("359");
 
-    expect(v.buildHighEndSectors({ warningFrom: 20, alarmFrom: 25 }, 0, 30, arc, {
-      warningColor: "#aa5500",
-      alarmColor: "#bb0011"
-    })).toEqual([
+    expect(
+      v.buildHighEndSectors({ warningFrom: 20, alarmFrom: 25 }, 0, 30, arc, {
+        warningColor: "#aa5500",
+        alarmColor: "#bb0011"
+      })
+    ).toEqual([
       { a0: 390, a1: 420, color: "#aa5500" },
       { a0: 420, a1: 450, color: "#bb0011" }
     ]);
 
-    expect(v.buildLowEndSectors({}, 10, 15, arc, {
-      defaultWarningFrom: 12.2,
-      defaultAlarmFrom: 11.6,
-      warningColor: "#aa5500",
-      alarmColor: "#bb0011"
-    })).toEqual([
+    expect(
+      v.buildLowEndSectors({}, 10, 15, arc, {
+        defaultWarningFrom: 12.2,
+        defaultAlarmFrom: 11.6,
+        warningColor: "#aa5500",
+        alarmColor: "#bb0011"
+      })
+    ).toEqual([
       { a0: 270, a1: 327.6, color: "#bb0011" },
       { a0: 327.6, a1: 349.2, color: "#aa5500" }
     ]);
@@ -92,17 +99,29 @@ describe("RadialValueMath", function () {
       return String(text);
     });
 
-    expect(v.formatGaugeDisplay(12.3, {
-      formatter: "formatSpeed",
-      formatterParameters: ["kn"]
-    }, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
+    expect(
+      v.formatGaugeDisplay(
+        12.3,
+        {
+          formatter: "formatSpeed",
+          formatterParameters: ["kn"]
+        },
+        applyFormatter,
+        normalize,
+        "formatSpeed",
+        ["kn"]
+      )
+    ).toEqual({
       num: 12.3,
       text: "12.3"
     });
-    expect(applyFormatter).toHaveBeenCalledWith(12.3, expect.objectContaining({
-      formatter: "formatSpeed",
-      formatterParameters: ["kn"]
-    }));
+    expect(applyFormatter).toHaveBeenCalledWith(
+      12.3,
+      expect.objectContaining({
+        formatter: "formatSpeed",
+        formatterParameters: ["kn"]
+      })
+    );
   });
 
   it("returns default text for invalid raw values without calling applyFormatter", function () {
@@ -115,17 +134,35 @@ describe("RadialValueMath", function () {
       return String(text);
     });
 
-    expect(v.formatGaugeDisplay("abc", {
-      default: "NO DATA"
-    }, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
+    expect(
+      v.formatGaugeDisplay(
+        "abc",
+        {
+          default: "NO DATA"
+        },
+        applyFormatter,
+        normalize,
+        "formatSpeed",
+        ["kn"]
+      )
+    ).toEqual({
       num: NaN,
       text: "NO DATA"
     });
     expect(applyFormatter).not.toHaveBeenCalled();
 
-    expect(v.formatGaugeDisplay(null, {
-      default: "---"
-    }, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
+    expect(
+      v.formatGaugeDisplay(
+        null,
+        {
+          default: "---"
+        },
+        applyFormatter,
+        normalize,
+        "formatSpeed",
+        ["kn"]
+      )
+    ).toEqual({
       num: NaN,
       text: "---"
     });
@@ -144,15 +181,20 @@ describe("RadialValueMath", function () {
 
     v.formatGaugeDisplay("12.3", {}, applyFormatter, normalize, "formatSpeed", ["kn"]);
 
-    expect(applyFormatter).toHaveBeenCalledWith(12.3, expect.objectContaining({
-      formatter: "formatSpeed",
-      formatterParameters: ["kn"]
-    }));
+    expect(applyFormatter).toHaveBeenCalledWith(
+      12.3,
+      expect.objectContaining({
+        formatter: "formatSpeed",
+        formatterParameters: ["kn"]
+      })
+    );
   });
 
   it("uses the default formatter and default parameters when props omit overrides", function () {
     const v = create();
-    const applyFormatter = vi.fn((value, options) => `fmt:${value}:${options.formatter}:${options.formatterParameters.join(",")}`);
+    const applyFormatter = vi.fn(
+      (value, options) => `fmt:${value}:${options.formatter}:${options.formatterParameters.join(",")}`
+    );
     const normalize = vi.fn((text, defaultText) => {
       if (text == null) {
         return defaultText;
@@ -164,10 +206,13 @@ describe("RadialValueMath", function () {
       num: 12.3,
       text: "12.3"
     });
-    expect(applyFormatter).toHaveBeenCalledWith(12.3, expect.objectContaining({
-      formatter: "formatSpeed",
-      formatterParameters: ["kn"]
-    }));
+    expect(applyFormatter).toHaveBeenCalledWith(
+      12.3,
+      expect.objectContaining({
+        formatter: "formatSpeed",
+        formatterParameters: ["kn"]
+      })
+    );
   });
 
   it("supports undefined sector colors when no overrides are passed", function () {
@@ -179,10 +224,12 @@ describe("RadialValueMath", function () {
       { a0: 420, a1: 450, color: undefined }
     ]);
 
-    expect(v.buildLowEndSectors({}, 10, 15, arc, {
-      defaultWarningFrom: 12.2,
-      defaultAlarmFrom: 11.6
-    })).toEqual([
+    expect(
+      v.buildLowEndSectors({}, 10, 15, arc, {
+        defaultWarningFrom: 12.2,
+        defaultAlarmFrom: 11.6
+      })
+    ).toEqual([
       { a0: 270, a1: 327.6, color: undefined },
       { a0: 327.6, a1: 349.2, color: undefined }
     ]);
@@ -192,17 +239,21 @@ describe("RadialValueMath", function () {
     const v = create();
     const arc = { startDeg: 270, endDeg: 450 };
 
-    expect(v.buildHighEndSectors({ warningFrom: null, alarmFrom: "   " }, 0, 30, arc, {
-      warningColor: "#aa5500",
-      alarmColor: "#bb0011"
-    })).toEqual([]);
+    expect(
+      v.buildHighEndSectors({ warningFrom: null, alarmFrom: "   " }, 0, 30, arc, {
+        warningColor: "#aa5500",
+        alarmColor: "#bb0011"
+      })
+    ).toEqual([]);
 
-    expect(v.buildLowEndSectors({ warningFrom: null, alarmFrom: "" }, 10, 15, arc, {
-      defaultWarningFrom: 12.2,
-      defaultAlarmFrom: 11.6,
-      warningColor: "#aa5500",
-      alarmColor: "#bb0011"
-    })).toEqual([
+    expect(
+      v.buildLowEndSectors({ warningFrom: null, alarmFrom: "" }, 10, 15, arc, {
+        defaultWarningFrom: 12.2,
+        defaultAlarmFrom: 11.6,
+        warningColor: "#aa5500",
+        alarmColor: "#bb0011"
+      })
+    ).toEqual([
       { a0: 270, a1: 327.6, color: "#bb0011" },
       { a0: 327.6, a1: 349.2, color: "#aa5500" }
     ]);

@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 const { createDomHarness } = require("../helpers/mock-dom");
 
@@ -51,15 +52,15 @@ function setupComponentLoader(options) {
       baseUrl: "http://host/plugins/dyninstruments/",
       runtime: {
         loadScriptOnce: runtimeLoadScriptOnce,
-        loadCssOnce: runtimeLoadCssOnce,
+        loadCssOnce: runtimeLoadCssOnce
       },
       state: {},
-      config: { shared: {}, clusters: [] },
+      config: { shared: {}, clusters: [] }
     },
     DyniComponents: {
       DyniA: { id: "A", create() {} },
-      DyniB: { id: "B", create() {} },
-    },
+      DyniB: { id: "B", create() {} }
+    }
   });
 
   runIifeScript("runtime/asset-preloader.js", context);
@@ -70,26 +71,26 @@ function setupComponentLoader(options) {
     runtime: context.DyniPlugin.runtime,
     context,
     runtimeLoadScriptOnce,
-    runtimeLoadCssOnce,
+    runtimeLoadCssOnce
   };
 }
 
 function installComponentContextRuntime(runtime) {
   runtime.theme = {
     tokens: {
-      resolveForRoot: vi.fn(() => ({})),
-    },
+      resolveForRoot: vi.fn(() => ({}))
+    }
   };
   runtime.format = { applyFormatter: vi.fn((v) => String(v)) };
   runtime.canvas = { setupCanvas: vi.fn() };
   runtime.dom = {
     requirePluginRoot: vi.fn(),
-    getNightModeState: vi.fn(() => false),
+    getNightModeState: vi.fn(() => false)
   };
   runtime.hostActions = vi.fn(() => ({}));
 }
 
 module.exports = {
   setupComponentLoader,
-  installComponentContextRuntime,
+  installComponentContextRuntime
 };

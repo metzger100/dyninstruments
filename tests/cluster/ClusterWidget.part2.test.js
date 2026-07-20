@@ -1,6 +1,5 @@
-const {
-  originalDyniPlugin,
-} = require("./ClusterWidget.harness.js");
+// @ts-nocheck
+const { originalDyniPlugin } = require("./ClusterWidget.harness.js");
 
 describe("ClusterWidget", function () {
   it("invalidates route-activation memo state when detaching for a diagnostic route so a same-signature return can remount", function () {
@@ -39,11 +38,16 @@ describe("ClusterWidget", function () {
     const activationController = {
       activateCommittedRoute: vi.fn(function (payload) {
         const raw = payload.routeFrame && payload.routeFrame.__dyniRawProps ? payload.routeFrame.__dyniRawProps : {};
-        const memoKey = String(raw.value)
-          + "|" + (raw.nightMode ? "1" : "0")
-          + "|" + (raw.editing ? "1" : "0")
-          + "|" + payload.rootEl.id
-          + "|" + payload.shellEl.id;
+        const memoKey =
+          String(raw.value) +
+          "|" +
+          (raw.nightMode ? "1" : "0") +
+          "|" +
+          (raw.editing ? "1" : "0") +
+          "|" +
+          payload.rootEl.id +
+          "|" +
+          payload.shellEl.id;
         if (lastMemoKey === memoKey) {
           return discardedActivation;
         }
@@ -98,10 +102,12 @@ describe("ClusterWidget", function () {
     expect(harness.surfaceSessionController.detachForShellReplacement).toHaveBeenCalledTimes(1);
     expect(harness.activationController.invalidateMemoState).toHaveBeenCalledTimes(1);
     expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledTimes(2);
-    expect(harness.surfaceSessionController.reconcileSession.mock.calls[1][0]).toEqual(expect.objectContaining({
-      revision: 3,
-      routeId: "speed/sog"
-    }));
+    expect(harness.surfaceSessionController.reconcileSession.mock.calls[1][0]).toEqual(
+      expect.objectContaining({
+        revision: 3,
+        routeId: "speed/sog"
+      })
+    );
   });
 
   it("drops a stale async activation after a newer shell commit", async function () {
@@ -151,14 +157,14 @@ describe("ClusterWidget", function () {
     widget.initFunction.call(widgetContext);
 
     const firstHtml = widget.renderHtml.call(widgetContext, activeRouteFrame);
-    expect(firstHtml).toBe("<div class=\"dyni-shell\">shell</div>");
+    expect(firstHtml).toBe('<div class="dyni-shell">shell</div>');
     expect(harness.runtime.theme.applyToRoot).toHaveBeenNthCalledWith(1, { id: "root-1" });
     expect(harness.surfaceSessionController.recordCommittedRevision).toHaveBeenNthCalledWith(1, 1);
     expect(harness.surfaceSessionController.detachForShellReplacement).not.toHaveBeenCalled();
     expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledTimes(1);
 
     const secondHtml = widget.renderHtml.call(widgetContext, diagnosticRouteFrame);
-    expect(secondHtml).toBe("<div class=\"dyni-shell\">shell</div>");
+    expect(secondHtml).toBe('<div class="dyni-shell">shell</div>');
     expect(harness.shellRenderer.renderRouteShell).toHaveBeenNthCalledWith(
       2,
       diagnosticRouteFrame,
@@ -175,11 +181,13 @@ describe("ClusterWidget", function () {
     await flushPromises();
 
     expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledTimes(1);
-    expect(harness.surfaceSessionController.reconcileSession.mock.calls[0][0]).toEqual(expect.objectContaining({
-      revision: 1,
-      routeId: routeMeta.routeId,
-      surface: routeMeta.surface
-    }));
+    expect(harness.surfaceSessionController.reconcileSession.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        revision: 1,
+        routeId: routeMeta.routeId,
+        surface: routeMeta.surface
+      })
+    );
     expect(harness.runtime.theme.applyToRoot).toHaveBeenCalledTimes(2);
     expect(harness.surfaceSessionController.detachForShellReplacement).not.toHaveBeenCalled();
   });
@@ -211,7 +219,7 @@ describe("ClusterWidget", function () {
     widget.initFunction.call(widgetContext);
     const html = widget.renderHtml.call(widgetContext, routeFrame);
 
-    expect(html).toBe("<div class=\"dyni-shell\">shell</div>");
+    expect(html).toBe('<div class="dyni-shell">shell</div>');
     expect(harness.runtime.theme.applyToRoot).toHaveBeenCalledWith({ id: "root-1" });
     expect(harness.surfaceSessionController.detachForShellReplacement).not.toHaveBeenCalled();
     expect(harness.runtime.routeActivation.reportActivationError).toHaveBeenCalledWith(activationError);

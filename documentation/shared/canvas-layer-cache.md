@@ -4,7 +4,8 @@
 
 ## Overview
 
-`CanvasLayerCache` is a shared utility module for canvas widgets that cache one or more offscreen layers and blit them to a target context. It centralizes key-based rebuild control and explicit cache invalidation.
+`CanvasLayerCache` is a shared utility module for canvas widgets that cache one or more offscreen layers and blit them
+to a target context. It centralizes key-based rebuild control and explicit cache invalidation.
 
 ## Key Details
 

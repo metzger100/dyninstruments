@@ -4,15 +4,15 @@
 
 ## Overview
 
-`dyni_Default_Instruments` is the self-configurable default cluster for arbitrary store values.
-It routes through the existing cluster system and offers three kinds:
+`dyni_Default_Instruments` is the self-configurable default cluster for arbitrary store values. It routes through the
+existing cluster system and offers three kinds:
 
 - `text`
 - `linearGauge`
 - `radialGauge`
 
-The cluster is intended for values that are not already covered by the domain-specific clusters.
-It keeps the mapper thin and pushes visual behavior into the existing renderers:
+The cluster is intended for values that are not already covered by the domain-specific clusters. It keeps the mapper
+thin and pushes visual behavior into the existing renderers:
 
 - `text` -> `ThreeValueTextWidget`
 - `linearGauge` -> `DefaultLinearWidget`
@@ -40,8 +40,8 @@ Formatter selection stays user-controlled.
 - the mapper passes through array-valued `formatterParameters`
 - no fallback formatter metadata is synthesized for empty input
 
-Text kinds render any normal formatter output.
-Gauge kinds expect a numeric raw value or a formatter output that still contains a parseable numeric substring.
+Text kinds render any normal formatter output. Gauge kinds expect a numeric raw value or a formatter output that still
+contains a parseable numeric substring.
 
 ## Editable Summary
 
@@ -91,8 +91,8 @@ Each sector has:
 - a threshold value
 - an editable color
 
-Threshold sanity is user responsibility.
-The cluster does not auto-sort awkward threshold orderings or apply extra validation beyond the existing engine behavior.
+Threshold sanity is user responsibility. The cluster does not auto-sort awkward threshold orderings or apply extra
+validation beyond the existing engine behavior.
 
 ## Notes
 

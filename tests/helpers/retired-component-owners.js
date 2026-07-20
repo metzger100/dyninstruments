@@ -16,7 +16,7 @@ const FORBIDDEN_COMPONENT_IDS = Object.freeze([
   "SurfaceControllerFactory",
   "ClusterMapperRegistry",
   "ClusterKindCatalog",
-  "RendererPropsWidget",
+  "RendererPropsWidget"
 ]);
 
 const FORBIDDEN_OWNER_MODULE_PATHS = Object.freeze([
@@ -31,10 +31,10 @@ const FORBIDDEN_OWNER_MODULE_PATHS = Object.freeze([
   "shared/widget-kits/perf/PerfSpanHelper.js",
   "cluster/rendering/ClusterSurfacePolicy.js",
   "cluster/rendering/CanvasDomSurfaceAdapter.js",
-  "cluster/rendering/HtmlSurfaceController.js",
+  "cluster/rendering/HtmlSurfaceController.js"
 ]);
 
 module.exports = {
   FORBIDDEN_COMPONENT_IDS,
-  FORBIDDEN_OWNER_MODULE_PATHS,
+  FORBIDDEN_OWNER_MODULE_PATHS
 };

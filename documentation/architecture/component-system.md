@@ -26,6 +26,7 @@ config.components is assembled from:
 - registry-shared-foundation-geometry.js
 - registry-shared-foundation-layout.js
 - registry-shared-foundation-state.js
+- registry-shared-foundation-xte.js
 - registry-shared-engines.js
 - registry-widgets-nav.js
 - registry-widgets-vessel.js
@@ -39,13 +40,14 @@ Assembly fail-closes when:
 
 Recent shared-foundation/runtime registrations:
 
-- `HtmlDomPatchUtils` is registered in `registry-shared-foundation-state.js` as the DOM patching helper consumed by `HtmlWidgetUtils`
+- `HtmlDomPatchUtils` is registered in `registry-shared-foundation-state.js` as the DOM patching helper consumed by
+  `HtmlWidgetUtils`
 - `PreparedPayloadModelCache` is registered in `registry-shared-foundation-state.js`
 - `ActiveRouteTextHtmlWidget` and `MapZoomTextHtmlWidget` include `PreparedPayloadModelCache` in `deps`
-- `MapZoomTextHtmlWidget` depends on `MapZoomMarkup`, which owns map-zoom state
-  and data markup assembly; widget lifecycle and interaction remain in the
-  renderer
-- `AisTargetLayoutGeometry` depends on `AisTargetLayoutGeometryStyles` from `registry-shared-foundation-layout.js`; rectangle construction and CSS-grid serialization remain separate UMD components
+- `MapZoomTextHtmlWidget` depends on `MapZoomMarkup`, which owns map-zoom state and data markup assembly; widget
+  lifecycle and interaction remain in the renderer
+- `AisTargetLayoutGeometry` depends on `AisTargetLayoutGeometryStyles` from `registry-shared-foundation-layout.js`;
+  rectangle construction and CSS-grid serialization remain separate UMD components
 - component entries may include optional `assets` arrays with relative paths and explicit asset types
 
 ## API Shape Contract
@@ -60,15 +62,17 @@ Validation behavior:
 - factory requires create()
 - module requires a direct module object API
 
-In the runtime service lane, theme internals stay inside `runtime.theme`; component factories resolve immutable snapshots through `componentContext.theme.tokens.resolveForRoot(rootEl)`.
-`componentContext.hostActions` is the same function reference as `runtime.hostActions`, so components can snapshot the current bridge state on demand.
+In the runtime service lane, theme internals stay inside `runtime.theme`; component factories resolve immutable
+snapshots through `componentContext.theme.tokens.resolveForRoot(rootEl)`. `componentContext.hostActions` is the same
+function reference as `runtime.hostActions`, so components can snapshot the current bridge state on demand.
 
 ## CSS Loading Contract
 
 Global CSS:
 
 - plugin.css remains global and is linked in document head
-- component loader CSS requests use the bootstrap-provided scoped loader so module timestamp reloads do not reuse a stale link id from an older AvNav API generation
+- component loader CSS requests use the bootstrap-provided scoped loader so module timestamp reloads do not reuse a
+  stale link id from an older AvNav API generation
 
 Committed HTML CSS:
 

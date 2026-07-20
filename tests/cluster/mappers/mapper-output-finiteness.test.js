@@ -4,54 +4,60 @@ const mapperCases = [
   {
     rel: "cluster/mappers/SpeedMapper.js",
     kind: "sogRadial",
-    props: { kind: "sogRadial", sog: 5 },
+    props: { kind: "sogRadial", sog: 5 }
   },
   {
     rel: "cluster/mappers/EnvironmentMapper.js",
     kind: "depthRadial",
-    props: { kind: "depthRadial", depth: 12 },
+    props: { kind: "depthRadial", depth: 12 }
   },
   {
     rel: "cluster/mappers/EnvironmentMapper.js",
     kind: "tempRadial",
-    props: { kind: "tempRadial", temp: 18 },
+    props: { kind: "tempRadial", temp: 18 }
   },
   {
     rel: "cluster/mappers/VesselMapper.js",
     kind: "voltageRadial",
-    props: { kind: "voltageRadial", value: 12.7 },
+    props: { kind: "voltageRadial", value: 12.7 }
   },
   {
     rel: "cluster/mappers/WindMapper.js",
     kind: "angleTrueRadial",
-    props: { kind: "angleTrueRadial", twa: 25, tws: 7 },
+    props: { kind: "angleTrueRadial", twa: 25, tws: 7 }
   },
   {
     rel: "cluster/mappers/CourseHeadingMapper.js",
     kind: "hdtRadial",
-    props: { kind: "hdtRadial", hdt: 312 },
-  },
+    props: { kind: "hdtRadial", hdt: 312 }
+  }
 ];
 
 function makeToolkit() {
   return {
+    /** @param {any} name */
     cap(name) {
       return "cap:" + name;
     },
+    /** @param {any} name */
     unit(name) {
       return "unit:" + name;
     },
+    /** @param {any} metricKey @param {any} familyId @param {any} fallbackToken */
     formatUnit(metricKey, familyId, fallbackToken) {
       return fallbackToken;
     },
+    /** @param {any} metricKey @param {any} familyId @param {any} selectedUnitToken */
     unitText(metricKey, familyId, selectedUnitToken) {
       return "unit:" + metricKey + ":" + String(selectedUnitToken || "");
     },
     unitNumber() {
       return undefined;
     },
+    /** @param {any} v @param {any} cap @param {any} unit @param {any} formatter @param {any} formatterParameters */
     out(v, cap, unit, formatter, formatterParameters) {
-      const o = {};
+      const o =
+        /** @type {{ value?: any, caption?: any, unit?: any, formatter?: any, formatterParameters?: any }} */ ({});
       if (typeof v !== "undefined") o.value = v;
       if (typeof cap !== "undefined") o.caption = cap;
       if (typeof unit !== "undefined") o.unit = unit;
@@ -61,18 +67,20 @@ function makeToolkit() {
       }
       return o;
     },
+    /** @param {any} value */
     num(value) {
       const n = Number(value);
       return Number.isFinite(n) ? n : undefined;
     },
     makeAngleFormatter() {
-      return function (raw) {
+      return function (/** @type {any} */ raw) {
         return String(raw);
       };
-    },
+    }
   };
 }
 
+/** @param {any} value @param {string} prefix @param {string[]} out */
 function collectInvalidNumbers(value, prefix, out) {
   if (typeof value === "number" && !Number.isFinite(value)) {
     out.push(prefix + "=" + String(value));
@@ -90,29 +98,27 @@ function collectInvalidNumbers(value, prefix, out) {
   });
 }
 
+/** @param {any} output */
 function expectFiniteMapperOutput(output) {
-  const invalids = [];
+  const invalids = /** @type {string[]} */ ([]);
   collectInvalidNumbers(output, "out", invalids);
   expect(invalids).toEqual([]);
 }
 
 describe("mapper output finiteness", function () {
-  it.each(mapperCases)(
-    "does not emit non-finite numbers for $kind",
-    function (item) {
-      const mapper = loadFresh(item.rel).create();
-      const translated = mapper.translate(item.props, {
-        toolkit: makeToolkit(),
-      });
+  it.each(mapperCases)("does not emit non-finite numbers for $kind", function (item) {
+    const mapper = loadFresh(item.rel).create();
+    const translated = mapper.translate(item.props, {
+      toolkit: makeToolkit()
+    });
 
-      expectFiniteMapperOutput(translated || {});
-    },
-  );
+    expectFiniteMapperOutput(translated || {});
+  });
 
   it("fails when nested mapper output contains a non-finite number", function () {
     expect(function () {
       expectFiniteMapperOutput({
-        rendererProps: { threshold: NaN },
+        rendererProps: { threshold: NaN }
       });
     }).toThrow();
   });

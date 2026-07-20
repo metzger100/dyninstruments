@@ -15,15 +15,25 @@ describe("FullCircleRadialLayout", function () {
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
-    return loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js").create({}, createComponentContextMock({
-      modules: {
-        ResponsiveScaleProfile: responsiveScaleProfile,
-        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-        GeometryScale: geometryScale
-      }
-    }));
+    return loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          ResponsiveScaleProfile: responsiveScaleProfile,
+          LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+          GeometryScale: geometryScale
+        }
+      })
+    );
   }
 
+  /**
+   * @param {any} layout
+   * @param {number} width
+   * @param {number} height
+   * @param {string} mode
+   * @param {Record<string, any>} [layoutConfig]
+   */
   function buildSnapshot(layout, width, height, mode, layoutConfig) {
     const insets = layout.computeInsets(width, height);
     const out = layout.computeLayout({
@@ -38,6 +48,7 @@ describe("FullCircleRadialLayout", function () {
     return { insets: insets, out: out };
   }
 
+  /** @param {any} inner @param {any} outer */
   function expectRectInside(inner, outer) {
     expect(inner.x).toBeGreaterThanOrEqual(outer.x);
     expect(inner.y).toBeGreaterThanOrEqual(outer.y);
@@ -151,12 +162,8 @@ describe("FullCircleRadialLayout", function () {
       responsive: insets.responsive
     });
 
-    expect(out.geom.labelRadius).toBe(
-      Math.max(0, out.geom.R - Math.max(1, Math.floor(out.geom.ringW * 2.2)))
-    );
-    expect(out.labels.fontPx).toBe(
-      Math.max(1, Math.floor(out.geom.R * 0.18 * out.compactGeometryScale))
-    );
+    expect(out.geom.labelRadius).toBe(Math.max(0, out.geom.R - Math.max(1, Math.floor(out.geom.ringW * 2.2))));
+    expect(out.labels.fontPx).toBe(Math.max(1, Math.floor(out.geom.R * 0.18 * out.compactGeometryScale)));
   });
 
   it("applies compactGeometryScale directly to full-circle label spacing and keeps course markers ahead of ticks", function () {
@@ -180,9 +187,7 @@ describe("FullCircleRadialLayout", function () {
       });
 
       expect(out.compactGeometryScale).toBeLessThan(1);
-      expect(out.labels.radiusOffset).toBe(
-        Math.max(1, Math.floor(out.geom.ringW * 2.1 * out.compactGeometryScale))
-      );
+      expect(out.labels.radiusOffset).toBe(Math.max(1, Math.floor(out.geom.ringW * 2.1 * out.compactGeometryScale)));
       expect(out.geom.labelRadius).toBe(
         Math.max(0, out.geom.R - Math.max(1, Math.floor(out.geom.ringW * 2.2 * out.compactGeometryScale)))
       );

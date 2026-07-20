@@ -1,9 +1,8 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("AisTargetRenderModel", function () {
+  /** @param {any} [options] */
   function createRenderModel(options) {
     const opts = options || {};
     const applyFormatter =
@@ -11,85 +10,58 @@ describe("AisTargetRenderModel", function () {
       vi.fn(function (value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (value == null || Number.isNaN(value)) {
-          return Object.prototype.hasOwnProperty.call(cfg, "default")
-            ? cfg.default
-            : "---";
+          return Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
         }
-        const params = Array.isArray(cfg.formatterParameters)
-          ? cfg.formatterParameters
-          : [];
-        return (
-          String(cfg.formatter) + "|" + String(value) + "|" + params.join(",")
-        );
+        const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
+        return String(cfg.formatter) + "|" + String(value) + "|" + params.join(",");
       });
 
     const modules = {
       AisTargetLayout: loadFresh("shared/widget-kits/nav/AisTargetLayout.js"),
-      AisTargetLayoutSizing: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutSizing.js",
-      ),
+      AisTargetLayoutSizing: loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js"),
       HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
-      ResponsiveScaleProfile: loadFresh(
-        "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-      ),
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
       LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-      AisTargetLayoutGeometry: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutGeometry.js",
-      ),
-      AisTargetLayoutGeometryStyles: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js",
-      ),
-      AisTargetLayoutMath: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutMath.js",
-      ),
-      PlaceholderNormalize: loadFresh(
-        "shared/widget-kits/format/PlaceholderNormalize.js",
-      ),
-      UnitAwareFormatter: loadFresh(
-        "shared/widget-kits/format/UnitAwareFormatter.js",
-      ),
-      StateScreenLabels: loadFresh(
-        "shared/widget-kits/state/StateScreenLabels.js",
-      ),
-      StateScreenPrecedence: loadFresh(
-        "shared/widget-kits/state/StateScreenPrecedence.js",
-      ),
-      StateScreenInteraction: loadFresh(
-        "shared/widget-kits/state/StateScreenInteraction.js",
-      ),
-      StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+      AisTargetLayoutGeometry: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js"),
+      AisTargetLayoutGeometryStyles: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js"),
+      AisTargetLayoutMath: loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js"),
+      PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+      UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
+      StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+      StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+      StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
+      StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js")
     };
     const componentContext = createComponentContextMock({
       modules: modules,
       services: {
         format: {
-          applyFormatter: applyFormatter,
-        },
-      },
+          applyFormatter: applyFormatter
+        }
+      }
     });
 
     return {
-      renderModel: loadFresh(
-        "shared/widget-kits/nav/AisTargetRenderModel.js",
-      ).create({}, componentContext),
-      applyFormatter: applyFormatter,
+      renderModel: loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js").create({}, componentContext),
+      applyFormatter: applyFormatter
     };
   }
 
+  /** @param {any} props @param {any} [options] */
   function withSurfacePolicy(props, options) {
     const opts = options || {};
     return Object.assign({}, props || {}, {
       surfacePolicy: {
         interaction: {
-          mode: opts.mode === "passive" ? "passive" : "dispatch",
+          mode: opts.mode === "passive" ? "passive" : "dispatch"
         },
         pageId: typeof opts.pageId === "string" ? opts.pageId : "navpage",
-        containerOrientation:
-          opts.orientation === "vertical" ? "vertical" : "default",
-      },
+        containerOrientation: opts.orientation === "vertical" ? "vertical" : "default"
+      }
     });
   }
 
+  /** @param {any} [overrides] */
   function makeProps(overrides) {
     const patch = overrides || {};
     const base = {
@@ -105,29 +77,29 @@ describe("AisTargetRenderModel", function () {
         distance: 4.2,
         cpa: 0.7,
         tcpa: 30,
-        headingTo: 112,
+        headingTo: 112
       },
       layout: {
         ratioThresholdNormal: 1.2,
-        ratioThresholdFlat: 3.8,
+        ratioThresholdFlat: 3.8
       },
       captions: {
         dst: "DST",
         cpa: "DCPA",
         tcpa: "TCPA",
-        brg: "BRG",
+        brg: "BRG"
       },
       units: {
         dst: "nm",
         cpa: "nm",
         tcpa: "min",
-        brg: "°",
+        brg: "°"
       },
       formatUnits: {
         dst: "nm",
-        cpa: "nm",
+        cpa: "nm"
       },
-      default: "---",
+      default: "---"
     };
     const out = Object.assign({}, base, patch);
     out.domain = Object.assign({}, base.domain, patch.domain || {});
@@ -142,11 +114,11 @@ describe("AisTargetRenderModel", function () {
     const model = setup.renderModel.buildModel({
       props: withSurfacePolicy(makeProps(), {
         pageId: "navpage",
-        mode: "dispatch",
+        mode: "dispatch"
       }),
       shellRect: { width: 320, height: 180 },
       mode: "normal",
-      isVerticalCommitted: false,
+      isVerticalCommitted: false
     });
 
     expect(model.kind).toBe("data");
@@ -158,31 +130,20 @@ describe("AisTargetRenderModel", function () {
       dst: true,
       cpa: true,
       tcpa: true,
-      brg: true,
+      brg: true
     });
     expect(model.wrapperClasses).toContain("dyni-ais-target-open-dispatch");
     expect(model.wrapperClasses).toContain("dyni-ais-target-branch-tcpa");
     expect(model.wrapperClasses).toContain("dyni-ais-target-color-warning");
     expect(model.inlineGeometry.wrapperStyle).toContain("grid-template-areas");
-    expect(model.inlineGeometry.metricStyles.cpa.valueRowStyle).toContain(
-      "grid-template-columns:",
-    );
+    expect(model.inlineGeometry.metricStyles.cpa.valueRowStyle).toContain("grid-template-columns:");
     expect(model.layout.accentRect).toBeTruthy();
     expect(model.layout.insets.accentReserve).toBeGreaterThan(0);
     expect(model.layout.accentRect.w).toBeGreaterThanOrEqual(14);
-    expect(model.layout.insets.identityGap).toBeGreaterThanOrEqual(
-      model.layout.insets.metricGridGap,
-    );
-    expect(
-      Math.abs(model.layout.nameRect.h - model.layout.frontRect.h),
-    ).toBeLessThanOrEqual(1);
-    expect(
-      model.layout.metricBoxes.dst.unitRect.w /
-        model.layout.metricBoxes.dst.valueRect.w,
-    ).toBeGreaterThan(0.24);
-    expect(
-      Object.prototype.hasOwnProperty.call(model, "frontInitialText"),
-    ).toBe(false);
+    expect(model.layout.insets.identityGap).toBeGreaterThanOrEqual(model.layout.insets.metricGridGap);
+    expect(Math.abs(model.layout.nameRect.h - model.layout.frontRect.h)).toBeLessThanOrEqual(1);
+    expect(model.layout.metricBoxes.dst.unitRect.w / model.layout.metricBoxes.dst.valueRect.w).toBeGreaterThan(0.24);
+    expect(Object.prototype.hasOwnProperty.call(model, "frontInitialText")).toBe(false);
     expect(model.metrics.dst.valueText).toBe("formatDistance|4.2|nm");
     expect(model.metrics.cpa.valueText).toBe("formatDistance|0.7|nm");
     expect(model.metrics.tcpa.valueText).toBe("formatDecimal|0.5|3,2");
@@ -191,31 +152,30 @@ describe("AisTargetRenderModel", function () {
       0.5,
       expect.objectContaining({
         formatter: "formatDecimal",
-        formatterParameters: [3, 2],
-      }),
+        formatterParameters: [3, 2]
+      })
     );
   });
 
   it("pads metric values and exposes plain values when stableDigits is enabled", function () {
     const setup = createRenderModel({
+      /** @param {any} value @param {any} formatterOptions */
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (value == null || Number.isNaN(value)) {
-          return Object.prototype.hasOwnProperty.call(cfg, "default")
-            ? cfg.default
-            : "---";
+          return Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
         }
         return String(value);
-      },
+      }
     });
     const model = setup.renderModel.buildModel({
       props: withSurfacePolicy(makeProps({ stableDigits: true }), {
         pageId: "navpage",
-        mode: "dispatch",
+        mode: "dispatch"
       }),
       shellRect: { width: 320, height: 180 },
       mode: "normal",
-      isVerticalCommitted: false,
+      isVerticalCommitted: false
     });
 
     expect(model.stableDigitsEnabled).toBe(true);
@@ -236,14 +196,14 @@ describe("AisTargetRenderModel", function () {
             showTcpaBranch: false,
             tcpa: 0,
             nameOrMmsi: "Athena",
-            frontText: "Back",
-          },
+            frontText: "Back"
+          }
         }),
-        { pageId: "navpage", mode: "dispatch" },
+        { pageId: "navpage", mode: "dispatch" }
       ),
       shellRect: { width: 620, height: 120 },
       mode: "flat",
-      isVerticalCommitted: false,
+      isVerticalCommitted: false
     });
 
     expect(model.mode).toBe("flat");
@@ -252,12 +212,11 @@ describe("AisTargetRenderModel", function () {
       dst: true,
       cpa: true,
       tcpa: true,
-      brg: true,
+      brg: true
     });
     expect(model.nameText).toBe("Athena");
     expect(model.frontText).toBe("Back");
     expect(model.wrapperClasses).toContain("dyni-ais-target-branch-brg");
     expect(model.wrapperClasses.join(" ")).not.toContain("flat-rows");
   });
-
 });

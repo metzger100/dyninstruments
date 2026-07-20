@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniEditRouteTextHtmlWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {DyniComponentContext & { theme: { tokens: DyniEditRouteThemeResolver } }} DyniEditRouteWidgetContext */
   /** @typedef {{ props: DyniWidgetValues, shellRect?: DyniHtmlShellRect | null, rootEl?: HTMLElement | null, layoutChanged?: boolean }} DyniEditRouteWidgetPayload */
@@ -35,7 +35,9 @@
 
     /** @param {unknown} rendererContext */
     function createCommittedRenderer(rendererContext) {
-      const context = /** @type {Record<string, unknown>} */ (rendererContext && typeof rendererContext === "object" ? rendererContext : {});
+      const context = /** @type {Record<string, unknown>} */ (
+        rendererContext && typeof rendererContext === "object" ? rendererContext : {}
+      );
       const hostContext = context.hostContext;
 
       /** @type {HTMLElement | null} */
@@ -71,9 +73,10 @@
           ev.preventDefault();
           ev.stopPropagation();
           const policy = htmlUtils.resolveSurfacePolicy(lastProps);
-          const actions = policy && typeof policy.actions === "object" && policy.actions
-            ? /** @type {{ routeEditor?: { openEditRoute?: () => void } }} */ (policy.actions)
-            : null;
+          const actions =
+            policy && typeof policy.actions === "object" && policy.actions
+              ? /** @type {{ routeEditor?: { openEditRoute?: () => void } }} */ (policy.actions)
+              : null;
           const routeEditorActions = actions ? actions.routeEditor : null;
           if (!routeEditorActions || typeof routeEditorActions.openEditRoute !== "function") {
             return;
@@ -90,27 +93,30 @@
         const model = buildModel(payload.props, shellRect);
         const shouldComputeFit = model.kind === "data" && (payload.layoutChanged || !lastFit);
         const fit = shouldComputeFit
-          ? (htmlFit.compute({
-            model: model,
-            hostContext: hostContext,
-            targetEl: payload.rootEl,
-            shellRect: shellRect
-          }) || {
-            nameTextStyle: "",
-            sourceBadgeStyle: "",
-            metrics: Object.create(null)
-          })
+          ? htmlFit.compute({
+              model: model,
+              hostContext: hostContext,
+              targetEl: payload.rootEl,
+              shellRect: shellRect
+            }) || {
+              nameTextStyle: "",
+              sourceBadgeStyle: "",
+              metrics: Object.create(null)
+            }
           : lastFit;
 
         htmlUtils.applyMirroredContext(rootEl, payload.props);
-        wrapperEl = htmlUtils.patchInnerHtml(rootEl, markup.render({
-          model: model,
-          fit: fit,
-          htmlUtils: htmlUtils,
-          shellRect: shellRect,
-          fontFamily: theme.font.family,
-          fontWeight: theme.font.labelWeight
-        }));
+        wrapperEl = htmlUtils.patchInnerHtml(
+          rootEl,
+          markup.render({
+            model: model,
+            fit: fit,
+            htmlUtils: htmlUtils,
+            shellRect: shellRect,
+            fontFamily: theme.font.family,
+            fontWeight: theme.font.labelWeight
+          })
+        );
         lastFit = fit;
         lastProps = payload.props;
 
@@ -182,4 +188,4 @@
   }
 
   return { id: "EditRouteTextHtmlWidget", create: create };
-}));
+});

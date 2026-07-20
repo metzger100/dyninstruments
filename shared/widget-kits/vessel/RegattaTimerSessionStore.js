@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRegattaTimerSessionStore = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const HOST_SESSION_KEY = "__dyniRegattaTimerSession";
@@ -62,7 +62,9 @@
       }
 
       const surfacePolicy = toObject(p.surfacePolicy);
-      const routeId = textOrEmpty(p.routeId || p.__dyniRouteId || p.regattaRouteId || surfacePolicy.routeId || lastRouteId);
+      const routeId = textOrEmpty(
+        p.routeId || p.__dyniRouteId || p.regattaRouteId || surfacePolicy.routeId || lastRouteId
+      );
       const routeSplit = routeId.indexOf("/") > 0 ? routeId.split("/") : [];
       const pageId = textOrEmpty(surfacePolicy.pageId || p.pageId);
       const cluster = textOrEmpty(p.cluster || surfacePolicy.cluster || routeSplit[0]);
@@ -189,4 +191,4 @@
   }
 
   return { id: "RegattaTimerSessionStore", create: create };
-}));
+});

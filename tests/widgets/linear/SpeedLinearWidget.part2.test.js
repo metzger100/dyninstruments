@@ -1,7 +1,6 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("SpeedLinearWidget", function () {
   it("returns placeholder output for null speed values", function () {
@@ -20,26 +19,16 @@ describe("SpeedLinearWidget", function () {
                     return defaultText == null ? "---" : defaultText;
                   }
                   return String(text);
-                },
+                }
               };
-            },
+            }
           },
           ValueMath: {
             create() {
               return {
-                formatGaugeDisplay(
-                  raw,
-                  props,
-                  apply,
-                  normalize,
-                  defaultFormatter,
-                  defaultParameters,
-                ) {
+                formatGaugeDisplay(raw, props, apply, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
-                  const defaultText = Object.prototype.hasOwnProperty.call(
-                    p,
-                    "default",
-                  )
+                  const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
                     ? p.default
                     : normalize(undefined, undefined);
                   if (raw == null) {
@@ -49,40 +38,31 @@ describe("SpeedLinearWidget", function () {
                   if (!Number.isFinite(n)) {
                     return { num: NaN, text: defaultText };
                   }
-                  const formatter = Object.prototype.hasOwnProperty.call(
-                    p,
-                    "formatter",
-                  )
+                  const formatter = Object.prototype.hasOwnProperty.call(p, "formatter")
                     ? p.formatter
                     : defaultFormatter;
-                  const formatterParameters =
-                    Object.prototype.hasOwnProperty.call(
-                      p,
-                      "formatterParameters",
-                    )
-                      ? p.formatterParameters
-                      : defaultParameters;
+                  const formatterParameters = Object.prototype.hasOwnProperty.call(p, "formatterParameters")
+                    ? p.formatterParameters
+                    : defaultParameters;
                   const formatted = normalize(
                     String(
                       apply(n, {
                         formatter: formatter,
                         formatterParameters: formatterParameters,
-                        default: defaultText,
-                      }),
+                        default: defaultText
+                      })
                     ),
-                    defaultText,
+                    defaultText
                   );
                   const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
-                  return Number.isFinite(num)
-                    ? { num: num, text: match[0] }
-                    : { num: NaN, text: defaultText };
+                  return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
                 },
                 resolveStandardTickSteps() {
                   return { major: 5, minor: 1 };
-                },
+                }
               };
-            },
+            }
           },
           LinearGaugeEngine: {
             create() {
@@ -90,20 +70,20 @@ describe("SpeedLinearWidget", function () {
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
-                },
+                }
               };
-            },
-          },
+            }
+          }
         },
         services: {
-          format: { applyFormatter },
-        },
-      }),
+          format: { applyFormatter }
+        }
+      })
     );
 
     expect(captured.formatDisplay(null, {}, "kn")).toEqual({
       num: NaN,
-      text: "---",
+      text: "---"
     });
     expect(applyFormatter).not.toHaveBeenCalled();
   });
@@ -123,24 +103,22 @@ describe("SpeedLinearWidget", function () {
                     return defaultText == null ? "---" : defaultText;
                   }
                   return String(text);
-                },
+                }
               };
-            },
+            }
           },
           ValueMath: {
             create() {
               return {
                 formatGaugeDisplay(raw) {
                   const n = Number(raw);
-                  return Number.isFinite(n)
-                    ? { num: n, text: String(n) }
-                    : { num: NaN, text: "---" };
+                  return Number.isFinite(n) ? { num: n, text: String(n) } : { num: NaN, text: "---" };
                 },
                 resolveStandardTickSteps() {
                   return { major: 5, minor: 1 };
-                },
+                }
               };
-            },
+            }
           },
           LinearGaugeEngine: {
             create() {
@@ -148,19 +126,19 @@ describe("SpeedLinearWidget", function () {
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
-                },
+                }
               };
-            },
-          },
+            }
+          }
         },
         services: {
           format: {
             applyFormatter(value) {
               return String(value);
-            },
-          },
-        },
-      }),
+            }
+          }
+        }
+      })
     );
 
     const theme = { colors: { warning: "#123456", alarm: "#654321" } };
@@ -168,7 +146,7 @@ describe("SpeedLinearWidget", function () {
     const valueApi = {
       clamp(v, lo, hi) {
         return Math.max(lo, Math.min(hi, Number(v)));
-      },
+      }
     };
 
     [null, undefined, "", "   "].forEach(function (rawThreshold) {
@@ -176,14 +154,14 @@ describe("SpeedLinearWidget", function () {
         captured.buildSectors(
           {
             speedLinearWarningFrom: rawThreshold,
-            speedLinearAlarmFrom: rawThreshold,
+            speedLinearAlarmFrom: rawThreshold
           },
           0,
           30,
           axis,
           valueApi,
-          theme,
-        ),
+          theme
+        )
       ).toEqual([]);
     });
 
@@ -191,17 +169,17 @@ describe("SpeedLinearWidget", function () {
       captured.buildSectors(
         {
           speedLinearWarningFrom: 20,
-          speedLinearAlarmFrom: 25,
+          speedLinearAlarmFrom: 25
         },
         0,
         30,
         axis,
         valueApi,
-        theme,
-      ),
+        theme
+      )
     ).toEqual([
       { from: 20, to: 25, color: "#123456" },
-      { from: 25, to: 30, color: "#654321" },
+      { from: 25, to: 30, color: "#654321" }
     ]);
   });
 });

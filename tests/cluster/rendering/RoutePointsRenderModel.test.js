@@ -1,45 +1,17 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RoutePointsRenderModel", function () {
-  function createLayoutApi() {
-    const responsiveScaleProfile = loadFresh(
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-    );
-    const routePointsLayoutSizing = loadFresh(
-      "shared/widget-kits/nav/RoutePointsLayoutSizing.js",
-    );
-    return loadFresh("shared/widget-kits/nav/RoutePointsLayout.js").create(
-      {},
-      createComponentContextMock({
-        modules: {
-          ResponsiveScaleProfile: responsiveScaleProfile,
-          LayoutRectMath: loadFresh(
-            "shared/widget-kits/layout/LayoutRectMath.js",
-          ),
-          RoutePointsLayoutSizing: routePointsLayoutSizing,
-          RoutePointsRowGeometry: loadFresh(
-            "shared/widget-kits/nav/RoutePointsRowGeometry.js",
-          ),
-        },
-      }),
-    );
-  }
-
+  /** @param {Record<string, any>} [options] @returns {any} */
   function createRenderModel(options) {
     const opts = options || {};
     const applyFormatter =
       opts.applyFormatter ||
+      /** @param {any} value @param {any} formatterOptions @returns {any} */
       function (value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (cfg.formatter === "formatLonLats") {
-          if (
-            !value ||
-            !Number.isFinite(value.lat) ||
-            !Number.isFinite(value.lon)
-          ) {
+          if (!value || !Number.isFinite(value.lat) || !Number.isFinite(value.lon)) {
             return cfg.default;
           }
           return "LL:" + value.lat.toFixed(2) + "," + value.lon.toFixed(2);
@@ -68,66 +40,36 @@ describe("RoutePointsRenderModel", function () {
               family: "sans-serif",
               familyMono: "monospace",
               weight: 720,
-              labelWeight: 610,
-            },
+              labelWeight: 610
+            }
           };
-        },
-      },
+        }
+      }
     };
     const moduleSources = {
-      CenterDisplayMath: loadFresh(
-        "shared/widget-kits/nav/CenterDisplayMath.js",
-      ),
+      CenterDisplayMath: loadFresh("shared/widget-kits/nav/CenterDisplayMath.js"),
       HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
       LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-      NavInteractionPolicy: loadFresh(
-        "shared/widget-kits/nav/NavInteractionPolicy.js",
-      ),
-      PlaceholderNormalize: loadFresh(
-        "shared/widget-kits/format/PlaceholderNormalize.js",
-      ),
-      RadialTextFitting: loadFresh(
-        "shared/widget-kits/radial/RadialTextFitting.js",
-      ),
-      CanvasTextLayout: loadFresh(
-        "shared/widget-kits/text/CanvasTextLayout.js",
-      ),
-      ResponsiveScaleProfile: loadFresh(
-        "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-      ),
-      RoutePointsHtmlFit: loadFresh(
-        "shared/widget-kits/nav/RoutePointsHtmlFit.js",
-      ),
-      RoutePointsInfoText: loadFresh(
-        "shared/widget-kits/nav/RoutePointsInfoText.js",
-      ),
-      RoutePointsLayout: loadFresh(
-        "shared/widget-kits/nav/RoutePointsLayout.js",
-      ),
-      RoutePointsLayoutSizing: loadFresh(
-        "shared/widget-kits/nav/RoutePointsLayoutSizing.js",
-      ),
-      RoutePointsRowGeometry: loadFresh(
-        "shared/widget-kits/nav/RoutePointsRowGeometry.js",
-      ),
+      NavInteractionPolicy: loadFresh("shared/widget-kits/nav/NavInteractionPolicy.js"),
+      PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+      RadialTextFitting: loadFresh("shared/widget-kits/radial/RadialTextFitting.js"),
+      CanvasTextLayout: loadFresh("shared/widget-kits/text/CanvasTextLayout.js"),
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+      RoutePointsHtmlFit: loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js"),
+      RoutePointsInfoText: loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js"),
+      RoutePointsLayout: loadFresh("shared/widget-kits/nav/RoutePointsLayout.js"),
+      RoutePointsLayoutSizing: loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js"),
+      RoutePointsRowGeometry: loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js"),
       StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-      StateScreenPrecedence: loadFresh(
-        "shared/widget-kits/state/StateScreenPrecedence.js",
-      ),
-      StateScreenInteraction: loadFresh(
-        "shared/widget-kits/state/StateScreenInteraction.js",
-      ),
-      StateScreenLabels: loadFresh(
-        "shared/widget-kits/state/StateScreenLabels.js",
-      ),
+      StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+      StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
+      StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
       TextTileLayout: loadFresh("shared/widget-kits/text/TextTileLayout.js"),
-      UnitAwareFormatter: loadFresh(
-        "shared/widget-kits/format/UnitAwareFormatter.js",
-      ),
+      UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js")
     };
     const moduleSourceContext = createComponentContextMock({
       modules: moduleSources,
-      services: services,
+      services: services
     });
     const modules = Object.create(null);
     Object.keys(moduleSources).forEach(function (id) {
@@ -135,32 +77,30 @@ describe("RoutePointsRenderModel", function () {
     });
     const componentContext = createComponentContextMock({
       modules: modules,
-      services: services,
+      services: services
     });
 
-    return loadFresh("shared/widget-kits/nav/RoutePointsRenderModel.js").create(
-      {},
-      componentContext,
-    );
+    return loadFresh("shared/widget-kits/nav/RoutePointsRenderModel.js").create({}, componentContext);
   }
 
+  /** @param {any} props @param {Record<string, any>} [options] @returns {any} */
   function withSurfacePolicy(props, options) {
     const opts = options || {};
     const interactionMode = opts.mode === "passive" ? "passive" : "dispatch";
     return Object.assign({}, props || {}, {
       surfacePolicy: {
         interaction: { mode: interactionMode },
-        containerOrientation:
-          opts.orientation === "vertical" ? "vertical" : "default",
+        containerOrientation: opts.orientation === "vertical" ? "vertical" : "default",
         actions: {
           routePoints: {
-            activate: vi.fn(() => true),
-          },
-        },
-      },
+            activate: vi.fn(() => true)
+          }
+        }
+      }
     });
   }
 
+  /** @param {Record<string, any>} [overrides] @returns {any} */
   function makeProps(overrides) {
     return Object.assign(
       {
@@ -171,44 +111,34 @@ describe("RoutePointsRenderModel", function () {
             points: [
               { name: "Start", lat: 54.1, lon: 10.4 },
               { name: "Mid", lat: 54.2, lon: 10.5 },
-              { name: "", lat: 54.3, lon: 10.6 },
-            ],
+              { name: "", lat: 54.3, lon: 10.6 }
+            ]
           },
           routeName: "Harbor Run",
           pointCount: 3,
           selectedIndex: 2,
           isActiveRoute: true,
           showLatLon: false,
-          useRhumbLine: false,
+          useRhumbLine: false
         },
         layout: {
           ratioThresholdNormal: 1.0,
           ratioThresholdFlat: 3.5,
-          showHeader: true,
+          showHeader: true
         },
         formatting: {
           courseUnit: "°",
-          waypointsText: "waypoints",
+          waypointsText: "waypoints"
         },
         units: {
-          distance: "nm",
+          distance: "nm"
         },
         formatUnits: {
-          distance: "nm",
-        },
+          distance: "nm"
+        }
       },
-      overrides || {},
+      overrides || {}
     );
-  }
-
-  function extractHeight(style) {
-    const match = String(style || "").match(new RegExp("height:(\\d+)px\\x3b"));
-    return match ? Number(match[1]) : 0;
-  }
-
-  function extractMinHeight(style) {
-    const match = String(style || "").match(new RegExp("min-height:(\\d+)px\\x3b"));
-    return match ? Number(match[1]) : 0;
   }
 
   it("builds course/distance rows with placeholder first row and name fallback", function () {
@@ -216,7 +146,7 @@ describe("RoutePointsRenderModel", function () {
     const model = renderModel.buildModel({
       props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
       shellRect: { width: 320, height: 180 },
-      isVerticalCommitted: false,
+      isVerticalCommitted: false
     });
 
     expect(model.mode).toBe("normal");
@@ -239,8 +169,7 @@ describe("RoutePointsRenderModel", function () {
       lat: 54.3,
       lon: 10.6,
       routeName: "Harbor Run",
-      selected: true,
+      selected: true
     });
   });
-
 });

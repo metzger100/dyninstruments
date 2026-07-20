@@ -7,18 +7,7 @@ describe("PlaceholderNormalize", function () {
 
   it("normalizes known formatter fallback tokens to ---", function () {
     const api = createApi();
-    const tokens = [
-      "",
-      "   ",
-      "--:--",
-      "--:--:--",
-      "----/--/--",
-      "NO DATA",
-      "-",
-      "--",
-      "---",
-      "-----"
-    ];
+    const tokens = ["", "   ", "--:--", "--:--:--", "----/--/--", "NO DATA", "-", "--", "---", "-----"];
 
     tokens.forEach(function (token) {
       expect(api.normalize(token, "---")).toBe("---");
@@ -53,14 +42,7 @@ describe("PlaceholderNormalize", function () {
 
   it("normalizes JavaScript sentinel strings to default text", function () {
     const api = createApi();
-    const tokens = [
-      "NaN",
-      "NaN ",
-      "undefined",
-      "null",
-      "Infinity",
-      "-Infinity"
-    ];
+    const tokens = ["NaN", "NaN ", "undefined", "null", "Infinity", "-Infinity"];
 
     tokens.forEach(function (token) {
       expect(api.normalize(token, "---")).toBe("---");

@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRegattaTimerPhase = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @param {unknown} phase @returns {DyniRegattaPhase} */
@@ -28,4 +28,4 @@
   }
 
   return { id: "RegattaTimerPhase", create: create };
-}));
+});

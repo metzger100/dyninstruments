@@ -1,12 +1,8 @@
+// @ts-nocheck
 const { loadFresh } = require("../helpers/load-umd");
-const {
-  createMockCanvas,
-  createMockContext2D,
-} = require("../helpers/mock-canvas");
+const { createMockCanvas, createMockContext2D } = require("../helpers/mock-canvas");
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
-const {
-  createComponentContextMock,
-} = require("../helpers/component-context-mock");
+const { createComponentContextMock } = require("../helpers/component-context-mock");
 
 describe("runtime/widget-registrar.js", function () {
   function setupContext(options) {
@@ -16,35 +12,34 @@ describe("runtime/widget-registrar.js", function () {
       getCapabilities: vi.fn(),
       routePoints: {},
       routeEditor: {},
-      ais: {},
+      ais: {}
     };
-    const runtimeHostActions =
-      opts.runtimeHostActions || vi.fn(() => hostActions);
+    const runtimeHostActions = opts.runtimeHostActions || vi.fn(() => hostActions);
     const includeGlobalApi = opts.includeGlobalApi !== false;
     const capturedApi =
       opts.hostApi ||
       (includeGlobalApi
         ? {
-            registerWidget: registerWidget,
+            registerWidget: registerWidget
           }
         : null);
 
     const context = createScriptContext({
       DyniPlugin: {
         runtime: {
-          hostActions: runtimeHostActions,
+          hostActions: runtimeHostActions
         },
         state: {},
         config: { shared: {}, clusters: [] },
-        ...(capturedApi ? { avnavApi: capturedApi } : {}),
+        ...(capturedApi ? { avnavApi: capturedApi } : {})
       },
       avnav: includeGlobalApi
         ? {
             api: {
-              registerWidget,
-            },
+              registerWidget
+            }
           }
-        : {},
+        : {}
     });
 
     runIifeScript("runtime/namespace.js", context);
@@ -59,8 +54,8 @@ describe("runtime/widget-registrar.js", function () {
       DyniPlugin: {
         runtime: {},
         state: {},
-        config: { shared: {}, clusters: [] },
-      },
+        config: { shared: {}, clusters: [] }
+      }
     });
 
     runIifeScript("config/shared/kind-defaults.js", context);
@@ -68,9 +63,7 @@ describe("runtime/widget-registrar.js", function () {
     runIifeScript("config/shared/vessel-voltage-editables.js", context);
     runIifeScript("config/clusters/vessel.js", context);
 
-    return context.DyniPlugin.config.clusters.find(
-      (c) => c.def && c.def.cluster === "vessel",
-    ).def;
+    return context.DyniPlugin.config.clusters.find((c) => c.def && c.def.cluster === "vessel").def;
   }
 
   function makePositionComponentContext() {
@@ -80,57 +73,38 @@ describe("runtime/widget-registrar.js", function () {
         family: "sans-serif",
         familyMono: "monospace",
         weight: 730,
-        labelWeight: 610,
-      },
+        labelWeight: 610
+      }
     };
-    const textLayoutEngineModule = loadFresh(
-      "shared/widget-kits/text/TextLayoutEngine.js",
-    );
+    const textLayoutEngineModule = loadFresh("shared/widget-kits/text/TextLayoutEngine.js");
     return createComponentContextMock({
       modules: {
-        RadialAngleMath: loadFresh(
-          "shared/widget-kits/radial/RadialAngleMath.js",
-        ),
-        RadialTextFitting: loadFresh(
-          "shared/widget-kits/radial/RadialTextFitting.js",
-        ),
-        CanvasTextLayout: loadFresh(
-          "shared/widget-kits/text/CanvasTextLayout.js",
-        ),
+        RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js"),
+        RadialTextFitting: loadFresh("shared/widget-kits/radial/RadialTextFitting.js"),
+        CanvasTextLayout: loadFresh("shared/widget-kits/text/CanvasTextLayout.js"),
         ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js"),
-        TextLayoutPrimitives: loadFresh(
-          "shared/widget-kits/text/TextLayoutPrimitives.js",
-        ),
-        TextLayoutComposite: loadFresh(
-          "shared/widget-kits/text/TextLayoutComposite.js",
-        ),
-        ResponsiveScaleProfile: loadFresh(
-          "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-        ),
+        TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
+        TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
+        ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
         TextLayoutEngine: textLayoutEngineModule,
-        PlaceholderNormalize: loadFresh(
-          "shared/widget-kits/format/PlaceholderNormalize.js",
-        ),
-        StateScreenLabels: loadFresh(
-          "shared/widget-kits/state/StateScreenLabels.js",
-        ),
-        StateScreenPrecedence: loadFresh(
-          "shared/widget-kits/state/StateScreenPrecedence.js",
-        ),
-        StateScreenCanvasOverlay: loadFresh(
-          "shared/widget-kits/state/StateScreenCanvasOverlay.js",
-        ),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js")
       },
       services: {
         format: {
           applyFormatter(raw, props) {
             const cfg = props || {};
             const fpRaw = cfg.formatterParameters;
-            const fp = Array.isArray(fpRaw)
-              ? fpRaw
-              : typeof fpRaw === "string"
-                ? fpRaw.split(",")
-                : [];
+            let fp;
+            if (Array.isArray(fpRaw)) {
+              fp = fpRaw;
+            } else if (typeof fpRaw === "string") {
+              fp = fpRaw.split(",");
+            } else {
+              fp = [];
+            }
             if (cfg && typeof cfg.formatter === "function") {
               return cfg.formatter.apply(null, [raw].concat(fp));
             }
@@ -140,17 +114,16 @@ describe("runtime/widget-registrar.js", function () {
               globalThis.avnav &&
               globalThis.avnav.api &&
               globalThis.avnav.api.formatter &&
-              typeof globalThis.avnav.api.formatter[cfg.formatter] ===
-                "function"
+              typeof globalThis.avnav.api.formatter[cfg.formatter] === "function"
             ) {
               return globalThis.avnav.api.formatter[cfg.formatter].apply(
                 globalThis.avnav.api.formatter,
-                [raw].concat(fp),
+                [raw].concat(fp)
               );
             }
             if (raw == null || Number.isNaN(raw)) return cfg.default || "---";
             return String(raw);
-          },
+          }
         },
         canvas: {
           setupCanvas(canvas) {
@@ -159,28 +132,26 @@ describe("runtime/widget-registrar.js", function () {
             return {
               ctx,
               W: Math.round(rect.width),
-              H: Math.round(rect.height),
+              H: Math.round(rect.height)
             };
-          },
+          }
         },
         dom: {
           requirePluginRoot(target) {
             return target;
-          },
+          }
         },
         themeTokens: {
           resolveForRoot() {
             return themeTokens;
-          },
-        },
-      },
+          }
+        }
+      }
     });
   }
 
   function fillTextValues(ctx) {
-    return ctx.calls
-      .filter((c) => c.name === "fillText")
-      .map((c) => String(c.args[0]));
+    return ctx.calls.filter((c) => c.name === "fillText").map((c) => String(c.args[0]));
   }
 
   function captureTextCalls(ctx) {
@@ -189,7 +160,7 @@ describe("runtime/widget-registrar.js", function () {
     ctx.fillText = function () {
       captured.push({
         text: String(arguments[0]),
-        font: ctx.font,
+        font: ctx.font
       });
       return originalFillText.apply(this, arguments);
     };
@@ -197,28 +168,22 @@ describe("runtime/widget-registrar.js", function () {
   }
 
   it("applies static host classes even when the component has no renderCanvas", function () {
-    const {
-      context,
-      registerWidget,
-      hostActions,
-      runtimeHostActions,
-    } =
-      setupContext();
+    const { context, registerWidget, hostActions, runtimeHostActions } = setupContext();
     const seen = [];
     const componentSpec = {
       wantsHideNativeHead: true,
       renderHtml() {
         seen.push(this.hostActions);
         return "<div>ok</div>";
-      },
+      }
     };
 
     context.DyniPlugin.runtime.registerWidget(componentSpec, {
       def: {
         name: "dyni_HtmlOnly",
         className: "customClass",
-        editableParameters: {},
-      },
+        editableParameters: {}
+      }
     });
 
     const [registeredDef] = registerWidget.mock.calls[0];
@@ -232,5 +197,4 @@ describe("runtime/widget-registrar.js", function () {
     expect(seen).toEqual([hostActions]);
     expect(runtimeHostActions).toHaveBeenCalledTimes(1);
   });
-
 });

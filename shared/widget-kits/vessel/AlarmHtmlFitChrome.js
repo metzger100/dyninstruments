@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAlarmHtmlFitChrome = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniValueMathApi["toObject"]} */
@@ -159,12 +159,24 @@
     if (m.showStrip !== true) {
       return "";
     }
-    return "left:" + chrome.stripLeft + "px;"
-      + "top:" + chrome.stripTop + "px;"
-      + "bottom:" + chrome.stripBottom + "px;"
-      + "width:" + chrome.stripWidth + "px;"
-      + "border-radius:" + chrome.stripRadius + "px;"
-      + htmlUtils.toStyleText("background-color", tokens.strip);
+    return (
+      "left:" +
+      chrome.stripLeft +
+      "px;" +
+      "top:" +
+      chrome.stripTop +
+      "px;" +
+      "bottom:" +
+      chrome.stripBottom +
+      "px;" +
+      "width:" +
+      chrome.stripWidth +
+      "px;" +
+      "border-radius:" +
+      chrome.stripRadius +
+      "px;" +
+      htmlUtils.toStyleText("background-color", tokens.strip)
+    );
   }
 
   /**
@@ -241,4 +253,4 @@
   }
 
   return { id: "AlarmHtmlFitChrome", create: create };
-}));
+});

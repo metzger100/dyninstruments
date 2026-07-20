@@ -77,10 +77,9 @@
         throw new Error("dyninstruments: fetch is required to preload svg assets");
       }
 
-      return fetchFn(url)
-        .then(function (response) {
-          return checkResponseOk(response, url, "svg").text();
-        });
+      return fetchFn(url).then(function (response) {
+        return checkResponseOk(response, url, "svg").text();
+      });
     }
 
     /** @param {string} url @returns {Promise<unknown>} */
@@ -90,10 +89,9 @@
         throw new Error("dyninstruments: fetch is required to preload audio assets");
       }
 
-      return fetchFn(url)
-        .then(function (response) {
-          return checkResponseOk(response, url, "audio").arrayBuffer();
-        });
+      return fetchFn(url).then(function (response) {
+        return checkResponseOk(response, url, "audio").arrayBuffer();
+      });
     }
 
     /** @param {string} url @returns {Promise<unknown>} */
@@ -103,10 +101,9 @@
         throw new Error("dyninstruments: fetch is required to preload json assets");
       }
 
-      return fetchFn(url)
-        .then(function (response) {
-          return checkResponseOk(response, url, "json").json();
-        });
+      return fetchFn(url).then(function (response) {
+        return checkResponseOk(response, url, "json").json();
+      });
     }
 
     /** @param {string} url @returns {Promise<unknown>} */
@@ -188,25 +185,27 @@
         value: null
       });
 
-      return loadAsset(asset)
-        .then(function (value) {
-          cache.set(asset.key, {
-            status: "loaded",
-            type: asset.type,
-            value: value
-          });
-          return value;
-        })
-        // dyni-lint-disable-next-line catch-fallback-without-suppression -- Known asset preload failures degrade to null after logging so widgets can fall back gracefully.
-        .catch(function (error) {
-          cache.set(asset.key, {
-            status: "failed",
-            type: asset.type,
-            value: null
-          });
-          console.warn("dyninstruments: failed to preload asset '" + asset.key + "' from " + url + ":", error);
-          return null;
-        });
+      return (
+        loadAsset(asset)
+          .then(function (value) {
+            cache.set(asset.key, {
+              status: "loaded",
+              type: asset.type,
+              value: value
+            });
+            return value;
+          })
+          // dyni-boundary-next-line(category: browser-asset-loading, owner: Metzger100, date: 2026-07-17) -- Known asset preload failures degrade to null after logging so widgets can fall back gracefully.
+          .catch(function (error) {
+            cache.set(asset.key, {
+              status: "failed",
+              type: asset.type,
+              value: null
+            });
+            console.warn("dyninstruments: failed to preload asset '" + asset.key + "' from " + url + ":", error);
+            return null;
+          })
+      );
     }
 
     /** @param {unknown} assetDeclarations @returns {Promise<unknown[]>} */
@@ -215,9 +214,11 @@
         throw new Error("dyninstruments: asset declarations must be an array");
       }
 
-      return Promise.all(assetDeclarations.map(function (asset) {
-        return preloadOne(validateAssetDeclaration(asset));
-      }));
+      return Promise.all(
+        assetDeclarations.map(function (asset) {
+          return preloadOne(validateAssetDeclaration(asset));
+        })
+      );
     }
 
     /** @param {string} key @returns {unknown} */
@@ -239,4 +240,4 @@
   }
 
   runtime.createAssetPreloader = createAssetPreloader;
-}(this));
+})(this);

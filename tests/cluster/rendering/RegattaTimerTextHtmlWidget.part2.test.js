@@ -1,3 +1,4 @@
+// @ts-nocheck
 const {
   parseStyle,
   readPx,
@@ -6,7 +7,7 @@ const {
   makeProps,
   withSurfacePolicy,
   createMountedRenderer,
-  installFakeTimerHooks,
+  installFakeTimerHooks
 } = require("./RegattaTimerTextHtmlWidget.harness.js");
 
 installFakeTimerHooks();
@@ -18,11 +19,11 @@ describe("RegattaTimerTextHtmlWidget", function () {
         makeProps({
           regattaTimerRatioThresholdNormal: 1.0,
           regattaTimerRatioThresholdFlat: 3.0,
-          regattaProgressBar: true,
+          regattaProgressBar: true
         }),
-        "dispatch",
+        "dispatch"
       ),
-      shellSize: { width: 200, height: 100 },
+      shellSize: { width: 200, height: 100 }
     });
     expect(mounted.html()).toContain("dyni-regatta-mode-normal");
     expect(mounted.mountEl.querySelector(".dyni-regatta-bar")).toBeTruthy();
@@ -32,10 +33,10 @@ describe("RegattaTimerTextHtmlWidget", function () {
         makeProps({
           regattaTimerRatioThresholdNormal: 1.0,
           regattaTimerRatioThresholdFlat: 1.5,
-          regattaProgressBar: true,
+          regattaProgressBar: true
         }),
-        "dispatch",
-      ),
+        "dispatch"
+      )
     );
     expect(mounted.html()).toContain("dyni-regatta-mode-flat");
 
@@ -44,10 +45,10 @@ describe("RegattaTimerTextHtmlWidget", function () {
         makeProps({
           regattaTimerRatioThresholdNormal: 2.5,
           regattaTimerRatioThresholdFlat: 4.0,
-          regattaProgressBar: false,
+          regattaProgressBar: false
         }),
-        "dispatch",
-      ),
+        "dispatch"
+      )
     );
     expect(mounted.html()).toContain("dyni-regatta-mode-high");
     expect(mounted.mountEl.querySelector(".dyni-regatta-bar")).toBeFalsy();
@@ -59,11 +60,11 @@ describe("RegattaTimerTextHtmlWidget", function () {
         makeProps({
           regattaProgressBar: true,
           regattaTimerRatioThresholdNormal: 1.0,
-          regattaTimerRatioThresholdFlat: 3.0,
+          regattaTimerRatioThresholdFlat: 3.0
         }),
-        "dispatch",
+        "dispatch"
       ),
-      shellSize: { width: 220, height: 120 },
+      shellSize: { width: 220, height: 120 }
     });
 
     function expectTopBar(expectedModeClass) {
@@ -83,10 +84,10 @@ describe("RegattaTimerTextHtmlWidget", function () {
         makeProps({
           regattaProgressBar: true,
           regattaTimerRatioThresholdNormal: 1.0,
-          regattaTimerRatioThresholdFlat: 1.5,
+          regattaTimerRatioThresholdFlat: 1.5
         }),
-        "dispatch",
-      ),
+        "dispatch"
+      )
     );
     expectTopBar("dyni-regatta-mode-flat");
 
@@ -95,16 +96,14 @@ describe("RegattaTimerTextHtmlWidget", function () {
         makeProps({
           regattaProgressBar: true,
           regattaTimerRatioThresholdNormal: 2.5,
-          regattaTimerRatioThresholdFlat: 4.0,
+          regattaTimerRatioThresholdFlat: 4.0
         }),
-        "dispatch",
-      ),
+        "dispatch"
+      )
     );
     expectTopBar("dyni-regatta-mode-high");
 
-    mounted.update(
-      withSurfacePolicy(makeProps({ regattaProgressBar: false }), "dispatch"),
-    );
+    mounted.update(withSurfacePolicy(makeProps({ regattaProgressBar: false }), "dispatch"));
     expect(mounted.mountEl.querySelector(".dyni-regatta-bar")).toBeFalsy();
   });
 
@@ -113,11 +112,11 @@ describe("RegattaTimerTextHtmlWidget", function () {
       props: withSurfacePolicy(
         makeProps({
           regattaTimerRatioThresholdNormal: 1.0,
-          regattaTimerRatioThresholdFlat: 3.0,
+          regattaTimerRatioThresholdFlat: 3.0
         }),
-        "dispatch",
+        "dispatch"
       ),
-      shellSize: { width: 128, height: 64 },
+      shellSize: { width: 128, height: 64 }
     });
     mounted.clickAction("regatta-start");
     vi.advanceTimersByTime(56000);
@@ -133,7 +132,7 @@ describe("RegattaTimerTextHtmlWidget", function () {
     expect(timerSize).toBeGreaterThan(0);
     expect(buttonHeight).toBeGreaterThan(0);
     expect(parseStyle(button.getAttribute("style"))["max-height"]).toBe(
-      parseStyle(button.getAttribute("style"))["height"],
+      parseStyle(button.getAttribute("style"))["height"]
     );
     expect(parseStyle(button.getAttribute("style"))["min-height"]).toBe("0");
     expect(parseStyle(display.getAttribute("style"))["min-height"]).toBe("0");
@@ -146,29 +145,25 @@ describe("RegattaTimerTextHtmlWidget", function () {
       props: withSurfacePolicy(
         makeProps({
           regattaTimerRatioThresholdNormal: 1.0,
-          regattaTimerRatioThresholdFlat: 3.0,
+          regattaTimerRatioThresholdFlat: 3.0
         }),
-        "dispatch",
+        "dispatch"
       ),
-      shellSize: { width: 220, height: 120 },
+      shellSize: { width: 220, height: 120 }
     });
 
     mounted.clickAction("regatta-start");
 
     const controls = mounted.mountEl.querySelector(".dyni-regatta-controls");
     const syncButton = mounted.mountEl.querySelector(".dyni-regatta-btn-sync");
-    const resetButton = mounted.mountEl.querySelector(
-      ".dyni-regatta-btn-reset",
-    );
+    const resetButton = mounted.mountEl.querySelector(".dyni-regatta-btn-reset");
     const controlsStyle = parseStyle(controls.getAttribute("style"));
     const syncStyle = parseStyle(syncButton.getAttribute("style"));
     const resetStyle = parseStyle(resetButton.getAttribute("style"));
 
     expect(syncButton).toBeTruthy();
     expect(resetButton).toBeTruthy();
-    expect(controlsStyle["grid-template-columns"]).toBe(
-      "repeat(2,minmax(0,1fr))",
-    );
+    expect(controlsStyle["grid-template-columns"]).toBe("repeat(2,minmax(0,1fr))");
     expect(controlsStyle["grid-template-rows"]).toBe("minmax(0,1fr)");
     expect(syncStyle.height).toBe(syncStyle["max-height"]);
     expect(resetStyle.height).toBe(resetStyle["max-height"]);
@@ -179,11 +174,11 @@ describe("RegattaTimerTextHtmlWidget", function () {
       props: withSurfacePolicy(
         makeProps({
           regattaTimerRatioThresholdNormal: 1.0,
-          regattaTimerRatioThresholdFlat: 3.0,
+          regattaTimerRatioThresholdFlat: 3.0
         }),
-        "dispatch",
+        "dispatch"
       ),
-      shellSize: { width: 70, height: 220 },
+      shellSize: { width: 70, height: 220 }
     });
     const timeEl = mounted.mountEl.querySelector(".dyni-regatta-time");
     const startBtn = mounted.mountEl.querySelector(".dyni-regatta-btn-start");
@@ -205,17 +200,13 @@ describe("RegattaTimerTextHtmlWidget", function () {
       props: withSurfacePolicy(
         makeProps({
           regattaTimerRatioThresholdNormal: 1.0,
-          regattaTimerRatioThresholdFlat: 3.0,
+          regattaTimerRatioThresholdFlat: 3.0
         }),
-        "dispatch",
+        "dispatch"
       ),
-      shellSize: { width: 220, height: 120 },
+      shellSize: { width: 220, height: 120 }
     });
-    const basePayload = mounted.payloadFor(
-      mounted.currentProps,
-      mounted.currentRevision,
-      { width: 220, height: 120 },
-    );
+    const basePayload = mounted.payloadFor(mounted.currentProps, mounted.currentRevision, { width: 220, height: 120 });
     const baseSig = mounted.committed.layoutSignature(basePayload);
 
     mounted.clickAction("regatta-start");
@@ -223,26 +214,21 @@ describe("RegattaTimerTextHtmlWidget", function () {
     const tickingSig = mounted.committed.layoutSignature(basePayload);
     expect(tickingSig).not.toBe(baseSig);
 
-    const shellChangedPayload = mounted.payloadFor(
-      mounted.currentProps,
-      mounted.currentRevision + 1,
-      { width: 260, height: 120 },
-    );
+    const shellChangedPayload = mounted.payloadFor(mounted.currentProps, mounted.currentRevision + 1, {
+      width: 260,
+      height: 120
+    });
     const shellSig = mounted.committed.layoutSignature(shellChangedPayload);
     expect(shellSig).not.toBe(tickingSig);
 
     const modeProps = withSurfacePolicy(
       makeProps({
         regattaTimerRatioThresholdNormal: 1.0,
-        regattaTimerRatioThresholdFlat: 1.5,
+        regattaTimerRatioThresholdFlat: 1.5
       }),
-      "dispatch",
+      "dispatch"
     );
-    const modePayload = mounted.payloadFor(
-      modeProps,
-      mounted.currentRevision + 2,
-      { width: 220, height: 120 },
-    );
+    const modePayload = mounted.payloadFor(modeProps, mounted.currentRevision + 2, { width: 220, height: 120 });
     const modeSig = mounted.committed.layoutSignature(modePayload);
     expect(modeSig).not.toBe(shellSig);
   });
@@ -252,10 +238,10 @@ describe("RegattaTimerTextHtmlWidget", function () {
       props: withSurfacePolicy(
         makeProps({
           regattaSoundEnabled: false,
-          regattaDuration: 3,
+          regattaDuration: 3
         }),
-        "dispatch",
-      ),
+        "dispatch"
+      )
     });
     silent.clickAction("regatta-start");
     vi.advanceTimersByTime(61000);
@@ -265,10 +251,10 @@ describe("RegattaTimerTextHtmlWidget", function () {
       props: withSurfacePolicy(
         makeProps({
           regattaSoundEnabled: true,
-          regattaDuration: 3,
+          regattaDuration: 3
         }),
-        "dispatch",
-      ),
+        "dispatch"
+      )
     });
     audible.clickAction("regatta-start");
     vi.advanceTimersByTime(61000);
@@ -278,7 +264,7 @@ describe("RegattaTimerTextHtmlWidget", function () {
   it("detach removes root and clears timer interval, and destroy delegates to detach", function () {
     const clearIntervalSpy = vi.spyOn(globalThis, "clearInterval");
     const mounted = createMountedRenderer({
-      props: withSurfacePolicy(makeProps(), "dispatch"),
+      props: withSurfacePolicy(makeProps(), "dispatch")
     });
     mounted.clickAction("regatta-start");
     expect(mounted.mountEl.querySelector(".dyni-regatta-root")).toBeTruthy();
@@ -291,16 +277,12 @@ describe("RegattaTimerTextHtmlWidget", function () {
     expect(mounted.mountEl.innerHTML).toBe(afterDetachHtml);
 
     const mountedForDestroy = createMountedRenderer({
-      props: withSurfacePolicy(makeProps(), "dispatch"),
+      props: withSurfacePolicy(makeProps(), "dispatch")
     });
     mountedForDestroy.clickAction("regatta-start");
-    expect(
-      mountedForDestroy.mountEl.querySelector(".dyni-regatta-root"),
-    ).toBeTruthy();
+    expect(mountedForDestroy.mountEl.querySelector(".dyni-regatta-root")).toBeTruthy();
     mountedForDestroy.committed.destroy();
-    expect(
-      mountedForDestroy.mountEl.querySelector(".dyni-regatta-root"),
-    ).toBeFalsy();
+    expect(mountedForDestroy.mountEl.querySelector(".dyni-regatta-root")).toBeFalsy();
 
     clearIntervalSpy.mockRestore();
   });

@@ -7,6 +7,7 @@ describe("HtmlWidgetUtils", function () {
     return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js").create();
   }
 
+  /** @param {number} width @param {number} height */
   function createTarget(width, height) {
     return {
       getBoundingClientRect() {
@@ -28,7 +29,7 @@ describe("HtmlWidgetUtils", function () {
   it("escapes html text and serializes style attributes", function () {
     const utils = createUtils();
 
-    expect(utils.escapeHtml('<x>&"\'' )).toBe("&lt;x&gt;&amp;&quot;&#39;");
+    expect(utils.escapeHtml("<x>&\"'")).toBe("&lt;x&gt;&amp;&quot;&#39;");
     expect(utils.toStyleAttr(" font-size:10px; ")).toBe(' style="font-size:10px;"');
     expect(utils.toStyleAttr("   ")).toBe("");
   });
@@ -62,24 +63,30 @@ describe("HtmlWidgetUtils", function () {
       }
     };
 
-    expect(utils.resolveRatioMode({
-      hostContext: hostContext,
-      defaultRatioThresholdNormal: 1.2,
-      defaultRatioThresholdFlat: 3.8
-    })).toBe("high");
+    expect(
+      utils.resolveRatioMode({
+        hostContext: hostContext,
+        defaultRatioThresholdNormal: 1.2,
+        defaultRatioThresholdFlat: 3.8
+      })
+    ).toBe("high");
 
-    expect(utils.resolveRatioMode({
-      hostContext: { __dyniHostCommitState: { shellEl: createTarget(500, 100) } },
-      ratioThresholdNormal: 1.0,
-      ratioThresholdFlat: 3.0,
-      defaultRatioThresholdNormal: 1.2,
-      defaultRatioThresholdFlat: 3.8
-    })).toBe("flat");
+    expect(
+      utils.resolveRatioMode({
+        hostContext: { __dyniHostCommitState: { shellEl: createTarget(500, 100) } },
+        ratioThresholdNormal: 1.0,
+        ratioThresholdFlat: 3.0,
+        defaultRatioThresholdNormal: 1.2,
+        defaultRatioThresholdFlat: 3.8
+      })
+    ).toBe("flat");
 
-    expect(utils.resolveRatioMode({
-      hostContext: null,
-      defaultMode: "normal"
-    })).toBe("normal");
+    expect(
+      utils.resolveRatioMode({
+        hostContext: null,
+        defaultMode: "normal"
+      })
+    ).toBe("normal");
   });
 
   it("treats null and blank ratio thresholds as unset in resolveRatioModeForRect", function () {
@@ -88,36 +95,46 @@ describe("HtmlWidgetUtils", function () {
     const omitted = utils.resolveRatioModeForRect({ shellRect: rect });
 
     expect(omitted).toBe("normal");
-    expect(utils.resolveRatioModeForRect({
-      shellRect: rect,
-      ratioThresholdNormal: null,
-      ratioThresholdFlat: null
-    })).toBe(omitted);
-    expect(utils.resolveRatioModeForRect({
-      shellRect: rect,
-      ratioThresholdNormal: "   ",
-      ratioThresholdFlat: ""
-    })).toBe(omitted);
-    expect(utils.resolveRatioModeForRect({
-      shellRect: { width: 50, height: 100 },
-      defaultRatioThresholdNormal: null,
-      defaultRatioThresholdFlat: ""
-    })).toBe("high");
+    expect(
+      utils.resolveRatioModeForRect({
+        shellRect: rect,
+        ratioThresholdNormal: null,
+        ratioThresholdFlat: null
+      })
+    ).toBe(omitted);
+    expect(
+      utils.resolveRatioModeForRect({
+        shellRect: rect,
+        ratioThresholdNormal: "   ",
+        ratioThresholdFlat: ""
+      })
+    ).toBe(omitted);
+    expect(
+      utils.resolveRatioModeForRect({
+        shellRect: { width: 50, height: 100 },
+        defaultRatioThresholdNormal: null,
+        defaultRatioThresholdFlat: ""
+      })
+    ).toBe("high");
   });
 
   it("accepts valid numeric-string ratio thresholds", function () {
     const utils = createUtils();
 
-    expect(utils.resolveRatioModeForRect({
-      shellRect: { width: 200, height: 100 },
-      ratioThresholdNormal: "2.1",
-      ratioThresholdFlat: "3.0"
-    })).toBe("high");
-    expect(utils.resolveRatioModeForRect({
-      shellRect: { width: 200, height: 100 },
-      ratioThresholdNormal: "1.0",
-      ratioThresholdFlat: "1.6"
-    })).toBe("flat");
+    expect(
+      utils.resolveRatioModeForRect({
+        shellRect: { width: 200, height: 100 },
+        ratioThresholdNormal: "2.1",
+        ratioThresholdFlat: "3.0"
+      })
+    ).toBe("high");
+    expect(
+      utils.resolveRatioModeForRect({
+        shellRect: { width: 200, height: 100 },
+        ratioThresholdNormal: "1.0",
+        ratioThresholdFlat: "1.6"
+      })
+    ).toBe("flat");
   });
 
   it("detects editing mode from editing and dyniLayoutEditing flags", function () {
@@ -144,7 +161,7 @@ describe("HtmlWidgetUtils", function () {
       expect(firstResult).toBe(firstChild);
       expect(secondResult).toBe(firstChild);
       expect(root.firstElementChild).toBe(firstChild);
-      expect(root[LAST_PATCHED_MARKUP_KEY]).toBe(markup);
+      expect(/** @type {any} */ (root)[LAST_PATCHED_MARKUP_KEY]).toBe(markup);
     } finally {
       createElementSpy.mockRestore();
     }
@@ -160,26 +177,26 @@ describe("HtmlWidgetUtils", function () {
     const replaceMarkup = '<section class="two">C</section>';
 
     utils.patchInnerHtml(root, appendMarkup);
-    expect(root[LAST_PATCHED_MARKUP_KEY]).toBe(appendMarkup);
+    expect(/** @type {any} */ (root)[LAST_PATCHED_MARKUP_KEY]).toBe(appendMarkup);
 
     const syncNode = root.firstElementChild;
     utils.patchInnerHtml(root, syncMarkup);
-    expect(root[LAST_PATCHED_MARKUP_KEY]).toBe(syncMarkup);
+    expect(/** @type {any} */ (root)[LAST_PATCHED_MARKUP_KEY]).toBe(syncMarkup);
     expect(root.firstElementChild).toBe(syncNode);
-    expect(root.firstElementChild.textContent).toBe("B");
+    expect(/** @type {Element} */ (root.firstElementChild).textContent).toBe("B");
 
     utils.patchInnerHtml(root, replaceMarkup);
-    expect(root[LAST_PATCHED_MARKUP_KEY]).toBe(replaceMarkup);
-    expect(root.firstElementChild.tagName).toBe("SECTION");
+    expect(/** @type {any} */ (root)[LAST_PATCHED_MARKUP_KEY]).toBe(replaceMarkup);
+    expect(/** @type {Element} */ (root.firstElementChild).tagName).toBe("SECTION");
 
     const cleared = utils.patchInnerHtml(root, "");
     expect(cleared).toBe(null);
-    expect(root[LAST_PATCHED_MARKUP_KEY]).toBe("");
+    expect(/** @type {any} */ (root)[LAST_PATCHED_MARKUP_KEY]).toBe("");
     expect(root.firstElementChild).toBe(null);
 
     const descriptor = Object.getOwnPropertyDescriptor(root, LAST_PATCHED_MARKUP_KEY);
     expect(descriptor).toBeTruthy();
-    expect(descriptor.enumerable).toBe(false);
+    expect(/** @type {PropertyDescriptor} */ (descriptor).enumerable).toBe(false);
   });
 
   it("keeps structural sync behavior in non-jsdom environments", function () {
@@ -195,7 +212,7 @@ describe("HtmlWidgetUtils", function () {
       expect(createElementSpy).toHaveBeenCalledWith("template");
       expect(result).toBe(stableRoot);
       expect(root.firstElementChild).toBe(stableRoot);
-      expect(root.querySelector("span").textContent).toBe("Two");
+      expect(/** @type {Element} */ (root.querySelector("span")).textContent).toBe("Two");
     } finally {
       createElementSpy.mockRestore();
     }

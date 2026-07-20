@@ -69,6 +69,44 @@ describe("maintained quality owners", function () {
     expect(result.messages[0].message).toContain("Missing @file");
   });
 
+  it("rejects a misspelled test global through the strict test lint boundary", async function () {
+    const fixture = path.join(root, "tests/tools/lint-fixtures/misspelled-test-global.test.js");
+    const result = await lintJavaScript(
+      fixture,
+      path.join(root, "tests/tools/lint-fixtures-proof/misspelled-test-global.test.js")
+    );
+
+    expect(
+      result.messages.some(function (message) {
+        return message.ruleId === "no-undef" && message.message.includes("exepct");
+      })
+    ).toBe(true);
+  });
+
+  it("rejects an incompatible test mock through the strict test typecheck boundary", function () {
+    const fixture = path.join(root, "tests/tools/lint-fixtures/incompatible-mock.js");
+    const result = spawnSync(
+      process.execPath,
+      [
+        path.join(root, "node_modules/typescript/bin/tsc"),
+        "--allowJs",
+        "--checkJs",
+        "--noEmit",
+        "--strict",
+        "--target",
+        "ES2020",
+        "--lib",
+        "ES2020,DOM",
+        "--skipLibCheck",
+        fixture
+      ],
+      { encoding: "utf8" }
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stdout).toContain("lineTo");
+  });
+
   it("uses the real Stylelint configuration for the namespace fixtures", async function () {
     const valid = path.join(root, "tests/css/lint-fixtures/namespace-valid.css");
     const invalid = path.join(root, "tests/css/lint-fixtures/namespace-invalid.css");
@@ -92,6 +130,7 @@ describe("maintained quality owners", function () {
   });
 });
 
+/** @param {string} filePath @param {string} [virtualFilePath] */
 async function lintJavaScript(filePath, virtualFilePath) {
   const eslint = new ESLint({
     overrideConfigFile: path.join(root, "eslint.config.mjs"),

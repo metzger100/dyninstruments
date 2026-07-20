@@ -87,7 +87,9 @@ describe("component registry contract", function () {
     retiredOwners.FORBIDDEN_COMPONENT_IDS.forEach(function (componentId) {
       expect(components[componentId], componentId).toBeUndefined();
     });
-    expect(contract.dependencyViolations(components, retiredOwners.FORBIDDEN_COMPONENT_IDS)).toEqual([]);
+    expect(
+      contract.dependencyViolations(components, /** @type {string[]} */ (retiredOwners.FORBIDDEN_COMPONENT_IDS))
+    ).toEqual([]);
     retiredOwners.FORBIDDEN_OWNER_MODULE_PATHS.forEach(function (relPath) {
       expect(fs.existsSync(path.join(process.cwd(), relPath)), relPath).toBe(false);
     });

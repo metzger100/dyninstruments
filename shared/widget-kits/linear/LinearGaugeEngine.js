@@ -27,13 +27,16 @@
     const DEFAULT_TICK_PROPS = { major: "tickMajor", minor: "tickMinor", showEndLabels: "showEndLabels" };
     const DEFAULT_TICK_PRESET = { major: 10, minor: 2 };
     const GU = /** @type {DyniLinearGaugeFacade} */ (componentContext.components.require("GaugeToolkit"));
-    const layerCacheApi = /** @type {DyniCanvasLayerCacheApi} */ (componentContext.components.require("CanvasLayerCache"));
+    const layerCacheApi = /** @type {DyniCanvasLayerCacheApi} */ (
+      componentContext.components.require("CanvasLayerCache")
+    );
     const primitives = componentContext.components.require("LinearCanvasPrimitives");
     const drawing = componentContext.components.require("LinearGaugeEngineDrawing");
     const math = componentContext.components.require("LinearGaugeMath");
     const layoutApi = componentContext.components.require("LinearGaugeLayout");
     const textLayout = componentContext.components.require("LinearGaugeTextLayout");
     const engineSupport = componentContext.components.require("LinearGaugeEngineSupport");
+    const engineFrame = componentContext.components.require("LinearGaugeEngineFrame");
     const scaleHelpers = componentContext.components.require("TextLayoutScaleHelpers");
     const stableDigits = componentContext.components.require("StableDigits");
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
@@ -77,33 +80,42 @@
       const unitDefault = hasOwn.call(cfg, "unitDefault") ? cfg.unitDefault : "";
       const springTarget = cfg.springTarget === "axis" ? "axis" : "pointer";
       const springWrap = Number(cfg.springWrap);
-      const springMotion = componentContext.components.require("SpringEasing").createMotion(Number.isFinite(springWrap) ? { wrap: springWrap } : {});
+      const springMotion = componentContext.components
+        .require("SpringEasing")
+        .createMotion(Number.isFinite(springWrap) ? { wrap: springWrap } : {});
       const layoutCfg = hasOwn.call(cfg, "layout") ? cfg.layout : null;
       const resolveAxisFn = typeof cfg.resolveAxis === "function" ? cfg.resolveAxis : null;
       const buildTicksFn = typeof cfg.buildTicks === "function" ? cfg.buildTicks : null;
-      const buildSectorsFn = typeof cfg.buildSectors === "function"
-        ? cfg.buildSectors
-        : function () {
-          return [];
-        };
-      const tickSteps = typeof cfg.tickSteps === "function"
-        ? cfg.tickSteps
-        : function () {
-          return DEFAULT_TICK_PRESET;
-        };
+      const buildSectorsFn =
+        typeof cfg.buildSectors === "function"
+          ? cfg.buildSectors
+          : function () {
+              return [];
+            };
+      const tickSteps =
+        typeof cfg.tickSteps === "function"
+          ? cfg.tickSteps
+          : function () {
+              return DEFAULT_TICK_PRESET;
+            };
       const hideTextualMetricsProp =
         typeof cfg.hideTextualMetricsProp === "string" && cfg.hideTextualMetricsProp ? cfg.hideTextualMetricsProp : "";
       const labelEdgePolicy = engineSupport.resolveLabelEdgePolicy(cfg);
       const formatDisplayFn = /** @type {DyniLinearFormatDisplay | undefined} */ (cfg.formatDisplay);
-      const formatDisplay = typeof formatDisplayFn === "function"
-        ? /** @type {DyniLinearFormatDisplay} */ (function (rawValue, props, unitText) {
-          return formatDisplayFn(rawValue, props, unitText, componentContext);
-        })
-        : /** @type {DyniLinearFormatDisplay} */ (function (rawValue) {
-          const numericRaw = value.toOptionalFiniteNumber(rawValue);
-          if (typeof numericRaw !== "number") return { num: NaN, text: "" };
-          return { num: numericRaw, text: String(rawValue) };
-        });
+      const formatDisplay =
+        typeof formatDisplayFn === "function"
+          ? /** @type {DyniLinearFormatDisplay} */ (
+              function (rawValue, props, unitText) {
+                return formatDisplayFn(rawValue, props, unitText, componentContext);
+              }
+            )
+          : /** @type {DyniLinearFormatDisplay} */ (
+              function (rawValue) {
+                const numericRaw = value.toOptionalFiniteNumber(rawValue);
+                if (typeof numericRaw !== "number") return { num: NaN, text: "" };
+                return { num: numericRaw, text: String(rawValue) };
+              }
+            );
       const layerCache = layerCacheApi.createLayerCache({ layers: ["back", "front"] });
 
       /** @param {HTMLCanvasElement} canvas @param {DyniLinearGaugeProps} props */
@@ -125,7 +137,10 @@
         const family = stableDigitsEnabled ? theme.font.familyMono || theme.font.family : theme.font.family;
         const color = theme.surface.fg;
         const labelWeight = theme.font.labelWeight;
-        const stateKind = stateScreenPrecedence.pickFirst([{ kind: "disconnected", when: p.disconnect === true }, { kind: "data", when: true }]);
+        const stateKind = stateScreenPrecedence.pickFirst([
+          { kind: "disconnected", when: p.disconnect === true },
+          { kind: "data", when: true }
+        ]);
         ctx.clearRect(0, 0, W, H);
         if (stateKind !== stateScreenLabels.KINDS.DATA) {
           stateScreenCanvasOverlay.drawStateScreen({
@@ -139,7 +154,8 @@
           });
           return;
         }
-        const hideTextualMetrics = p.hideTextualMetrics === true || (hideTextualMetricsProp && p[hideTextualMetricsProp] === true);
+        const hideTextualMetrics =
+          p.hideTextualMetrics === true || (hideTextualMetricsProp && p[hideTextualMetricsProp] === true);
         const mode = layoutApi.computeMode(
           W,
           H,
@@ -194,7 +210,8 @@
             }).padded
           : valueRawText;
         const secScale = value.clamp(p.captionUnitScale, 0.3, 3.0);
-        const rowBoxes = /** @type {{ captionBox: DyniRect | null | undefined, valueBox: DyniRect | null | undefined, top: { captionBox: DyniRect | null | undefined, valueBox: DyniRect | null | undefined } | null, bottom: { captionBox: DyniRect | null | undefined, valueBox: DyniRect | null | undefined } | null }} */ ({
+        const rowBoxes =
+          /** @type {{ captionBox: DyniRect | null | undefined, valueBox: DyniRect | null | undefined, top: { captionBox: DyniRect | null | undefined, valueBox: DyniRect | null | undefined } | null, bottom: { captionBox: DyniRect | null | undefined, valueBox: DyniRect | null | undefined } | null }} */ ({
             captionBox: null,
             valueBox: null,
             top: null,
@@ -254,7 +271,10 @@
           labelFontPx: labelFontPx,
           labelInsetPx: labelInsetPx,
           labelEdgePolicy: labelEdgePolicy,
-          mapValueToX: /** @param {unknown} valueNum @param {boolean} [doClamp] @returns {number} */ function (valueNum, doClamp) {
+          mapValueToX: /** @param {unknown} valueNum @param {boolean} [doClamp] @returns {number} */ function (
+            valueNum,
+            doClamp
+          ) {
             return math.mapValueToX(valueNum, axis.min, axis.max, layout.scaleX0, layout.scaleX1, doClamp);
           }
         };
@@ -286,12 +306,19 @@
           rowBoxes: rowBoxes,
           parsed: display
         };
-        const formatTickLabelFn = /** @type {((tickValue: unknown, state: DyniLinearGaugeDrawingState, props: DyniLinearGaugeProps, hooks: Record<string, unknown>) => string) | undefined} */ (cfg.formatTickLabel);
-        const tickLabelFormatter = typeof formatTickLabelFn === "function"
-          ? /** @param {unknown} tickValue @param {DyniLinearGaugeDrawingState} tickState */ function (tickValue, tickState) {
-            return formatTickLabelFn(tickValue, tickState || state, p, hookApi);
-          }
-          : null;
+        const formatTickLabelFn =
+          /** @type {((tickValue: unknown, state: DyniLinearGaugeDrawingState, props: DyniLinearGaugeProps, hooks: Record<string, unknown>) => string) | undefined} */ (
+            cfg.formatTickLabel
+          );
+        const tickLabelFormatter =
+          typeof formatTickLabelFn === "function"
+            ? /** @param {unknown} tickValue @param {DyniLinearGaugeDrawingState} tickState */ function (
+                tickValue,
+                tickState
+              ) {
+                return formatTickLabelFn(tickValue, tickState || state, p, hookApi);
+              }
+            : null;
         const staticKey = engineSupport.buildStaticKey(math, state, {
           tickMajor: tickMajor,
           tickMinor: tickMinor,
@@ -304,7 +331,14 @@
         layerCache.ensureLayer(canvas, staticKey, function (layerCtx, layerName) {
           layerCtx.setTransform(1, 0, 0, 1, 0, 0);
           layerCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-          layerCtx.setTransform(canvasElement.width / Math.max(1, W), 0, 0, canvasElement.height / Math.max(1, H), 0, 0);
+          layerCtx.setTransform(
+            canvasElement.width / Math.max(1, W),
+            0,
+            0,
+            canvasElement.height / Math.max(1, H),
+            0,
+            0
+          );
           layerCtx.fillStyle = color;
           layerCtx.strokeStyle = color;
           if (layerName === "back") {
@@ -315,83 +349,27 @@
         });
         layerCache.blitLayer(ctx, "back");
 
-        const drawApi = {
-          drawDefaultPointer: /** @param {DyniLinearDrawOptions} [opts] */ function (opts) {
-            drawing.drawPointerAtValue(
-              ctx,
-              state,
-              layout,
-              theme,
-              primitives,
-              state.mapValueToX,
-              easedDisplayNum,
-              pointerDepthBase,
-              markerSizeBase,
-              opts
-            );
-          },
-          drawPointerAtValue: /** @param {unknown} valueNum @param {DyniLinearDrawOptions} [opts] */ function (valueNum, opts) {
-            drawing.drawPointerAtValue(
-              ctx,
-              state,
-              layout,
-              theme,
-              primitives,
-              state.mapValueToX,
-              valueNum,
-              pointerDepthBase,
-              markerSizeBase,
-              opts
-            );
-          },
-          drawMarkerAtValue: /** @param {unknown} valueNum @param {DyniLinearDrawOptions} [opts] */ function (valueNum, opts) {
-            drawing.drawMarkerAtValue(
-              ctx,
-              state,
-              layout,
-              theme,
-              primitives,
-              state.mapValueToX,
-              valueNum,
-              markerSizeBase,
-              opts
-            );
-          }
-        };
-        let drawResult = null;
-        if (typeof cfg.drawFrame === "function")
-          drawResult = cfg.drawFrame(
-            state,
-            p,
-            /** @type {DyniLinearRichDisplay} */ (/** @type {unknown} */ (displayState)),
-            Object.assign({}, hookApi, drawApi)
-          );
-        else drawApi.drawDefaultPointer();
-
-        layerCache.blitLayer(ctx, "front");
-
-        const modeKey = /** @type {"flat" | "normal" | "high"} */ (state.mode);
-        const modeRenderer = cfg.drawMode && cfg.drawMode[modeKey];
-        let modeResult = null;
-        if (typeof modeRenderer === "function") {
-          modeResult = modeRenderer(state, p, /** @type {DyniLinearRichDisplay} */ (/** @type {unknown} */ (displayState)), Object.assign({}, hookApi, drawApi));
-        } else if (state.mode === "high") {
-          textLayout.drawCaptionRow(state, text, displayState.caption, rowBoxes.captionBox, secScale, "center");
-          textLayout.drawValueUnitRow(state, text, valueText, unit, rowBoxes.valueBox, secScale, "center");
-        } else if (state.mode === "normal") {
-          textLayout.drawInlineRow(state, text, displayState.caption, valueText, unit, state.layout.inlineBox, secScale);
-        } else {
-          textLayout.drawCaptionRow(state, text, displayState.caption, rowBoxes.captionBox, secScale, "right");
-          textLayout.drawValueUnitRow(state, text, valueText, unit, rowBoxes.valueBox, secScale, "right");
-        }
-
-        if (
-          (drawResult && drawResult.wantsFollowUpFrame === true) ||
-          (modeResult && modeResult.wantsFollowUpFrame === true) ||
-          springMotion.isActive(canvasElement)
-        ) {
-          return { wantsFollowUpFrame: true };
-        }
+        return engineFrame.renderFrame(ctx, state, canvasElement, {
+          layout: layout,
+          theme: theme,
+          primitives: primitives,
+          drawing: drawing,
+          easedDisplayNum: easedDisplayNum,
+          pointerDepthBase: pointerDepthBase,
+          markerSizeBase: markerSizeBase,
+          cfg: cfg,
+          p: p,
+          displayState: displayState,
+          hookApi: hookApi,
+          text: text,
+          textLayout: textLayout,
+          valueText: valueText,
+          unit: unit,
+          rowBoxes: rowBoxes,
+          secScale: secScale,
+          layerCache: layerCache,
+          springMotion: springMotion
+        });
       };
     }
 

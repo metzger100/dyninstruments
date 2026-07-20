@@ -7,7 +7,9 @@
 
   const ns = /** @type {DyniPluginNamespace & { runtime: DyniTemporaryBridgeRuntime }} */ (root.DyniPlugin);
   const runtime = ns.runtime;
-  const valueMathModule = /** @type {{ create(): DyniValueMathApi }} */ (/** @type {unknown} */ (root.DyniComponents && root.DyniComponents.DyniValueMath));
+  const valueMathModule = /** @type {{ create(): DyniValueMathApi }} */ (
+    /** @type {unknown} */ (root.DyniComponents && root.DyniComponents.DyniValueMath)
+  );
   const valueMath = valueMathModule.create();
 
   /** @param {string} message @returns {Error} */
@@ -122,7 +124,9 @@
 
     /** @returns {DyniTemporaryRoutePointsApi | null | undefined} */
     function getRoutePointsApi() {
-      const avnavApi = /** @type {DyniTemporaryAvnavApi | null} */ (/** @type {unknown} */ (runtime.getAvnavApi(rootRef)));
+      const avnavApi = /** @type {DyniTemporaryAvnavApi | null} */ (
+        /** @type {unknown} */ (runtime.getAvnavApi(rootRef))
+      );
       return avnavApi && avnavApi.routePoints;
     }
 
@@ -151,24 +155,36 @@
 
     /** @param {string} pageId @param {boolean} hasRoutePointsRelay @param {boolean} hasEditRouteParityDispatch @param {boolean} hasAlarmDispatch @returns {DyniTemporaryCapabilities} */
     function buildCapabilitiesSnapshot(pageId, hasRoutePointsRelay, hasEditRouteParityDispatch, hasAlarmDispatch) {
+      let openActiveRoute;
+      if (pageId === "navpage") {
+        openActiveRoute = "dispatch";
+      } else if (pageId === "gpspage") {
+        openActiveRoute = "passive";
+      } else {
+        openActiveRoute = "unsupported";
+      }
+
       return freezeCapabilitiesSnapshot({
         pageId: pageId,
         routePoints: {
-          activate: pageId === "gpspage"
-            ? (hasRoutePointsRelay ? "dispatch" : "unsupported")
-            : (pageId === "editroutepage" && hasEditRouteParityDispatch ? "dispatch" : "unsupported")
+          activate:
+            pageId === "gpspage"
+              ? hasRoutePointsRelay
+                ? "dispatch"
+                : "unsupported"
+              : pageId === "editroutepage" && hasEditRouteParityDispatch
+                ? "dispatch"
+                : "unsupported"
         },
         map: {
           checkAutoZoom: pageId === "navpage" ? "dispatch" : "unsupported"
         },
         routeEditor: {
-          openActiveRoute: pageId === "navpage"
-            ? "dispatch"
-            : (pageId === "gpspage" ? "passive" : "unsupported"),
+          openActiveRoute: openActiveRoute,
           openEditRoute: pageId === "editroutepage" ? "dispatch" : "unsupported"
         },
         ais: {
-          showInfo: (pageId === "navpage" || pageId === "gpspage") ? "dispatch" : "unsupported"
+          showInfo: pageId === "navpage" || pageId === "gpspage" ? "dispatch" : "unsupported"
         },
         alarm: {
           stopAll: hasAlarmDispatch ? "dispatch" : "unsupported"
@@ -181,13 +197,18 @@
       const pageId = discovery.detectPageId();
       const routePointsApi = getRoutePointsApi();
       const hasRoutePointsRelay = !!(routePointsApi && typeof routePointsApi.activate === "function");
-      const hasEditRouteParityDispatch = pageId === "editroutepage"
-        && typeof discovery.findPageDispatchHandler(pageId, ["onItemClick", "widgetClick"]) === "function";
+      const hasEditRouteParityDispatch =
+        pageId === "editroutepage" &&
+        typeof discovery.findPageDispatchHandler(pageId, ["onItemClick", "widgetClick"]) === "function";
       const hasAlarmDispatch = discovery.hasAlarmDispatch();
-      const cacheKey = pageId
-        + "|" + (hasRoutePointsRelay ? "1" : "0")
-        + "|" + (hasEditRouteParityDispatch ? "1" : "0")
-        + "|" + (hasAlarmDispatch ? "1" : "0");
+      const cacheKey =
+        pageId +
+        "|" +
+        (hasRoutePointsRelay ? "1" : "0") +
+        "|" +
+        (hasEditRouteParityDispatch ? "1" : "0") +
+        "|" +
+        (hasAlarmDispatch ? "1" : "0");
       if (cacheKey === cachedCapabilitiesKey && cachedCapabilitiesSnapshot) {
         return cachedCapabilitiesSnapshot;
       }
@@ -251,9 +272,15 @@
             return false;
           }
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native Zoom dispatch until core exposes map actions.
-          return discovery.dispatchPageAction("map.checkAutoZoom", capabilities.pageId, {
-            item: { name: "Zoom" }
-          }, ["onItemClick"], "onItemClick");
+          return discovery.dispatchPageAction(
+            "map.checkAutoZoom",
+            capabilities.pageId,
+            {
+              item: { name: "Zoom" }
+            },
+            ["onItemClick"],
+            "onItemClick"
+          );
         }
       },
       routeEditor: {
@@ -264,9 +291,15 @@
             return false;
           }
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native ActiveRoute dispatch until core exposes routeEditor actions.
-          return discovery.dispatchPageAction("routeEditor.openActiveRoute", capabilities.pageId, {
-            item: { name: "ActiveRoute" }
-          }, ["onItemClick"], "onItemClick");
+          return discovery.dispatchPageAction(
+            "routeEditor.openActiveRoute",
+            capabilities.pageId,
+            {
+              item: { name: "ActiveRoute" }
+            },
+            ["onItemClick"],
+            "onItemClick"
+          );
         },
         openEditRoute: function () {
           ensureActive();
@@ -275,9 +308,15 @@
             return false;
           }
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native EditRoute dialog dispatch until core exposes routeEditor actions.
-          return discovery.dispatchPageAction("routeEditor.openEditRoute", capabilities.pageId, {
-            item: { name: "EditRoute" }
-          }, ["onItemClick"], "onItemClick");
+          return discovery.dispatchPageAction(
+            "routeEditor.openEditRoute",
+            capabilities.pageId,
+            {
+              item: { name: "EditRoute" }
+            },
+            ["onItemClick"],
+            "onItemClick"
+          );
         }
       },
       ais: {
@@ -289,10 +328,16 @@
           }
           const normalizedMmsi = normalizeMmsi(mmsi);
           // dyni-workaround(avnav-plugin-actions) -- use current page item-click wiring to reproduce native AIS info dispatch until core exposes AIS actions.
-          return discovery.dispatchPageAction("ais.showInfo", capabilities.pageId, {
-            item: { name: "AisTarget" },
-            mmsi: normalizedMmsi
-          }, ["onItemClick"], "onItemClick");
+          return discovery.dispatchPageAction(
+            "ais.showInfo",
+            capabilities.pageId,
+            {
+              item: { name: "AisTarget" },
+              mmsi: normalizedMmsi
+            },
+            ["onItemClick"],
+            "onItemClick"
+          );
         }
       },
       alarm: {
@@ -332,4 +377,4 @@
   runtime.createTemporaryHostActionBridge = function () {
     return create(root);
   };
-}(this));
+})(this);

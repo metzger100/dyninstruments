@@ -3,6 +3,7 @@ const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-ca
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("CenterDisplayTextWidget", function () {
+  /** @param {Record<string, any>} [options] */
   function makeComponentContext(options) {
     const opts = options || {};
     const themeTokens = {
@@ -61,6 +62,7 @@ describe("CenterDisplayTextWidget", function () {
       },
       services: {
         format: {
+          /** @param {any} value @param {any} formatterOptions */
           applyFormatter(value, formatterOptions) {
             if (typeof opts.applyFormatter === "function") {
               return opts.applyFormatter(value, formatterOptions);
@@ -87,6 +89,7 @@ describe("CenterDisplayTextWidget", function () {
           }
         },
         canvas: {
+          /** @param {any} canvas */
           setupCanvas(canvas) {
             const ctx = canvas.getContext("2d");
             const rect = canvas.getBoundingClientRect();
@@ -94,6 +97,7 @@ describe("CenterDisplayTextWidget", function () {
           }
         },
         dom: {
+          /** @param {any} target */
           requirePluginRoot(target) {
             return target;
           }
@@ -102,6 +106,7 @@ describe("CenterDisplayTextWidget", function () {
     });
   }
 
+  /** @param {Record<string, any>} [overrides] */
   function makeProps(overrides) {
     const opts = overrides || {};
     return {
@@ -112,7 +117,9 @@ describe("CenterDisplayTextWidget", function () {
         measure: {
           activeMeasure: Object.prototype.hasOwnProperty.call(opts, "activeMeasure")
             ? opts.activeMeasure
-            : { getPointAtIndex: (index) => index === 0 ? { lat: 54.18, lon: 10.52 } : undefined },
+            : {
+                getPointAtIndex: (/** @type {number} */ index) => (index === 0 ? { lat: 54.18, lon: 10.52 } : undefined)
+              },
           useRhumbLine: opts.useRhumbLine === true
         }
       },
@@ -132,8 +139,12 @@ describe("CenterDisplayTextWidget", function () {
         boat: "nm",
         measure: "nm"
       },
-      ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal") ? opts.ratioThresholdNormal : 1.1,
-      ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat") ? opts.ratioThresholdFlat : 2.4,
+      ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal")
+        ? opts.ratioThresholdNormal
+        : 1.1,
+      ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat")
+        ? opts.ratioThresholdFlat
+        : 2.4,
       coordinatesTabular: opts.coordinatesTabular,
       stableDigits: opts.stableDigits === true,
       disconnect: opts.disconnect === true,
@@ -141,91 +152,25 @@ describe("CenterDisplayTextWidget", function () {
     };
   }
 
+  /** @param {any} ctx */
   function fillTextCalls(ctx) {
     return ctx.calls
-      .filter((entry) => entry.name === "fillText")
-      .map((entry) => ({
+      .filter((/** @type {any} */ entry) => entry.name === "fillText")
+      .map((/** @type {any} */ entry) => ({
         text: String(entry.args[0]),
         x: entry.args[1],
         y: entry.args[2]
       }));
   }
 
+  /** @param {any[]} calls @param {string} text */
   function findFirstText(calls, text) {
     return calls.find((entry) => entry.text === text);
   }
 
-  function findAllTexts(calls, text) {
-    return calls.filter((entry) => entry.text === text);
-  }
-
-  function findFirstTextPrefix(calls, prefix) {
-    return calls.find((entry) => entry.text.indexOf(prefix) === 0);
-  }
-
-  function captureTextFonts(ctx) {
-    const captured = [];
-    const originalFillText = ctx.fillText;
-    ctx.fillText = function () {
-      captured.push({
-        text: String(arguments[0]),
-        font: ctx.font
-      });
-      return originalFillText.apply(this, arguments);
-    };
-    return captured;
-  }
-
-  function captureTextCalls(ctx) {
-    const captured = [];
-    const originalFillText = ctx.fillText;
-    ctx.fillText = function () {
-      captured.push({
-        text: String(arguments[0]),
-        x: arguments[1],
-        y: arguments[2],
-        textAlign: ctx.textAlign
-      });
-      return originalFillText.apply(this, arguments);
-    };
-    return captured;
-  }
-
-  function parseFontPx(font) {
-    const match = /(\d+)px/.exec(String(font || ""));
-    return match ? Number(match[1]) : 0;
-  }
-
-  function computeLayoutSnapshot(width, height, mode, relationCount) {
-    const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create({}, makeComponentContext());
-    const insets = layout.computeInsets(width, height);
-    const contentRect = layout.createContentRect(width, height, insets);
-    return layout.computeLayout({
-      contentRect: contentRect,
-      mode: mode,
-      relationCount: relationCount,
-      gap: insets.gap,
-      responsive: insets.responsive,
-      normalCaptionShare: 0.28,
-      flatCenterShare: 0.42,
-      highCaptionRatio: 0.24,
-      flatCaptionRatio: 0.22
-    });
-  }
-
-  function expectTextsInsideCanvas(calls, width, height) {
-    calls.forEach((entry) => {
-      expect(entry.x).toBeGreaterThanOrEqual(0);
-      expect(entry.x).toBeLessThanOrEqual(width);
-      expect(entry.y).toBeGreaterThanOrEqual(0);
-      expect(entry.y).toBeLessThanOrEqual(height);
-    });
-  }
-
   it("exposes the center-display renderer contract", function () {
     const helpers = makeComponentContext();
-    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
-      .create({}, helpers);
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js").create({}, helpers);
 
     expect(spec.id).toBe("CenterDisplayTextWidget");
     expect(spec.wantsHideNativeHead).toBe(true);
@@ -233,8 +178,7 @@ describe("CenterDisplayTextWidget", function () {
 
   it("renders high mode with stacked coordinates and ordered relation rows", function () {
     const helpers = makeComponentContext();
-    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
-      .create({}, helpers);
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js").create({}, helpers);
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({ rectWidth: 140, rectHeight: 260, ctx });
 
@@ -260,5 +204,4 @@ describe("CenterDisplayTextWidget", function () {
     expect(meas.y).toBeLessThan(wp.y);
     expect(wp.y).toBeLessThan(boat.y);
   });
-
 });

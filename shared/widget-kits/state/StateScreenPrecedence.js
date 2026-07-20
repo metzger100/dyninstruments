@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniStateScreenPrecedence = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @param {unknown} candidate @param {number} index @returns {void} */
@@ -57,4 +57,4 @@
     id: "StateScreenPrecedence",
     create: create
   };
-}));
+});

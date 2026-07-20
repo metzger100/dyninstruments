@@ -4,7 +4,8 @@
 
 ## Overview
 
-Use this convention for all canvas widgets that use `CanvasLayerCache`. Cache only static layer content and keep per-frame values in dynamic draw paths.
+Use this convention for all canvas widgets that use `CanvasLayerCache`. Cache only static layer content and keep
+per-frame values in dynamic draw paths.
 
 ## Key Details
 
@@ -16,11 +17,13 @@ Use this convention for all canvas widgets that use `CanvasLayerCache`. Cache on
 ## Cache Scope Rules
 
 Cache these static elements:
+
 - Rings, arc strokes, tick marks
 - Static label sprites and fixed label maps
 - Geometry-bound primitives that change only on resize/style/token updates
 
 Do not cache these dynamic elements:
+
 - Live values (`heading`, `speed`, `angle`, sensor values)
 - Live text output (formatted value/caption/unit)
 - State-screen branch conditions (`disconnected`, `noTarget`, etc.)
@@ -29,6 +32,7 @@ Do not cache these dynamic elements:
 ## Cache Key Design Rules
 
 Include in static key:
+
 - Canvas buffer and draw dimensions (`canvas.width`, `canvas.height`, `W`, `H`, `dpr`)
 - Dial geometry (`cx`, `cy`, radii, ring/tick geometry, label inset/radius/font px)
 - Style/theme token inputs (colors, line widths, tick lengths, pointer style factors)
@@ -36,12 +40,14 @@ Include in static key:
 - Label-set signature (for example `N|NE|E|SE|S|SW|W|NW`)
 
 Exclude from static key:
+
 - Live data values (`heading`, `speed`, `angle`, current reading)
 - State-screen-driving state (for example `disconnect`)
 - Per-frame marker/needle angles or positions
 - Per-frame formatter outputs
 
 Rule:
+
 - If a prop changes on every frame, it must NOT be in the key.
 
 ## API/Interfaces
@@ -66,12 +72,14 @@ cache.blit(targetCtx);
 ```
 
 `CanvasLayerCache` rebuilds when:
+
 - key changes
 - `cache.invalidate()` is called
 - layer buffer is missing/recreated
 - layer buffer size changes
 
 Transform ownership:
+
 - `CanvasLayerCache` does not apply DPR transforms automatically.
 - Rebuild callbacks own layer transform setup when drawing geometry in CSS-space coordinates.
 
@@ -85,11 +93,11 @@ Transform ownership:
 
 ## Anti-Patterns
 
-| Anti-pattern | Impact | Required fix |
-|---|---|---|
-| Cache everything (including dynamic values) | Frequent key churn and expensive rebuilds | Move live values/text/marker state out of static key and draw per frame |
-| Cache nothing | Rebuild static dial art every frame; jank under load | Cache static background layers via `CanvasLayerCache` |
-| Put live values in static key | Cache invalidates every frame; no reuse | Restrict key to geometry/style/token/typography/label signature inputs |
+| Anti-pattern                                | Impact                                               | Required fix                                                            |
+| ------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------- |
+| Cache everything (including dynamic values) | Frequent key churn and expensive rebuilds            | Move live values/text/marker state out of static key and draw per frame |
+| Cache nothing                               | Rebuild static dial art every frame; jank under load | Cache static background layers via `CanvasLayerCache`                   |
+| Put live values in static key               | Cache invalidates every frame; no reuse              | Restrict key to geometry/style/token/typography/label signature inputs  |
 
 ## Related
 

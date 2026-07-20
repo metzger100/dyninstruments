@@ -8,6 +8,7 @@ const {
 
 describe("tools/check-file-size.mjs core behavior", function () {
   const workspaces = createWorkspaceManager();
+  /** @type {any} */
   let runFileSizeCheck;
 
   beforeAll(async function () {

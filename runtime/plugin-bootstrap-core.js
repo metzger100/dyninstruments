@@ -10,7 +10,7 @@
   } else {
     root.DyniPluginBootstrapCore = factory();
   }
-}(/** @type {DyniBootstrapRoot} */ (typeof globalThis !== "undefined" ? globalThis : this), function () {
+})(/** @type {DyniBootstrapRoot} */ (typeof globalThis !== "undefined" ? globalThis : this), function () {
   "use strict";
 
   var SCRIPT_ID_PREFIX = "dyni-internal";
@@ -28,10 +28,12 @@
 
   /** @param {unknown} value @returns {string} */
   function sanitizeIdToken(value) {
-    return String(value || "")
-      .replace(/[^a-z0-9]+/gi, "-")
-      .replace(/^-+|-+$/g, "")
-      .toLowerCase() || "x";
+    return (
+      String(value || "")
+        .replace(/[^a-z0-9]+/gi, "-")
+        .replace(/^-+|-+$/g, "")
+        .toLowerCase() || "x"
+    );
   }
 
   /** @param {unknown} value @returns {string} */
@@ -78,11 +80,7 @@
 
   /** @param {unknown} relativePath @param {unknown} scope @returns {string} */
   function makeScriptId(relativePath, scope) {
-    return [
-      SCRIPT_ID_PREFIX,
-      sanitizeIdToken(scope || "legacy"),
-      sanitizeIdToken(relativePath)
-    ].join("-");
+    return [SCRIPT_ID_PREFIX, sanitizeIdToken(scope || "legacy"), sanitizeIdToken(relativePath)].join("-");
   }
 
   /** @param {Document} documentRef @param {string} scriptId @param {string} src @returns {Promise<void>} */
@@ -200,6 +198,13 @@
       });
   }
 
+  /** @returns {DyniBootstrapRoot} */
+  function resolveGlobalRoot() {
+    return /** @type {DyniBootstrapRoot} */ (
+      (typeof window !== "undefined" && window) || (typeof globalThis !== "undefined" && globalThis) || {}
+    );
+  }
+
   /** @param {DyniBootstrapNamespace} ns @returns {Promise<(() => void) | undefined>} */
   function runInit(ns) {
     var init = ns.runtime.runInit;
@@ -213,7 +218,9 @@
   function start(options) {
     var opts = /** @type {DyniBootstrapOptions} */ (options || {});
     var documentRef = opts.document || (typeof document !== "undefined" ? document : null);
-    var logger = /** @type {DyniBootstrapLogger} */ (opts.logger || (typeof console !== "undefined" ? console : { error: function () {} }));
+    var logger = /** @type {DyniBootstrapLogger} */ (
+      opts.logger || (typeof console !== "undefined" ? console : { error: function () {} })
+    );
 
     if (!documentRef || !documentRef.head) {
       throw new Error("dyninstruments: document.head missing");
@@ -245,10 +252,7 @@
       return loadScriptOnceById(activeDocument, scriptId, src);
     };
 
-    var globalRoot = typeof window !== "undefined"
-      ? window
-      : (typeof globalThis !== "undefined" ? globalThis : {});
-    var rootRef = /** @type {DyniBootstrapRoot} */ (opts.root || globalRoot);
+    var rootRef = /** @type {DyniBootstrapRoot} */ (opts.root || resolveGlobalRoot());
     var ns = prepareNamespace(
       rootRef,
       baseUrl,
@@ -258,20 +262,24 @@
       generation
     );
 
-    return loadScriptById(makeScriptId(BOOTSTRAP_BUNDLE_PATH, scope), baseUrl + BOOTSTRAP_BUNDLE_PATH)
-      .then(function () {
-        return runInit(ns);
-      }, function () {
-        return loadBootstrapManifest(ns, activeDocument, baseUrl, scope, logger, loadScriptById)
-          .then(function () {
+    return (
+      loadScriptById(makeScriptId(BOOTSTRAP_BUNDLE_PATH, scope), baseUrl + BOOTSTRAP_BUNDLE_PATH)
+        .then(
+          function () {
             return runInit(ns);
-          });
-      })
-      // dyni-lint-disable-next-line catch-fallback-without-suppression -- Top-level bootstrap should log startup failures without turning them into unhandled browser promise rejections.
-      .catch(function (error) {
-        logger.error("dyninstruments bootstrap failed:", error);
-        return undefined;
-      });
+          },
+          function () {
+            return loadBootstrapManifest(ns, activeDocument, baseUrl, scope, logger, loadScriptById).then(function () {
+              return runInit(ns);
+            });
+          }
+        )
+        // dyni-boundary-next-line(category: browser-runtime-boundary, owner: Metzger100, date: 2026-07-17) -- Top-level bootstrap should log startup failures without turning them into unhandled browser promise rejections.
+        .catch(function (error) {
+          logger.error("dyninstruments bootstrap failed:", error);
+          return undefined;
+        })
+    );
   }
 
   return {
@@ -280,6 +288,7 @@
     resolveGenerationDiscriminator: resolveGenerationDiscriminator,
     resolveScriptScope: resolveScriptScope,
     resolveEntrypoint: resolveEntrypoint,
-    normalizeBaseUrl: normalizeBaseUrl
+    normalizeBaseUrl: normalizeBaseUrl,
+    resolveGlobalRoot: resolveGlobalRoot
   };
-}));
+});

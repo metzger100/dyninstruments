@@ -1,5 +1,5 @@
 const { loadFresh } = require("../helpers/load-umd");
-const { createMockCanvas, createMockContext2D } = require("../helpers/mock-canvas");
+const { createMockContext2D } = require("../helpers/mock-canvas");
 const { createComponentContextMock } = require("../helpers/component-context-mock");
 
 function createActiveRouteWidget() {
@@ -14,9 +14,11 @@ function createActiveRouteWidget() {
     };
   });
   const htmlFitStub = {
+    /** @param {Record<string, any>} props */
     ensureDisplayProps(props) {
       return props;
     },
+    /** @param {Record<string, any>} props @param {any} shellRect @param {any} htmlUtils */
     resolveDisplayMode(props, shellRect, htmlUtils) {
       return htmlUtils.resolveRatioModeForRect({
         shellRect: shellRect,
@@ -27,17 +29,22 @@ function createActiveRouteWidget() {
         defaultMode: "normal"
       });
     },
+    /** @param {any} rawValue @param {any} formatter @param {any} formatterParameters @param {any} defaultText @param {any} placeholderNormalize */
     formatActiveRouteMetric(rawValue, formatter, formatterParameters, defaultText, placeholderNormalize) {
-      const out = String(componentContext.format.applyFormatter(rawValue, {
-        formatter: formatter,
-        formatterParameters: formatterParameters,
-        default: defaultText
-      }));
+      const out = String(
+        componentContext.format.applyFormatter(rawValue, {
+          formatter: formatter,
+          formatterParameters: formatterParameters,
+          default: defaultText
+        })
+      );
       return placeholderNormalize.normalize(out, defaultText);
     },
+    /** @param {any} value */
     textLength(value) {
       return value == null ? 0 : String(value).length;
     },
+    /** @param {any} rawText @param {any} stableDigitsEnabled @param {any} stableDigits @param {any} minWidth */
     normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
       if (!stableDigitsEnabled) {
         return { padded: rawText, plain: rawText };
@@ -63,6 +70,7 @@ function createActiveRouteWidget() {
     },
     services: {
       format: {
+        /** @param {any} value @param {Record<string, any>} [formatterOptions] */
         applyFormatter(value, formatterOptions) {
           const cfg = formatterOptions || {};
           return value == null ? cfg.default : String(value);
@@ -85,6 +93,7 @@ function createActiveRouteWidget() {
   return loadFresh("widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js").create({}, componentContext);
 }
 
+/** @param {any} rendererSpec @param {Record<string, any>} props */
 function mountHtml(rendererSpec, props) {
   const hostContext = {};
   const rootEl = document.createElement("div");
@@ -114,90 +123,64 @@ function mountHtml(rendererSpec, props) {
 
 function createRenderModelContext() {
   const moduleCache = Object.create(null);
+  /** @param {string} id */
   function loadModuleById(id) {
     if (!moduleCache[id]) {
       if (id === "EditRouteLayout") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayout.js");
-      }
-      else if (id === "EditRouteLayoutMath") {
+      } else if (id === "EditRouteLayoutMath") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayoutMath.js");
-      }
-      else if (id === "EditRouteLayoutGeometry") {
+      } else if (id === "EditRouteLayoutGeometry") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js");
-      }
-      else if (id === "ResponsiveScaleProfile") {
+      } else if (id === "ResponsiveScaleProfile") {
         moduleCache[id] = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-      }
-      else if (id === "LayoutRectMath") {
+      } else if (id === "LayoutRectMath") {
         moduleCache[id] = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-      }
-      else if (id === "RoutePointsLayout") {
+      } else if (id === "RoutePointsLayout") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayout.js");
-      }
-      else if (id === "RadialTextFitting") {
+      } else if (id === "RadialTextFitting") {
         moduleCache[id] = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
-      }
-      else if (id === "CanvasTextLayout") {
+      } else if (id === "CanvasTextLayout") {
         moduleCache[id] = loadFresh("shared/widget-kits/text/CanvasTextLayout.js");
-      }
-      else if (id === "TextTileLayout") {
+      } else if (id === "TextTileLayout") {
         moduleCache[id] = loadFresh("shared/widget-kits/text/TextTileLayout.js");
-      }
-      else if (id === "RoutePointsInfoText") {
+      } else if (id === "RoutePointsInfoText") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js");
-      }
-      else if (id === "RoutePointsHtmlFit") {
+      } else if (id === "RoutePointsHtmlFit") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js");
-      }
-      else if (id === "RoutePointsLayoutSizing") {
+      } else if (id === "RoutePointsLayoutSizing") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
-      }
-      else if (id === "RoutePointsRowGeometry") {
+      } else if (id === "RoutePointsRowGeometry") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
-      }
-      else if (id === "CenterDisplayMath") {
+      } else if (id === "CenterDisplayMath") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/CenterDisplayMath.js");
-      }
-      else if (id === "AisTargetLayout") {
+      } else if (id === "AisTargetLayout") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayout.js");
-      }
-      else if (id === "AisTargetLayoutSizing") {
+      } else if (id === "AisTargetLayoutSizing") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
-      }
-      else if (id === "AisTargetLayoutGeometry") {
+      } else if (id === "AisTargetLayoutGeometry") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
-      }
-      else if (id === "AisTargetLayoutGeometryStyles") {
+      } else if (id === "AisTargetLayoutGeometryStyles") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js");
-      }
-      else if (id === "AisTargetLayoutMath") {
+      } else if (id === "AisTargetLayoutMath") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
-      }
-      else if (id === "HtmlWidgetUtils") {
+      } else if (id === "HtmlWidgetUtils") {
         moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-      }
-      else if (id === "UnitAwareFormatter") {
+      } else if (id === "UnitAwareFormatter") {
         moduleCache[id] = loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
-      }
-      else if (id === "NavInteractionPolicy") {
+      } else if (id === "NavInteractionPolicy") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/NavInteractionPolicy.js");
-      }
-      else if (id === "PlaceholderNormalize") {
+      } else if (id === "PlaceholderNormalize") {
         moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-      }
-      else if (id === "StableDigits") {
+      } else if (id === "StableDigits") {
         moduleCache[id] = loadFresh("shared/widget-kits/format/StableDigits.js");
-      }
-      else if (id === "StateScreenLabels") {
+      } else if (id === "StateScreenLabels") {
         moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-      }
-      else if (id === "StateScreenPrecedence") {
+      } else if (id === "StateScreenPrecedence") {
         moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-      }
-      else if (id === "StateScreenInteraction") {
+      } else if (id === "StateScreenInteraction") {
         moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
-      }
-      else {
+      } else {
         throw new Error("unexpected module: " + id);
       }
     }
@@ -240,26 +223,27 @@ function createRenderModelContext() {
     modules,
     services: {
       format: {
+        /** @param {any} value @param {Record<string, any>} [formatterOptions] */
         applyFormatter(value, formatterOptions) {
-      const cfg = formatterOptions || {};
-      if (value == null || Number.isNaN(value)) {
-        return Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
-      }
-      if (cfg.formatter === "formatDecimal") {
-        const precision = Array.isArray(cfg.formatterParameters) ? Number(cfg.formatterParameters[0]) : 0;
-        const places = Number.isFinite(precision) ? Math.max(0, Math.floor(precision)) : 0;
-        return Number(value).toFixed(places);
-      }
-      if (cfg.formatter === "formatDistance") {
-        return Number(value).toFixed(1);
-      }
-      if (cfg.formatter === "formatTime") {
-        return "TIME:" + String(value);
-      }
-      if (cfg.formatter === "formatClock") {
-        return "CLOCK:" + String(value);
-      }
-      return String(value);
+          const cfg = formatterOptions || {};
+          if (value == null || Number.isNaN(value)) {
+            return Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
+          }
+          if (cfg.formatter === "formatDecimal") {
+            const precision = Array.isArray(cfg.formatterParameters) ? Number(cfg.formatterParameters[0]) : 0;
+            const places = Number.isFinite(precision) ? Math.max(0, Math.floor(precision)) : 0;
+            return Number(value).toFixed(places);
+          }
+          if (cfg.formatter === "formatDistance") {
+            return Number(value).toFixed(1);
+          }
+          if (cfg.formatter === "formatTime") {
+            return "TIME:" + String(value);
+          }
+          if (cfg.formatter === "formatClock") {
+            return "CLOCK:" + String(value);
+          }
+          return String(value);
         }
       },
       themeTokens: {
@@ -291,20 +275,14 @@ function createAisTargetRenderModel() {
 }
 
 function createStateOverlay() {
-  return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js").create({}, createComponentContextMock({
-    modules: {
-      StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js")
-    }
-  }));
-}
-
-function createSpringMotion() {
-  return loadFresh("shared/widget-kits/anim/SpringEasing.js").create({}, createComponentContextMock({})).createMotion();
-}
-
-function readTextContent(root, selector) {
-  const node = root.querySelector(selector);
-  return node ? node.textContent : "";
+  return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js").create(
+    {},
+    createComponentContextMock({
+      modules: {
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js")
+      }
+    })
+  );
 }
 
 describe("Phase 9 acceptance coverage", function () {
@@ -332,7 +310,13 @@ describe("Phase 9 acceptance coverage", function () {
         interaction: { mode: "dispatch" },
         pageId: "navpage",
         containerOrientation: "default",
-        actions: { routeEditor: { openActiveRoute() { return true; } } }
+        actions: {
+          routeEditor: {
+            openActiveRoute() {
+              return true;
+            }
+          }
+        }
       }
     });
 
@@ -399,7 +383,10 @@ describe("Phase 9 acceptance coverage", function () {
     expect(routePointsModel.stateLabel).toBe("GPS Lost");
     expect(aisHiddenModel.kind).toBe("hidden");
     expect(aisHiddenModel.stateLabel).toBe("");
-    expect(overlayCtx.calls.filter((entry) => entry.name === "fillText").map((entry) => entry.args[0])).toContain("GPS Lost");
+    expect(
+      overlayCtx.calls
+        .filter((/** @type {any} */ entry) => entry.name === "fillText")
+        .map((/** @type {any} */ entry) => entry.args[0])
+    ).toContain("GPS Lost");
   });
-
 });

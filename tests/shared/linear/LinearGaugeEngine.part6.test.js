@@ -1,8 +1,5 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./LinearGaugeEngine.harness");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
 describe("LinearGaugeEngine", function () {
   it("matches callback-visible axis and layout state with or without wrapper-owned rangeDefaults when config bounds are present", function () {
@@ -16,7 +13,7 @@ describe("LinearGaugeEngine", function () {
         tickProps: {
           major: "major",
           minor: "minor",
-          showEndLabels: "showEndLabels",
+          showEndLabels: "showEndLabels"
         },
         ratioProps: { normal: "n", flat: "f" },
         drawFrame(state) {
@@ -25,9 +22,9 @@ describe("LinearGaugeEngine", function () {
             axis: state.axis,
             trackY: state.layout.trackY,
             trackBox: state.layout.trackBox,
-            textFillScale: state.textFillScale,
+            textFillScale: state.textFillScale
           };
-        },
+        }
       };
       if (includeRangeDefaults) {
         spec.rangeDefaults = { min: 0, max: 30 };
@@ -38,7 +35,7 @@ describe("LinearGaugeEngine", function () {
         createMockCanvas({
           rectWidth: 300,
           rectHeight: 300,
-          ctx: createMockContext2D(),
+          ctx: createMockContext2D()
         }),
         {
           value: 15,
@@ -47,8 +44,8 @@ describe("LinearGaugeEngine", function () {
           major: 10,
           minor: 5,
           n: 1.1,
-          f: 3.5,
-        },
+          f: 3.5
+        }
       );
 
       return snapshot;
@@ -56,5 +53,4 @@ describe("LinearGaugeEngine", function () {
 
     expect(captureState(true)).toEqual(captureState(false));
   });
-
 });

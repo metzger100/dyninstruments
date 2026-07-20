@@ -1,9 +1,28 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 
 describe("GeometryScale", function () {
   function createScaleApi() {
     return loadFresh("shared/widget-kits/layout/GeometryScale.js").create();
   }
+
+  it("registers itself on the global DyniComponents root in a non-module browser load", function () {
+    const context = createScriptContext();
+
+    runIifeScript("shared/widget-kits/layout/GeometryScale.js", context);
+
+    expect(context.DyniComponents.DyniGeometryScale).toBeTruthy();
+    expect(context.DyniComponents.DyniGeometryScale.id).toBe("GeometryScale");
+  });
+
+  it("treats non-numeric primary dimension, factor, or weight inputs as zero extent", function () {
+    const api = createScaleApi();
+
+    expect(api.scale(undefined, 0.08)).toBe(1);
+    expect(api.scale("abc", 0.08)).toBe(1);
+    expect(api.scale(150, undefined)).toBe(1);
+    expect(api.scaleStroke(150, 0.02, "bad")).toBe(1);
+  });
 
   it("scales factors to whole pixels and supports explicit extent floors", function () {
     const api = createScaleApi();

@@ -7,15 +7,17 @@
 
   const ns = root.DyniPlugin;
   const config = ns.config;
-  const shared = config.shared = config.shared || {};
+  const shared = (config.shared = config.shared || {});
   const BASE = ns.baseUrl;
 
   if (typeof BASE !== "string" || !BASE) {
-    throw new Error("dyninstruments: baseUrl missing before config/components/registry-shared-foundation-state.js load");
+    throw new Error(
+      "dyninstruments: baseUrl missing before config/components/registry-shared-foundation-state.js load"
+    );
   }
 
-  const groups = shared.componentRegistryGroups = shared.componentRegistryGroups || {};
-  var sf = groups.sharedFoundation = groups.sharedFoundation || {};
+  const groups = (shared.componentRegistryGroups = shared.componentRegistryGroups || {});
+  var sf = (groups.sharedFoundation = groups.sharedFoundation || {});
 
   sf.StateScreenLabels = {
     js: BASE + "shared/widget-kits/state/StateScreenLabels.js",
@@ -102,4 +104,4 @@
     globalKey: "DyniCenterDisplayStateAdapter",
     deps: ["StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
   };
-}(this));
+})(this);

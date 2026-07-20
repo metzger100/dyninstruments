@@ -1,8 +1,6 @@
+// @ts-nocheck
 const { createMockContext2D } = require("../../helpers/mock-canvas");
-const {
-  createFontAwareContext,
-  createTextLayout,
-} = require("../../helpers/linear-label-fit");
+const { createFontAwareContext, createTextLayout } = require("../../helpers/linear-label-fit");
 
 describe("LinearGaugeTextLayout", function () {
   function createState(textFillScale) {
@@ -16,22 +14,22 @@ describe("LinearGaugeTextLayout", function () {
         linear: {
           ticks: {
             majorLen: 8,
-            minorLen: 4,
-          },
-        },
+            minorLen: 4
+          }
+        }
       },
       layout: {
         trackY: 20,
         trackBox: { y: 0, h: 40 },
         scaleX0: 0,
-        scaleX1: 100,
+        scaleX1: 100
       },
       axis: {
         min: 0,
-        max: 100,
+        max: 100
       },
       labelFontPx: 12,
-      labelInsetPx: 4,
+      labelInsetPx: 4
     };
   }
 
@@ -47,27 +45,21 @@ describe("LinearGaugeTextLayout", function () {
       trackY: 24,
       trackBox: { y: 0, h: 52 },
       scaleX0: 0,
-      scaleX1: 80,
+      scaleX1: 80
     };
     state.axis = {
       min: 12,
-      max: 372,
+      max: 372
     };
 
-    textLayout.drawTickLabels(
-      layerCtx,
-      state,
-      { major: [12, 42, 342, 372], minor: [] },
-      false,
-      {
-        mapValueToX(value, minV, maxV, x0, x1) {
-          return x0 + (x1 - x0) * ((value - minV) / (maxV - minV));
-        },
-        formatTickLabel(value) {
-          return String(value).padStart(3, "0");
-        },
+    textLayout.drawTickLabels(layerCtx, state, { major: [12, 42, 342, 372], minor: [] }, false, {
+      mapValueToX(value, minV, maxV, x0, x1) {
+        return x0 + (x1 - x0) * ((value - minV) / (maxV - minV));
       },
-    );
+      formatTickLabel(value) {
+        return String(value).padStart(3, "0");
+      }
+    });
 
     const fills = calls.filter((entry) => entry.type === "fillText");
     const firstVisible = fills.find((entry) => entry.text === "042");
@@ -93,11 +85,11 @@ describe("LinearGaugeTextLayout", function () {
       trackY: 24,
       trackBox: { y: 0, h: 52 },
       scaleX0: 0,
-      scaleX1: 120,
+      scaleX1: 120
     };
     state.axis = {
       min: -180,
-      max: 180,
+      max: 180
     };
 
     textLayout.drawTickLabels(
@@ -105,7 +97,7 @@ describe("LinearGaugeTextLayout", function () {
       state,
       {
         major: [-180, -150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180],
-        minor: [],
+        minor: []
       },
       false,
       {
@@ -114,8 +106,8 @@ describe("LinearGaugeTextLayout", function () {
         },
         formatTickLabel(value) {
           return String(value);
-        },
-      },
+        }
+      }
     );
 
     const fills = calls.filter((entry) => entry.type === "fillText");
@@ -140,23 +132,17 @@ describe("LinearGaugeTextLayout", function () {
       },
       fillText(text, x, y) {
         calls.push({ text: text, x: x, y: y });
-      },
+      }
     };
 
-    textLayout.drawTickLabels(
-      layerCtx,
-      state,
-      { major: [0], minor: [] },
-      true,
-      {
-        mapValueToX() {
-          return 0;
-        },
-        formatTickLabel() {
-          return "0";
-        },
+    textLayout.drawTickLabels(layerCtx, state, { major: [0], minor: [] }, true, {
+      mapValueToX() {
+        return 0;
       },
-    );
+      formatTickLabel() {
+        return "0";
+      }
+    });
 
     expect(calls[0].y).toBe(12);
   });
@@ -173,7 +159,7 @@ describe("LinearGaugeTextLayout", function () {
       },
       fillText() {
         fonts.push(layerCtx.font);
-      },
+      }
     };
 
     textLayout.drawTickLabels(
@@ -187,8 +173,8 @@ describe("LinearGaugeTextLayout", function () {
         },
         formatTickLabel() {
           return "0";
-        },
-      },
+        }
+      }
     );
 
     expect(fonts[0]).toContain("4px");

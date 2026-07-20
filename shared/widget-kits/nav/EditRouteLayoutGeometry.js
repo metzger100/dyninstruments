@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniEditRouteLayoutGeometry = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -25,12 +25,17 @@
       const source = /** @type {Record<string, unknown> | null} */ (
         insets && typeof insets === "object" ? insets : null
       );
-      return Math.max(0, Math.floor(mathApi.clampNumber(
-        source && Object.prototype.hasOwnProperty.call(source, key) ? source[key] : undefined,
+      return Math.max(
         0,
-        Number.MAX_SAFE_INTEGER,
-        defaultValue
-      )));
+        Math.floor(
+          mathApi.clampNumber(
+            source && Object.prototype.hasOwnProperty.call(source, key) ? source[key] : undefined,
+            0,
+            Number.MAX_SAFE_INTEGER,
+            defaultValue
+          )
+        )
+      );
     }
 
     /** @param {DyniEditRouteNameRectArgs} [args] @returns {DyniEditRouteNameRects} */
@@ -39,7 +44,10 @@
       const nameBarRect = cfg.nameBarRect || makeRect(0, 0, 1, 1);
       const showSourceBadge = cfg.showSourceBadge === true;
       const sourceBadgeRatio = mathApi.clampNumber(cfg.sourceBadgeRatio, 0, 1, 0.22);
-      const sourceBadgeMinPx = Math.max(1, Math.floor(mathApi.clampNumber(cfg.sourceBadgeMinPx, 1, Number.MAX_SAFE_INTEGER, 26)));
+      const sourceBadgeMinPx = Math.max(
+        1,
+        Math.floor(mathApi.clampNumber(cfg.sourceBadgeMinPx, 1, Number.MAX_SAFE_INTEGER, 26))
+      );
       const sourceBadgeMaxRatio = mathApi.clampNumber(cfg.sourceBadgeMaxRatio, 0, 1, 0.4);
       const gap = Math.max(1, resolveInsetValue(cfg.insets, "gap", 1));
 
@@ -87,10 +95,7 @@
       const unitMaxRatio = mathApi.clampNumber(cfg.unitMaxRatio, 0, 1, 0.46);
       const maxUnitWidth = Math.max(unitMinPx, Math.floor(valueRect.w * unitMaxRatio));
 
-      let unitWidth = Math.max(
-        unitMinPx,
-        Math.min(maxUnitWidth, Math.floor(usableWidth * unitShare))
-      );
+      let unitWidth = Math.max(unitMinPx, Math.min(maxUnitWidth, Math.floor(usableWidth * unitShare)));
       if (unitWidth >= usableWidth) {
         unitWidth = Math.max(1, usableWidth - 1);
       }
@@ -109,11 +114,17 @@
       const metricTileCaptionRatio = mathApi.clampNumber(cfg.metricTileCaptionRatio, 0, 1, 0.34);
       // Keep the JS split aligned with the CSS fr-based row split.
       const safeTileHeight = Math.max(1, Math.floor(Number(tileRect.h) || 0));
-      const labelHeight = safeTileHeight <= 1
-        ? 1
-        : Math.max(1, Math.min(safeTileHeight - 1, Math.round(safeTileHeight * metricTileCaptionRatio)));
+      const labelHeight =
+        safeTileHeight <= 1
+          ? 1
+          : Math.max(1, Math.min(safeTileHeight - 1, Math.round(safeTileHeight * metricTileCaptionRatio)));
       const valueHeight = Math.max(1, safeTileHeight - labelHeight);
-      const labelRect = makeRect(tileRect.x + metricPadX, tileRect.y, Math.max(1, tileRect.w - metricPadX * 2), labelHeight);
+      const labelRect = makeRect(
+        tileRect.x + metricPadX,
+        tileRect.y,
+        Math.max(1, tileRect.w - metricPadX * 2),
+        labelHeight
+      );
       const valueRect = makeRect(
         tileRect.x + metricPadX,
         tileRect.y + labelHeight,
@@ -174,4 +185,4 @@
   }
 
   return { id: "EditRouteLayoutGeometry", create: create };
-}));
+});

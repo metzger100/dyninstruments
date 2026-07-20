@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniHtmlWidgetLifecycle = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @param {HTMLElement} mountHostEl @returns {DyniHtmlMount} */
@@ -29,9 +29,7 @@
    * @returns {(mountHostEl: HTMLElement, payload: unknown) => void}
    */
   function createMountHandler(spec) {
-    const cfg = /** @type {DyniHtmlMountSpec} */ (
-      spec && typeof spec === "object" ? spec : {}
-    );
+    const cfg = /** @type {DyniHtmlMountSpec} */ (spec && typeof spec === "object" ? spec : {});
     return function mount(mountHostEl, payload) {
       const mounted = mountRootDiv(mountHostEl);
       cfg.applyMounted(mounted);
@@ -45,13 +43,8 @@
    */
   function createResizeSignatureHandler(buildModel) {
     return function layoutSignature(payload) {
-      const source = /** @type {{ props?: unknown, shellRect?: unknown }} */ (
-        payload || {}
-      );
-      const model = buildModel(
-        source.props ? source.props : {},
-        source.shellRect ? source.shellRect : null
-      );
+      const source = /** @type {{ props?: unknown, shellRect?: unknown }} */ (payload || {});
+      const model = buildModel(source.props ? source.props : {}, source.shellRect ? source.shellRect : null);
       return joinSignatureParts(model.resizeSignatureParts);
     };
   }
@@ -68,4 +61,4 @@
   }
 
   return { id: "HtmlWidgetLifecycle", create: create };
-}));
+});

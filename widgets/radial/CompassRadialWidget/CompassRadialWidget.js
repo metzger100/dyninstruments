@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniCompassRadialWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {{ angleDeg: number, canvas: HTMLCanvasElement, width: number, height: number }} DyniCompassLabelSprite */
   /** @typedef {{ sprites: DyniCompassLabelSprite[], labelRadius: number }} DyniCompassLabelCache */
@@ -92,7 +92,7 @@
         const t = state.angle.degToCanvasRad(sprite.angleDeg, null, rotationDeg);
         const x = state.geom.cx + Math.cos(t) * entry.labelRadius;
         const y = state.geom.cy + Math.sin(t) * entry.labelRadius;
-        state.ctx.drawImage(sprite.canvas, x - (sprite.width / 2), y - (sprite.height / 2));
+        state.ctx.drawImage(sprite.canvas, x - sprite.width / 2, y - sprite.height / 2);
       }
     }
 
@@ -103,12 +103,13 @@
       const headingText = state.value.isFiniteNumber(heading)
         ? state.value.formatDirection360(heading, !!p.leadingZero)
         : p.default;
-      const valueText = p.stableDigits === true
-        ? stableDigits.normalize(headingText, {
-          integerWidth: 3,
-          reserveSignSlot: false
-        }).padded
-        : headingText;
+      const valueText =
+        p.stableDigits === true
+          ? stableDigits.normalize(headingText, {
+              integerWidth: 3,
+              reserveSignSlot: false
+            }).padded
+          : headingText;
       return {
         heading: heading,
         marker: p.markerCourse,
@@ -145,7 +146,10 @@
           stepMajor: 30,
           stepMinor: 10
         });
-        api.setCacheMeta("labels:" + state.staticKey, buildCompassLabelSprites(/** @type {HTMLCanvasElement} */ (state.canvas), state));
+        api.setCacheMeta(
+          "labels:" + state.staticKey,
+          buildCompassLabelSprites(/** @type {HTMLCanvasElement} */ (state.canvas), state)
+        );
       },
       drawFrame: function (state, props, api) {
         const display = compassDisplay(state, props);
@@ -166,11 +170,18 @@
         api.drawFixedPointer(state.ctx, 0);
 
         if (Number.isFinite(easedHeading) && Number.isFinite(easedMarker)) {
-          state.draw.drawRimMarker(state.ctx, state.geom.cx, state.geom.cy, state.geom.rOuter, easedMarker - easedHeading, {
-            len: state.geom.markerLen,
-            width: state.geom.markerWidth,
-            strokeStyle: state.theme.colors.pointer
-          });
+          state.draw.drawRimMarker(
+            state.ctx,
+            state.geom.cx,
+            state.geom.cy,
+            state.geom.rOuter,
+            easedMarker - easedHeading,
+            {
+              len: state.geom.markerLen,
+              width: state.geom.markerWidth,
+              strokeStyle: state.theme.colors.pointer
+            }
+          );
         }
         drawCompassCachedLabels(state, rotationDeg, api);
         if (headingMotion.isActive(motionCanvas) || (markerFinite && markerMotion.isActive(motionCanvas))) {
@@ -203,4 +214,4 @@
   }
 
   return { id: "CompassRadialWidget", create };
-}));
+});

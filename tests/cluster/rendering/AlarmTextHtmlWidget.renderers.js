@@ -1,41 +1,21 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 function createRealAlarmRenderer() {
-  const htmlWidgetUtilsModule = loadFresh(
-    "shared/widget-kits/html/HtmlWidgetUtils.js",
-  );
-  const alarmRenderModelModule = loadFresh(
-    "shared/widget-kits/vessel/AlarmRenderModel.js",
-  );
-  const alarmMarkupModule = loadFresh(
-    "shared/widget-kits/vessel/AlarmMarkup.js",
-  );
-  const alarmFitModule = loadFresh(
-    "shared/widget-kits/vessel/AlarmHtmlFit.js",
-  );
-  const alarmFitChromeModule = loadFresh(
-    "shared/widget-kits/vessel/AlarmHtmlFitChrome.js",
-  );
-  const aisLayoutSizingModule = loadFresh(
-    "shared/widget-kits/nav/AisTargetLayoutSizing.js",
-  );
-  const responsiveScaleProfileModule = loadFresh(
-    "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-  );
-  const layoutRectMathModule = loadFresh(
-    "shared/widget-kits/layout/LayoutRectMath.js",
-  );
-  const aisLayoutMathModule = loadFresh(
-    "shared/widget-kits/nav/AisTargetLayoutMath.js",
-  );
+  const htmlWidgetUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+  const alarmRenderModelModule = loadFresh("shared/widget-kits/vessel/AlarmRenderModel.js");
+  const alarmMarkupModule = loadFresh("shared/widget-kits/vessel/AlarmMarkup.js");
+  const alarmFitModule = loadFresh("shared/widget-kits/vessel/AlarmHtmlFit.js");
+  const alarmFitChromeModule = loadFresh("shared/widget-kits/vessel/AlarmHtmlFitChrome.js");
+  const aisLayoutSizingModule = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
+  const responsiveScaleProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+  const layoutRectMathModule = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+  const aisLayoutMathModule = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
 
   const textLayoutApi = {
     fitThreeRowBlock: () => ({ cPx: 11, vPx: 18 }),
     fitValueUnitCaptionRows: () => ({ cPx: 10, vPx: 16 }),
-    fitInlineTriplet: () => ({ sPx: 9, vPx: 15 }),
+    fitInlineTriplet: () => ({ sPx: 9, vPx: 15 })
   };
   const themeResolver = {
     resolveForRoot: vi.fn(() => ({
@@ -43,15 +23,15 @@ function createRealAlarmRenderer() {
         alarmWidget: {
           bg: "#d9534a",
           fg: "#ffffff",
-          strip: "#2e9e6b",
-        },
+          strip: "#2e9e6b"
+        }
       },
       font: {
         family: "sans-serif",
         weight: 700,
-        labelWeight: 600,
-      },
-    })),
+        labelWeight: 600
+      }
+    }))
   };
 
   const componentContext = createComponentContextMock({
@@ -65,26 +45,25 @@ function createRealAlarmRenderer() {
       TextLayoutEngine: { create: () => textLayoutApi },
       HtmlWidgetUtils: htmlWidgetUtilsModule,
       AlarmRenderModel: alarmRenderModelModule,
-      AlarmMarkup: alarmMarkupModule,
+      AlarmMarkup: alarmMarkupModule
     },
     services: {
       dom: {
+        /** @param {any} target */
         requirePluginRoot(target) {
           return target || null;
         },
         getNightModeState() {
           return false;
-        },
+        }
       },
       themeTokens: {
-        resolveForRoot: themeResolver.resolveForRoot,
-      },
-    },
+        resolveForRoot: themeResolver.resolveForRoot
+      }
+    }
   });
 
-  return loadFresh(
-    "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js",
-  ).create({}, componentContext);
+  return loadFresh("widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js").create({}, componentContext);
 }
 
 function createAisRendererWithRealLayout() {
@@ -103,90 +82,59 @@ function createAisRendererWithRealLayout() {
                     captionStyle: "font-size:8px;",
                     valueRowStyle: "",
                     valueStyle: "font-size:11px;",
-                    unitStyle: "font-size:7px;",
+                    unitStyle: "font-size:7px;"
                   },
                   cpa: {
                     captionStyle: "font-size:8px;",
                     valueRowStyle: "",
                     valueStyle: "font-size:11px;",
-                    unitStyle: "font-size:7px;",
+                    unitStyle: "font-size:7px;"
                   },
                   tcpa: {
                     captionStyle: "font-size:8px;",
                     valueRowStyle: "",
                     valueStyle: "font-size:11px;",
-                    unitStyle: "font-size:7px;",
+                    unitStyle: "font-size:7px;"
                   },
                   brg: {
                     captionStyle: "font-size:8px;",
                     valueRowStyle: "",
                     valueStyle: "font-size:11px;",
-                    unitStyle: "font-size:7px;",
-                  },
+                    unitStyle: "font-size:7px;"
+                  }
                 },
-                accentStyle: "background-color:#c33;",
+                accentStyle: "background-color:#c33;"
               };
-            },
+            }
           };
-        },
+        }
       },
-      HtmlWidgetUtils: loadFresh(
-        "shared/widget-kits/html/HtmlWidgetUtils.js",
-      ),
-      AisTargetRenderModel: loadFresh(
-        "shared/widget-kits/nav/AisTargetRenderModel.js",
-      ),
-      UnitAwareFormatter: loadFresh(
-        "shared/widget-kits/format/UnitAwareFormatter.js",
-      ),
+      HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+      AisTargetRenderModel: loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js"),
+      UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
       AisTargetMarkup: loadFresh("shared/widget-kits/nav/AisTargetMarkup.js"),
       AisTargetLayout: loadFresh("shared/widget-kits/nav/AisTargetLayout.js"),
-      AisTargetLayoutSizing: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutSizing.js",
-      ),
-      ResponsiveScaleProfile: loadFresh(
-        "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-      ),
-      LayoutRectMath: loadFresh(
-        "shared/widget-kits/layout/LayoutRectMath.js",
-      ),
-      AisTargetLayoutGeometry: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutGeometry.js",
-      ),
-      AisTargetLayoutGeometryStyles: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js",
-      ),
-      AisTargetLayoutMath: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutMath.js",
-      ),
-      PlaceholderNormalize: loadFresh(
-        "shared/widget-kits/format/PlaceholderNormalize.js",
-      ),
+      AisTargetLayoutSizing: loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js"),
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+      LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+      AisTargetLayoutGeometry: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js"),
+      AisTargetLayoutGeometryStyles: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js"),
+      AisTargetLayoutMath: loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js"),
+      PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
       StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-      StateScreenLabels: loadFresh(
-        "shared/widget-kits/state/StateScreenLabels.js",
-      ),
-      StateScreenPrecedence: loadFresh(
-        "shared/widget-kits/state/StateScreenPrecedence.js",
-      ),
-      StateScreenInteraction: loadFresh(
-        "shared/widget-kits/state/StateScreenInteraction.js",
-      ),
-      StateScreenMarkup: loadFresh(
-        "shared/widget-kits/state/StateScreenMarkup.js",
-      ),
-      StateScreenTextFit: loadFresh(
-        "shared/widget-kits/state/StateScreenTextFit.js",
-      ),
+      StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+      StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+      StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
+      StateScreenMarkup: loadFresh("shared/widget-kits/state/StateScreenMarkup.js"),
+      StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js")
     },
     services: {
       format: {
+        /** @param {any} value @param {Record<string, any>} [formatterOptions] */
         applyFormatter(value, formatterOptions) {
           const cfg = formatterOptions || {};
           const formatter = cfg.formatter;
-          const params = Array.isArray(cfg.formatterParameters)
-            ? cfg.formatterParameters
-            : [];
+          const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
           if (value == null) {
             return cfg.default;
           }
@@ -200,15 +148,16 @@ function createAisRendererWithRealLayout() {
             return "DEC:" + String(value) + ":" + params.join(",");
           }
           return String(value);
-        },
+        }
       },
       dom: {
+        /** @param {any} target */
         requirePluginRoot(target) {
           return target || null;
         },
         getNightModeState() {
           return false;
-        },
+        }
       },
       themeTokens: {
         resolveForRoot() {
@@ -217,31 +166,31 @@ function createAisRendererWithRealLayout() {
               family: "sans-serif",
               familyMono: "monospace",
               weight: 720,
-              labelWeight: 610,
-            },
+              labelWeight: 610
+            }
           };
-        },
-      },
-    },
+        }
+      }
+    }
   });
 
-  return loadFresh(
-    "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js",
-  ).create({}, componentContext);
+  return loadFresh("widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js").create({}, componentContext);
 }
 
+/** @param {any} rendererSpec @param {Record<string, any>} payload */
 function mountRenderer(rendererSpec, payload) {
   const mountHost = document.createElement("div");
   const committed = rendererSpec.createCommittedRenderer({
-    hostContext: payload.hostContext || {},
+    hostContext: payload.hostContext || {}
   });
   committed.mount(mountHost, payload);
   return {
     mountHost: mountHost,
-    committed: committed,
+    committed: committed
   };
 }
 
+/** @param {any} node */
 function readStyleFields(node) {
   const style = node && node.style ? node.style : null;
   return {
@@ -249,20 +198,21 @@ function readStyleFields(node) {
     top: style ? style.top : "",
     bottom: style ? style.bottom : "",
     width: style ? style.width : "",
-    borderRadius: style ? style.borderRadius : "",
+    borderRadius: style ? style.borderRadius : ""
   };
 }
 
 function createAlarmMeasureContext() {
   return {
     font: "700 12px sans-serif",
+    /** @param {any} text */
     measureText(text) {
       const source = String(this.font || "");
       const match = source.match(new RegExp("(\\d+(?:\\.\\d+)?)px"));
       const px = match ? Number(match[1]) : 12;
       const safePx = Number.isFinite(px) ? px : 12;
       return { width: String(text).length * safePx * 0.56 };
-    },
+    }
   };
 }
 
@@ -271,5 +221,5 @@ module.exports = {
   createAisRendererWithRealLayout,
   mountRenderer,
   readStyleFields,
-  createAlarmMeasureContext,
+  createAlarmMeasureContext
 };

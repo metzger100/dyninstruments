@@ -7,7 +7,7 @@
 
   const ns = root.DyniPlugin;
   const config = ns.config;
-  const shared = config.shared = config.shared || {};
+  const shared = (config.shared = config.shared || {});
   const BASE = ns.baseUrl;
 
   if (typeof BASE !== "string" || !BASE) {
@@ -15,12 +15,7 @@
   }
 
   const groups = shared.componentRegistryGroups;
-  const orderedGroupIds = [
-    "sharedFoundation",
-    "sharedEngines",
-    "widgets",
-    "cluster"
-  ];
+  const orderedGroupIds = ["sharedFoundation", "sharedEngines", "widgets", "cluster"];
   /** @type {DyniComponentRegistryGroup} */
   const mergedComponents = {};
 
@@ -43,4 +38,4 @@
   });
 
   config.components = mergedComponents;
-}(this));
+})(this);

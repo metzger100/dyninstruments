@@ -20,7 +20,9 @@
     def: {
       name: "dyni_Vessel_Instruments",
       description: "Vessel metrics (voltage, alarm, time/date, GPS status, SignalK attitude)",
-      caption: "", unit: "", default: "---",
+      caption: "",
+      unit: "",
+      default: "---",
       cluster: "vessel",
       storeKeys: {
         alarmInfo: "nav.alarms.all",
@@ -89,13 +91,21 @@
           condition: { kind: "regattaTimer" }
         },
         regattaTimerRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.0,
           internal: true,
           name: "RegattaTimer: Normal Threshold",
           condition: { kind: "regattaTimer" }
         },
         regattaTimerRatioThresholdFlat: {
-          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+          type: "FLOAT",
+          min: 1.5,
+          max: 6.0,
+          step: 0.05,
+          default: 3.0,
           internal: true,
           name: "RegattaTimer: Flat Threshold",
           condition: { kind: "regattaTimer" }
@@ -104,85 +114,13 @@
         // --- Voltage gauge params (linear + radial) ---
         ...shared.buildVesselVoltageGaugeParams(),
 
-        voltageLinearWarningEnabled: {
-          type: "BOOLEAN",
-          default: true,
-          name: "Show warning sector",
-          condition: { kind: "voltageLinear" }
-        },
-        voltageLinearAlarmEnabled: {
-          type: "BOOLEAN",
-          default: true,
-          name: "Show alarm sector",
-          condition: { kind: "voltageLinear" }
-        },
-
-        voltageLinearAlarmFrom: {
-          type: "FLOAT", min: 0, max: 80, step: 0.1, default: 11.6,
-          name: "Alarm at or below",
-          condition: { kind: "voltageLinear", voltageLinearAlarmEnabled: true }
-        },
-        voltageLinearWarningFrom: {
-          type: "FLOAT", min: 0, max: 80, step: 0.1, default: 12.2,
-          name: "Warning at or below",
-          condition: { kind: "voltageLinear", voltageLinearWarningEnabled: true }
-        },
-
-        voltageLinearRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
-          internal: true,
-          name: "VoltageLinearWidget: Normal Threshold",
-          condition: { kind: "voltageLinear" }
-        },
-        voltageLinearRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
-          internal: true,
-          name: "VoltageLinearWidget: Flat Threshold",
-          condition: { kind: "voltageLinear" }
-        },
-
-        // --- VoltageRadialWidget sector toggles and sectors ----------------
-        voltageRadialWarningEnabled: {
-          type: "BOOLEAN",
-          default: true,
-          name: "Show warning sector",
-          condition: { kind: "voltageRadial" }
-        },
-        voltageRadialAlarmEnabled: {
-          type: "BOOLEAN",
-          default: true,
-          name: "Show alarm sector",
-          condition: { kind: "voltageRadial" }
-        },
-
-        // low-end sectors (DepthRadialWidget-Regeln)
-        voltageRadialAlarmFrom: {
-          type: "FLOAT", min: 0, max: 80, step: 0.1, default: 11.6,
-          name: "Alarm at or below",
-          condition: { kind: "voltageRadial", voltageRadialAlarmEnabled: true }
-        },
-        voltageRadialWarningFrom: {
-          type: "FLOAT", min: 0, max: 80, step: 0.1, default: 12.2,
-          name: "Warning at or below",
-          condition: { kind: "voltageRadial", voltageRadialWarningEnabled: true }
-        },
-
-        voltageRadialRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
-          internal: true,
-          name: "VoltageRadialWidget: Normal Threshold",
-          condition: { kind: "voltageRadial" }
-        },
-        voltageRadialRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
-          internal: true,
-          name: "VoltageRadialWidget: Flat Threshold",
-          condition: { kind: "voltageRadial" }
-        },
-
         // Shared scale
         captionUnitScale: {
-          type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
+          type: "FLOAT",
+          min: 0.5,
+          max: 1.5,
+          step: 0.05,
+          default: 0.8,
           name: "Caption/Unit size",
           condition: [
             { kind: "voltage" },
@@ -215,10 +153,7 @@
           type: "BOOLEAN",
           default: true,
           name: "Smooth motion",
-          condition: [
-            { kind: "voltageLinear" },
-            { kind: "voltageRadial" }
-          ]
+          condition: [{ kind: "voltageLinear" }, { kind: "voltageRadial" }]
         },
         voltageLinearHideTextualMetrics: {
           type: "BOOLEAN",
@@ -233,13 +168,21 @@
           condition: { kind: "voltageRadial" }
         },
         clockRadialRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.7,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 0.7,
           internal: true,
           name: "ClockRadial: Normal Threshold",
           condition: { kind: "clockRadial" }
         },
         clockRadialRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.0,
+          type: "FLOAT",
+          min: 1.0,
+          max: 6.0,
+          step: 0.05,
+          default: 2.0,
           internal: true,
           name: "ClockRadial: Flat Threshold",
           condition: { kind: "clockRadial" }
@@ -248,21 +191,24 @@
           type: "BOOLEAN",
           default: false,
           name: "Hide seconds",
-          condition: [
-            { kind: "clock" },
-            { kind: "clockRadial" },
-            { kind: "dateTime" },
-            { kind: "timeStatus" }
-          ]
+          condition: [{ kind: "clock" }, { kind: "clockRadial" }, { kind: "dateTime" }, { kind: "timeStatus" }]
         },
         alarmRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.0,
           internal: true,
           name: "Alarm: Normal Threshold",
           condition: { kind: "alarm" }
         },
         alarmRatioThresholdFlat: {
-          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+          type: "FLOAT",
+          min: 1.5,
+          max: 6.0,
+          step: 0.05,
+          default: 3.0,
           internal: true,
           name: "Alarm: Flat Threshold",
           condition: { kind: "alarm" }
@@ -282,7 +228,11 @@
 
         // ThreeValueTextWidget thresholds (numeric only)
         ratioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.0,
           internal: true,
           name: "3-Rows Threshold (numeric)",
           condition: [
@@ -294,7 +244,11 @@
           ]
         },
         ratioThresholdFlat: {
-          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+          type: "FLOAT",
+          min: 1.5,
+          max: 6.0,
+          step: 0.05,
+          default: 3.0,
           internal: true,
           name: "1-Row Threshold (numeric)",
           condition: [
@@ -338,14 +292,12 @@
         if (kind === "voltage" || kind === "voltageLinear" || kind === "voltageRadial") {
           if (typeof out.value === "string" && out.value.trim()) {
             out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), value: out.value.trim() };
-          }
-          else if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
+          } else if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
             const sk = { .../** @type {Record<string, unknown>} */ (out.storeKeys) };
             delete sk.value;
             out.storeKeys = sk;
           }
-        }
-        else {
+        } else {
           if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
             const sk = { .../** @type {Record<string, unknown>} */ (out.storeKeys) };
             delete sk.value;
@@ -356,8 +308,7 @@
         if (kind === "pitch") {
           if (typeof out.pitchKey === "string" && out.pitchKey.trim()) {
             out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), pitch: out.pitchKey.trim() };
-          }
-          else {
+          } else {
             out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), pitch: DEFAULT_PITCH_KEY };
           }
         }
@@ -365,8 +316,7 @@
         if (kind === "roll") {
           if (typeof out.rollKey === "string" && out.rollKey.trim()) {
             out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), roll: out.rollKey.trim() };
-          }
-          else {
+          } else {
             out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), roll: DEFAULT_ROLL_KEY };
           }
         }
@@ -375,4 +325,4 @@
       }
     }
   });
-}(this));
+})(this);

@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 const { flushPromises } = require("../helpers/async");
 const hasOwn = Object.prototype.hasOwnProperty;
@@ -12,23 +13,24 @@ describe("runtime/theme-runtime.js", function () {
               dom: {
                 getNightModeState() {
                   return false;
-                },
-              },
+                }
+              }
             },
             state: {},
-            config: { shared: {}, clusters: [] },
-          },
+            config: { shared: {}, clusters: [] }
+          }
         },
-        overrides || {},
-      ),
+        overrides || {}
+      )
     );
 
     runIifeScript("runtime/namespace.js", context);
     context.DyniPlugin.runtime.dom = context.DyniPlugin.runtime.dom || {
       getNightModeState() {
         return false;
-      },
+      }
     };
+    runIifeScript("runtime/theme/token-catalog.js", context);
     runIifeScript("runtime/theme/model.js", context);
     runIifeScript("runtime/theme/resolver.js", context);
     runIifeScript("runtime/theme-runtime.js", context);
@@ -42,7 +44,7 @@ describe("runtime/theme-runtime.js", function () {
       classList: {
         contains(name) {
           return name === "widget" || name === "dyniplugin";
-        },
+        }
       },
       closest() {
         return null;
@@ -51,8 +53,8 @@ describe("runtime/theme-runtime.js", function () {
         getPropertyValue() {
           return "";
         },
-        setProperty: vi.fn(),
-      },
+        setProperty: vi.fn()
+      }
     };
   }
 
@@ -72,9 +74,9 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.dom.getNightModeState = function () {
@@ -82,8 +84,7 @@ describe("runtime/theme-runtime.js", function () {
     };
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.colors.alarm).toBe("rgba(250, 88, 74, 0.60)");
     expect(resolved.colors.alarmWidget.bg).toBe("rgba(250, 88, 74, 0.60)");
@@ -105,9 +106,9 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.dom.getNightModeState = function () {
@@ -115,8 +116,7 @@ describe("runtime/theme-runtime.js", function () {
     };
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.colors.ok).toBe("rgba(112, 243, 175, 0.60)");
     expect(resolved.colors.info).toBe("#cc2222");
@@ -128,17 +128,16 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({
-      activePresetName: "highcontrast",
+      activePresetName: "highcontrast"
     });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.colors.ok).toBe("#008f5a");
     expect(resolved.colors.info).toBe("#0057ff");
@@ -150,15 +149,14 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const dayResolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const dayResolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
     expect(dayResolved.colors.ais.warning).toBe(dayResolved.colors.alarm);
     expect(dayResolved.colors.ais.nearest).toBe(dayResolved.colors.ok);
     expect(dayResolved.colors.info).toBe(dayResolved.colors.pointer);
@@ -173,19 +171,14 @@ describe("runtime/theme-runtime.js", function () {
     context.DyniPlugin.runtime.dom.getNightModeState = function () {
       return true;
     };
-    const nightResolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const nightResolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
     expect(nightResolved.colors.ais.warning).toBe(nightResolved.colors.alarm);
     expect(nightResolved.colors.ais.nearest).toBe(nightResolved.colors.ok);
     expect(nightResolved.colors.info).toBe(nightResolved.colors.pointer);
     expect(nightResolved.colors.laylineStb).toBe(nightResolved.colors.ok);
     expect(nightResolved.colors.laylinePort).toBe(nightResolved.colors.alarm);
-    expect(nightResolved.colors.alarmWidget.strip).toBe(
-      nightResolved.colors.ok,
-    );
-    expect(nightResolved.colors.regatta.barDefault).toBe(
-      nightResolved.colors.info,
-    );
+    expect(nightResolved.colors.alarmWidget.strip).toBe(nightResolved.colors.ok);
+    expect(nightResolved.colors.regatta.barDefault).toBe(nightResolved.colors.info);
   });
 
   it("cascades scoped tokens in highcontrast base mode", function () {
@@ -194,17 +187,16 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({
-      activePresetName: "highcontrast",
+      activePresetName: "highcontrast"
     });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.colors.alarm).toBe("#ff3b2f");
     expect(resolved.colors.laylineStb).toBe("#008f5a");
@@ -218,22 +210,21 @@ describe("runtime/theme-runtime.js", function () {
       "--dyni-alarm": "#00ff00",
       "--dyni-warning": "#778899",
       "--dyni-ok": "#112233",
-      "--dyni-info": "#445566",
+      "--dyni-info": "#445566"
     };
     const context = setupContext({
       getComputedStyle() {
         return {
           getPropertyValue(name) {
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.colors.ais.warning).toBe("#00ff00");
     expect(resolved.colors.regatta.barCritical).toBe("#00ff00");
@@ -249,44 +240,42 @@ describe("runtime/theme-runtime.js", function () {
   it("uses scoped override over parent cascade for ais.warning", function () {
     const cssVars = {
       "--dyni-alarm": "#00ff00",
-      "--dyni-ais-warning": "#0000ff",
+      "--dyni-ais-warning": "#0000ff"
     };
     const context = setupContext({
       getComputedStyle() {
         return {
           getPropertyValue(name) {
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.colors.ais.warning).toBe("#0000ff");
   });
 
   it("uses kebab-case regatta input var override", function () {
     const cssVars = {
-      "--dyni-regatta-bar-warning": "#123abc",
+      "--dyni-regatta-bar-warning": "#123abc"
     };
     const context = setupContext({
       getComputedStyle() {
         return {
           getPropertyValue(name) {
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.colors.regatta.barWarning).toBe("#123abc");
   });
@@ -294,24 +283,22 @@ describe("runtime/theme-runtime.js", function () {
   it("prefers kebab-case regatta input var over deprecated alias", function () {
     const cssVars = {
       "--dyni-regatta-bar-warning": "#aabbcc",
-      "--dyni-regatta-barWarning": "#ddeeff",
+      "--dyni-regatta-barWarning": "#ddeeff"
     };
     const context = setupContext({
       getComputedStyle() {
         return {
           getPropertyValue(name) {
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.colors.regatta.barWarning).toBe("#aabbcc");
   });
-
 });

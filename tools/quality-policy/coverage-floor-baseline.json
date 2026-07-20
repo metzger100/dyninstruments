@@ -1,0 +1,929 @@
+{
+  "description": "Immutable minimum floors captured when per-file coverage ratcheting was introduced. Below-default captured debt is marked explicitly; new files use the policy defaults.",
+  "entries": {
+    "cluster/ClusterWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/AnchorMapper.js": {
+      "lines": 80,
+      "branches": 61.11,
+      "legacyBelowDefault": true
+    },
+    "cluster/mappers/ClusterMapperToolkit.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/CourseHeadingMapper.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/DefaultMapper.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/EnvironmentMapper.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/MapMapper.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/NavMapper.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/SpeedMapper.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/VesselMapper.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/mappers/WindMapper.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/viewmodels/ActiveRouteViewModel.js": {
+      "lines": 80,
+      "branches": 58.82,
+      "legacyBelowDefault": true
+    },
+    "cluster/viewmodels/AisTargetViewModel.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/viewmodels/AlarmViewModel.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/viewmodels/EditRouteViewModel.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "cluster/viewmodels/RoutePointsViewModel.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/bootstrap-manifest.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/anchor.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/course-heading.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/default.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/environment.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/finalize.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/map.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/nav.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/speed.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/vessel.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/cluster-routes/wind.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/anchor.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/course-heading.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/default-radial-editables.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/default.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/environment.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/map.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/nav-ratio-thresholds.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/nav.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/speed.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/vessel.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/clusters/wind.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-cluster.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-shared-engines.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-shared-foundation-format.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-shared-foundation-geometry.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-shared-foundation-layout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-shared-foundation-state.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-shared-foundation-xte.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-widgets-gauge.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-widgets-nav.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/components/registry-widgets-vessel.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/common-editables.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/editable-param-utils.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/environment-base-editables.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/environment-depth-editables.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/environment-editables.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/environment-temperature-editables.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/kind-defaults.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/unit-editable-utils.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/shared/vessel-voltage-editables.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "config/widget-definitions.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "plugin.js": {
+      "lines": 71.73,
+      "branches": 65,
+      "legacyBelowDefault": true
+    },
+    "plugin.mjs": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/HostCommitController.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/SurfaceSessionController.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/TemporaryHostActionBridge.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/TemporaryHostActionBridgeDiscovery.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/asset-preloader.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/canvas-runtime.js": {
+      "lines": 80,
+      "branches": 53.84,
+      "legacyBelowDefault": true
+    },
+    "runtime/cluster/ClusterShellRenderer.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/cluster/RouteActivationController.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/cluster/RouteActivationLatestWins.js": {
+      "lines": 73.06,
+      "branches": 63.88,
+      "legacyBelowDefault": true
+    },
+    "runtime/cluster/RouteActivationPayloadBuilder.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/component-loader.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/dom-runtime.js": {
+      "lines": 58.13,
+      "branches": 44.44,
+      "legacyBelowDefault": true
+    },
+    "runtime/editable-defaults.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/format-runtime.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/init.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/namespace.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/plugin-bootstrap-core.js": {
+      "lines": 77.68,
+      "branches": 64.21,
+      "legacyBelowDefault": true
+    },
+    "runtime/surface/CanvasDomSurfaceAdapter.js": {
+      "lines": 76.55,
+      "branches": 51.67,
+      "legacyBelowDefault": true
+    },
+    "runtime/surface/ClusterSurfacePolicy.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/surface/HtmlSurfaceController.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/surface/index.js": {
+      "lines": 38.7,
+      "branches": 23.07,
+      "legacyBelowDefault": true
+    },
+    "runtime/theme-runtime.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/theme/token-catalog.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/theme/model.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/theme/resolver.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "runtime/widget-registrar.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/unit-format-families.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/anim/SpringEasing.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/canvas/CanvasLayerCache.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/format/DepthDisplayFormatter.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/format/PlaceholderNormalize.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/format/StableDigits.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/format/UnitAwareFormatter.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/gauge/GaugeToolkit.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/html/HtmlDomPatchUtils.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/html/HtmlMeasureUtils.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/html/HtmlWidgetLifecycle.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/html/HtmlWidgetUtils.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/html/PreparedPayloadModelCache.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/layout/GeometryScale.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/layout/LayoutRectMath.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/layout/LayoutSizingHelpers.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/layout/ResponsiveScaleProfile.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearCanvasPrimitives.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeEngineFrame.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeEngine.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeEngineDrawing.js": {
+      "lines": 80,
+      "branches": 63.46,
+      "legacyBelowDefault": true
+    },
+    "shared/widget-kits/linear/LinearGaugeEngineSupport.js": {
+      "lines": 80,
+      "branches": 50,
+      "legacyBelowDefault": true
+    },
+    "shared/widget-kits/linear/LinearGaugeLabelFit.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeLayoutVariants.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeMath.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/linear/LinearGaugeTextLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/ActiveRouteHtmlFit.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/ActiveRouteLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetHtmlFit.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetLayoutGeometry.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetLayoutMath.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetLayoutSizing.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetMarkup.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/AisTargetRenderModel.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/CenterDisplayLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/CenterDisplayMath.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/CenterDisplayRenderModel.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteHtmlFit.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteHtmlFitSupport.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteLayoutTiles.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteLayoutGeometry.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteLayoutMath.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteMarkup.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/EditRouteRenderModel.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/MapZoomHtmlFit.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/MapZoomMarkup.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/NavInteractionPolicy.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/NavModeRatio.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsDomEffects.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsHtmlFit.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsInfoText.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsLayoutSizing.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsMarkup.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsRenderModel.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/nav/RoutePointsRowGeometry.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/FullCircleRadialEngine.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/FullCircleRadialLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/FullCircleRadialMeasure.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/FullCircleRadialDrawing.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/FullCircleRadialTextLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialAngleMath.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialCanvasPrimitives.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialFrameRenderer.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialSectorMath.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialTextFitting.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialTextLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialTickMath.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialToolkit.js": {
+      "lines": 80,
+      "branches": 50,
+      "legacyBelowDefault": true
+    },
+    "shared/widget-kits/radial/RadialValueMath.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/RadialMajorValueLabels.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/SemicircleRadialEngine.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/SemicircleRadialLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/radial/SemicircleRadialTextLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/state/StateScreenCanvasOverlay.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/state/StateScreenInteraction.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/state/StateScreenLabels.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/state/StateScreenMarkup.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/state/StateScreenPrecedence.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/state/StateScreenTextFit.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/CanvasTextFitting.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/CanvasTextLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/CenterDisplayStateAdapter.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/PositionCoordinateFormatting.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/TextFitMath.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/TextLayoutComposite.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/TextLayoutEngine.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/TextLayoutPrimitives.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/TextLayoutScaleHelpers.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/text/TextTileLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/value/ValueMath.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/AlarmHtmlFit.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/AlarmHtmlFitChrome.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/AlarmMarkup.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/AlarmRenderModel.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/RegattaTimerAudio.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/RegattaTimerHtmlFit.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/RegattaTimerMarkup.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/RegattaTimerModel.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/RegattaTimerPhase.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/vessel/RegattaTimerSessionStore.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteHighwayLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteHighwayPrimitives.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteLinearPrimitives.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteLinearDynamicMetrics.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteDisplayMetrics.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteDisplayPropsNormalize.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteDisplayRenderSetup.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "shared/widget-kits/xte/XteLinearLayout.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/CompassLinearWidget/CompassLinearWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/DefaultLinearWidget/DefaultLinearWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/DepthLinearWidget/DepthLinearWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/linear/WindLinearWidget/WindLinearWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/ClockRadialWidget/ClockRadialWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/CompassRadialWidget/CompassRadialWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/DepthRadialWidget/DepthRadialWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/radial/WindRadialWidget/WindRadialWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/XteDisplayLinearWidget/XteDisplayLinearWidget.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "widgets/text/XteDisplayWidget/XteDisplayWidget.js": {
+      "lines": 80,
+      "branches": 65
+    }
+  }
+}

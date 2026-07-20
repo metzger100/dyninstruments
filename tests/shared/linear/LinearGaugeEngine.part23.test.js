@@ -1,8 +1,5 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./LinearGaugeEngine.harness");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
 describe("LinearGaugeEngine", function () {
   it("keeps spring state keyed by canvas and snaps immediately when easing is disabled", function () {
@@ -14,20 +11,20 @@ describe("LinearGaugeEngine", function () {
       tickProps: {
         major: "major",
         minor: "minor",
-        showEndLabels: "showEndLabels",
+        showEndLabels: "showEndLabels"
       },
       ratioProps: { normal: "n", flat: "f" },
-      ratioDefaults: { normal: 1.1, flat: 3.5 },
+      ratioDefaults: { normal: 1.1, flat: 3.5 }
     });
     const canvasA = createMockCanvas({
       rectWidth: 480,
       rectHeight: 120,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     const canvasB = createMockCanvas({
       rectWidth: 480,
       rectHeight: 120,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     const nowSpy = vi.spyOn(Date, "now");
 
@@ -40,8 +37,8 @@ describe("LinearGaugeEngine", function () {
           max: 30,
           major: 10,
           minor: 5,
-          showEndLabels: false,
-        }),
+          showEndLabels: false
+        })
       ).toBeUndefined();
 
       nowSpy.mockReturnValue(16);
@@ -52,8 +49,8 @@ describe("LinearGaugeEngine", function () {
           max: 30,
           major: 10,
           minor: 5,
-          showEndLabels: false,
-        }),
+          showEndLabels: false
+        })
       ).toEqual({ wantsFollowUpFrame: true });
 
       nowSpy.mockReturnValue(16);
@@ -64,8 +61,8 @@ describe("LinearGaugeEngine", function () {
           max: 30,
           major: 10,
           minor: 5,
-          showEndLabels: false,
-        }),
+          showEndLabels: false
+        })
       ).toBeUndefined();
 
       nowSpy.mockReturnValue(32);
@@ -77,12 +74,11 @@ describe("LinearGaugeEngine", function () {
           major: 10,
           minor: 5,
           showEndLabels: false,
-          easing: false,
-        }),
+          easing: false
+        })
       ).toBeUndefined();
     } finally {
       nowSpy.mockRestore();
     }
   });
-
 });

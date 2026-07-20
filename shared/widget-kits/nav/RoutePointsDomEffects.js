@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRoutePointsDomEffects = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const EFFECT_STATE_KEY = "__dyniRoutePointsDomEffects";
@@ -36,9 +36,10 @@
 
   /** @param {unknown} hostContext @returns {DyniRoutePointsDomEffectState | null} */
   function getEffectState(hostContext) {
-    const ctx = hostContext && typeof hostContext === "object"
-      ? /** @type {Record<string, DyniRoutePointsDomEffectState>} */ (hostContext)
-      : null;
+    const ctx =
+      hostContext && typeof hostContext === "object"
+        ? /** @type {Record<string, DyniRoutePointsDomEffectState>} */ (hostContext)
+        : null;
     if (!ctx) {
       return null;
     }
@@ -101,7 +102,7 @@
       const rowRect = element.getBoundingClientRect();
       const listRect = listEl.getBoundingClientRect();
       const listScrollTop = Number(listEl.scrollTop) || 0;
-      return (Number(rowRect.top) - Number(listRect.top)) + listScrollTop;
+      return Number(rowRect.top) - Number(listRect.top) + listScrollTop;
     }
     return 0;
   }
@@ -121,9 +122,8 @@
     if (!element) {
       return 0;
     }
-    const listEl = typeof element.querySelector === "function"
-      ? element.querySelector(".dyni-route-points-list")
-      : null;
+    const listEl =
+      typeof element.querySelector === "function" ? element.querySelector(".dyni-route-points-list") : null;
     if (!listEl) {
       return 0;
     }
@@ -164,8 +164,7 @@
     let nextScrollTop = null;
     if (rowTop < currentScrollTop) {
       nextScrollTop = rowTop;
-    }
-    else if (rowBottom > viewportBottom) {
+    } else if (rowBottom > viewportBottom) {
       nextScrollTop = rowBottom - viewportHeight;
     }
 
@@ -333,4 +332,4 @@
 
   /** @type {DyniRoutePointsDomEffectsModule} */
   return { id: "RoutePointsDomEffects", create: create };
-}));
+});

@@ -1,9 +1,9 @@
 module.exports = [
-    {
-      rule: "catch-fallback-without-suppression",
-      severity: "warn",
-      rel: "runtime/example.js",
-      positive: `
+  {
+    rule: "catch-fallback-without-suppression",
+    severity: "block",
+    rel: "runtime/example.js",
+    positive: `
 (function () {
   "use strict";
   function runTask() {
@@ -16,7 +16,7 @@ module.exports = [
   runTask();
 }());
 `,
-      clean: `
+    clean: `
 (function () {
   "use strict";
   function runTask() {
@@ -29,7 +29,7 @@ module.exports = [
   runTask();
 }());
 `,
-      disableNextLine: `
+    disableNextLine: `
 (function () {
   "use strict";
   function runTask() {
@@ -44,7 +44,7 @@ module.exports = [
   runTask();
 }());
 `,
-      disableLine: `
+    disableLine: `
 (function () {
   "use strict";
   function runTask() {
@@ -55,12 +55,12 @@ module.exports = [
   runTask();
 }());
 `
-    },
-    {
-      rule: "internal-hook-fallback",
-      severity: "block",
-      rel: "shared/example.js",
-      positive: `
+  },
+  {
+    rule: "internal-hook-fallback",
+    severity: "block",
+    rel: "shared/example.js",
+    positive: `
 (function () {
   "use strict";
   function normalizeAxis(candidate, fallbackAxis) {
@@ -69,7 +69,7 @@ module.exports = [
   normalizeAxis({}, {});
 }());
 `,
-      clean: `
+    clean: `
 (function () {
   "use strict";
   function resolveAxis(axis) {
@@ -78,7 +78,7 @@ module.exports = [
   resolveAxis({});
 }());
 `,
-      disableNextLine: `
+    disableNextLine: `
 (function () {
   "use strict";
   // dyni-lint-disable-next-line internal-hook-fallback -- temporary bridge until hook contract is tightened
@@ -88,19 +88,19 @@ module.exports = [
   normalizeAxis({}, {});
 }());
 `,
-      disableLine: `
+    disableLine: `
 (function () {
   "use strict";
   function normalizeAxis(candidate, fallbackAxis) { return candidate; } /* dyni-lint-disable-line internal-hook-fallback -- temporary bridge until hook contract is tightened */
   normalizeAxis({}, {});
 }());
 `
-    },
-    {
-      rule: "redundant-null-type-guard",
-      severity: "block",
-      rel: "widgets/example.js",
-      positive: `
+  },
+  {
+    rule: "redundant-null-type-guard",
+    severity: "block",
+    rel: "widgets/example.js",
+    positive: `
 (function () {
   "use strict";
   function renderCanvas() {
@@ -110,7 +110,7 @@ module.exports = [
   renderCanvas();
 }());
 `,
-      clean: `
+    clean: `
 (function () {
   "use strict";
   function renderCanvas() {
@@ -120,7 +120,7 @@ module.exports = [
   renderCanvas();
 }());
 `,
-      disableNextLine: `
+    disableNextLine: `
 (function () {
   "use strict";
   function renderCanvas() {
@@ -131,7 +131,7 @@ module.exports = [
   renderCanvas();
 }());
 `,
-      disableLine: `
+    disableLine: `
 (function () {
   "use strict";
   function renderCanvas() {
@@ -141,12 +141,12 @@ module.exports = [
   renderCanvas();
 }());
 `
-    },
-    {
-      rule: "hardcoded-runtime-default",
-      severity: "block",
-      rel: "widgets/example.js",
-      positive: `
+  },
+  {
+    rule: "hardcoded-runtime-default",
+    severity: "block",
+    rel: "widgets/example.js",
+    positive: `
 (function () {
   "use strict";
   function renderCanvas() {
@@ -156,7 +156,7 @@ module.exports = [
   renderCanvas();
 }());
 `,
-      clean: `
+    clean: `
 (function () {
   "use strict";
   function renderCanvas() {
@@ -165,7 +165,7 @@ module.exports = [
   renderCanvas();
 }());
 `,
-      disableNextLine: `
+    disableNextLine: `
 (function () {
   "use strict";
   function renderCanvas() {
@@ -176,7 +176,7 @@ module.exports = [
   renderCanvas();
 }());
 `,
-      disableLine: `
+    disableLine: `
 (function () {
   "use strict";
   function renderCanvas() {
@@ -186,12 +186,12 @@ module.exports = [
   renderCanvas();
 }());
 `
-    },
-    {
-      rule: "css-js-default-duplication",
-      severity: "warn",
-      rel: "runtime/example.js",
-      positive: `
+  },
+  {
+    rule: "css-js-default-duplication",
+    severity: "block",
+    rel: "runtime/example.js",
+    positive: `
 (function () {
   "use strict";
   function renderCanvas() {
@@ -201,7 +201,7 @@ module.exports = [
   renderCanvas();
 }());
 `,
-      clean: `
+    clean: `
 (function () {
   "use strict";
   function renderCanvas() {
@@ -210,7 +210,7 @@ module.exports = [
   renderCanvas();
 }());
 `,
-      disableNextLine: `
+    disableNextLine: `
 (function () {
   "use strict";
   function renderCanvas() {
@@ -221,7 +221,7 @@ module.exports = [
   renderCanvas();
 }());
 `,
-      disableLine: `
+    disableLine: `
 (function () {
   "use strict";
   function renderCanvas() {
@@ -231,12 +231,12 @@ module.exports = [
   renderCanvas();
 }());
 `
-    },
-    {
-      rule: "premature-legacy-support",
-      severity: "block",
-      rel: "shared/example.js",
-      positive: `
+  },
+  {
+    rule: "premature-legacy-support",
+    severity: "block",
+    rel: "shared/example.js",
+    positive: `
 (function () {
   "use strict";
   function copy(axis) {
@@ -246,7 +246,7 @@ module.exports = [
   copy({});
 }());
 `,
-      clean: `
+    clean: `
 (function () {
   "use strict";
   function copy(axis) {
@@ -256,7 +256,7 @@ module.exports = [
   copy({});
 }());
 `,
-      disableNextLine: `
+    disableNextLine: `
 (function () {
   "use strict";
   function copy(axis) {
@@ -267,7 +267,7 @@ module.exports = [
   copy({});
 }());
 `,
-      disableLine: `
+    disableLine: `
 (function () {
   "use strict";
   function copy(axis) {
@@ -277,12 +277,12 @@ module.exports = [
   copy({});
 }());
 `
-    },
-    {
-      rule: "editable-threshold-missing-internal",
-      severity: "warn",
-      rel: "config/clusters/example.js",
-      positive: `
+  },
+  {
+    rule: "editable-threshold-missing-internal",
+    severity: "block",
+    rel: "config/clusters/example.js",
+    positive: `
 (function (root) {
   "use strict";
   root.DyniPlugin.config.clusters.push({
@@ -295,7 +295,7 @@ module.exports = [
   });
 }(this));
 `,
-      clean: `
+    clean: `
 (function (root) {
   "use strict";
   root.DyniPlugin.config.clusters.push({
@@ -308,7 +308,7 @@ module.exports = [
   });
 }(this));
 `,
-      disableNextLine: `
+    disableNextLine: `
 (function (root) {
   "use strict";
   root.DyniPlugin.config.clusters.push({
@@ -322,7 +322,7 @@ module.exports = [
   });
 }(this));
 `,
-      disableLine: `
+    disableLine: `
 (function (root) {
   "use strict";
   root.DyniPlugin.config.clusters.push({
@@ -335,12 +335,12 @@ module.exports = [
   });
 }(this));
 `
-    },
-    {
-      rule: "absolute-user-home-path",
-      severity: "block",
-      rel: "runtime/example.js",
-      positive: `
+  },
+  {
+    rule: "absolute-user-home-path",
+    severity: "block",
+    rel: "runtime/example.js",
+    positive: `
 (function () {
   "use strict";
   function readPath() {
@@ -350,7 +350,7 @@ module.exports = [
   readPath();
 }());
 `,
-      clean: `
+    clean: `
 (function () {
   "use strict";
   function readPath() {
@@ -360,7 +360,7 @@ module.exports = [
   readPath();
 }());
 `,
-      disableNextLine: `
+    disableNextLine: `
 (function () {
   "use strict";
   function readPath() {
@@ -371,7 +371,7 @@ module.exports = [
   readPath();
 }());
 `,
-      disableLine: `
+    disableLine: `
 (function () {
   "use strict";
   function readPath() {
@@ -381,12 +381,12 @@ module.exports = [
   readPath();
 }());
 `
-    },
-    {
-      rule: "removed-theme-surface-architecture",
-      severity: "block",
-      rel: "runtime/example.js",
-      positive: `
+  },
+  {
+    rule: "removed-theme-surface-architecture",
+    severity: "block",
+    rel: "runtime/example.js",
+    positive: `
 (function () {
   "use strict";
   function wireLegacy(widget) {
@@ -397,7 +397,7 @@ module.exports = [
   wireLegacy({});
 }());
 `,
-      clean: `
+    clean: `
 (function () {
   "use strict";
   function wireCommitted(widget) {
@@ -406,7 +406,7 @@ module.exports = [
   wireCommitted({});
 }());
 `,
-      disableNextLine: `
+    disableNextLine: `
 (function () {
   "use strict";
   function wireLegacy(widget) {
@@ -417,7 +417,7 @@ module.exports = [
   wireLegacy({});
 }());
 `,
-      disableLine: `
+    disableLine: `
 (function () {
   "use strict";
   function wireLegacy(widget) {
@@ -427,31 +427,208 @@ module.exports = [
   wireLegacy({});
 }());
 `
-    },
-    {
-      rule: "legacy-theme-css-input-consumer",
-      severity: "block",
-      rel: "widgets/text/SampleWidget.css",
-      positive: `
+  },
+  {
+    rule: "legacy-theme-css-input-consumer",
+    severity: "block",
+    rel: "widgets/text/SampleWidget.css",
+    positive: `
 .dyni-html-root .sample-value {
   font-weight: var(--dyni-font-weight, 700);
 }
 `,
-      clean: `
+    clean: `
 .dyni-html-root .sample-value {
   font-weight: var(--dyni-theme-font-weight, 700);
 }
 `,
-      disableNextLine: `
+    disableNextLine: `
 .dyni-html-root .sample-value {
   /* dyni-lint-disable-next-line legacy-theme-css-input-consumer -- negative fixture for css token migration rule coverage */
   font-weight: var(--dyni-font-weight, 700);
 }
 `,
-      disableLine: `
+    disableLine: `
 .dyni-html-root .sample-value {
   font-weight: var(--dyni-font-weight, 700); /* dyni-lint-disable-line legacy-theme-css-input-consumer -- negative fixture for css token migration rule coverage */
 }
 `
+  },
+  {
+    rule: "absent-numeric-sentinel",
+    severity: "block",
+    rel: "cluster/mappers/SampleMapper.js",
+    positive: `
+(function () {
+  "use strict";
+  function create() {
+    function translate(props) {
+      return {
+        renderer: "SpeedRadialWidget",
+        warningFrom: props.warningEnabled ? props.warningFrom : NaN
+      };
     }
-  ];;
+    return { cluster: "sample", translate: translate };
+  }
+  return { id: "SampleMapper", create: create };
+}());
+`,
+    clean: `
+(function () {
+  "use strict";
+  function create() {
+    function translate(props) {
+      return {
+        renderer: "SpeedRadialWidget",
+        warningFrom: props.warningEnabled ? props.warningFrom : undefined
+      };
+    }
+    return { cluster: "sample", translate: translate };
+  }
+  return { id: "SampleMapper", create: create };
+}());
+`,
+    disableNextLine: `
+(function () {
+  "use strict";
+  function create() {
+    function translate(props) {
+      return {
+        renderer: "SpeedRadialWidget",
+        // dyni-lint-disable-next-line absent-numeric-sentinel -- negative fixture for absent-sentinel rule coverage
+        warningFrom: props.warningEnabled ? props.warningFrom : NaN
+      };
+    }
+    return { cluster: "sample", translate: translate };
+  }
+  return { id: "SampleMapper", create: create };
+}());
+`,
+    disableLine: `
+(function () {
+  "use strict";
+  function create() {
+    function translate(props) {
+      return {
+        renderer: "SpeedRadialWidget",
+        warningFrom: props.warningEnabled ? props.warningFrom : NaN /* dyni-lint-disable-line absent-numeric-sentinel -- negative fixture for absent-sentinel rule coverage */
+      };
+    }
+    return { cluster: "sample", translate: translate };
+  }
+  return { id: "SampleMapper", create: create };
+}());
+`
+  },
+  {
+    rule: "mapper-prop-renormalization",
+    severity: "block",
+    rel: "widgets/text/SampleTextWidget/SampleTextWidget.js",
+    positive: `
+(function () {
+  "use strict";
+  function create(def, componentContext) {
+    const valueMath = componentContext.components.require("ValueMath");
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
+    function buildModel(props) {
+      const p = props || {};
+      return { zoomNumber: toOptionalFiniteNumber(p.zoom) };
+    }
+    return { id: "MapZoomTextHtmlWidget", buildModel: buildModel };
+  }
+  return { id: "MapZoomTextHtmlWidget", create: create };
+}());
+`,
+    clean: `
+(function () {
+  "use strict";
+  function create(def, componentContext) {
+    const valueMath = componentContext.components.require("ValueMath");
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
+    function buildModel(props) {
+      const p = props || {};
+      return { zoomNumber: p.zoom, scaleNumber: p.captionUnitScale };
+    }
+    return { id: "MapZoomTextHtmlWidget", buildModel: buildModel };
+  }
+  return { id: "MapZoomTextHtmlWidget", create: create };
+}());
+`,
+    disableNextLine: `
+(function () {
+  "use strict";
+  function create(def, componentContext) {
+    const valueMath = componentContext.components.require("ValueMath");
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
+    function buildModel(props) {
+      const p = props || {};
+      // dyni-lint-disable-next-line mapper-prop-renormalization -- negative fixture for mapper-prop-renormalization rule coverage
+      return { zoomNumber: toOptionalFiniteNumber(p.zoom) };
+    }
+    return { id: "MapZoomTextHtmlWidget", buildModel: buildModel };
+  }
+  return { id: "MapZoomTextHtmlWidget", create: create };
+}());
+`,
+    disableLine: `
+(function () {
+  "use strict";
+  function create(def, componentContext) {
+    const valueMath = componentContext.components.require("ValueMath");
+    const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
+    function buildModel(props) {
+      const p = props || {};
+      return { zoomNumber: toOptionalFiniteNumber(p.zoom) }; /* dyni-lint-disable-line mapper-prop-renormalization -- negative fixture for mapper-prop-renormalization rule coverage */
+    }
+    return { id: "MapZoomTextHtmlWidget", buildModel: buildModel };
+  }
+  return { id: "MapZoomTextHtmlWidget", create: create };
+}());
+`
+  },
+  {
+    rule: "unsafe-html-dom-sink",
+    severity: "block",
+    rel: "widgets/text/SampleHtmlWidget.js",
+    positive: `
+(function () {
+  "use strict";
+  function patch(rootEl, markup) {
+    rootEl.innerHTML = markup;
+    return rootEl;
+  }
+  patch({}, "<div></div>");
+}());
+`,
+    clean: `
+(function () {
+  "use strict";
+  function renderHtml(props) {
+    return "<div class=\\"dyni-html-root\\">" + String(props && props.value) + "</div>";
+  }
+  renderHtml({ value: 1 });
+}());
+`,
+    disableNextLine: `
+(function () {
+  "use strict";
+  function patch(rootEl, markup) {
+    // dyni-lint-disable-next-line unsafe-html-dom-sink -- negative fixture for unsafe-html-dom-sink rule coverage
+    rootEl.innerHTML = markup;
+    return rootEl;
+  }
+  patch({}, "<div></div>");
+}());
+`,
+    disableLine: `
+(function () {
+  "use strict";
+  function patch(rootEl, markup) {
+    rootEl.innerHTML = markup; /* dyni-lint-disable-line unsafe-html-dom-sink -- negative fixture for unsafe-html-dom-sink rule coverage */
+    return rootEl;
+  }
+  patch({}, "<div></div>");
+}());
+`
+  }
+];

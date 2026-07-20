@@ -12,6 +12,7 @@ describe("config/clusters/default.js", function () {
 
     runIifeScript("config/shared/editable-param-utils.js", context);
     runIifeScript("config/shared/kind-defaults.js", context);
+    runIifeScript("config/shared/default-radial-editables.js", context);
     runIifeScript("config/clusters/default.js", context);
 
     expect(context.DyniPlugin.config.clusters).toHaveLength(1);
@@ -29,7 +30,7 @@ describe("config/clusters/default.js", function () {
     expect(def.default).toBe("---");
     expect(def.storeKeys).toEqual({});
     expect(def.editableParameters.kind.default).toBe("text");
-    expect(def.editableParameters.kind.list.map((entry) => entry.value)).toEqual([
+    expect(def.editableParameters.kind.list.map((/** @type {any} */ entry) => entry.value)).toEqual([
       "text",
       "linearGauge",
       "radialGauge"
@@ -40,38 +41,50 @@ describe("config/clusters/default.js", function () {
     expect(def.editableParameters.formatter).toBe(true);
     expect(def.editableParameters.formatterParameters).toBe(true);
     expect(def.editableParameters.className).toBe(true);
-    expect(def.editableParameters.caption_text).toEqual(expect.objectContaining({
-      default: "VALUE",
-      condition: { kind: "text" }
-    }));
-    expect(def.editableParameters.unit_text).toEqual(expect.objectContaining({
-      default: "",
-      condition: { kind: "text" }
-    }));
-    expect(def.editableParameters.caption_linearGauge).toEqual(expect.objectContaining({
-      default: "VALUE",
-      condition: { kind: "linearGauge" }
-    }));
-    expect(def.editableParameters.unit_radialGauge).toEqual(expect.objectContaining({
-      default: "",
-      condition: { kind: "radialGauge" }
-    }));
-    expect(def.editableParameters.ratioThresholdNormal).toEqual(expect.objectContaining({
-      default: 1.0,
-      min: 0.5,
-      max: 2.0,
-      step: 0.05,
-      internal: true,
-      condition: { kind: "text" }
-    }));
-    expect(def.editableParameters.ratioThresholdFlat).toEqual(expect.objectContaining({
-      default: 3.0,
-      min: 1.5,
-      max: 6.0,
-      step: 0.05,
-      internal: true,
-      condition: { kind: "text" }
-    }));
+    expect(def.editableParameters.caption_text).toEqual(
+      expect.objectContaining({
+        default: "VALUE",
+        condition: { kind: "text" }
+      })
+    );
+    expect(def.editableParameters.unit_text).toEqual(
+      expect.objectContaining({
+        default: "",
+        condition: { kind: "text" }
+      })
+    );
+    expect(def.editableParameters.caption_linearGauge).toEqual(
+      expect.objectContaining({
+        default: "VALUE",
+        condition: { kind: "linearGauge" }
+      })
+    );
+    expect(def.editableParameters.unit_radialGauge).toEqual(
+      expect.objectContaining({
+        default: "",
+        condition: { kind: "radialGauge" }
+      })
+    );
+    expect(def.editableParameters.ratioThresholdNormal).toEqual(
+      expect.objectContaining({
+        default: 1.0,
+        min: 0.5,
+        max: 2.0,
+        step: 0.05,
+        internal: true,
+        condition: { kind: "text" }
+      })
+    );
+    expect(def.editableParameters.ratioThresholdFlat).toEqual(
+      expect.objectContaining({
+        default: 3.0,
+        min: 1.5,
+        max: 6.0,
+        step: 0.05,
+        internal: true,
+        condition: { kind: "text" }
+      })
+    );
     expect(def.editableParameters.captionUnitScale.default).toBe(0.8);
     expect(def.editableParameters.stableDigits.default).toBe(false);
     expect(def.editableParameters.stableDigits.condition).toEqual([
@@ -80,10 +93,7 @@ describe("config/clusters/default.js", function () {
       { kind: "radialGauge" }
     ]);
     expect(def.editableParameters.easing.default).toBe(true);
-    expect(def.editableParameters.easing.condition).toEqual([
-      { kind: "linearGauge" },
-      { kind: "radialGauge" }
-    ]);
+    expect(def.editableParameters.easing.condition).toEqual([{ kind: "linearGauge" }, { kind: "radialGauge" }]);
     expect(def.editableParameters.defaultLinearHideTextualMetrics.default).toBe(false);
     expect(def.editableParameters.defaultLinearHideTextualMetrics.name).toBe("Hide textual metrics");
     expect(def.editableParameters.defaultLinearHideTextualMetrics.condition).toEqual({ kind: "linearGauge" });

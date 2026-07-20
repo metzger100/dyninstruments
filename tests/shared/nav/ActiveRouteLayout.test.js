@@ -4,14 +4,18 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 describe("ActiveRouteLayout", function () {
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    return loadFresh("shared/widget-kits/nav/ActiveRouteLayout.js").create({}, createComponentContextMock({
-      modules: {
-        ResponsiveScaleProfile: responsiveScaleProfile,
-        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
-      }
-    }));
+    return loadFresh("shared/widget-kits/nav/ActiveRouteLayout.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          ResponsiveScaleProfile: responsiveScaleProfile,
+          LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+        }
+      })
+    );
   }
 
+  /** @param {any} inner @param {any} outer */
   function expectRectInside(inner, outer) {
     expect(inner.x).toBeGreaterThanOrEqual(outer.x);
     expect(inner.y).toBeGreaterThanOrEqual(outer.y);
@@ -19,6 +23,13 @@ describe("ActiveRouteLayout", function () {
     expect(inner.y + inner.h).toBeLessThanOrEqual(outer.y + outer.h);
   }
 
+  /**
+   * @param {any} layout
+   * @param {number} width
+   * @param {number} height
+   * @param {string} mode
+   * @param {boolean} isApproaching
+   */
   function buildSnapshot(layout, width, height, mode, isApproaching) {
     const insets = layout.computeInsets(width, height);
     const contentRect = layout.createContentRect(width, height, insets);
@@ -98,12 +109,8 @@ describe("ActiveRouteLayout", function () {
     expect(mediumNormal.out.nameRect.h / mediumNormal.contentRect.h).toBeLessThan(
       largeNormal.out.nameRect.h / largeNormal.contentRect.h
     );
-    expect(compactNormal.out.responsive.textFillScale).toBeGreaterThan(
-      mediumNormal.out.responsive.textFillScale
-    );
-    expect(mediumNormal.out.responsive.textFillScale).toBeGreaterThan(
-      largeNormal.out.responsive.textFillScale
-    );
+    expect(compactNormal.out.responsive.textFillScale).toBeGreaterThan(mediumNormal.out.responsive.textFillScale);
+    expect(mediumNormal.out.responsive.textFillScale).toBeGreaterThan(largeNormal.out.responsive.textFillScale);
   });
 
   it("derives metric-tile spacing from compact layout-owned responsive state", function () {

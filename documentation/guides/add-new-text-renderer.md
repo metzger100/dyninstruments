@@ -1,6 +1,7 @@
 # Add New Text Renderer
 
-**Status:** ✅ Reference | Canvas text renderer workflow on TextLayoutEngine + `componentContext.theme.tokens.resolveForRoot(rootEl)`
+**Status:** ✅ Reference | Canvas text renderer workflow on TextLayoutEngine +
+`componentContext.theme.tokens.resolveForRoot(rootEl)`
 
 ## Overview
 
@@ -16,31 +17,38 @@ Core rules:
 ## Steps
 
 1. Create renderer module
+
 - add widget module under widgets/text/<RendererName>/<RendererName>.js
 - register UMD component with id and `create(def, componentContext)`
 - keep rendering in renderCanvas(canvas, props)
 
 2. Use shared engines
+
 - use TextLayoutEngine for mode/layout routing
 - use shared math/layout helpers from shared/widget-kits where applicable
 - avoid widget-local clones of shared logic
 
 3. Resolve theme correctly
+
 - rootEl = componentContext.dom.requirePluginRoot(canvas)
 - const tokens = componentContext.theme.tokens.resolveForRoot(rootEl)
 - consume tokens.surface.fg, tokens.font.family, tokens.font.weight, tokens.font.labelWeight as needed
 
 4. Keep mapper declarative
+
 - mapper chooses renderer id and normalized payload fields
 - mapper does numeric normalization and formatter key pass-through only
 - presentation/layout behavior stays in renderer module
 
 5. Register component and route usage
-- add component entry in the appropriate fragment: `config/components/registry-widgets-nav.js` for nav/route renderers or `config/components/registry-widgets-vessel.js` for vessel/text renderers
+
+- add component entry in the appropriate fragment: `config/components/registry-widgets-nav.js` for nav/route renderers
+  or `config/components/registry-widgets-vessel.js` for vessel/text renderers
 - wire dependencies in registry
 - update relevant mapper branch to emit renderer id and payload
 
 6. Add tests
+
 - renderer unit tests under tests/widgets/text/
 - shared layout/fit tests when new shared helpers are introduced
 - ensure explicit falsy default behavior is covered

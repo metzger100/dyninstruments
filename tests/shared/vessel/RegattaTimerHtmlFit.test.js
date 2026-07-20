@@ -2,13 +2,13 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RegattaTimerHtmlFit", function () {
+  /** @param {any} [options] */
   function createFit(options) {
     const opts = options || {};
-    const strokeWeight = Object.prototype.hasOwnProperty.call(opts, "strokeWeight")
-      ? opts.strokeWeight
-      : 1.28;
+    const strokeWeight = Object.prototype.hasOwnProperty.call(opts, "strokeWeight") ? opts.strokeWeight : 1.28;
     const measureCtx = {
       font: "700 12px sans-serif",
+      /** @param {any} text */
       measureText(text) {
         const match = String(this.font || "").match(/(\d+(?:\.\d+)?)px/);
         const px = match ? Number(match[1]) : 12;
@@ -54,6 +54,7 @@ describe("RegattaTimerHtmlFit", function () {
           })
         },
         dom: {
+          /** @param {any} target */
           requirePluginRoot(target) {
             return target;
           }
@@ -63,6 +64,7 @@ describe("RegattaTimerHtmlFit", function () {
     return loadFresh("shared/widget-kits/vessel/RegattaTimerHtmlFit.js").create({}, componentContext);
   }
 
+  /** @param {any} styleText */
   function parseStyle(styleText) {
     return String(styleText || "")
       .split(";")
@@ -78,6 +80,7 @@ describe("RegattaTimerHtmlFit", function () {
       }, Object.create(null));
   }
 
+  /** @param {any} styleText @param {any} key */
   function readPx(styleText, key) {
     const styleMap = parseStyle(styleText);
     const raw = styleMap[key] || "";
@@ -85,17 +88,24 @@ describe("RegattaTimerHtmlFit", function () {
     return match ? Number(match[1]) : NaN;
   }
 
+  /** @param {any} [overrides] */
   function makeModel(overrides) {
-    return Object.assign({
-      phase: "idle",
-      displayTime: "05:00"
-    }, overrides || {});
+    return Object.assign(
+      {
+        phase: "idle",
+        displayTime: "05:00"
+      },
+      overrides || {}
+    );
   }
 
+  /** @param {any} fit @param {any} [args] */
   function computeFit(fit, args) {
-    return fit.compute(Object.assign({}, args || {}, {
-      targetEl: document.createElement("div")
-    }));
+    return fit.compute(
+      Object.assign({}, args || {}, {
+        targetEl: document.createElement("div")
+      })
+    );
   }
 
   it("computes proportional fit styles for timer, buttons, and bar", function () {
@@ -137,12 +147,8 @@ describe("RegattaTimerHtmlFit", function () {
       hostContext: {}
     });
 
-    expect(readPx(tiny.buttonStyle, "border-width")).toBeLessThan(
-      readPx(normal.buttonStyle, "border-width")
-    );
-    expect(readPx(bold.buttonStyle, "border-width")).toBeGreaterThan(
-      readPx(normal.buttonStyle, "border-width")
-    );
+    expect(readPx(tiny.buttonStyle, "border-width")).toBeLessThan(readPx(normal.buttonStyle, "border-width"));
+    expect(readPx(bold.buttonStyle, "border-width")).toBeGreaterThan(readPx(normal.buttonStyle, "border-width"));
   });
 
   it("scales timer font down on tighter geometry", function () {
@@ -221,7 +227,7 @@ describe("RegattaTimerHtmlFit", function () {
 
   it("keys fit-cache entries on hostContext and supports explicit invalidation", function () {
     const fit = createFit();
-    const hostContext = {};
+    const hostContext = /** @type {any} */ ({});
     const args = {
       model: makeModel({ phase: "countdown", displayTime: "04:10" }),
       shellRect: { width: 300, height: 140 },
@@ -259,17 +265,21 @@ describe("RegattaTimerHtmlFit", function () {
   it("returns null when shellRect is missing or invalid", function () {
     const fit = createFit();
 
-    expect(computeFit(fit, {
-      model: makeModel(),
-      mode: "normal",
-      hostContext: {}
-    })).toBeNull();
-    expect(computeFit(fit, {
-      model: makeModel(),
-      shellRect: { width: 0, height: 120 },
-      mode: "normal",
-      hostContext: {}
-    })).toBeNull();
+    expect(
+      computeFit(fit, {
+        model: makeModel(),
+        mode: "normal",
+        hostContext: {}
+      })
+    ).toBeNull();
+    expect(
+      computeFit(fit, {
+        model: makeModel(),
+        shellRect: { width: 0, height: 120 },
+        mode: "normal",
+        hostContext: {}
+      })
+    ).toBeNull();
   });
 
   it("scales countdown button height below 32px on tiny shells", function () {
@@ -309,7 +319,9 @@ describe("RegattaTimerHtmlFit", function () {
     expect(countdownHeight).toBeLessThan(idleHeight);
     expect(parseStyle(countdown.controlsStyle)["min-width"]).toBe("0");
     expect(parseStyle(countdown.displayStyle)["min-width"]).toBe("0");
-    expect(parseStyle(countdown.wrapperStyle)["grid-template-columns"]).toMatch(/^minmax\(0,\d+px\) minmax\(0,\d+px\)$/);
+    expect(parseStyle(countdown.wrapperStyle)["grid-template-columns"]).toMatch(
+      /^minmax\(0,\d+px\) minmax\(0,\d+px\)$/
+    );
     expect(countdown.buttonStyle).not.toContain("min-width");
     expect(countdown.buttonStyle).not.toContain("em");
     expect(countdown.buttonStyle).not.toContain("32px");

@@ -4,7 +4,9 @@
 
 ## Overview
 
-dyninstruments HTML kinds are commit-driven. Pre-commit shell output is inert; semantic rendering begins only after host commit inside HtmlSurfaceController. Route metadata owns the pre-activation shell contract, and committed renderers own post-activation shadow CSS sizing and layout.
+dyninstruments HTML kinds are commit-driven. Pre-commit shell output is inert; semantic rendering begins only after host
+commit inside HtmlSurfaceController. Route metadata owns the pre-activation shell contract, and committed renderers own
+post-activation shadow CSS sizing and layout.
 
 ## Authoritative Contract
 
@@ -81,7 +83,8 @@ This keeps the measured mount-host `shellRect` and committed subtree sizing alig
 - stores last patched markup in non-enumerable `__dyniLastPatchedMarkup`
 - identical markup is a no-op and preserves root identity
 - jsdom path uses direct `innerHTML` assignment for deterministic tests
-- browser/non-jsdom path keeps structural in-place sync semantics
+- browser/non-jsdom path keeps structural in-place sync semantics; sibling cursors are captured before replacement so
+  every mismatched node is replaced exactly once and stale siblings cannot survive
 
 ## Interaction Ownership
 
@@ -95,9 +98,11 @@ Committed renderers attach and remove direct DOM listeners under dispatch/passiv
 
 ## Interactive State Persistence Across Remounts
 
-Committed HTML renderers can be detached and remounted during surface/session switching. The `detach()` -> `mount()` cycle recreates renderer instances and destroys in-memory instance state.
+Committed HTML renderers can be detached and remounted during surface/session switching. The `detach()` -> `mount()`
+cycle recreates renderer instances and destroys in-memory instance state.
 
-For interactive widgets with user-driven state (running timers, toggles, form input), preserve state explicitly across remount cycles.
+For interactive widgets with user-driven state (running timers, toggles, form input), preserve state explicitly across
+remount cycles.
 
 Pattern 1: `hostContext` snapshot (same surface session)
 
@@ -132,8 +137,10 @@ Reference implementation
 ## Styling Ownership
 
 - committed HTML styles are shadow-local
-- RouteActivationController preloads and caches per-renderer shadow CSS bundles for the live activation path before hydration
-- route metadata supplies pre-activation shell sizing; committed renderer shadow CSS owns post-activation sizing behavior
+- RouteActivationController preloads and caches per-renderer shadow CSS bundles for the live activation path before
+  hydration
+- route metadata supplies pre-activation shell sizing; committed renderer shadow CSS owns post-activation sizing
+  behavior
 - required outer context (pageId, orientation, interaction mode) is mirrored into shadow-visible attributes/classes
 
 ## Related

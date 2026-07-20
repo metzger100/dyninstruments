@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniActiveRouteViewModel = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniValueMathApi["trimText"]} */
@@ -60,4 +60,4 @@
   }
 
   return { id: "ActiveRouteViewModel", create: create };
-}));
+});

@@ -1,0 +1,1334 @@
+{
+  "capturedCommit": "4dbb579cd9247bbaf5f1630337d292b5ef4b46bc",
+  "strictLimits": {
+    "complexity": 10,
+    "max-statements": 40,
+    "max-depth": 4,
+    "max-params": 6
+  },
+  "findingCount": 188,
+  "byMetric": {
+    "complexity": 124,
+    "max-statements": 23,
+    "max-depth": 1,
+    "max-params": 40
+  },
+  "findings": [
+    {
+      "file": "cluster/ClusterWidget.js",
+      "identity": "anonymous#2.ensureRuntimeBoundary",
+      "metric": "complexity",
+      "value": 13,
+      "limit": 10
+    },
+    {
+      "file": "cluster/mappers/CourseHeadingMapper.js",
+      "identity": "anonymous#2.create.translate",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "cluster/mappers/EnvironmentMapper.js",
+      "identity": "anonymous#2.create.translate",
+      "metric": "complexity",
+      "value": 17,
+      "limit": 10
+    },
+    {
+      "file": "cluster/mappers/NavMapper.js",
+      "identity": "anonymous#2.create.translate",
+      "metric": "complexity",
+      "value": 31,
+      "limit": 10
+    },
+    {
+      "file": "cluster/mappers/NavMapper.js",
+      "identity": "anonymous#2.create.translate",
+      "metric": "max-statements",
+      "value": 67,
+      "limit": 40
+    },
+    {
+      "file": "cluster/mappers/SpeedMapper.js",
+      "identity": "anonymous#2.create.translate",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "cluster/mappers/VesselMapper.js",
+      "identity": "anonymous#2.create.translate",
+      "metric": "complexity",
+      "value": 26,
+      "limit": 10
+    },
+    {
+      "file": "cluster/mappers/VesselMapper.js",
+      "identity": "anonymous#2.create.translate",
+      "metric": "max-statements",
+      "value": 43,
+      "limit": 40
+    },
+    {
+      "file": "cluster/mappers/WindMapper.js",
+      "identity": "anonymous#2.create.translate",
+      "metric": "complexity",
+      "value": 19,
+      "limit": 10
+    },
+    {
+      "file": "cluster/viewmodels/AisTargetViewModel.js",
+      "identity": "anonymous#2.pickNameOrMmsi",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "cluster/viewmodels/RoutePointsViewModel.js",
+      "identity": "anonymous#2.create.build",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "config/clusters/environment.js",
+      "identity": "anonymous",
+      "metric": "complexity",
+      "value": 25,
+      "limit": 10
+    },
+    {
+      "file": "config/clusters/nav.js",
+      "identity": "anonymous",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "config/clusters/vessel.js",
+      "identity": "anonymous",
+      "metric": "complexity",
+      "value": 18,
+      "limit": 10
+    },
+    {
+      "file": "config/shared/unit-editable-utils.js",
+      "identity": "anonymous",
+      "metric": "complexity",
+      "value": 13,
+      "limit": 10
+    },
+    {
+      "file": "runtime/asset-preloader.js",
+      "identity": "anonymous.createAssetPreloader.validateAssetDeclaration",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "runtime/cluster/ClusterShellRenderer.js",
+      "identity": "anonymous",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "runtime/cluster/RouteActivationController.js",
+      "identity": "anonymous.createWidgetController",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "runtime/cluster/RouteActivationController.js",
+      "identity": "anonymous.createWidgetController.activateCommittedRoute",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "runtime/cluster/RouteActivationController.js",
+      "identity": "anonymous.createWidgetController.ensureRouteInstance",
+      "metric": "complexity",
+      "value": 18,
+      "limit": 10
+    },
+    {
+      "file": "runtime/dom-runtime.js",
+      "identity": "anonymous.resolveTargetNode",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "runtime/format-runtime.js",
+      "identity": "anonymous.applyFormatter",
+      "metric": "complexity",
+      "value": 16,
+      "limit": 10
+    },
+    {
+      "file": "runtime/HostCommitController.js",
+      "identity": "anonymous.createHostCommitController",
+      "metric": "complexity",
+      "value": 13,
+      "limit": 10
+    },
+    {
+      "file": "runtime/plugin-bootstrap-core.js",
+      "identity": "anonymous#2.start",
+      "metric": "complexity",
+      "value": 13,
+      "limit": 10
+    },
+    {
+      "file": "runtime/surface/CanvasDomSurfaceAdapter.js",
+      "identity": "anonymous.createCanvasDomSurfaceAdapter.createSurfaceController",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "runtime/surface/CanvasDomSurfaceAdapter.js",
+      "identity": "anonymous.createCanvasDomSurfaceAdapter.createSurfaceController",
+      "metric": "max-statements",
+      "value": 43,
+      "limit": 40
+    },
+    {
+      "file": "runtime/surface/ClusterSurfacePolicy.js",
+      "identity": "anonymous.normalizeHostCapabilities",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "runtime/surface/ClusterSurfacePolicy.js",
+      "identity": "anonymous.resolveInteractionMode",
+      "metric": "complexity",
+      "value": 34,
+      "limit": 10
+    },
+    {
+      "file": "runtime/surface/HtmlSurfaceController.js",
+      "identity": "anonymous.createHtmlSurfaceController.createSurfaceController.scheduleFontMetricsRefresh",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "runtime/surface/HtmlSurfaceController.js",
+      "identity": "anonymous.measureShellRect",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "runtime/SurfaceSessionController.js",
+      "identity": "anonymous.createSurfaceSessionController.reconcileSession",
+      "metric": "complexity",
+      "value": 16,
+      "limit": 10
+    },
+    {
+      "file": "runtime/SurfaceSessionController.js",
+      "identity": "anonymous.ensurePayload",
+      "metric": "complexity",
+      "value": 16,
+      "limit": 10
+    },
+    {
+      "file": "runtime/TemporaryHostActionBridge.js",
+      "identity": "anonymous.buildEditRoutePointPayload",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "runtime/TemporaryHostActionBridge.js",
+      "identity": "anonymous.create.buildCapabilitiesSnapshot",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "runtime/TemporaryHostActionBridgeDiscovery.js",
+      "identity": "anonymous.findFiberProp",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "runtime/TemporaryHostActionBridgeDiscovery.js",
+      "identity": "anonymous.findFiberProp",
+      "metric": "max-depth",
+      "value": 5,
+      "limit": 4
+    },
+    {
+      "file": "runtime/theme/model.js",
+      "identity": "anonymous.defineToken",
+      "metric": "max-params",
+      "value": 8,
+      "limit": 6
+    },
+    {
+      "file": "runtime/theme/resolver.js",
+      "identity": "anonymous.createThemeResolver.resolveTokenValue",
+      "metric": "complexity",
+      "value": 13,
+      "limit": 10
+    },
+    {
+      "file": "runtime/widget-registrar.js",
+      "identity": "anonymous.registerWidget",
+      "metric": "complexity",
+      "value": 16,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/canvas/CanvasLayerCache.js",
+      "identity": "anonymous#2.create.createLayerCache.ensureLayer",
+      "metric": "complexity",
+      "value": 17,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/canvas/CanvasLayerCache.js",
+      "identity": "anonymous#2.create.resolveDrawSize",
+      "metric": "complexity",
+      "value": 15,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/html/HtmlDomPatchUtils.js",
+      "identity": "anonymous#2.patchInnerHtml",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/html/HtmlDomPatchUtils.js",
+      "identity": "anonymous#2.syncNodeTree",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/html/HtmlMeasureUtils.js",
+      "identity": "anonymous#2.resolveMeasureContext",
+      "metric": "complexity",
+      "value": 13,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeEngine.js",
+      "identity": "anonymous#2.create.createRenderer",
+      "metric": "complexity",
+      "value": 19,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeEngine.js",
+      "identity": "anonymous#2.create.createRenderer.renderCanvas",
+      "metric": "complexity",
+      "value": 39,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeEngine.js",
+      "identity": "anonymous#2.create.createRenderer.renderCanvas",
+      "metric": "max-statements",
+      "value": 91,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeEngineDrawing.js",
+      "identity": "anonymous#2.create.drawMarkerAtValue",
+      "metric": "max-params",
+      "value": 9,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeEngineDrawing.js",
+      "identity": "anonymous#2.create.drawPointerAtValue",
+      "metric": "max-params",
+      "value": 10,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeLabelFit.js",
+      "identity": "anonymous#2.collectLabels",
+      "metric": "complexity",
+      "value": 15,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeLabelFit.js",
+      "identity": "anonymous#2.create.resolveLabelPlacementWithPolicy",
+      "metric": "max-params",
+      "value": 8,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeLabelFit.js",
+      "identity": "anonymous#2.resolveEdgePlacement",
+      "metric": "max-params",
+      "value": 8,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeLabelFit.js",
+      "identity": "anonymous#2.resolveLabelPlacement",
+      "metric": "max-params",
+      "value": 9,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeLayout.js",
+      "identity": "anonymous#2.create.computeLayout",
+      "metric": "complexity",
+      "value": 18,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeMath.js",
+      "identity": "anonymous#2.buildTicks",
+      "metric": "complexity",
+      "value": 18,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeMath.js",
+      "identity": "anonymous#2.mapValueToX",
+      "metric": "max-params",
+      "value": 7,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeTextLayout.js",
+      "identity": "anonymous#2.create",
+      "metric": "max-params",
+      "value": 7,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeTextLayout.js",
+      "identity": "anonymous#2.create.drawTickLabels",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeTextLayout.js",
+      "identity": "anonymous#2.drawCaptionRow",
+      "metric": "max-params",
+      "value": 8,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeTextLayout.js",
+      "identity": "anonymous#2.drawInlineRow",
+      "metric": "max-params",
+      "value": 10,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeTextLayout.js",
+      "identity": "anonymous#2.drawValueUnitRow",
+      "metric": "max-params",
+      "value": 10,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeTextLayout.js",
+      "identity": "anonymous#2.measureFitTotal",
+      "metric": "max-params",
+      "value": 8,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/linear/LinearGaugeTextLayout.js",
+      "identity": "anonymous#2.measureInlineTotal",
+      "metric": "max-params",
+      "value": 9,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/nav/ActiveRouteHtmlFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "complexity",
+      "value": 29,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/ActiveRouteHtmlFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "max-statements",
+      "value": 54,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/nav/ActiveRouteLayout.js",
+      "identity": "anonymous#2.create.computeLayout",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/ActiveRouteLayout.js",
+      "identity": "anonymous#2.create.computeLayout",
+      "metric": "max-statements",
+      "value": 44,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/nav/AisTargetHtmlFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "complexity",
+      "value": 21,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/AisTargetHtmlFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "max-statements",
+      "value": 47,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/nav/AisTargetHtmlFit.js",
+      "identity": "anonymous#2.selectMetricValueFit",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/AisTargetLayout.js",
+      "identity": "anonymous#2.create.computeLayout",
+      "metric": "max-statements",
+      "value": 53,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/nav/AisTargetLayoutSizing.js",
+      "identity": "anonymous#2.create.computeInsets",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/AisTargetRenderModel.js",
+      "identity": "anonymous#2.buildAisTargetSignatureParts",
+      "metric": "complexity",
+      "value": 15,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/AisTargetRenderModel.js",
+      "identity": "anonymous#2.create.buildModel",
+      "metric": "complexity",
+      "value": 31,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/CenterDisplayRenderModel.js",
+      "identity": "anonymous#2.computeMeasurementHints",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/CenterDisplayRenderModel.js",
+      "identity": "anonymous#2.create.buildDisplayState",
+      "metric": "complexity",
+      "value": 19,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/EditRouteHtmlFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "complexity",
+      "value": 37,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/EditRouteHtmlFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "max-statements",
+      "value": 57,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/nav/EditRouteLayout.js",
+      "identity": "anonymous#2.create.computeLayout",
+      "metric": "complexity",
+      "value": 17,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/EditRouteLayout.js",
+      "identity": "anonymous#2.create.computeLayout",
+      "metric": "max-statements",
+      "value": 55,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/nav/EditRouteMarkup.js",
+      "identity": "anonymous#2.create.render",
+      "metric": "complexity",
+      "value": 17,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/EditRouteRenderModel.js",
+      "identity": "anonymous#2.buildEditRouteSignatureParts",
+      "metric": "complexity",
+      "value": 24,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/EditRouteRenderModel.js",
+      "identity": "anonymous#2.create.buildModel",
+      "metric": "complexity",
+      "value": 34,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/MapZoomHtmlFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "complexity",
+      "value": 30,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/MapZoomHtmlFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "max-statements",
+      "value": 43,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/nav/MapZoomHtmlFit.js",
+      "identity": "anonymous#2.estimateMainUsedHeight",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/RoutePointsDomEffects.js",
+      "identity": "anonymous#2.ensureSelectedRowVisible",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/RoutePointsHtmlFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "complexity",
+      "value": 26,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/RoutePointsHtmlFit.js",
+      "identity": "anonymous#2.selectInfoText",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/RoutePointsMarkup.js",
+      "identity": "anonymous#2.create.render",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/RoutePointsRenderModel.js",
+      "identity": "anonymous#2.buildRoutePointsSignatureParts",
+      "metric": "complexity",
+      "value": 23,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/RoutePointsRenderModel.js",
+      "identity": "anonymous#2.create.buildModel",
+      "metric": "complexity",
+      "value": 25,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/nav/RoutePointsRenderModel.js",
+      "identity": "anonymous#2.create.buildModel",
+      "metric": "max-statements",
+      "value": 56,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/radial/FullCircleRadialEngine.js",
+      "identity": "anonymous#2.create.fullCircleCreateRenderer.renderCanvas",
+      "metric": "complexity",
+      "value": 24,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/radial/FullCircleRadialEngine.js",
+      "identity": "anonymous#2.create.fullCircleCreateRenderer.renderCanvas",
+      "metric": "max-statements",
+      "value": 50,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/radial/FullCircleRadialLayout.js",
+      "identity": "anonymous#2.computeModeGeometry",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/radial/FullCircleRadialLayout.js",
+      "identity": "anonymous#2.create.computeLayout",
+      "metric": "complexity",
+      "value": 13,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+      "identity": "anonymous#2.drawBlock",
+      "metric": "max-params",
+      "value": 8,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+      "identity": "anonymous#2.drawDualNormal",
+      "metric": "complexity",
+      "value": 15,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+      "identity": "anonymous#2.drawSingleNormal",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+      "identity": "anonymous#2.scoreDisplaySizes",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/radial/RadialCanvasPrimitives.js",
+      "identity": "anonymous#2.create.drawArcRing",
+      "metric": "max-params",
+      "value": 7,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/radial/RadialFrameRenderer.js",
+      "identity": "anonymous#2.create.drawLabels",
+      "metric": "complexity",
+      "value": 15,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/radial/RadialSectorMath.js",
+      "identity": "anonymous#2.create.buildLowEndSectors",
+      "metric": "complexity",
+      "value": 16,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/radial/RadialTickMath.js",
+      "identity": "anonymous#2.create.buildTickAngles",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/radial/RadialValueMath.js",
+      "identity": "anonymous#2.create.buildValueTickAngles",
+      "metric": "complexity",
+      "value": 19,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/radial/SemicircleRadialEngine.js",
+      "identity": "anonymous#2.create.createRenderer",
+      "metric": "complexity",
+      "value": 15,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/radial/SemicircleRadialEngine.js",
+      "identity": "anonymous#2.create.createRenderer.renderCanvas",
+      "metric": "complexity",
+      "value": 23,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/radial/SemicircleRadialEngine.js",
+      "identity": "anonymous#2.create.createRenderer.renderCanvas",
+      "metric": "max-statements",
+      "value": 62,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/radial/SemicircleRadialEngine.js",
+      "identity": "anonymous#2.create.drawMajorValueLabels",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/radial/SemicircleRadialEngine.js",
+      "identity": "anonymous#2.create.drawMajorValueLabels",
+      "metric": "max-params",
+      "value": 10,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/radial/SemicircleRadialTextLayout.js",
+      "identity": "anonymous#2.drawNormalText",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/state/StateScreenCanvasOverlay.js",
+      "identity": "anonymous#2.create.drawStateScreen",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/state/StateScreenTextFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "complexity",
+      "value": 23,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/state/StateScreenTextFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "max-params",
+      "value": 7,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/state/StateScreenTextFit.js",
+      "identity": "anonymous#2.fitStateScreenTextPx",
+      "metric": "max-params",
+      "value": 8,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/text/CanvasTextFitting.js",
+      "identity": "anonymous#2.create.fitInlineCapValUnit",
+      "metric": "complexity",
+      "value": 21,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/CanvasTextFitting.js",
+      "identity": "anonymous#2.create.fitInlineCapValUnit",
+      "metric": "max-params",
+      "value": 10,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/text/CanvasTextFitting.js",
+      "identity": "anonymous#2.create.fitSingleTextPx",
+      "metric": "max-params",
+      "value": 7,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/text/CanvasTextFitting.js",
+      "identity": "anonymous#2.create.measureValueUnitFit",
+      "metric": "complexity",
+      "value": 19,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/CanvasTextFitting.js",
+      "identity": "anonymous#2.create.measureValueUnitFit",
+      "metric": "max-params",
+      "value": 10,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/text/CanvasTextLayout.js",
+      "identity": "anonymous#2.create.drawCaptionMax",
+      "metric": "max-params",
+      "value": 11,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/text/CanvasTextLayout.js",
+      "identity": "anonymous#2.create.drawInlineCapValUnit",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/CanvasTextLayout.js",
+      "identity": "anonymous#2.create.drawInlineCapValUnit",
+      "metric": "max-params",
+      "value": 13,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/text/CanvasTextLayout.js",
+      "identity": "anonymous#2.create.drawThreeRowsBlock",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/CanvasTextLayout.js",
+      "identity": "anonymous#2.create.drawThreeRowsBlock",
+      "metric": "max-params",
+      "value": 15,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/text/CanvasTextLayout.js",
+      "identity": "anonymous#2.create.drawThreeRowsBlock",
+      "metric": "max-statements",
+      "value": 47,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/text/CanvasTextLayout.js",
+      "identity": "anonymous#2.create.drawValueUnitWithFit",
+      "metric": "complexity",
+      "value": 17,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/CanvasTextLayout.js",
+      "identity": "anonymous#2.create.drawValueUnitWithFit",
+      "metric": "max-params",
+      "value": 13,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/text/TextFitMath.js",
+      "identity": "anonymous#2.resolveSecondaryMaxPx",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/TextLayoutComposite.js",
+      "identity": "anonymous#2.create.drawThreeRowBlock",
+      "metric": "complexity",
+      "value": 13,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/TextLayoutComposite.js",
+      "identity": "anonymous#2.create.drawTwoRowsWithHeader",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/TextLayoutComposite.js",
+      "identity": "anonymous#2.create.fitTwoRowsWithHeader",
+      "metric": "complexity",
+      "value": 19,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/TextLayoutEngine.js",
+      "identity": "anonymous#2.create.computeModeLayout",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/TextLayoutPrimitives.js",
+      "identity": "anonymous#2.create.drawInlineTriplet",
+      "metric": "complexity",
+      "value": 22,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/TextLayoutPrimitives.js",
+      "identity": "anonymous#2.create.drawInlineTriplet",
+      "metric": "max-statements",
+      "value": 43,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/text/TextLayoutPrimitives.js",
+      "identity": "anonymous#2.create.fitInlineTriplet",
+      "metric": "complexity",
+      "value": 25,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/TextLayoutPrimitives.js",
+      "identity": "anonymous#2.create.fitInlineTriplet",
+      "metric": "max-statements",
+      "value": 48,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/text/TextLayoutPrimitives.js",
+      "identity": "anonymous#2.create.fitMultiRowBinary",
+      "metric": "complexity",
+      "value": 16,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/TextLayoutPrimitives.js",
+      "identity": "anonymous#2.create.fitSingleLineBinary",
+      "metric": "complexity",
+      "value": 15,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/TextLayoutPrimitives.js",
+      "identity": "anonymous#2.create.fitValueUnitRow",
+      "metric": "complexity",
+      "value": 15,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/TextTileLayout.js",
+      "identity": "anonymous#2.buildMetricTileSignature",
+      "metric": "complexity",
+      "value": 25,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/text/TextTileLayout.js",
+      "identity": "anonymous#2.trimToWidth",
+      "metric": "max-params",
+      "value": 7,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/vessel/AlarmHtmlFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "complexity",
+      "value": 24,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/vessel/AlarmHtmlFitChrome.js",
+      "identity": "anonymous#2.resolveMode",
+      "metric": "complexity",
+      "value": 13,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/vessel/AlarmHtmlFitChrome.js",
+      "identity": "anonymous#2.resolveShellChrome",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/vessel/RegattaTimerHtmlFit.js",
+      "identity": "anonymous#2.buildSignature",
+      "metric": "max-params",
+      "value": 10,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/vessel/RegattaTimerHtmlFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "complexity",
+      "value": 32,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/vessel/RegattaTimerHtmlFit.js",
+      "identity": "anonymous#2.create.compute",
+      "metric": "max-statements",
+      "value": 88,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/vessel/RegattaTimerModel.js",
+      "identity": "anonymous#2.create.createTimerModel",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/vessel/RegattaTimerModel.js",
+      "identity": "anonymous#2.create.createTimerModel.handleCountdownTick",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/vessel/RegattaTimerSessionStore.js",
+      "identity": "anonymous#2.create.resolveRouteIdFromPayload",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/vessel/RegattaTimerSessionStore.js",
+      "identity": "anonymous#2.create.resolveSessionKey",
+      "metric": "complexity",
+      "value": 13,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/xte/XteHighwayLayout.js",
+      "identity": "anonymous#2.create.computeLayout",
+      "metric": "complexity",
+      "value": 14,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/xte/XteHighwayLayout.js",
+      "identity": "anonymous#2.create.computeLayout",
+      "metric": "max-statements",
+      "value": 42,
+      "limit": 40
+    },
+    {
+      "file": "shared/widget-kits/xte/XteHighwayPrimitives.js",
+      "identity": "anonymous#2.create.drawDynamicHighway",
+      "metric": "max-params",
+      "value": 8,
+      "limit": 6
+    },
+    {
+      "file": "shared/widget-kits/xte/XteHighwayPrimitives.js",
+      "identity": "anonymous#2.create.shouldShowWaypoint",
+      "metric": "complexity",
+      "value": 21,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/xte/XteLinearLayout.js",
+      "identity": "anonymous#2.create.computeLayout",
+      "metric": "complexity",
+      "value": 21,
+      "limit": 10
+    },
+    {
+      "file": "shared/widget-kits/xte/XteLinearLayout.js",
+      "identity": "anonymous#2.create.computeLayout",
+      "metric": "max-statements",
+      "value": 54,
+      "limit": 40
+    },
+    {
+      "file": "widgets/linear/CompassLinearWidget/CompassLinearWidget.js",
+      "identity": "anonymous#2.create.drawFrame",
+      "metric": "complexity",
+      "value": 11,
+      "limit": 10
+    },
+    {
+      "file": "widgets/linear/DefaultLinearWidget/DefaultLinearWidget.js",
+      "identity": "anonymous#2.create.buildSectors",
+      "metric": "complexity",
+      "value": 18,
+      "limit": 10
+    },
+    {
+      "file": "widgets/linear/DepthLinearWidget/DepthLinearWidget.js",
+      "identity": "anonymous#2.create.buildLowEndSectors",
+      "metric": "complexity",
+      "value": 15,
+      "limit": 10
+    },
+    {
+      "file": "widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js",
+      "identity": "anonymous#2.create.buildSectors",
+      "metric": "complexity",
+      "value": 18,
+      "limit": 10
+    },
+    {
+      "file": "widgets/linear/WindLinearWidget/WindLinearWidget.js",
+      "identity": "anonymous#2.create.drawDualRows",
+      "metric": "max-params",
+      "value": 10,
+      "limit": 6
+    },
+    {
+      "file": "widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js",
+      "identity": "anonymous#2.create.buildSectors",
+      "metric": "complexity",
+      "value": 22,
+      "limit": 10
+    },
+    {
+      "file": "widgets/radial/DefaultRadialWidget/DefaultRadialWidget.js",
+      "identity": "anonymous#2.create.pushSector",
+      "metric": "max-params",
+      "value": 8,
+      "limit": 6
+    },
+    {
+      "file": "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+      "identity": "anonymous#2.buildRenderModel",
+      "metric": "max-params",
+      "value": 10,
+      "limit": 6
+    },
+    {
+      "file": "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+      "identity": "anonymous#2.renderMarkup",
+      "metric": "complexity",
+      "value": 13,
+      "limit": 10
+    },
+    {
+      "file": "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+      "identity": "anonymous#2.renderMarkup",
+      "metric": "max-params",
+      "value": 7,
+      "limit": 6
+    },
+    {
+      "file": "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
+      "identity": "anonymous#2.renderMetricTile",
+      "metric": "max-params",
+      "value": 7,
+      "limit": 6
+    },
+    {
+      "file": "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+      "identity": "anonymous#2.computeRowLayout",
+      "metric": "max-params",
+      "value": 7,
+      "limit": 6
+    },
+    {
+      "file": "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+      "identity": "anonymous#2.create.renderCanvas",
+      "metric": "complexity",
+      "value": 15,
+      "limit": 10
+    },
+    {
+      "file": "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+      "identity": "anonymous#2.drawCenterPanel",
+      "metric": "max-params",
+      "value": 8,
+      "limit": 6
+    },
+    {
+      "file": "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+      "identity": "anonymous#2.drawRelationRows",
+      "metric": "max-params",
+      "value": 8,
+      "limit": 6
+    },
+    {
+      "file": "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+      "identity": "anonymous#2.measureCachedTextWidth",
+      "metric": "max-params",
+      "value": 7,
+      "limit": 6
+    },
+    {
+      "file": "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
+      "identity": "anonymous#2.buildModel",
+      "metric": "complexity",
+      "value": 13,
+      "limit": 10
+    },
+    {
+      "file": "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
+      "identity": "anonymous#2.buildModel",
+      "metric": "max-params",
+      "value": 9,
+      "limit": 6
+    },
+    {
+      "file": "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
+      "identity": "anonymous#2.create.renderCanvas",
+      "metric": "complexity",
+      "value": 28,
+      "limit": 10
+    },
+    {
+      "file": "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
+      "identity": "anonymous#2.create.renderCanvas",
+      "metric": "max-statements",
+      "value": 49,
+      "limit": 40
+    },
+    {
+      "file": "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
+      "identity": "anonymous#2.formatAxisValue",
+      "metric": "max-params",
+      "value": 7,
+      "limit": 6
+    },
+    {
+      "file": "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
+      "identity": "anonymous#2.isGpsValid",
+      "metric": "complexity",
+      "value": 12,
+      "limit": 10
+    },
+    {
+      "file": "widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.js",
+      "identity": "anonymous#2.create.createCommittedRenderer.patchDomFromState",
+      "metric": "complexity",
+      "value": 26,
+      "limit": 10
+    },
+    {
+      "file": "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
+      "identity": "anonymous#2.create.renderCanvas",
+      "metric": "complexity",
+      "value": 15,
+      "limit": 10
+    },
+    {
+      "file": "widgets/text/XteDisplayLinearWidget/XteDisplayLinearWidget.js",
+      "identity": "anonymous#2.create.drawEndLabels",
+      "metric": "max-params",
+      "value": 7,
+      "limit": 6
+    },
+    {
+      "file": "widgets/text/XteDisplayLinearWidget/XteDisplayLinearWidget.js",
+      "identity": "anonymous#2.create.renderCanvas",
+      "metric": "complexity",
+      "value": 96,
+      "limit": 10
+    },
+    {
+      "file": "widgets/text/XteDisplayLinearWidget/XteDisplayLinearWidget.js",
+      "identity": "anonymous#2.create.renderCanvas",
+      "metric": "max-statements",
+      "value": 98,
+      "limit": 40
+    },
+    {
+      "file": "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
+      "identity": "anonymous#2.create.renderCanvas",
+      "metric": "complexity",
+      "value": 77,
+      "limit": 10
+    },
+    {
+      "file": "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
+      "identity": "anonymous#2.create.renderCanvas",
+      "metric": "max-statements",
+      "value": 97,
+      "limit": 40
+    }
+  ]
+}

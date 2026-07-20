@@ -1,7 +1,6 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("TextLayoutEngine", function () {
@@ -14,31 +13,19 @@ describe("TextLayoutEngine", function () {
       return {
         width: width,
         actualBoundingBoxAscent: px * 0.7,
-        actualBoundingBoxDescent: px * 0.3,
+        actualBoundingBoxDescent: px * 0.3
       };
     };
     return ctx;
   }
 
   function createEngine() {
-    const engineModule = loadFresh(
-      "shared/widget-kits/text/TextLayoutEngine.js",
-    );
-    const primitiveModule = loadFresh(
-      "shared/widget-kits/text/TextLayoutPrimitives.js",
-    );
-    const compositeModule = loadFresh(
-      "shared/widget-kits/text/TextLayoutComposite.js",
-    );
-    const textLayoutModule = loadFresh(
-      "shared/widget-kits/text/CanvasTextLayout.js",
-    );
-    const textFittingModule = loadFresh(
-      "shared/widget-kits/radial/RadialTextFitting.js",
-    );
-    const responsiveProfileModule = loadFresh(
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-    );
+    const engineModule = loadFresh("shared/widget-kits/text/TextLayoutEngine.js");
+    const primitiveModule = loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js");
+    const compositeModule = loadFresh("shared/widget-kits/text/TextLayoutComposite.js");
+    const textLayoutModule = loadFresh("shared/widget-kits/text/CanvasTextLayout.js");
+    const textFittingModule = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
+    const responsiveProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const valueMathModule = {
       create() {
         return {
@@ -64,9 +51,9 @@ describe("TextLayoutEngine", function () {
             if (ratio < normal) return "high";
             if (ratio > flat) return "flat";
             return "normal";
-          },
+          }
         };
-      },
+      }
     };
 
     return engineModule.create(
@@ -78,9 +65,9 @@ describe("TextLayoutEngine", function () {
           RadialTextFitting: textFittingModule,
           TextLayoutPrimitives: primitiveModule,
           TextLayoutComposite: compositeModule,
-          ResponsiveScaleProfile: responsiveProfileModule,
-        },
-      }),
+          ResponsiveScaleProfile: responsiveProfileModule
+        }
+      })
     );
   }
 
@@ -101,7 +88,7 @@ describe("TextLayoutEngine", function () {
       unitText: "k",
       family: "sans-serif",
       valueWeight: 730,
-      labelWeight: 610,
+      labelWeight: 610
     });
     const normalFit = engine.fitValueUnitCaptionRows({
       ctx: ctx,
@@ -117,7 +104,7 @@ describe("TextLayoutEngine", function () {
       unitText: "k",
       family: "sans-serif",
       valueWeight: 730,
-      labelWeight: 610,
+      labelWeight: 610
     });
     const stackedFit = engine.fitTwoRowsWithHeader({
       ctx: ctx,
@@ -134,7 +121,7 @@ describe("TextLayoutEngine", function () {
       bottomText: "LON",
       family: "sans-serif",
       valueWeight: 730,
-      labelWeight: 610,
+      labelWeight: 610
     });
 
     expect(highFit.cPx).toBeGreaterThan(0);
@@ -160,7 +147,7 @@ describe("TextLayoutEngine", function () {
       maxH: 5,
       family: "sans-serif",
       valueWeight: 730,
-      labelWeight: 610,
+      labelWeight: 610
     });
 
     expect(inline.vPx).toBeGreaterThan(0);
@@ -183,7 +170,7 @@ describe("TextLayoutEngine", function () {
       maxH: 70,
       family: "sans-serif",
       valueWeight: 730,
-      labelWeight: 610,
+      labelWeight: 610
     });
     engine.drawInlineTriplet({
       ctx: ctx,
@@ -197,7 +184,7 @@ describe("TextLayoutEngine", function () {
       H: 70,
       family: "sans-serif",
       valueWeight: 730,
-      labelWeight: 610,
+      labelWeight: 610
     });
 
     const threeFit = engine.fitThreeRowBlock({
@@ -212,7 +199,7 @@ describe("TextLayoutEngine", function () {
       unitText: "kn",
       family: "sans-serif",
       valueWeight: 730,
-      labelWeight: 610,
+      labelWeight: 610
     });
     engine.drawThreeRowBlock({
       ctx: ctx,
@@ -224,12 +211,10 @@ describe("TextLayoutEngine", function () {
       unitText: "kn",
       family: "sans-serif",
       valueWeight: 730,
-      labelWeight: 610,
+      labelWeight: 610
     });
 
-    const textEntries = ctx.calls
-      .filter((entry) => entry.name === "fillText")
-      .map((entry) => String(entry.args[0]));
+    const textEntries = ctx.calls.filter((entry) => entry.name === "fillText").map((entry) => String(entry.args[0]));
     expect(textEntries).toContain("SPD");
     expect(textEntries).toContain("12.3");
     expect(textEntries).toContain("kn");

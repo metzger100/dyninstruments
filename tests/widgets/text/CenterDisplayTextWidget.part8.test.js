@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
@@ -112,7 +113,7 @@ describe("CenterDisplayTextWidget", function () {
         measure: {
           activeMeasure: Object.prototype.hasOwnProperty.call(opts, "activeMeasure")
             ? opts.activeMeasure
-            : { getPointAtIndex: (index) => index === 0 ? { lat: 54.18, lon: 10.52 } : undefined },
+            : { getPointAtIndex: (index) => (index === 0 ? { lat: 54.18, lon: 10.52 } : undefined) },
           useRhumbLine: opts.useRhumbLine === true
         }
       },
@@ -132,8 +133,12 @@ describe("CenterDisplayTextWidget", function () {
         boat: "nm",
         measure: "nm"
       },
-      ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal") ? opts.ratioThresholdNormal : 1.1,
-      ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat") ? opts.ratioThresholdFlat : 2.4,
+      ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal")
+        ? opts.ratioThresholdNormal
+        : 1.1,
+      ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat")
+        ? opts.ratioThresholdFlat
+        : 2.4,
       coordinatesTabular: opts.coordinatesTabular,
       stableDigits: opts.stableDigits === true,
       disconnect: opts.disconnect === true,
@@ -224,8 +229,7 @@ describe("CenterDisplayTextWidget", function () {
 
   it("keeps compact flat and high layouts inside the canvas while preserving waypoint and boat rows", function () {
     const helpers = makeComponentContext();
-    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
-      .create({}, helpers);
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js").create({}, helpers);
     const sizes = [
       { width: 220, height: 80 },
       { width: 120, height: 140 }
@@ -248,8 +252,7 @@ describe("CenterDisplayTextWidget", function () {
 
   it("keeps coordinate font sizes coupled in normal and flat modes", function () {
     const helpers = makeComponentContext();
-    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
-      .create({}, helpers);
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js").create({}, helpers);
     const sizes = [
       { width: 260, height: 180 },
       { width: 520, height: 100 }
@@ -274,5 +277,4 @@ describe("CenterDisplayTextWidget", function () {
       expect(Math.abs(parseFontPx(latCall.font) - parseFontPx(lonCall.font))).toBeLessThanOrEqual(1);
     });
   });
-
 });

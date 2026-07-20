@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniEditRouteMarkup = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const METRIC_IDS = ["pts", "dst", "rte", "rteEta"];
@@ -68,11 +68,11 @@
     const unitText = toText(metric.unitText);
     const valueRowStyle = metricFit.valueRowStyle;
     const unitNode = shouldRenderUnitNode(mode, metricId, metric, unitText)
-      ? ('<span class="dyni-edit-route-metric-unit"'
-        + htmlUtils.toStyleAttr(metricFit.unitStyle)
-        + ">"
-        + htmlUtils.escapeHtml(unitText)
-        + "</span>")
+      ? '<span class="dyni-edit-route-metric-unit"' +
+        htmlUtils.toStyleAttr(metricFit.unitStyle) +
+        ">" +
+        htmlUtils.escapeHtml(unitText) +
+        "</span>"
       : "";
     const valueTextClasses = ["dyni-edit-route-metric-value-text"];
     if (model.stableDigitsEnabled === true) {
@@ -80,44 +80,56 @@
     }
 
     if (mode === "high") {
-      return ""
-        + '<div class="dyni-edit-route-metric-row ' + metricClass + '">'
-        + '<div class="dyni-edit-route-metric-label"'
-        + htmlUtils.toStyleAttr(metricFit.labelStyle)
-        + ">"
-        + htmlUtils.escapeHtml(labelText)
-        + "</div>"
-        + '<div class="dyni-edit-route-metric-value"'
-        + htmlUtils.toStyleAttr(valueRowStyle)
-        + ">"
-        + '<span class="' + valueTextClasses.join(" ") + '"'
-        + htmlUtils.toStyleAttr(metricFit.valueStyle)
-        + ">"
-        + htmlUtils.escapeHtml(valueText)
-        + "</span>"
-        + unitNode
-        + "</div>"
-        + "</div>";
+      return (
+        "" +
+        '<div class="dyni-edit-route-metric-row ' +
+        metricClass +
+        '">' +
+        '<div class="dyni-edit-route-metric-label"' +
+        htmlUtils.toStyleAttr(metricFit.labelStyle) +
+        ">" +
+        htmlUtils.escapeHtml(labelText) +
+        "</div>" +
+        '<div class="dyni-edit-route-metric-value"' +
+        htmlUtils.toStyleAttr(valueRowStyle) +
+        ">" +
+        '<span class="' +
+        valueTextClasses.join(" ") +
+        '"' +
+        htmlUtils.toStyleAttr(metricFit.valueStyle) +
+        ">" +
+        htmlUtils.escapeHtml(valueText) +
+        "</span>" +
+        unitNode +
+        "</div>" +
+        "</div>"
+      );
     }
 
-    return ""
-      + '<div class="dyni-edit-route-metric ' + metricClass + '">'
-      + '<div class="dyni-edit-route-metric-label"'
-      + htmlUtils.toStyleAttr(metricFit.labelStyle)
-      + ">"
-      + htmlUtils.escapeHtml(labelText)
-      + "</div>"
-      + '<div class="dyni-edit-route-metric-value"'
-      + htmlUtils.toStyleAttr(valueRowStyle)
-      + ">"
-      + '<span class="' + valueTextClasses.join(" ") + '"'
-      + htmlUtils.toStyleAttr(metricFit.valueStyle)
-      + ">"
-      + htmlUtils.escapeHtml(valueText)
-      + "</span>"
-      + unitNode
-      + "</div>"
-      + "</div>";
+    return (
+      "" +
+      '<div class="dyni-edit-route-metric ' +
+      metricClass +
+      '">' +
+      '<div class="dyni-edit-route-metric-label"' +
+      htmlUtils.toStyleAttr(metricFit.labelStyle) +
+      ">" +
+      htmlUtils.escapeHtml(labelText) +
+      "</div>" +
+      '<div class="dyni-edit-route-metric-value"' +
+      htmlUtils.toStyleAttr(valueRowStyle) +
+      ">" +
+      '<span class="' +
+      valueTextClasses.join(" ") +
+      '"' +
+      htmlUtils.toStyleAttr(metricFit.valueStyle) +
+      ">" +
+      htmlUtils.escapeHtml(valueText) +
+      "</span>" +
+      unitNode +
+      "</div>" +
+      "</div>"
+    );
   }
 
   /**
@@ -173,9 +185,7 @@
         });
       }
 
-      const openHotspot = canOpen
-        ? '<div class="dyni-edit-route-open-hotspot"></div>'
-        : "";
+      const openHotspot = canOpen ? '<div class="dyni-edit-route-open-hotspot"></div>' : "";
       const showSourceBadge = hasRoute && isLocalRoute;
       const nameTextStyle = fit.nameTextStyle;
       const sourceBadgeStyle = fit.sourceBadgeStyle;
@@ -186,44 +196,42 @@
         const visibleMetricIds = Array.isArray(model.visibleMetricIds)
           ? model.visibleMetricIds.slice()
           : METRIC_IDS.filter(function (id) {
-            return !!(model.metricVisibility && model.metricVisibility[id]);
-          });
+              return !!(model.metricVisibility && model.metricVisibility[id]);
+            });
 
         for (let i = 0; i < visibleMetricIds.length; i += 1) {
           metricsHtml += renderMetric(model, fit, visibleMetricIds[i], htmlUtils);
         }
       }
 
-      return ""
-        + '<div class="' + wrapperClasses.join(" ") + '"'
-        + ' data-dyni-action="edit-route-open"'
-        + htmlUtils.toStyleAttr(model.wrapperStyle)
-        + ">"
-        + openHotspot
-        + '<div class="dyni-edit-route-name-bar">'
-        + '<div class="dyni-edit-route-name-text"'
-        + htmlUtils.toStyleAttr(nameTextStyle)
-        + ">"
-        + htmlUtils.escapeHtml(toText(model.nameText))
-        + "</div>"
-        + (showSourceBadge
-          ? (
-            '<div class="dyni-edit-route-source-badge"'
-            + htmlUtils.toStyleAttr(sourceBadgeStyle)
-            + ">"
-            + htmlUtils.escapeHtml(toText(model.sourceBadgeText))
-            + "</div>"
-          )
-          : "")
-        + "</div>"
-        + (hasRoute
-          ? ('<div class="dyni-edit-route-metrics"'
-            + htmlUtils.toStyleAttr(metricsStyle)
-            + ">"
-            + metricsHtml
-            + "</div>")
-          : "")
-        + "</div>";
+      return (
+        "" +
+        '<div class="' +
+        wrapperClasses.join(" ") +
+        '"' +
+        ' data-dyni-action="edit-route-open"' +
+        htmlUtils.toStyleAttr(model.wrapperStyle) +
+        ">" +
+        openHotspot +
+        '<div class="dyni-edit-route-name-bar">' +
+        '<div class="dyni-edit-route-name-text"' +
+        htmlUtils.toStyleAttr(nameTextStyle) +
+        ">" +
+        htmlUtils.escapeHtml(toText(model.nameText)) +
+        "</div>" +
+        (showSourceBadge
+          ? '<div class="dyni-edit-route-source-badge"' +
+            htmlUtils.toStyleAttr(sourceBadgeStyle) +
+            ">" +
+            htmlUtils.escapeHtml(toText(model.sourceBadgeText)) +
+            "</div>"
+          : "") +
+        "</div>" +
+        (hasRoute
+          ? '<div class="dyni-edit-route-metrics"' + htmlUtils.toStyleAttr(metricsStyle) + ">" + metricsHtml + "</div>"
+          : "") +
+        "</div>"
+      );
     }
 
     return {
@@ -233,4 +241,4 @@
   }
 
   return { id: "EditRouteMarkup", create: create };
-}));
+});

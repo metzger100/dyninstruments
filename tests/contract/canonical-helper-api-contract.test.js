@@ -21,8 +21,8 @@ const MODULE_EXPECTATIONS = [
       "trimText",
       "clamp",
       "clampPositive",
-      "ensureObject",
-    ],
+      "ensureObject"
+    ]
   },
   {
     rel: "shared/widget-kits/html/HtmlMeasureUtils.js",
@@ -34,8 +34,8 @@ const MODULE_EXPECTATIONS = [
       "measureStyle",
       "toStyle",
       "resolveOwnerDocument",
-      "resolveFitCache",
-    ],
+      "resolveFitCache"
+    ]
   },
   {
     rel: "shared/widget-kits/html/HtmlWidgetUtils.js",
@@ -47,8 +47,8 @@ const MODULE_EXPECTATIONS = [
       "resolveMetricValueFamily",
       "resolveLabelEdgePolicy",
       "toPx",
-      "joinStyles",
-    ],
+      "joinStyles"
+    ]
   },
   {
     rel: "shared/widget-kits/text/TextLayoutComposite.js",
@@ -59,40 +59,41 @@ const MODULE_EXPECTATIONS = [
       "resolveOpacity",
       "resolveCompactGeometryScale",
       "scaleValueUnitFit",
-      "scaleInlineFit",
-    ],
+      "scaleInlineFit"
+    ]
   },
   {
     rel: "shared/widget-kits/text/TextLayoutEngine.js",
-    api: ["makeFitCacheKey", "writeFitCache", "readFitCache", "createFitCache"],
+    api: ["makeFitCacheKey", "writeFitCache", "readFitCache", "createFitCache"]
   },
   {
     rel: "shared/widget-kits/text/CanvasTextFitting.js",
-    api: ["setFont", "measureTextWidth", "fitSingleTextPx"],
+    api: ["setFont", "measureTextWidth", "fitSingleTextPx"]
   },
   {
     rel: "shared/widget-kits/text/CanvasTextLayout.js",
-    api: ["resolveFamily"],
+    api: ["resolveFamily"]
   },
   {
     rel: "shared/widget-kits/layout/LayoutRectMath.js",
-    api: ["makeRect", "splitRow", "splitStack"],
+    api: ["makeRect", "splitRow", "splitStack"]
   },
   {
     rel: "shared/widget-kits/radial/RadialAngleMath.js",
-    api: ["valueToAngle", "valueToAngleFlat"],
+    api: ["valueToAngle", "valueToAngleFlat"]
   },
   {
     rel: "shared/widget-kits/radial/RadialValueMath.js",
-    api: ["buildValueTickAngles"],
+    api: ["buildValueTickAngles"]
   },
   {
     rel: "shared/widget-kits/format/StableDigits.js",
     api: ["resolveIntegerWidth"],
+    /** @param {any} api */
     extra(api) {
       expect(api.resolveIntegerWidth.length).toBeGreaterThanOrEqual(3);
-    },
-  },
+    }
+  }
 ];
 
 const EXTRA_MODULES = {
@@ -100,7 +101,7 @@ const EXTRA_MODULES = {
   RadialSectorMath: "shared/widget-kits/radial/RadialSectorMath.js",
   ResponsiveScaleProfile: "shared/widget-kits/layout/ResponsiveScaleProfile.js",
   TextLayoutComposite: "shared/widget-kits/text/TextLayoutComposite.js",
-  TextLayoutPrimitives: "shared/widget-kits/text/TextLayoutPrimitives.js",
+  TextLayoutPrimitives: "shared/widget-kits/text/TextLayoutPrimitives.js"
 };
 
 describe("canonical helper API contract", function () {
@@ -115,18 +116,18 @@ describe("canonical helper API contract", function () {
   });
 
   it("reports missing helper functions in the local assertion", function () {
-    expect(missingFunctions({ keep() {} }, ["keep", "missing"])).toEqual([
-      "missing",
-    ]);
+    expect(missingFunctions({ keep() {} }, ["keep", "missing"])).toEqual(["missing"]);
   });
 });
 
+/** @param {string} rel */
 function createApi(rel) {
   const mod = loadFresh(rel);
   expect(typeof mod.create, rel).toBe("function");
   return mod.create({}, createComponentContextMock({ modules: loadExtraModules() }));
 }
 
+/** @param {any} api @param {string[]} names */
 function missingFunctions(api, names) {
   return names.filter(function (name) {
     return !api || typeof api[name] !== "function";
@@ -134,9 +135,9 @@ function missingFunctions(api, names) {
 }
 
 function loadExtraModules() {
-  const modules = {};
+  const modules = /** @type {Record<string, any>} */ ({});
   Object.keys(EXTRA_MODULES).forEach(function (id) {
-    modules[id] = loadFresh(EXTRA_MODULES[id]);
+    modules[id] = loadFresh(EXTRA_MODULES[/** @type {keyof typeof EXTRA_MODULES} */ (id)]);
   });
   return modules;
 }

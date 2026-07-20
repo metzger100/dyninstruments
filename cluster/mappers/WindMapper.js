@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniWindMapper = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   function create() {
@@ -26,7 +26,7 @@
       const req = p.kind;
 
       if (req === "angleTrueRadial" || req === "angleApparentRadial") {
-        const isTrue = (req === "angleTrueRadial");
+        const isTrue = req === "angleTrueRadial";
         const angleKind = isTrue ? "angleTrueRadialAngle" : "angleApparentRadialAngle";
         const speedKind = isTrue ? "angleTrueRadialSpeed" : "angleApparentRadialSpeed";
         const speedToken = toolkit.formatUnit(speedKind, "speed");
@@ -54,7 +54,7 @@
       }
 
       if (req === "angleTrueLinear" || req === "angleApparentLinear") {
-        const isTrue = (req === "angleTrueLinear");
+        const isTrue = req === "angleTrueLinear";
         const angleKind = isTrue ? "angleTrueLinearAngle" : "angleApparentLinearAngle";
         const speedKind = isTrue ? "angleTrueLinearSpeed" : "angleApparentLinearSpeed";
         const speedToken = toolkit.formatUnit(speedKind, "speed");
@@ -90,10 +90,22 @@
         return out(p.twa, cap("angleTrue"), unit("angleTrue"), makeAngleFormatter(false, leadingZero, p.default), []);
       }
       if (req === "angleApparent") {
-        return out(p.awa, cap("angleApparent"), unit("angleApparent"), makeAngleFormatter(false, leadingZero, p.default), []);
+        return out(
+          p.awa,
+          cap("angleApparent"),
+          unit("angleApparent"),
+          makeAngleFormatter(false, leadingZero, p.default),
+          []
+        );
       }
       if (req === "angleTrueDirection") {
-        return out(p.twd, cap("angleTrueDirection"), unit("angleTrueDirection"), makeAngleFormatter(true, leadingZero, p.default), []);
+        return out(
+          p.twd,
+          cap("angleTrueDirection"),
+          unit("angleTrueDirection"),
+          makeAngleFormatter(true, leadingZero, p.default),
+          []
+        );
       }
       if (req === "speedTrue") {
         const token = toolkit.formatUnit("speedTrue", "speed");
@@ -101,7 +113,9 @@
       }
       if (req === "speedApparent") {
         const token = toolkit.formatUnit("speedApparent", "speed");
-        return out(p.aws, cap("speedApparent"), toolkit.unitText("speedApparent", "speed", token), "formatSpeed", [token]);
+        return out(p.aws, cap("speedApparent"), toolkit.unitText("speedApparent", "speed", token), "formatSpeed", [
+          token
+        ]);
       }
       return {};
     }
@@ -113,4 +127,4 @@
   }
 
   return { id: "WindMapper", create: create };
-}));
+});

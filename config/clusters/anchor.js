@@ -26,7 +26,9 @@
     def: {
       name: "dyni_Anchor_Instruments",
       description: "Anchor metrics (distance, watch radius, bearing)",
-      caption: "", unit: "", default: "---",
+      caption: "",
+      unit: "",
+      default: "---",
       cluster: "anchor",
       storeKeys: {
         distance: "nav.anchor.distance",
@@ -63,13 +65,9 @@
           type: "BOOLEAN",
           default: false,
           name: "Stable digits",
-          condition: [
-            { kind: "anchorDistance" },
-            { kind: "anchorWatch" },
-            { kind: "anchorBearing" }
-          ]
+          condition: [{ kind: "anchorDistance" }, { kind: "anchorWatch" }, { kind: "anchorBearing" }]
         }
       }
     }
   });
-}(this));
+})(this);

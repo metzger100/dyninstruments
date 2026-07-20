@@ -2,37 +2,46 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
 const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
+/** @param {Record<string, any>} [overrides] @param {Record<string, any>} [bindingOverrides] */
 function makeToolkit(overrides, bindingOverrides) {
   installUnitFormatFamilies(bindingOverrides);
-  return loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().createToolkit(Object.assign({
-    caption_zoom: "ZOOM CAP",
-    unit_zoom: "",
-    caption_aisTargetDst: "DST CAP",
-    formatUnit_aisTargetDst: "nm",
-    unit_aisTargetDst_nm: "nmD",
-    caption_aisTargetCpa: "DCPA CAP",
-    formatUnit_aisTargetCpa: "nm",
-    unit_aisTargetCpa_nm: "nmC",
-    caption_aisTargetTcpa: "TCPA CAP",
-    unit_aisTargetTcpa: "minT",
-    caption_aisTargetBrg: "BRG CAP",
-    unit_aisTargetBrg: "degB",
-    caption_centerDisplayPosition: "CENTER CAP",
-    unit_centerDisplayPosition: "",
-    caption_centerDisplayMarker: "WP CAP",
-    formatUnit_centerDisplayMarker: "nm",
-    unit_centerDisplayMarker_nm: "nmC",
-    caption_centerDisplayBoat: "BOAT CAP",
-    formatUnit_centerDisplayBoat: "nm",
-    unit_centerDisplayBoat_nm: "nmB",
-    caption_centerDisplayMeasure: "MEAS CAP",
-    formatUnit_centerDisplayMeasure: "nm",
-    unit_centerDisplayMeasure_nm: "nmM"
-  }, overrides || {}));
+  return loadFresh("cluster/mappers/ClusterMapperToolkit.js")
+    .create()
+    .createToolkit(
+      Object.assign(
+        {
+          caption_zoom: "ZOOM CAP",
+          unit_zoom: "",
+          caption_aisTargetDst: "DST CAP",
+          formatUnit_aisTargetDst: "nm",
+          unit_aisTargetDst_nm: "nmD",
+          caption_aisTargetCpa: "DCPA CAP",
+          formatUnit_aisTargetCpa: "nm",
+          unit_aisTargetCpa_nm: "nmC",
+          caption_aisTargetTcpa: "TCPA CAP",
+          unit_aisTargetTcpa: "minT",
+          caption_aisTargetBrg: "BRG CAP",
+          unit_aisTargetBrg: "degB",
+          caption_centerDisplayPosition: "CENTER CAP",
+          unit_centerDisplayPosition: "",
+          caption_centerDisplayMarker: "WP CAP",
+          formatUnit_centerDisplayMarker: "nm",
+          unit_centerDisplayMarker_nm: "nmC",
+          caption_centerDisplayBoat: "BOAT CAP",
+          formatUnit_centerDisplayBoat: "nm",
+          unit_centerDisplayBoat_nm: "nmB",
+          caption_centerDisplayMeasure: "MEAS CAP",
+          formatUnit_centerDisplayMeasure: "nm",
+          unit_centerDisplayMeasure_nm: "nmM"
+        },
+        overrides || {}
+      )
+    );
 }
 
 const toolkit = makeToolkit();
 
+/** @param {any} kind @param {any} activeToolkit @param {any} [viewModel] */
 function routeContext(kind, activeToolkit, viewModel) {
   return makeRouteContext({
     routeId: "map:" + kind,
@@ -47,10 +56,12 @@ function createMapper() {
   return loadFresh("cluster/mappers/MapMapper.js").create();
 }
 
+/** @param {any} value */
 function trimText(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+/** @param {any} value */
 function toMaybeNumber(value) {
   if (typeof value === "undefined" || value === null) {
     return undefined;
@@ -64,12 +75,12 @@ function toMaybeNumber(value) {
 
 function makeAisTargetViewModel() {
   return {
+    /** @param {any} props */
     build(props) {
       const target = props.target || {};
       const mmsiRaw = target.mmsi;
       const mmsiNormalized = typeof mmsiRaw === "undefined" || mmsiRaw === null ? "" : String(mmsiRaw);
       const trackedMmsiRaw = props.trackedMmsi;
-      const trackedMmsiNormalized = typeof trackedMmsiRaw === "undefined" || trackedMmsiRaw === null ? "" : String(trackedMmsiRaw);
       const hasTargetIdentity = mmsiNormalized !== "";
       const warning = target.warning === true;
 
@@ -103,18 +114,21 @@ describe("MapMapper", function () {
   it("maps centerDisplay to CenterDisplayTextWidget with renderer-owned fields", function () {
     const mapper = createMapper();
     const activeMeasure = { getPointAtIndex: vi.fn(() => ({ lat: 54.1, lon: 10.2 })) };
-    const out = mapper.translate({
-      kind: "centerDisplay",
-      centerPosition: { lat: 54.2, lon: 10.3 },
-      centerMarkerCourse: "91",
-      centerMarkerDistance: "1852",
-      centerCourse: "182",
-      centerDistance: "926",
-      activeMeasure: activeMeasure,
-      measureRhumbLine: true,
-      centerDisplayRatioThresholdNormal: "1.1",
-      centerDisplayRatioThresholdFlat: "2.4"
-    }, routeContext("centerDisplay", toolkit));
+    const out = mapper.translate(
+      {
+        kind: "centerDisplay",
+        centerPosition: { lat: 54.2, lon: 10.3 },
+        centerMarkerCourse: "91",
+        centerMarkerDistance: "1852",
+        centerCourse: "182",
+        centerDistance: "926",
+        activeMeasure: activeMeasure,
+        measureRhumbLine: true,
+        centerDisplayRatioThresholdNormal: "1.1",
+        centerDisplayRatioThresholdFlat: "2.4"
+      },
+      routeContext("centerDisplay", toolkit)
+    );
 
     expect(out).toEqual({
       display: {
@@ -146,29 +160,37 @@ describe("MapMapper", function () {
 
   it("uses shared binding defaults when formatter selectors are missing", function () {
     const mapper = createMapper();
-    const customToolkit = makeToolkit({
-      formatUnit_centerDisplayMarker: undefined,
-      unit_centerDisplayMarker_m: "meter marker",
-      formatUnit_centerDisplayBoat: undefined,
-      unit_centerDisplayBoat_m: "meter boat",
-      formatUnit_centerDisplayMeasure: undefined,
-      unit_centerDisplayMeasure_m: "meter measure",
-      formatUnit_aisTargetDst: undefined,
-      unit_aisTargetDst_m: "meter dst",
-      formatUnit_aisTargetCpa: undefined,
-      unit_aisTargetCpa_m: "meter cpa"
-    }, {
-      centerDisplayMarker: { defaultToken: "m" },
-      centerDisplayBoat: { defaultToken: "m" },
-      centerDisplayMeasure: { defaultToken: "m" },
-      aisTargetDst: { defaultToken: "m" },
-      aisTargetCpa: { defaultToken: "m" }
-    });
+    const customToolkit = makeToolkit(
+      {
+        formatUnit_centerDisplayMarker: undefined,
+        unit_centerDisplayMarker_m: "meter marker",
+        formatUnit_centerDisplayBoat: undefined,
+        unit_centerDisplayBoat_m: "meter boat",
+        formatUnit_centerDisplayMeasure: undefined,
+        unit_centerDisplayMeasure_m: "meter measure",
+        formatUnit_aisTargetDst: undefined,
+        unit_aisTargetDst_m: "meter dst",
+        formatUnit_aisTargetCpa: undefined,
+        unit_aisTargetCpa_m: "meter cpa"
+      },
+      {
+        centerDisplayMarker: { defaultToken: "m" },
+        centerDisplayBoat: { defaultToken: "m" },
+        centerDisplayMeasure: { defaultToken: "m" },
+        aisTargetDst: { defaultToken: "m" },
+        aisTargetCpa: { defaultToken: "m" }
+      }
+    );
 
-    expect(mapper.translate({
-      kind: "centerDisplay",
-      centerPosition: { lat: 54.2, lon: 10.3 }
-    }, routeContext("centerDisplay", customToolkit))).toEqual({
+    expect(
+      mapper.translate(
+        {
+          kind: "centerDisplay",
+          centerPosition: { lat: 54.2, lon: 10.3 }
+        },
+        routeContext("centerDisplay", customToolkit)
+      )
+    ).toEqual({
       display: {
         position: { lat: 54.2, lon: 10.3 },
         marker: { course: undefined, distance: undefined },
@@ -195,11 +217,14 @@ describe("MapMapper", function () {
       ratioThresholdFlat: undefined
     });
 
-    const aisTarget = mapper.translate({
-      kind: "aisTarget",
-      target: {},
-      default: "---"
-    }, routeContext("aisTarget", customToolkit, makeAisTargetViewModel()));
+    const aisTarget = mapper.translate(
+      {
+        kind: "aisTarget",
+        target: {},
+        default: "---"
+      },
+      routeContext("aisTarget", customToolkit, makeAisTargetViewModel())
+    );
     expect(aisTarget.units.dst).toBe("meter dst");
     expect(aisTarget.units.cpa).toBe("meter cpa");
     expect(aisTarget.formatUnits).toEqual({
@@ -210,11 +235,14 @@ describe("MapMapper", function () {
 
   it("maps zoom to MapZoomTextHtmlWidget", function () {
     const mapper = createMapper();
-    const out = mapper.translate({
-      kind: "zoom",
-      zoom: "12.3",
-      requiredZoom: "11.5"
-    }, routeContext("zoom", toolkit));
+    const out = mapper.translate(
+      {
+        kind: "zoom",
+        zoom: "12.3",
+        requiredZoom: "11.5"
+      },
+      routeContext("zoom", toolkit)
+    );
 
     expect(out).toEqual({
       zoom: 12.3,
@@ -226,11 +254,14 @@ describe("MapMapper", function () {
 
   it("keeps zoom mapper values missing when live zoom inputs are null/blank", function () {
     const mapper = createMapper();
-    const out = mapper.translate({
-      kind: "zoom",
-      zoom: null,
-      requiredZoom: "   "
-    }, routeContext("zoom", toolkit));
+    const out = mapper.translate(
+      {
+        kind: "zoom",
+        zoom: null,
+        requiredZoom: "   "
+      },
+      routeContext("zoom", toolkit)
+    );
 
     expect(out.zoom).toBeUndefined();
     expect(out.requiredZoom).toBeUndefined();
@@ -238,27 +269,30 @@ describe("MapMapper", function () {
 
   it("maps aisTarget to grouped renderer payload with viewmodel domain output", function () {
     const mapper = createMapper();
-    const out = mapper.translate({
-      kind: "aisTarget",
-      target: {
-        mmsi: 123456789,
-        distance: "2.3",
-        cpa: "0.8",
-        tcpa: "90",
-        headingTo: "271",
-        type: 21,
-        name: "  Harbor Mark  ",
-        passFront: 1,
-        warning: true,
-        nextWarning: false,
-        nearest: false
+    const out = mapper.translate(
+      {
+        kind: "aisTarget",
+        target: {
+          mmsi: 123456789,
+          distance: "2.3",
+          cpa: "0.8",
+          tcpa: "90",
+          headingTo: "271",
+          type: 21,
+          name: "  Harbor Mark  ",
+          passFront: 1,
+          warning: true,
+          nextWarning: false,
+          nearest: false
+        },
+        trackedMmsi: "123456789",
+        aisMarkAllWarning: true,
+        aisTargetRatioThresholdNormal: "1.2",
+        aisTargetRatioThresholdFlat: "3.8",
+        default: "---"
       },
-      trackedMmsi: "123456789",
-      aisMarkAllWarning: true,
-      aisTargetRatioThresholdNormal: "1.2",
-      aisTargetRatioThresholdFlat: "3.8",
-      default: "---"
-    }, routeContext("aisTarget", toolkit, makeAisTargetViewModel()));
+      routeContext("aisTarget", toolkit, makeAisTargetViewModel())
+    );
 
     expect(out).toEqual({
       domain: {
@@ -309,11 +343,14 @@ describe("MapMapper", function () {
 
   it("propagates aisTarget thresholds and caption/unit overrides fail-closed", function () {
     const mapper = createMapper();
-    const out = mapper.translate({
-      kind: "aisTarget",
-      target: {},
-      aisTargetRatioThresholdNormal: "bad"
-    }, routeContext("aisTarget", toolkit, makeAisTargetViewModel()));
+    const out = mapper.translate(
+      {
+        kind: "aisTarget",
+        target: {},
+        aisTargetRatioThresholdNormal: "bad"
+      },
+      routeContext("aisTarget", toolkit, makeAisTargetViewModel())
+    );
 
     expect(out.layout).toEqual({
       ratioThresholdNormal: undefined,

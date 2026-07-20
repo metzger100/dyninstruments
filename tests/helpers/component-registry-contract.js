@@ -12,6 +12,7 @@ const REGISTRY_SCRIPTS = [
   "config/components/registry-shared-foundation-geometry.js",
   "config/components/registry-shared-foundation-layout.js",
   "config/components/registry-shared-foundation-state.js",
+  "config/components/registry-shared-foundation-xte.js",
   "config/components/registry-shared-engines.js",
   "config/components/registry-widgets-nav.js",
   "config/components/registry-widgets-vessel.js",
@@ -30,6 +31,7 @@ const CREATE_EXPORT_RE = new RegExp(
   "m"
 );
 
+/** @returns {Record<string, any>} */
 function loadComponents() {
   const context = createScriptContext({
     DyniPlugin: {
@@ -45,12 +47,14 @@ function loadComponents() {
   return context.DyniPlugin.config.components;
 }
 
+/** @param {string} jsPath @returns {string} */
 function readSource(jsPath) {
   return fs.readFileSync(path.join(process.cwd(), jsPath), "utf8");
 }
 
+/** @param {string[]} roots @returns {string[]} */
 function collectJsFiles(roots) {
-  const out = [];
+  const out = /** @type {string[]} */ ([]);
   roots.forEach(function (root) {
     const abs = path.join(process.cwd(), root);
     if (fs.existsSync(abs)) {
@@ -62,6 +66,7 @@ function collectJsFiles(roots) {
   });
 }
 
+/** @param {string} currentPath @param {string[]} out */
 function walkJs(currentPath, out) {
   const stat = fs.statSync(currentPath);
   if (stat.isFile()) {
@@ -76,16 +81,19 @@ function walkJs(currentPath, out) {
   });
 }
 
+/** @param {string} absolutePath @returns {string} */
 function toRelPath(absolutePath) {
   return path.relative(process.cwd(), absolutePath).replace(/\\/g, "/");
 }
 
+/** @param {any} entry @returns {string} */
 function relJsPath(entry) {
   if (!entry || typeof entry.js !== "string") return "";
   if (!entry.js.startsWith(BASE_URL)) return entry.js;
   return entry.js.slice(BASE_URL.length);
 }
 
+/** @param {Record<string, any>} components @returns {Set<string>} */
 function registeredJsPathSet(components) {
   const registered = new Set();
   Object.keys(components).forEach(function (componentId) {
@@ -94,6 +102,7 @@ function registeredJsPathSet(components) {
   return registered;
 }
 
+/** @param {string} relPath @returns {string} */
 function layerOf(relPath) {
   if (relPath.startsWith("widgets/")) return "widgets";
   if (relPath.startsWith("cluster/")) return "cluster";
@@ -103,6 +112,7 @@ function layerOf(relPath) {
   return "unknown";
 }
 
+/** @param {string} sourceLayer @param {string} targetLayer @returns {boolean} */
 function canDependOn(sourceLayer, targetLayer) {
   if (sourceLayer === "widgets") return targetLayer === "shared";
   if (sourceLayer === "cluster") {
@@ -116,12 +126,14 @@ function canDependOn(sourceLayer, targetLayer) {
   return false;
 }
 
+/** @param {any} source @returns {any[]} */
 function getDependencies(source) {
   return typeof source.deps === "undefined" ? [] : source.deps;
 }
 
+/** @param {Record<string, any>} components @param {string[]} [forbiddenIds] @returns {any[]} */
 function dependencyViolations(components, forbiddenIds) {
-  const violations = [];
+  const violations = /** @type {any[]} */ ([]);
   let canCheckCycles = true;
   Object.keys(components).forEach(function (componentId) {
     const source = components[componentId];
@@ -179,6 +191,7 @@ function dependencyViolations(components, forbiddenIds) {
   return violations;
 }
 
+/** @param {string} text @param {number} start @returns {number} */
 function skipWhitespace(text, start) {
   let index = start;
   while (index < text.length) {
@@ -190,6 +203,7 @@ function skipWhitespace(text, start) {
   return index;
 }
 
+/** @param {string} content @returns {number} */
 function findUmdWrapperStart(content) {
   let index = content.charCodeAt(0) === 0xfeff ? 1 : 0;
   index = skipWhitespace(content, index);
@@ -203,27 +217,32 @@ function findUmdWrapperStart(content) {
   return index;
 }
 
+/** @param {string} content @returns {boolean} */
 function hasStandardUmdWrapper(content) {
   const wrapperIndex = findUmdWrapperStart(content);
   return wrapperIndex >= 0 && UMD_WRAPPER_RE.test(content.slice(wrapperIndex));
 }
 
+/** @param {string} content @returns {boolean} */
 function hasDyniComponentsRegistration(content) {
   return DYNI_COMPONENTS_RE.test(content);
 }
 
+/** @param {string} content @returns {boolean} */
 function hasCreateExport(content) {
   return CREATE_EXPORT_RE.test(content);
 }
 
+/** @param {string} content @returns {string} */
 function extractUmdGlobalKey(content) {
   const match = content.match(UMD_GLOBAL_RE);
   return match ? match[1] : "";
 }
 
+/** @param {string} content @returns {string} */
 function extractLastReturnedId(content) {
   const re = /return\s*{\s*id\s*:\s*(['"])([^"'\\]*(?:\\.[^"'\\]*)*)\1/g;
-  let match = null;
+  let match;
   let lastId = "";
   while ((match = re.exec(content))) {
     lastId = match[2];
@@ -231,6 +250,7 @@ function extractLastReturnedId(content) {
   return lastId;
 }
 
+/** @param {string} clusterFile @returns {string} */
 function buildExpectedClusterName(clusterFile) {
   const name = path.basename(clusterFile, ".js");
   const words = name.split(/[-_]+/).filter(Boolean);
@@ -238,20 +258,24 @@ function buildExpectedClusterName(clusterFile) {
   return "dyni_" + (pascal || "Cluster") + "_Instruments";
 }
 
+/** @param {string} text @returns {string} */
 function capitalize(text) {
   if (!text) return "";
   return text[0].toUpperCase() + text.slice(1);
 }
 
+/** @param {string} content @returns {string} */
 function extractClusterWidgetName(content) {
   const match = content.match(/def\s*:\s*{[\s\S]*?\bname\s*:\s*(['"])([^"'\\]*(?:\\.[^"'\\]*)*)\1/);
   return match ? match[2] : "";
 }
 
+/** @param {string} jsPath @returns {boolean} */
 function isBootstrapOnlyComponentFile(jsPath) {
   return BOOTSTRAP_ONLY_COMPONENT_SCAN_FILES.has(jsPath);
 }
 
+/** @param {string} componentId @param {Record<string, any>} components @param {Record<string, boolean>} visiting @param {Record<string, boolean>} visited */
 function visitDependency(componentId, components, visiting, visited) {
   if (visited[componentId]) return;
   if (visiting[componentId]) {

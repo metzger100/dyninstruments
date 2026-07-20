@@ -90,7 +90,11 @@
         require: function (dependencyId) {
           if (!declaredDepsByOwner[dependencyId]) {
             throw new Error(
-              "componentContext.components.require: '" + ownerId + "' requested undeclared dependency '" + dependencyId + "'"
+              "componentContext.components.require: '" +
+                ownerId +
+                "' requested undeclared dependency '" +
+                dependencyId +
+                "'"
             );
           }
           return dependencyInstancesById[dependencyId];
@@ -251,7 +255,13 @@
         const componentDef = ensureComponent(registry, componentId, "createInstance");
         const moduleApi = loadedComponents[componentId];
         if (!moduleApi) {
-          throw new Error("createInstance: component '" + componentId + "' is not loaded; call loadComponent('" + componentId + "') first");
+          throw new Error(
+            "createInstance: component '" +
+              componentId +
+              "' is not loaded; call loadComponent('" +
+              componentId +
+              "') first"
+          );
         }
 
         building[componentId] = true;
@@ -270,7 +280,13 @@
         if (apiShape === "module") {
           instance = moduleApi;
         } else {
-          const componentContext = buildComponentContext(runtime, def, dependencyInstancesById, declaredDepsByOwner, componentId);
+          const componentContext = buildComponentContext(
+            runtime,
+            def,
+            dependencyInstancesById,
+            declaredDepsByOwner,
+            componentId
+          );
           instance = /** @type {DyniLoaderFactoryModule} */ (moduleApi).create(def, componentContext);
         }
 
@@ -291,4 +307,4 @@
   }
 
   runtime.createComponentLoader = createComponentLoader;
-}(this));
+})(this);

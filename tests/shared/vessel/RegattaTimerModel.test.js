@@ -44,10 +44,11 @@ describe("RegattaTimerModel", function () {
   });
 
   it("ticks countdown display from absolute Date.now timing", function () {
-    const ticks = [];
+    const ticks = /** @type {any[]} */ ([]);
     const createTimerModel = createFactory();
     const timer = createTimerModel({
       durationMinutes: 5,
+      /** @param {any} state */
       onTick(state) {
         ticks.push(state.displayTime);
       }
@@ -172,6 +173,7 @@ describe("RegattaTimerModel", function () {
     const createTimerModel = createFactory();
     const timer = createTimerModel({
       durationMinutes: 3,
+      /** @param {any} state */
       onTick(state) {
         ticks.push(state.displayTime);
       }
@@ -187,10 +189,11 @@ describe("RegattaTimerModel", function () {
   });
 
   it("emits low-tone signals at countdown start and whole-minute boundaries", function () {
-    const signals = [];
+    const signals = /** @type {any[]} */ ([]);
     const createTimerModel = createFactory();
     const timer = createTimerModel({
       durationMinutes: 3,
+      /** @param {any} type @param {any} frequency @param {any} durationMs */
       onSignal(type, frequency, durationMs) {
         signals.push({ type, frequency, durationMs });
       }
@@ -208,10 +211,11 @@ describe("RegattaTimerModel", function () {
   });
 
   it("emits high-tone countdown signals for the final 10 seconds", function () {
-    const signals = [];
+    const signals = /** @type {any[]} */ ([]);
     const createTimerModel = createFactory();
     const timer = createTimerModel({
       durationMinutes: 3,
+      /** @param {any} type @param {any} frequency @param {any} durationMs */
       onSignal(type, frequency, durationMs) {
         signals.push({ type, frequency, durationMs });
       }
@@ -227,10 +231,11 @@ describe("RegattaTimerModel", function () {
   });
 
   it("emits long start signal when countdown crosses zero", function () {
-    const signals = [];
+    const signals = /** @type {any[]} */ ([]);
     const createTimerModel = createFactory();
     const timer = createTimerModel({
       durationMinutes: 3,
+      /** @param {any} type @param {any} frequency @param {any} durationMs */
       onSignal(type, frequency, durationMs) {
         signals.push({ type, frequency, durationMs });
       }
@@ -247,10 +252,11 @@ describe("RegattaTimerModel", function () {
   });
 
   it("keeps signal emission independent from external sound toggles", function () {
-    const signals = [];
+    const signals = /** @type {any[]} */ ([]);
     const createTimerModel = createFactory();
     const timer = createTimerModel({
       durationMinutes: 3,
+      /** @param {any} type @param {any} frequency @param {any} durationMs */
       onSignal(type, frequency, durationMs) {
         signals.push({ type, frequency, durationMs });
       }

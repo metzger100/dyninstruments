@@ -1,11 +1,6 @@
 import { escapeRegex, findMatchingBrace, getFileData, lineAt, readLiteralToken } from "./shared.mjs";
 import { getAtomicityContracts, getUniqueConfigDefault } from "./atomicity-contracts.mjs";
-import {
-  collectFrameworkAliases,
-  normalizeToken,
-  readConstLiteral,
-  readDefaultRatioMap
-} from "./atomicity-parser.mjs";
+import { collectFrameworkAliases, normalizeToken, readConstLiteral, readDefaultRatioMap } from "./atomicity-parser.mjs";
 
 const CANVAS_METHODS = new Set([
   "arc",
@@ -55,8 +50,22 @@ export function runWidgetRendererDefaultDuplicationRule(rule, files) {
     if (!fileSet.has(spec.file)) {
       continue;
     }
-    pushRendererDefaultDuplicationFinding(out, rule, spec, contracts.configDefaultsByKey, "ratioDefaults", "ratioProps");
-    pushRendererDefaultDuplicationFinding(out, rule, spec, contracts.configDefaultsByKey, "rangeDefaults", "rangeProps");
+    pushRendererDefaultDuplicationFinding(
+      out,
+      rule,
+      spec,
+      contracts.configDefaultsByKey,
+      "ratioDefaults",
+      "ratioProps"
+    );
+    pushRendererDefaultDuplicationFinding(
+      out,
+      rule,
+      spec,
+      contracts.configDefaultsByKey,
+      "rangeDefaults",
+      "rangeProps"
+    );
   }
 
   return out;
@@ -263,7 +272,8 @@ export function runFrameworkMethodTypeofGuardRule(rule, files) {
 export function runInlineConfigDefaultDuplicationRule(rule, files) {
   const out = [];
   const contracts = getAtomicityContracts();
-  const detect = /typeof\s+([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*!==\s*["']undefined["']\s*\)?\s*\?\s*\1\.\2\s*:\s*/g;
+  const detect =
+    /typeof\s+([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*!==\s*["']undefined["']\s*\)?\s*\?\s*\1\.\2\s*:\s*/g;
 
   for (const file of files) {
     const data = getFileData(file);

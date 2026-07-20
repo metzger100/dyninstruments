@@ -39,33 +39,28 @@
   /** @param {DyniHostCommitControllerOptions} options @returns {DyniHostCommitControllerApi} */
   function createHostCommitController(options) {
     const opts = /** @type {DyniHostCommitControllerOptions} */ (options || {});
-    const instancePrefix = (typeof opts.instancePrefix === "string" && opts.instancePrefix)
-      ? opts.instancePrefix
-      : "dyni-host-";
+    const instancePrefix =
+      typeof opts.instancePrefix === "string" && opts.instancePrefix ? opts.instancePrefix : "dyni-host-";
     const doc = opts.document || root.document || null;
-    const requestFrame = typeof opts.requestAnimationFrame === "function"
-      ? opts.requestAnimationFrame
-      : (typeof root.requestAnimationFrame === "function"
-        ? root.requestAnimationFrame.bind(root)
-        : function (/** @type {() => void} */ cb) {
-          return root.setTimeout(cb, 16);
-        });
-    const cancelFrame = typeof opts.cancelAnimationFrame === "function"
-      ? opts.cancelAnimationFrame
-      : (typeof root.cancelAnimationFrame === "function"
-        ? root.cancelAnimationFrame.bind(root)
-        : function (/** @type {number} */ handle) {
-          root.clearTimeout(handle);
-        });
-    const setTimer = typeof opts.setTimeout === "function"
-      ? opts.setTimeout
-      : root.setTimeout.bind(root);
-    const clearTimer = typeof opts.clearTimeout === "function"
-      ? opts.clearTimeout
-      : root.clearTimeout.bind(root);
-    const MutationObserverCtor = hasOwn.call(opts, "MutationObserver")
-      ? opts.MutationObserver
-      : root.MutationObserver;
+    const requestFrame =
+      typeof opts.requestAnimationFrame === "function"
+        ? opts.requestAnimationFrame
+        : typeof root.requestAnimationFrame === "function"
+          ? root.requestAnimationFrame.bind(root)
+          : function (/** @type {() => void} */ cb) {
+              return root.setTimeout(cb, 16);
+            };
+    const cancelFrame =
+      typeof opts.cancelAnimationFrame === "function"
+        ? opts.cancelAnimationFrame
+        : typeof root.cancelAnimationFrame === "function"
+          ? root.cancelAnimationFrame.bind(root)
+          : function (/** @type {number} */ handle) {
+              root.clearTimeout(handle);
+            };
+    const setTimer = typeof opts.setTimeout === "function" ? opts.setTimeout : root.setTimeout.bind(root);
+    const clearTimer = typeof opts.clearTimeout === "function" ? opts.clearTimeout : root.clearTimeout.bind(root);
+    const MutationObserverCtor = hasOwn.call(opts, "MutationObserver") ? opts.MutationObserver : root.MutationObserver;
 
     /** @type {DyniHostCommitState} */
     let state = createState(nextInstanceId(instancePrefix));
@@ -173,7 +168,7 @@
     function commitIfReady(targetRevision, callbacks) {
       if (targetRevision !== state.renderRevision) {
         clearAsyncHandles();
-      clearPendingState();
+        clearPendingState();
         return true;
       }
 
@@ -209,9 +204,12 @@
     /** @param {number} targetRevision @param {DyniHostCommitCallbacks} callbacks */
     function installDeferredObservers(targetRevision, callbacks) {
       if (!MutationObserverCtor || typeof MutationObserverCtor !== "function") {
-        setStateField("timeoutHandle", setTimer(function () {
-          commitIfReady(targetRevision, callbacks);
-        }, 0));
+        setStateField(
+          "timeoutHandle",
+          setTimer(function () {
+            commitIfReady(targetRevision, callbacks);
+          }, 0)
+        );
         return;
       }
 
@@ -226,32 +224,38 @@
       }
 
       if (state.timeoutHandle == null) {
-        setStateField("timeoutHandle", setTimer(function () {
-          if (commitIfReady(targetRevision, callbacks)) {
-            return;
-          }
-          clearAsyncHandles();
-          clearPendingState();
-        }, OBSERVER_TIMEOUT_MS));
+        setStateField(
+          "timeoutHandle",
+          setTimer(function () {
+            if (commitIfReady(targetRevision, callbacks)) {
+              return;
+            }
+            clearAsyncHandles();
+            clearPendingState();
+          }, OBSERVER_TIMEOUT_MS)
+        );
       }
     }
 
     /** @param {number} targetRevision @param {DyniHostCommitCallbacks} callbacks @param {number} attempt */
     function scheduleRafAttempt(targetRevision, callbacks, attempt) {
-      setStateField("rafHandle", requestFrame(function () {
-        setStateField("rafHandle", null);
+      setStateField(
+        "rafHandle",
+        requestFrame(function () {
+          setStateField("rafHandle", null);
 
-        if (commitIfReady(targetRevision, callbacks)) {
-          return;
-        }
+          if (commitIfReady(targetRevision, callbacks)) {
+            return;
+          }
 
-        if (attempt < MAX_RAF_ATTEMPTS) {
-          scheduleRafAttempt(targetRevision, callbacks, attempt + 1);
-          return;
-        }
+          if (attempt < MAX_RAF_ATTEMPTS) {
+            scheduleRafAttempt(targetRevision, callbacks, attempt + 1);
+            return;
+          }
 
-        installDeferredObservers(targetRevision, callbacks);
-      }));
+          installDeferredObservers(targetRevision, callbacks);
+        })
+      );
     }
 
     function initState() {
@@ -305,4 +309,4 @@
   }
 
   runtime.createHostCommitController = createHostCommitController;
-}(this));
+})(this);

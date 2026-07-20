@@ -3,11 +3,14 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 
 describe("RadialTickMath", function () {
   function create() {
-    return loadFresh("shared/widget-kits/radial/RadialTickMath.js").create({}, createComponentContextMock({
-      modules: {
-        RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js")
-      }
-    }));
+    return loadFresh("shared/widget-kits/radial/RadialTickMath.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js")
+        }
+      })
+    );
   }
 
   it("computes sweep direction and handles zero sweep as full circle", function () {
@@ -29,7 +32,7 @@ describe("RadialTickMath", function () {
     });
 
     expect(absolute.majors.slice(0, 4)).toEqual([0, 30, 60, 90]);
-    expect(absolute.majors.filter((a) => a === 90).length).toBeGreaterThan(0);
+    expect(absolute.majors.filter((/** @type {number} */ a) => a === 90).length).toBeGreaterThan(0);
     expect(absolute.minors).toContain(10);
 
     const relative = mod.buildTickAngles({
@@ -42,7 +45,7 @@ describe("RadialTickMath", function () {
     });
 
     expect(relative.majors.slice(0, 4)).toEqual([5, 15, 25, 35]);
-    expect(relative.majors.filter((a) => a === 35).length).toBeGreaterThan(0);
+    expect(relative.majors.filter((/** @type {number} */ a) => a === 35).length).toBeGreaterThan(0);
   });
 
   it("detects whether an angle has passed the configured end boundary", function () {

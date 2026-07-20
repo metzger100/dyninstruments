@@ -1,17 +1,12 @@
 const {
-  parseStyle,
-  readPx,
   toTimerSeconds,
   buildRenderer,
   makeProps,
   withSurfacePolicy,
   createMountedRenderer,
-  installFakeTimerHooks,
+  installFakeTimerHooks
 } = require("./RegattaTimerTextHtmlWidget.harness.js");
-const {
-  createScriptContext,
-  runIifeScript,
-} = require("../../helpers/eval-iife");
+const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 
 installFakeTimerHooks();
 
@@ -22,16 +17,17 @@ describe("RegattaTimerTextHtmlWidget", function () {
         runtime: {},
         state: {},
         config: {
-          clusterRoutes: { routes: [] },
-        },
-      },
+          clusterRoutes: { routes: [] }
+        }
+      }
     });
     runIifeScript("config/cluster-routes/vessel.js", routeContext);
 
     const route = routeContext.DyniPlugin.config.clusterRoutes.routes.find(
+      /** @param {any} entry */
       function (entry) {
         return entry.cluster === "vessel" && entry.kind === "regattaTimer";
-      },
+      }
     );
 
     expect(route).toEqual({
@@ -40,7 +36,7 @@ describe("RegattaTimerTextHtmlWidget", function () {
       mapperId: "VesselMapper",
       rendererId: "RegattaTimerTextHtmlWidget",
       surface: "html",
-      shellSizing: { kind: "ratio", aspectRatio: 2 },
+      shellSizing: { kind: "ratio", aspectRatio: 2 }
     });
 
     const registryContext = createScriptContext({
@@ -48,15 +44,11 @@ describe("RegattaTimerTextHtmlWidget", function () {
         baseUrl: "http://host/plugins/dyninstruments/",
         runtime: {},
         state: {},
-        config: { shared: {} },
-      },
+        config: { shared: {} }
+      }
     });
-    runIifeScript(
-      "config/components/registry-widgets-vessel.js",
-      registryContext,
-    );
-    const widgets =
-      registryContext.DyniPlugin.config.shared.componentRegistryGroups.widgets;
+    runIifeScript("config/components/registry-widgets-vessel.js", registryContext);
+    const widgets = registryContext.DyniPlugin.config.shared.componentRegistryGroups.widgets;
     const component = widgets.RegattaTimerTextHtmlWidget;
 
     expect(component).toBeTruthy();
@@ -64,34 +56,33 @@ describe("RegattaTimerTextHtmlWidget", function () {
     expect(Array.isArray(component.shadowCss)).toBe(true);
     expect(component.shadowCss).toEqual([
       "http://host/plugins/dyninstruments/shared/html/HtmlShadowCommon.css",
-      "http://host/plugins/dyninstruments/widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.css",
+      "http://host/plugins/dyninstruments/widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.css"
     ]);
     const context = createScriptContext({
-      DyniPlugin: { runtime: {}, state: {}, config: {} },
+      DyniPlugin: { runtime: {}, state: {}, config: {} }
     });
     runIifeScript("runtime/cluster/ClusterShellRenderer.js", context);
 
-    const html =
-      context.DyniPlugin.runtime.clusterShellRenderer.renderRouteShell(
-        {
-          cluster: "vessel",
-          kind: "regattaTimer",
-          __dyniRouteId: "vessel/regattaTimer",
-          __dyniRawProps: {},
-        },
-        {
-          surface: "html",
-          shellSizing: { kind: "ratio", aspectRatio: 2 },
-        },
-        "test-instance",
-        {},
-      );
+    const html = context.DyniPlugin.runtime.clusterShellRenderer.renderRouteShell(
+      {
+        cluster: "vessel",
+        kind: "regattaTimer",
+        __dyniRouteId: "vessel/regattaTimer",
+        __dyniRawProps: {}
+      },
+      {
+        surface: "html",
+        shellSizing: { kind: "ratio", aspectRatio: 2 }
+      },
+      "test-instance",
+      {}
+    );
 
     expect(html).toContain(
-      'class="widgetData dyni-shell dyni-surface-html dyni-kind-regattaTimer dyni-cluster-vessel"',
+      'class="widgetData dyni-shell dyni-surface-html dyni-kind-regattaTimer dyni-cluster-vessel"'
     );
     expect(html).toContain(
-      '<div class="dyni-surface-html"><div class="dyni-surface-html-mount" data-dyni-html-mount="1"></div></div>',
+      '<div class="dyni-surface-html"><div class="dyni-surface-html-mount" data-dyni-html-mount="1"></div></div>'
     );
     expect(html).not.toContain("dyni-regatta-html");
     expect(html).not.toContain("dyni-regatta-time");
@@ -99,7 +90,7 @@ describe("RegattaTimerTextHtmlWidget", function () {
 
   it("mounts idle markup and transitions across countdown, sync, elapsed, and reset", function () {
     const mounted = createMountedRenderer({
-      props: withSurfacePolicy(makeProps(), "dispatch"),
+      props: withSurfacePolicy(makeProps(), "dispatch")
     });
     expect(mounted.html()).toContain("dyni-regatta-phase-idle");
     expect(mounted.html()).toContain("05:00");
@@ -108,9 +99,7 @@ describe("RegattaTimerTextHtmlWidget", function () {
     mounted.clickAction("regatta-start");
     expect(mounted.audioEngine.ensureContext).toHaveBeenCalledTimes(1);
     expect(mounted.html()).toContain("dyni-regatta-phase-countdown");
-    mounted.update(
-      withSurfacePolicy(makeProps({ regattaDuration: 6 }), "dispatch"),
-    );
+    mounted.update(withSurfacePolicy(makeProps({ regattaDuration: 6 }), "dispatch"));
     expect(mounted.html()).toContain("dyni-regatta-phase-countdown");
     expect(mounted.html()).not.toContain("06:00");
 
@@ -130,14 +119,14 @@ describe("RegattaTimerTextHtmlWidget", function () {
 
   it("keeps listeners in dispatch mode, suppresses wrapper blank-space clicks, and stays passive otherwise", function () {
     const dispatchMounted = createMountedRenderer({
-      props: withSurfacePolicy(makeProps(), "dispatch"),
+      props: withSurfacePolicy(makeProps(), "dispatch")
     });
     const parentClick = vi.fn();
     dispatchMounted.mountEl.addEventListener("click", parentClick);
-    const wrapper = dispatchMounted.wrapper();
+    const wrapper = /** @type {HTMLElement} */ (dispatchMounted.wrapper());
     const blankSpaceEvent = new MouseEvent("click", {
       bubbles: true,
-      cancelable: true,
+      cancelable: true
     });
     const dispatchResult = wrapper.dispatchEvent(blankSpaceEvent);
 
@@ -150,11 +139,9 @@ describe("RegattaTimerTextHtmlWidget", function () {
     expect(dispatchMounted.html()).toContain("dyni-regatta-phase-countdown");
 
     const passiveMounted = createMountedRenderer({
-      props: withSurfacePolicy(makeProps(), "passive"),
+      props: withSurfacePolicy(makeProps(), "passive")
     });
-    expect(passiveMounted.wrapper().className).toContain(
-      "dyni-regatta-open-passive",
-    );
+    expect(/** @type {HTMLElement} */ (passiveMounted.wrapper()).className).toContain("dyni-regatta-open-passive");
     passiveMounted.clickAction("regatta-start");
     expect(passiveMounted.html()).toContain("dyni-regatta-phase-idle");
   });
@@ -164,7 +151,7 @@ describe("RegattaTimerTextHtmlWidget", function () {
     const mounted = createMountedRenderer({
       hostContext: sharedHostContext,
       props: withSurfacePolicy(makeProps(), "dispatch"),
-      shellSize: { width: 260, height: 130 },
+      shellSize: { width: 260, height: 130 }
     });
 
     mounted.clickAction("regatta-start");
@@ -178,7 +165,7 @@ describe("RegattaTimerTextHtmlWidget", function () {
     const remounted = createMountedRenderer({
       hostContext: sharedHostContext,
       props: withSurfacePolicy(makeProps(), "dispatch"),
-      shellSize: { width: 260, height: 130 },
+      shellSize: { width: 260, height: 130 }
     });
 
     expect(remounted.html()).toContain("dyni-regatta-phase-countdown");
@@ -190,14 +177,14 @@ describe("RegattaTimerTextHtmlWidget", function () {
     const props = withSurfacePolicy(makeProps(), {
       mode: "dispatch",
       pageId: "regattapage",
-      routeId: "vessel/regattaTimer",
+      routeId: "vessel/regattaTimer"
     });
     const rendererBundle = buildRenderer();
     const mounted = createMountedRenderer({
       rendererBundle: rendererBundle,
       hostContext: { name: "first" },
       props: props,
-      shellSize: { width: 260, height: 130 },
+      shellSize: { width: 260, height: 130 }
     });
 
     mounted.clickAction("regatta-start");
@@ -210,7 +197,7 @@ describe("RegattaTimerTextHtmlWidget", function () {
       rendererBundle: rendererBundle,
       hostContext: { name: "second" },
       props: props,
-      shellSize: { width: 260, height: 130 },
+      shellSize: { width: 260, height: 130 }
     });
 
     expect(remounted.html()).toContain("dyni-regatta-phase-countdown");
@@ -222,13 +209,13 @@ describe("RegattaTimerTextHtmlWidget", function () {
     const props = withSurfacePolicy(makeProps(), {
       mode: "dispatch",
       pageId: "regattapage",
-      routeId: "vessel/regattaTimer",
+      routeId: "vessel/regattaTimer"
     });
     const rendererBundle = buildRenderer();
     const mounted = createMountedRenderer({
       rendererBundle: rendererBundle,
       hostContext: { name: "first" },
-      props: props,
+      props: props
     });
 
     mounted.clickAction("regatta-start");
@@ -240,7 +227,7 @@ describe("RegattaTimerTextHtmlWidget", function () {
     const remounted = createMountedRenderer({
       rendererBundle: rendererBundle,
       hostContext: { name: "second" },
-      props: props,
+      props: props
     });
 
     expect(remounted.html()).toContain("dyni-regatta-phase-elapsed");
@@ -252,13 +239,13 @@ describe("RegattaTimerTextHtmlWidget", function () {
     const props = withSurfacePolicy(makeProps(), {
       mode: "dispatch",
       pageId: "regattapage",
-      routeId: "vessel/regattaTimer",
+      routeId: "vessel/regattaTimer"
     });
     const rendererBundle = buildRenderer();
     const mounted = createMountedRenderer({
       rendererBundle: rendererBundle,
       hostContext: { name: "first" },
-      props: props,
+      props: props
     });
 
     mounted.clickAction("regatta-start");
@@ -270,7 +257,7 @@ describe("RegattaTimerTextHtmlWidget", function () {
     const remounted = createMountedRenderer({
       rendererBundle: rendererBundle,
       hostContext: { name: "second" },
-      props: props,
+      props: props
     });
 
     expect(remounted.html()).toContain("dyni-regatta-phase-countdown");
@@ -281,13 +268,13 @@ describe("RegattaTimerTextHtmlWidget", function () {
     const props = withSurfacePolicy(makeProps(), {
       mode: "dispatch",
       pageId: "regattapage",
-      routeId: "vessel/regattaTimer",
+      routeId: "vessel/regattaTimer"
     });
     const rendererBundle = buildRenderer();
     const mounted = createMountedRenderer({
       rendererBundle: rendererBundle,
       hostContext: { name: "first" },
-      props: props,
+      props: props
     });
 
     mounted.clickAction("regatta-start");
@@ -301,7 +288,7 @@ describe("RegattaTimerTextHtmlWidget", function () {
     const remounted = createMountedRenderer({
       rendererBundle: rendererBundle,
       hostContext: { name: "second" },
-      props: props,
+      props: props
     });
 
     expect(remounted.html()).toContain("dyni-regatta-phase-idle");
@@ -311,7 +298,7 @@ describe("RegattaTimerTextHtmlWidget", function () {
   it("keeps active countdown running when shellRect changes during update", function () {
     const mounted = createMountedRenderer({
       props: withSurfacePolicy(makeProps(), "dispatch"),
-      shellSize: { width: 240, height: 120 },
+      shellSize: { width: 240, height: 120 }
     });
 
     mounted.clickAction("regatta-start");
@@ -331,16 +318,13 @@ describe("RegattaTimerTextHtmlWidget", function () {
 
   it("keeps stable digits off by default and enables dyni-tabular only when configured", function () {
     const mounted = createMountedRenderer({
-      props: withSurfacePolicy(makeProps({ stableDigits: false }), "dispatch"),
+      props: withSurfacePolicy(makeProps({ stableDigits: false }), "dispatch")
     });
-    const initialTime = mounted.mountEl.querySelector(".dyni-regatta-time");
+    const initialTime = /** @type {HTMLElement} */ (mounted.mountEl.querySelector(".dyni-regatta-time"));
     expect(initialTime.classList.contains("dyni-tabular")).toBe(false);
 
-    mounted.update(
-      withSurfacePolicy(makeProps({ stableDigits: true }), "dispatch"),
-    );
-    const tabularTime = mounted.mountEl.querySelector(".dyni-regatta-time");
+    mounted.update(withSurfacePolicy(makeProps({ stableDigits: true }), "dispatch"));
+    const tabularTime = /** @type {HTMLElement} */ (mounted.mountEl.querySelector(".dyni-regatta-time"));
     expect(tabularTime.classList.contains("dyni-tabular")).toBe(true);
   });
-
 });

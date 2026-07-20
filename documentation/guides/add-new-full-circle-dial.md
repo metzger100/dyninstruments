@@ -4,9 +4,11 @@
 
 ## Overview
 
-New full-circle dials should be thin wrappers over `FullCircleRadialEngine`. Keep widget modules focused on display strategy, static-layer callbacks, and pointer behavior.
-Cluster host registration remains `renderHtml`; full-circle canvas wrappers run through internal `surface: "canvas-dom"` routes.
-Route selection lives in `config.clusterRoutes.byRouteId`; it owns `mapperId`, `rendererId`, `surface`, optional `viewModelId`, and `shellSizing`.
+New full-circle dials should be thin wrappers over `FullCircleRadialEngine`. Keep widget modules focused on display
+strategy, static-layer callbacks, and pointer behavior. Cluster host registration remains `renderHtml`; full-circle
+canvas wrappers run through internal `surface: "canvas-dom"` routes. Route selection lives in
+`config.clusterRoutes.byRouteId`; it owns `mapperId`, `rendererId`, `surface`, optional `viewModelId`, and
+`shellSizing`.
 
 ## Prerequisites
 
@@ -26,10 +28,13 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
    - `const engine = componentContext.components.require("FullCircleRadialEngine")`
    - `const textLayout = componentContext.components.require("FullCircleRadialTextLayout")`
 3. Respect responsive ownership:
-   - `FullCircleRadialLayout` already consumes `ResponsiveScaleProfile` and owns compact insets, dial geometry, slot bounds, and compact geometry scales.
+   - `FullCircleRadialLayout` already consumes `ResponsiveScaleProfile` and owns compact insets, dial geometry, slot
+     bounds, and compact geometry scales.
    - `GeometryScale` already handles the factor-to-pixel conversion from the dial radius.
-   - Wrapper callbacks consume `state.layout`, `state.responsive`, and `state.textFillScale`; use `state.layout.compactGeometryScale` for compact text/layout spacing.
-   - Do not import `ResponsiveScaleProfile` directly and do not add widget-local user-visible responsive `Math.max(...)` / `clamp(...)` floors.
+   - Wrapper callbacks consume `state.layout`, `state.responsive`, and `state.textFillScale`; use
+     `state.layout.compactGeometryScale` for compact text/layout spacing.
+   - Do not import `ResponsiveScaleProfile` directly and do not add widget-local user-visible responsive `Math.max(...)`
+     / `clamp(...)` floors.
 4. Add widget-specific display strategy only:
    - single-value display object (compass-style), or
    - dual-value display object (wind-style)
@@ -43,8 +48,10 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
 (function (root, factory) {
   if (typeof define === "function" && define.amd) define([], factory);
   else if (typeof module === "object" && module.exports) module.exports = factory();
-  else { (root.DyniComponents = root.DyniComponents || {}).DyniNewDialWidget = factory(); }
-}(this, function () {
+  else {
+    (root.DyniComponents = root.DyniComponents || {}).DyniNewDialWidget = factory();
+  }
+})(this, function () {
   "use strict";
 
   function create(def, componentContext) {
@@ -64,7 +71,8 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
       },
       rebuildLayer: function (layerCtx, layerName, state, props, api) {
         if (layerName === "back") api.drawFullCircleRing(layerCtx);
-        if (layerName === "front") api.drawFullCircleTicks(layerCtx, { startDeg: 0, endDeg: 360, stepMajor: 30, stepMinor: 10 });
+        if (layerName === "front")
+          api.drawFullCircleTicks(layerCtx, { startDeg: 0, endDeg: 360, stepMajor: 30, stepMinor: 10 });
       },
       drawFrame: function (state, props, api) {
         const display = buildDisplay(state, props);
@@ -94,11 +102,16 @@ Create `widgets/radial/NewDialWidget/NewDialWidget.js`:
       return {};
     }
 
-    return { id: "NewDialWidget", wantsHideNativeHead: true, renderCanvas: renderCanvas, translateFunction: translateFunction };
+    return {
+      id: "NewDialWidget",
+      wantsHideNativeHead: true,
+      renderCanvas: renderCanvas,
+      translateFunction: translateFunction
+    };
   }
 
   return { id: "NewDialWidget", create: create };
-}));
+});
 ```
 
 ## Step 2: Register Module in `config/components/registry-widgets-gauge.js`
@@ -123,7 +136,8 @@ If `ClusterWidget` should render this dial, update the route entry in `config/cl
 3. set `surface` to `"canvas-dom"`
 4. set `shellSizing` to the route's pre-activation shell contract
 
-If this dial needs a new renderer component, register that component in the relevant `config/components/registry-*.js` fragment and keep its shadow CSS with the component.
+If this dial needs a new renderer component, register that component in the relevant `config/components/registry-*.js`
+fragment and keep its shadow CSS with the component.
 
 ## Step 4: Route Data via Mapper Module
 
@@ -143,6 +157,7 @@ if (p.kind === "newDialRadial") {
 ```
 
 Mapper rule:
+
 - Keep mappers declarative (`create` + `translate` only).
 - Do not add drawing, formatter fallback logic, or layout logic to mapper files.
 
@@ -157,13 +172,16 @@ Mapper rule:
 
 Decision guide:
 
-- Create a new full-circle dial wrapper when the visual shape is shared (ring + ticks + pointer) but label strategy, pointer behavior, or dial-specific behavior differs.
-- Add a new kind to an existing cluster mapper when only data source/kind mapping changes and visual behavior is unchanged.
+- Create a new full-circle dial wrapper when the visual shape is shared (ring + ticks + pointer) but label strategy,
+  pointer behavior, or dial-specific behavior differs.
+- Add a new kind to an existing cluster mapper when only data source/kind mapping changes and visual behavior is
+  unchanged.
 
 ## Checklist
 
 - [ ] Dial wrapper created in `widgets/radial/NewDialWidget/NewDialWidget.js`
-- [ ] Module registered in `config/components/registry-widgets-gauge.js` with `deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]`
+- [ ] Module registered in `config/components/registry-widgets-gauge.js` with
+      `deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]`
 - [ ] Route metadata updated in `config/cluster-routes/<cluster>.js`
 - [ ] Mapper returns declarative, normalized props
 - [ ] Layout behavior verified in `flat`, `normal`, `high`

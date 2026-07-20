@@ -70,10 +70,10 @@ function removeElement(element) {
 /** @param {string} baseUrl @returns {Promise<DyniBootstrapCoreApi>} */
 async function ensureBootstrapCore(baseUrl) {
   const ns = /** @type {DyniModulePluginNamespace} */ (window.DyniPlugin = window.DyniPlugin || {});
-  const state = ns.moduleBootstrapCoreState = ns.moduleBootstrapCoreState || {
+  const state = (ns.moduleBootstrapCoreState = ns.moduleBootstrapCoreState || {
     lastBaseUrl: "",
     loadedCoreIds: {}
-  };
+  });
   if (window.DyniPluginBootstrapCore) {
     if (state.lastBaseUrl === baseUrl) {
       return window.DyniPluginBootstrapCore;

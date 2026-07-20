@@ -1,3 +1,4 @@
+// @ts-nocheck
 const {
   makeThemeDefaults,
   makeComponentContext,
@@ -5,7 +6,7 @@ const {
   createBaseSequence,
   createValueMath,
   makeBaseSpec,
-  createRenderHarness,
+  createRenderHarness
 } = require("./SemicircleRadialEngine.harness");
 
 describe("SemicircleRadialEngine", function () {
@@ -22,10 +23,10 @@ describe("SemicircleRadialEngine", function () {
               theme: {
                 resolveForRoot() {
                   return themeDefaults;
-                },
+                }
               },
               text: {
-                drawDisconnectOverlay() {},
+                drawDisconnectOverlay() {}
               },
               value: gaugeValueMath,
               draw: {
@@ -35,35 +36,27 @@ describe("SemicircleRadialEngine", function () {
                   pointerCalls.push(opts);
                 },
                 drawTicksFromAngles() {},
-                drawLabels() {},
-              },
+                drawLabels() {}
+              }
             };
-          },
+          }
         },
-        SemicircleRadialLayout: loadFresh(
-          "shared/widget-kits/radial/SemicircleRadialLayout.js",
-        ),
+        SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
         SemicircleRadialTextLayout: {
           create() {
             return {
               createFitCache() {
                 return {};
               },
-              drawModeText() {},
+              drawModeText() {}
             };
-          },
+          }
         },
-        ResponsiveScaleProfile: loadFresh(
-          "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-        ),
-        LayoutRectMath: loadFresh(
-          "shared/widget-kits/layout/LayoutRectMath.js",
-        ),
-        GeometryScale: geometryScale,
+        ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        GeometryScale: geometryScale
       };
-      const renderer = loadFresh(
-        "shared/widget-kits/radial/SemicircleRadialEngine.js",
-      )
+      const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
         .create({}, makeComponentContext(modules))
         .createRenderer(makeBaseSpec());
 
@@ -71,13 +64,13 @@ describe("SemicircleRadialEngine", function () {
         createMockCanvas({
           rectWidth: 480,
           rectHeight: 110,
-          ctx: createMockContext2D(),
+          ctx: createMockContext2D()
         }),
         {
           value: 12.3,
           caption: "SPD",
-          unit: "kn",
-        },
+          unit: "kn"
+        }
       );
 
       return pointerCalls[0];
@@ -90,5 +83,4 @@ describe("SemicircleRadialEngine", function () {
     expect(thinPointer.halfWidth).toBe(thickPointer.halfWidth);
     expect(thinPointer.fillStyle).toBe(thickPointer.fillStyle);
   });
-
 });

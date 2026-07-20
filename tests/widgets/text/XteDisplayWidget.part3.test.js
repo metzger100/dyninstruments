@@ -1,12 +1,6 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./XteDisplayWidget.harness.js");
-const {
-  makeProps,
-  fillTextValues,
-} = require("./XteDisplayWidget.test-model.js");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./XteDisplayWidget.harness.js");
+const { makeProps, fillTextValues } = require("./XteDisplayWidget.test-model.js");
 
 describe("XteDisplayWidget", function () {
   it("uses provided DST unit directly without local fallback", function () {
@@ -14,7 +8,7 @@ describe("XteDisplayWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(canvas, makeProps({ units: { dtw: undefined } }));
@@ -27,7 +21,7 @@ describe("XteDisplayWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(
@@ -35,9 +29,9 @@ describe("XteDisplayWidget", function () {
       makeProps({
         units: {
           track: "degT",
-          brg: "degM",
-        },
-      }),
+          brg: "degM"
+        }
+      })
     );
 
     expect(harness.calls.valueRows[0].unit).toBe("degT");
@@ -49,7 +43,7 @@ describe("XteDisplayWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(
@@ -57,9 +51,9 @@ describe("XteDisplayWidget", function () {
       makeProps({
         units: {
           track: undefined,
-          brg: undefined,
-        },
-      }),
+          brg: undefined
+        }
+      })
     );
 
     expect(harness.calls.valueRows[0].unit).toBe("");
@@ -71,7 +65,7 @@ describe("XteDisplayWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(canvas, makeProps({ xte: 1852 }));
@@ -89,27 +83,25 @@ describe("XteDisplayWidget", function () {
       createMockCanvas({
         rectWidth: 161,
         rectHeight: 80,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
-      makeProps({ showWpName: true, wpName: "Fairway Buoy" }),
+      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
     );
     largeHarness.spec.renderCanvas(
       createMockCanvas({
         rectWidth: 520,
         rectHeight: 260,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
-      makeProps({ showWpName: true, wpName: "Fairway Buoy" }),
+      makeProps({ showWpName: true, wpName: "Fairway Buoy" })
     );
 
     expect(compactHarness.calls.modeHistory[0]).toBe("normal");
     expect(largeHarness.calls.modeHistory[0]).toBe("normal");
     expect(compactHarness.calls.waypointTextFillScales[0]).toBeGreaterThan(
-      largeHarness.calls.waypointTextFillScales[0],
+      largeHarness.calls.waypointTextFillScales[0]
     );
-    expect(compactHarness.calls.metricTextFillScales[0]).toBeGreaterThan(
-      largeHarness.calls.metricTextFillScales[0],
-    );
+    expect(compactHarness.calls.metricTextFillScales[0]).toBeGreaterThan(largeHarness.calls.metricTextFillScales[0]);
   });
 
   it("keeps XTE side suffix alignment for R/L and preserves an empty slot at zero", function () {
@@ -119,9 +111,9 @@ describe("XteDisplayWidget", function () {
         createMockCanvas({
           rectWidth: 520,
           rectHeight: 260,
-          ctx: createMockContext2D(),
+          ctx: createMockContext2D()
         }),
-        makeProps({ stableDigits: true, xte: xte }),
+        makeProps({ stableDigits: true, xte: xte })
       );
       return harness.calls.valueRows[1].value;
     }
@@ -142,38 +134,27 @@ describe("XteDisplayWidget", function () {
     const canvasA = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     const canvasB = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     const nowSpy = vi.spyOn(Date, "now");
 
     try {
       nowSpy.mockReturnValue(0);
-      expect(
-        harness.spec.renderCanvas(canvasA, makeProps({ xte: 0.25 })),
-      ).toBeUndefined();
+      expect(harness.spec.renderCanvas(canvasA, makeProps({ xte: 0.25 }))).toBeUndefined();
 
       nowSpy.mockReturnValue(16);
-      expect(
-        harness.spec.renderCanvas(canvasA, makeProps({ xte: 1.25 })),
-      ).toEqual({ wantsFollowUpFrame: true });
+      expect(harness.spec.renderCanvas(canvasA, makeProps({ xte: 1.25 }))).toEqual({ wantsFollowUpFrame: true });
 
       nowSpy.mockReturnValue(16);
-      expect(
-        harness.spec.renderCanvas(canvasB, makeProps({ xte: 1.25 })),
-      ).toBeUndefined();
+      expect(harness.spec.renderCanvas(canvasB, makeProps({ xte: 1.25 }))).toBeUndefined();
 
       nowSpy.mockReturnValue(32);
-      expect(
-        harness.spec.renderCanvas(
-          canvasA,
-          makeProps({ xte: 1.25, easing: false }),
-        ),
-      ).toBeUndefined();
+      expect(harness.spec.renderCanvas(canvasA, makeProps({ xte: 1.25, easing: false }))).toBeUndefined();
     } finally {
       nowSpy.mockRestore();
     }

@@ -1,15 +1,15 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("CompassLinearWidget", function () {
   it("configures fixed360 moving-scale compass behavior and waypoint marker wrapping", function () {
+    /** @type {any} */
     let captured;
     const renderCanvas = vi.fn();
     const markerMotion = {
       active: false,
-      resolves: [],
+      resolves: /** @type {any[]} */ ([]),
+      /** @param {any} canvas @param {any} target @param {any} easingEnabled @param {any} nowMs @returns {any} */
       resolve(canvas, target, easingEnabled, nowMs) {
         this.resolves.push({ canvas, target, easingEnabled, nowMs });
         if (!easingEnabled) {
@@ -19,15 +19,14 @@ describe("CompassLinearWidget", function () {
         this.active = true;
         return Number(target) + 100;
       },
+      /** @param {any} canvas @returns {any} */
       isActive(canvas) {
         void canvas;
         return this.active;
-      },
+      }
     };
 
-    const mod = loadFresh(
-      "widgets/linear/CompassLinearWidget/CompassLinearWidget.js",
-    );
+    const mod = loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js");
     const spec = mod.create(
       {},
       createComponentContextMock({
@@ -35,68 +34,71 @@ describe("CompassLinearWidget", function () {
           ValueMath: {
             create() {
               return {
+                /** @param {any} value @returns {boolean} */
                 isFiniteNumber(value) {
                   return typeof value === "number" && Number.isFinite(value);
                 },
+                /** @param {any} value @returns {any} */
                 toFiniteNumber(value) {
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
+                /** @param {any} value @returns {any} */
                 toOptionalFiniteNumber(value) {
                   if (value == null) return undefined;
-                  if (typeof value === "string" && value.trim() === "")
-                    return undefined;
+                  if (typeof value === "string" && value.trim() === "") return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
+                /** @param {any} value @param {any} leadingZero @returns {any} */
                 formatDirection360(value, leadingZero) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
                   const norm = ((Math.round(n) % 360) + 360) % 360;
                   const out = String(norm);
                   return leadingZero ? out.padStart(3, "0") : out;
-                },
+                }
               };
-            },
+            }
           },
           SpringEasing: {
             create() {
               return {
+                /** @param {any} spec @returns {any} */
                 createMotion(spec) {
                   expect(spec).toEqual({ wrap: 360 });
                   return markerMotion;
-                },
+                }
               };
-            },
+            }
           },
           LinearGaugeEngine: {
             create() {
               return {
+                /** @param {any} cfg @returns {any} */
                 createRenderer(cfg) {
                   captured = cfg;
                   return renderCanvas;
-                },
+                }
               };
-            },
-          },
-        },
-      }),
+            }
+          }
+        }
+      })
     );
 
     expect(spec.renderCanvas).toBe(renderCanvas);
     expect(captured.axisMode).toBe("fixed360");
-    expect(captured.hideTextualMetricsProp).toBe(
-      "compassLinearHideTextualMetrics",
-    );
+    expect(captured.hideTextualMetricsProp).toBe("compassLinearHideTextualMetrics");
     expect(captured.labelEdgePolicy).toBe("sliding");
     expect(captured.tickProps).toEqual({
       major: "compassLinearTickMajor",
       minor: "compassLinearTickMinor",
-      showEndLabels: "compassLinearShowEndLabels",
+      showEndLabels: "compassLinearShowEndLabels"
     });
     expect(captured.ratioProps).toEqual({
       normal: "compassLinearRatioThresholdNormal",
-      flat: "compassLinearRatioThresholdFlat",
+      flat: "compassLinearRatioThresholdFlat"
     });
     expect(captured).not.toHaveProperty("ratioDefaults");
     expect(captured.springTarget).toBe("axis");
@@ -104,16 +106,8 @@ describe("CompassLinearWidget", function () {
     expect(captured.tickSteps(360)).toEqual({ major: 30, minor: 10 });
     expect(captured.tickSteps(180)).toEqual({ major: 15, minor: 5 });
 
-    const axisA = captured.resolveAxis(
-      { heading: 10 },
-      {},
-      { min: 0, max: 360 },
-    );
-    const axisB = captured.resolveAxis(
-      { heading: 40, compassLinearRange: 180 },
-      {},
-      { min: 0, max: 360 },
-    );
+    const axisA = captured.resolveAxis({ heading: 10 }, {}, { min: 0, max: 360 });
+    const axisB = captured.resolveAxis({ heading: 40, compassLinearRange: 180 }, {}, { min: 0, max: 360 });
     expect(axisA).toEqual({ min: -170, max: 190 });
     expect(axisB).toEqual({ min: -50, max: 130 });
 
@@ -132,36 +126,31 @@ describe("CompassLinearWidget", function () {
     expect(captured.formatTickLabel(390)).toBe("30");
     expect(captured.formatDisplay("12", { leadingZero: true })).toEqual({
       num: 12,
-      text: "012",
+      text: "012"
     });
 
     const api = {
       drawDefaultPointer: vi.fn(),
-      drawMarkerAtValue: vi.fn(),
+      drawMarkerAtValue: vi.fn()
     };
     const state = {
       canvas: {},
       nowMs: 16,
       theme: {
-        colors: { pointer: "#3366cc" },
-      },
+        colors: { pointer: "#3366cc" }
+      }
     };
 
-    const firstResult = captured.drawFrame(
-      state,
-      { markerCourse: 10 },
-      { num: 350, easedNum: 350 },
-      api,
-    );
+    const firstResult = captured.drawFrame(state, { markerCourse: 10 }, { num: 350, easedNum: 350 }, api);
     expect(api.drawDefaultPointer).toHaveBeenCalledTimes(1);
     expect(markerMotion.resolves[0]).toEqual({
       canvas: state.canvas,
       target: 10,
       easingEnabled: true,
-      nowMs: 16,
+      nowMs: 16
     });
     expect(api.drawMarkerAtValue).toHaveBeenNthCalledWith(1, 470, {
-      strokeStyle: "#3366cc",
+      strokeStyle: "#3366cc"
     });
     expect(firstResult).toEqual({ wantsFollowUpFrame: true });
 
@@ -170,106 +159,103 @@ describe("CompassLinearWidget", function () {
       state,
       { markerCourse: 300, easing: false },
       { num: 350, easedNum: 10 },
-      api,
+      api
     );
     expect(markerMotion.resolves[1]).toEqual({
       canvas: state.canvas,
       target: 300,
       easingEnabled: false,
-      nowMs: 32,
+      nowMs: 32
     });
     expect(api.drawMarkerAtValue).toHaveBeenNthCalledWith(2, -60, {
-      strokeStyle: "#3366cc",
+      strokeStyle: "#3366cc"
     });
     expect(secondResult).toBeUndefined();
   });
 
   it("skips drawing stale markers when markerCourse is invalid", function () {
+    /** @type {any} */
     let captured;
     const markerMotion = {
       active: true,
       resolve: vi.fn(),
-      isActive: vi.fn(() => true),
+      isActive: vi.fn(() => true)
     };
 
-    loadFresh(
-      "widgets/linear/CompassLinearWidget/CompassLinearWidget.js",
-    ).create(
+    loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js").create(
       {},
       createComponentContextMock({
         modules: {
           ValueMath: {
             create() {
               return {
+                /** @param {any} value @returns {boolean} */
                 isFiniteNumber(value) {
                   return typeof value === "number" && Number.isFinite(value);
                 },
+                /** @param {any} value @returns {any} */
                 toFiniteNumber(value) {
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
+                /** @param {any} value @returns {any} */
                 toOptionalFiniteNumber(value) {
                   if (value == null) return undefined;
-                  if (typeof value === "string" && value.trim() === "")
-                    return undefined;
+                  if (typeof value === "string" && value.trim() === "") return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
+                /** @param {any} value @param {any} leadingZero @returns {any} */
                 formatDirection360(value, leadingZero) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
                   const norm = ((Math.round(n) % 360) + 360) % 360;
                   const out = String(norm);
                   return leadingZero ? out.padStart(3, "0") : out;
-                },
+                }
               };
-            },
+            }
           },
           SpringEasing: {
             create() {
               return {
                 createMotion() {
                   return markerMotion;
-                },
+                }
               };
-            },
+            }
           },
           LinearGaugeEngine: {
             create() {
               return {
+                /** @param {any} cfg @returns {any} */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
-                },
+                }
               };
-            },
-          },
-        },
-      }),
+            }
+          }
+        }
+      })
     );
 
     const api = {
       drawDefaultPointer: vi.fn(),
-      drawMarkerAtValue: vi.fn(),
+      drawMarkerAtValue: vi.fn()
     };
     const state = {
       canvas: {},
       nowMs: 48,
       theme: {
-        colors: { pointer: "#3366cc" },
-      },
+        colors: { pointer: "#3366cc" }
+      }
     };
 
-    const result = captured.drawFrame(
-      state,
-      { markerCourse: undefined },
-      { num: 350, easedNum: 350 },
-      api,
-    );
+    const result = captured.drawFrame(state, { markerCourse: undefined }, { num: 350, easedNum: 350 }, api);
     expect(markerMotion.resolve).not.toHaveBeenCalled();
     expect(markerMotion.isActive).not.toHaveBeenCalled();
     expect(api.drawMarkerAtValue).not.toHaveBeenCalled();
     expect(result).toBeUndefined();
   });
-
 });

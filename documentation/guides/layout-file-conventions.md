@@ -15,7 +15,8 @@ This guide defines the required JSON shape, page-key naming, and widget entry co
   - `properties`
   - `widgets`
 - `widgets` maps page IDs to page objects.
-- Each page object maps position slots (`left`, `m1`, `right`, `bottomLeft`, `bottomRight`, `left_small`, `top_small`, anchor variants, and similar host-supported keys) to arrays of widget entries.
+- Each page object maps position slots (`left`, `m1`, `right`, `bottomLeft`, `bottomRight`, `left_small`, `top_small`,
+  anchor variants, and similar host-supported keys) to arrays of widget entries.
 
 ## Page Naming Convention
 
@@ -25,8 +26,8 @@ Allowed bundled page key families:
 - `gpspage1`, `gpspage2`, ... `gpspageN` (strictly sequential numbering, no gaps)
 - `editroutepage`
 
-Do not introduce domain-specific page IDs such as `regattapage` or `anchorpage`.
-New bundled pages must use the next sequential `gpspage{N}` key.
+Do not introduce domain-specific page IDs such as `regattapage` or `anchorpage`. New bundled pages must use the next
+sequential `gpspage{N}` key.
 
 Normative reference from shipped layouts:
 
@@ -50,7 +51,8 @@ Rules:
 - `name` must match a registered cluster widget name.
 - `kind` selects the cluster kind.
 - `weight` is optional and controls relative slot sizing.
-- Any editable parameter key may be added as an override (`caption_*`, `unit_*`, `formatUnit_*`, thresholds, behavior toggles, etc.).
+- Any editable parameter key may be added as an override (`caption_*`, `unit_*`, `formatUnit_*`, thresholds, behavior
+  toggles, etc.).
 
 ## Adding a New Page
 

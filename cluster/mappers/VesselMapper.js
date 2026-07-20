@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniVesselMapper = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @param {unknown} def @param {unknown} componentContext */
@@ -27,8 +27,8 @@
       const req = p.kind;
 
       if (req === "voltageLinear") {
-        const warnEnabled = (p.voltageLinearWarningEnabled !== false);
-        const alarmEnabled = (p.voltageLinearAlarmEnabled !== false);
+        const warnEnabled = p.voltageLinearWarningEnabled !== false;
+        const alarmEnabled = p.voltageLinearAlarmEnabled !== false;
         return {
           value: p.value,
           caption: cap("voltageLinear"),
@@ -52,8 +52,8 @@
       }
 
       if (req === "voltageRadial") {
-        const warnEnabled = (p.voltageRadialWarningEnabled !== false);
-        const alarmEnabled = (p.voltageRadialAlarmEnabled !== false);
+        const warnEnabled = p.voltageRadialWarningEnabled !== false;
+        const alarmEnabled = p.voltageRadialAlarmEnabled !== false;
         return {
           value: p.value,
           caption: cap("voltageRadial"),
@@ -120,9 +120,8 @@
       }
       if (req === "pitch") {
         const rawPitch = p.pitch;
-        const pitchValue = (rawPitch == null || (typeof rawPitch === "string" && rawPitch.trim() === ""))
-          ? undefined
-          : rawPitch;
+        const pitchValue =
+          rawPitch == null || (typeof rawPitch === "string" && rawPitch.trim() === "") ? undefined : rawPitch;
         return {
           value: pitchValue,
           caption: cap("pitch"),
@@ -133,9 +132,8 @@
       }
       if (req === "roll") {
         const rawRoll = p.roll;
-        const rollValue = (rawRoll == null || (typeof rawRoll === "string" && rawRoll.trim() === ""))
-          ? undefined
-          : rawRoll;
+        const rollValue =
+          rawRoll == null || (typeof rawRoll === "string" && rawRoll.trim() === "") ? undefined : rawRoll;
         return {
           value: rollValue,
           caption: cap("roll"),
@@ -180,4 +178,4 @@
   }
 
   return { id: "VesselMapper", create: create };
-}));
+});

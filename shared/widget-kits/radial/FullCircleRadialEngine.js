@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniFullCircleRadialEngine = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
   const DEFAULT_RATIO_PROPS = { normal: "ratioThresholdNormal", flat: "ratioThresholdFlat" };
@@ -71,18 +71,17 @@
       const ratioDefaults = /** @type {{ normal: number, flat: number }} */ (
         hasOwn.call(cfg, "ratioDefaults") ? cfg.ratioDefaults : DEFAULT_RATIO_DEFAULTS
       );
-      const hideTextualMetricsProp = typeof cfg.hideTextualMetricsProp === "string" && cfg.hideTextualMetricsProp
-        ? cfg.hideTextualMetricsProp
-        : null;
+      const hideTextualMetricsProp =
+        typeof cfg.hideTextualMetricsProp === "string" && cfg.hideTextualMetricsProp
+          ? cfg.hideTextualMetricsProp
+          : null;
       const layers = fullCircleNormalizeLayers(cfg.cacheLayers);
       const layerCache = layerCacheApi.createLayerCache({ layers: layers });
       /** @type {Record<string, HTMLCanvasElement>} */
       const layerCanvases = Object.create(null);
       /** @type {Record<string, unknown>} */
       const cacheMeta = Object.create(null);
-      const layoutCfg = /** @type {DyniRadialConfigMap} */ (
-        hasOwn.call(cfg, "layout") ? cfg.layout : DEFAULT_LAYOUT
-      );
+      const layoutCfg = /** @type {DyniRadialConfigMap} */ (hasOwn.call(cfg, "layout") ? cfg.layout : DEFAULT_LAYOUT);
 
       /**
        * @param {unknown} canvas
@@ -92,7 +91,7 @@
       return function renderCanvas(canvas, props) {
         const p = /** @type {Record<string, unknown>} */ (props || {});
         const setup = /** @type {DyniCanvasSurface} */ (
-          (/** @type {DyniCanvasHostApi} */ (componentContext.canvas)).setupCanvas(canvas)
+          /** @type {DyniCanvasHostApi} */ (componentContext.canvas).setupCanvas(canvas)
         );
         const ctx = setup.ctx;
         const W = setup.W;
@@ -102,15 +101,16 @@
         }
 
         const rootEl = componentContext.dom.requirePluginRoot(canvas);
-        const theme = (/** @type {DyniGaugeThemeResolver} */ (/** @type {unknown} */ (GU.theme))).resolveForRoot(rootEl);
+        const theme = /** @type {DyniGaugeThemeResolver} */ (/** @type {unknown} */ (GU.theme)).resolveForRoot(rootEl);
         const valueWeight = theme.font.weight;
         const labelWeight = theme.font.labelWeight;
-        const family = p.stableDigits === true
-          ? (theme.font.familyMono || theme.font.family)
-          : theme.font.family;
+        const family = p.stableDigits === true ? theme.font.familyMono || theme.font.family : theme.font.family;
         const color = theme.surface.fg;
         const hideTextualMetrics = hideTextualMetricsProp ? p[hideTextualMetricsProp] === true : false;
-        const stateKind = stateScreenPrecedence.pickFirst([{ kind: "disconnected", when: p.disconnect === true }, { kind: "data", when: true }]);
+        const stateKind = stateScreenPrecedence.pickFirst([
+          { kind: "disconnected", when: p.disconnect === true },
+          { kind: "data", when: true }
+        ]);
 
         ctx.clearRect(0, 0, W, H);
         if (stateKind !== stateScreenLabels.KINDS.DATA) {
@@ -206,7 +206,7 @@
             labelWeight: labelWeight,
             color: color
           },
-          widget: (typeof cfg.buildStaticKey === "function") ? cfg.buildStaticKey(state, p) : null
+          widget: typeof cfg.buildStaticKey === "function" ? cfg.buildStaticKey(state, p) : null
         };
         state.staticKey = fullCircleKeyToText(staticKey);
 
@@ -247,11 +247,18 @@
            */
           drawFixedPointer(targetCtx, angleDeg, opts) {
             const target = /** @type {CanvasRenderingContext2D} */ (targetCtx || state.ctx);
-            draw.drawPointerAtRim(target, state.geom.cx, state.geom.cy, state.geom.rOuter, value.resolveFiniteNumber(angleDeg, 0), {
-              depth: state.geom.fixedPointerDepth,
-              halfWidth: Math.max(1, Math.floor(state.geom.pointerSide / 2)),
-              fillStyle: (opts && opts.fillStyle) || state.theme.colors.pointer
-            });
+            draw.drawPointerAtRim(
+              target,
+              state.geom.cx,
+              state.geom.cy,
+              state.geom.rOuter,
+              value.resolveFiniteNumber(angleDeg, 0),
+              {
+                depth: state.geom.fixedPointerDepth,
+                halfWidth: Math.max(1, Math.floor(state.geom.pointerSide / 2)),
+                fillStyle: (opts && opts.fillStyle) || state.theme.colors.pointer
+              }
+            );
           },
           /** @param {unknown} layerName @param {DyniRadialDrawOptions} [opts] @returns {void} */
           drawCachedLayer(layerName, opts) {
@@ -292,15 +299,14 @@
             layerCtx.clearRect(0, 0, state.W, state.H);
             layerCtx.fillStyle = /** @type {string} */ (state.color);
             layerCtx.strokeStyle = /** @type {string} */ (state.color);
-            (/** @type {Function} */ (cfg.rebuildLayer))(layerCtx, layerName, state, p, api);
+            /** @type {Function} */ (cfg.rebuildLayer)(layerCtx, layerName, state, p, api);
           });
         }
 
         let drawResult = null;
         if (typeof cfg.drawFrame === "function") {
           drawResult = cfg.drawFrame(state, p, api);
-        }
-        else if (layerCanvases[layers[0]]) {
+        } else if (layerCanvases[layers[0]]) {
           api.drawCachedLayer(layers[0]);
         }
 
@@ -312,10 +318,12 @@
         if (!hideTextualMetrics && typeof modeRenderer === "function") {
           modeResult = modeRenderer(state, p, api);
         }
-        if ((drawResult && drawResult.wantsFollowUpFrame === true) || (modeResult && modeResult.wantsFollowUpFrame === true)) {
+        if (
+          (drawResult && drawResult.wantsFollowUpFrame === true) ||
+          (modeResult && modeResult.wantsFollowUpFrame === true)
+        ) {
           return { wantsFollowUpFrame: true };
         }
-
       };
     };
 
@@ -326,4 +334,4 @@
   }
 
   return { id: "FullCircleRadialEngine", create: create };
-}));
+});

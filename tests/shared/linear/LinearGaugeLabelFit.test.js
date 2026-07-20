@@ -1,6 +1,7 @@
 const { createFontAwareContext, createTextLayout } = require("../../helpers/linear-label-fit");
 
 describe("LinearGaugeLabelFit edge policy", function () {
+  /** @param {any} policy */
   function createState(policy) {
     return {
       ctx: null,
@@ -34,28 +35,32 @@ describe("LinearGaugeLabelFit edge policy", function () {
     };
   }
 
+  /** @param {any} policy */
   function drawLabels(policy) {
-    const calls = [];
+    const calls = /** @type {any[]} */ ([]);
     const layerCtx = createFontAwareContext(calls, { charFactor: 1 });
     const textLayout = createTextLayout();
     const state = createState(policy);
     state.ctx = layerCtx;
 
-    textLayout.drawTickLabels(
-      layerCtx,
-      state,
-      { major: [5, 40], minor: [] },
-      true,
-      {
-        mapValueToX(value, minV, maxV, x0, x1, doClamp) {
-          void doClamp;
-          return x0 + (x1 - x0) * ((value - minV) / (maxV - minV));
-        },
-        formatTickLabel(value) {
-          return String(value).padStart(3, "0");
-        }
+    textLayout.drawTickLabels(layerCtx, state, { major: [5, 40], minor: [] }, true, {
+      /**
+       * @param {number} value
+       * @param {number} minV
+       * @param {number} maxV
+       * @param {number} x0
+       * @param {number} x1
+       * @param {boolean} doClamp
+       */
+      mapValueToX(value, minV, maxV, x0, x1, doClamp) {
+        void doClamp;
+        return x0 + (x1 - x0) * ((value - minV) / (maxV - minV));
+      },
+      /** @param {any} value */
+      formatTickLabel(value) {
+        return String(value).padStart(3, "0");
       }
-    );
+    });
 
     return {
       calls: calls,

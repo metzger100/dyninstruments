@@ -1,7 +1,5 @@
-const {
-  setupComponentLoader,
-  installComponentContextRuntime,
-} = require("./component-loader.harness");
+// @ts-nocheck
+const { setupComponentLoader, installComponentContextRuntime } = require("./component-loader.harness");
 
 describe("runtime/component-loader.js createInstance", function () {
   it("fails before component closure is loaded", function () {
@@ -9,7 +7,7 @@ describe("runtime/component-loader.js createInstance", function () {
     installComponentContextRuntime(runtime);
 
     const loader = runtime.createComponentLoader({
-      A: { js: "/a.js", css: undefined, globalKey: "DyniA" },
+      A: { js: "/a.js", css: undefined, globalKey: "DyniA" }
     });
 
     expect(function () {
@@ -25,7 +23,7 @@ describe("runtime/component-loader.js createInstance", function () {
     runtime.theme.tokens.resolveForRoot.mockReturnValue({ token: true });
 
     context.DyniComponents.DyniDep = {
-      create: vi.fn(() => ({ dep: true })),
+      create: vi.fn(() => ({ dep: true }))
     };
     context.DyniComponents.DyniA = {
       create: vi.fn((def, componentContext) => ({
@@ -35,13 +33,13 @@ describe("runtime/component-loader.js createInstance", function () {
         format: componentContext.format,
         canvas: componentContext.canvas,
         dom: componentContext.dom,
-        hostActions: componentContext.hostActions,
-      })),
+        hostActions: componentContext.hostActions
+      }))
     };
 
     const loader = runtime.createComponentLoader({
       A: { js: "/a.js", css: undefined, globalKey: "DyniA", deps: ["Dep"] },
-      Dep: { js: "/dep.js", css: undefined, globalKey: "DyniDep" },
+      Dep: { js: "/dep.js", css: undefined, globalKey: "DyniDep" }
     });
 
     await loader.loadComponent("A");
@@ -68,11 +66,11 @@ describe("runtime/component-loader.js createInstance", function () {
       create: vi.fn((def, componentContext) => {
         componentContext.components.require("MissingDep");
         return {};
-      }),
+      })
     };
 
     const loader = runtime.createComponentLoader({
-      A: { js: "/a.js", css: undefined, globalKey: "DyniA" },
+      A: { js: "/a.js", css: undefined, globalKey: "DyniA" }
     });
     await loader.loadComponent("A");
 
@@ -90,7 +88,7 @@ describe("runtime/component-loader.js createInstance", function () {
 
     const loader = runtime.createComponentLoader({
       A: { js: "/a.js", css: undefined, globalKey: "DyniA", deps: ["B"] },
-      B: { js: "/b.js", css: undefined, globalKey: "DyniB", deps: ["A"] },
+      B: { js: "/b.js", css: undefined, globalKey: "DyniB", deps: ["A"] }
     });
 
     expect(function () {

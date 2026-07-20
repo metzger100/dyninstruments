@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniNavInteractionPolicy = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniValueMathApi["toObject"]} */
@@ -28,11 +28,35 @@
       return htmlUtils.canDispatchSurfaceInteraction(safeProps);
     }
 
+    /** @param {unknown} props @returns {boolean} */
+    function openActiveRoute(props) {
+      const p = props && typeof props === "object" ? props : null;
+      if (htmlUtils.isEditingMode(p)) {
+        return false;
+      }
+      const policy = /** @type {{ actions?: { routeEditor?: { openActiveRoute?: () => boolean } } } | null} */ (
+        htmlUtils.resolveSurfacePolicy(p)
+      );
+      if (
+        !policy ||
+        !policy.actions ||
+        !policy.actions.routeEditor ||
+        typeof policy.actions.routeEditor.openActiveRoute !== "function"
+      ) {
+        return false;
+      }
+      if (!htmlUtils.canDispatchSurfaceInteraction(p)) {
+        return false;
+      }
+      return policy.actions.routeEditor.openActiveRoute() !== false;
+    }
+
     return {
       id: "NavInteractionPolicy",
-      canDispatchWhenNotEditing: canDispatchWhenNotEditing
+      canDispatchWhenNotEditing: canDispatchWhenNotEditing,
+      openActiveRoute: openActiveRoute
     };
   }
 
   return { id: "NavInteractionPolicy", create: create };
-}));
+});

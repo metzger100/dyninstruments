@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniHtmlDomPatchUtils = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const LAST_PATCHED_MARKUP_KEY = "__dyniLastPatchedMarkup";
@@ -41,7 +41,6 @@
       }
     }
   }
-
   /**
    * @param {Node | null | undefined} currentNode
    * @param {Node | null | undefined} nextNode
@@ -59,7 +58,6 @@
     }
     return true;
   }
-
   /** @param {DyniPatchedRootElement | null | undefined} rootEl @returns {string | undefined} */
   function readLastPatchedMarkup(rootEl) {
     return rootEl ? rootEl[LAST_PATCHED_MARKUP_KEY] : undefined;
@@ -131,13 +129,15 @@
         nextChild = nextChild.nextSibling;
         continue;
       }
+      const followingCurrentChild = currentChild.nextSibling;
+      const followingNextChild = nextChild.nextSibling;
       if (canSyncInPlace(currentChild, nextChild)) {
         syncNodeTree(currentChild, nextChild);
       } else {
         currentEl.replaceChild(nextChild.cloneNode(true), currentChild);
       }
-      currentChild = currentChild.nextSibling;
-      nextChild = nextChild.nextSibling;
+      currentChild = followingCurrentChild;
+      nextChild = followingNextChild;
     }
   }
 
@@ -203,4 +203,4 @@
   }
 
   return { id: "HtmlDomPatchUtils", create: create };
-}));
+});

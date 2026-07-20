@@ -4,6 +4,10 @@ const path = require("node:path");
 
 const { checkReachability } = require("../helpers/markdown-docs");
 
+/**
+ * @param {Record<string, string>} files
+ * @param {(dir: string) => { ok: boolean, discovered: number, reachable: number, orphans: string[], broken: Array<{ file: string, target: string }> }} body
+ */
 function withFixture(files, body) {
   const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-doc-reach-"));
   try {
@@ -30,9 +34,9 @@ describe("documentation reachability contract", function () {
       {
         "AGENTS.md": "# Agents\n\n[toc](documentation/TABLEOFCONTENTS.md)\n",
         "documentation/TABLEOFCONTENTS.md": "# TOC\n",
-        "documentation/lonely.md": "# Lonely\n",
+        "documentation/lonely.md": "# Lonely\n"
       },
-      (dir) => checkReachability(dir),
+      (dir) => checkReachability(dir)
     );
     expect(result.orphans).toContain("documentation/lonely.md");
   });
@@ -40,9 +44,9 @@ describe("documentation reachability contract", function () {
   it("reports a broken markdown link to a nonexistent doc", function () {
     const result = withFixture(
       {
-        "AGENTS.md": "# Agents\n\n[gone](documentation/missing.md)\n",
+        "AGENTS.md": "# Agents\n\n[gone](documentation/missing.md)\n"
       },
-      (dir) => checkReachability(dir),
+      (dir) => checkReachability(dir)
     );
     expect(result.broken.map((b) => b.target)).toContain("documentation/missing.md");
   });
@@ -52,9 +56,9 @@ describe("documentation reachability contract", function () {
       {
         "AGENTS.md": "# Agents\n\n[toc](documentation/TABLEOFCONTENTS.md)\n",
         "documentation/TABLEOFCONTENTS.md": "# TOC\n\n[guide](guides/guide.md)\n",
-        "documentation/guides/guide.md": "# Guide\n",
+        "documentation/guides/guide.md": "# Guide\n"
       },
-      (dir) => checkReachability(dir),
+      (dir) => checkReachability(dir)
     );
     expect(result.orphans).toEqual([]);
     expect(result.broken).toEqual([]);

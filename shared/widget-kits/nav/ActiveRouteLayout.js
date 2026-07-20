@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniActiveRouteLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const PAD_X_RATIO = 0.04;
@@ -74,19 +74,30 @@
     function computeLayout(args) {
       const cfg = args || {};
       const contentRect = cfg.contentRect || makeRect(0, 0, 0, 0);
-      const responsive = cfg.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
-      const gap = Math.max(0, Math.floor(clampNumber(
-        cfg.gap,
+      const responsive =
+        cfg.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
+      const gap = Math.max(
         0,
-        Math.max(contentRect.w, contentRect.h),
-        profileApi.computeInsetPx(responsive, GAP_RATIO, 1)
-      )));
-      const namePadX = Math.max(0, Math.floor(clampNumber(
-        cfg.namePadX,
+        Math.floor(
+          clampNumber(
+            cfg.gap,
+            0,
+            Math.max(contentRect.w, contentRect.h),
+            profileApi.computeInsetPx(responsive, GAP_RATIO, 1)
+          )
+        )
+      );
+      const namePadX = Math.max(
         0,
-        Math.max(contentRect.w, contentRect.h),
-        profileApi.computeInsetPx(responsive, NAME_PAD_X_RATIO, 1)
-      )));
+        Math.floor(
+          clampNumber(
+            cfg.namePadX,
+            0,
+            Math.max(contentRect.w, contentRect.h),
+            profileApi.computeInsetPx(responsive, NAME_PAD_X_RATIO, 1)
+          )
+        )
+      );
       const mode = /** @type {DyniActiveRouteLayoutMode} */ (
         cfg.mode === "high" || cfg.mode === "flat" ? cfg.mode : "normal"
       );
@@ -125,19 +136,25 @@
         return layout;
       }
 
-      const nameShare = mode === "high"
-        ? profileApi.scaleShare(
-          clampNumber(cfg.highNameBandRatio, HIGH_NAME_MIN_RATIO, HIGH_NAME_MAX_RATIO, NAME_BAND_RATIO_HIGH),
-          responsive.highNameBandScale,
-          HIGH_NAME_MIN_RATIO,
-          HIGH_NAME_MAX_RATIO
-        )
-        : profileApi.scaleShare(
-          clampNumber(cfg.normalNameBandRatio, NORMAL_NAME_MIN_RATIO, NORMAL_NAME_MAX_RATIO, NAME_BAND_RATIO_NORMAL),
-          responsive.normalNameBandScale,
-          NORMAL_NAME_MIN_RATIO,
-          NORMAL_NAME_MAX_RATIO
-        );
+      const nameShare =
+        mode === "high"
+          ? profileApi.scaleShare(
+              clampNumber(cfg.highNameBandRatio, HIGH_NAME_MIN_RATIO, HIGH_NAME_MAX_RATIO, NAME_BAND_RATIO_HIGH),
+              responsive.highNameBandScale,
+              HIGH_NAME_MIN_RATIO,
+              HIGH_NAME_MAX_RATIO
+            )
+          : profileApi.scaleShare(
+              clampNumber(
+                cfg.normalNameBandRatio,
+                NORMAL_NAME_MIN_RATIO,
+                NORMAL_NAME_MAX_RATIO,
+                NAME_BAND_RATIO_NORMAL
+              ),
+              responsive.normalNameBandScale,
+              NORMAL_NAME_MIN_RATIO,
+              NORMAL_NAME_MAX_RATIO
+            );
       const nameHeight = Math.max(1, Math.floor(contentRect.h * nameShare));
       const metricsRect = makeRect(
         contentRect.x,
@@ -189,4 +206,4 @@
   }
 
   return { id: "ActiveRouteLayout", create: create };
-}));
+});

@@ -73,7 +73,9 @@
   /** @param {unknown} controller @param {DyniSessionSurface} surface @returns {asserts controller is DyniSessionSurfaceController} */
   function ensureController(controller, surface) {
     if (!controller || typeof controller !== "object") {
-      throw new Error("SurfaceSessionController: runtime.surfaces.createController('" + surface + "') returned an invalid controller");
+      throw new Error(
+        "SurfaceSessionController: runtime.surfaces.createController('" + surface + "') returned an invalid controller"
+      );
     }
 
     const surfaceController = /** @type {Record<string, unknown>} */ (controller);
@@ -176,50 +178,40 @@
     /** @param {unknown} payload @returns {boolean} */
     function reconcileSession(payload) {
       ensurePayload(payload);
-        if (payload.revision < state.committedRevisionFloor || payload.revision < state.mountedRevision) {
-          return false;
-        }
+      if (payload.revision < state.committedRevisionFloor || payload.revision < state.mountedRevision) {
+        return false;
+      }
 
-        ensureSurface(payload.surface);
+      ensureSurface(payload.surface);
 
-        const mountedController = state.activeController;
-        const sameSurface = !!mountedController && state.mountedSurface === payload.surface;
-        const sameRoute = sameSurface && state.mountedRouteId === payload.routeId;
-        const sameRenderer = sameSurface && state.mountedRendererId === payload.rendererId;
-        const sameShell = sameSurface && state.shellEl === payload.shellEl;
+      const mountedController = state.activeController;
+      const sameSurface = !!mountedController && state.mountedSurface === payload.surface;
+      const sameRoute = sameSurface && state.mountedRouteId === payload.routeId;
+      const sameRenderer = sameSurface && state.mountedRendererId === payload.rendererId;
+      const sameShell = sameSurface && state.shellEl === payload.shellEl;
 
-        if (!mountedController) {
-          const firstController = createControllerForPayload(payload);
-          firstController.attach(payload);
-          state.activeController = firstController;
-          applyMountedState(payload);
-          return true;
-        }
+      if (!mountedController) {
+        const firstController = createControllerForPayload(payload);
+        firstController.attach(payload);
+        state.activeController = firstController;
+        applyMountedState(payload);
+        return true;
+      }
 
-        if (sameSurface && sameRoute && sameRenderer && sameShell) {
-          mountedController.update(payload);
-          applyMountedState(payload);
-          return true;
-        }
+      if (sameSurface && sameRoute && sameRenderer && sameShell) {
+        mountedController.update(payload);
+        applyMountedState(payload);
+        return true;
+      }
 
-        if (sameSurface && sameRoute && sameRenderer) {
-          mountedController.detach("remount");
-          mountedController.attach(payload);
-          applyMountedState(payload);
-          return true;
-        }
+      if (sameSurface && sameRoute && sameRenderer) {
+        mountedController.detach("remount");
+        mountedController.attach(payload);
+        applyMountedState(payload);
+        return true;
+      }
 
-        if (sameSurface) {
-          mountedController.destroy();
-
-          const nextController = createControllerForPayload(payload);
-          nextController.attach(payload);
-          state.activeController = nextController;
-          applyMountedState(payload);
-          return true;
-        }
-
-        mountedController.detach("surface-switch");
+      if (sameSurface) {
         mountedController.destroy();
 
         const nextController = createControllerForPayload(payload);
@@ -227,6 +219,16 @@
         state.activeController = nextController;
         applyMountedState(payload);
         return true;
+      }
+
+      mountedController.detach("surface-switch");
+      mountedController.destroy();
+
+      const nextController = createControllerForPayload(payload);
+      nextController.attach(payload);
+      state.activeController = nextController;
+      applyMountedState(payload);
+      return true;
     }
 
     /** @returns {DyniSessionState} */
@@ -249,5 +251,6 @@
     };
   }
 
-  /** @type {DyniRuntimeNamespace & Record<string, unknown>} */ (runtime).createSurfaceSessionController = createSurfaceSessionController;
-}(this));
+  /** @type {DyniRuntimeNamespace & Record<string, unknown>} */ (runtime).createSurfaceSessionController =
+    createSurfaceSessionController;
+})(this);

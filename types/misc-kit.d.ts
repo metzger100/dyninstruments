@@ -351,6 +351,36 @@ interface DyniLinearGaugeLayout {
   textBottomBox?: DyniRect | null;
 }
 
+interface DyniLinearGaugeLayoutVariantsApi {
+  id: "LinearGaugeLayoutVariants";
+  computeFlatLayout(
+    contentRect: DyniRect,
+    right: number,
+    gap: number,
+    responsive: DyniResponsiveScaleProfile,
+    profileApi: DyniResponsiveScaleProfileApi
+  ): DyniLinearLayoutBlock;
+  computeStackedLayout(
+    contentRect: DyniRect,
+    bottom: number,
+    gap: number,
+    responsive: DyniResponsiveScaleProfile,
+    profileApi: DyniResponsiveScaleProfileApi
+  ): DyniLinearLayoutBlock;
+  computeSplitHighLayout(contentRect: DyniRect, gap: number): DyniLinearLayoutBlock;
+  computeGraphicsOnlyFlatLayout(contentRect: DyniRect): DyniLinearLayoutBlock;
+  computeGraphicsOnlyNormalLayout(contentRect: DyniRect, right: number): DyniLinearLayoutBlock;
+  computeGraphicsOnlyHighLayout(contentRect: DyniRect): DyniLinearLayoutBlock;
+  computeInlineLayout(
+    contentRect: DyniRect,
+    right: number,
+    bottom: number,
+    gap: number,
+    responsive: DyniResponsiveScaleProfile,
+    profileApi: DyniResponsiveScaleProfileApi
+  ): DyniLinearLayoutBlock;
+}
+
 interface DyniLinearGaugeLayoutApi {
   id: "LinearGaugeLayout";
   computeMode(W: unknown, H: unknown, thresholdNormal: unknown, thresholdFlat: unknown): "flat" | "high" | "normal";
@@ -424,13 +454,6 @@ interface DyniLinearGaugeProps {
   [key: string]: unknown;
 }
 
-type DyniLinearFormatDisplay = (
-  rawValue: unknown,
-  props: DyniLinearGaugeProps,
-  unitText: unknown,
-  componentContext?: DyniComponentContext
-) => { num: number; text: unknown };
-
 interface DyniLinearMetricDisplay {
   caption: unknown;
   value: unknown;
@@ -438,9 +461,19 @@ interface DyniLinearMetricDisplay {
 }
 
 interface DyniLinearParsedDisplay {
-  left: DyniLinearMetricDisplay;
-  right: DyniLinearMetricDisplay;
+  num: number;
+  text: unknown;
+  secScale?: number;
+  left?: DyniLinearMetricDisplay;
+  right?: DyniLinearMetricDisplay;
 }
+
+type DyniLinearFormatDisplay = (
+  rawValue: unknown,
+  props: DyniLinearGaugeProps,
+  unitText: unknown,
+  componentContext?: DyniComponentContext
+) => DyniLinearParsedDisplay;
 
 interface DyniLinearRichDisplay {
   num: number;
@@ -642,6 +675,7 @@ interface DyniLinearGaugeTextLayoutApi {
 }
 
 type DyniLinearMapValueToX = (valueNum: unknown, doClamp?: boolean) => number;
+type DyniLinearHookMapValueToX = (valueNum: unknown, axisOverride?: DyniLinearRange, doClamp?: boolean) => number;
 type DyniLinearTickLabelFormatter = (tickValue: unknown, state: DyniLinearGaugeDrawingState) => string;
 
 interface DyniLinearGaugeDrawingState {
@@ -717,6 +751,46 @@ interface DyniLinearGaugeEngineDrawingApi {
     markerSizeBase: number,
     opts?: DyniLinearDrawOptions
   ): void;
+}
+
+interface DyniLinearGaugeEngineFrameParams {
+  layout: DyniLinearGaugeLayout;
+  theme: DyniLinearGaugeTheme;
+  primitives: DyniLinearCanvasPrimitivesApi;
+  drawing: DyniLinearGaugeEngineDrawingApi;
+  easedDisplayNum: number;
+  pointerDepthBase: number;
+  markerSizeBase: number;
+  cfg: DyniLinearRendererSpec;
+  p: DyniLinearGaugeProps;
+  displayState: DyniLinearRichDisplay;
+  hookApi: {
+    primitives: DyniLinearCanvasPrimitivesApi;
+    math: DyniLinearGaugeMathApi;
+    textLayout: DyniLinearGaugeTextLayoutApi;
+    text: DyniCanvasTextLayoutApi;
+    value: DyniValueMathApi;
+    theme: DyniLinearGaugeTheme;
+    mapValueToX: DyniLinearHookMapValueToX;
+  };
+  text: DyniCanvasTextLayoutApi;
+  textLayout: DyniLinearGaugeTextLayoutApi;
+  valueText: unknown;
+  unit: unknown;
+  rowBoxes: { captionBox?: DyniRect | null; valueBox?: DyniRect | null; top?: unknown; bottom?: unknown };
+  secScale: unknown;
+  layerCache: DyniCanvasLayerCache;
+  springMotion: { isActive(canvasElement: unknown): boolean };
+}
+
+interface DyniLinearGaugeEngineFrameApi {
+  id: "LinearGaugeEngineFrame";
+  renderFrame(
+    ctx: CanvasRenderingContext2D,
+    state: DyniLinearGaugeDrawingState,
+    canvasElement: HTMLCanvasElement,
+    deps: DyniLinearGaugeEngineFrameParams
+  ): DyniLinearRenderResult;
 }
 
 interface DyniLinearGaugeEngineSupportApi {
@@ -890,6 +964,199 @@ interface DyniXteLinearGeometry {
   labelInset: number;
 }
 
+interface DyniXteDisplayNormalizedProps {
+  display: Record<string, unknown>;
+  captions: Record<string, unknown>;
+  units: Record<string, unknown>;
+  formatUnits: Record<string, unknown>;
+  layoutConfig: Record<string, unknown>;
+  easingEnabled: boolean;
+  hideTextualMetrics: boolean;
+  xteScale: number;
+}
+
+interface DyniXteDisplayPropsNormalizeApi {
+  read(p: DyniWidgetValues): DyniXteDisplayNormalizedProps;
+}
+
+interface DyniXteRenderThemeView {
+  family: unknown;
+  labelWeight: unknown;
+  [key: string]: unknown;
+}
+
+interface DyniXteRenderSetupArgs {
+  componentContext: DyniComponentContext & {
+    canvas: DyniCanvasHostApi;
+    dom: { requirePluginRoot(target: unknown): unknown };
+  };
+  toolkit: { theme: { resolveForRoot(rootEl: unknown): unknown } };
+  canvas: HTMLCanvasElement;
+  props: DyniWidgetValues;
+  resolveThemeView(theme: unknown, stableDigitsEnabled: boolean): DyniXteRenderThemeView;
+  resolveStateKind(props: DyniWidgetValues): string;
+  stateScreenLabels: { KINDS: Readonly<Record<string, string>> };
+  stateScreenCanvasOverlay: { drawStateScreen(args: Record<string, unknown>): void };
+  stateScreenColor(theme: unknown, themeView: DyniXteRenderThemeView): string;
+}
+
+interface DyniXteRenderSetupResult {
+  ctx: CanvasRenderingContext2D;
+  W: number;
+  H: number;
+  theme: unknown;
+  themeView: DyniXteRenderThemeView;
+}
+
+interface DyniXteDisplayRenderSetupApi {
+  resolveRenderSetup(args: DyniXteRenderSetupArgs): DyniXteRenderSetupResult | null;
+}
+
+interface DyniXteDynamicXteResult {
+  xteNumber: number | undefined;
+  xteAvailable: boolean;
+  xteDistance: string;
+  xteDistanceMissing: boolean;
+  xteSide: string;
+  defaultText: string;
+  dtwDistance: string;
+  cogRaw: unknown;
+  btwRaw: unknown;
+  headingParams: [boolean];
+}
+
+interface DyniXteDisplayMetricsBuildResult {
+  metricSpacing: Record<"cog" | "xte" | "dtw" | "btw", DyniIntrinsicTileSpacing>;
+  metrics: Record<"cog" | "xte" | "dtw" | "btw", { caption: unknown; value: string; unit: unknown }>;
+}
+
+interface DyniXteDynamicOptions {
+  springMotion: DyniSpringMotion;
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  geom: DyniHighwayGeom;
+  colors: DyniHighwayColors;
+  primaryDim: number;
+  theme: DyniRadialResolvedTheme;
+  display: Record<string, unknown>;
+  formatUnits: Record<string, unknown>;
+  layoutConfig: Record<string, unknown>;
+  props: DyniWidgetValues;
+  xteScale: number;
+  easingEnabled: boolean;
+}
+
+interface DyniXteStableDigitsOptions {
+  ctx: CanvasRenderingContext2D;
+  xteDistance: string;
+  xteSide: string;
+  captions: Record<string, unknown>;
+  units: Record<string, unknown>;
+  family: unknown;
+  valueWeight: unknown;
+  labelWeight: unknown;
+  layout: DyniXteHighwayLayoutResult;
+  metricSpacing: Record<"cog" | "xte" | "dtw" | "btw", DyniIntrinsicTileSpacing>;
+  metricRects: DyniXteMetricRects;
+}
+
+interface DyniXteMetricsOptions {
+  ctx: CanvasRenderingContext2D;
+  dyn: DyniXteDynamicXteResult;
+  captions: Record<string, unknown>;
+  units: Record<string, unknown>;
+  stableDigitsEnabled: boolean;
+  themeView: DyniXteRenderThemeView;
+  layout: DyniXteHighwayLayoutResult;
+  metricRects: DyniXteMetricRects;
+}
+
+interface DyniXteDisplayMetricsApi {
+  resolveAndDrawDynamicXte(options: DyniXteDynamicOptions): DyniXteDynamicXteResult;
+  buildXteMetrics(options: DyniXteMetricsOptions): DyniXteDisplayMetricsBuildResult;
+}
+
+interface DyniXteLinearEndLabelOptions {
+  ctx: CanvasRenderingContext2D;
+  theme: DyniXteLinearTheme;
+  geom: DyniXteLinearGeometry;
+  ticks: DyniLinearTicks;
+  showEndLabels: boolean;
+  family: unknown;
+  labelWeight: unknown;
+}
+
+interface DyniXteLinearPrimitivesApi {
+  resolveGeometry(layout: DyniXteLinearLayoutResult, theme: DyniXteLinearTheme): DyniXteLinearGeometry;
+  drawEndLabels(options: DyniXteLinearEndLabelOptions): void;
+  drawPointerUpward(ctx: CanvasRenderingContext2D, x: number, geom: DyniXteLinearGeometry, color: string): void;
+  drawTrackLayer(ctx: CanvasRenderingContext2D, geom: DyniXteLinearGeometry, color: string): void;
+  drawTicksLayer(
+    ctx: CanvasRenderingContext2D,
+    geom: DyniXteLinearGeometry,
+    ticks: DyniLinearTicks,
+    xteScale: number,
+    color: string
+  ): void;
+}
+
+interface DyniXteLinearDynamicResult {
+  xteNumber: number | undefined;
+  xteHasValue: boolean;
+  defaultText: string;
+  xteDistance: string;
+  xteDistanceMissing: boolean;
+}
+
+interface DyniXteLinearMetricsResult {
+  cog: { caption: unknown; value: string; unit: unknown };
+  xte: { caption: unknown; value: string; unit: unknown };
+  dtw: { caption: unknown; value: string; unit: unknown };
+  btw: { caption: unknown; value: string; unit: unknown };
+}
+
+interface DyniXteLinearPointerOptions {
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  geom: DyniXteLinearGeometry;
+  theme: DyniXteLinearTheme;
+  display: DyniXteLinearData;
+  formatUnits: DyniXteLinearData;
+  props: DyniWidgetValues;
+  xteScale: number;
+  easingEnabled: boolean;
+}
+
+interface DyniXteLinearStableDigitsOptions {
+  ctx: CanvasRenderingContext2D;
+  xteDistance: string;
+  xteSide: string;
+  captions: DyniXteLinearData;
+  units: DyniXteLinearData;
+  family: unknown;
+  valueWeight: unknown;
+  labelWeight: unknown;
+  layout: DyniXteLinearLayoutResult;
+  metricRects: DyniXteMetricRects | null;
+}
+
+interface DyniXteLinearMetricsOptions {
+  display: DyniXteLinearData;
+  formatUnits: DyniXteLinearData;
+  layoutConfig: DyniXteLinearLayoutConfig;
+  defaultText: string;
+  xteValueText: string;
+  captions: DyniXteLinearData;
+  units: DyniXteLinearData;
+}
+
+interface DyniXteLinearDynamicMetricsApi {
+  isPointerMotionActive(canvas: HTMLCanvasElement): boolean;
+  resolveAndDrawLinearPointer(options: DyniXteLinearPointerOptions): DyniXteLinearDynamicResult;
+  resolveStableDigitsXteTextLinear(options: DyniXteLinearStableDigitsOptions): string;
+  buildLinearMetrics(options: DyniXteLinearMetricsOptions): DyniXteLinearMetricsResult;
+}
+
 // --- XteHighwayPrimitives --------------------------------------------------
 
 interface DyniHighwayGeomOptions {
@@ -1035,6 +1302,7 @@ interface DyniStateScreenTextFitApi {
 interface DyniNavInteractionPolicyApi {
   id: "NavInteractionPolicy";
   canDispatchWhenNotEditing(props: unknown): boolean;
+  openActiveRoute(props: unknown): boolean;
 }
 
 type DyniActiveRouteLayoutMode = "flat" | "high" | "normal";
@@ -2621,6 +2889,31 @@ interface DyniEditRouteLayoutApi {
   ): DyniIntrinsicTileSpacing;
 }
 
+interface DyniEditRouteLayoutTilesApi {
+  id: "EditRouteLayoutTiles";
+  computeNameRects(
+    nameBarRect: DyniRect,
+    showSourceBadge: boolean,
+    insets: DyniEditRouteInsets
+  ): DyniEditRouteNameRects;
+  createMetricTile(
+    tileRect: DyniRect,
+    insets: DyniEditRouteInsets,
+    responsive: DyniResponsiveScaleProfile,
+    options?: Record<string, unknown>
+  ): DyniEditRouteMetricTile;
+  buildFlatWrapperLayoutStyle(args: DyniEditRouteWrapperArgs): string;
+  buildFlatMetricsLayoutStyle(rows: number, columns: number, gapPx: number): string;
+  createHighMetricRow(rowRect: DyniRect, insets: DyniEditRouteInsets, hasUnit: boolean): DyniEditRouteMetricTile;
+  computeFlatMetricsLayout(
+    metricsRect: DyniRect,
+    insets: DyniEditRouteInsets,
+    responsive: DyniResponsiveScaleProfile,
+    out: DyniEditRouteLayoutOutput,
+    metricHasUnit: { dst: boolean; rte: boolean }
+  ): void;
+}
+
 interface DyniEditRouteHtmlFitApi {
   id: "EditRouteHtmlFit";
   compute(args?: DyniEditRouteHtmlFitArgs): DyniEditRouteMarkupFit | null;
@@ -3166,12 +3459,15 @@ interface DyniComponentRequire {
   (id: "GaugeToolkit"): DyniGaugeToolkitApi;
   (id: "LinearCanvasPrimitives"): DyniLinearCanvasPrimitivesApi;
   (id: "LinearGaugeEngineDrawing"): DyniLinearGaugeEngineDrawingApi;
+  (id: "LinearGaugeEngineFrame"): DyniLinearGaugeEngineFrameApi;
   (id: "LinearGaugeLabelFit"): DyniLinearGaugeLabelFitApi;
   (id: "LinearGaugeEngineSupport"): DyniLinearGaugeEngineSupportApi;
   (id: "LinearGaugeMath"): DyniLinearGaugeMathApi;
   (id: "LinearGaugeTextLayout"): DyniLinearGaugeTextLayoutApi;
+  (id: "LinearGaugeLayoutVariants"): DyniLinearGaugeLayoutVariantsApi;
   (id: "LinearGaugeLayout"): DyniLinearGaugeLayoutApi;
   (id: "EditRouteLayoutGeometry"): DyniEditRouteLayoutGeometryApi;
+  (id: "EditRouteLayoutTiles"): DyniEditRouteLayoutTilesApi;
   (id: "EditRouteLayout"): DyniEditRouteLayoutApi;
   (id: "EditRouteHtmlFit"): DyniEditRouteHtmlFitApi;
   (id: "ActiveRouteLayout"): DyniActiveRouteLayoutApi;
@@ -3211,6 +3507,11 @@ interface DyniComponentRequire {
   (id: "XteHighwayLayout"): DyniXteHighwayLayoutApi;
   (id: "XteLinearLayout"): DyniXteLinearLayoutApi;
   (id: "XteHighwayPrimitives"): DyniXteHighwayPrimitivesApi;
+  (id: "XteLinearPrimitives"): DyniXteLinearPrimitivesApi;
+  (id: "XteLinearDynamicMetrics"): DyniXteLinearDynamicMetricsApi;
+  (id: "XteDisplayPropsNormalize"): DyniXteDisplayPropsNormalizeApi;
+  (id: "XteDisplayRenderSetup"): DyniXteDisplayRenderSetupApi;
+  (id: "XteDisplayMetrics"): DyniXteDisplayMetricsApi;
   (id: "StateScreenCanvasOverlay"): DyniStateScreenCanvasOverlayApi;
   (id: "StateScreenMarkup"): DyniStateScreenMarkupApi;
   (id: "StateScreenTextFit"): DyniStateScreenTextFitApi;

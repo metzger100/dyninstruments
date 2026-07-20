@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRegattaTimerHtmlFit = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const FIT_CACHE_KEY = "__dyniRegattaTimerHtmlFitCache";
@@ -36,9 +36,10 @@
 
   /** @param {unknown} hostContext @returns {DyniRegattaTimerHtmlFitCache | null} */
   function resolveRegattaCacheEntry(hostContext) {
-    const owner = hostContext && typeof hostContext === "object"
-      ? /** @type {DyniRegattaTimerHtmlFitHostContext} */ (hostContext)
-      : null;
+    const owner =
+      hostContext && typeof hostContext === "object"
+        ? /** @type {DyniRegattaTimerHtmlFitHostContext} */ (hostContext)
+        : null;
     if (!owner) {
       return null;
     }
@@ -53,9 +54,10 @@
 
   /** @param {unknown} hostContext */
   function clearCache(hostContext) {
-    const owner = hostContext && typeof hostContext === "object"
-      ? /** @type {DyniRegattaTimerHtmlFitHostContext} */ (hostContext)
-      : null;
+    const owner =
+      hostContext && typeof hostContext === "object"
+        ? /** @type {DyniRegattaTimerHtmlFitHostContext} */ (hostContext)
+        : null;
     if (owner && Object.prototype.hasOwnProperty.call(owner, FIT_CACHE_KEY)) {
       delete owner[FIT_CACHE_KEY];
     }
@@ -129,7 +131,8 @@
     const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const textLayout = componentContext.components.require("TextLayoutEngine");
     const themeResolver = /** @type {DyniRegattaTimerThemeResolver} */ (
-      /** @type {{ theme: { tokens: DyniRegattaTimerThemeResolver } }} */ (/** @type {unknown} */ (componentContext)).theme.tokens
+      /** @type {{ theme: { tokens: DyniRegattaTimerThemeResolver } }} */ (/** @type {unknown} */ (componentContext))
+        .theme.tokens
     );
     const domApi = /** @type {DyniRegattaTimerDomApi} */ (
       /** @type {{ dom: DyniRegattaTimerDomApi }} */ (/** @type {unknown} */ (componentContext)).dom
@@ -199,15 +202,15 @@
       const displayGap = scaledPx(0.02, minSide);
       const controlGap = scaledPx(0.03, minSide);
       const barHeight = scaledPx(BAR_HEIGHT_FROM_WIDGET_HEIGHT_RATIO, height);
-      const contentWidth = Math.max(1, width - (pad * 2));
-      const contentHeight = Math.max(1, height - (pad * 2));
+      const contentWidth = Math.max(1, width - pad * 2);
+      const contentHeight = Math.max(1, height - pad * 2);
       const visibleButtons = phase === "countdown" ? 2 : 1;
       const isNormalCountdown = phase === "countdown" && mode === "normal";
       const controlsColumns = isNormalCountdown ? 2 : 1;
       const controlsRows = isNormalCountdown ? 1 : visibleButtons;
       const modeSharesTotal = shares.display + shares.controls;
-      const modeDisplayShare = modeSharesTotal > 0 ? (shares.display / modeSharesTotal) : 0.5;
-      const modeControlsShare = modeSharesTotal > 0 ? (shares.controls / modeSharesTotal) : 0.5;
+      const modeDisplayShare = modeSharesTotal > 0 ? shares.display / modeSharesTotal : 0.5;
+      const modeControlsShare = modeSharesTotal > 0 ? shares.controls / modeSharesTotal : 0.5;
       let displayHeight = contentHeight;
       let controlsHeight = contentHeight;
       let displayWidth = contentWidth;
@@ -223,27 +226,18 @@
         displayHeight = Math.max(1, contentHeightWithoutGap - controlsHeight);
       }
 
-      const buttonsHeightBudget = Math.max(1, controlsHeight - (controlGap * Math.max(0, controlsRows - 1)));
-      const buttonsWidthBudget = Math.max(1, controlsWidth - (controlGap * Math.max(0, controlsColumns - 1)));
+      const buttonsHeightBudget = Math.max(1, controlsHeight - controlGap * Math.max(0, controlsRows - 1));
+      const buttonsWidthBudget = Math.max(1, controlsWidth - controlGap * Math.max(0, controlsColumns - 1));
       const buttonHeight = Math.max(1, Math.floor(buttonsHeightBudget / Math.max(1, controlsRows)));
       const buttonWidth = Math.max(1, Math.floor(buttonsWidthBudget / Math.max(1, controlsColumns)));
       const visibleLabels = resolveVisibleLabels(phase);
       const buttonPadY = Math.max(0, Math.floor(buttonHeight * 0.12));
       const buttonPadX = Math.max(0, Math.floor(Math.min(buttonWidth * 0.08, buttonHeight * 0.35)));
       const buttonBorderBase = geometryScale.scaleStroke(minSide, 0.026, strokeWeight, 1);
-      const buttonBorderCap = Math.max(
-        1,
-        Math.floor(Math.min(buttonWidth, buttonHeight) * 0.18)
-      );
+      const buttonBorderCap = Math.max(1, Math.floor(Math.min(buttonWidth, buttonHeight) * 0.18));
       const buttonBorderWidth = Math.min(buttonBorderBase, buttonBorderCap);
-      const buttonInnerHeight = Math.max(
-        1,
-        buttonHeight - (buttonPadY * 2) - (buttonBorderWidth * 2)
-      );
-      const buttonInnerWidth = Math.max(
-        1,
-        buttonWidth - (buttonPadX * 2) - (buttonBorderWidth * 2)
-      );
+      const buttonInnerHeight = Math.max(1, buttonHeight - buttonPadY * 2 - buttonBorderWidth * 2);
+      const buttonInnerWidth = Math.max(1, buttonWidth - buttonPadX * 2 - buttonBorderWidth * 2);
       const longestLabel = visibleLabels.reduce(function (longest, label) {
         return label.length > longest.length ? label : longest;
       }, "");
@@ -269,35 +263,46 @@
         monoFamily: monoFamily
       });
       const timerPx = timerFit.px;
-      const flatColumnsStyle = mode === "flat"
-        ? "grid-template-columns:minmax(0," + displayWidth + "px) minmax(0," + controlsWidth + "px);"
-        : "";
-      const flatDisplayWidthStyle = mode === "flat"
-        ? "width:" + displayWidth + "px;max-width:100%;"
-        : "";
-      const flatControlsWidthStyle = mode === "flat"
-        ? "width:" + controlsWidth + "px;max-width:100%;"
-        : "";
+      const flatColumnsStyle =
+        mode === "flat"
+          ? "grid-template-columns:minmax(0," + displayWidth + "px) minmax(0," + controlsWidth + "px);"
+          : "";
+      const flatDisplayWidthStyle = mode === "flat" ? "width:" + displayWidth + "px;max-width:100%;" : "";
+      const flatControlsWidthStyle = mode === "flat" ? "width:" + controlsWidth + "px;max-width:100%;" : "";
       const controlsGridStyle = isNormalCountdown
         ? "grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:minmax(0,1fr);"
-        : (
-          "grid-template-columns:minmax(0,1fr);"
-          + "grid-template-rows:" + (visibleButtons > 1 ? "repeat(" + visibleButtons + ",minmax(0,1fr))" : "minmax(0,1fr)") + ";"
-        );
+        : "grid-template-columns:minmax(0,1fr);" +
+          "grid-template-rows:" +
+          (visibleButtons > 1 ? "repeat(" + visibleButtons + ",minmax(0,1fr))" : "minmax(0,1fr)") +
+          ";";
 
       const result = {
         wrapperStyle: "padding:" + pad + "px;gap:" + sectionGap + "px;" + flatColumnsStyle,
         displayStyle: "row-gap:" + displayGap + "px;min-width:0;min-height:0;" + flatDisplayWidthStyle,
         timerStyle: htmlUtils.toFontStyle(timerPx),
-        controlsStyle: "gap:" + controlGap + "px;min-width:0;min-height:0;" + controlsGridStyle + flatControlsWidthStyle,
+        controlsStyle:
+          "gap:" + controlGap + "px;min-width:0;min-height:0;" + controlsGridStyle + flatControlsWidthStyle,
         barStyle: "height:" + barHeight + "px;border-radius:" + Math.max(1, Math.floor(barHeight * 0.5)) + "px;",
-        buttonStyle: ""
-          + "height:" + buttonHeight + "px;"
-          + "max-height:" + buttonHeight + "px;"
-          + "min-height:0;"
-          + "border-width:" + buttonBorderWidth + "px;"
-          + "font-size:" + buttonFontPx + "px;"
-          + "padding:" + buttonPadY + "px " + buttonPadX + "px;",
+        buttonStyle:
+          "" +
+          "height:" +
+          buttonHeight +
+          "px;" +
+          "max-height:" +
+          buttonHeight +
+          "px;" +
+          "min-height:0;" +
+          "border-width:" +
+          buttonBorderWidth +
+          "px;" +
+          "font-size:" +
+          buttonFontPx +
+          "px;" +
+          "padding:" +
+          buttonPadY +
+          "px " +
+          buttonPadX +
+          "px;",
         startButtonStyle: "",
         syncButtonStyle: "",
         resetButtonStyle: ""
@@ -319,4 +324,4 @@
   }
 
   return { id: "RegattaTimerHtmlFit", create: create };
-}));
+});

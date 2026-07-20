@@ -3,21 +3,19 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 describe("smell catalog coverage contract", function () {
+  /** @type {string[]} */
   let ruleNames;
 
   beforeAll(async function () {
     const rulesPath = path.resolve(process.cwd(), "tools/check-patterns/rules.mjs");
     const mod = await import(pathToFileURL(rulesPath).href);
-    ruleNames = mod.RULES.map(function (rule) {
+    ruleNames = mod.RULES.map(function (/** @type {any} */ rule) {
       return rule.name;
     });
   });
 
   it("documents every live check-patterns rule in the smell catalog", function () {
-    const markdown = fs.readFileSync(
-      path.join(process.cwd(), "documentation/conventions/smell-prevention.md"),
-      "utf8",
-    );
+    const markdown = fs.readFileSync(path.join(process.cwd(), "documentation/conventions/smell-prevention.md"), "utf8");
 
     expect(missingRuleNames(markdown, ruleNames)).toEqual([]);
   });
@@ -34,21 +32,18 @@ describe("smell catalog coverage contract", function () {
       "",
       "## Executable Rule Index",
       "",
-      "`missing-rule`",
+      "`missing-rule`"
     ].join("\n");
 
-    expect(missingRuleNames(markdown, ["absolute-user-home-path", "missing-rule"])).toEqual([
-      "missing-rule",
-    ]);
+    expect(missingRuleNames(markdown, ["absolute-user-home-path", "missing-rule"])).toEqual(["missing-rule"]);
   });
 
   it("rejects documents without a smell catalog section", function () {
-    expect(missingRuleNames("# Smell Prevention\n", ["missing-rule"])).toEqual([
-      "missing-rule",
-    ]);
+    expect(missingRuleNames("# Smell Prevention\n", ["missing-rule"])).toEqual(["missing-rule"]);
   });
 });
 
+/** @param {string} markdown @param {string[]} names */
 function missingRuleNames(markdown, names) {
   const catalog = extractMarkdownSection(markdown, "Smell Catalog");
   return names
@@ -58,6 +53,7 @@ function missingRuleNames(markdown, names) {
     .sort();
 }
 
+/** @param {string} text @param {string} heading */
 function extractMarkdownSection(text, heading) {
   const headingRe = new RegExp("^## " + escapeRegex(heading) + "\\s*$", "m");
   const match = headingRe.exec(text);
@@ -70,6 +66,7 @@ function extractMarkdownSection(text, heading) {
   return text.slice(start, end);
 }
 
+/** @param {string} value */
 function escapeRegex(value) {
   return String(value).replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
 }

@@ -4,28 +4,29 @@
 
 ## Overview
 
-Use this guide for every native HTML renderer routed through `HtmlSurfaceController`.
-It defines visual ownership, CSS/state contracts, responsive-mode documentation format, and fail-closed guardrails.
+Use this guide for every native HTML renderer routed through `HtmlSurfaceController`. It defines visual ownership,
+CSS/state contracts, responsive-mode documentation format, and fail-closed guardrails.
 
 ## Key Details
 
 - Scope: native HTML kinds only (`surface: "html"`), not `canvas-dom` wrappers.
 - HTML renderers own inner markup/classes; shared host CSS owns root/shell/surface fill behavior.
-- HtmlSurfaceController injects the committed shadow-root base box contract (`:host` and `.dyni-html-root` fill semantics) once per shadow root.
+- HtmlSurfaceController injects the committed shadow-root base box contract (`:host` and `.dyni-html-root` fill
+  semantics) once per shadow root.
 - Responsive geometry ownership and text-fit ownership must be split across shared layout/fit modules.
 - Visual docs must include exact class/state contracts and normative constants when they are runtime-owned.
 
 ## Ownership Contract
 
-| Area | Owner | Non-owner rule |
-|---|---|---|
-| Root widget and shell sizing (`.widget.dyniplugin`, `.widgetData.dyni-shell`, `.dyni-surface-html`) | `plugin.css` and host lifecycle modules | Widget-local CSS must not override shell/root fill contracts |
-| Committed shadow box contract (`:host`, `.dyni-html-root`) | `runtime/surface/HtmlSurfaceController.js` | Widget-local CSS/docs must not re-own the base fill contract |
-| HTML surface lifecycle (`attach`/`update`/`detach`/`destroy`) | `runtime/surface/HtmlSurfaceController.js` | Widget docs must not claim lifecycle ownership |
-| Domain normalization (`display`, `captions`, `units`, disconnect derivation) | mapper + viewmodel modules | HTML renderer docs must consume normalized payload contract |
-| Responsive geometry (`rects`, shares, insets, mode-specific splits) | shared layout-owner module | Renderer must not define a second compact curve |
-| Text fitting (`font-size` ceilings, measurement) | shared fit module | Renderer applies styles; it does not own fit math |
-| Visual tokens (font/color weights) | `runtime.theme` + `componentContext.theme.tokens.resolveForRoot(rootEl)` | No duplicated token defaults in widget code/docs |
+| Area                                                                                                | Owner                                                                    | Non-owner rule                                               |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| Root widget and shell sizing (`.widget.dyniplugin`, `.widgetData.dyni-shell`, `.dyni-surface-html`) | `plugin.css` and host lifecycle modules                                  | Widget-local CSS must not override shell/root fill contracts |
+| Committed shadow box contract (`:host`, `.dyni-html-root`)                                          | `runtime/surface/HtmlSurfaceController.js`                               | Widget-local CSS/docs must not re-own the base fill contract |
+| HTML surface lifecycle (`attach`/`update`/`detach`/`destroy`)                                       | `runtime/surface/HtmlSurfaceController.js`                               | Widget docs must not claim lifecycle ownership               |
+| Domain normalization (`display`, `captions`, `units`, disconnect derivation)                        | mapper + viewmodel modules                                               | HTML renderer docs must consume normalized payload contract  |
+| Responsive geometry (`rects`, shares, insets, mode-specific splits)                                 | shared layout-owner module                                               | Renderer must not define a second compact curve              |
+| Text fitting (`font-size` ceilings, measurement)                                                    | shared fit module                                                        | Renderer applies styles; it does not own fit math            |
+| Visual tokens (font/color weights)                                                                  | `runtime.theme` + `componentContext.theme.tokens.resolveForRoot(rootEl)` | No duplicated token defaults in widget code/docs             |
 
 ## CSS Class and State Contract
 
@@ -34,7 +35,8 @@ Required naming shape for HTML widget docs:
 - Wrapper base class: `dyni-<widget>-html`
 - Element classes: `dyni-<widget>-<element>`
 - Mode state classes: `dyni-<widget>-mode-high`, `dyni-<widget>-mode-normal`, `dyni-<widget>-mode-flat`
-- Behavior/state classes: `dyni-<widget>-disconnect`, `dyni-<widget>-approaching`, `dyni-<widget>-open-dispatch`, `dyni-<widget>-open-passive`
+- Behavior/state classes: `dyni-<widget>-disconnect`, `dyni-<widget>-approaching`, `dyni-<widget>-open-dispatch`,
+  `dyni-<widget>-open-passive`
 
 Rules:
 
@@ -57,35 +59,46 @@ Each HTML widget doc must include:
 Document the split explicitly:
 
 - Layout module: computes insets/content rects/mode rectangles/tile spacing.
-- Fit module: measures text and emits inline style payload (`font-size:...`) for each text role (caption/value/unit/name as applicable).
+- Fit module: measures text and emits inline style payload (`font-size:...`) for each text role (caption/value/unit/name
+  as applicable).
 - Renderer: injects style attributes onto markup and escapes text content.
 
 Fail-closed expectation:
 
 - If fit context cannot be established, renderer should keep valid markup behavior without throwing from the fit path.
-- Resize behavior stays on normal host commit/update flow; do not add observer-driven fitting loops or triggerResize shims.
+- Resize behavior stays on normal host commit/update flow; do not add observer-driven fitting loops or triggerResize
+  shims.
 
 ## Token Usage Contract
 
 HTML renderer docs must state the visual token boundary:
 
-- Font family and foreground color come from the strict theme boundary (`const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`).
-- Font weight and label weight come from the resolved token contract (`tokens.font.weight`, `tokens.font.labelWeight`) when fit/layout logic depends on weights.
-- Do not duplicate `plugin.css` or `runtime.theme` defaults in widget-local docs/code unless boundary ownership requires it.
+- Font family and foreground color come from the strict theme boundary
+  (`const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`).
+- Font weight and label weight come from the resolved token contract (`tokens.font.weight`, `tokens.font.labelWeight`)
+  when fit/layout logic depends on weights.
+- Do not duplicate `plugin.css` or `runtime.theme` defaults in widget-local docs/code unless boundary ownership requires
+  it.
 
 ## Committed Surface Box Contract
 
-The committed HTML surface box (`shellRect` from `.dyni-surface-html-mount`, rendered as `.dyni-html-root` in shadow DOM) is the authoritative geometry source for all committed HTML widgets.
+The committed HTML surface box (`shellRect` from `.dyni-surface-html-mount`, rendered as `.dyni-html-root` in shadow
+DOM) is the authoritative geometry source for all committed HTML widgets.
 
 Rules:
-- Inner widget wrappers (`.dyni-*-html`) must resolve their size against `width: 100%` / `height: 100%` from the base rule.
-- Vertical-mode CSS must not use `height: auto`, `aspect-ratio`, or `min-height` on the inner wrapper to self-expand beyond the surface box.
-- If a true minimum-size policy is needed, it must not be enforced by making the committed inner widget render bigger than the surface box.
+
+- Inner widget wrappers (`.dyni-*-html`) must resolve their size against `width: 100%` / `height: 100%` from the base
+  rule.
+- Vertical-mode CSS must not use `height: auto`, `aspect-ratio`, or `min-height` on the inner wrapper to self-expand
+  beyond the surface box.
+- If a true minimum-size policy is needed, it must not be enforced by making the committed inner widget render bigger
+  than the surface box.
 - Resize stays on normal host commit/update flow; no observer-driven fitting loops or triggerResize shims.
 
 ## Text-Fit Safety Margin
 
-Fitted text must stay visually inside its allocated row/inline band. Browser glyph paint can exceed nominal `line-height: 1` at tight sizes.
+Fitted text must stay visually inside its allocated row/inline band. Browser glyph paint can exceed nominal
+`line-height: 1` at tight sizes.
 
 - Shared fit primitives apply a `ROW_SAFE_RATIO` (0.85) safety factor to row height ceilings.
 - This benefits all widgets that use `TextTileLayout`, `TextLayoutComposite`, and `TextLayoutPrimitives`.
@@ -95,7 +108,8 @@ Fitted text must stay visually inside its allocated row/inline band. Browser gly
 
 - Grid template columns/rows:
   - Use `minmax(0, 1fr)` or `minmax(0, Npx)` track sizing.
-  - Do not use bare `auto` tracks in committed widget grid templates, because content can expand beyond the committed surface box.
+  - Do not use bare `auto` tracks in committed widget grid templates, because content can expand beyond the committed
+    surface box.
   - Example: `grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)` (not `minmax(0, 1fr) auto`).
 - Grid/flex child overflow prevention:
   - Every direct child of grid/flex containers must set `min-width: 0; min-height: 0`.
@@ -119,16 +133,16 @@ Fitted text must stay visually inside its allocated row/inline band. Browser gly
 
 ## Anti-Patterns (Fail-Closed)
 
-| Anti-pattern | Required alternative | Related smell rule |
-|---|---|---|
-| Widget-local CSS modifies `.widget.dyniplugin` shell/root ownership | Keep shell/root ownership in `plugin.css` and host surface docs | `css-js-default-duplication` (warn), architecture boundary |
-| Renderer defines responsive hard floors independent of shared profile | Move compaction math to layout owner + `ResponsiveScaleProfile` | `responsive-layout-hard-floor`, `responsive-profile-ownership` |
-| Runtime state encoded in ad hoc attributes | Use explicit contract classes and documented handler names | compatibility cleanup policy |
-| Renderer re-documents fallback literals owned by config/theme | Keep defaults at config/theme boundary and reference owner | `hardcoded-runtime-default`, `inline-config-default-duplication` |
-| Inner widget wrapper self-expands beyond committed surface box | Rely on `width:100%`/`height:100%` from base rule; no vertical-mode overrides | surface box contract |
-| Bare `auto` in grid template | Use `minmax(0, 1fr)` or `minmax(0, Npx)` | surface box contract |
-| Missing `min-width:0` on grid/flex children | Always set `min-width:0; min-height:0` on grid/flex children | surface box contract |
-| Hardcoded `min-width` floor on interactive elements | Scale with fit-module sizes, use `max-width:100%` | `responsive-layout-hard-floor` |
+| Anti-pattern                                                          | Required alternative                                                          | Related smell rule                                               |
+| --------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Widget-local CSS modifies `.widget.dyniplugin` shell/root ownership   | Keep shell/root ownership in `plugin.css` and host surface docs               | `css-js-default-duplication` (warn), architecture boundary       |
+| Renderer defines responsive hard floors independent of shared profile | Move compaction math to layout owner + `ResponsiveScaleProfile`               | `responsive-layout-hard-floor`, `responsive-profile-ownership`   |
+| Runtime state encoded in ad hoc attributes                            | Use explicit contract classes and documented handler names                    | compatibility cleanup policy                                     |
+| Renderer re-documents fallback literals owned by config/theme         | Keep defaults at config/theme boundary and reference owner                    | `hardcoded-runtime-default`, `inline-config-default-duplication` |
+| Inner widget wrapper self-expands beyond committed surface box        | Rely on `width:100%`/`height:100%` from base rule; no vertical-mode overrides | surface box contract                                             |
+| Bare `auto` in grid template                                          | Use `minmax(0, 1fr)` or `minmax(0, Npx)`                                      | surface box contract                                             |
+| Missing `min-width:0` on grid/flex children                           | Always set `min-width:0; min-height:0` on grid/flex children                  | surface box contract                                             |
+| Hardcoded `min-width` floor on interactive elements                   | Scale with fit-module sizes, use `max-width:100%`                             | `responsive-layout-hard-floor`                                   |
 
 ## Visual Contract Template
 
@@ -138,29 +152,34 @@ Use this template section in each HTML widget module doc:
 ## Visual Contract
 
 ### CSS State Classes
-| Class | Source | Meaning |
-|---|---|---|
-| `dyni-<widget>-mode-high` | renderer mode resolver | Tall layout |
+
+| Class                       | Source                 | Meaning         |
+| --------------------------- | ---------------------- | --------------- |
+| `dyni-<widget>-mode-high`   | renderer mode resolver | Tall layout     |
 | `dyni-<widget>-mode-normal` | renderer mode resolver | Balanced layout |
-| `dyni-<widget>-mode-flat` | renderer mode resolver | Wide layout |
+| `dyni-<widget>-mode-flat`   | renderer mode resolver | Wide layout     |
 
 ### Layering
-| Layer | Selector | Purpose |
-|---|---|---|
-| base content | `.dyni-<widget>-...` | Text/tiles |
+
+| Layer               | Selector             | Purpose       |
+| ------------------- | -------------------- | ------------- |
+| base content        | `.dyni-<widget>-...` | Text/tiles    |
 | interaction overlay | `.dyni-<widget>-...` | Click capture |
 
 ### Layout Constants (Owner: `<LayoutModule>`)
+
 | Constant | Value | Purpose |
-|---|---|---|
-| `...` | `...` | `...` |
+| -------- | ----- | ------- |
+| `...`    | `...` | `...`   |
 
 ### Text-Fit Constants (Owner: `<FitModule>`)
+
 | Constant | Value | Purpose |
-|---|---|---|
-| `...` | `...` | `...` |
+| -------- | ----- | ------- |
+| `...`    | `...` | `...`   |
 
 ### Visual Regression Checklist
+
 - [ ] Mode class matches shell ratio thresholds
 - [ ] Conditional tiles appear/disappear by state
 - [ ] Dispatch/passive click capture classes and handlers align

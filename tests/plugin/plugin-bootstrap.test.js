@@ -1,7 +1,12 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 const { createDomHarness } = require("../helpers/mock-dom");
 const { flushPromises } = require("../helpers/async");
-const bootstrapCore = require("../../runtime/plugin-bootstrap-core.js");
+
+/** @param {string} relativePath @returns {any} */
+function requireModule(relativePath) {
+  return require(relativePath);
+}
+const bootstrapCore = requireModule("../../runtime/plugin-bootstrap-core.js");
 
 function loadBootstrapManifest() {
   const context = createScriptContext({
@@ -22,7 +27,7 @@ describe("plugin.js bootstrap", function () {
   function createHostApi() {
     return {
       registerWidget: vi.fn(),
-      log: vi.fn(),
+      log: vi.fn()
     };
   }
 
@@ -49,11 +54,11 @@ describe("plugin.js bootstrap", function () {
     runIifeScript("plugin.js", context);
     await flushPromises(120);
 
-    const loadedScriptSrc = dom.appendedScripts.map((item) => item.src);
+    const loadedScriptSrc = dom.appendedScripts.map((/** @type {any} */ item) => item.src);
     const expected = [
       "http://host/plugins/dyninstruments/bootstrap-bundle.js",
       "http://host/plugins/dyninstruments/config/bootstrap-manifest.js"
-    ].concat(BOOTSTRAP_MANIFEST.map((rel) => "http://host/plugins/dyninstruments/" + rel));
+    ].concat(BOOTSTRAP_MANIFEST.map((/** @type {any} */ rel) => "http://host/plugins/dyninstruments/" + rel));
 
     expect(loadedScriptSrc).toEqual(expected);
     expect(typeof context.window.DyniPlugin.runtime.loadScriptOnce).toBe("function");
@@ -108,10 +113,12 @@ describe("plugin.js bootstrap", function () {
     runIifeScript("plugin.js", context);
     await flushPromises(120);
 
-    expect(dom.appendedScripts.map((item) => item.src)).toEqual([
+    expect(dom.appendedScripts.map((/** @type {any} */ item) => item.src)).toEqual([
       "http://host/plugins/dyninstruments/bootstrap-bundle.js"
     ]);
-    expect(dom.appendedScripts.some((item) => item.src.includes("config/bootstrap-manifest.js"))).toBe(false);
+    expect(
+      dom.appendedScripts.some((/** @type {any} */ item) => item.src.includes("config/bootstrap-manifest.js"))
+    ).toBe(false);
     expect(runInit).toHaveBeenCalledOnce();
   });
 
@@ -138,10 +145,12 @@ describe("plugin.js bootstrap", function () {
     runIifeScript("plugin.js", context);
     await flushPromises(120);
 
-    expect(dom.appendedScripts.map((item) => item.src)).toEqual([
-      "http://host/plugins/dyninstruments/bootstrap-bundle.js",
-      "http://host/plugins/dyninstruments/config/bootstrap-manifest.js"
-    ].concat(BOOTSTRAP_MANIFEST.map((rel) => "http://host/plugins/dyninstruments/" + rel)));
+    expect(dom.appendedScripts.map((/** @type {any} */ item) => item.src)).toEqual(
+      [
+        "http://host/plugins/dyninstruments/bootstrap-bundle.js",
+        "http://host/plugins/dyninstruments/config/bootstrap-manifest.js"
+      ].concat(BOOTSTRAP_MANIFEST.map((/** @type {any} */ rel) => "http://host/plugins/dyninstruments/" + rel))
+    );
     expect(runInit).toHaveBeenCalledOnce();
   });
 
@@ -178,10 +187,7 @@ describe("plugin.js bootstrap", function () {
 
   it("logs a clear error when bootstrap manifest cannot be loaded", async function () {
     const dom = createDomHarness({
-      failScriptIds: [
-        "dyni-internal-legacy-bootstrap-bundle-js",
-        "dyni-internal-legacy-config-bootstrap-manifest-js"
-      ]
+      failScriptIds: ["dyni-internal-legacy-bootstrap-bundle-js", "dyni-internal-legacy-config-bootstrap-manifest-js"]
     });
     const err = vi.fn();
 
@@ -205,6 +211,7 @@ describe("plugin.js bootstrap", function () {
 
   it("loads runtime/plugin-bootstrap-core.js when the shared core is not preloaded", async function () {
     const runInit = vi.fn(() => Promise.resolve());
+    /** @type {any} */
     let context;
     const dom = createDomHarness({
       failScriptIds: ["dyni-internal-legacy-bootstrap-bundle-js"],
@@ -231,11 +238,19 @@ describe("plugin.js bootstrap", function () {
     runIifeScript("plugin.js", context);
     await flushPromises(120);
 
-    expect(dom.appendedScripts.map((item) => item.src)).toEqual([
-      "http://host/plugins/dyninstruments/runtime/plugin-bootstrap-core.js",
-      "http://host/plugins/dyninstruments/bootstrap-bundle.js",
-      "http://host/plugins/dyninstruments/config/bootstrap-manifest.js"
-    ].concat(BOOTSTRAP_MANIFEST.map((rel) => "http://host/plugins/dyninstruments/" + rel)));
+    expect(dom.appendedScripts.map((/** @type {any} */ item) => item.src)).toEqual(
+      [
+        "http://host/plugins/dyninstruments/runtime/plugin-bootstrap-core.js",
+        "http://host/plugins/dyninstruments/bootstrap-bundle.js",
+        "http://host/plugins/dyninstruments/config/bootstrap-manifest.js"
+      ].concat(BOOTSTRAP_MANIFEST.map((/** @type {any} */ rel) => "http://host/plugins/dyninstruments/" + rel))
+    );
     expect(runInit).toHaveBeenCalledOnce();
+  });
+});
+
+describe("plugin-bootstrap-core resolveGlobalRoot", function () {
+  it("falls back to globalThis when no window global is present", function () {
+    expect(bootstrapCore.resolveGlobalRoot()).toBe(globalThis);
   });
 });

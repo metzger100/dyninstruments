@@ -1,6 +1,7 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
 describe("runtime/dom-runtime.js", function () {
+  /** @param {any} classNames @param {any} [parentNode] */
   function createElementNode(classNames, parentNode) {
     const classes = Array.isArray(classNames) ? classNames.slice() : [];
     const classSet = new Set(classes);
@@ -8,17 +9,21 @@ describe("runtime/dom-runtime.js", function () {
       nodeType: 1,
       parentNode: parentNode || null,
       classList: {
+        /** @param {any} name */
         contains(name) {
           return classSet.has(name);
         }
       },
+      /** @param {any} selector */
       closest(selector) {
-        let cursor = node;
+        let cursor = /** @type {any} */ (node);
         while (cursor) {
           if (cursor.nodeType === 1) {
-            if (selector === ".widget.dyniplugin" &&
+            if (
+              selector === ".widget.dyniplugin" &&
               cursor.classList.contains("widget") &&
-              cursor.classList.contains("dyniplugin")) {
+              cursor.classList.contains("dyniplugin")
+            ) {
               return cursor;
             }
             if (selector === ".nightMode" && cursor.classList.contains("nightMode")) {
@@ -41,6 +46,7 @@ describe("runtime/dom-runtime.js", function () {
     return node;
   }
 
+  /** @param {any} [host] */
   function createShadowRootNode(host) {
     return {
       nodeType: 11,
@@ -49,14 +55,20 @@ describe("runtime/dom-runtime.js", function () {
     };
   }
 
+  /** @param {Record<string, any>} [extra] */
   function loadRuntimeDom(extra) {
-    const context = createScriptContext(Object.assign({
-      DyniPlugin: {
-        runtime: {},
-        state: {},
-        config: { shared: {}, clusters: [] }
-      }
-    }, extra || {}));
+    const context = createScriptContext(
+      Object.assign(
+        {
+          DyniPlugin: {
+            runtime: {},
+            state: {},
+            config: { shared: {}, clusters: [] }
+          }
+        },
+        extra || {}
+      )
+    );
 
     runIifeScript("runtime/namespace.js", context);
     runIifeScript("runtime/dom-runtime.js", context);

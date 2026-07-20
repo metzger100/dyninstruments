@@ -8,157 +8,11 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniPositionCoordinateWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {{ resolveForRoot(rootEl: unknown): { font: { family: string, familyMono?: string, weight: unknown, labelWeight: unknown }, surface: { fg: string }, opacity?: { caption?: unknown, unit?: unknown } } }} DyniPositionCoordinateThemeResolver */
   /** @typedef {DyniComponentContext & { theme: { tokens: DyniPositionCoordinateThemeResolver }, canvas: DyniCanvasHostApi }} DyniPositionCoordinateWidgetContext */
 
-  const DISPLAY_VARIANT_POSITION = "position";
-  const DISPLAY_VARIANT_DATE_TIME = "dateTime";
-  const DISPLAY_VARIANT_TIME_STATUS = "timeStatus";
-  const STATUS_OK = "\ud83d\udfe2";
-  const STATUS_BAD = "\ud83d\udd34";
-  const TIME_STATUS_SCALE_LIMIT = 0.82;
-
-  /** @param {unknown} value @returns {string} */
-  function normalizeDisplayVariant(value) {
-    if (value === DISPLAY_VARIANT_DATE_TIME || value === DISPLAY_VARIANT_TIME_STATUS) {
-      return value;
-    }
-    return DISPLAY_VARIANT_POSITION;
-  }
-
-  /** @param {unknown} value @param {boolean} rawMode @param {DyniValueMathApi["toOptionalFiniteNumber"]} toOptionalFiniteNumber */
-  function readCoordinatePair(value, rawMode, toOptionalFiniteNumber) {
-    if (!value || typeof value !== "object") {
-      return null;
-    }
-    const point = /** @type {{ lat?: unknown, lon?: unknown }} */ (value);
-    const lonRaw = Array.isArray(value) ? value[0] : point.lon;
-    const latRaw = Array.isArray(value) ? value[1] : point.lat;
-    if (Array.isArray(value) && value.length < 2) {
-      return null;
-    }
-    if (rawMode) {
-      return { lat: latRaw, lon: lonRaw };
-    }
-    const lat = toOptionalFiniteNumber(latRaw);
-    const lon = toOptionalFiniteNumber(lonRaw);
-    return Number.isFinite(lat) && Number.isFinite(lon) ? { lat: lat, lon: lon } : null;
-  }
-
-  /** @param {unknown} value @returns {boolean} */
-  function isGpsValid(value) {
-    if (value === true) {
-      return true;
-    }
-    if (value === false || value == null) {
-      return false;
-    }
-    if (typeof value === "number") {
-      return Number.isFinite(value) && value !== 0;
-    }
-    if (typeof value === "string") {
-      const text = value.trim().toLowerCase();
-      if (!text || text === "0" || text === "false" || text === "off" || text === "no") {
-        return false;
-      }
-      return true;
-    }
-    return !!value;
-  }
-
-  /** @param {unknown} raw @returns {string} */
-  function statusCircleFormatter(raw) {
-    return isGpsValid(raw) ? STATUS_OK : STATUS_BAD;
-  }
-
-  /** @param {DyniWidgetValues} props @returns {DyniWidgetValues} */
-  function resolveVariantProps(props) {
-    const p = props || {};
-    const displayVariant = normalizeDisplayVariant(p.displayVariant);
-    const timeFormatter = p.hideSeconds === true ? "formatClock" : "formatTime";
-
-    if (displayVariant === DISPLAY_VARIANT_DATE_TIME) {
-      return {
-        ...p,
-        displayVariant: displayVariant,
-        coordinateFormatterLat: "formatDate",
-        coordinateFormatterLon: timeFormatter,
-        coordinateFlatFromAxes: true,
-        coordinateRawValues: true
-      };
-    }
-
-    if (displayVariant === DISPLAY_VARIANT_TIME_STATUS) {
-      return {
-        ...p,
-        displayVariant: displayVariant,
-        coordinateFormatterLat: statusCircleFormatter,
-        coordinateFormatterLon: timeFormatter,
-        coordinateFlatFromAxes: true,
-        coordinateRawValues: true
-      };
-    }
-
-    return p;
-  }
-
-  /** @param {DyniWidgetValues} props @param {"lat" | "lon"} axis */
-  function pickAxisFormatter(props, axis) {
-    const p = props || {};
-    const suffix = axis === "lat" ? "Lat" : "Lon";
-    const formatterKey = "coordinateFormatter" + suffix;
-    const paramsKey = "coordinateFormatterParameters" + suffix;
-    const paramsRaw = Object.prototype.hasOwnProperty.call(p, paramsKey) ? p[paramsKey] : p.coordinateFormatterParameters;
-    const hasOverride = Object.prototype.hasOwnProperty.call(p, formatterKey);
-    return {
-      formatter: hasOverride
-        ? p[formatterKey]
-        : (typeof p.coordinateFormatter !== "undefined" ? p.coordinateFormatter : "formatLonLatsDecimal"),
-      params: Array.isArray(paramsRaw) ? paramsRaw.slice() : (typeof paramsRaw === "string" ? paramsRaw.split(",") : []),
-      appendAxisParam: !hasOverride
-    };
-  }
-  /** @param {unknown} rawValue @param {"lat" | "lon"} axis @param {string} defaultText @param {DyniWidgetValues} props @param {DyniComponentContext} componentContext @param {DyniPlaceholderNormalizeApi} placeholderNormalize @param {DyniValueMathApi["toOptionalFiniteNumber"]} toOptionalFiniteNumber */
-  function formatAxisValue(rawValue, axis, defaultText, props, componentContext, placeholderNormalize, toOptionalFiniteNumber) {
-    const rawMode = props && props.coordinateRawValues === true;
-    if (rawMode) {
-      if (rawValue == null || (typeof rawValue === "number" && Number.isNaN(rawValue))) {
-        return defaultText;
-      }
-    } else {
-      const n = toOptionalFiniteNumber(rawValue);
-      if (typeof n !== "number") {
-        return defaultText;
-      }
-      rawValue = n;
-    }
-    const cfg = pickAxisFormatter(props, axis);
-    if (cfg.appendAxisParam) cfg.params.push(axis);
-    const out = String(componentContext.format.applyFormatter(rawValue, {
-      formatter: cfg.formatter,
-      formatterParameters: cfg.params,
-      default: defaultText
-    }));
-    return placeholderNormalize.normalize(out, defaultText);
-  }
-  /** @param {string} text @returns {boolean} */
-  function isTimeStatusMarker(text) {
-    const normalized = String(text).trim();
-    return normalized === STATUS_OK || normalized === STATUS_BAD;
-  }
-  /** @param {unknown} metrics @returns {number | null} */
-  function readActualTextHeight(metrics) {
-    const textMetrics = /** @type {Partial<TextMetrics> | null} */ (metrics && typeof metrics === "object" ? metrics : null);
-    const ascent = Number(textMetrics && textMetrics.actualBoundingBoxAscent);
-    const descent = Number(textMetrics && textMetrics.actualBoundingBoxDescent);
-    const total = ascent + descent;
-    if (!Number.isFinite(ascent) || !Number.isFinite(descent) || !(total > 0)) {
-      return null;
-    }
-    return total;
-  }
   /** @param {unknown} def @param {DyniPositionCoordinateWidgetContext} componentContext */
   function create(def, componentContext) {
     const theme = componentContext.theme.tokens;
@@ -168,11 +22,13 @@
     const stateScreenLabels = componentContext.components.require("StateScreenLabels");
     const stateScreenPrecedence = componentContext.components.require("StateScreenPrecedence");
     const stateScreenCanvasOverlay = componentContext.components.require("StateScreenCanvasOverlay");
+    const coordFormatting = componentContext.components.require("PositionCoordinateFormatting");
     const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
+    const formatServices = { componentContext, placeholderNormalize, toOptionalFiniteNumber };
     const fitCache = text.createFitCache(["flat", "stacked"]);
     /** @param {HTMLCanvasElement} canvas @param {DyniWidgetValues} props */
     function renderCanvas(canvas, props) {
-      const p = resolveVariantProps(props);
+      const p = coordFormatting.resolveVariantProps(props);
       const setup = componentContext.canvas.setupCanvas(canvas);
       const ctx = setup && setup.ctx;
       const W = setup && setup.W;
@@ -184,14 +40,15 @@
       ctx.textBaseline = "middle";
       const rootEl = componentContext.dom.requirePluginRoot(canvas);
       const tokens = theme.resolveForRoot(rootEl);
-      const displayVariant = normalizeDisplayVariant(p.displayVariant);
-      const isCoordinateVariant = displayVariant === DISPLAY_VARIANT_POSITION;
+      const displayVariant = coordFormatting.normalizeDisplayVariant(p.displayVariant);
+      const isCoordinateVariant = displayVariant === coordFormatting.DISPLAY_VARIANT_POSITION;
       const coordinatesTabular = p.coordinatesTabular !== false;
       const effectiveCoordinatesTabular = isCoordinateVariant ? coordinatesTabular : false;
       const stableDigitsEnabled = isCoordinateVariant ? p.stableDigits === true : p.stableDigits !== false;
-      const family = (effectiveCoordinatesTabular || stableDigitsEnabled)
-        ? (tokens.font.familyMono || tokens.font.family)
-        : tokens.font.family;
+      const family =
+        effectiveCoordinatesTabular || stableDigitsEnabled
+          ? tokens.font.familyMono || tokens.font.family
+          : tokens.font.family;
       const color = tokens.surface.fg;
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
@@ -216,7 +73,8 @@
         return;
       }
       const modeData = text.computeModeLayout({
-        W: W, H: H,
+        W: W,
+        H: H,
         ratioThresholdNormal: p.ratioThresholdNormal,
         ratioThresholdFlat: p.ratioThresholdFlat,
         captionUnitScale: p.captionUnitScale,
@@ -225,28 +83,31 @@
       });
       const insets = text.computeResponsiveInsets(W, H);
       const textFillScale = insets.responsive.textFillScale;
-      const defaultText = String(p.default);
+      const defaultText = /** @type {string} */ (p.default);
       if (modeData.mode === "flat") {
-        const pairRaw = readCoordinatePair(p.value, true, toOptionalFiniteNumber);
+        const pairRaw = coordFormatting.readCoordinatePair(p.value, true, toOptionalFiniteNumber);
         const useAxisFlat = !!p.coordinateFlatFromAxes;
         const topText = useAxisFlat
-          ? formatAxisValue(pairRaw ? pairRaw.lat : null, "lat", defaultText, p, componentContext, placeholderNormalize, toOptionalFiniteNumber)
+          ? coordFormatting.formatAxisValue(pairRaw ? pairRaw.lat : null, "lat", defaultText, p, formatServices)
           : "";
         const bottomText = useAxisFlat
-          ? formatAxisValue(pairRaw ? pairRaw.lon : null, "lon", defaultText, p, componentContext, placeholderNormalize, toOptionalFiniteNumber)
+          ? coordFormatting.formatAxisValue(pairRaw ? pairRaw.lon : null, "lon", defaultText, p, formatServices)
           : "";
         const valueText = useAxisFlat
-          ? ((topText + " " + bottomText).trim() || defaultText)
+          ? (topText + " " + bottomText).trim() || defaultText
           : placeholderNormalize.normalize(String(componentContext.format.applyFormatter(p.value, p)), defaultText);
-        const statusEmoji = useAxisFlat && isTimeStatusMarker(topText);
+        const statusEmoji = useAxisFlat && coordFormatting.isTimeStatusMarker(topText);
         const key = text.makeFitCacheKey({
           mode: "flat",
-          W: W, H: H,
-          caption: modeData.caption, unit: modeData.unit,
+          W: W,
+          H: H,
+          caption: modeData.caption,
+          unit: modeData.unit,
           value: valueText,
           secScale: modeData.secScale,
           family: family,
-          valueWeight: valueWeight, labelWeight: labelWeight,
+          valueWeight: valueWeight,
+          labelWeight: labelWeight,
           statusEmoji: statusEmoji
         });
         const fit = text.resolveFitCache(fitCache, "flat", key, function () {
@@ -262,12 +123,14 @@
             family: family,
             valueWeight: valueWeight,
             labelWeight: labelWeight,
-            extraValueCheck: /** @param {{ maxH: number, valueMetrics: unknown, valuePx: number }} meta */ function (meta) {
+            extraValueCheck: /** @param {{ maxH: number, valueMetrics: unknown, valuePx: number }} meta */ function (
+              meta
+            ) {
               if (!statusEmoji) {
                 return true;
               }
-              const safeHeight = meta.maxH * TIME_STATUS_SCALE_LIMIT;
-              const h = readActualTextHeight(meta.valueMetrics);
+              const safeHeight = meta.maxH * coordFormatting.TIME_STATUS_SCALE_LIMIT;
+              const h = coordFormatting.readActualTextHeight(meta.valueMetrics);
               return h == null ? meta.valuePx <= safeHeight : h <= safeHeight;
             }
           });
@@ -278,8 +141,10 @@
           captionText: modeData.caption,
           valueText: valueText,
           unitText: modeData.unit,
-          x: 0, y: 0,
-          W: W, H: H,
+          x: 0,
+          y: 0,
+          W: W,
+          H: H,
           family: family,
           valueWeight: valueWeight,
           labelWeight: labelWeight,
@@ -287,23 +152,31 @@
           unitOpacity: unitOpacity
         });
       } else {
-        const parsed = readCoordinatePair(p.value, p.coordinateRawValues === true, toOptionalFiniteNumber);
+        const parsed = coordFormatting.readCoordinatePair(
+          p.value,
+          p.coordinateRawValues === true,
+          toOptionalFiniteNumber
+        );
         const latText = parsed
-          ? formatAxisValue(parsed.lat, "lat", defaultText, p, componentContext, placeholderNormalize, toOptionalFiniteNumber)
+          ? coordFormatting.formatAxisValue(parsed.lat, "lat", defaultText, p, formatServices)
           : defaultText;
         const lonText = parsed
-          ? formatAxisValue(parsed.lon, "lon", defaultText, p, componentContext, placeholderNormalize, toOptionalFiniteNumber)
+          ? coordFormatting.formatAxisValue(parsed.lon, "lon", defaultText, p, formatServices)
           : defaultText;
-        const topStatusEmoji = isTimeStatusMarker(latText);
+        const topStatusEmoji = coordFormatting.isTimeStatusMarker(latText);
         const key = text.makeFitCacheKey({
           mode: modeData.mode,
-          W: W, H: H,
-          caption: modeData.caption, unit: modeData.unit,
-          latText: latText, lonText: lonText,
+          W: W,
+          H: H,
+          caption: modeData.caption,
+          unit: modeData.unit,
+          latText: latText,
+          lonText: lonText,
           secScale: modeData.secScale,
           align: coordinateAlign,
           family: family,
-          valueWeight: valueWeight, labelWeight: labelWeight
+          valueWeight: valueWeight,
+          labelWeight: labelWeight
         });
         const fit = text.resolveFitCache(fitCache, "stacked", key, function () {
           return text.fitTwoRowsWithHeader({
@@ -327,8 +200,8 @@
               if (!topStatusEmoji) {
                 return true;
               }
-              const safeHeight = meta.maxH * TIME_STATUS_SCALE_LIMIT;
-              const h = readActualTextHeight(meta.metrics);
+              const safeHeight = meta.maxH * coordFormatting.TIME_STATUS_SCALE_LIMIT;
+              const h = coordFormatting.readActualTextHeight(meta.metrics);
               return h == null ? meta.px <= safeHeight : h <= safeHeight;
             }
           });
@@ -336,9 +209,12 @@
         text.drawTwoRowsWithHeader({
           ctx: ctx,
           fit: fit,
-          W: W, padX: insets.padX,
-          captionText: modeData.caption, unitText: modeData.unit,
-          topText: latText, bottomText: lonText,
+          W: W,
+          padX: insets.padX,
+          captionText: modeData.caption,
+          unitText: modeData.unit,
+          topText: latText,
+          bottomText: lonText,
           family: family,
           valueWeight: valueWeight,
           labelWeight: labelWeight,
@@ -347,7 +223,9 @@
         });
       }
     }
-    function translateFunction() { return {}; }
+    function translateFunction() {
+      return {};
+    }
     return {
       id: "PositionCoordinateWidget",
       wantsHideNativeHead: true,
@@ -356,4 +234,4 @@
     };
   }
   return { id: "PositionCoordinateWidget", create: create };
-}));
+});

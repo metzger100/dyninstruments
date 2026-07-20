@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRadialTickMath = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
@@ -35,7 +35,7 @@
 
       let sweep = e - s;
       if (sweep === 0) sweep = 360;
-      const dir = (sweep >= 0) ? 1 : -1;
+      const dir = sweep >= 0 ? 1 : -1;
 
       return { s, e, sweep, dir };
     }
@@ -50,9 +50,9 @@
     function isBeyondEnd(curr, end, dir, includeEnd) {
       const direction = Number(dir) >= 0 ? 1 : -1;
       if (direction > 0) {
-        return includeEnd ? (curr > end) : (curr >= end);
+        return includeEnd ? curr > end : curr >= end;
       }
-      return includeEnd ? (curr < end) : (curr <= end);
+      return includeEnd ? curr < end : curr <= end;
     }
 
     /**
@@ -111,4 +111,4 @@
   }
 
   return { id: "RadialTickMath", create };
-}));
+});

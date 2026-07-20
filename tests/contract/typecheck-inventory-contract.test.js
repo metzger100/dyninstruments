@@ -16,31 +16,37 @@ describe("TypeScript checkJs inventory", function () {
       ...collectJavaScriptFiles("widgets"),
       "vitest.config.js"
     ]);
-    const listed = new Set(config.files.filter(function (file) {
-      return file.endsWith(".js") || file.endsWith(".mjs");
-    }));
+    const listed = new Set(
+      config.files.filter(function (/** @type {any} */ file) {
+        return file.endsWith(".js") || file.endsWith(".mjs");
+      })
+    );
 
     expect(listed).toEqual(expected);
-    expect(listed.size).toBe(213);
+    expect(listed.size).toBe(229);
   });
 
   it("keeps the six ambient declaration files in the strict project", function () {
-    expect(config.files.filter(function (file) {
-      return file.endsWith(".d.ts");
-    })).toHaveLength(6);
+    expect(
+      config.files.filter(function (/** @type {any} */ file) {
+        return file.endsWith(".d.ts");
+      })
+    ).toHaveLength(6);
   });
 });
 
+/** @param {string} relativeRoot */
 function collectJavaScriptFiles(relativeRoot) {
   const absoluteRoot = path.join(root, relativeRoot);
-  const files = [];
+  const files = /** @type {string[]} */ ([]);
 
+  /** @param {string} directory */
   function visit(directory) {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
       const absolutePath = path.join(directory, entry.name);
       if (entry.isDirectory() && entry.name !== "lint-fixtures") visit(absolutePath);
       else if (entry.isFile() && entry.name.endsWith(".js")) {
-        files.push(path.relative(root, absolutePath).replaceAll(path.sep, "/"));
+        files.push(/** @type {any} */ (path.relative(root, absolutePath)).replaceAll(path.sep, "/"));
       }
     }
   }

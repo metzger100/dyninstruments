@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
@@ -112,7 +113,7 @@ describe("CenterDisplayTextWidget", function () {
         measure: {
           activeMeasure: Object.prototype.hasOwnProperty.call(opts, "activeMeasure")
             ? opts.activeMeasure
-            : { getPointAtIndex: (index) => index === 0 ? { lat: 54.18, lon: 10.52 } : undefined },
+            : { getPointAtIndex: (index) => (index === 0 ? { lat: 54.18, lon: 10.52 } : undefined) },
           useRhumbLine: opts.useRhumbLine === true
         }
       },
@@ -132,8 +133,12 @@ describe("CenterDisplayTextWidget", function () {
         boat: "nm",
         measure: "nm"
       },
-      ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal") ? opts.ratioThresholdNormal : 1.1,
-      ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat") ? opts.ratioThresholdFlat : 2.4,
+      ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal")
+        ? opts.ratioThresholdNormal
+        : 1.1,
+      ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat")
+        ? opts.ratioThresholdFlat
+        : 2.4,
       coordinatesTabular: opts.coordinatesTabular,
       stableDigits: opts.stableDigits === true,
       disconnect: opts.disconnect === true,
@@ -224,8 +229,7 @@ describe("CenterDisplayTextWidget", function () {
 
   it("keeps compact nav-page-like sizes inside the canvas while preserving waypoint and boat rows", function () {
     const helpers = makeComponentContext();
-    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
-      .create({}, helpers);
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js").create({}, helpers);
     const sizes = [
       { width: 120, height: 60 },
       { width: 120, height: 80 },
@@ -248,8 +252,7 @@ describe("CenterDisplayTextWidget", function () {
 
   it("keeps compact measured layouts inside the canvas when the measure row is present", function () {
     const helpers = makeComponentContext();
-    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
-      .create({}, helpers);
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js").create({}, helpers);
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({ rectWidth: 120, rectHeight: 80, ctx });
 
@@ -261,5 +264,4 @@ describe("CenterDisplayTextWidget", function () {
     expect(findFirstText(texts, "POS")).toBeTruthy();
     expectTextsInsideCanvas(texts, 120, 80);
   });
-
 });

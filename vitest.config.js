@@ -49,15 +49,12 @@ module.exports = {
       reportsDirectory: "coverage",
       include: [
         "plugin.js",
-        "cluster/**/*.js",
+        "plugin.mjs",
+        "config/**/*.js",
         "runtime/**/*.js",
-        "config/shared/*.js",
-        "config/clusters/*.js",
-        "shared/widget-kits/linear/*.js",
-        "widgets/linear/**/*.js",
-        "shared/widget-kits/radial/RadialAngleMath.js",
-        "shared/widget-kits/radial/RadialTickMath.js",
-        "shared/widget-kits/radial/RadialValueMath.js"
+        "cluster/**/*.js",
+        "shared/**/*.js",
+        "widgets/**/*.js"
       ],
       exclude: ["tests/**", "documentation/**"],
       thresholds: {

@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniTextLayoutScaleHelpers = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniValueMathApi["clampNumber"]} */
@@ -25,10 +25,7 @@
     const safeMax = Math.max(1, Math.floor(Number(maxPx) || 0));
     const safeBase = Math.max(1, Math.floor(Number(basePx) || 0));
     const compactBoost = Math.max(0, clampTextFillScale(textFillScale) - 1);
-    return Math.min(
-      safeMax,
-      Math.max(1, Math.floor(safeBase + ((safeMax - safeBase) * compactBoost)))
-    );
+    return Math.min(safeMax, Math.max(1, Math.floor(safeBase + (safeMax - safeBase) * compactBoost)));
   }
 
   /** @param {unknown} source @returns {number} */
@@ -118,4 +115,4 @@
   }
 
   return { id: "TextLayoutScaleHelpers", create: create };
-}));
+});

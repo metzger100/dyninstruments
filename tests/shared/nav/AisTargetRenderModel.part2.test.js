@@ -1,7 +1,6 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("AisTargetRenderModel", function () {
   function createRenderModel(options) {
@@ -11,68 +10,40 @@ describe("AisTargetRenderModel", function () {
       vi.fn(function (value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (value == null || Number.isNaN(value)) {
-          return Object.prototype.hasOwnProperty.call(cfg, "default")
-            ? cfg.default
-            : "---";
+          return Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
         }
-        const params = Array.isArray(cfg.formatterParameters)
-          ? cfg.formatterParameters
-          : [];
-        return (
-          String(cfg.formatter) + "|" + String(value) + "|" + params.join(",")
-        );
+        const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
+        return String(cfg.formatter) + "|" + String(value) + "|" + params.join(",");
       });
 
     const modules = {
       AisTargetLayout: loadFresh("shared/widget-kits/nav/AisTargetLayout.js"),
-      AisTargetLayoutSizing: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutSizing.js",
-      ),
+      AisTargetLayoutSizing: loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js"),
       HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
-      ResponsiveScaleProfile: loadFresh(
-        "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-      ),
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
       LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-      AisTargetLayoutGeometry: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutGeometry.js",
-      ),
-      AisTargetLayoutGeometryStyles: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js",
-      ),
-      AisTargetLayoutMath: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutMath.js",
-      ),
-      PlaceholderNormalize: loadFresh(
-        "shared/widget-kits/format/PlaceholderNormalize.js",
-      ),
-      UnitAwareFormatter: loadFresh(
-        "shared/widget-kits/format/UnitAwareFormatter.js",
-      ),
-      StateScreenLabels: loadFresh(
-        "shared/widget-kits/state/StateScreenLabels.js",
-      ),
-      StateScreenPrecedence: loadFresh(
-        "shared/widget-kits/state/StateScreenPrecedence.js",
-      ),
-      StateScreenInteraction: loadFresh(
-        "shared/widget-kits/state/StateScreenInteraction.js",
-      ),
-      StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+      AisTargetLayoutGeometry: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js"),
+      AisTargetLayoutGeometryStyles: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js"),
+      AisTargetLayoutMath: loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js"),
+      PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+      UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
+      StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+      StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+      StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
+      StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js")
     };
     const componentContext = createComponentContextMock({
       modules: modules,
       services: {
         format: {
-          applyFormatter: applyFormatter,
-        },
-      },
+          applyFormatter: applyFormatter
+        }
+      }
     });
 
     return {
-      renderModel: loadFresh(
-        "shared/widget-kits/nav/AisTargetRenderModel.js",
-      ).create({}, componentContext),
-      applyFormatter: applyFormatter,
+      renderModel: loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js").create({}, componentContext),
+      applyFormatter: applyFormatter
     };
   }
 
@@ -81,12 +52,11 @@ describe("AisTargetRenderModel", function () {
     return Object.assign({}, props || {}, {
       surfacePolicy: {
         interaction: {
-          mode: opts.mode === "passive" ? "passive" : "dispatch",
+          mode: opts.mode === "passive" ? "passive" : "dispatch"
         },
         pageId: typeof opts.pageId === "string" ? opts.pageId : "navpage",
-        containerOrientation:
-          opts.orientation === "vertical" ? "vertical" : "default",
-      },
+        containerOrientation: opts.orientation === "vertical" ? "vertical" : "default"
+      }
     });
   }
 
@@ -105,29 +75,29 @@ describe("AisTargetRenderModel", function () {
         distance: 4.2,
         cpa: 0.7,
         tcpa: 30,
-        headingTo: 112,
+        headingTo: 112
       },
       layout: {
         ratioThresholdNormal: 1.2,
-        ratioThresholdFlat: 3.8,
+        ratioThresholdFlat: 3.8
       },
       captions: {
         dst: "DST",
         cpa: "DCPA",
         tcpa: "TCPA",
-        brg: "BRG",
+        brg: "BRG"
       },
       units: {
         dst: "nm",
         cpa: "nm",
         tcpa: "min",
-        brg: "°",
+        brg: "°"
       },
       formatUnits: {
         dst: "nm",
-        cpa: "nm",
+        cpa: "nm"
       },
-      default: "---",
+      default: "---"
     };
     const out = Object.assign({}, base, patch);
     out.domain = Object.assign({}, base.domain, patch.domain || {});
@@ -151,16 +121,16 @@ describe("AisTargetRenderModel", function () {
           return "NO DATA";
         }
         return cfg.default;
-      },
+      }
     });
     const model = setup.renderModel.buildModel({
       props: withSurfacePolicy(makeProps(), {
         pageId: "navpage",
-        mode: "dispatch",
+        mode: "dispatch"
       }),
       shellRect: { width: 320, height: 180 },
       mode: "normal",
-      isVerticalCommitted: false,
+      isVerticalCommitted: false
     });
 
     expect(model.metrics.dst.valueText).toBe("---");
@@ -178,14 +148,14 @@ describe("AisTargetRenderModel", function () {
             distance: null,
             cpa: "   ",
             tcpa: "",
-            headingTo: undefined,
-          },
+            headingTo: undefined
+          }
         }),
-        { pageId: "navpage", mode: "dispatch" },
+        { pageId: "navpage", mode: "dispatch" }
       ),
       shellRect: { width: 320, height: 180 },
       mode: "normal",
-      isVerticalCommitted: false,
+      isVerticalCommitted: false
     });
 
     expect(model.metrics.dst.valueText).toBe("---");
@@ -201,18 +171,15 @@ describe("AisTargetRenderModel", function () {
   it("keeps all four metrics visible for flat, normal, and high data modes without flat-row state classes", function () {
     const setup = createRenderModel();
     ["flat", "normal", "high"].forEach((mode) => {
-      const shellRect =
-        mode === "flat"
-          ? { width: 620, height: 120 }
-          : { width: 280, height: 220 };
+      const shellRect = mode === "flat" ? { width: 620, height: 120 } : { width: 280, height: 220 };
       const model = setup.renderModel.buildModel({
-        props: withSurfacePolicy(
-          makeProps({ domain: { showTcpaBranch: false, tcpa: 0 } }),
-          { pageId: "navpage", mode: "dispatch" },
-        ),
+        props: withSurfacePolicy(makeProps({ domain: { showTcpaBranch: false, tcpa: 0 } }), {
+          pageId: "navpage",
+          mode: "dispatch"
+        }),
         shellRect: shellRect,
         mode: mode,
-        isVerticalCommitted: false,
+        isVerticalCommitted: false
       });
 
       expect(model.visibleMetricIds).toEqual(["dst", "cpa", "tcpa", "brg"]);
@@ -220,7 +187,7 @@ describe("AisTargetRenderModel", function () {
         dst: true,
         cpa: true,
         tcpa: true,
-        brg: true,
+        brg: true
       });
       expect(model.wrapperClasses.join(" ")).not.toContain("flat-rows");
     });
@@ -233,14 +200,14 @@ describe("AisTargetRenderModel", function () {
         makeProps({
           domain: {
             hasTargetIdentity: false,
-            hasDispatchMmsi: false,
-          },
+            hasDispatchMmsi: false
+          }
         }),
-        { pageId: "gpspage", mode: "dispatch" },
+        { pageId: "gpspage", mode: "dispatch" }
       ),
       shellRect: { width: 300, height: 170 },
       mode: "normal",
-      isVerticalCommitted: false,
+      isVerticalCommitted: false
     });
 
     expect(model.kind).toBe("noAis");
@@ -257,14 +224,14 @@ describe("AisTargetRenderModel", function () {
         makeProps({
           domain: {
             hasTargetIdentity: false,
-            hasDispatchMmsi: false,
-          },
+            hasDispatchMmsi: false
+          }
         }),
-        { pageId: "navpage", mode: "dispatch" },
+        { pageId: "navpage", mode: "dispatch" }
       ),
       shellRect: { width: 300, height: 170 },
       mode: "normal",
-      isVerticalCommitted: false,
+      isVerticalCommitted: false
     });
 
     expect(model.kind).toBe("hidden");
@@ -272,5 +239,4 @@ describe("AisTargetRenderModel", function () {
     expect(model.visibleMetricIds).toEqual([]);
     expect(model.stateLabel).toBe("");
   });
-
 });

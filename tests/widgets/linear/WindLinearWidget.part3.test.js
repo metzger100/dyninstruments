@@ -1,7 +1,6 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("WindLinearWidget", function () {
   it("keeps missing angle values on placeholder path instead of numeric zero formatting", function () {
@@ -12,9 +11,7 @@ describe("WindLinearWidget", function () {
       createComponentContextMock({
         modules: {
           StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-          PlaceholderNormalize: loadFresh(
-            "shared/widget-kits/format/PlaceholderNormalize.js",
-          ),
+          PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
           ValueMath: {
             create() {
               return {
@@ -25,17 +22,16 @@ describe("WindLinearWidget", function () {
                 },
                 toOptionalFiniteNumber(value) {
                   if (value == null) return undefined;
-                  if (typeof value === "string" && value.trim() === "")
-                    return undefined;
+                  if (typeof value === "string" && value.trim() === "") return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
                 formatAngle180(value) {
                   const n = Number(value);
                   return isFinite(n) ? String(Math.round(n)) : "---";
-                },
+                }
               };
-            },
+            }
           },
           LinearGaugeEngine: {
             create() {
@@ -43,19 +39,19 @@ describe("WindLinearWidget", function () {
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
-                },
+                }
               };
-            },
-          },
+            }
+          }
         },
         services: {
           format: {
             applyFormatter(value) {
               return String(value);
-            },
-          },
-        },
-      }),
+            }
+          }
+        }
+      })
     );
 
     [null, undefined, "", "   "].forEach(function (rawAngle) {
@@ -65,7 +61,7 @@ describe("WindLinearWidget", function () {
         speedCaption: "AWS",
         angleUnit: "°",
         speedUnit: "kn",
-        speed: 4.2,
+        speed: 4.2
       });
 
       expect(Number.isNaN(display.num)).toBe(true);
@@ -79,7 +75,7 @@ describe("WindLinearWidget", function () {
       speedCaption: "AWS",
       angleUnit: "°",
       speedUnit: "kn",
-      speed: 4.2,
+      speed: 4.2
     });
     expect(valid.num).toBe(4);
     expect(valid.text).toBe("4");

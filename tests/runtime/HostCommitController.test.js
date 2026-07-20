@@ -4,6 +4,7 @@ describe("runtime/HostCommitController.js", function () {
   function createHostRoot() {
     return {
       classList: {
+        /** @param {any} name */
         contains(name) {
           return name === "dyniplugin" || name === "dyni-host-html";
         }
@@ -11,8 +12,10 @@ describe("runtime/HostCommitController.js", function () {
     };
   }
 
+  /** @param {any} rootEl */
   function createShell(rootEl) {
     return {
+      /** @param {any} selector */
       closest(selector) {
         return selector === ".widget.dyniplugin" ? rootEl : null;
       }
@@ -20,16 +23,17 @@ describe("runtime/HostCommitController.js", function () {
   }
 
   function createHarness() {
-    let shell = null;
-    const rafQueue = [];
-    const canceledRafs = [];
+    let shell = /** @type {any} */ (null);
+    const rafQueue = /** @type {any[]} */ ([]);
+    const canceledRafs = /** @type {any[]} */ ([]);
     let rafId = 0;
 
-    const timeoutQueue = [];
-    const clearedTimeouts = [];
+    const timeoutQueue = /** @type {any[]} */ ([]);
+    const clearedTimeouts = /** @type {any[]} */ ([]);
     let timeoutId = 0;
 
-    const observerInstances = [];
+    const observerInstances = /** @type {any[]} */ ([]);
+    /** @this {any} @param {any} callback */
     function MutationObserverStub(callback) {
       this.callback = callback;
       this.observe = vi.fn();
@@ -37,15 +41,17 @@ describe("runtime/HostCommitController.js", function () {
       observerInstances.push(this);
     }
 
+    /** @param {any} callback */
     function requestAnimationFrameStub(callback) {
       rafId += 1;
       rafQueue.push({ id: rafId, callback: callback });
       return rafId;
     }
 
+    /** @param {any} handle */
     function cancelAnimationFrameStub(handle) {
       canceledRafs.push(handle);
-      const next = [];
+      const next = /** @type {any[]} */ ([]);
       for (let i = 0; i < rafQueue.length; i++) {
         if (rafQueue[i].id !== handle) {
           next.push(rafQueue[i]);
@@ -55,15 +61,17 @@ describe("runtime/HostCommitController.js", function () {
       Array.prototype.push.apply(rafQueue, next);
     }
 
+    /** @param {any} callback @param {any} delay */
     function setTimeoutStub(callback, delay) {
       timeoutId += 1;
       timeoutQueue.push({ id: timeoutId, callback: callback, delay: delay });
       return timeoutId;
     }
 
+    /** @param {any} handle */
     function clearTimeoutStub(handle) {
       clearedTimeouts.push(handle);
-      const next = [];
+      const next = /** @type {any[]} */ ([]);
       for (let i = 0; i < timeoutQueue.length; i++) {
         if (timeoutQueue[i].id !== handle) {
           next.push(timeoutQueue[i]);
@@ -75,7 +83,7 @@ describe("runtime/HostCommitController.js", function () {
 
     const document = {
       body: {},
-      querySelector: vi.fn(function () {
+      querySelector: vi.fn(function (/** @type {any} */ selector) {
         return shell;
       })
     };
@@ -114,6 +122,7 @@ describe("runtime/HostCommitController.js", function () {
       return task.id;
     }
 
+    /** @param {any} [index] */
     function triggerObserver(index) {
       const targetIndex = Number.isInteger(index) ? index : 0;
       const observer = observerInstances[targetIndex];
@@ -125,6 +134,7 @@ describe("runtime/HostCommitController.js", function () {
 
     return {
       createController: context.DyniPlugin.runtime.createHostCommitController,
+      /** @param {any} nextShell */
       setShell(nextShell) {
         shell = nextShell;
       },
@@ -254,5 +264,4 @@ describe("runtime/HostCommitController.js", function () {
     expect(onCommit).toHaveBeenCalledTimes(1);
     expect(observer.disconnect).toHaveBeenCalledTimes(1);
   });
-
 });

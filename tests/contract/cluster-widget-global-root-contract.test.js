@@ -40,7 +40,7 @@ describe("ClusterWidget global root contract", function () {
         components: {
           require: function () {
             return {
-              ensureObject: function (value) {
+              ensureObject: function (/** @type {any} */ value) {
                 return value;
               }
             };

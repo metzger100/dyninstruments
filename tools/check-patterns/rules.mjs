@@ -7,6 +7,7 @@ import {
   runRendererNumericCoercionRule,
   runRuntimeReachThroughRule,
   runTodoWithoutOwner,
+  runUnsafeHtmlDomSinkRule,
   runUnusedFallbackRule
 } from "./rules-core.mjs";
 import { runDuplicateBlockClones, runDuplicateFunctions } from "./rules-duplicates.mjs";
@@ -30,28 +31,33 @@ import {
   runRedundantNullTypeGuardRule
 } from "./rules-failfast.mjs";
 import {
+  runAbsentNumericSentinelRule,
   runClusterRendererClusterPrefixRule,
   runMapperLogicLeakageRule,
-  runMapperOutputComplexityRule
+  runMapperOutputComplexityRule,
+  runMapperPropRenormalizationRule
 } from "./rules-mapper.mjs";
 import { runRedundantInternalFallbackRule } from "./rules-redundant-fallback.mjs";
-import {
-  runResponsiveLayoutHardFloorRule,
-  runResponsiveProfileOwnershipRule
-} from "./rules-responsive.mjs";
+import { runResponsiveLayoutHardFloorRule, runResponsiveProfileOwnershipRule } from "./rules-responsive.mjs";
 
-const ALLOWLISTED_ORCHESTRATION_FUNCTIONS = new Set([
-  "create",
-  "translateFunction",
-  "translate",
-  "renderCanvas"
-]);
+const ALLOWLISTED_ORCHESTRATION_FUNCTIONS = new Set(["create", "translateFunction", "translate", "renderCanvas"]);
 
 export const RULES = [
   {
     name: "invalid-lint-suppression",
     scope: {
-      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
+      include: [
+        "widgets/**/*.js",
+        "widgets/**/*.css",
+        "cluster/**/*.js",
+        "shared/**/*.js",
+        "shared/**/*.css",
+        "runtime/**/*.js",
+        "config/**/*.js",
+        "plugin.js",
+        "plugin.mjs",
+        "plugin.css"
+      ],
       exclude: ["tests/**", "tools/**"]
     },
     run: runInvalidLintSuppressionRule,
@@ -71,8 +77,10 @@ export const RULES = [
       ],
       exclude: ["tests/**", "tools/**"]
     },
-    detect: /\bThemePresets\b|data-dyni-theme|applyThemePreset|ThemeResolver\.create\s*\(|invalidateTheme\s*\(|namedHandlers\s*\(|\bcatchAll\b|triggerResize\s*\(|onclick="/g,
-    message: ({ file, line, match }) => `[removed-theme-surface-architecture] ${file}:${line}\nRemoved PLAN9 architecture token detected (${match[0]}). Do not reintroduce legacy theme/surface interaction paths.`
+    detect:
+      /\bThemePresets\b|data-dyni-theme|applyThemePreset|ThemeResolver\.create\s*\(|invalidateTheme\s*\(|namedHandlers\s*\(|\bcatchAll\b|triggerResize\s*\(|onclick="/g,
+    message: ({ file, line, match }) =>
+      `[removed-theme-surface-architecture] ${file}:${line}\nRemoved PLAN9 architecture token detected (${match[0]}). Do not reintroduce legacy theme/surface interaction paths.`
   },
   {
     name: "legacy-theme-css-input-consumer",
@@ -82,17 +90,29 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     detect: /--dyni-border-day|--dyni-border-night|--dyni-font-weight|--dyni-label-weight/g,
-    message: ({ file, line, match }) => `[legacy-theme-css-input-consumer] ${file}:${line}\nLegacy CSS input var '${match[0]}' detected. Migrated surface/typography consumers must use --dyni-theme-* outputs.`
+    message: ({ file, line, match }) =>
+      `[legacy-theme-css-input-consumer] ${file}:${line}\nLegacy CSS input var '${match[0]}' detected. Migrated surface/typography consumers must use --dyni-theme-* outputs.`
   },
   {
     name: "absolute-user-home-path",
     severity: "block",
     scope: {
-      include: ["**/*.md", "**/*.js", "**/*.mjs", "**/*.cjs", "**/*.json", "**/*.yml", "**/*.yaml", "**/*.txt", "**/*.sh"],
+      include: [
+        "**/*.md",
+        "**/*.js",
+        "**/*.mjs",
+        "**/*.cjs",
+        "**/*.json",
+        "**/*.yml",
+        "**/*.yaml",
+        "**/*.txt",
+        "**/*.sh"
+      ],
       exclude: ["tests/**", "tools/**", ".vscode/**", ".idea/**"]
     },
     detect: /(?:\/home\/[A-Za-z0-9_.-]+\/|\/Users\/[A-Za-z0-9_.-]+\/)/g,
-    message: ({ file, line, match }) => `[absolute-user-home-path] ${file}:${line}\nAbsolute user-home path detected (${match[0]}). Use project-relative or redacted placeholders instead (for example '/path/to/...', '/home/<user>/...').`
+    message: ({ file, line, match }) =>
+      `[absolute-user-home-path] ${file}:${line}\nAbsolute user-home path detected (${match[0]}). Use project-relative or redacted placeholders instead (for example '/path/to/...', '/home/<user>/...').`
   },
   {
     name: "duplicate-functions",
@@ -128,17 +148,26 @@ export const RULES = [
     },
     detect: /(?:window\.avnav|(?<!\w)avnav\.api)/g,
     allowlist: [],
-    message: ({ file, line }) => `[forbidden-global] ${file}:${line}\nDirect access to 'avnav.api' in widget code. Widgets must use\ncomponentContext.format.applyFormatter() instead. The centralized formatter in\nruntime/format-runtime.js (runtime.format service) already handles availability checks, try/catch,\nand fallback. See ARCHITECTURE.md boundary rule and core-principles.md #9.`
+    message: ({ file, line }) =>
+      `[forbidden-global] ${file}:${line}\nDirect access to 'avnav.api' in widget code. Widgets must use\ncomponentContext.format.applyFormatter() instead. The centralized formatter in\nruntime/format-runtime.js (runtime.format service) already handles availability checks, try/catch,\nand fallback. See ARCHITECTURE.md boundary rule and core-principles.md #9.`
   },
   {
     name: "legacy-component-loader-api",
     severity: "block",
     scope: {
-      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "config/**/*.js", "plugin.js"],
+      include: [
+        "widgets/**/*.js",
+        "cluster/**/*.js",
+        "shared/**/*.js",
+        "runtime/**/*.js",
+        "config/**/*.js",
+        "plugin.js"
+      ],
       exclude: ["tests/**", "tools/**"]
     },
     run: runLegacyComponentLoaderApiRule,
-    message: ({ file, line, expression }) => `[legacy-component-loader-api] ${file}:${line}\nRemoved loader API detected (${expression}). Final runtime/component code must use componentContext.components.require(...) and runtime-owned services only.`
+    message: ({ file, line, expression }) =>
+      `[legacy-component-loader-api] ${file}:${line}\nRemoved loader API detected (${expression}). Final runtime/component code must use componentContext.components.require(...) and runtime-owned services only.`
   },
   {
     name: "runtime-service-reach-through",
@@ -148,24 +177,26 @@ export const RULES = [
       exclude: ["cluster/ClusterWidget.js", "tests/**", "tools/**"]
     },
     run: runRuntimeReachThroughRule,
-    message: ({ file, line, expression }) => `[runtime-service-reach-through] ${file}:${line}\nDirect runtime service reach-through detected (${expression}). Ordinary registered components must use componentContext.* service views instead.`
+    message: ({ file, line, expression }) =>
+      `[runtime-service-reach-through] ${file}:${line}\nDirect runtime service reach-through detected (${expression}). Ordinary registered components must use componentContext.* service views instead.`
   },
   {
     name: "empty-catch",
     scope: { include: ["**/*.js"], exclude: ["tests/**", "tools/**"] },
     detect: /catch\s*\([^)]*\)\s*\{\s*\}/g,
     allowlist: [],
-    message: ({ file, line }) => `[empty-catch] ${file}:${line}\nEmpty catch block swallows errors silently. Either:\n1. Add a comment explaining why: catch(e) { /* intentional: avnav may be absent */ }\n2. Log the error: catch(e) { console.warn('...', e); }\n3. Use componentContext.format.applyFormatter() which handles this centrally via runtime.format.\nSee core-principles.md #11.`
+    message: ({ file, line }) =>
+      `[empty-catch] ${file}:${line}\nEmpty catch block swallows errors silently. Either:\n1. Add a comment explaining why: catch(e) { /* intentional: avnav may be absent */ }\n2. Log the error: catch(e) { console.warn('...', e); }\n3. Use componentContext.format.applyFormatter() which handles this centrally via runtime.format.\nSee core-principles.md #11.`
   },
   {
     name: "catch-fallback-without-suppression",
-    severity: "warn",
     scope: {
       include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
       exclude: ["tests/**", "tools/**"]
     },
     run: runCatchFallbackWithoutSuppressionRule,
-    message: ({ file, line, expression }) => `[catch-fallback-without-suppression] ${file}:${line}\nNon-rethrow catch detected (${expression}). Fail-fast policy requires an inline rule-specific suppression comment for intentional fallback catches.`
+    message: ({ file, line, expression }) =>
+      `[catch-fallback-without-suppression] ${file}:${line}\nNon-rethrow catch detected (${expression}). Fail-fast policy requires an inline rule-specific suppression comment for intentional fallback catches.`
   },
   {
     name: "console-in-widgets",
@@ -175,7 +206,8 @@ export const RULES = [
     },
     detect: /\bconsole\.(log|warn|error)\b/g,
     allowlist: [],
-    message: ({ file, line }) => `[console-in-widget] ${file}:${line}\nconsole.log/warn/error in non-runtime code. Only runtime/ and plugin.js\nmay log directly. Remove debug logging before committing.`
+    message: ({ file, line }) =>
+      `[console-in-widget] ${file}:${line}\nconsole.log/warn/error in non-runtime code. Only runtime/ and plugin.js\nmay log directly. Remove debug logging before committing.`
   },
   {
     name: "todo-without-owner",
@@ -186,40 +218,72 @@ export const RULES = [
     detect: /\b(?:TODO|FIXME|HACK|XXX)\b/,
     allowlist: [],
     run: runTodoWithoutOwner,
-    message: ({ file, line }) => `[todo-missing-owner] ${file}:${line}\nTODO/FIXME without owner and date. Use format: TODO(name, 2025-06-15): description.\nUndated TODOs become permanent. See conventions/coding-standards.md.`
+    message: ({ file, line }) =>
+      `[todo-missing-owner] ${file}:${line}\nTODO/FIXME without owner and date. Use format: TODO(name, 2025-06-15): description.\nUndated TODOs become permanent. See conventions/coding-standards.md.`
   },
   {
     name: "unused-fallback",
     scope: {
-      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "config/**/*.js", "plugin.js"],
+      include: [
+        "widgets/**/*.js",
+        "cluster/**/*.js",
+        "shared/**/*.js",
+        "runtime/**/*.js",
+        "config/**/*.js",
+        "plugin.js"
+      ],
       exclude: ["tests/**", "tools/**"]
     },
     run: runUnusedFallbackRule,
-    message: ({ file, line, name }) => `[unused-fallback] ${file}:${line}\nFallback symbol '${name}' is declared but never used. Remove stale fallback leftovers from refactors or wire the fallback into active code paths.`
+    message: ({ file, line, name }) =>
+      `[unused-fallback] ${file}:${line}\nFallback symbol '${name}' is declared but never used. Remove stale fallback leftovers from refactors or wire the fallback into active code paths.`
   },
   {
     name: "dead-code",
     scope: {
-      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "config/**/*.js", "plugin.js"],
+      include: [
+        "widgets/**/*.js",
+        "cluster/**/*.js",
+        "shared/**/*.js",
+        "runtime/**/*.js",
+        "config/**/*.js",
+        "plugin.js"
+      ],
       exclude: ["tests/**", "tools/**"]
     },
     run: runDeadCodeRule,
     functionAllowlist: ["create", "translateFunction", "translate", "renderCanvas"],
-    message: ({ file, line, detail }) => `[dead-code] ${file}:${line}\n${detail}\nRemove stale refactor leftovers or make branch/function reachable.`
+    message: ({ file, line, detail }) =>
+      `[dead-code] ${file}:${line}\n${detail}\nRemove stale refactor leftovers or make branch/function reachable.`
   },
   {
     name: "default-truthy-fallback",
     scope: {
-      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "config/**/*.js", "plugin.js"],
+      include: [
+        "widgets/**/*.js",
+        "cluster/**/*.js",
+        "shared/**/*.js",
+        "runtime/**/*.js",
+        "config/**/*.js",
+        "plugin.js"
+      ],
       exclude: ["tests/**", "tools/**"]
     },
     run: runDefaultTruthyFallbackRule,
-    message: ({ file, line, expression }) => `[default-truthy-fallback] ${file}:${line}\nTruthy fallback on '.default' detected (${expression}). This clobbers explicit falsy defaults ("", 0, false).\nUse property-presence/nullish semantics instead of '||'.`
+    message: ({ file, line, expression }) =>
+      `[default-truthy-fallback] ${file}:${line}\nTruthy fallback on '.default' detected (${expression}). This clobbers explicit falsy defaults ("", 0, false).\nUse property-presence/nullish semantics instead of '||'.`
   },
   {
     name: "redundant-internal-fallback",
     scope: {
-      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "config/**/*.js", "plugin.js"],
+      include: [
+        "widgets/**/*.js",
+        "cluster/**/*.js",
+        "shared/**/*.js",
+        "runtime/**/*.js",
+        "config/**/*.js",
+        "plugin.js"
+      ],
       exclude: ["tests/**", "tools/**"]
     },
     run: runRedundantInternalFallbackRule,
@@ -238,7 +302,8 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runInternalHookFallbackRule,
-    message: ({ file, line, expression }) => `[internal-hook-fallback] ${file}:${line}\nInternal hook/spec fallback detected (${expression}). Keep defaults at the boundary and avoid re-sanitizing internal hook results.`
+    message: ({ file, line, expression }) =>
+      `[internal-hook-fallback] ${file}:${line}\nInternal hook/spec fallback detected (${expression}). Keep defaults at the boundary and avoid re-sanitizing internal hook results.`
   },
   {
     name: "redundant-null-type-guard",
@@ -248,7 +313,8 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runRedundantNullTypeGuardRule,
-    message: ({ file, line, expression }) => `[redundant-null-type-guard] ${file}:${line}\nRedundant internal null/type guard (${expression}). Trust validated internal contracts instead of silently sanitizing again.`
+    message: ({ file, line, expression }) =>
+      `[redundant-null-type-guard] ${file}:${line}\nRedundant internal null/type guard (${expression}). Trust validated internal contracts instead of silently sanitizing again.`
   },
   {
     name: "hardcoded-runtime-default",
@@ -258,7 +324,8 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runHardcodedRuntimeDefaultRule,
-    message: ({ file, line, expression }) => `[hardcoded-runtime-default] ${file}:${line}\nHardcoded runtime fallback/default detected (${expression}). Prefer declarative config or boundary-owned defaults over inline literals.`
+    message: ({ file, line, expression }) =>
+      `[hardcoded-runtime-default] ${file}:${line}\nHardcoded runtime fallback/default detected (${expression}). Prefer declarative config or boundary-owned defaults over inline literals.`
   },
   {
     name: "widget-renderer-default-duplication",
@@ -268,7 +335,8 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runWidgetRendererDefaultDuplicationRule,
-    message: ({ file, line, groupName, expression, configFile, propNames }) => `[widget-renderer-default-duplication] ${file}:${line}\nWidget hardcodes ${groupName} (${expression}) which duplicates config-owned defaults in ${configFile} via ${propNames}. Remove the widget-level defaults and keep the engine fallback as the unreachable last resort.`
+    message: ({ file, line, groupName, expression, configFile, propNames }) =>
+      `[widget-renderer-default-duplication] ${file}:${line}\nWidget hardcodes ${groupName} (${expression}) which duplicates config-owned defaults in ${configFile} via ${propNames}. Remove the widget-level defaults and keep the engine fallback as the unreachable last resort.`
   },
   {
     name: "engine-layout-default-drift",
@@ -278,7 +346,8 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runEngineLayoutDefaultDriftRule,
-    message: ({ file, line, constantName, expression, otherFile }) => `[engine-layout-default-drift] ${file}:${line}\nLayout constant ${constantName} = ${expression} duplicates the engine-owned ratio default in ${otherFile}. Keep semantic ratio defaults in one owner only.`
+    message: ({ file, line, constantName, expression, otherFile }) =>
+      `[engine-layout-default-drift] ${file}:${line}\nLayout constant ${constantName} = ${expression} duplicates the engine-owned ratio default in ${otherFile}. Keep semantic ratio defaults in one owner only.`
   },
   {
     name: "canvas-api-typeof-guard",
@@ -288,7 +357,8 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runCanvasApiTypeofGuardRule,
-    message: ({ file, line, methodName }) => `[canvas-api-typeof-guard] ${file}:${line}\nRedundant typeof guard for Canvas 2D method ctx.${methodName}. The rendering context is already a trusted CanvasRenderingContext2D at the setup boundary.`
+    message: ({ file, line, methodName }) =>
+      `[canvas-api-typeof-guard] ${file}:${line}\nRedundant typeof guard for Canvas 2D method ctx.${methodName}. The rendering context is already a trusted CanvasRenderingContext2D at the setup boundary.`
   },
   {
     name: "try-finally-canvas-drawing",
@@ -298,7 +368,8 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runTryFinallyCanvasDrawingRule,
-    message: ({ file, line, expression }) => `[try-finally-canvas-drawing] ${file}:${line}\nCanvas save/restore wrapped in ${expression}. Keep the direct save/restore pair and reserve try/finally for real throwing boundaries.`
+    message: ({ file, line, expression }) =>
+      `[try-finally-canvas-drawing] ${file}:${line}\nCanvas save/restore wrapped in ${expression}. Keep the direct save/restore pair and reserve try/finally for real throwing boundaries.`
   },
   {
     name: "framework-method-typeof-guard",
@@ -308,7 +379,8 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runFrameworkMethodTypeofGuardRule,
-    message: ({ file, line, target }) => `[framework-method-typeof-guard] ${file}:${line}\nRedundant typeof guard on trusted framework method ${target}. Internal module-loader contracts should be used directly once resolved.`
+    message: ({ file, line, target }) =>
+      `[framework-method-typeof-guard] ${file}:${line}\nRedundant typeof guard on trusted framework method ${target}. Internal module-loader contracts should be used directly once resolved.`
   },
   {
     name: "inline-config-default-duplication",
@@ -318,17 +390,18 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runInlineConfigDefaultDuplicationRule,
-    message: ({ file, line, propName, literal, configFile }) => `[inline-config-default-duplication] ${file}:${line}\nInline fallback ${literal} for prop '${propName}' duplicates the config-owned editable default in ${configFile}. Trust the editable-default contract instead of re-declaring it locally.`
+    message: ({ file, line, propName, literal, configFile }) =>
+      `[inline-config-default-duplication] ${file}:${line}\nInline fallback ${literal} for prop '${propName}' duplicates the config-owned editable default in ${configFile}. Trust the editable-default contract instead of re-declaring it locally.`
   },
   {
     name: "css-js-default-duplication",
-    severity: "warn",
     scope: {
       include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
       exclude: ["tests/**", "tools/**"]
     },
     run: runCssJsDefaultDuplicationRule,
-    message: ({ file, line, expression }) => `[css-js-default-duplication] ${file}:${line}\nJS duplicates CSS/theme defaults (${expression}). Keep theme/token defaults in the CSS or theme boundary layer only.`
+    message: ({ file, line, expression }) =>
+      `[css-js-default-duplication] ${file}:${line}\nJS duplicates CSS/theme defaults (${expression}). Keep theme/token defaults in the CSS or theme boundary layer only.`
   },
   {
     name: "premature-legacy-support",
@@ -338,7 +411,8 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runPrematureLegacySupportRule,
-    message: ({ file, line, expression }) => `[premature-legacy-support] ${file}:${line}\nPremature legacy/compatibility support detected (${expression}). Remove speculative fallback/compat paths unless an active boundary contract requires them.`
+    message: ({ file, line, expression }) =>
+      `[premature-legacy-support] ${file}:${line}\nPremature legacy/compatibility support detected (${expression}). Remove speculative fallback/compat paths unless an active boundary contract requires them.`
   },
   {
     name: "canonical-helper-redefinition",
@@ -348,17 +422,18 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runCanonicalHelperRedefinitionRule,
-    message: ({ file, line, helperName, ownerModule, ownerPath }) => `[canonical-helper-redefinition] ${file}:${line}\nCanonical helper '${helperName}' is redefined outside its owner '${ownerModule}' (${ownerPath}). Use the shared module export instead of a private helper copy.`
+    message: ({ file, line, helperName, ownerModule, ownerPath }) =>
+      `[canonical-helper-redefinition] ${file}:${line}\nCanonical helper '${helperName}' is redefined outside its owner '${ownerModule}' (${ownerPath}). Use the shared module export instead of a private helper copy.`
   },
   {
     name: "editable-threshold-missing-internal",
-    severity: "warn",
     scope: {
       include: ["config/clusters/*.js", "config/shared/*.js"],
       exclude: ["tests/**", "tools/**"]
     },
     run: runEditableThresholdInternalRule,
-    message: ({ file, line, keyName }) => `[editable-threshold-missing-internal] ${file}:${line}\nEditable parameter '${keyName}' looks like an internal ratio/threshold layout knob but is missing 'internal: true'. Mark runtime-only threshold specs internal so defaults still apply without exposing them in the host editor.`
+    message: ({ file, line, keyName }) =>
+      `[editable-threshold-missing-internal] ${file}:${line}\nEditable parameter '${keyName}' looks like an internal ratio/threshold layout knob but is missing 'internal: true'. Mark runtime-only threshold specs internal so defaults still apply without exposing them in the host editor.`
   },
   {
     name: "formatter-availability-heuristic",
@@ -367,7 +442,8 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runFormatterAvailabilityHeuristicRule,
-    message: ({ file, line }) => `[formatter-availability-heuristic] ${file}:${line}\nFormatter-availability inferred from output equality to String(raw).\nDo not treat formatted output equal to raw text as formatter failure.`
+    message: ({ file, line }) =>
+      `[formatter-availability-heuristic] ${file}:${line}\nFormatter-availability inferred from output equality to String(raw).\nDo not treat formatted output equal to raw text as formatter failure.`
   },
   {
     name: "renderer-numeric-coercion-without-boundary-contract",
@@ -376,7 +452,49 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runRendererNumericCoercionRule,
-    message: ({ file, line, propName }) => `[renderer-numeric-coercion-without-boundary-contract] ${file}:${line}\nRenderer coerces mapper-owned prop '${propName}' via Number(props.${propName}).\nNormalize at mapper boundary and pass finite numbers or undefined.`
+    message: ({ file, line, propName }) =>
+      `[renderer-numeric-coercion-without-boundary-contract] ${file}:${line}\nRenderer coerces mapper-owned prop '${propName}' via Number(props.${propName}).\nNormalize at mapper boundary and pass finite numbers or undefined.`
+  },
+  {
+    name: "absent-numeric-sentinel",
+    severity: "block",
+    scope: {
+      include: ["cluster/mappers/*.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runAbsentNumericSentinelRule,
+    message: ({ file, line, sentinel }) =>
+      `[absent-numeric-sentinel] ${file}:${line}\nMapper output uses '${sentinel}' as an absent-value sentinel. Optional numeric mapper output must use 'undefined' for the absent case.`
+  },
+  {
+    name: "unsafe-html-dom-sink",
+    severity: "block",
+    scope: {
+      include: [
+        "widgets/**/*.js",
+        "cluster/**/*.js",
+        "shared/**/*.js",
+        "runtime/**/*.js",
+        "config/**/*.js",
+        "plugin.js",
+        "plugin.mjs"
+      ],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runUnsafeHtmlDomSinkRule,
+    message: ({ file, line, sinkName }) =>
+      `[unsafe-html-dom-sink] ${file}:${line}\nUnauthorized HTML DOM sink '${sinkName}' detected. Only the two reviewed parsing/patch sinks in shared/widget-kits/html/HtmlDomPatchUtils.js may assign innerHTML; use componentContext/HtmlDomPatchUtils boundaries elsewhere.`
+  },
+  {
+    name: "mapper-prop-renormalization",
+    severity: "block",
+    scope: {
+      include: ["widgets/**/*.js"],
+      exclude: ["tests/**", "tools/**"]
+    },
+    run: runMapperPropRenormalizationRule,
+    message: ({ file, line, propName, helperName }) =>
+      `[mapper-prop-renormalization] ${file}:${line}\nRenderer re-normalizes boundary-owned prop '${propName}' via ${helperName}.\nCluster mappers and editable defaults own rendererProps normalization. Trust that boundary instead of re-normalizing numeric or string props downstream.`
   },
   {
     name: "responsive-layout-hard-floor",
@@ -404,7 +522,8 @@ export const RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runResponsiveLayoutHardFloorRule,
-    message: ({ file, line, expression }) => `[responsive-layout-hard-floor] ${file}:${line}\nResponsive layout/text floor detected (${expression}). Use ResponsiveScaleProfile-derived sizing or add a rule-specific suppression for a technical safety guard.`
+    message: ({ file, line, expression }) =>
+      `[responsive-layout-hard-floor] ${file}:${line}\nResponsive layout/text floor detected (${expression}). Use ResponsiveScaleProfile-derived sizing or add a rule-specific suppression for a technical safety guard.`
   },
   {
     name: "responsive-profile-ownership",
@@ -449,7 +568,8 @@ export const RULES = [
     },
     run: runMapperLogicLeakageRule,
     functionAllowlist: ["create", "translate"],
-    message: ({ file, line, detail }) => `[mapper-logic-leakage] ${file}:${line}\n${detail}\nMappers must stay declarative. Move presentation/business logic to renderer modules or ClusterMapperToolkit.`
+    message: ({ file, line, detail }) =>
+      `[mapper-logic-leakage] ${file}:${line}\n${detail}\nMappers must stay declarative. Move presentation/business logic to renderer modules or ClusterMapperToolkit.`
   },
   {
     name: "cluster-renderer-cluster-prefix",
@@ -459,7 +579,8 @@ export const RULES = [
     },
     run: runClusterRendererClusterPrefixRule,
     allowlist: [],
-    message: ({ file, line, id, prefix }) => `[cluster-renderer-cluster-prefix] ${file}:${line}\nRenderer id '${id}' starts with cluster prefix '${prefix}'.\nUse role-based renderer names in cluster/rendering/ (for example 'RendererPropsWidget' instead of '${prefix}${id.slice(prefix.length)}').`
+    message: ({ file, line, id, prefix }) =>
+      `[cluster-renderer-cluster-prefix] ${file}:${line}\nRenderer id '${id}' starts with cluster prefix '${prefix}'.\nUse role-based renderer names in cluster/rendering/ (for example 'RendererPropsWidget' instead of '${prefix}${id.slice(prefix.length)}').`
   },
   {
     name: "mapper-output-complexity",
@@ -473,7 +594,8 @@ export const RULES = [
       ]
     },
     run: runMapperOutputComplexityRule,
-    message: ({ file, line, propCount, kind }) => `[mapper-output-complexity] ${file}:${line} — Mapper returns ${propCount} properties for kind '${kind}'. If >8 props are needed, consider extracting a dedicated renderer wrapper instead of overloading the target renderer. See the renderer decision rule in the add-new-cluster guide.`
+    message: ({ file, line, propCount, kind }) =>
+      `[mapper-output-complexity] ${file}:${line} — Mapper returns ${propCount} properties for kind '${kind}'. If >8 props are needed, consider extracting a dedicated renderer wrapper instead of overloading the target renderer. See the renderer decision rule in the add-new-cluster guide.`
   }
 ];
 

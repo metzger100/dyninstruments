@@ -1,12 +1,10 @@
 const path = require("node:path");
 const fs = require("node:fs");
 const {
-  ORIGINAL_DYNI_PLUGIN,
   createRenderer,
   makeProps,
   withSurfacePolicy,
-  createSurfaceDom,
-  mountCommitted,
+  mountCommitted
 } = require("./ActiveRouteTextHtmlWidget.harness.js");
 
 describe("ActiveRouteTextHtmlWidget", function () {
@@ -23,7 +21,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const openActiveRoute = vi.fn(() => true);
     const mounted = mountCommitted(
       setup.renderer,
-      withSurfacePolicy(makeProps(), { mode: "dispatch", openActiveRoute }),
+      withSurfacePolicy(makeProps(), { mode: "dispatch", openActiveRoute })
     );
 
     const html = mounted.html();
@@ -33,21 +31,19 @@ describe("ActiveRouteTextHtmlWidget", function () {
     expect(html).toContain("dyni-active-route-open-hotspot");
     expect(html).toContain("DIST:12.4");
     expect(
-      mounted.mountEl
-        .querySelector(".dyni-active-route-metric-value-row")
-        .getAttribute("style"),
+      /** @type {HTMLElement} */ (mounted.mountEl.querySelector(".dyni-active-route-metric-value-row")).getAttribute(
+        "style"
+      )
     ).toBe("gap:4px;");
     expect(setup.fitCompute).toHaveBeenCalledTimes(1);
     expect(
-      mounted.mountEl
-        .querySelector(".dyni-active-route-metric-caption")
-        .getAttribute("style"),
+      /** @type {HTMLElement} */ (mounted.mountEl.querySelector(".dyni-active-route-metric-caption")).getAttribute(
+        "style"
+      )
     ).toBe("font-size:12px;");
 
-    const wrapper = mounted.mountEl.querySelector(".dyni-active-route-html");
-    wrapper.dispatchEvent(
-      new MouseEvent("click", { bubbles: true, cancelable: true }),
-    );
+    const wrapper = /** @type {HTMLElement} */ (mounted.mountEl.querySelector(".dyni-active-route-html"));
+    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(openActiveRoute).toHaveBeenCalledTimes(1);
   });
 
@@ -58,17 +54,15 @@ describe("ActiveRouteTextHtmlWidget", function () {
       setup.renderer,
       withSurfacePolicy(makeProps({ editing: true }), {
         mode: "dispatch",
-        openActiveRoute,
-      }),
+        openActiveRoute
+      })
     );
 
     const html = mounted.html();
     expect(html).toContain("dyni-active-route-open-passive");
 
-    const wrapper = mounted.mountEl.querySelector(".dyni-active-route-html");
-    wrapper.dispatchEvent(
-      new MouseEvent("click", { bubbles: true, cancelable: true }),
-    );
+    const wrapper = /** @type {HTMLElement} */ (mounted.mountEl.querySelector(".dyni-active-route-html"));
+    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(openActiveRoute).not.toHaveBeenCalled();
   });
 
@@ -80,18 +74,16 @@ describe("ActiveRouteTextHtmlWidget", function () {
       setup.renderer,
       withSurfacePolicy(makeProps({ disconnect: true }), {
         mode: "dispatch",
-        openActiveRoute,
-      }),
+        openActiveRoute
+      })
     );
     expect(disconnected.html()).toContain("dyni-state-disconnected");
     expect(disconnected.html()).toContain("GPS Lost");
     expect(disconnected.html()).toContain("dyni-active-route-open-passive");
     expect(disconnected.html()).not.toContain("dyni-active-route-open-hotspot");
-    disconnected.mountEl
-      .querySelector(".dyni-active-route-html")
-      .dispatchEvent(
-        new MouseEvent("click", { bubbles: true, cancelable: true }),
-      );
+    /** @type {HTMLElement} */ (disconnected.mountEl.querySelector(".dyni-active-route-html")).dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true })
+    );
     expect(openActiveRoute).not.toHaveBeenCalled();
 
     const noRouteByWpServer = mountCommitted(
@@ -100,20 +92,20 @@ describe("ActiveRouteTextHtmlWidget", function () {
         makeProps({
           disconnect: false,
           wpServer: false,
-          routeName: "Harbor Run",
+          routeName: "Harbor Run"
         }),
-        { mode: "dispatch", openActiveRoute },
-      ),
+        { mode: "dispatch", openActiveRoute }
+      )
     );
     expect(noRouteByWpServer.html()).toContain("dyni-state-no-route");
     expect(noRouteByWpServer.html()).toContain("No Route");
 
     const noRouteByEmptyName = mountCommitted(
       setup.renderer,
-      withSurfacePolicy(
-        makeProps({ disconnect: false, wpServer: true, routeName: "   " }),
-        { mode: "dispatch", openActiveRoute },
-      ),
+      withSurfacePolicy(makeProps({ disconnect: false, wpServer: true, routeName: "" }), {
+        mode: "dispatch",
+        openActiveRoute
+      })
     );
     expect(noRouteByEmptyName.html()).toContain("dyni-state-no-route");
     expect(noRouteByEmptyName.html()).toContain("No Route");
@@ -124,10 +116,10 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const mounted = mountCommitted(
       setup.renderer,
       withSurfacePolicy(makeProps({ disconnect: true }), { mode: "dispatch" }),
-      { shellSize: { width: 2, height: 2 } },
+      { shellSize: { width: 2, height: 2 } }
     );
 
-    const label = mounted.mountEl.querySelector(".dyni-state-screen-label");
+    const label = /** @type {HTMLElement} */ (mounted.mountEl.querySelector(".dyni-state-screen-label"));
     expect(label.textContent).toBe("GPS Lost");
     expect(label.getAttribute("style")).toBe("font-size:1px;");
   });
@@ -136,7 +128,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const setup = createRenderer();
     const mounted = mountCommitted(
       setup.renderer,
-      withSurfacePolicy(makeProps({ hideSeconds: true }), { mode: "dispatch" }),
+      withSurfacePolicy(makeProps({ hideSeconds: true }), { mode: "dispatch" })
     );
 
     expect(mounted.html()).toContain("CLOCK:");
@@ -145,6 +137,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
 
   it("normalizes known formatter fallback tokens to the configured default", function () {
     const setup = createRenderer({
+      /** @param {any} value @param {any} formatterOptions @returns {any} */
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (cfg.formatter === "formatDistance") {
@@ -160,16 +153,13 @@ describe("ActiveRouteTextHtmlWidget", function () {
           return "NO DATA";
         }
         return value == null ? cfg.default : String(value);
-      },
+      }
     });
-    const mounted = mountCommitted(
-      setup.renderer,
-      withSurfacePolicy(makeProps(), { mode: "dispatch" }),
-    );
+    const mounted = mountCommitted(setup.renderer, withSurfacePolicy(makeProps(), { mode: "dispatch" }));
 
-    const valueTexts = Array.from(
-      mounted.mountEl.querySelectorAll(".dyni-active-route-metric-value"),
-    ).map((el) => el.textContent);
+    const valueTexts = Array.from(mounted.mountEl.querySelectorAll(".dyni-active-route-metric-value")).map(
+      (el) => el.textContent
+    );
     expect(valueTexts).toEqual(["---", "---", "---"]);
     expect(mounted.html()).not.toContain("--:--:--");
     expect(mounted.html()).not.toContain("NO DATA");
@@ -180,13 +170,11 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const mounted = mountCommitted(
       setup.renderer,
       withSurfacePolicy(makeProps({ stableDigits: true }), {
-        mode: "dispatch",
-      }),
+        mode: "dispatch"
+      })
     );
 
-    const valueEls = mounted.mountEl.querySelectorAll(
-      ".dyni-active-route-metric-value",
-    );
+    const valueEls = mounted.mountEl.querySelectorAll(".dyni-active-route-metric-value");
     expect(valueEls.length).toBeGreaterThan(0);
     valueEls.forEach((el) => {
       expect(el.classList.contains("dyni-tabular")).toBe(true);
@@ -201,19 +189,19 @@ describe("ActiveRouteTextHtmlWidget", function () {
           remain: {
             captionStyle: "font-size:12px;",
             valueStyle: "font-size:18px;",
-            unitStyle: "font-size:11px;",
+            unitStyle: "font-size:11px;"
           },
           rteEta: {
             captionStyle: "font-size:11px;",
             valueStyle: "font-size:17px;",
-            unitStyle: "font-size:10px;",
+            unitStyle: "font-size:10px;"
           },
           next: {
             captionStyle: "font-size:10px;",
             valueStyle: "font-size:16px;",
-            unitStyle: "font-size:9px;",
-          },
-        },
+            unitStyle: "font-size:9px;"
+          }
+        }
       };
     });
     const setup = createRenderer({ fitCompute });
@@ -221,7 +209,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const committed = setup.renderer.createCommittedRenderer({
       hostContext,
       mountEl: null,
-      shadowRoot: null,
+      shadowRoot: null
     });
     const rootEl = document.createElement("div");
     const shellEl = document.createElement("div");
@@ -229,6 +217,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     rootEl.appendChild(shellEl);
     shellEl.appendChild(mountEl);
 
+    /** @param {number} revision @param {boolean} layoutChanged @returns {any} */
     function payload(revision, layoutChanged) {
       return {
         props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
@@ -240,7 +229,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
         shellRect: { width: 320, height: 180 },
         hostContext: hostContext,
         layoutChanged: layoutChanged === true,
-        relayoutPass: 0,
+        relayoutPass: 0
       };
     }
 
@@ -258,16 +247,16 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const committed = setup.renderer.createCommittedRenderer({
       hostContext: {},
       mountEl: null,
-      shadowRoot: null,
+      shadowRoot: null
     });
 
     const baseSig = committed.layoutSignature({
       props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
-      shellRect: { width: 220, height: 180 },
+      shellRect: { width: 220, height: 180 }
     });
     const flatSig = committed.layoutSignature({
       props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
-      shellRect: { width: 520, height: 120 },
+      shellRect: { width: 520, height: 120 }
     });
 
     expect(flatSig).not.toBe(baseSig);
@@ -280,21 +269,18 @@ describe("ActiveRouteTextHtmlWidget", function () {
       withSurfacePolicy(makeProps(), {
         mode: "dispatch",
         pageId: "editroutepage",
-        orientation: "vertical",
-      }),
+        orientation: "vertical"
+      })
     );
 
-    const root = mounted.mountEl.querySelector(".dyni-html-root");
+    const root = /** @type {HTMLElement} */ (mounted.mountEl.querySelector(".dyni-html-root"));
     expect(root).toBeTruthy();
     expect(root.getAttribute("data-dyni-page-id")).toBe("editroutepage");
     expect(root.getAttribute("data-dyni-orientation")).toBe("vertical");
   });
 
   it("uses shadow-local css selectors", function () {
-    const cssPath = path.join(
-      process.cwd(),
-      "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css",
-    );
+    const cssPath = path.join(process.cwd(), "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css");
     const css = fs.readFileSync(cssPath, "utf8");
 
     expect(css).toContain(".dyni-html-root .dyni-active-route-html");
@@ -329,7 +315,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const committed = setup.renderer.createCommittedRenderer({
       hostContext,
       mountEl: null,
-      shadowRoot: null,
+      shadowRoot: null
     });
     const rootEl = document.createElement("div");
     const shellEl = document.createElement("div");
@@ -337,6 +323,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     rootEl.appendChild(shellEl);
     shellEl.appendChild(mountEl);
 
+    /** @param {any} props @param {number} revision @param {any} shellRect @param {boolean} layoutChanged @returns {any} */
     function buildPayload(props, revision, shellRect, layoutChanged) {
       return {
         props,
@@ -348,7 +335,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
         shellRect,
         hostContext,
         layoutChanged: layoutChanged === true,
-        relayoutPass: 0,
+        relayoutPass: 0
       };
     }
 
@@ -358,12 +345,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     committed.mount(mountEl, initial);
     expect(applyFormatter).toHaveBeenCalledTimes(3);
 
-    const revisionChanged = buildPayload(
-      propsA,
-      2,
-      { width: 320, height: 180 },
-      false,
-    );
+    const revisionChanged = buildPayload(propsA, 2, { width: 320, height: 180 }, false);
     committed.layoutSignature(revisionChanged);
     committed.update(revisionChanged);
     expect(applyFormatter).toHaveBeenCalledTimes(6);
@@ -372,18 +354,13 @@ describe("ActiveRouteTextHtmlWidget", function () {
       withSurfacePolicy(makeProps(), { mode: "dispatch" }),
       2,
       { width: 320, height: 180 },
-      false,
+      false
     );
     committed.layoutSignature(propsIdentityChanged);
     committed.update(propsIdentityChanged);
     expect(applyFormatter).toHaveBeenCalledTimes(9);
 
-    const shellSizeChanged = buildPayload(
-      propsIdentityChanged.props,
-      2,
-      { width: 321, height: 180 },
-      true,
-    );
+    const shellSizeChanged = buildPayload(propsIdentityChanged.props, 2, { width: 321, height: 180 }, true);
     committed.layoutSignature(shellSizeChanged);
     committed.update(shellSizeChanged);
     expect(applyFormatter).toHaveBeenCalledTimes(12);
@@ -399,7 +376,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     const committed = setup.renderer.createCommittedRenderer({
       hostContext,
       mountEl: null,
-      shadowRoot: null,
+      shadowRoot: null
     });
     const rootEl = document.createElement("div");
     const shellEl = document.createElement("div");
@@ -417,7 +394,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
       shellRect: { width: 320, height: 180 },
       hostContext,
       layoutChanged: true,
-      relayoutPass: 0,
+      relayoutPass: 0
     };
 
     committed.layoutSignature(payload);

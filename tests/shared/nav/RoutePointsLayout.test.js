@@ -1,41 +1,33 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("RoutePointsLayout", function () {
   function createLayout() {
-    const responsiveScaleProfile = loadFresh(
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-    );
-    const routePointsLayoutSizing = loadFresh(
-      "shared/widget-kits/nav/RoutePointsLayoutSizing.js",
-    );
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const routePointsLayoutSizing = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
     return loadFresh("shared/widget-kits/nav/RoutePointsLayout.js").create(
       {},
       createComponentContextMock({
         modules: {
           ResponsiveScaleProfile: responsiveScaleProfile,
-          LayoutRectMath: loadFresh(
-            "shared/widget-kits/layout/LayoutRectMath.js",
-          ),
+          LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
           RoutePointsLayoutSizing: routePointsLayoutSizing,
-          RoutePointsRowGeometry: loadFresh(
-            "shared/widget-kits/nav/RoutePointsRowGeometry.js",
-          ),
-        },
-      }),
+          RoutePointsRowGeometry: loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js")
+        }
+      })
     );
   }
 
+  /** @param {any} layout @param {number} width @param {number} height */
   function buildContentRect(layout, width, height) {
     const insets = layout.computeInsets(width, height);
     return {
       insets: insets,
-      contentRect: layout.createContentRect(width, height, insets),
+      contentRect: layout.createContentRect(width, height, insets)
     };
   }
 
+  /** @param {any} style */
   function parseMarkerDiameter(style) {
     const match = new RegExp("^width:(\\d+)px\\x3bheight:(\\d+)px\\x3b$").exec(style || "");
     if (!match) {
@@ -44,13 +36,12 @@ describe("RoutePointsLayout", function () {
     return Number(match[1]) === Number(match[2]) ? Number(match[1]) : 0;
   }
 
+  /** @param {any} layout @param {number} markerHeight */
   function expectedMarkerDiameterFromHeight(layout, markerHeight) {
-    const scaled = Math.floor(
-      Math.max(1, markerHeight) * layout.constants.MARKER_DIAMETER_RATIO,
-    );
+    const scaled = Math.floor(Math.max(1, markerHeight) * layout.constants.MARKER_DIAMETER_RATIO);
     const preferred = Math.max(
       layout.constants.MARKER_DIAMETER_MIN_PX,
-      Math.min(layout.constants.MARKER_DIAMETER_MAX_PX, scaled),
+      Math.min(layout.constants.MARKER_DIAMETER_MAX_PX, scaled)
     );
     return Math.max(1, Math.min(Math.max(1, markerHeight), preferred));
   }
@@ -90,14 +81,8 @@ describe("RoutePointsLayout", function () {
 
     expect(layout.computeRowHeight(240, 280, false, "flat")).toBe(baseHost);
     expect(layout.computeRowHeight(240, 280, false, "normal")).toBe(baseHost);
-    expect(highHost).toBe(
-      Math.floor(baseHost * layout.constants.HIGH_MODE_ROW_HEIGHT_MULTIPLIER),
-    );
-    expect(highVertical).toBe(
-      Math.floor(
-        baseVertical * layout.constants.HIGH_MODE_ROW_HEIGHT_MULTIPLIER,
-      ),
-    );
+    expect(highHost).toBe(Math.floor(baseHost * layout.constants.HIGH_MODE_ROW_HEIGHT_MULTIPLIER));
+    expect(highVertical).toBe(Math.floor(baseVertical * layout.constants.HIGH_MODE_ROW_HEIGHT_MULTIPLIER));
   });
 
   it("applies the row-height floor budget in normal mode", function () {
@@ -107,14 +92,10 @@ describe("RoutePointsLayout", function () {
       contentRect: built.contentRect,
       mode: "normal",
       pointCount: 3,
-      showHeader: true,
+      showHeader: true
     });
 
-    expect(normal.headerRect.h).toBe(
-      Math.floor(
-        normal.rowHeight * layout.constants.HEADER_HEIGHT_FLOOR_ROWS_NORMAL,
-      ),
-    );
+    expect(normal.headerRect.h).toBe(Math.floor(normal.rowHeight * layout.constants.HEADER_HEIGHT_FLOOR_ROWS_NORMAL));
   });
 
   it("applies the row-height floor budget in high mode", function () {
@@ -124,14 +105,10 @@ describe("RoutePointsLayout", function () {
       contentRect: built.contentRect,
       mode: "high",
       pointCount: 3,
-      showHeader: true,
+      showHeader: true
     });
 
-    expect(high.headerRect.h).toBe(
-      Math.floor(
-        high.rowHeight * layout.constants.HEADER_HEIGHT_FLOOR_ROWS_HIGH,
-      ),
-    );
+    expect(high.headerRect.h).toBe(Math.floor(high.rowHeight * layout.constants.HEADER_HEIGHT_FLOOR_ROWS_HIGH));
   });
 
   it("adds a narrow-vertical header boost on top of the high-mode floor budget", function () {
@@ -143,11 +120,10 @@ describe("RoutePointsLayout", function () {
       pointCount: 4,
       showHeader: true,
       isVerticalContainer: true,
-      verticalAnchorWidth: built.contentRect.w,
+      verticalAnchorWidth: built.contentRect.w
     });
     const expectedRows =
-      layout.constants.HEADER_HEIGHT_FLOOR_ROWS_HIGH +
-      layout.constants.HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_HIGH;
+      layout.constants.HEADER_HEIGHT_FLOOR_ROWS_HIGH + layout.constants.HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_HIGH;
 
     expect(out.mode).toBe("high");
     expect(out.headerRect.h).toBe(Math.floor(out.rowHeight * expectedRows));
@@ -173,7 +149,7 @@ describe("RoutePointsLayout", function () {
       contentRect: built.contentRect,
       mode: "high",
       pointCount: 3,
-      showHeader: true,
+      showHeader: true
     });
 
     expect(out.mode).toBe("high");
@@ -182,27 +158,18 @@ describe("RoutePointsLayout", function () {
     expect(out.listRect.y).toBeGreaterThan(out.headerRect.y);
     expect(out.rows).toHaveLength(3);
 
-    out.rows.forEach((row, index) => {
+    out.rows.forEach((/** @type {any} */ row, /** @type {number} */ index) => {
       expect(row.ordinalRect.w).toBe(0);
       expect(row.nameRect.x).toBe(row.infoRect.x);
-      expect(row.infoRect.y).toBeGreaterThanOrEqual(
-        row.nameRect.y + row.nameRect.h,
-      );
-      expect(row.markerRect.x + row.markerRect.w).toBeLessThanOrEqual(
-        row.rowRect.x + row.rowRect.w,
-      );
+      expect(row.infoRect.y).toBeGreaterThanOrEqual(row.nameRect.y + row.nameRect.h);
+      expect(row.markerRect.x + row.markerRect.w).toBeLessThanOrEqual(row.rowRect.x + row.rowRect.w);
       expect(row.markerRect.h).toBe(row.rowRect.h - out.rowPadding * 2);
       if (index > 0) {
-        expect(out.rows[index].rowRect.y).toBeGreaterThan(
-          out.rows[index - 1].rowRect.y,
-        );
+        expect(out.rows[index].rowRect.y).toBeGreaterThan(out.rows[index - 1].rowRect.y);
       }
     });
 
-    expect(out.listContentHeight).toBe(
-      out.pointCount * out.rowHeight +
-        Math.max(0, out.pointCount - 1) * out.rowGap,
-    );
+    expect(out.listContentHeight).toBe(out.pointCount * out.rowHeight + Math.max(0, out.pointCount - 1) * out.rowGap);
   });
 
   it("builds normal mode with side-by-side header and 4-column rows", function () {
@@ -212,15 +179,13 @@ describe("RoutePointsLayout", function () {
       contentRect: built.contentRect,
       mode: "normal",
       pointCount: 2,
-      showHeader: true,
+      showHeader: true
     });
 
     expect(out.mode).toBe("normal");
     expect(out.rowPolicy.showOrdinal).toBe(true);
     expect(out.headerLayout.routeNameRect.y).toBe(out.headerLayout.metaRect.y);
-    expect(out.headerLayout.metaRect.x).toBeGreaterThan(
-      out.headerLayout.routeNameRect.x,
-    );
+    expect(out.headerLayout.metaRect.x).toBeGreaterThan(out.headerLayout.routeNameRect.x);
     expect(out.rows[0].ordinalRect.w).toBeGreaterThan(0);
     expect(out.rows[0].nameRect.y).toBe(out.rows[0].infoRect.y);
     expect(out.rows[0].infoRect.x).toBeGreaterThan(out.rows[0].nameRect.x);
@@ -229,31 +194,21 @@ describe("RoutePointsLayout", function () {
   it("forces compact row policy in vertical containers", function () {
     const layout = createLayout();
     const built = buildContentRect(layout, 180, 340);
-    const baseVerticalRowHeight = layout.computeRowHeight(
-      built.contentRect.w,
-      built.contentRect.h,
-      true,
-      "normal",
-    );
+    const baseVerticalRowHeight = layout.computeRowHeight(built.contentRect.w, built.contentRect.h, true, "normal");
     const out = layout.computeLayout({
       contentRect: built.contentRect,
       mode: "normal",
       pointCount: 2,
       showHeader: true,
       isVerticalContainer: true,
-      verticalAnchorWidth: built.contentRect.w,
+      verticalAnchorWidth: built.contentRect.w
     });
     const inline = layout.computeInlineGeometry({ layout: out });
 
     expect(out.mode).toBe("high");
     expect(out.rowPolicy.showOrdinal).toBe(false);
     expect(out.rows[0].ordinalRect.w).toBe(0);
-    expect(out.rowHeight).toBe(
-      Math.floor(
-        baseVerticalRowHeight *
-          layout.constants.HIGH_MODE_ROW_HEIGHT_MULTIPLIER,
-      ),
-    );
+    expect(out.rowHeight).toBe(Math.floor(baseVerticalRowHeight * layout.constants.HIGH_MODE_ROW_HEIGHT_MULTIPLIER));
     expect(inline.showOrdinal).toBe(false);
     expect(inline.rows[0].ordinalStyle).toBe("");
     expect(inline.rows[0].nameStyle).toMatch(new RegExp("width:\\d+px\\x3b"));
@@ -268,20 +223,18 @@ describe("RoutePointsLayout", function () {
       mode: "normal",
       pointCount: 1,
       showHeader: true,
-      trailingGutterPx: 14,
+      trailingGutterPx: 14
     });
     const noGutter = layout.computeLayout({
       contentRect: built.contentRect,
       mode: "normal",
       pointCount: 1,
       showHeader: true,
-      trailingGutterPx: 0,
+      trailingGutterPx: 0
     });
 
     expect(withGutter.trailingGutterPx).toBe(14);
-    expect(withGutter.rows[0].markerRect.x).toBeLessThan(
-      noGutter.rows[0].markerRect.x,
-    );
+    expect(withGutter.rows[0].markerRect.x).toBeLessThan(noGutter.rows[0].markerRect.x);
   });
 
   it("keeps marker diameter tied to row height while using a compact marker column in normal mode", function () {
@@ -291,18 +244,13 @@ describe("RoutePointsLayout", function () {
       contentRect: built.contentRect,
       mode: "normal",
       pointCount: 2,
-      showHeader: true,
+      showHeader: true
     });
     const inline = layout.computeInlineGeometry({ layout: out });
     const row = out.rows[0];
     const markerDiameter = parseMarkerDiameter(inline.rows[0].markerDotStyle);
-    const expectedMarkerDiameter = expectedMarkerDiameterFromHeight(
-      layout,
-      row.markerRect.h,
-    );
-    const legacyCellDrivenDiameter = Math.floor(
-      Math.max(1, row.markerRect.w) * layout.constants.MARKER_DIAMETER_RATIO,
-    );
+    const expectedMarkerDiameter = expectedMarkerDiameterFromHeight(layout, row.markerRect.h);
+    const legacyCellDrivenDiameter = Math.floor(Math.max(1, row.markerRect.w) * layout.constants.MARKER_DIAMETER_RATIO);
 
     expect(markerDiameter).toBe(expectedMarkerDiameter);
     expect(markerDiameter).toBe(row.markerDiameter);
@@ -310,9 +258,6 @@ describe("RoutePointsLayout", function () {
     expect(markerDiameter).toBeGreaterThan(legacyCellDrivenDiameter);
     expect(markerDiameter).toBeLessThanOrEqual(row.markerRect.w);
     expect(row.markerRect.x).toBeGreaterThanOrEqual(row.rowRect.x);
-    expect(row.markerRect.x + row.markerRect.w).toBeLessThanOrEqual(
-      row.rowRect.x + row.rowRect.w,
-    );
+    expect(row.markerRect.x + row.markerRect.w).toBeLessThanOrEqual(row.rowRect.x + row.rowRect.w);
   });
-
 });

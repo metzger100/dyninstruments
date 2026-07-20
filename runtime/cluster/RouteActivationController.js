@@ -45,7 +45,11 @@
     if (!loader || typeof loader.loadComponent !== "function" || typeof loader.createInstance !== "function") {
       throw new Error("RouteActivationController: runtime.componentLoader must be available");
     }
-    if (!themeRuntime || typeof themeRuntime.preloadShadowCssUrls !== "function" || typeof themeRuntime.hasShadowCssText !== "function") {
+    if (
+      !themeRuntime ||
+      typeof themeRuntime.preloadShadowCssUrls !== "function" ||
+      typeof themeRuntime.hasShadowCssText !== "function"
+    ) {
       throw new Error("RouteActivationController: runtime.theme must be available");
     }
     if (!surfaces || typeof surfaces.materializeSurfacePolicyProps !== "function") {
@@ -103,8 +107,12 @@
       }
 
       cache.mapper = /** @type {DyniControllerMapper} */ (loader.createInstance(routeMeta.mapperId, widgetDef));
-      cache.viewModel = routeMeta.viewModelId ? /** @type {DyniControllerViewModel} */ (loader.createInstance(routeMeta.viewModelId, widgetDef)) : null;
-      cache.rendererSpec = /** @type {DyniControllerRendererSpec} */ (loader.createInstance(routeMeta.rendererId, widgetDef));
+      cache.viewModel = routeMeta.viewModelId
+        ? /** @type {DyniControllerViewModel} */ (loader.createInstance(routeMeta.viewModelId, widgetDef))
+        : null;
+      cache.rendererSpec = /** @type {DyniControllerRendererSpec} */ (
+        loader.createInstance(routeMeta.rendererId, widgetDef)
+      );
 
       if (!cache.mapper || typeof cache.mapper.translate !== "function") {
         throw new Error("RouteActivationController: mapper '" + routeMeta.mapperId + "' must implement translate()");
@@ -112,11 +120,25 @@
       if (routeMeta.viewModelId && (!cache.viewModel || typeof cache.viewModel.build !== "function")) {
         throw new Error("RouteActivationController: view model '" + routeMeta.viewModelId + "' must implement build()");
       }
-      if (routeMeta.surface === "html" && (!cache.rendererSpec || typeof cache.rendererSpec.createCommittedRenderer !== "function")) {
-        throw new Error("RouteActivationController: renderer '" + routeMeta.rendererId + "' must implement createCommittedRenderer() for surface 'html'");
+      if (
+        routeMeta.surface === "html" &&
+        (!cache.rendererSpec || typeof cache.rendererSpec.createCommittedRenderer !== "function")
+      ) {
+        throw new Error(
+          "RouteActivationController: renderer '" +
+            routeMeta.rendererId +
+            "' must implement createCommittedRenderer() for surface 'html'"
+        );
       }
-      if (routeMeta.surface === "canvas-dom" && (!cache.rendererSpec || typeof cache.rendererSpec.renderCanvas !== "function")) {
-        throw new Error("RouteActivationController: renderer '" + routeMeta.rendererId + "' must implement renderCanvas() for surface 'canvas-dom'");
+      if (
+        routeMeta.surface === "canvas-dom" &&
+        (!cache.rendererSpec || typeof cache.rendererSpec.renderCanvas !== "function")
+      ) {
+        throw new Error(
+          "RouteActivationController: renderer '" +
+            routeMeta.rendererId +
+            "' must implement renderCanvas() for surface 'canvas-dom'"
+        );
       }
 
       return cache;
@@ -150,9 +172,12 @@
         return payload;
       }
 
-      var memoKey = payload.__mappedSignature
-        + "|" + (payload.props.nightMode ? "1" : "0")
-        + "|" + (payload.props.editing ? "1" : "0");
+      var memoKey =
+        payload.__mappedSignature +
+        "|" +
+        (payload.props.nightMode ? "1" : "0") +
+        "|" +
+        (payload.props.editing ? "1" : "0");
       var sameRootEl = routeCache.lastRootEl === payload.rootEl;
       var sameShellEl = routeCache.lastShellEl === payload.shellEl;
       if (routeCache.lastMemoKey === memoKey && sameRootEl && sameShellEl) {
@@ -187,7 +212,8 @@
 
       const routeId = payloadBuilder.resolveRouteId(routeFrame, widgetDef.cluster);
       const config = ns.config || {};
-      const clusterRoutes = config.clusterRoutes && config.clusterRoutes.byRouteId ? config.clusterRoutes.byRouteId : null;
+      const clusterRoutes =
+        config.clusterRoutes && config.clusterRoutes.byRouteId ? config.clusterRoutes.byRouteId : null;
       const routeMeta = /** @type {DyniControllerRouteMeta | null} */ (clusterRoutes ? clusterRoutes[routeId] : null);
       payloadBuilder.ensureRouteMeta(routeMeta, routeId);
       const checkedRouteMeta = /** @type {DyniControllerRouteMeta} */ (routeMeta);
@@ -247,4 +273,4 @@
       console.error("dyninstruments route activation failed:", error);
     }
   });
-}(this));
+})(this);

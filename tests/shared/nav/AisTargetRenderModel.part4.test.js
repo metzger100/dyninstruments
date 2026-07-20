@@ -1,7 +1,6 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("AisTargetRenderModel", function () {
   function createRenderModel(options) {
@@ -11,68 +10,40 @@ describe("AisTargetRenderModel", function () {
       vi.fn(function (value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (value == null || Number.isNaN(value)) {
-          return Object.prototype.hasOwnProperty.call(cfg, "default")
-            ? cfg.default
-            : "---";
+          return Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
         }
-        const params = Array.isArray(cfg.formatterParameters)
-          ? cfg.formatterParameters
-          : [];
-        return (
-          String(cfg.formatter) + "|" + String(value) + "|" + params.join(",")
-        );
+        const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
+        return String(cfg.formatter) + "|" + String(value) + "|" + params.join(",");
       });
 
     const modules = {
       AisTargetLayout: loadFresh("shared/widget-kits/nav/AisTargetLayout.js"),
-      AisTargetLayoutSizing: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutSizing.js",
-      ),
+      AisTargetLayoutSizing: loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js"),
       HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
-      ResponsiveScaleProfile: loadFresh(
-        "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-      ),
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
       LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-      AisTargetLayoutGeometry: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutGeometry.js",
-      ),
-      AisTargetLayoutGeometryStyles: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js",
-      ),
-      AisTargetLayoutMath: loadFresh(
-        "shared/widget-kits/nav/AisTargetLayoutMath.js",
-      ),
-      PlaceholderNormalize: loadFresh(
-        "shared/widget-kits/format/PlaceholderNormalize.js",
-      ),
-      UnitAwareFormatter: loadFresh(
-        "shared/widget-kits/format/UnitAwareFormatter.js",
-      ),
-      StateScreenLabels: loadFresh(
-        "shared/widget-kits/state/StateScreenLabels.js",
-      ),
-      StateScreenPrecedence: loadFresh(
-        "shared/widget-kits/state/StateScreenPrecedence.js",
-      ),
-      StateScreenInteraction: loadFresh(
-        "shared/widget-kits/state/StateScreenInteraction.js",
-      ),
-      StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
+      AisTargetLayoutGeometry: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js"),
+      AisTargetLayoutGeometryStyles: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js"),
+      AisTargetLayoutMath: loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js"),
+      PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+      UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
+      StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+      StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+      StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
+      StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js")
     };
     const componentContext = createComponentContextMock({
       modules: modules,
       services: {
         format: {
-          applyFormatter: applyFormatter,
-        },
-      },
+          applyFormatter: applyFormatter
+        }
+      }
     });
 
     return {
-      renderModel: loadFresh(
-        "shared/widget-kits/nav/AisTargetRenderModel.js",
-      ).create({}, componentContext),
-      applyFormatter: applyFormatter,
+      renderModel: loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js").create({}, componentContext),
+      applyFormatter: applyFormatter
     };
   }
 
@@ -81,12 +52,11 @@ describe("AisTargetRenderModel", function () {
     return Object.assign({}, props || {}, {
       surfacePolicy: {
         interaction: {
-          mode: opts.mode === "passive" ? "passive" : "dispatch",
+          mode: opts.mode === "passive" ? "passive" : "dispatch"
         },
         pageId: typeof opts.pageId === "string" ? opts.pageId : "navpage",
-        containerOrientation:
-          opts.orientation === "vertical" ? "vertical" : "default",
-      },
+        containerOrientation: opts.orientation === "vertical" ? "vertical" : "default"
+      }
     });
   }
 
@@ -105,29 +75,29 @@ describe("AisTargetRenderModel", function () {
         distance: 4.2,
         cpa: 0.7,
         tcpa: 30,
-        headingTo: 112,
+        headingTo: 112
       },
       layout: {
         ratioThresholdNormal: 1.2,
-        ratioThresholdFlat: 3.8,
+        ratioThresholdFlat: 3.8
       },
       captions: {
         dst: "DST",
         cpa: "DCPA",
         tcpa: "TCPA",
-        brg: "BRG",
+        brg: "BRG"
       },
       units: {
         dst: "nm",
         cpa: "nm",
         tcpa: "min",
-        brg: "°",
+        brg: "°"
       },
       formatUnits: {
         dst: "nm",
-        cpa: "nm",
+        cpa: "nm"
       },
-      default: "---",
+      default: "---"
     };
     const out = Object.assign({}, base, patch);
     out.domain = Object.assign({}, base.domain, patch.domain || {});
@@ -141,7 +111,7 @@ describe("AisTargetRenderModel", function () {
     const setup = createRenderModel();
     const props = withSurfacePolicy(makeProps(), {
       pageId: "navpage",
-      mode: "dispatch",
+      mode: "dispatch"
     });
     const shellRect = { width: 320, height: 180 };
     const baseSig = setup.renderModel
@@ -149,7 +119,7 @@ describe("AisTargetRenderModel", function () {
         props: props,
         shellRect: shellRect,
         mode: "normal",
-        isVerticalCommitted: false,
+        isVerticalCommitted: false
       })
       .resizeSignatureParts.join("|");
 
@@ -157,44 +127,44 @@ describe("AisTargetRenderModel", function () {
       .buildModel({
         props: withSurfacePolicy(makeProps({ domain: { distance: 9.1 } }), {
           pageId: "navpage",
-          mode: "dispatch",
+          mode: "dispatch"
         }),
         shellRect: shellRect,
         mode: "normal",
-        isVerticalCommitted: false,
+        isVerticalCommitted: false
       })
       .resizeSignatureParts.join("|");
     const sigCpa = setup.renderModel
       .buildModel({
         props: withSurfacePolicy(makeProps({ domain: { cpa: 1.9 } }), {
           pageId: "navpage",
-          mode: "dispatch",
+          mode: "dispatch"
         }),
         shellRect: shellRect,
         mode: "normal",
-        isVerticalCommitted: false,
+        isVerticalCommitted: false
       })
       .resizeSignatureParts.join("|");
     const sigTcpa = setup.renderModel
       .buildModel({
         props: withSurfacePolicy(makeProps({ domain: { tcpa: 12 } }), {
           pageId: "navpage",
-          mode: "dispatch",
+          mode: "dispatch"
         }),
         shellRect: shellRect,
         mode: "normal",
-        isVerticalCommitted: false,
+        isVerticalCommitted: false
       })
       .resizeSignatureParts.join("|");
     const sigBrg = setup.renderModel
       .buildModel({
         props: withSurfacePolicy(makeProps({ domain: { headingTo: 302 } }), {
           pageId: "navpage",
-          mode: "dispatch",
+          mode: "dispatch"
         }),
         shellRect: shellRect,
         mode: "normal",
-        isVerticalCommitted: false,
+        isVerticalCommitted: false
       })
       .resizeSignatureParts.join("|");
 
@@ -209,48 +179,42 @@ describe("AisTargetRenderModel", function () {
     const props = withSurfacePolicy(makeProps(), {
       pageId: "navpage",
       mode: "dispatch",
-      orientation: "vertical",
+      orientation: "vertical"
     });
 
     const verticalA = setup.renderModel.buildModel({
       props: props,
       shellRect: { width: 220, height: 120 },
       mode: "normal",
-      isVerticalCommitted: true,
+      isVerticalCommitted: true
     });
     const verticalB = setup.renderModel.buildModel({
       props: props,
       shellRect: { width: 220, height: 360 },
       mode: "normal",
-      isVerticalCommitted: true,
+      isVerticalCommitted: true
     });
     const hostSizedA = setup.renderModel.buildModel({
       props: withSurfacePolicy(makeProps(), {
         pageId: "navpage",
-        mode: "dispatch",
+        mode: "dispatch"
       }),
       shellRect: { width: 220, height: 120 },
       mode: "normal",
-      isVerticalCommitted: false,
+      isVerticalCommitted: false
     });
     const hostSizedB = setup.renderModel.buildModel({
       props: withSurfacePolicy(makeProps(), {
         pageId: "navpage",
-        mode: "dispatch",
+        mode: "dispatch"
       }),
       shellRect: { width: 220, height: 360 },
       mode: "normal",
-      isVerticalCommitted: false,
+      isVerticalCommitted: false
     });
 
-    expect(verticalA.resizeSignatureParts.join("|")).toBe(
-      verticalB.resizeSignatureParts.join("|"),
-    );
-    expect(hostSizedA.resizeSignatureParts.join("|")).not.toBe(
-      hostSizedB.resizeSignatureParts.join("|"),
-    );
-    expect(
-      Math.abs(verticalA.layout.nameRect.h - verticalA.layout.frontRect.h),
-    ).toBeLessThanOrEqual(1);
+    expect(verticalA.resizeSignatureParts.join("|")).toBe(verticalB.resizeSignatureParts.join("|"));
+    expect(hostSizedA.resizeSignatureParts.join("|")).not.toBe(hostSizedB.resizeSignatureParts.join("|"));
+    expect(Math.abs(verticalA.layout.nameRect.h - verticalA.layout.frontRect.h)).toBeLessThanOrEqual(1);
   });
 });

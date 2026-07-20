@@ -1,12 +1,8 @@
+// @ts-nocheck
 const { loadFresh } = require("../helpers/load-umd");
-const {
-  createMockCanvas,
-  createMockContext2D,
-} = require("../helpers/mock-canvas");
+const { createMockCanvas, createMockContext2D } = require("../helpers/mock-canvas");
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
-const {
-  createComponentContextMock,
-} = require("../helpers/component-context-mock");
+const { createComponentContextMock } = require("../helpers/component-context-mock");
 
 describe("runtime/widget-registrar.js", function () {
   function setupContext(options) {
@@ -16,35 +12,34 @@ describe("runtime/widget-registrar.js", function () {
       getCapabilities: vi.fn(),
       routePoints: {},
       routeEditor: {},
-      ais: {},
+      ais: {}
     };
-    const runtimeHostActions =
-      opts.runtimeHostActions || vi.fn(() => hostActions);
+    const runtimeHostActions = opts.runtimeHostActions || vi.fn(() => hostActions);
     const includeGlobalApi = opts.includeGlobalApi !== false;
     const capturedApi =
       opts.hostApi ||
       (includeGlobalApi
         ? {
-            registerWidget: registerWidget,
+            registerWidget: registerWidget
           }
         : null);
 
     const context = createScriptContext({
       DyniPlugin: {
         runtime: {
-          hostActions: runtimeHostActions,
+          hostActions: runtimeHostActions
         },
         state: {},
         config: { shared: {}, clusters: [] },
-        ...(capturedApi ? { avnavApi: capturedApi } : {}),
+        ...(capturedApi ? { avnavApi: capturedApi } : {})
       },
       avnav: includeGlobalApi
         ? {
             api: {
-              registerWidget,
-            },
+              registerWidget
+            }
           }
-        : {},
+        : {}
     });
 
     runIifeScript("runtime/namespace.js", context);
@@ -59,8 +54,8 @@ describe("runtime/widget-registrar.js", function () {
       DyniPlugin: {
         runtime: {},
         state: {},
-        config: { shared: {}, clusters: [] },
-      },
+        config: { shared: {}, clusters: [] }
+      }
     });
 
     runIifeScript("config/shared/kind-defaults.js", context);
@@ -68,9 +63,7 @@ describe("runtime/widget-registrar.js", function () {
     runIifeScript("config/shared/vessel-voltage-editables.js", context);
     runIifeScript("config/clusters/vessel.js", context);
 
-    return context.DyniPlugin.config.clusters.find(
-      (c) => c.def && c.def.cluster === "vessel",
-    ).def;
+    return context.DyniPlugin.config.clusters.find((c) => c.def && c.def.cluster === "vessel").def;
   }
 
   function makePositionComponentContext() {
@@ -80,57 +73,38 @@ describe("runtime/widget-registrar.js", function () {
         family: "sans-serif",
         familyMono: "monospace",
         weight: 730,
-        labelWeight: 610,
-      },
+        labelWeight: 610
+      }
     };
-    const textLayoutEngineModule = loadFresh(
-      "shared/widget-kits/text/TextLayoutEngine.js",
-    );
+    const textLayoutEngineModule = loadFresh("shared/widget-kits/text/TextLayoutEngine.js");
     return createComponentContextMock({
       modules: {
-        RadialAngleMath: loadFresh(
-          "shared/widget-kits/radial/RadialAngleMath.js",
-        ),
-        RadialTextFitting: loadFresh(
-          "shared/widget-kits/radial/RadialTextFitting.js",
-        ),
-        CanvasTextLayout: loadFresh(
-          "shared/widget-kits/text/CanvasTextLayout.js",
-        ),
+        RadialAngleMath: loadFresh("shared/widget-kits/radial/RadialAngleMath.js"),
+        RadialTextFitting: loadFresh("shared/widget-kits/radial/RadialTextFitting.js"),
+        CanvasTextLayout: loadFresh("shared/widget-kits/text/CanvasTextLayout.js"),
         ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js"),
-        TextLayoutPrimitives: loadFresh(
-          "shared/widget-kits/text/TextLayoutPrimitives.js",
-        ),
-        TextLayoutComposite: loadFresh(
-          "shared/widget-kits/text/TextLayoutComposite.js",
-        ),
-        ResponsiveScaleProfile: loadFresh(
-          "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-        ),
+        TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
+        TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
+        ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
         TextLayoutEngine: textLayoutEngineModule,
-        PlaceholderNormalize: loadFresh(
-          "shared/widget-kits/format/PlaceholderNormalize.js",
-        ),
-        StateScreenLabels: loadFresh(
-          "shared/widget-kits/state/StateScreenLabels.js",
-        ),
-        StateScreenPrecedence: loadFresh(
-          "shared/widget-kits/state/StateScreenPrecedence.js",
-        ),
-        StateScreenCanvasOverlay: loadFresh(
-          "shared/widget-kits/state/StateScreenCanvasOverlay.js",
-        ),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js")
       },
       services: {
         format: {
           applyFormatter(raw, props) {
             const cfg = props || {};
             const fpRaw = cfg.formatterParameters;
-            const fp = Array.isArray(fpRaw)
-              ? fpRaw
-              : typeof fpRaw === "string"
-                ? fpRaw.split(",")
-                : [];
+            let fp;
+            if (Array.isArray(fpRaw)) {
+              fp = fpRaw;
+            } else if (typeof fpRaw === "string") {
+              fp = fpRaw.split(",");
+            } else {
+              fp = [];
+            }
             if (cfg && typeof cfg.formatter === "function") {
               return cfg.formatter.apply(null, [raw].concat(fp));
             }
@@ -140,17 +114,16 @@ describe("runtime/widget-registrar.js", function () {
               globalThis.avnav &&
               globalThis.avnav.api &&
               globalThis.avnav.api.formatter &&
-              typeof globalThis.avnav.api.formatter[cfg.formatter] ===
-                "function"
+              typeof globalThis.avnav.api.formatter[cfg.formatter] === "function"
             ) {
               return globalThis.avnav.api.formatter[cfg.formatter].apply(
                 globalThis.avnav.api.formatter,
-                [raw].concat(fp),
+                [raw].concat(fp)
               );
             }
             if (raw == null || Number.isNaN(raw)) return cfg.default || "---";
             return String(raw);
-          },
+          }
         },
         canvas: {
           setupCanvas(canvas) {
@@ -159,28 +132,26 @@ describe("runtime/widget-registrar.js", function () {
             return {
               ctx,
               W: Math.round(rect.width),
-              H: Math.round(rect.height),
+              H: Math.round(rect.height)
             };
-          },
+          }
         },
         dom: {
           requirePluginRoot(target) {
             return target;
-          },
+          }
         },
         themeTokens: {
           resolveForRoot() {
             return themeTokens;
-          },
-        },
-      },
+          }
+        }
+      }
     });
   }
 
   function fillTextValues(ctx) {
-    return ctx.calls
-      .filter((c) => c.name === "fillText")
-      .map((c) => String(c.args[0]));
+    return ctx.calls.filter((c) => c.name === "fillText").map((c) => String(c.args[0]));
   }
 
   function captureTextCalls(ctx) {
@@ -189,7 +160,7 @@ describe("runtime/widget-registrar.js", function () {
     ctx.fillText = function () {
       captured.push({
         text: String(arguments[0]),
-        font: ctx.font,
+        font: ctx.font
       });
       return originalFillText.apply(this, arguments);
     };
@@ -204,13 +175,11 @@ describe("runtime/widget-registrar.js", function () {
 
     try {
       context.DyniPlugin.runtime.registerWidget(componentSpec, {
-        def: vesselDef,
+        def: vesselDef
       });
 
       const [registeredDef] = registerWidget.mock.calls[0];
-      expect(
-        Object.prototype.hasOwnProperty.call(registeredDef, "stableDigits"),
-      ).toBe(false);
+      expect(Object.prototype.hasOwnProperty.call(registeredDef, "stableDigits")).toBe(false);
 
       const rawClock = new Date("2026-02-22T15:00:00Z");
       globalThis.avnav = {
@@ -221,28 +190,29 @@ describe("runtime/widget-registrar.js", function () {
             },
             formatTime(value) {
               return value === rawClock ? "TIME" : "TIME_BAD";
-            },
-          },
-        },
+            }
+          }
+        }
       };
 
-      const spec = loadFresh(
-        "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-      ).create({}, makePositionComponentContext());
+      const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create(
+        {},
+        makePositionComponentContext()
+      );
 
       const registeredProps = Object.assign({}, registeredDef, {
         displayVariant: "dateTime",
         value: [rawClock, rawClock],
         ratioThresholdNormal: 1.0,
         ratioThresholdFlat: 3.0,
-        default: "NA",
+        default: "NA"
       });
 
       const registeredCtx = createMockContext2D();
       const registeredCanvas = createMockCanvas({
         rectWidth: 220,
         rectHeight: 140,
-        ctx: registeredCtx,
+        ctx: registeredCtx
       });
       const registeredCaptured = captureTextCalls(registeredCtx);
       spec.renderCanvas(registeredCanvas, registeredProps);
@@ -250,9 +220,7 @@ describe("runtime/widget-registrar.js", function () {
       expect(fillTextValues(registeredCtx)).toContain("DATE");
       expect(fillTextValues(registeredCtx)).toContain("TIME");
       expect(String(registeredCtx.textAlign)).toBe("center");
-      expect(
-        String(registeredCaptured.find((entry) => entry.text === "TIME").font),
-      ).toContain("monospace");
+      expect(String(registeredCaptured.find((entry) => entry.text === "TIME").font)).toContain("monospace");
 
       const explicitProps = Object.assign({}, registeredDef, {
         displayVariant: "dateTime",
@@ -260,14 +228,14 @@ describe("runtime/widget-registrar.js", function () {
         value: [rawClock, rawClock],
         ratioThresholdNormal: 1.0,
         ratioThresholdFlat: 3.0,
-        default: "NA",
+        default: "NA"
       });
 
       const explicitCtx = createMockContext2D();
       const explicitCanvas = createMockCanvas({
         rectWidth: 220,
         rectHeight: 140,
-        ctx: explicitCtx,
+        ctx: explicitCtx
       });
       const explicitCaptured = captureTextCalls(explicitCtx);
       spec.renderCanvas(explicitCanvas, explicitProps);
@@ -275,13 +243,10 @@ describe("runtime/widget-registrar.js", function () {
       expect(fillTextValues(explicitCtx)).toContain("DATE");
       expect(fillTextValues(explicitCtx)).toContain("TIME");
       expect(String(explicitCtx.textAlign)).toBe("center");
-      expect(
-        String(explicitCaptured.find((entry) => entry.text === "TIME").font),
-      ).toContain("sans-serif");
+      expect(String(explicitCaptured.find((entry) => entry.text === "TIME").font)).toContain("sans-serif");
     } finally {
       if (typeof previousAvnav === "undefined") delete globalThis.avnav;
       else globalThis.avnav = previousAvnav;
     }
   });
-
 });

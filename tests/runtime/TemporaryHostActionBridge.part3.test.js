@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
 describe("runtime/TemporaryHostActionBridge.js", function () {
@@ -8,9 +9,9 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
         parentElement: null,
         querySelectorAll() {
           return [];
-        },
+        }
       },
-      opts,
+      opts
     );
   }
 
@@ -25,8 +26,8 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       (includeGlobalApi
         ? {
             routePoints: {
-              activate: routePointsActivate,
-            },
+              activate: routePointsActivate
+            }
           }
         : null);
     function hasClassName(root, className) {
@@ -37,9 +38,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       return value.split(/\s+/).indexOf(className) >= 0;
     }
     const getElementById = vi.fn(function (id) {
-      return Object.prototype.hasOwnProperty.call(pageRoots, id)
-        ? pageRoots[id]
-        : null;
+      return Object.prototype.hasOwnProperty.call(pageRoots, id) ? pageRoots[id] : null;
     });
     const querySelectorAll = vi.fn(function (selector) {
       if (selector === ".alarmWidget") {
@@ -54,21 +53,21 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
         runtime: {},
         state: {},
         config: { shared: {}, clusters: [] },
-        ...(capturedApi ? { avnavApi: capturedApi } : {}),
+        ...(capturedApi ? { avnavApi: capturedApi } : {})
       },
       avnav: includeGlobalApi
         ? {
             api: {
               routePoints: {
-                activate: routePointsActivate,
-              },
-            },
+                activate: routePointsActivate
+              }
+            }
           }
         : {},
       document: {
         getElementById: getElementById,
-        querySelectorAll: querySelectorAll,
-      },
+        querySelectorAll: querySelectorAll
+      }
     });
 
     runIifeScript("runtime/namespace.js", context);
@@ -78,7 +77,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       context,
       bridge: context.DyniPlugin.runtime.createTemporaryHostActionBridge(),
       routePointsActivate,
-      getElementById,
+      getElementById
     };
   }
 
@@ -89,11 +88,11 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       lat: 54 + index * 0.01,
       lon: 10 + index * 0.01,
       routeName: "Harbor Run",
-      selected: false,
+      selected: false
     };
     return {
       index: index,
-      pointSnapshot: Object.assign(basePoint, overrides || {}),
+      pointSnapshot: Object.assign(basePoint, overrides || {})
     };
   }
 
@@ -103,12 +102,12 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       className: "alarmWidget",
       __reactFiber$alarm: {
         memoizedProps: { onClick: alarmClick },
-        return: null,
-      },
+        return: null
+      }
     });
     const { bridge } = createBridgeContext({
       pageRoots: {},
-      alarmWidgetRoots: [alarmWidget],
+      alarmWidgetRoots: [alarmWidget]
     });
     const hostActions = bridge.getHostActions();
 
@@ -118,10 +117,10 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       map: { checkAutoZoom: "unsupported" },
       routeEditor: {
         openActiveRoute: "unsupported",
-        openEditRoute: "unsupported",
+        openEditRoute: "unsupported"
       },
       ais: { showInfo: "unsupported" },
-      alarm: { stopAll: "dispatch" },
+      alarm: { stopAll: "dispatch" }
     });
     expect(hostActions.alarm.stopAll()).toBe(true);
     expect(alarmClick).toHaveBeenCalledTimes(1);
@@ -133,12 +132,12 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       className: "dyni-alarm-root",
       __reactFiber$dynAlarm: {
         memoizedProps: { onClick: dynAlarmClick },
-        return: null,
-      },
+        return: null
+      }
     });
     const { bridge } = createBridgeContext({
       pageRoots: {},
-      alarmWidgetRoots: [dynAlarmRoot],
+      alarmWidgetRoots: [dynAlarmRoot]
     });
     const hostActions = bridge.getHostActions();
 
@@ -150,7 +149,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
   it("keeps alarm stop-all unsupported and non-throwing when no native alarm widget is mounted", function () {
     const { bridge } = createBridgeContext({
       pageRoots: {},
-      alarmWidgetRoots: [],
+      alarmWidgetRoots: []
     });
     const hostActions = bridge.getHostActions();
     let result = null;
@@ -168,12 +167,12 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       className: "alarmWidget",
       __reactFiber$alarm: {
         memoizedProps: { onClick: alarmClick },
-        return: null,
-      },
+        return: null
+      }
     });
     const { bridge, context } = createBridgeContext({
       pageRoots: {},
-      alarmWidgetRoots: [alarmWidget],
+      alarmWidgetRoots: [alarmWidget]
     });
     const hostActions = bridge.getHostActions();
 
@@ -182,20 +181,18 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
 
     expect(function () {
       hostActions.alarm.stopAll();
-    }).toThrow(
-      /TemporaryHostActionBridge: alarm\.stopAll missing native \.alarmWidget click path/,
-    );
+    }).toThrow(/TemporaryHostActionBridge: alarm\.stopAll missing native \.alarmWidget click path/);
   });
 
   it("fails closed on editroutepage when parity dispatch was granted but handler disappears", function () {
     const editRoot = makeElement({
       __reactFiber$edit: {
         memoizedProps: { widgetClick: vi.fn() },
-        return: null,
-      },
+        return: null
+      }
     });
     const { bridge } = createBridgeContext({
-      pageRoots: { editroutepage: editRoot },
+      pageRoots: { editroutepage: editRoot }
     });
     const hostActions = bridge.getHostActions();
 
@@ -204,42 +201,36 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
 
     expect(function () {
       hostActions.routePoints.activate(makeRoutePointPayload(1));
-    }).toThrow(
-      /TemporaryHostActionBridge: routePoints\.activate parity dispatch unavailable on editroutepage/,
-    );
+    }).toThrow(/TemporaryHostActionBridge: routePoints\.activate parity dispatch unavailable on editroutepage/);
   });
 
   it("returns false for passive or unsupported action modes before dispatch", function () {
     const gpsBridge = createBridgeContext({
-      pageRoots: { gpspage: makeElement() },
+      pageRoots: { gpspage: makeElement() }
     }).bridge;
     const otherBridge = createBridgeContext({ pageRoots: {} }).bridge;
 
     expect(gpsBridge.getHostActions().map.checkAutoZoom()).toBe(false);
-    expect(gpsBridge.getHostActions().routeEditor.openActiveRoute()).toBe(
-      false,
-    );
+    expect(gpsBridge.getHostActions().routeEditor.openActiveRoute()).toBe(false);
     expect(otherBridge.getHostActions().ais.showInfo("123")).toBe(false);
   });
 
   it("throws explicit errors when a dispatch-capable page handler is missing", function () {
     const { bridge } = createBridgeContext({
-      pageRoots: { navpage: makeElement() },
+      pageRoots: { navpage: makeElement() }
     });
 
     expect(function () {
       bridge.getHostActions().routeEditor.openActiveRoute();
-    }).toThrow(
-      /TemporaryHostActionBridge: routeEditor\.openActiveRoute missing host onItemClick handler/,
-    );
+    }).toThrow(/TemporaryHostActionBridge: routeEditor\.openActiveRoute missing host onItemClick handler/);
   });
 
   it("invalidates the facade after destroy", function () {
     const root = makeElement({
       __reactFiber$nav: {
         memoizedProps: { onItemClick: vi.fn() },
-        return: null,
-      },
+        return: null
+      }
     });
     const { bridge } = createBridgeContext({ pageRoots: { navpage: root } });
     const hostActions = bridge.getHostActions();

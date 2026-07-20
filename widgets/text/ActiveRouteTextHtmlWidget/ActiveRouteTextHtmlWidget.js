@@ -9,29 +9,13 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniActiveRouteTextHtmlWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const EMPTY_FIT = {
     routeNameStyle: "",
     metrics: Object.create(null)
   };
-
-  /** @param {unknown} props @param {DyniHtmlWidgetUtilsApi} htmlUtils @returns {boolean} */
-  function openActiveRoute(props, htmlUtils) {
-    const p = props && typeof props === "object" ? props : null;
-    if (htmlUtils.isEditingMode(p)) {
-      return false;
-    }
-    const policy = /** @type {{ actions?: { routeEditor?: { openActiveRoute?: () => boolean } } } | null} */ (htmlUtils.resolveSurfacePolicy(p));
-    if (!policy || !policy.actions || !policy.actions.routeEditor || typeof policy.actions.routeEditor.openActiveRoute !== "function") {
-      return false;
-    }
-    if (!htmlUtils.canDispatchSurfaceInteraction(p)) {
-      return false;
-    }
-    return policy.actions.routeEditor.openActiveRoute() !== false;
-  }
 
   /** @param {DyniActiveRouteDisplayProps} props @param {DyniHtmlWidgetUtilsApi} htmlUtils @param {DyniStateScreenPrecedenceApi} stateScreenPrecedence @returns {string} */
   function resolveStateKind(props, htmlUtils, stateScreenPrecedence) {
@@ -40,7 +24,7 @@
     return stateScreenPrecedence.pickFirst([
       { kind: "disconnected", when: display.disconnect === true },
       { kind: "noRoute", when: p.wpServer === false },
-      { kind: "noRoute", when: htmlUtils.trimText(display.routeName) === "" },
+      { kind: "noRoute", when: display.routeName === "" },
       { kind: "data", when: true }
     ]);
   }
@@ -65,7 +49,7 @@
     const formatUnits = p.formatUnits && typeof p.formatUnits === "object" ? p.formatUnits : {};
     const isApproaching = display.isApproaching === true;
     const kind = resolveStateKind(p, htmlUtils, stateScreenPrecedence);
-    const defaultText = String(p.default);
+    const defaultText = /** @type {string} */ (p.default);
     const etaFormatter = display.hideSeconds === true ? "formatClock" : "formatTime";
     const stableDigitsEnabled = p.stableDigits === true;
     const mode = htmlFit.resolveDisplayMode(p, shellRect, htmlUtils);
@@ -77,21 +61,23 @@
     });
 
     if (kind !== stateScreenLabels.KINDS.DATA) {
-      return /** @type {DyniActiveRouteRenderModel} */ (/** @type {unknown} */ ({
-        kind: kind,
-        stateLabel: stateScreenLabels.LABELS[kind] || "",
-        mode: mode,
-        interactionState: interactionState
-      }));
+      return /** @type {DyniActiveRouteRenderModel} */ (
+        /** @type {unknown} */ ({
+          kind: kind,
+          stateLabel: stateScreenLabels.LABELS[kind] || "",
+          mode: mode,
+          interactionState: interactionState
+        })
+      );
     }
 
-    const routeNameText = htmlUtils.trimText(display.routeName) || defaultText;
-    const remainCaption = htmlUtils.trimText(captions.remain);
-    const etaCaption = htmlUtils.trimText(captions.rteEta);
-    const nextCourseCaption = htmlUtils.trimText(captions.nextCourse);
-    const remainUnit = htmlUtils.trimText(units.remain);
-    const etaUnit = htmlUtils.trimText(units.rteEta);
-    const nextCourseUnit = htmlUtils.trimText(units.nextCourse);
+    const routeNameText = /** @type {string} */ (display.routeName) || defaultText;
+    const remainCaption = /** @type {string} */ (captions.remain);
+    const etaCaption = /** @type {string} */ (captions.rteEta);
+    const nextCourseCaption = /** @type {string} */ (captions.nextCourse);
+    const remainUnit = /** @type {string} */ (units.remain);
+    const etaUnit = /** @type {string} */ (units.rteEta);
+    const nextCourseUnit = /** @type {string} */ (units.nextCourse);
     const remainFormatUnit = formatUnits.remain;
     const remainRawText = htmlFit.formatActiveRouteMetric(
       display.remain,
@@ -108,13 +94,7 @@
       placeholderNormalize
     );
     const nextCourseRawText = isApproaching
-      ? htmlFit.formatActiveRouteMetric(
-        display.nextCourse,
-        "formatDirection",
-        [],
-        defaultText,
-        placeholderNormalize
-      )
+      ? htmlFit.formatActiveRouteMetric(display.nextCourse, "formatDirection", [], defaultText, placeholderNormalize)
       : "";
     const remainStable = htmlFit.normalizeStableValue(remainRawText, stableDigitsEnabled, stableDigits, 2);
     const etaStable = htmlFit.normalizeStableValue(etaRawText, stableDigitsEnabled, stableDigits, 2);
@@ -153,14 +133,34 @@
     if (tabular) {
       valueClasses.push("dyni-tabular");
     }
-    return ""
-      + '<div class="dyni-active-route-metric dyni-active-route-metric-' + metricId + '">'
-      + '<div class="dyni-active-route-metric-caption"' + htmlUtils.toStyleAttr(captionStyle) + ">" + htmlUtils.escapeHtml(caption) + "</div>"
-      + '<div class="dyni-active-route-metric-value-row"' + htmlUtils.toStyleAttr(gapStyle) + ">"
-      + '<span class="' + valueClasses.join(" ") + '"' + htmlUtils.toStyleAttr(valueStyle) + ">" + htmlUtils.escapeHtml(value) + "</span>"
-      + '<span class="dyni-active-route-metric-unit"' + htmlUtils.toStyleAttr(unitStyle) + ">" + htmlUtils.escapeHtml(unit) + "</span>"
-      + "</div>"
-      + "</div>";
+    return (
+      "" +
+      '<div class="dyni-active-route-metric dyni-active-route-metric-' +
+      metricId +
+      '">' +
+      '<div class="dyni-active-route-metric-caption"' +
+      htmlUtils.toStyleAttr(captionStyle) +
+      ">" +
+      htmlUtils.escapeHtml(caption) +
+      "</div>" +
+      '<div class="dyni-active-route-metric-value-row"' +
+      htmlUtils.toStyleAttr(gapStyle) +
+      ">" +
+      '<span class="' +
+      valueClasses.join(" ") +
+      '"' +
+      htmlUtils.toStyleAttr(valueStyle) +
+      ">" +
+      htmlUtils.escapeHtml(value) +
+      "</span>" +
+      '<span class="dyni-active-route-metric-unit"' +
+      htmlUtils.toStyleAttr(unitStyle) +
+      ">" +
+      htmlUtils.escapeHtml(unit) +
+      "</span>" +
+      "</div>" +
+      "</div>"
+    );
   }
 
   /** @param {DyniActiveRouteRenderModel} model @param {DyniActiveRouteMarkupFit} fitStyles @param {DyniHtmlShellRect | null} shellRect @param {DyniActiveRouteThemeTokens} theme @param {DyniHtmlWidgetUtilsApi} htmlUtils @param {DyniStateScreenLabelsApi} stateScreenLabels @param {DyniStateScreenMarkupApi} stateScreenMarkup @returns {string} */
@@ -170,9 +170,7 @@
 
     const wrapperClasses = [
       "dyni-active-route-html",
-      model.interactionState === "dispatch"
-        ? "dyni-active-route-open-dispatch"
-        : "dyni-active-route-open-passive",
+      model.interactionState === "dispatch" ? "dyni-active-route-open-dispatch" : "dyni-active-route-open-passive",
       "dyni-active-route-mode-" + model.mode
     ];
     if (model.kind !== stateScreenLabels.KINDS.DATA) {
@@ -207,26 +205,44 @@
     let metricsHtml = "";
     for (let i = 0; i < metricSpecs.length; i += 1) {
       const metric = metricSpecs[i];
-      const value = typeof metricValueOverrides[metric.id] === "string" ? metricValueOverrides[metric.id] : metric.value;
-      metricsHtml += renderMetricTile(metric.id, metric.caption, value, metric.unit, metricStyles[metric.id], htmlUtils, model.stableDigitsEnabled);
+      const value =
+        typeof metricValueOverrides[metric.id] === "string" ? metricValueOverrides[metric.id] : metric.value;
+      metricsHtml += renderMetricTile(
+        metric.id,
+        metric.caption,
+        value,
+        metric.unit,
+        metricStyles[metric.id],
+        htmlUtils,
+        model.stableDigitsEnabled
+      );
     }
 
-    return ""
-      + '<div class="' + wrapperClasses.join(" ") + '"'
-      + ' data-dyni-action="active-route-open"'
-      + '>'
-      + '<div class="dyni-active-route-open-hotspot"></div>'
-      + '<div class="dyni-active-route-route-name"' + htmlUtils.toStyleAttr(routeNameStyle) + ">"
-      + htmlUtils.escapeHtml(model.routeNameText)
-      + "</div>"
-      + '<div class="dyni-active-route-metrics">' + metricsHtml + "</div>"
-      + "</div>";
+    return (
+      "" +
+      '<div class="' +
+      wrapperClasses.join(" ") +
+      '"' +
+      ' data-dyni-action="active-route-open"' +
+      ">" +
+      '<div class="dyni-active-route-open-hotspot"></div>' +
+      '<div class="dyni-active-route-route-name"' +
+      htmlUtils.toStyleAttr(routeNameStyle) +
+      ">" +
+      htmlUtils.escapeHtml(model.routeNameText) +
+      "</div>" +
+      '<div class="dyni-active-route-metrics">' +
+      metricsHtml +
+      "</div>" +
+      "</div>"
+    );
   }
 
   /** @param {unknown} def @param {DyniActiveRouteContext} componentContext */
   function create(def, componentContext) {
     const htmlFit = componentContext.components.require("ActiveRouteHtmlFit");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    const navInteractionPolicy = componentContext.components.require("NavInteractionPolicy");
     const lifecycle = componentContext.components.require("HtmlWidgetLifecycle");
     const preparedPayloadModelCache = componentContext.components.require("PreparedPayloadModelCache");
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
@@ -256,14 +272,14 @@
       /** @param {unknown} props @param {DyniHtmlShellRect | null} shellRect */
       const translate = function (props, shellRect) {
         return buildRenderModel(
-        /** @type {DyniActiveRouteDisplayProps} */ (props),
-        shellRect,
-        componentContext,
-        htmlUtils,
-        htmlFit,
-        placeholderNormalize,
-        stableDigits,
-        stateScreenLabels,
+          /** @type {DyniActiveRouteDisplayProps} */ (props),
+          shellRect,
+          componentContext,
+          htmlUtils,
+          htmlFit,
+          placeholderNormalize,
+          stableDigits,
+          stateScreenLabels,
           stateScreenPrecedence,
           stateScreenInteraction
         );
@@ -285,7 +301,7 @@
         clickHandler = function onDispatchClick(ev) {
           ev.preventDefault();
           ev.stopPropagation();
-          openActiveRoute(lastProps, htmlUtils);
+          navInteractionPolicy.openActiveRoute(lastProps);
         };
         wrapperEl.addEventListener("click", clickHandler);
       }
@@ -297,16 +313,19 @@
         const theme = themeResolver.resolveForRoot(payload.rootEl);
         const model = /** @type {DyniActiveRouteRenderModel} */ (prepared.model);
         const fit = shellRect
-          ? (htmlFit.compute({
-            model: model,
-            hostContext: hostContext,
-            targetEl: payload.rootEl,
-            shellRect: shellRect
-          }) || EMPTY_FIT)
+          ? htmlFit.compute({
+              model: model,
+              hostContext: hostContext,
+              targetEl: payload.rootEl,
+              shellRect: shellRect
+            }) || EMPTY_FIT
           : lastFit;
 
         htmlUtils.applyMirroredContext(rootEl, payload.props);
-        wrapperEl = htmlUtils.patchInnerHtml(rootEl, renderMarkup(model, fit, shellRect, theme, htmlUtils, stateScreenLabels, stateScreenMarkup));
+        wrapperEl = htmlUtils.patchInnerHtml(
+          rootEl,
+          renderMarkup(model, fit, shellRect, theme, htmlUtils, stateScreenLabels, stateScreenMarkup)
+        );
         lastFit = fit;
         lastProps = /** @type {DyniActiveRouteDisplayProps} */ (prepared.props);
 
@@ -394,4 +413,4 @@
   }
 
   return { id: "ActiveRouteTextHtmlWidget", create: create };
-}));
+});

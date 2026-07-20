@@ -16,6 +16,7 @@
     "runtime/canvas-runtime.js",
     "runtime/dom-runtime.js",
     "runtime/editable-defaults.js",
+    "runtime/theme/token-catalog.js",
     "runtime/theme/model.js",
     "shared/widget-kits/value/ValueMath.js",
     "runtime/theme/resolver.js",
@@ -24,6 +25,7 @@
     "config/components/registry-shared-foundation-geometry.js",
     "config/components/registry-shared-foundation-layout.js",
     "config/components/registry-shared-foundation-state.js",
+    "config/components/registry-shared-foundation-xte.js",
     "config/components/registry-shared-engines.js",
     "config/components/registry-widgets-nav.js",
     "config/components/registry-widgets-vessel.js",
@@ -44,10 +46,12 @@
     "config/clusters/speed.js",
     "config/clusters/environment.js",
     "config/clusters/wind.js",
+    "config/shared/nav-ratio-thresholds.js",
     "config/clusters/nav.js",
     "config/clusters/map.js",
     "config/clusters/anchor.js",
     "config/clusters/vessel.js",
+    "config/shared/default-radial-editables.js",
     "config/clusters/default.js",
     "config/cluster-routes.js",
     "config/cluster-routes/course-heading.js",
@@ -78,4 +82,4 @@
     "runtime/cluster/RouteActivationController.js",
     "runtime/init.js"
   ];
-}(this));
+})(this);

@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRadialSectorMath = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -74,15 +74,10 @@
       const opts = options || {};
       const warningFrom = readOptionalThreshold(p.warningFrom, undefined);
       const alarmFrom = readOptionalThreshold(p.alarmFrom, undefined);
-      const warningTo = (typeof alarmFrom === "number" && typeof warningFrom === "number" && alarmFrom > warningFrom)
-        ? alarmFrom
-        : maxV;
-      const warning = typeof warningFrom === "number"
-        ? sectorAngles(warningFrom, warningTo, minV, maxV, arc)
-        : null;
-      const alarm = typeof alarmFrom === "number"
-        ? sectorAngles(alarmFrom, maxV, minV, maxV, arc)
-        : null;
+      const warningTo =
+        typeof alarmFrom === "number" && typeof warningFrom === "number" && alarmFrom > warningFrom ? alarmFrom : maxV;
+      const warning = typeof warningFrom === "number" ? sectorAngles(warningFrom, warningTo, minV, maxV, arc) : null;
+      const alarm = typeof alarmFrom === "number" ? sectorAngles(alarmFrom, maxV, minV, maxV, arc) : null;
       const sectors = [];
       if (warning) sectors.push({ a0: warning.a0, a1: warning.a1, color: opts.warningColor });
       if (alarm) sectors.push({ a0: alarm.a0, a1: alarm.a1, color: opts.alarmColor });
@@ -104,15 +99,15 @@
       const alarmFrom = readOptionalThreshold(p.alarmFrom, opts.defaultAlarmFrom);
       const alarmTo = typeof alarmFrom === "number" ? value.clamp(alarmFrom, minV, maxV) : undefined;
       const warningTo = typeof warningFrom === "number" ? value.clamp(warningFrom, minV, maxV) : undefined;
-      const alarm = (typeof alarmTo === "number" && alarmTo > minV)
-        ? sectorAngles(minV, alarmTo, minV, maxV, arc)
-        : null;
-      const warning = (typeof alarmTo === "number" && typeof warningTo === "number" && warningTo > alarmTo)
-        ? sectorAngles(alarmTo, warningTo, minV, maxV, arc)
-        : null;
-      const warningOnly = (!alarm && typeof warningTo === "number" && warningTo > minV)
-        ? sectorAngles(minV, warningTo, minV, maxV, arc)
-        : null;
+      const alarm = typeof alarmTo === "number" && alarmTo > minV ? sectorAngles(minV, alarmTo, minV, maxV, arc) : null;
+      const warning =
+        typeof alarmTo === "number" && typeof warningTo === "number" && warningTo > alarmTo
+          ? sectorAngles(alarmTo, warningTo, minV, maxV, arc)
+          : null;
+      const warningOnly =
+        !alarm && typeof warningTo === "number" && warningTo > minV
+          ? sectorAngles(minV, warningTo, minV, maxV, arc)
+          : null;
       const sectors = [];
       if (alarm) sectors.push({ a0: alarm.a0, a1: alarm.a1, color: opts.alarmColor });
       if (warning) sectors.push({ a0: warning.a0, a1: warning.a1, color: opts.warningColor });
@@ -129,4 +124,4 @@
   }
 
   return { id: "RadialSectorMath", create: create };
-}));
+});

@@ -4,14 +4,18 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 describe("XteHighwayLayout", function () {
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    return loadFresh("shared/widget-kits/xte/XteHighwayLayout.js").create({}, createComponentContextMock({
-      modules: {
-        ResponsiveScaleProfile: responsiveScaleProfile,
-        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
-      }
-    }));
+    return loadFresh("shared/widget-kits/xte/XteHighwayLayout.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          ResponsiveScaleProfile: responsiveScaleProfile,
+          LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
+        }
+      })
+    );
   }
 
+  /** @param {any} inner @param {any} outer */
   function expectRectInside(inner, outer) {
     expect(inner.x).toBeGreaterThanOrEqual(outer.x);
     expect(inner.y).toBeGreaterThanOrEqual(outer.y);
@@ -19,6 +23,13 @@ describe("XteHighwayLayout", function () {
     expect(inner.y + inner.h).toBeLessThanOrEqual(outer.y + outer.h);
   }
 
+  /**
+   * @param {any} layout
+   * @param {number} width
+   * @param {number} height
+   * @param {string} mode
+   * @param {Record<string, any>} [options]
+   */
   function buildSnapshot(layout, width, height, mode, options) {
     const cfg = options || {};
     const insets = layout.computeInsets(width, height);
@@ -120,12 +131,8 @@ describe("XteHighwayLayout", function () {
     expect(mediumNormal.out.nameRect.h / mediumNormal.out.highway.h).toBeLessThan(
       largeNormal.out.nameRect.h / largeNormal.out.highway.h
     );
-    expect(compactNormal.out.responsive.textFillScale).toBeGreaterThan(
-      mediumNormal.out.responsive.textFillScale
-    );
-    expect(mediumNormal.out.responsive.textFillScale).toBeGreaterThan(
-      largeNormal.out.responsive.textFillScale
-    );
+    expect(compactNormal.out.responsive.textFillScale).toBeGreaterThan(mediumNormal.out.responsive.textFillScale);
+    expect(mediumNormal.out.responsive.textFillScale).toBeGreaterThan(largeNormal.out.responsive.textFillScale);
   });
 
   it("keeps high-mode metric columns balanced", function () {
@@ -171,11 +178,14 @@ describe("XteHighwayLayout", function () {
 
   it("uses the highway height as the constraining axis in flat mode", function () {
     const layout = createLayout();
-    const primitives = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js").create({}, createComponentContextMock({
-      modules: {
-        GeometryScale: loadFresh("shared/widget-kits/layout/GeometryScale.js")
-      }
-    }));
+    const primitives = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          GeometryScale: loadFresh("shared/widget-kits/layout/GeometryScale.js")
+        }
+      })
+    );
     const snapshot = buildSnapshot(layout, 600, 150, "flat").out;
     const geometry = primitives.highwayGeometry(snapshot.highway, "flat", snapshot.highway.h);
 

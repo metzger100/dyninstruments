@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetLayoutGeometry = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const STACKED_METRIC_INSET_X_RATIO = 0.034;
@@ -84,12 +84,7 @@
   function shrinkRect(rect, padX, padY, makeRect) {
     const px = Math.max(0, Math.floor(Number(padX) || 0));
     const py = Math.max(0, Math.floor(Number(padY) || 0));
-    return makeRect(
-      rect.x + px,
-      rect.y + py,
-      Math.max(1, rect.w - px * 2),
-      Math.max(1, rect.h - py * 2)
-    );
+    return makeRect(rect.x + px, rect.y + py, Math.max(1, rect.w - px * 2), Math.max(1, rect.h - py * 2));
   }
 
   /** @param {unknown} width @param {number} share @param {number} minPx @param {number} maxRatio @returns {number} */
@@ -175,12 +170,7 @@
     const labelRect = makeRect(inner.x, inner.y, labelWidth, inner.h);
     const valueRect = makeRect(labelRect.x + labelRect.w + gap, inner.y, valueWidth, inner.h);
     const valueUsableWidth = Math.max(1, valueRect.w - gap);
-    const unitWidth = resolveUnitWidth(
-      valueUsableWidth,
-      settings.unitShare,
-      settings.unitMinPx,
-      settings.unitMaxRatio
-    );
+    const unitWidth = resolveUnitWidth(valueUsableWidth, settings.unitShare, settings.unitMinPx, settings.unitMaxRatio);
     const valueTextWidth = Math.max(1, valueRect.w - unitWidth - gap);
     const valueTextRect = makeRect(valueRect.x, valueRect.y, valueTextWidth, valueRect.h);
     const unitRect = makeRect(
@@ -260,4 +250,4 @@
   }
 
   return { id: "AisTargetLayoutGeometry", create: create };
-}));
+});

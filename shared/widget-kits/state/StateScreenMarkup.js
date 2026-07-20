@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniStateScreenMarkup = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @param {unknown} input @returns {string[]} */
@@ -63,7 +63,7 @@
   function resolveExtraAttrs(extraAttrs, htmlUtils) {
     if (typeof extraAttrs === "string") {
       const text = extraAttrs.trim();
-      return text ? (" " + text) : "";
+      return text ? " " + text : "";
     }
     if (!extraAttrs || typeof extraAttrs !== "object") {
       return "";
@@ -126,9 +126,7 @@
       const stateClass = "dyni-state-" + kindToClassSuffix(kind);
       const baseClasses = normalizeClasses(cfg.wrapperClasses);
       const wrapperClasses = forcePassiveClasses(dedupeClasses(baseClasses.concat([stateClass])));
-      const labelText = typeof cfg.label === "string"
-        ? cfg.label
-        : (labels.LABELS[kind] || "");
+      const labelText = typeof cfg.label === "string" ? cfg.label : labels.LABELS[kind] || "";
       const labelStyle = resolveLabelStyle(cfg, labelText);
       const attrs = resolveExtraAttrs(cfg.extraAttrs, htmlUtils);
 
@@ -136,14 +134,22 @@
         return '<div class="' + wrapperClasses.join(" ") + '"' + attrs + "></div>";
       }
 
-      return ''
-        + '<div class="' + wrapperClasses.join(" ") + '"' + attrs + ">"
-        + '<div class="dyni-state-screen-body">'
-        + '<span class="dyni-state-screen-label"' + htmlUtils.toStyleAttr(labelStyle) + ">"
-        + htmlUtils.escapeHtml(labelText)
-        + "</span>"
-        + "</div>"
-        + "</div>";
+      return (
+        "" +
+        '<div class="' +
+        wrapperClasses.join(" ") +
+        '"' +
+        attrs +
+        ">" +
+        '<div class="dyni-state-screen-body">' +
+        '<span class="dyni-state-screen-label"' +
+        htmlUtils.toStyleAttr(labelStyle) +
+        ">" +
+        htmlUtils.escapeHtml(labelText) +
+        "</span>" +
+        "</div>" +
+        "</div>"
+      );
     }
 
     return {
@@ -156,4 +162,4 @@
     id: "StateScreenMarkup",
     create: create
   };
-}));
+});

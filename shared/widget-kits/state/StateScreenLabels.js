@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniStateScreenLabels = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const KINDS = Object.freeze({
@@ -40,4 +40,4 @@
     id: "StateScreenLabels",
     create: create
   };
-}));
+});

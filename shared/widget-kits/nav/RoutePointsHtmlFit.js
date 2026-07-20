@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRoutePointsHtmlFit = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const EMPTY_MAX_PX_RATIO = {
@@ -30,29 +30,42 @@
     const cfg = /** @type {DyniRoutePointsInfoFitArgs} */ (args || {});
     const valueText = toText(cfg.valueText);
     const plainText = cfg.plainText == null ? valueText : toText(cfg.plainText);
-    const valueFit = htmlMeasureUtils.measurePx({
-      rect: cfg.rect,
-      text: valueText,
-      maxPxRatio: cfg.maxPxRatio,
-      textApi: cfg.textApi,
-      ctx: cfg.ctx,
-      textFillScale: cfg.textFillScale,
-      family: cfg.family,
-      weight: cfg.weight
-    }, htmlUtils, tileLayout);
-    if (!valueFit || !plainText || plainText === valueText || valueFit.width <= Math.max(1, Math.floor(cfg.rect.w)) + 0.01) {
+    const valueFit = htmlMeasureUtils.measurePx(
+      {
+        rect: cfg.rect,
+        text: valueText,
+        maxPxRatio: cfg.maxPxRatio,
+        textApi: cfg.textApi,
+        ctx: cfg.ctx,
+        textFillScale: cfg.textFillScale,
+        family: cfg.family,
+        weight: cfg.weight
+      },
+      htmlUtils,
+      tileLayout
+    );
+    if (
+      !valueFit ||
+      !plainText ||
+      plainText === valueText ||
+      valueFit.width <= Math.max(1, Math.floor(cfg.rect.w)) + 0.01
+    ) {
       return { text: valueText, px: valueFit && valueFit.px ? valueFit.px : 0 };
     }
-    const plainFit = htmlMeasureUtils.measurePx({
-      rect: cfg.rect,
-      text: plainText,
-      maxPxRatio: cfg.maxPxRatio,
-      textApi: cfg.textApi,
-      ctx: cfg.ctx,
-      textFillScale: cfg.textFillScale,
-      family: cfg.family,
-      weight: cfg.weight
-    }, htmlUtils, tileLayout);
+    const plainFit = htmlMeasureUtils.measurePx(
+      {
+        rect: cfg.rect,
+        text: plainText,
+        maxPxRatio: cfg.maxPxRatio,
+        textApi: cfg.textApi,
+        ctx: cfg.ctx,
+        textFillScale: cfg.textFillScale,
+        family: cfg.family,
+        weight: cfg.weight
+      },
+      htmlUtils,
+      tileLayout
+    );
     return { text: plainText, px: plainFit && plainFit.px ? plainFit.px : 0 };
   }
 
@@ -74,10 +87,11 @@
     let metaText = toText(model.metaText);
     if (!metaText) {
       const waypointsText = toText(model.waypointsText);
-      metaText = waypointsText ? (String(pointCount) + " " + waypointsText) : String(pointCount);
+      metaText = waypointsText ? String(pointCount) + " " + waypointsText : String(pointCount);
     }
     return {
-      routeNameText: routeName, metaText: metaText
+      routeNameText: routeName,
+      metaText: metaText
     };
   }
 
@@ -85,11 +99,12 @@
   function toRowTexts(points, index) {
     const source = Array.isArray(points) ? points[index] : null;
     const point = source && typeof source === "object" ? source : {};
+    const resolvedInfoText = point.infoText != null ? point.infoText : point.info;
     return {
-      ordinalText: toText(point.ordinalText != null ? point.ordinalText : (index + 1)),
+      ordinalText: toText(point.ordinalText != null ? point.ordinalText : index + 1),
       nameText: toText(point.nameText != null ? point.nameText : point.name),
       infoText: toText(point.infoText != null ? point.infoText : point.info),
-      infoPlainText: toText(point.infoPlainText != null ? point.infoPlainText : (point.infoText != null ? point.infoText : point.info))
+      infoPlainText: toText(point.infoPlainText != null ? point.infoPlainText : resolvedInfoText)
     };
   }
 
@@ -116,9 +131,9 @@
 
   /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniRoutePointsHtmlFitApi} */
   function create(def, componentContext) {
-    const theme = /** @type {DyniRoutePointsThemeResolver} */ (/** @type {unknown} */ (
-      componentContext.theme && componentContext.theme.tokens
-    ));
+    const theme = /** @type {DyniRoutePointsThemeResolver} */ (
+      /** @type {unknown} */ (componentContext.theme && componentContext.theme.tokens)
+    );
     const radialText = componentContext.components.require("CanvasTextLayout");
     const tileLayout = componentContext.components.require("TextTileLayout");
     const layoutApi = componentContext.components.require("RoutePointsLayout");
@@ -151,11 +166,12 @@
 
       const W = Math.max(1, Math.round(shellRect.width));
       const layoutShellHeight = htmlUtils.toFiniteNumber(model.layoutShellHeight);
-      const H = Math.max(1, Math.round(
-        (typeof layoutShellHeight === "number" && layoutShellHeight > 0)
-          ? layoutShellHeight
-          : shellRect.height
-      ));
+      const H = Math.max(
+        1,
+        Math.round(
+          typeof layoutShellHeight === "number" && layoutShellHeight > 0 ? layoutShellHeight : shellRect.height
+        )
+      );
       const pointCount = toPointCount(model, htmlUtils);
       const insets = layoutApi.computeInsets(W, H);
       const contentRect = layoutApi.createContentRect(W, H, insets);
@@ -178,24 +194,32 @@
       let headerFit = null;
       if (layout.showHeader && layout.headerLayout) {
         headerFit = {
-          routeNameStyle: htmlMeasureUtils.measureStyle({
-            rect: layout.headerLayout.routeNameRect,
-            textApi: radialText,
-            ctx: env.measureCtx,
-            text: headerTexts.routeNameText,
-            textFillScale: textFillScale,
-            family: env.family,
-            weight: env.valueWeight
-          }, htmlUtils, tileLayout),
-          metaStyle: htmlMeasureUtils.measureStyle({
-            rect: layout.headerLayout.metaRect,
-            textApi: radialText,
-            ctx: env.measureCtx,
-            text: headerTexts.metaText,
-            textFillScale: textFillScale,
-            family: env.family,
-            weight: env.labelWeight
-          }, htmlUtils, tileLayout)
+          routeNameStyle: htmlMeasureUtils.measureStyle(
+            {
+              rect: layout.headerLayout.routeNameRect,
+              textApi: radialText,
+              ctx: env.measureCtx,
+              text: headerTexts.routeNameText,
+              textFillScale: textFillScale,
+              family: env.family,
+              weight: env.valueWeight
+            },
+            htmlUtils,
+            tileLayout
+          ),
+          metaStyle: htmlMeasureUtils.measureStyle(
+            {
+              rect: layout.headerLayout.metaRect,
+              textApi: radialText,
+              ctx: env.measureCtx,
+              text: headerTexts.metaText,
+              textFillScale: textFillScale,
+              family: env.family,
+              weight: env.labelWeight
+            },
+            htmlUtils,
+            tileLayout
+          )
         };
       }
 
@@ -204,75 +228,107 @@
       for (let i = 0; i < layout.rows.length; i += 1) {
         const row = layout.rows[i];
         const rowTexts = toRowTexts(model.points, i);
-        const infoTextFit = model.showLatLon === true
-          ? {
-            text: rowTexts.infoText,
-            px: (htmlMeasureUtils.measurePx({
-              rect: row.infoRect,
-              text: rowTexts.infoText,
+        const infoTextFit =
+          model.showLatLon === true
+            ? {
+                text: rowTexts.infoText,
+                px:
+                  (
+                    htmlMeasureUtils.measurePx(
+                      {
+                        rect: row.infoRect,
+                        text: rowTexts.infoText,
+                        textApi: radialText,
+                        ctx: env.measureCtx,
+                        textFillScale: textFillScale,
+                        family: infoFamily,
+                        weight: env.labelWeight
+                      },
+                      htmlUtils,
+                      tileLayout
+                    ) || {}
+                  ).px || 0
+              }
+            : selectInfoText(
+                {
+                  rect: row.infoRect,
+                  valueText: rowTexts.infoText,
+                  plainText: rowTexts.infoPlainText,
+                  textApi: radialText,
+                  ctx: env.measureCtx,
+                  textFillScale: textFillScale,
+                  family: infoFamily,
+                  weight: env.labelWeight
+                },
+                htmlUtils,
+                htmlMeasureUtils,
+                tileLayout
+              );
+        rowFits.push({
+          ordinalStyle: htmlMeasureUtils.measureStyle(
+            {
+              rect: row.ordinalRect,
               textApi: radialText,
               ctx: env.measureCtx,
+              text: rowTexts.ordinalText,
+              textFillScale: textFillScale,
+              family: env.family,
+              weight: env.labelWeight
+            },
+            htmlUtils,
+            tileLayout
+          ),
+          nameStyle: htmlMeasureUtils.measureStyle(
+            {
+              rect: row.nameRect,
+              textApi: radialText,
+              ctx: env.measureCtx,
+              text: rowTexts.nameText,
+              textFillScale: textFillScale,
+              family: env.family,
+              weight: env.valueWeight
+            },
+            htmlUtils,
+            tileLayout
+          ),
+          infoStyle: htmlMeasureUtils.measureStyle(
+            {
+              rect: row.infoRect,
+              textApi: radialText,
+              ctx: env.measureCtx,
+              text: infoTextFit.text,
               textFillScale: textFillScale,
               family: infoFamily,
               weight: env.labelWeight
-            }, htmlUtils, tileLayout) || {}).px || 0
-          }
-          : selectInfoText({
-            rect: row.infoRect,
-            valueText: rowTexts.infoText,
-            plainText: rowTexts.infoPlainText,
-            textApi: radialText,
-            ctx: env.measureCtx,
-            textFillScale: textFillScale,
-            family: infoFamily,
-            weight: env.labelWeight
-          }, htmlUtils, htmlMeasureUtils, tileLayout);
-        rowFits.push({
-          ordinalStyle: htmlMeasureUtils.measureStyle({
-            rect: row.ordinalRect,
-            textApi: radialText,
-            ctx: env.measureCtx,
-            text: rowTexts.ordinalText,
-            textFillScale: textFillScale,
-            family: env.family,
-            weight: env.labelWeight
-          }, htmlUtils, tileLayout),
-          nameStyle: htmlMeasureUtils.measureStyle({
-            rect: row.nameRect,
-            textApi: radialText,
-            ctx: env.measureCtx,
-            text: rowTexts.nameText,
-            textFillScale: textFillScale,
-            family: env.family,
-            weight: env.valueWeight
-          }, htmlUtils, tileLayout),
-          infoStyle: htmlMeasureUtils.measureStyle({
-            rect: row.infoRect,
-            textApi: radialText,
-            ctx: env.measureCtx,
-            text: infoTextFit.text,
-            textFillScale: textFillScale,
-            family: infoFamily,
-            weight: env.labelWeight
-          }, htmlUtils, tileLayout),
+            },
+            htmlUtils,
+            tileLayout
+          ),
           infoText: infoTextFit.text
         });
       }
 
       let emptyStyle = "";
       if (model.hasRoute !== true) {
-        emptyStyle = htmlMeasureUtils.measureStyle({
-          rect: contentRect,
-          textApi: radialText,
-          ctx: env.measureCtx,
-          text: toText(model.emptyText || model.routeNameText || "No Route"),
-          textFillScale: textFillScale,
-          family: env.family,
-          weight: env.valueWeight,
-          maxPxRatio: model.mode === "flat"
-            ? EMPTY_MAX_PX_RATIO.flat
-            : (model.mode === "high" ? EMPTY_MAX_PX_RATIO.high : EMPTY_MAX_PX_RATIO.normal)
-        }, htmlUtils, tileLayout);
+        emptyStyle = htmlMeasureUtils.measureStyle(
+          {
+            rect: contentRect,
+            textApi: radialText,
+            ctx: env.measureCtx,
+            text: toText(model.emptyText || model.routeNameText || "No Route"),
+            textFillScale: textFillScale,
+            family: env.family,
+            weight: env.valueWeight,
+            maxPxRatio:
+              model.mode === "flat"
+                ? EMPTY_MAX_PX_RATIO.flat
+                : model.mode === "high"
+                  ? EMPTY_MAX_PX_RATIO.high
+                  : EMPTY_MAX_PX_RATIO.normal
+          },
+          htmlUtils,
+          tileLayout
+        );
       }
 
       return { headerFit: headerFit, rowFits: rowFits, emptyStyle: emptyStyle };
@@ -289,4 +345,4 @@
 
   /** @type {DyniRoutePointsHtmlFitModule} */
   return { id: "RoutePointsHtmlFit", create: create };
-}));
+});

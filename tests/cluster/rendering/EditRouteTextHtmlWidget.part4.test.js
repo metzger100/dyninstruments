@@ -1,9 +1,8 @@
+// @ts-nocheck
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("EditRouteTextHtmlWidget", function () {
   function createRenderer(options) {
@@ -29,7 +28,7 @@ describe("EditRouteTextHtmlWidget", function () {
           visibleMetricIds: [],
           flatMetricRows: 1,
           metricsStyle: "",
-          wrapperStyle: "",
+          wrapperStyle: ""
         };
       });
     const fitCompute =
@@ -37,7 +36,7 @@ describe("EditRouteTextHtmlWidget", function () {
       vi.fn(() => ({
         nameTextStyle: "font-size:12px;",
         sourceBadgeStyle: "font-size:9px;",
-        metrics: Object.create(null),
+        metrics: Object.create(null)
       }));
     const markupRender =
       opts.markupRender ||
@@ -49,9 +48,7 @@ describe("EditRouteTextHtmlWidget", function () {
           '<div class="dyni-edit-route-html dyni-edit-route-open-' +
           state +
           '" data-dyni-action="edit-route-open">' +
-          (model.canOpenEditRoute
-            ? '<div class="dyni-edit-route-open-hotspot"></div>'
-            : "") +
+          (model.canOpenEditRoute ? '<div class="dyni-edit-route-open-hotspot"></div>' : "") +
           "</div>"
         );
       });
@@ -61,21 +58,19 @@ describe("EditRouteTextHtmlWidget", function () {
         EditRouteHtmlFit: {
           create() {
             return { compute: fitCompute };
-          },
+          }
         },
-        HtmlWidgetUtils: loadFresh(
-          "shared/widget-kits/html/HtmlWidgetUtils.js",
-        ),
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
         EditRouteRenderModel: {
           create() {
             return { buildModel };
-          },
+          }
         },
         EditRouteMarkup: {
           create() {
             return { render: markupRender };
-          },
-        },
+          }
+        }
       },
       services: {
         themeTokens: {
@@ -85,29 +80,29 @@ describe("EditRouteTextHtmlWidget", function () {
                 family: "sans-serif",
                 familyMono: "monospace",
                 weight: 720,
-                labelWeight: 610,
-              },
+                labelWeight: 610
+              }
             };
-          },
-        },
-      },
+          }
+        }
+      }
     });
 
     return {
-      renderer: loadFresh(
-        "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js",
-      ).create({}, componentContext),
+      renderer: loadFresh("widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js").create(
+        {},
+        componentContext
+      ),
       buildModel,
       fitCompute,
-      markupRender,
+      markupRender
     };
   }
 
   function withSurfacePolicy(props, options) {
     const opts = options || {};
     const mode = opts.mode === "passive" ? "passive" : "dispatch";
-    const orientation =
-      opts.orientation === "vertical" ? "vertical" : "default";
+    const orientation = opts.orientation === "vertical" ? "vertical" : "default";
     const openEditRoute = opts.openEditRoute || vi.fn(() => true);
 
     return Object.assign({}, props || {}, {
@@ -117,10 +112,10 @@ describe("EditRouteTextHtmlWidget", function () {
         containerOrientation: orientation,
         actions: {
           routeEditor: {
-            openEditRoute,
-          },
-        },
-      },
+            openEditRoute
+          }
+        }
+      }
     });
   }
 
@@ -140,13 +135,13 @@ describe("EditRouteTextHtmlWidget", function () {
 
     mountEl.getBoundingClientRect = vi.fn(() => ({
       width: shellSize.width,
-      height: shellSize.height,
+      height: shellSize.height
     }));
 
     const committed = rendererSpec.createCommittedRenderer({
       hostContext,
       mountEl,
-      shadowRoot: null,
+      shadowRoot: null
     });
 
     let revision = 0;
@@ -163,7 +158,7 @@ describe("EditRouteTextHtmlWidget", function () {
         shellRect: { width: shellSize.width, height: shellSize.height },
         hostContext,
         layoutChanged: layoutChanged === true,
-        relayoutPass: 0,
+        relayoutPass: 0
       };
     }
 
@@ -181,15 +176,12 @@ describe("EditRouteTextHtmlWidget", function () {
       },
       html() {
         return mountEl.innerHTML;
-      },
+      }
     };
   }
 
   it("uses shadow-local css selectors", function () {
-    const cssPath = path.join(
-      process.cwd(),
-      "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css",
-    );
+    const cssPath = path.join(process.cwd(), "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css");
     const css = fs.readFileSync(cssPath, "utf8");
 
     expect(css).toContain(".dyni-html-root .dyni-edit-route-html");
@@ -201,9 +193,7 @@ describe("EditRouteTextHtmlWidget", function () {
     expect(css).toContain("gap: 0.08em;");
     expect(css).toContain("row-gap: 0.04em;");
     expect(css).not.toContain("grid-template-rows: auto minmax(0, 1fr);");
-    expect(css).toContain(
-      "grid-template-rows: minmax(0, 0.34fr) minmax(0, 0.66fr);",
-    );
+    expect(css).toContain("grid-template-rows: minmax(0, 0.34fr) minmax(0, 0.66fr);");
     expect(css).toContain("align-content: stretch;");
     expect(css).toContain("flex: 0 1 auto;");
     expect(css).toContain("flex: 0 0 auto;");
@@ -211,18 +201,13 @@ describe("EditRouteTextHtmlWidget", function () {
   });
 
   it("keeps metric row fractions and shrink guards in css", function () {
-    const cssPath = path.join(
-      process.cwd(),
-      "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css",
-    );
+    const cssPath = path.join(process.cwd(), "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css");
     const css = fs.readFileSync(cssPath, "utf8");
 
-    expect(css).toMatch(
-      /\.dyni-html-root \.dyni-edit-route-metric-label \{[\s\S]*?min-height: 0;/,
-    );
-    expect(css).toMatch(
-      /\.dyni-html-root \.dyni-edit-route-metric-value \{[\s\S]*?min-height: 0;/,
-    );
+    const labelBlockPattern = /\.dyni-html-root \.dyni-edit-route-metric-label \{[\s\S]*?min-height: 0\x3b/;
+    const valueBlockPattern = /\.dyni-html-root \.dyni-edit-route-metric-value \{[\s\S]*?min-height: 0\x3b/;
+    expect(css).toMatch(labelBlockPattern);
+    expect(css).toMatch(valueBlockPattern);
     expect(css).not.toContain("overflow: hidden;");
   });
 });

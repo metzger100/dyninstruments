@@ -30,9 +30,9 @@
   const runtime = ns.runtime;
   const valueMath = typedRoot.DyniComponents.DyniValueMath.create();
 
-  const GLOBAL_ROOT = /** @type {DyniSurfaceRecord} */ ((typeof globalThis !== "undefined")
-    ? globalThis
-    : (typeof self !== "undefined" ? self : {}));
+  const globalRootCandidate =
+    (typeof globalThis !== "undefined" && globalThis) || (typeof self !== "undefined" && self) || {};
+  const GLOBAL_ROOT = /** @type {DyniSurfaceRecord} */ (globalRootCandidate);
   const DEFAULT_CAPABILITIES = Object.freeze({
     pageId: "other",
     alarm: Object.freeze({ stopAll: "unsupported" })
@@ -48,9 +48,13 @@
 
   /** @param {unknown} hostContext @returns {DyniSurfaceRecord | null} */
   function resolveHostActions(hostContext) {
-    const ctx = /** @type {DyniSurfaceRecord | null} */ (hostContext && typeof hostContext === "object" ? hostContext : null);
+    const ctx = /** @type {DyniSurfaceRecord | null} */ (
+      hostContext && typeof hostContext === "object" ? hostContext : null
+    );
     const hostActions = ctx && ctx.hostActions ? ctx.hostActions : null;
-    return /** @type {DyniSurfaceRecord | null} */ (hostActions && typeof hostActions === "object" ? hostActions : null);
+    return /** @type {DyniSurfaceRecord | null} */ (
+      hostActions && typeof hostActions === "object" ? hostActions : null
+    );
   }
 
   /** @param {unknown} capabilities @returns {DyniSurfaceCapabilities} */
@@ -67,7 +71,9 @@
     if (hasPageId && hasAlarmGroup) {
       return /** @type {DyniSurfaceCapabilities} */ (capabilityRecord);
     }
-    const out = /** @type {DyniSurfaceCapabilities} */ (hasPageId ? Object.assign({}, capabilityRecord) : Object.assign({}, capabilityRecord, { pageId: "other" }));
+    const out = /** @type {DyniSurfaceCapabilities} */ (
+      hasPageId ? Object.assign({}, capabilityRecord) : Object.assign({}, capabilityRecord, { pageId: "other" })
+    );
     if (!hasAlarmGroup) {
       out.alarm = { stopAll: "unsupported" };
     }
@@ -196,7 +202,9 @@
   function resolveInteractionMode(routeState, capabilities) {
     const rendererId = routeState.route.rendererId;
     const props = routeState.props || {};
-    const domain = /** @type {DyniSurfaceRecord | null} */ (props.domain && typeof props.domain === "object" ? props.domain : null);
+    const domain = /** @type {DyniSurfaceRecord | null} */ (
+      props.domain && typeof props.domain === "object" ? props.domain : null
+    );
     if (isEditingMode(props)) {
       return "passive";
     }
@@ -214,9 +222,7 @@
         : "passive";
     }
     if (rendererId === "MapZoomTextHtmlWidget") {
-      return capabilities && capabilities.map && capabilities.map.checkAutoZoom === "dispatch"
-        ? "dispatch"
-        : "passive";
+      return capabilities && capabilities.map && capabilities.map.checkAutoZoom === "dispatch" ? "dispatch" : "passive";
     }
     if (rendererId === "AisTargetTextHtmlWidget") {
       return capabilities &&
@@ -237,9 +243,7 @@
         : "passive";
     }
     if (rendererId === "RoutePointsTextHtmlWidget") {
-      return capabilities &&
-        capabilities.routePoints &&
-        capabilities.routePoints.activate === "dispatch"
+      return capabilities && capabilities.routePoints && capabilities.routePoints.activate === "dispatch"
         ? "dispatch"
         : "passive";
     }
@@ -271,7 +275,12 @@
   /** @param {DyniSurfaceRecord} props @param {string} key @param {unknown} value */
   function materializeRuntimeField(props, key, value) {
     const descriptor = Object.getOwnPropertyDescriptor(props, key);
-    if (descriptor && descriptor.enumerable === false && descriptor.configurable === true && descriptor.writable === true) {
+    if (
+      descriptor &&
+      descriptor.enumerable === false &&
+      descriptor.configurable === true &&
+      descriptor.writable === true
+    ) {
       props[key] = value;
       return;
     }
@@ -323,11 +332,15 @@
     const cacheByHostContext = new WeakMap();
     return {
       resolveRouteStateWithPolicy: function (routeState, hostContext) {
-        return resolveRouteStateWithPolicy(/** @type {DyniSurfaceRouteState} */ (routeState), hostContext, cacheByHostContext);
+        return resolveRouteStateWithPolicy(
+          /** @type {DyniSurfaceRouteState} */ (routeState),
+          hostContext,
+          cacheByHostContext
+        );
       },
       resolveShellWidth: resolveShellWidth
     };
   }
 
   runtime._createClusterSurfacePolicy = createClusterSurfacePolicy;
-}(this));
+})(this);

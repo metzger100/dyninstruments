@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 const { flushPromises } = require("../helpers/async");
 const hasOwn = Object.prototype.hasOwnProperty;
@@ -12,23 +13,24 @@ describe("runtime/theme-runtime.js", function () {
               dom: {
                 getNightModeState() {
                   return false;
-                },
-              },
+                }
+              }
             },
             state: {},
-            config: { shared: {}, clusters: [] },
-          },
+            config: { shared: {}, clusters: [] }
+          }
         },
-        overrides || {},
-      ),
+        overrides || {}
+      )
     );
 
     runIifeScript("runtime/namespace.js", context);
     context.DyniPlugin.runtime.dom = context.DyniPlugin.runtime.dom || {
       getNightModeState() {
         return false;
-      },
+      }
     };
+    runIifeScript("runtime/theme/token-catalog.js", context);
     runIifeScript("runtime/theme/model.js", context);
     runIifeScript("runtime/theme/resolver.js", context);
     runIifeScript("runtime/theme-runtime.js", context);
@@ -42,7 +44,7 @@ describe("runtime/theme-runtime.js", function () {
       classList: {
         contains(name) {
           return name === "widget" || name === "dyniplugin";
-        },
+        }
       },
       closest() {
         return null;
@@ -51,8 +53,8 @@ describe("runtime/theme-runtime.js", function () {
         getPropertyValue() {
           return "";
         },
-        setProperty: vi.fn(),
-      },
+        setProperty: vi.fn()
+      }
     };
   }
 
@@ -72,9 +74,9 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
@@ -90,24 +92,18 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
     context.DyniPlugin.runtime.theme.applyToRoot(rootEl);
 
-    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-bar-warning")).toBe(
-      "#e0a92e",
-    );
-    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-bar-critical")).toBe(
-      "#d9534a",
-    );
-    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-bar-default")).toBe(
-      "#3366cc",
-    );
+    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-bar-warning")).toBe("#e0a92e");
+    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-bar-critical")).toBe("#d9534a");
+    expect(getAppliedOutput(rootEl, "--dyni-theme-regatta-bar-default")).toBe("#3366cc");
   });
 
   it("opacity tokens have no preset overrides", function () {
@@ -116,17 +112,16 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     const presets = ["slim", "bold", "darkmode", "highcontrast"];
 
     presets.forEach(function (preset) {
       context.DyniPlugin.runtime.theme.configure({ activePresetName: preset });
-      const resolved =
-        context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+      const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
       expect(resolved.opacity.caption).toBe(1);
       expect(resolved.opacity.unit).toBe(1);
     });
@@ -138,9 +133,9 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue() {
             return "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.dom.getNightModeState = function () {
@@ -148,8 +143,7 @@ describe("runtime/theme-runtime.js", function () {
     };
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const resolved =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const resolved = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
 
     expect(resolved.opacity.caption).toBe(1);
     expect(resolved.opacity.unit).toBe(1);
@@ -162,21 +156,19 @@ describe("runtime/theme-runtime.js", function () {
         return {
           getPropertyValue(name) {
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
-          },
+          }
         };
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     context.DyniPlugin.runtime.theme.configure({ activePresetName: "default" });
 
-    const inherited =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
+    const inherited = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
     expect(inherited.regatta.buttonStrokeWeight).toBe(1.7);
 
     cssVars["--dyni-regatta-button-stroke-weight"] = "2.4";
     const overrideRootEl = createPluginRootElement();
-    const overridden =
-      context.DyniPlugin.runtime.theme.tokens.resolveForRoot(overrideRootEl);
+    const overridden = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(overrideRootEl);
     expect(overridden.regatta.buttonStrokeWeight).toBe(2.4);
   });
 
@@ -188,14 +180,14 @@ describe("runtime/theme-runtime.js", function () {
       },
       setProperty(name, value) {
         inlineValues[String(name)] = String(value);
-      },
+      }
     };
     let computedStyleCalls = 0;
     const context = setupContext({
       getComputedStyle() {
         computedStyleCalls += 1;
         return inlineStyle;
-      },
+      }
     });
     const model = context.DyniPlugin.runtime.createThemeModel();
     const resolver = context.DyniPlugin.runtime.createThemeResolver(model, {
@@ -204,7 +196,7 @@ describe("runtime/theme-runtime.js", function () {
       },
       getActivePresetName() {
         return "default";
-      },
+      }
     });
     const rootEl = createPluginRootElement();
     rootEl.style = inlineStyle;
@@ -236,7 +228,7 @@ describe("runtime/theme-runtime.js", function () {
       },
       getActivePresetName() {
         return "default";
-      },
+      }
     });
     const fresh = secondResolver.resolveForRoot(rootEl);
     expect(fresh).not.toBe(changed);

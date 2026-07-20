@@ -21,7 +21,9 @@
     def: {
       name: "dyni_CourseHeading_Instruments",
       description: "Course & headings (COG/HDT/HDM/BRG) incl. radial and linear compass gauges",
-      caption: "", unit: "", default: "---",
+      caption: "",
+      unit: "",
+      default: "---",
       cluster: "courseHeading",
       storeKeys: {
         cog: "nav.gps.course",
@@ -54,13 +56,21 @@
 
         // ThreeValueTextWidget thresholds — only for numeric kinds
         ratioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.0,
           internal: true,
           name: "3-Rows Threshold (numeric)",
           condition: [{ kind: "cog" }, { kind: "hdt" }, { kind: "hdm" }, { kind: "brg" }]
         },
         ratioThresholdFlat: {
-          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+          type: "FLOAT",
+          min: 1.5,
+          max: 6.0,
+          step: 0.05,
+          default: 3.0,
           internal: true,
           name: "1-Row Threshold (numeric)",
           condition: [{ kind: "cog" }, { kind: "hdt" }, { kind: "hdm" }, { kind: "brg" }]
@@ -68,13 +78,21 @@
 
         // CompassRadialWidget thresholds — only for radial kinds
         compassRadialRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.8,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 0.8,
           internal: true,
           name: "Compass 2-Rows Threshold",
           condition: [{ kind: "hdtRadial" }, { kind: "hdmRadial" }]
         },
         compassRadialRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.2,
+          type: "FLOAT",
+          min: 1.0,
+          max: 6.0,
+          step: 0.05,
+          default: 2.2,
           internal: true,
           name: "Compass 1-Row Threshold",
           condition: [{ kind: "hdtRadial" }, { kind: "hdmRadial" }]
@@ -82,29 +100,46 @@
 
         // CompassLinearWidget settings — only for linear kinds
         compassLinearRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.1,
           internal: true,
           name: "CompassLinearWidget: Normal Threshold",
           condition: [{ kind: "hdtLinear" }, { kind: "hdmLinear" }]
         },
         compassLinearRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          type: "FLOAT",
+          min: 1.0,
+          max: 6.0,
+          step: 0.05,
+          default: 3.5,
           internal: true,
           name: "CompassLinearWidget: Flat Threshold",
           condition: [{ kind: "hdtLinear" }, { kind: "hdmLinear" }]
         },
         compassLinearTickMajor: {
-          type: "FLOAT", min: 1, max: 180, step: 1, default: 30,
+          type: "FLOAT",
+          min: 1,
+          max: 180,
+          step: 1,
+          default: 30,
           name: "Major tick step",
           condition: [{ kind: "hdtLinear" }, { kind: "hdmLinear" }]
         },
         compassLinearTickMinor: {
-          type: "FLOAT", min: 1, max: 180, step: 1, default: 10,
+          type: "FLOAT",
+          min: 1,
+          max: 180,
+          step: 1,
+          default: 10,
           name: "Minor tick step",
           condition: [{ kind: "hdtLinear" }, { kind: "hdmLinear" }]
         },
         compassLinearShowEndLabels: {
-          type: "BOOLEAN", default: false,
+          type: "BOOLEAN",
+          default: false,
           name: "Show min/max labels",
           condition: [{ kind: "hdtLinear" }, { kind: "hdmLinear" }]
         },
@@ -121,7 +156,11 @@
 
         // Shared caption/unit-to-value scale applies to both numeric & radial
         captionUnitScale: {
-          type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
+          type: "FLOAT",
+          min: 0.5,
+          max: 1.5,
+          step: 0.05,
+          default: 0.8,
           name: "Caption/Unit size"
         },
         stableDigits: {
@@ -143,30 +182,19 @@
           type: "BOOLEAN",
           default: true,
           name: "Smooth motion",
-          condition: [
-            { kind: "hdtRadial" },
-            { kind: "hdmRadial" },
-            { kind: "hdtLinear" },
-            { kind: "hdmLinear" }
-          ]
+          condition: [{ kind: "hdtRadial" }, { kind: "hdmRadial" }, { kind: "hdtLinear" }, { kind: "hdmLinear" }]
         },
         compassRadialHideTextualMetrics: {
           type: "BOOLEAN",
           default: false,
           name: "Hide textual metrics",
-          condition: [
-            { kind: "hdtRadial" },
-            { kind: "hdmRadial" }
-          ]
+          condition: [{ kind: "hdtRadial" }, { kind: "hdmRadial" }]
         },
         compassLinearHideTextualMetrics: {
           type: "BOOLEAN",
           default: false,
           name: "Hide textual metrics",
-          condition: [
-            { kind: "hdtLinear" },
-            { kind: "hdmLinear" }
-          ]
+          condition: [{ kind: "hdtLinear" }, { kind: "hdmLinear" }]
         },
 
         // hide low-levels
@@ -180,4 +208,4 @@
       }
     }
   });
-}(this));
+})(this);

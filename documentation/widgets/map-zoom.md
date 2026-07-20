@@ -24,12 +24,10 @@ MapZoomTextHtmlWidget renders map zoom state as a committed HTML surface.
 
 ## Ownership Contract
 
-- `shared/widget-kits/nav/MapZoomMarkup.js` owns disconnected/data markup
-  assembly and state-screen HTML.
-- `MapZoomTextHtmlWidget` owns prepared-model reuse, lifecycle, interaction,
-  layout signatures, and post-patch fitting.
-- `HtmlDomPatchUtils.patchInnerHtml()` owns root markup replacement; markup and
-  widget modules do not duplicate DOM patch logic.
+- `shared/widget-kits/nav/MapZoomMarkup.js` owns disconnected/data markup assembly and state-screen HTML.
+- `MapZoomTextHtmlWidget` owns prepared-model reuse, lifecycle, interaction, layout signatures, and post-patch fitting.
+- `HtmlDomPatchUtils.patchInnerHtml()` owns root markup replacement; markup and widget modules do not duplicate DOM
+  patch logic.
 
 ## Layout Contract
 
@@ -50,9 +48,12 @@ MapZoomTextHtmlWidget renders map zoom state as a committed HTML surface.
   - `valueStyle`
   - `unitStyle`
   - `requiredStyle`
-- `MapZoomTextHtmlWidget` reuses semantic model work via `PreparedPayloadModelCache` across `layoutSignature` and `patchDom`.
-- Prepared payload cache invalidation boundaries: payload revision change, props identity change, shell size change, and renderer `detach`/`destroy`.
-- Renderer consults `MapZoomHtmlFit.compute(...)` whenever `shellRect` exists; `MapZoomHtmlFit` performs hostContext-local signature caching for identical fit requests.
+- `MapZoomTextHtmlWidget` reuses semantic model work via `PreparedPayloadModelCache` across `layoutSignature` and
+  `patchDom`.
+- Prepared payload cache invalidation boundaries: payload revision change, props identity change, shell size change, and
+  renderer `detach`/`destroy`.
+- Renderer consults `MapZoomHtmlFit.compute(...)` whenever `shellRect` exists; `MapZoomHtmlFit` performs
+  hostContext-local signature caching for identical fit requests.
 
 ## Related
 

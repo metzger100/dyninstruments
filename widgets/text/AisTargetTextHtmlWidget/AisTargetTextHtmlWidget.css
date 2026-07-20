@@ -74,7 +74,6 @@
   min-width: 0;
   line-height: 1;
   white-space: nowrap;
-
 }
 
 .dyni-html-root .dyni-ais-target-name {
@@ -94,7 +93,9 @@
 
 .dyni-html-root .dyni-ais-target-mode-normal .dyni-ais-target-front,
 .dyni-html-root .dyni-ais-target-mode-high .dyni-ais-target-front,
-.dyni-html-root[data-dyni-orientation="vertical"] .dyni-ais-target-html.dyni-ais-target-vertical .dyni-ais-target-front {
+.dyni-html-root[data-dyni-orientation="vertical"]
+  .dyni-ais-target-html.dyni-ais-target-vertical
+  .dyni-ais-target-front {
   display: flex;
   align-items: flex-start;
 }

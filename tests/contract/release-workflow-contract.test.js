@@ -19,7 +19,7 @@ describe("tag-only release workflow", function () {
     expect(quality.permissions).toEqual({ contents: "read" });
     expect(quality["timeout-minutes"]).toBe(30);
     const commands = quality.steps
-      .map(function (step) {
+      .map(function (/** @type {any} */ step) {
         return step.run || "";
       })
       .join("\n");
@@ -28,10 +28,10 @@ describe("tag-only release workflow", function () {
     expect(commands).toContain("npm run setup");
     expect(commands).toContain("npm run check:all");
 
-    const setupIndex = quality.steps.findIndex(function (step) {
+    const setupIndex = quality.steps.findIndex(function (/** @type {any} */ step) {
       return step.name === "Install locked quality tooling";
     });
-    const gateIndex = quality.steps.findIndex(function (step) {
+    const gateIndex = quality.steps.findIndex(function (/** @type {any} */ step) {
       return step.name === "Run complete quality gate";
     });
     expect(setupIndex).toBeGreaterThan(-1);
@@ -44,10 +44,10 @@ describe("tag-only release workflow", function () {
     expect(publish.permissions).toEqual({ contents: "write" });
     expect(publish["timeout-minutes"]).toBe(10);
 
-    const validationIndex = publish.steps.findIndex(function (step) {
+    const validationIndex = publish.steps.findIndex(function (/** @type {any} */ step) {
       return step.name === "Validate release tag";
     });
-    const artifactIndex = publish.steps.findIndex(function (step) {
+    const artifactIndex = publish.steps.findIndex(function (/** @type {any} */ step) {
       return step.name === "Verify release artifacts";
     });
     expect(validationIndex).toBeGreaterThan(-1);
@@ -60,7 +60,7 @@ describe("tag-only release workflow", function () {
     const artifactCommands = publish.steps[artifactIndex].run;
     expect(artifactCommands).toContain('version="${{ steps.release_version.outputs.version }}"');
 
-    const releaseStep = publish.steps.find(function (step) {
+    const releaseStep = publish.steps.find(function (/** @type {any} */ step) {
       return step.name === "Create GitHub Release";
     });
     expect(releaseStep.with.prerelease).toBe("${{ steps.release_version.outputs.prerelease }}");
@@ -69,7 +69,7 @@ describe("tag-only release workflow", function () {
   it("uses immutable actions and never rebuilds in the publish job", function () {
     const uses = Object.values(workflow.jobs).flatMap(function (job) {
       return job.steps
-        .map(function (step) {
+        .map(function (/** @type {any} */ step) {
           return step.uses;
         })
         .filter(Boolean);
@@ -79,7 +79,7 @@ describe("tag-only release workflow", function () {
     });
 
     const publishCommands = workflow.jobs["publish-release"].steps
-      .map(function (step) {
+      .map(function (/** @type {any} */ step) {
         return step.run || "";
       })
       .join("\n");

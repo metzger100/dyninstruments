@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniDefaultMapper = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   function create() {
@@ -118,4 +118,4 @@
   }
 
   return { id: "DefaultMapper", create: create };
-}));
+});

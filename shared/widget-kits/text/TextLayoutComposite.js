@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniTextLayoutComposite = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   const ROW_SAFE_RATIO = 0.92;
   /**
@@ -59,27 +59,27 @@
       });
       const cFit = cfg.captionText
         ? primitive.fitSingleLineBinary({
-          ctx: cfg.ctx,
-          text: cfg.captionText,
-          minPx: 1,
-          maxPx: capMaxPx,
-          maxW: maxW,
-          maxH: maxHTop,
-          family: cfg.family,
-          weight: cfg.labelWeight
-        })
+            ctx: cfg.ctx,
+            text: cfg.captionText,
+            minPx: 1,
+            maxPx: capMaxPx,
+            maxW: maxW,
+            maxH: maxHTop,
+            family: cfg.family,
+            weight: cfg.labelWeight
+          })
         : { px: 0 };
       const uFit = cfg.unitText
         ? primitive.fitSingleLineBinary({
-          ctx: cfg.ctx,
-          text: cfg.unitText,
-          minPx: 1,
-          maxPx: unitMaxPx,
-          maxW: maxW,
-          maxH: maxHBot,
-          family: cfg.family,
-          weight: cfg.labelWeight
-        })
+            ctx: cfg.ctx,
+            text: cfg.unitText,
+            minPx: 1,
+            maxPx: unitMaxPx,
+            maxW: maxW,
+            maxH: maxHBot,
+            family: cfg.family,
+            weight: cfg.labelWeight
+          })
         : { px: 0 };
       return {
         hTop: hTop,
@@ -163,15 +163,15 @@
       });
       const capFit = cfg.captionText
         ? primitive.fitSingleLineBinary({
-          ctx: cfg.ctx,
-          text: cfg.captionText,
-          minPx: 1,
-          maxPx: capMaxPx,
-          maxW: maxW,
-          maxH: maxHBot,
-          family: cfg.family,
-          weight: cfg.labelWeight
-        })
+            ctx: cfg.ctx,
+            text: cfg.captionText,
+            minPx: 1,
+            maxPx: capMaxPx,
+            maxW: maxW,
+            maxH: maxHBot,
+            family: cfg.family,
+            weight: cfg.labelWeight
+          })
         : { px: 0 };
       return {
         hTop: hTop,
@@ -240,12 +240,10 @@
       const secScale = Number(cfg.secScale);
       const scale = Number.isFinite(secScale) ? secScale : 0.8;
       const textFillScale = clampTextFillScale(cfg.textFillScale);
-      const topRowExtraCheck = typeof cfg.topRowExtraCheck === "function"
-        ? cfg.topRowExtraCheck
-        : null;
+      const topRowExtraCheck = typeof cfg.topRowExtraCheck === "function" ? cfg.topRowExtraCheck : null;
       let headerH = 0;
       if (hasHeader) {
-        const headerWeight = cfg.mode === "high" ? 0.24 : 0.30;
+        const headerWeight = cfg.mode === "high" ? 0.24 : 0.3;
         headerH = Math.max(1, Math.floor(H * headerWeight));
         headerH = Math.min(headerH, Math.floor(H * 0.45));
       }
@@ -277,35 +275,33 @@
           maxHeaderH,
           textFillScale
         );
-        const capMaxW = cfg.captionText && cfg.unitText
-          ? Math.max(1, Math.floor((W - padX * 2) * 0.62))
-          : Math.max(1, W - padX * 2);
-        const unitMaxW = cfg.captionText && cfg.unitText
-          ? Math.max(1, Math.floor((W - padX * 2) * 0.32))
-          : Math.max(1, W - padX * 2);
+        const capMaxW =
+          cfg.captionText && cfg.unitText ? Math.max(1, Math.floor((W - padX * 2) * 0.62)) : Math.max(1, W - padX * 2);
+        const unitMaxW =
+          cfg.captionText && cfg.unitText ? Math.max(1, Math.floor((W - padX * 2) * 0.32)) : Math.max(1, W - padX * 2);
         capPx = cfg.captionText
           ? primitive.fitSingleLineBinary({
-            ctx: cfg.ctx,
-            text: cfg.captionText,
-            minPx: 1,
-            maxPx: headerBase,
-            maxW: capMaxW,
-            maxH: maxHeaderH,
-            family: cfg.family,
-            weight: cfg.labelWeight
-          }).px
+              ctx: cfg.ctx,
+              text: cfg.captionText,
+              minPx: 1,
+              maxPx: headerBase,
+              maxW: capMaxW,
+              maxH: maxHeaderH,
+              family: cfg.family,
+              weight: cfg.labelWeight
+            }).px
           : 0;
         unitPx = cfg.unitText
           ? primitive.fitSingleLineBinary({
-            ctx: cfg.ctx,
-            text: cfg.unitText,
-            minPx: 1,
-            maxPx: Math.floor(headerBase * scale),
-            maxW: unitMaxW,
-            maxH: maxHeaderH,
-            family: cfg.family,
-            weight: cfg.labelWeight
-          }).px
+              ctx: cfg.ctx,
+              text: cfg.unitText,
+              minPx: 1,
+              maxPx: Math.floor(headerBase * scale),
+              maxW: unitMaxW,
+              maxH: maxHeaderH,
+              family: cfg.family,
+              weight: cfg.labelWeight
+            }).px
           : 0;
       }
       return {
@@ -381,4 +377,4 @@
     };
   }
   return { id: "TextLayoutComposite", create: create };
-}));
+});

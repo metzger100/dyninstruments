@@ -28,7 +28,8 @@ Canvas shells use the same central vertical sizing pipeline as HTML shells.
 
 - ratio sizing materialized through shell aspect-ratio
 - current canvas routes use ratio shell sizing
-- natural sizing is route-specific and finalized by the committed renderer after activation, not by CanvasDomSurfaceAdapter
+- natural sizing is route-specific and finalized by the committed renderer after activation, not by
+  CanvasDomSurfaceAdapter
 - width remains host-owned in vertical mode
 
 ## Related

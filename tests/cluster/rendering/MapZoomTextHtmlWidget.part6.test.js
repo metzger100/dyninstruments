@@ -1,9 +1,8 @@
+// @ts-nocheck
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("MapZoomTextHtmlWidget", function () {
   const MODULE_PATH_BY_ID = {
@@ -15,19 +14,16 @@ describe("MapZoomTextHtmlWidget", function () {
     RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js",
     TextLayoutPrimitives: "shared/widget-kits/text/TextLayoutPrimitives.js",
     TextLayoutComposite: "shared/widget-kits/text/TextLayoutComposite.js",
-    ResponsiveScaleProfile:
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
+    ResponsiveScaleProfile: "shared/widget-kits/layout/ResponsiveScaleProfile.js",
     CanvasTextLayout: "shared/widget-kits/text/CanvasTextLayout.js",
     RadialTextFitting: "shared/widget-kits/radial/RadialTextFitting.js",
     PlaceholderNormalize: "shared/widget-kits/format/PlaceholderNormalize.js",
-    PreparedPayloadModelCache:
-      "shared/widget-kits/html/PreparedPayloadModelCache.js",
+    PreparedPayloadModelCache: "shared/widget-kits/html/PreparedPayloadModelCache.js",
     StateScreenLabels: "shared/widget-kits/state/StateScreenLabels.js",
     StateScreenPrecedence: "shared/widget-kits/state/StateScreenPrecedence.js",
-    StateScreenInteraction:
-      "shared/widget-kits/state/StateScreenInteraction.js",
+    StateScreenInteraction: "shared/widget-kits/state/StateScreenInteraction.js",
     StateScreenTextFit: "shared/widget-kits/state/StateScreenTextFit.js",
-    StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js",
+    StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js"
   };
 
   function createRenderer(options) {
@@ -87,17 +83,15 @@ describe("MapZoomTextHtmlWidget", function () {
                 family: "sans-serif",
                 familyMono: "monospace",
                 weight: 700,
-                labelWeight: 700,
+                labelWeight: 700
               },
-              colors: {},
+              colors: {}
             };
-          },
-        },
-      },
+          }
+        }
+      }
     });
-    return loadFresh(
-      "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
-    ).create({}, componentContext);
+    return loadFresh("widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js").create({}, componentContext);
   }
 
   function makeProps(overrides) {
@@ -107,9 +101,9 @@ describe("MapZoomTextHtmlWidget", function () {
         unit: "",
         zoom: 12.2,
         requiredZoom: 11.9,
-        default: "---",
+        default: "---"
       },
-      overrides || {},
+      overrides || {}
     );
   }
 
@@ -117,8 +111,7 @@ describe("MapZoomTextHtmlWidget", function () {
     const opts = options || {};
     const mode = opts.mode === "passive" ? "passive" : "dispatch";
     const checkAutoZoom = opts.checkAutoZoom || vi.fn(() => true);
-    const orientation =
-      opts.orientation === "vertical" ? "vertical" : "default";
+    const orientation = opts.orientation === "vertical" ? "vertical" : "default";
     const pageId = opts.pageId || "navpage";
 
     return Object.assign({}, props || {}, {
@@ -128,10 +121,10 @@ describe("MapZoomTextHtmlWidget", function () {
         interaction: { mode },
         actions: {
           map: {
-            checkAutoZoom,
-          },
-        },
-      },
+            checkAutoZoom
+          }
+        }
+      }
     });
   }
 
@@ -151,13 +144,13 @@ describe("MapZoomTextHtmlWidget", function () {
 
     mountEl.getBoundingClientRect = vi.fn(() => ({
       width: shellSize.width,
-      height: shellSize.height,
+      height: shellSize.height
     }));
 
     const committed = rendererSpec.createCommittedRenderer({
       hostContext,
       mountEl,
-      shadowRoot: null,
+      shadowRoot: null
     });
 
     function payload(nextProps, revision, layoutChanged) {
@@ -171,7 +164,7 @@ describe("MapZoomTextHtmlWidget", function () {
         shellRect: { width: shellSize.width, height: shellSize.height },
         hostContext,
         layoutChanged: layoutChanged === true,
-        relayoutPass: 0,
+        relayoutPass: 0
       };
     }
 
@@ -189,7 +182,7 @@ describe("MapZoomTextHtmlWidget", function () {
       },
       html() {
         return mountEl.innerHTML;
-      },
+      }
     };
   }
 
@@ -197,7 +190,7 @@ describe("MapZoomTextHtmlWidget", function () {
     const renderer = createRenderer({
       applyFormatter: function () {
         return '<span class="unsafe">x</span>';
-      },
+      }
     });
     const mounted = mountCommitted(
       renderer,
@@ -206,10 +199,10 @@ describe("MapZoomTextHtmlWidget", function () {
           caption: "<ZOOM>",
           unit: '"deg"',
           zoom: 12.1,
-          requiredZoom: 11.7,
+          requiredZoom: 11.7
         }),
-        { mode: "dispatch" },
-      ),
+        { mode: "dispatch" }
+      )
     );
 
     const html = mounted.html();
@@ -220,7 +213,7 @@ describe("MapZoomTextHtmlWidget", function () {
     const committed = renderer.createCommittedRenderer({
       hostContext: {},
       mountEl: null,
-      shadowRoot: null,
+      shadowRoot: null
     });
     const mountEl = document.createElement("div");
     expect(function () {
@@ -234,7 +227,7 @@ describe("MapZoomTextHtmlWidget", function () {
         shellRect: { width: 320, height: 180 },
         hostContext: {},
         layoutChanged: true,
-        relayoutPass: 0,
+        relayoutPass: 0
       });
     }).toThrow("props.default is required");
   });
@@ -244,34 +237,30 @@ describe("MapZoomTextHtmlWidget", function () {
     const committed = renderer.createCommittedRenderer({
       hostContext: {},
       mountEl: null,
-      shadowRoot: null,
+      shadowRoot: null
     });
 
     const base = committed.layoutSignature({
       props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
-      shellRect: { width: 300, height: 100 },
+      shellRect: { width: 300, height: 100 }
     });
     const captionChanged = committed.layoutSignature({
       props: withSurfacePolicy(makeProps({ caption: "ZOOM EXT" }), {
-        mode: "dispatch",
+        mode: "dispatch"
       }),
-      shellRect: { width: 300, height: 100 },
+      shellRect: { width: 300, height: 100 }
     });
     const stableDigitsChanged = committed.layoutSignature({
-      props: withSurfacePolicy(
-        makeProps({ stableDigits: true, zoom: 12.2, requiredZoom: 11.9 }),
-        { mode: "dispatch" },
-      ),
-      shellRect: { width: 300, height: 100 },
+      props: withSurfacePolicy(makeProps({ stableDigits: true, zoom: 12.2, requiredZoom: 11.9 }), { mode: "dispatch" }),
+      shellRect: { width: 300, height: 100 }
     });
     const shapeChanged = committed.layoutSignature({
       props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),
-      shellRect: { width: 90, height: 200 },
+      shellRect: { width: 90, height: 200 }
     });
 
     expect(captionChanged).not.toBe(base);
     expect(stableDigitsChanged).not.toBe(base);
     expect(shapeChanged).not.toBe(base);
   });
-
 });

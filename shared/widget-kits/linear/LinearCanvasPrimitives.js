@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniLinearCanvasPrimitives = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
@@ -55,9 +55,9 @@
     ctx.save();
     applyStyle(ctx, {
       strokeStyle: p.strokeStyle,
-      lineWidth: (p.lineWidth != null) ? p.lineWidth : 1,
+      lineWidth: p.lineWidth != null ? p.lineWidth : 1,
       lineCap: hasOwn.call(p, "lineCap") ? p.lineCap : "round",
-      alpha: (p.alpha != null) ? p.alpha : 1,
+      alpha: p.alpha != null ? p.alpha : 1,
       dash: p.dash
     });
     ctx.beginPath();
@@ -90,7 +90,7 @@
     applyStyle(ctx, {
       fillStyle: p.fillStyle,
       strokeStyle: p.strokeStyle,
-      alpha: (p.alpha != null) ? p.alpha : 1
+      alpha: p.alpha != null ? p.alpha : 1
     });
     ctx.fillRect(left, top, width, t);
     const lineWidth = hasOwn.call(p, "lineWidth") ? Number(p.lineWidth) : 0;
@@ -115,9 +115,9 @@
     ctx.save();
     applyStyle(ctx, {
       strokeStyle: p.strokeStyle,
-      lineWidth: (p.lineWidth != null) ? p.lineWidth : 1,
+      lineWidth: p.lineWidth != null ? p.lineWidth : 1,
       lineCap: hasOwn.call(p, "lineCap") ? p.lineCap : "butt",
-      alpha: (p.alpha != null) ? p.alpha : 1
+      alpha: p.alpha != null ? p.alpha : 1
     });
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -140,7 +140,7 @@
     ctx.save();
     applyStyle(ctx, {
       fillStyle: p.fillStyle || p.color,
-      alpha: (p.alpha != null) ? p.alpha : 1
+      alpha: p.alpha != null ? p.alpha : 1
     });
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -163,4 +163,4 @@
   }
 
   return { id: "LinearCanvasPrimitives", create: create };
-}));
+});

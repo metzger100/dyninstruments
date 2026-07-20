@@ -3,10 +3,7 @@ const path = require("node:path");
 
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
-const BUNDLED_LAYOUT_FILES = [
-  "layouts/dyni-motorboat.json",
-  "layouts/dyni-sailboat.json"
-];
+const BUNDLED_LAYOUT_FILES = ["layouts/dyni-motorboat.json", "layouts/dyni-sailboat.json"];
 
 const REQUIRED_NAVPAGE_PANELS = [
   "left",
@@ -63,12 +60,14 @@ const CLUSTER_ROUTE_SCRIPTS = [
   "config/cluster-routes/finalize.js"
 ];
 
+/** @param {string} relPath @returns {any} */
 function loadBundledLayout(relPath) {
   return JSON.parse(fs.readFileSync(path.join(process.cwd(), relPath), "utf8"));
 }
 
+/** @param {any} layout @returns {any[]} */
 function collectWidgetsFromLayout(layout) {
-  const widgets = [];
+  const widgets = /** @type {any[]} */ ([]);
   const pages = layout && layout.widgets ? layout.widgets : {};
   Object.keys(pages).forEach(function (pageName) {
     const page = pages[pageName];
@@ -84,13 +83,14 @@ function collectWidgetsFromLayout(layout) {
   return widgets;
 }
 
+/** @param {any} entry @param {any[]} out */
 function collectWidgetEntry(entry, out) {
   if (!entry || typeof entry !== "object") return;
   if (Object.prototype.hasOwnProperty.call(entry, "name") || Object.prototype.hasOwnProperty.call(entry, "kind")) {
     out.push(entry);
   }
   if (Array.isArray(entry.children)) {
-    entry.children.forEach(function (child) {
+    entry.children.forEach(function (/** @type {any} */ child) {
       collectWidgetEntry(child, out);
     });
   }
@@ -114,7 +114,7 @@ describe("bundled layouts", function () {
 
   beforeAll(function () {
     const routes = loadRouteCatalog();
-    routes.forEach(function (route) {
+    routes.forEach(function (/** @type {any} */ route) {
       kindToCluster[route.kind] = route.cluster;
     });
   });
@@ -152,7 +152,8 @@ describe("bundled layouts", function () {
         if (typeof widget.name !== "string" || !widget.name.startsWith("dyni_")) return;
 
         const ownerCluster = kindToCluster[widget.kind];
-        const expectedWidgetName = CLUSTER_WIDGET_BY_CLUSTER[ownerCluster];
+        const expectedWidgetName =
+          CLUSTER_WIDGET_BY_CLUSTER[/** @type {keyof typeof CLUSTER_WIDGET_BY_CLUSTER} */ (ownerCluster)];
         expect(expectedWidgetName).toBeTruthy();
         expect(widget.name).toBe(expectedWidgetName);
       });
@@ -185,7 +186,7 @@ describe("bundled layouts", function () {
         expect(Array.isArray(leftAnchorPanel)).toBe(true);
 
         requiredAnchorKinds.forEach(function (kind) {
-          const match = leftAnchorPanel.find(function (entry) {
+          const match = leftAnchorPanel.find(function (/** @type {any} */ entry) {
             return entry && entry.name === "dyni_Anchor_Instruments" && entry.kind === kind;
           });
           expect(match).toBeTruthy();
@@ -203,7 +204,7 @@ describe("bundled layouts", function () {
       { name: "Dyni Sailboat", file: "layouts/dyni-sailboat.json" }
     ]);
 
-    pluginConfig.layouts.forEach(function (layoutDef) {
+    pluginConfig.layouts.forEach(function (/** @type {any} */ layoutDef) {
       const filePath = path.join(process.cwd(), layoutDef.file);
       expect(fs.existsSync(filePath)).toBe(true);
     });

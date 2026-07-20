@@ -3,6 +3,12 @@ const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
+/** @param {string} relativePath @returns {Promise<any>} */
+function importTool(relativePath) {
+  return import(relativePath);
+}
+
+/** @param {string} command @param {string[]} args @param {string} cwd */
 function runReal(command, args, cwd) {
   const result = spawnSync(command, args, { cwd, encoding: "utf8" });
   if (result.status !== 0) {
@@ -11,18 +17,21 @@ function runReal(command, args, cwd) {
   return result.stdout || "";
 }
 
+/** @param {string} rootDir @param {string} relPath @param {string} content */
 function writeFile(rootDir, relPath, content) {
   const absPath = path.join(rootDir, relPath);
   fs.mkdirSync(path.dirname(absPath), { recursive: true });
   fs.writeFileSync(absPath, content);
 }
 
+/** @param {string} rootDir */
 function listRelativeFiles(rootDir) {
-  const out = [];
+  const out = /** @type {string[]} */ ([]);
   walk(rootDir, out, rootDir);
   return out.sort((a, b) => a.localeCompare(b));
 }
 
+/** @param {string} currentPath @param {string[]} out @param {string} rootDir */
 function walk(currentPath, out, rootDir) {
   const stat = fs.statSync(currentPath);
   if (stat.isFile()) {
@@ -37,7 +46,7 @@ function walk(currentPath, out, rootDir) {
 
 describe("release-create", function () {
   it("accepts only the canonical notes path before release creation", async function () {
-    const { ensureCleanReleaseCreation } = await import("../../tools/release-create.mjs");
+    const { ensureCleanReleaseCreation } = await importTool("../../tools/release-create.mjs");
     const statusCases = [
       " M releases/dyninstruments-1.2.4.zip\0",
       " M releases/dyninstruments-1.2.3.md\0",
@@ -45,8 +54,9 @@ describe("release-create", function () {
       "R  releases/dyninstruments-1.2.4.md\0releases/old.md\0"
     ];
 
+    /** @param {string} status */
     function runWithStatus(status) {
-      return function (command, args) {
+      return function (/** @type {string} */ command, /** @type {string[]} */ args) {
         expect(command).toBe("git");
         expect(args[0]).toBe("status");
         return { status: 0, stdout: status, stderr: "", error: null };
@@ -65,12 +75,9 @@ describe("release-create", function () {
   });
 
   it("shares strict SemVer validation with tag publication", async function () {
-    const {
-      classifyReleaseTag,
-      formatGithubOutput,
-      isValidReleaseVersion,
-      parseReleaseTag
-    } = await import("../../tools/release-version.mjs");
+    const { classifyReleaseTag, formatGithubOutput, isValidReleaseVersion, parseReleaseTag } = await importTool(
+      "../../tools/release-version.mjs"
+    );
 
     ["0.0.0", "1.2.3", "1.2.3-rc.1", "1.2.3+build.5"].forEach(function (version) {
       expect(isValidReleaseVersion(version), version).toBe(true);
@@ -93,7 +100,7 @@ describe("release-create", function () {
   });
 
   it("creates prerelease artifacts, commit, and annotated tag after one aggregate gate", async function () {
-    const { createRelease } = await import("../../tools/release-create.mjs");
+    const { createRelease } = await importTool("../../tools/release-create.mjs");
 
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-create-"));
     const version = "1.2.3-beta.1";
@@ -127,11 +134,16 @@ describe("release-create", function () {
         "assets/fonts/Roboto-Regular.woff2"
       ];
 
-      let zippedEntries = [];
+      let zippedEntries = /** @type {string[]} */ ([]);
       let aggregateGateCalls = 0;
       const result = createRelease({
         rootDir: tempRoot,
         version,
+        /**
+         * @param {string} command
+         * @param {string[]} args
+         * @param {Record<string, any>} [options]
+         */
         runCommand(command, args, options = {}) {
           if (command === "npm") {
             if (args[0] === "run" && args[1] === "check:all") {
@@ -158,10 +170,11 @@ describe("release-create", function () {
               const stdout = runReal("git", args, tempRoot);
               return { status: 0, stdout, stderr: "", error: null };
             } catch (error) {
+              const err = /** @type {any} */ (error);
               return {
                 status: 1,
                 stdout: "",
-                stderr: String(error.message || error),
+                stderr: String(err.message || err),
                 error: null
               };
             }
@@ -231,9 +244,9 @@ describe("release-create", function () {
   });
 
   it("rejects cross-boundary release renames in both directions", async function () {
-    const { createRelease } = await import("../../tools/release-create.mjs");
+    const { createRelease } = await importTool("../../tools/release-create.mjs");
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-create-rename-"));
-    const calls = [];
+    const calls = /** @type {string[][]} */ ([]);
     const cases = [
       {
         status: "R  releases/moved.js\0runtime/source.js\0",
@@ -254,7 +267,7 @@ describe("release-create", function () {
           createRelease({
             rootDir: tempRoot,
             version: "1.2.4",
-            runCommand(command, args) {
+            runCommand(/** @type {string} */ command, /** @type {string[]} */ args) {
               calls.push([command, ...args]);
               if (command === "zip") {
                 return { status: 0, stdout: "", stderr: "", error: null };
@@ -279,10 +292,10 @@ describe("release-create", function () {
   });
 
   it("aborts before packaging when the aggregate gate fails", async function () {
-    const { createRelease } = await import("../../tools/release-create.mjs");
+    const { createRelease } = await importTool("../../tools/release-create.mjs");
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-create-failed-gate-"));
     const version = "1.2.4";
-    const calls = [];
+    const calls = /** @type {string[][]} */ ([]);
     let manifestBuilderCalls = 0;
 
     try {
@@ -292,7 +305,7 @@ describe("release-create", function () {
         createRelease({
           rootDir: tempRoot,
           version,
-          runCommand(command, args) {
+          runCommand(/** @type {string} */ command, /** @type {string[]} */ args) {
             calls.push([command, ...args]);
 
             if (command === "npm") {

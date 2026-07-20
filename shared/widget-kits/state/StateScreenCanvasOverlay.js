@@ -8,17 +8,12 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniStateScreenCanvasOverlay = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @returns {boolean} */
   function isDevMode() {
-    return !!(
-      typeof process !== "undefined" &&
-      process &&
-      process.env &&
-      process.env.NODE_ENV !== "production"
-    );
+    return !!(typeof process !== "undefined" && process && process.env && process.env.NODE_ENV !== "production");
   }
 
   /**
@@ -75,12 +70,13 @@
 
       const W = Math.max(1, Math.floor(Number(cfg.W) || 1));
       const H = Math.max(1, Math.floor(Number(cfg.H) || 1));
-      const color = typeof cfg.color === "string" && cfg.color
-        ? cfg.color
-        : (typeof ctx.fillStyle === "string" && ctx.fillStyle ? ctx.fillStyle : "");
-      const labelText = typeof cfg.label === "string"
-        ? cfg.label
-        : (labels.LABELS[/** @type {string} */ (kind)] || "");
+      const color =
+        typeof cfg.color === "string" && cfg.color
+          ? cfg.color
+          : typeof ctx.fillStyle === "string" && ctx.fillStyle
+            ? ctx.fillStyle
+            : "";
+      const labelText = typeof cfg.label === "string" ? cfg.label : labels.LABELS[/** @type {string} */ (kind)] || "";
       const px = resolveFontPx(ctx, labelText, W, H, cfg.labelWeight, cfg.family);
 
       ctx.save();
@@ -103,4 +99,4 @@
     id: "StateScreenCanvasOverlay",
     create: create
   };
-}));
+});

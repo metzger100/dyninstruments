@@ -4,9 +4,8 @@
 
 ## Overview
 
-`SpringEasing` provides the shared motion primitive used by the phase 8 gauge and
-text renderers. It exposes a per-value spring integrator plus a canvas-keyed
-motion controller so widgets can smooth pointer/heading/XTE changes without
+`SpringEasing` provides the shared motion primitive used by the phase 8 gauge and text renderers. It exposes a per-value
+spring integrator plus a canvas-keyed motion controller so widgets can smooth pointer/heading/XTE changes without
 duplicating animation state.
 
 ## API

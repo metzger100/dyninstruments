@@ -8,13 +8,20 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetRenderModel = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniAisTargetMetricId[]} */
   const METRIC_ORDER = ["dst", "cpa", "tcpa", "brg"];
   /** @type {DyniAisTargetMetricVisibility} */
   const DATA_METRIC_VISIBILITY = { dst: true, cpa: true, tcpa: true, brg: true };
+  /** @type {DyniAisTargetMetricVisibility} */
+  const HIDDEN_METRIC_VISIBILITY = {
+    dst: false,
+    cpa: false,
+    tcpa: false,
+    brg: false
+  };
 
   /** @type {DyniValueMathApi["toObject"]} */
   let toObject;
@@ -29,9 +36,7 @@
    * @returns {DyniAisTargetShellSize}
    */
   function toSafeSizeRect(shellRect, htmlUtils) {
-    const rect = shellRect && typeof shellRect === "object"
-      ? /** @type {Record<string, unknown>} */ (shellRect)
-      : null;
+    const rect = shellRect && typeof shellRect === "object" ? /** @type {Record<string, unknown>} */ (shellRect) : null;
     return {
       width: Math.max(1, Math.round(htmlUtils.toFiniteNumber(rect && rect.width) || 1)),
       height: Math.max(1, Math.round(htmlUtils.toFiniteNumber(rect && rect.height) || 1))
@@ -69,10 +74,11 @@
     return stateScreenPrecedence.pickFirst([
       {
         kind: "hidden",
-        when: domain.hasTargetIdentity === false
-          && cfg.isEditingMode !== true
-          && cfg.pageId !== "gpspage"
-          && cfg.isVerticalContainer !== true
+        when:
+          domain.hasTargetIdentity === false &&
+          cfg.isEditingMode !== true &&
+          cfg.pageId !== "gpspage" &&
+          cfg.isVerticalContainer !== true
       },
       { kind: "disconnected", when: cfg.disconnect === true },
       { kind: "noAis", when: domain.hasTargetIdentity === false },
@@ -87,13 +93,20 @@
    */
   function resolveAisInteractionState(args, stateScreenInteraction) {
     const cfg = args || {};
-    const baseInteraction = cfg.isEditingMode === true
-      ? "passive"
-      : (cfg.canDispatch ? "dispatch" : "passive");
-    return toText(stateScreenInteraction.resolveInteraction({
-      kind: cfg.kind,
-      baseInteraction: baseInteraction
-    }));
+    let baseInteraction;
+    if (cfg.isEditingMode === true) {
+      baseInteraction = "passive";
+    } else if (cfg.canDispatch) {
+      baseInteraction = "dispatch";
+    } else {
+      baseInteraction = "passive";
+    }
+    return toText(
+      stateScreenInteraction.resolveInteraction({
+        kind: cfg.kind,
+        baseInteraction: baseInteraction
+      })
+    );
   }
 
   /**
@@ -196,30 +209,36 @@
       const shellSize = toSafeSizeRect(cfg.shellRect, htmlUtils);
       const defaultText = htmlUtils.resolveDefaultText(props);
       const isEditingMode = htmlUtils.isEditingMode(props);
-      const surfacePolicy = props.surfacePolicy && typeof props.surfacePolicy === "object"
-        ? /** @type {Record<string, unknown>} */ (props.surfacePolicy)
-        : null;
-      const kind = resolveStateKind({
-        domain: domain,
-        pageId: surfacePolicy && typeof surfacePolicy.pageId === "string" ? surfacePolicy.pageId : "other",
-        isVerticalContainer: surfacePolicy && surfacePolicy.containerOrientation === "vertical",
-        isEditingMode: isEditingMode,
-        disconnect: props.disconnect === true
-      }, stateScreenPrecedence);
+      const surfacePolicy =
+        props.surfacePolicy && typeof props.surfacePolicy === "object"
+          ? /** @type {Record<string, unknown>} */ (props.surfacePolicy)
+          : null;
+      const kind = resolveStateKind(
+        {
+          domain: domain,
+          pageId: surfacePolicy && typeof surfacePolicy.pageId === "string" ? surfacePolicy.pageId : "other",
+          isVerticalContainer: surfacePolicy && surfacePolicy.containerOrientation === "vertical",
+          isEditingMode: isEditingMode,
+          disconnect: props.disconnect === true
+        },
+        stateScreenPrecedence
+      );
       const stableDigitsEnabled = props.stableDigits === true;
       const canDispatch = domain.hasDispatchMmsi === true && htmlUtils.canDispatchSurfaceInteraction(props);
-      const interactionState = resolveAisInteractionState({
-        kind: kind,
-        canDispatch: canDispatch,
-        isEditingMode: isEditingMode
-      }, stateScreenInteraction);
+      const interactionState = resolveAisInteractionState(
+        {
+          kind: kind,
+          canDispatch: canDispatch,
+          isEditingMode: isEditingMode
+        },
+        stateScreenInteraction
+      );
 
       const showTcpaBranch = kind === "data" && domain.showTcpaBranch === true;
       const hasData = kind === "data";
-      const colorRole = (hasData && domain.hasColorRole === true)
-        ? toText(domain.colorRole)
-        : "";
-      const hasAccent = colorRole === "warning" || colorRole === "nearest" || colorRole === "tracking" || colorRole === "normal";
+      const colorRole = hasData && domain.hasColorRole === true ? toText(domain.colorRole) : "";
+      const hasAccent =
+        colorRole === "warning" || colorRole === "nearest" || colorRole === "tracking" || colorRole === "normal";
       const layout = layoutApi.computeLayout({
         W: shellSize.width,
         H: shellSize.height,
@@ -262,29 +281,43 @@
           id: "tcpa",
           captionText: toText(captions.tcpa),
           unitText: toText(units.tcpa),
-          ...normalizeStableMetricValue(formatWithFormatter({
-            value: typeof tcpaSeconds === "number" ? (tcpaSeconds / 60) : undefined,
-            formatter: "formatDecimal",
-            formatterParameters: [3, (typeof tcpaSeconds === "number" && Math.abs(tcpaSeconds) > 60) ? 0 : 2],
-            defaultText: defaultText
-          }, componentContext, placeholderNormalize), 2, stableDigitsEnabled)
+          ...normalizeStableMetricValue(
+            formatWithFormatter(
+              {
+                value: typeof tcpaSeconds === "number" ? tcpaSeconds / 60 : undefined,
+                formatter: "formatDecimal",
+                formatterParameters: [3, typeof tcpaSeconds === "number" && Math.abs(tcpaSeconds) > 60 ? 0 : 2],
+                defaultText: defaultText
+              },
+              componentContext,
+              placeholderNormalize
+            ),
+            2,
+            stableDigitsEnabled
+          )
         },
         brg: {
           id: "brg",
           captionText: toText(captions.brg),
           unitText: toText(units.brg),
-          ...normalizeStableMetricValue(formatWithFormatter({
-            value: headingTo,
-            formatter: "formatDirection",
-            formatterParameters: [],
-            defaultText: defaultText
-          }, componentContext, placeholderNormalize), 3, stableDigitsEnabled)
+          ...normalizeStableMetricValue(
+            formatWithFormatter(
+              {
+                value: headingTo,
+                formatter: "formatDirection",
+                formatterParameters: [],
+                defaultText: defaultText
+              },
+              componentContext,
+              placeholderNormalize
+            ),
+            3,
+            stableDigitsEnabled
+          )
         }
       };
 
-      const metricVisibility = hasData
-        ? DATA_METRIC_VISIBILITY
-        : { dst: false, cpa: false, tcpa: false, brg: false };
+      const metricVisibility = hasData ? DATA_METRIC_VISIBILITY : HIDDEN_METRIC_VISIBILITY;
       const visibleMetricIds = hasData ? METRIC_ORDER.slice() : [];
 
       const wrapperClasses = [
@@ -307,7 +340,7 @@
       /** @type {DyniAisTargetRenderModel} */
       const model = {
         kind: kind,
-        stateLabel: kind === "data" ? "" : (stateScreenLabels.LABELS[kind] || ""),
+        stateLabel: kind === "data" ? "" : stateScreenLabels.LABELS[kind] || "",
         mode: layout.mode,
         interactionState: interactionState,
         showTcpaBranch: showTcpaBranch,
@@ -345,4 +378,4 @@
   }
 
   return { id: "AisTargetRenderModel", create: create };
-}));
+});

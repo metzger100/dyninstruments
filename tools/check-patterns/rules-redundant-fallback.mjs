@@ -25,7 +25,8 @@ export function runRedundantInternalFallbackRule(rule, files) {
     const seen = new Set();
 
     if (contract) {
-      const detectFallbackTextProp = /\bfallbackText\s*\(\s*([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*,/g;
+      const detectFallbackTextProp =
+        /\bfallbackText\s*\(\s*([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*,/g;
       let fallbackMatch;
 
       while ((fallbackMatch = detectFallbackTextProp.exec(data.maskedText))) {
@@ -43,9 +44,10 @@ export function runRedundantInternalFallbackRule(rule, files) {
 
         const openParen = data.maskedText.indexOf("(", fallbackMatch.index);
         const closeParen = openParen >= 0 ? findMatchingParen(data.maskedText, openParen) : -1;
-        const expression = closeParen > openParen
-          ? data.text.slice(fallbackMatch.index, closeParen + 1).trim()
-          : `fallbackText(${objectName}.${propName}, ...)`;
+        const expression =
+          closeParen > openParen
+            ? data.text.slice(fallbackMatch.index, closeParen + 1).trim()
+            : `fallbackText(${objectName}.${propName}, ...)`;
         const line = lineAt(fallbackMatch.index, data.lineStarts);
         const key = `${file}:${line}:fallbackText:${propName}`;
         if (seen.has(key)) {

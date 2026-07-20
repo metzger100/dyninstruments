@@ -4,9 +4,11 @@
 
 ## Overview
 
-`TextLayoutEngine` centralizes reusable text sizing and row rendering logic used by `ThreeValueTextWidget` and `PositionCoordinateWidget`.
+`TextLayoutEngine` centralizes reusable text sizing and row rendering logic used by `ThreeValueTextWidget` and
+`PositionCoordinateWidget`.
 
-The engine is split into small shared modules to stay under hotspot/file-size limits while exposing one stable API surface.
+The engine is split into small shared modules to stay under hotspot/file-size limits while exposing one stable API
+surface.
 
 ## Key Details
 
@@ -22,16 +24,21 @@ The engine is split into small shared modules to stay under hotspot/file-size li
 - Widgets pass preformatted strings; engine does not parse coordinates or select formatters.
 - Fit cache is widget-instance local (`createFitCache()` in widget `create()` scope).
 - Layout mode routing supports `flat` / `normal` / `high`.
-- Shared fit primitives apply a row safety factor (`ROW_SAFE_RATIO = 0.85`) so fitted glyphs stay inside row bands at tight sizes.
-- `TextTileLayout` keeps context-local measurement caches (`metricTiles`, `fittedLines`) keyed by semantic + geometry signatures.
+- Shared fit primitives apply a row safety factor (`ROW_SAFE_RATIO = 0.85`) so fitted glyphs stay inside row bands at
+  tight sizes.
+- `TextTileLayout` keeps context-local measurement caches (`metricTiles`, `fittedLines`) keyed by semantic + geometry
+  signatures.
 
 ## Ownership Contract
 
 - `ResponsiveScaleProfile` owns the shared `minDim -> t` compaction curve.
 - `TextLayoutEngine` is the shared text-family layout owner for reusable numeric and coordinate renderers.
-- New shared text renderers should use `computeResponsiveInsets(W, H)` and consume `insets.responsive.textFillScale` for compact text-ceiling boosts.
-- Widgets with distinct geometry contracts should create a dedicated shared layout-owner module such as `ActiveRouteLayout` or `XteHighwayLayout` instead of embedding responsive floors in renderer code.
-- Consumer renderers read layout-owned `responsive` / `textFillScale`; they do not import `ResponsiveScaleProfile` directly.
+- New shared text renderers should use `computeResponsiveInsets(W, H)` and consume `insets.responsive.textFillScale` for
+  compact text-ceiling boosts.
+- Widgets with distinct geometry contracts should create a dedicated shared layout-owner module such as
+  `ActiveRouteLayout` or `XteHighwayLayout` instead of embedding responsive floors in renderer code.
+- Consumer renderers read layout-owned `responsive` / `textFillScale`; they do not import `ResponsiveScaleProfile`
+  directly.
 
 ## API/Interfaces
 
@@ -40,10 +47,14 @@ The engine is split into small shared modules to stay under hotspot/file-size li
 - Cache: `createFitCache`, `clearFitCache`, `makeFitCacheKey`, `readFitCache`, `writeFitCache`, `resolveFitCache`
 - Mode/insets: `computeModeLayout`, `computeInsets`, `computeResponsiveInsets`
 - Responsive scaling: `scaleMaxTextPx`
-- Primitive fit/draw: `setFont`, `fitSingleLineBinary`, `fitMultiRowBinary`, `fitValueUnitRow`, `fitInlineTriplet`, `drawInlineTriplet`
-- Composite layouts: `fitThreeRowBlock`, `drawThreeRowBlock`, `fitValueUnitCaptionRows`, `drawValueUnitCaptionRows`, `fitTwoRowsWithHeader`, `drawTwoRowsWithHeader`
-- `fitTwoRowsWithHeader` accepts `align` (`"center"` default, `"right"` for tabular stacked coordinates) and returns it as `fit.align`
-- `drawTwoRowsWithHeader` uses `fit.align` for the top and bottom value rows while keeping the header row alignment unchanged
+- Primitive fit/draw: `setFont`, `fitSingleLineBinary`, `fitMultiRowBinary`, `fitValueUnitRow`, `fitInlineTriplet`,
+  `drawInlineTriplet`
+- Composite layouts: `fitThreeRowBlock`, `drawThreeRowBlock`, `fitValueUnitCaptionRows`, `drawValueUnitCaptionRows`,
+  `fitTwoRowsWithHeader`, `drawTwoRowsWithHeader`
+- `fitTwoRowsWithHeader` accepts `align` (`"center"` default, `"right"` for tabular stacked coordinates) and returns it
+  as `fit.align`
+- `drawTwoRowsWithHeader` uses `fit.align` for the top and bottom value rows while keeping the header row alignment
+  unchanged
 
 Responsive inset shape:
 
@@ -52,15 +63,18 @@ const insets = textEngine.computeResponsiveInsets(W, H);
 // -> { padX, innerY, gapBase, responsive: { minDim, t, textFillScale } }
 ```
 
-New shared text renderers should treat `computeResponsiveInsets(...)` as the stable responsive contract. `computeInsets(...)` remains a low-level helper, not the cross-widget ownership boundary.
+New shared text renderers should treat `computeResponsiveInsets(...)` as the stable responsive contract.
+`computeInsets(...)` remains a low-level helper, not the cross-widget ownership boundary.
 
-Composite fit calls accept optional `textFillScale` and use it only as a consumer-side ceiling boost for compact caption/unit/header text. The shared profile still owns the compact curve itself.
+Composite fit calls accept optional `textFillScale` and use it only as a consumer-side ceiling boost for compact
+caption/unit/header text. The shared profile still owns the compact curve itself.
 
 Mode routing shape:
 
 ```javascript
 const modeData = textEngine.computeModeLayout({
-  W, H,
+  W,
+  H,
   ratioThresholdNormal,
   ratioThresholdFlat,
   captionUnitScale,

@@ -1,39 +1,18 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createMockCanvas,
-  createMockContext2D,
-} = require("../../helpers/mock-canvas");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
-const {
-  computeWindLayout,
-  makeWindProps,
-} = require("./WindRadialWidget.caching.harness.js");
+const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const { computeWindLayout, makeWindProps } = require("./WindRadialWidget.caching.harness.js");
 
 describe("WindRadialWidget", function () {
   it("formats speed via componentContext.format.applyFormatter in graphic mode", function () {
-    const fullCircleEngine = loadFresh(
-      "shared/widget-kits/radial/FullCircleRadialEngine.js",
-    );
-    const fullCircleLayout = loadFresh(
-      "shared/widget-kits/radial/FullCircleRadialLayout.js",
-    );
-    const layerCache = loadFresh(
-      "shared/widget-kits/canvas/CanvasLayerCache.js",
-    );
-    const textLayout = loadFresh(
-      "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
-    );
-    const responsiveScaleProfile = loadFresh(
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-    );
-    const layoutRectMath = loadFresh(
-      "shared/widget-kits/layout/LayoutRectMath.js",
-    );
-    const geometryScale = loadFresh(
-      "shared/widget-kits/layout/GeometryScale.js",
-    );
+    const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
+    const fullCircleLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
+    const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
+    const textLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialTextLayout.js");
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     const valueDrawCalls = [];
     const laylineCalls = [];
     const pointerCalls = [];
@@ -42,32 +21,32 @@ describe("WindRadialWidget", function () {
     const labelCalls = [];
     const themeDefaults = {
       surface: {
-        fg: "#fff",
+        fg: "#fff"
       },
       colors: {
         pointer: "#3366cc",
         laylineStb: "#2e9e6b",
-        laylinePort: "#d9534a",
+        laylinePort: "#d9534a"
       },
       radial: {
         ticks: {
           majorLenFactor: 0.08,
           majorWidthFactor: 0.02,
           minorLenFactor: 0.047,
-          minorWidthFactor: 0.01,
+          minorWidthFactor: 0.01
         },
         pointer: {
           depthFactor: 0.22,
-          sideFactor: 0.11,
+          sideFactor: 0.11
         },
         ring: {
           arcLineWidthFactor: 0.013,
-          widthFactor: 0.35,
+          widthFactor: 0.35
         },
         labels: {
           insetFactor: 2.1,
-          fontFactor: 0.35,
-        },
+          fontFactor: 0.35
+        }
       },
       strokeWeight: 1,
       pointerDepthWeight: 1,
@@ -75,16 +54,14 @@ describe("WindRadialWidget", function () {
       font: {
         family: "sans-serif",
         weight: 720,
-        labelWeight: 660,
-      },
+        labelWeight: 660
+      }
     };
     const applyFormatter = vi.fn((value, spec) => {
       return "spd:" + String(value) + ":" + String(spec.formatterParameters[0]);
     });
 
-    const spec = loadFresh(
-      "widgets/radial/WindRadialWidget/WindRadialWidget.js",
-    ).create(
+    const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js").create(
       {},
       createComponentContextMock({
         modules: {
@@ -95,19 +72,11 @@ describe("WindRadialWidget", function () {
           ResponsiveScaleProfile: responsiveScaleProfile,
           LayoutRectMath: layoutRectMath,
           GeometryScale: geometryScale,
-          StateScreenLabels: loadFresh(
-            "shared/widget-kits/state/StateScreenLabels.js",
-          ),
-          StateScreenPrecedence: loadFresh(
-            "shared/widget-kits/state/StateScreenPrecedence.js",
-          ),
-          StateScreenCanvasOverlay: loadFresh(
-            "shared/widget-kits/state/StateScreenCanvasOverlay.js",
-          ),
+          StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+          StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+          StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
           StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-          PlaceholderNormalize: loadFresh(
-            "shared/widget-kits/format/PlaceholderNormalize.js",
-          ),
+          PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
           ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js"),
           SpringEasing: loadFresh("shared/widget-kits/anim/SpringEasing.js"),
           RadialToolkit: {
@@ -128,31 +97,22 @@ describe("WindRadialWidget", function () {
                   },
                   drawLabels(ctx, cx, cy, rOuter, opts) {
                     labelCalls.push(opts);
-                  },
+                  }
                 },
                 theme: {
                   resolveForRoot() {
                     return themeDefaults;
-                  },
+                  }
                 },
                 text: {
                   measureValueUnitFit() {
                     return { vPx: 12, uPx: 10, gap: 6 };
                   },
                   drawCaptionMax() {},
-                  drawValueUnitWithFit(
-                    ctx,
-                    family,
-                    x,
-                    y,
-                    w,
-                    h,
-                    valueText,
-                    unitText,
-                  ) {
+                  drawValueUnitWithFit(ctx, family, x, y, w, h, valueText, unitText) {
                     valueDrawCalls.push({
                       valueText: String(valueText),
-                      unitText: String(unitText || ""),
+                      unitText: String(unitText || "")
                     });
                   },
                   fitInlineCapValUnit() {
@@ -162,7 +122,7 @@ describe("WindRadialWidget", function () {
                   fitTextPx() {
                     return 12;
                   },
-                  drawThreeRowsBlock() {},
+                  drawThreeRowsBlock() {}
                 },
                 value: {
                   clamp(value, lo, hi) {
@@ -181,12 +141,12 @@ describe("WindRadialWidget", function () {
                     const n = Number(value);
                     if (!isFinite(n)) return "---";
                     return String(Math.round(n));
-                  },
+                  }
                 },
-                angle: {},
+                angle: {}
               };
-            },
-          },
+            }
+          }
         },
         services: {
           format: { applyFormatter },
@@ -197,23 +157,23 @@ describe("WindRadialWidget", function () {
               return {
                 ctx,
                 W: Math.round(rect.width),
-                H: Math.round(rect.height),
+                H: Math.round(rect.height)
               };
-            },
+            }
           },
           dom: {
             requirePluginRoot(target) {
               return target;
-            },
-          },
-        },
-      }),
+            }
+          }
+        }
+      })
     );
 
     const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     spec.renderCanvas(canvas, {
       angle: 23,
@@ -225,7 +185,7 @@ describe("WindRadialWidget", function () {
       windRadialLayMin: 35,
       windRadialLayMax: 45,
       formatter: "formatSpeed",
-      formatterParameters: ["kn"],
+      formatterParameters: ["kn"]
     });
     const layout = computeWindLayout(themeDefaults, 480, 110);
 
@@ -233,31 +193,25 @@ describe("WindRadialWidget", function () {
       5.5,
       expect.objectContaining({
         formatter: "formatSpeed",
-        formatterParameters: ["kn"],
-      }),
+        formatterParameters: ["kn"]
+      })
     );
-    expect(
-      valueDrawCalls.some(
-        (c) => c.valueText === "spd:5.5:kn" && c.unitText === "kn",
-      ),
-    ).toBe(true);
+    expect(valueDrawCalls.some((c) => c.valueText === "spd:5.5:kn" && c.unitText === "kn")).toBe(true);
     expect(laylineCalls[0].fillStyle).toBe(themeDefaults.colors.laylineStb);
     expect(laylineCalls[1].fillStyle).toBe(themeDefaults.colors.laylinePort);
     expect(laylineCalls[0].thickness).toBe(layout.geom.ringW);
     expect(laylineCalls[1].thickness).toBe(layout.geom.ringW);
     expect(pointerCalls[0].fillStyle).toBe(themeDefaults.colors.pointer);
     expect(pointerCalls[0].depth).toBe(layout.geom.pointerDepth);
-    expect(pointerCalls[0].halfWidth).toBe(
-      Math.max(1, Math.floor(layout.geom.pointerSide / 2)),
-    );
+    expect(pointerCalls[0].halfWidth).toBe(Math.max(1, Math.floor(layout.geom.pointerSide / 2)));
     expect(ringCalls[0].lineWidth).toBe(layout.geom.arcLineWidth);
     expect(tickCalls[0].major).toEqual({
       len: layout.geom.majorTickLen,
-      width: layout.geom.majorTickWidth,
+      width: layout.geom.majorTickWidth
     });
     expect(tickCalls[0].minor).toEqual({
       len: layout.geom.minorTickLen,
-      width: layout.geom.minorTickWidth,
+      width: layout.geom.minorTickWidth
     });
     expect(labelCalls[0].radiusOffset).toBe(layout.labels.radiusOffset);
     expect(labelCalls[0].fontPx).toBe(layout.labels.fontPx);
@@ -276,14 +230,12 @@ describe("WindRadialWidget", function () {
         windRadialLayMin: 35,
         windRadialLayMax: 45,
         formatter: "formatSpeed",
-        formatterParameters: ["kn"],
+        formatterParameters: ["kn"]
       });
 
       expect(applyFormatter.mock.calls.length).toBe(applyCallsBefore);
       const newDraws = valueDrawCalls.slice(drawCallsBefore);
-      expect(
-        newDraws.some((c) => c.valueText === "---" && c.unitText === "kn"),
-      ).toBe(true);
+      expect(newDraws.some((c) => c.valueText === "---" && c.unitText === "kn")).toBe(true);
     });
 
     const applyCallsBeforeValid = applyFormatter.mock.calls.length;
@@ -297,18 +249,15 @@ describe("WindRadialWidget", function () {
       windRadialLayMin: 35,
       windRadialLayMax: 45,
       formatter: "formatSpeed",
-      formatterParameters: ["kn"],
+      formatterParameters: ["kn"]
     });
-    expect(applyFormatter.mock.calls.length).toBeGreaterThan(
-      applyCallsBeforeValid,
-    );
+    expect(applyFormatter.mock.calls.length).toBeGreaterThan(applyCallsBeforeValid);
     expect(applyFormatter).toHaveBeenLastCalledWith(
       4.2,
       expect.objectContaining({
         formatter: "formatSpeed",
-        formatterParameters: ["kn"],
-      }),
+        formatterParameters: ["kn"]
+      })
     );
   });
-
 });

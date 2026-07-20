@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniLinearGaugeEngineSupport = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -68,4 +68,4 @@
   }
 
   return { id: "LinearGaugeEngineSupport", create: create };
-}));
+});

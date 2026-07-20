@@ -27,46 +27,65 @@ describe("SemicircleRadialLayout", function () {
 
   const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
 
+  /** @param {Record<string, any>} [overrides] */
   function createTheme(overrides) {
     const extra = overrides || {};
     return {
       radial: {
-        ticks: Object.assign({
-          majorLenFactor: 0.08,
-          majorWidthFactor: 0.02,
-          minorLenFactor: 0.047,
-          minorWidthFactor: 0.01
-        }, extra.radial && extra.radial.ticks ? extra.radial.ticks : {}),
-        pointer: Object.assign({
-          depthFactor: 0.22,
-          sideFactor: 0.11
-        }, extra.radial && extra.radial.pointer ? extra.radial.pointer : {}),
-        ring: Object.assign({
-          widthFactor: 0.18,
-          arcLineWidthFactor: 0.013
-        }, extra.radial && extra.radial.ring ? extra.radial.ring : {}),
-        labels: Object.assign({
-          insetFactor: 2.2,
-          fontFactor: 0.2
-        }, extra.radial && extra.radial.labels ? extra.radial.labels : {})
+        ticks: Object.assign(
+          {
+            majorLenFactor: 0.08,
+            majorWidthFactor: 0.02,
+            minorLenFactor: 0.047,
+            minorWidthFactor: 0.01
+          },
+          extra.radial && extra.radial.ticks ? extra.radial.ticks : {}
+        ),
+        pointer: Object.assign(
+          {
+            depthFactor: 0.22,
+            sideFactor: 0.11
+          },
+          extra.radial && extra.radial.pointer ? extra.radial.pointer : {}
+        ),
+        ring: Object.assign(
+          {
+            widthFactor: 0.18,
+            arcLineWidthFactor: 0.013
+          },
+          extra.radial && extra.radial.ring ? extra.radial.ring : {}
+        ),
+        labels: Object.assign(
+          {
+            insetFactor: 2.2,
+            fontFactor: 0.2
+          },
+          extra.radial && extra.radial.labels ? extra.radial.labels : {}
+        )
       },
       strokeWeight: Object.prototype.hasOwnProperty.call(extra, "strokeWeight") ? extra.strokeWeight : 1,
-      pointerDepthWeight: Object.prototype.hasOwnProperty.call(extra, "pointerDepthWeight") ? extra.pointerDepthWeight : 1,
+      pointerDepthWeight: Object.prototype.hasOwnProperty.call(extra, "pointerDepthWeight")
+        ? extra.pointerDepthWeight
+        : 1,
       pointerSideWeight: Object.prototype.hasOwnProperty.call(extra, "pointerSideWeight") ? extra.pointerSideWeight : 1
     };
   }
 
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    return loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js").create({}, createComponentContextMock({
-      modules: {
-        ResponsiveScaleProfile: responsiveScaleProfile,
-        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-        GeometryScale: geometryScale
-      }
-    }));
+    return loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          ResponsiveScaleProfile: responsiveScaleProfile,
+          LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+          GeometryScale: geometryScale
+        }
+      })
+    );
   }
 
+  /** @param {any} inner @param {any} outer */
   function expectRectInside(inner, outer) {
     expect(inner.x).toBeGreaterThanOrEqual(outer.x);
     expect(inner.y).toBeGreaterThanOrEqual(outer.y);
@@ -74,6 +93,7 @@ describe("SemicircleRadialLayout", function () {
     expect(inner.y + inner.h).toBeLessThanOrEqual(outer.y + outer.h);
   }
 
+  /** @param {any} layout @param {number} width @param {number} height @param {string} mode */
   function buildSnapshot(layout, width, height, mode) {
     const insets = layout.computeInsets(width, height);
     const out = layout.computeLayout({
@@ -154,12 +174,22 @@ describe("SemicircleRadialLayout", function () {
     const eFloor = gs.extentFloor(themeDefaults.strokeWeight);
 
     expect(geom.majorTickLen).toBe(gs.scale(geom.R, themeDefaults.radial.ticks.majorLenFactor, eFloor));
-    expect(geom.majorTickWidth).toBe(gs.scaleStroke(geom.R, themeDefaults.radial.ticks.majorWidthFactor, themeDefaults.strokeWeight, sFloor));
+    expect(geom.majorTickWidth).toBe(
+      gs.scaleStroke(geom.R, themeDefaults.radial.ticks.majorWidthFactor, themeDefaults.strokeWeight, sFloor)
+    );
     expect(geom.minorTickLen).toBe(gs.scale(geom.R, themeDefaults.radial.ticks.minorLenFactor, eFloor));
-    expect(geom.minorTickWidth).toBe(gs.scaleStroke(geom.R, themeDefaults.radial.ticks.minorWidthFactor, themeDefaults.strokeWeight, sFloor));
-    expect(geom.arcLineWidth).toBe(gs.scaleStroke(geom.R, themeDefaults.radial.ring.arcLineWidthFactor, themeDefaults.strokeWeight, sFloor));
-    expect(geom.pointerDepth).toBe(gs.scalePointer(geom.R, themeDefaults.radial.pointer.depthFactor, themeDefaults.pointerDepthWeight, eFloor));
-    expect(geom.pointerSide).toBe(gs.scalePointer(geom.R, themeDefaults.radial.pointer.sideFactor, themeDefaults.pointerSideWeight, eFloor));
+    expect(geom.minorTickWidth).toBe(
+      gs.scaleStroke(geom.R, themeDefaults.radial.ticks.minorWidthFactor, themeDefaults.strokeWeight, sFloor)
+    );
+    expect(geom.arcLineWidth).toBe(
+      gs.scaleStroke(geom.R, themeDefaults.radial.ring.arcLineWidthFactor, themeDefaults.strokeWeight, sFloor)
+    );
+    expect(geom.pointerDepth).toBe(
+      gs.scalePointer(geom.R, themeDefaults.radial.pointer.depthFactor, themeDefaults.pointerDepthWeight, eFloor)
+    );
+    expect(geom.pointerSide).toBe(
+      gs.scalePointer(geom.R, themeDefaults.radial.pointer.sideFactor, themeDefaults.pointerSideWeight, eFloor)
+    );
     expect(geom).not.toHaveProperty("needleDepth");
   });
 

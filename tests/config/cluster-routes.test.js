@@ -5,12 +5,13 @@ const COMPONENT_REGISTRY_FRAGMENT_SCRIPTS = [
   "config/components/registry-shared-foundation-geometry.js",
   "config/components/registry-shared-foundation-layout.js",
   "config/components/registry-shared-foundation-state.js",
+  "config/components/registry-shared-foundation-xte.js",
   "config/components/registry-shared-engines.js",
   "config/components/registry-widgets-nav.js",
   "config/components/registry-widgets-vessel.js",
   "config/components/registry-widgets-gauge.js",
   "config/components/registry-cluster.js",
-  "config/components.js",
+  "config/components.js"
 ];
 
 const SHARED_CONFIG_SCRIPTS = [
@@ -23,7 +24,7 @@ const SHARED_CONFIG_SCRIPTS = [
   "config/shared/environment-depth-editables.js",
   "config/shared/environment-temperature-editables.js",
   "config/shared/environment-editables.js",
-  "config/shared/vessel-voltage-editables.js",
+  "config/shared/vessel-voltage-editables.js"
 ];
 
 const CLUSTER_DEF_SCRIPTS = [
@@ -31,11 +32,13 @@ const CLUSTER_DEF_SCRIPTS = [
   "config/clusters/speed.js",
   "config/clusters/environment.js",
   "config/clusters/wind.js",
+  "config/shared/nav-ratio-thresholds.js",
   "config/clusters/nav.js",
   "config/clusters/map.js",
   "config/clusters/anchor.js",
   "config/clusters/vessel.js",
-  "config/clusters/default.js",
+  "config/shared/default-radial-editables.js",
+  "config/clusters/default.js"
 ];
 
 const CLUSTER_ROUTE_SCRIPTS = [
@@ -49,9 +52,13 @@ const CLUSTER_ROUTE_SCRIPTS = [
   "config/cluster-routes/anchor.js",
   "config/cluster-routes/vessel.js",
   "config/cluster-routes/default.js",
-  "config/cluster-routes/finalize.js",
+  "config/cluster-routes/finalize.js"
 ];
 
+/**
+ * @param {import("node:vm").Context} context
+ * @param {string[]} scripts
+ */
 function runScripts(context, scripts) {
   scripts.forEach(function (scriptPath) {
     runIifeScript(scriptPath, context);
@@ -66,9 +73,9 @@ function buildContext() {
       state: {},
       config: {
         shared: {},
-        clusters: [],
-      },
-    },
+        clusters: []
+      }
+    }
   });
 }
 
@@ -82,15 +89,17 @@ function loadClusterRouteEnvironment() {
   return context;
 }
 
+/**
+ * @param {any[]} widgetDefs
+ * @returns {Record<string, string[]>}
+ */
 function collectKindsByCluster(widgetDefs) {
   const map = Object.create(null);
 
   widgetDefs.forEach(function (def) {
     const cluster = def.cluster;
-    const kindParam =
-      def && def.editableParameters ? def.editableParameters.kind : null;
-    const list =
-      kindParam && Array.isArray(kindParam.list) ? kindParam.list : [];
+    const kindParam = def && def.editableParameters ? def.editableParameters.kind : null;
+    const list = /** @type {any[]} */ (kindParam && Array.isArray(kindParam.list) ? kindParam.list : []);
     map[cluster] = list
       .map(function (item) {
         return item.value;
@@ -102,19 +111,34 @@ function collectKindsByCluster(widgetDefs) {
   return map;
 }
 
-const PENDING_ROUTE_KINDS_BY_CLUSTER = Object.freeze({});
-const PENDING_ROUTE_RENDERER_IDS = Object.freeze({});
+const PENDING_ROUTE_KINDS_BY_CLUSTER = /** @type {Record<string, string[]>} */ (Object.freeze({}));
+const PENDING_ROUTE_RENDERER_IDS = /** @type {Record<string, string>} */ (Object.freeze({}));
 
 describe("config/cluster-routes metadata", function () {
+  it("creates config from scratch when the namespace has not initialized it yet", function () {
+    const context = createScriptContext({ DyniPlugin: {} });
+
+    expect(context.DyniPlugin.config).toBeUndefined();
+
+    runIifeScript("config/cluster-routes.js", context);
+
+    expect(context.DyniPlugin.config).toEqual({
+      clusterRoutes: { schemaVersion: 1, routes: [] }
+    });
+  });
+
   it("defines the canonical 61-route catalog with schema, index, and validation invariants", function () {
     const context = loadClusterRouteEnvironment();
     const clusterRoutes = context.DyniPlugin.config.clusterRoutes;
-    const routes = clusterRoutes.routes;
+    const routes = /** @type {any[]} */ (clusterRoutes.routes);
     const byRouteId = clusterRoutes.byRouteId;
     const components = context.DyniPlugin.config.components;
-    const widgetDefs = context.DyniPlugin.config.clusters.map(function (entry) {
-      return entry.def;
-    });
+    const widgetDefs = context.DyniPlugin.config.clusters.map(
+      /** @param {any} entry */
+      function (entry) {
+        return entry.def;
+      }
+    );
 
     const allowedKeys = {
       cluster: true,
@@ -124,7 +148,7 @@ describe("config/cluster-routes metadata", function () {
       rendererId: true,
       surface: true,
       shellSizing: true,
-      routeId: true,
+      routeId: true
     };
     const forbiddenRouteFields = [
       "deps",
@@ -139,7 +163,7 @@ describe("config/cluster-routes metadata", function () {
       "predictivePreload",
       "priority",
       "idleWarm",
-      "idleWarming",
+      "idleWarming"
     ];
 
     expect(clusterRoutes.schemaVersion).toBe(1);
@@ -150,8 +174,8 @@ describe("config/cluster-routes metadata", function () {
 
     const seenRouteIds = new Set();
     const seenClusterKinds = new Set();
-    const htmlRoutes = [];
-    const viewModelRouteIds = [];
+    const htmlRoutes = /** @type {any[]} */ ([]);
+    const viewModelRouteIds = /** @type {string[]} */ ([]);
     const routeKindsByCluster = Object.create(null);
 
     routes.forEach(function (route) {
@@ -164,12 +188,10 @@ describe("config/cluster-routes metadata", function () {
       expect(route.mapperId.trim().length).toBeGreaterThan(0);
       expect(typeof route.rendererId).toBe("string");
       expect(route.rendererId.trim().length).toBeGreaterThan(0);
-      expect(route.surface === "html" || route.surface === "canvas-dom").toBe(
-        true,
-      );
+      expect(route.surface === "html" || route.surface === "canvas-dom").toBe(true);
 
       Object.keys(route).forEach(function (key) {
-        expect(allowedKeys[key]).toBe(true);
+        expect(allowedKeys[/** @type {keyof typeof allowedKeys} */ (key)]).toBe(true);
       });
 
       forbiddenRouteFields.forEach(function (key) {
@@ -192,12 +214,7 @@ describe("config/cluster-routes metadata", function () {
       seenClusterKinds.add(pair);
 
       expect(components[route.mapperId]).toBeTruthy();
-      if (
-        Object.prototype.hasOwnProperty.call(
-          PENDING_ROUTE_RENDERER_IDS,
-          routeId,
-        )
-      ) {
+      if (Object.prototype.hasOwnProperty.call(PENDING_ROUTE_RENDERER_IDS, routeId)) {
         expect(PENDING_ROUTE_RENDERER_IDS[routeId]).toBe(route.rendererId);
         expect(components[route.rendererId]).toBeUndefined();
       } else {
@@ -212,10 +229,7 @@ describe("config/cluster-routes metadata", function () {
       }
 
       expect(route.shellSizing && typeof route.shellSizing).toBe("object");
-      expect(
-        route.shellSizing.kind === "ratio" ||
-          route.shellSizing.kind === "natural",
-      ).toBe(true);
+      expect(route.shellSizing.kind === "ratio" || route.shellSizing.kind === "natural").toBe(true);
       if (route.shellSizing.kind === "ratio") {
         expect(Number.isFinite(route.shellSizing.aspectRatio)).toBe(true);
         expect(route.shellSizing.aspectRatio).toBeGreaterThan(0);
@@ -226,12 +240,8 @@ describe("config/cluster-routes metadata", function () {
 
       if (route.surface === "html") {
         htmlRoutes.push(route);
-        expect(Array.isArray(components[route.rendererId].shadowCss)).toBe(
-          true,
-        );
-        expect(components[route.rendererId].shadowCss.length).toBeGreaterThan(
-          0,
-        );
+        expect(Array.isArray(components[route.rendererId].shadowCss)).toBe(true);
+        expect(components[route.rendererId].shadowCss.length).toBeGreaterThan(0);
       }
     });
 
@@ -241,15 +251,13 @@ describe("config/cluster-routes metadata", function () {
       "nav/activeRoute",
       "nav/editRoute",
       "nav/routePoints",
-      "vessel/alarm",
+      "vessel/alarm"
     ]);
 
     expect(byRouteId["map/zoom"].viewModelId).toBeUndefined();
 
     const kindsByCluster = collectKindsByCluster(widgetDefs);
-    const clusterNamesFromRoutes = Object.keys(routeKindsByCluster)
-      .slice()
-      .sort();
+    const clusterNamesFromRoutes = Object.keys(routeKindsByCluster).slice().sort();
     const clusterNamesFromDefs = Object.keys(kindsByCluster).slice().sort();
 
     expect(clusterNamesFromRoutes).toEqual(clusterNamesFromDefs);

@@ -8,29 +8,13 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniLinearGaugeLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const STRUCTURAL_RATIO_THRESHOLD_NORMAL = 1.0;
   const STRUCTURAL_RATIO_THRESHOLD_FLAT = 3.0;
   const PAD_RATIO = 0.04;
   const GAP_RATIO = 0.03;
-  const DUAL_ROW_GAP_RATIO = 0.04;
-  const DUAL_INLINE_GAP_RATIO = 0.05;
-  const FLAT_TEXT_SHARE_RATIO = 0.34;
-  const FLAT_TEXT_HEIGHT_RATIO = 0.76;
-  const FLAT_CAPTION_SHARE_RATIO = 0.38;
-  const FLAT_TRACK_Y_RATIO = 0.58;
-  const HIGH_SCALE_HEIGHT_RATIO = 0.44;
-  const HIGH_TRACK_Y_RATIO = 0.35;
-  const HIGH_TEXT_GAP_FACTOR = 1.2;
-  const HIGH_CAPTION_SHARE_RATIO = 0.36;
-  const HIGH_SPLIT_TEXT_SHARE_RATIO = 0.24;
-  const NORMAL_INSET_RATIO = 0.04;
-  const NORMAL_TOP_MARGIN_RATIO = 0.05;
-  const NORMAL_SCALE_HEIGHT_RATIO = 0.50;
-  const NORMAL_TRACK_Y_RATIO = 0.34;
-  const NORMAL_INLINE_HEIGHT_RATIO = 0.42;
   // Horizontal clearance kept between the value scale ends and the content edges so the
   // pointer at the extreme values (base half-width ~= linear.pointer.sideFactor *
   // pointerSideWeight / 2 of the track primary dimension, i.e. ~0.12 for the shipped
@@ -64,166 +48,101 @@
     return layoutConfig && layoutConfig.highVariant === "split" ? "split" : "stacked";
   }
 
-  /** @param {DyniRect} contentRect @param {number} right @param {number} gap @param {DyniResponsiveScaleProfile} responsive @param {DyniResponsiveScaleProfileApi} profileApi @returns {DyniLinearLayoutBlock} */
-  function computeFlatLayout(contentRect, right, gap, responsive, profileApi) {
-    const usableWidth = Math.max(1, contentRect.w - gap);
-    const textW = Math.max(1, Math.floor(usableWidth * FLAT_TEXT_SHARE_RATIO));
-    const scaleW = Math.max(1, contentRect.w - textW - gap);
-    const textH = Math.max(1, Math.floor(contentRect.h * FLAT_TEXT_HEIGHT_RATIO));
-    const rightX = contentRect.x + scaleW + gap;
-    const rightW = Math.max(1, right - rightX);
-    const rightY = contentRect.y + Math.floor((contentRect.h - textH) / 2);
-    const captionH = Math.max(1, Math.floor(textH * FLAT_CAPTION_SHARE_RATIO));
-    const scaleX0 = contentRect.x;
-    const scaleX1 = contentRect.x + scaleW;
-    const captionBox = makeRect(rightX, rightY, rightW, captionH);
-    return {
-      scaleX0: scaleX0,
-      scaleX1: scaleX1,
-      trackY: contentRect.y + Math.floor(contentRect.h * FLAT_TRACK_Y_RATIO),
-      trackBox: makeRect(scaleX0, contentRect.y, scaleW, contentRect.h),
-      captionBox: captionBox,
-      valueBox: makeRect(rightX, rightY + captionH, rightW, Math.max(1, textH - captionH)),
-      inlineBox: null,
-      dualRowGap: profileApi.computeIntrinsicSpacePx(responsive, captionBox.w, DUAL_ROW_GAP_RATIO, 2, 1),
-      inlineDualGap: 0,
-      textTopBox: null,
-      textBottomBox: null
-    };
-  }
-
-  /** @param {DyniRect} contentRect @param {number} bottom @param {number} gap @param {DyniResponsiveScaleProfile} responsive @param {DyniResponsiveScaleProfileApi} profileApi @returns {DyniLinearLayoutBlock} */
-  function computeStackedLayout(contentRect, bottom, gap, responsive, profileApi) {
-    const textGap = Math.max(1, Math.floor(gap * HIGH_TEXT_GAP_FACTOR));
-    const availableHeight = Math.max(1, contentRect.h - textGap);
-    const scaleH = Math.max(1, Math.floor(availableHeight * HIGH_SCALE_HEIGHT_RATIO));
-    const textY = Math.min(bottom - 1, contentRect.y + scaleH + textGap);
-    const textH = Math.max(1, bottom - textY);
-    const captionH = Math.max(1, Math.floor(textH * HIGH_CAPTION_SHARE_RATIO));
-    const captionBox = makeRect(contentRect.x, textY, contentRect.w, captionH);
-    return {
-      scaleX0: contentRect.x,
-      scaleX1: contentRect.x + contentRect.w,
-      trackY: contentRect.y + Math.floor(scaleH * HIGH_TRACK_Y_RATIO),
-      trackBox: makeRect(contentRect.x, contentRect.y, contentRect.w, scaleH),
-      captionBox: captionBox,
-      valueBox: makeRect(contentRect.x, textY + captionH, contentRect.w, Math.max(1, textH - captionH)),
-      inlineBox: null,
-      dualRowGap: profileApi.computeIntrinsicSpacePx(responsive, captionBox.w, DUAL_ROW_GAP_RATIO, 2, 1),
-      inlineDualGap: 0,
-      textTopBox: null,
-      textBottomBox: null
-    };
-  }
-
-  /** @param {DyniRect} contentRect @param {number} gap @returns {DyniLinearLayoutBlock} */
-  function computeSplitHighLayout(contentRect, gap) {
-    const textGap = Math.max(1, gap);
-    const availableHeight = Math.max(1, contentRect.h - textGap * 2);
-    const topTextH = Math.max(1, Math.floor(availableHeight * HIGH_SPLIT_TEXT_SHARE_RATIO));
-    const bottomTextH = Math.max(1, Math.floor(availableHeight * HIGH_SPLIT_TEXT_SHARE_RATIO));
-    const scaleH = Math.max(1, availableHeight - topTextH - bottomTextH);
-    const middleY = contentRect.y + topTextH + textGap;
-    const bottomY = middleY + scaleH + textGap;
-    return {
-      scaleX0: contentRect.x,
-      scaleX1: contentRect.x + contentRect.w,
-      trackY: middleY + Math.floor(scaleH * HIGH_TRACK_Y_RATIO),
-      trackBox: makeRect(contentRect.x, middleY, contentRect.w, scaleH),
-      captionBox: null,
-      valueBox: null,
-      inlineBox: null,
-      dualRowGap: 0,
-      inlineDualGap: 0,
-      textTopBox: makeRect(contentRect.x, contentRect.y, contentRect.w, topTextH),
-      textBottomBox: makeRect(contentRect.x, bottomY, contentRect.w, Math.max(1, contentRect.y + contentRect.h - bottomY))
-    };
-  }
-
-  /** @param {DyniRect} contentRect @returns {DyniLinearLayoutBlock} */
-  function computeGraphicsOnlyFlatLayout(contentRect) {
-    return {
-      scaleX0: contentRect.x,
-      scaleX1: contentRect.x + contentRect.w,
-      trackY: contentRect.y + Math.floor(contentRect.h / 2),
-      trackBox: makeRect(contentRect.x, contentRect.y, contentRect.w, contentRect.h),
-      captionBox: null,
-      valueBox: null,
-      inlineBox: null,
-      dualRowGap: 0,
-      inlineDualGap: 0,
-      textTopBox: null,
-      textBottomBox: null
-    };
-  }
-
-  /** @param {DyniRect} contentRect @param {number} right @returns {DyniLinearLayoutBlock} */
-  function computeGraphicsOnlyNormalLayout(contentRect, right) {
-    const inset = Math.max(1, Math.floor(contentRect.w * NORMAL_INSET_RATIO));
-    const scaleX0 = contentRect.x + inset;
-    const scaleX1 = Math.max(scaleX0 + 1, right - inset);
-    return {
-      scaleX0: scaleX0,
-      scaleX1: scaleX1,
-      trackY: contentRect.y + Math.floor(contentRect.h / 2),
-      trackBox: makeRect(scaleX0, contentRect.y, Math.max(1, scaleX1 - scaleX0), contentRect.h),
-      captionBox: null,
-      valueBox: null,
-      inlineBox: null,
-      dualRowGap: 0,
-      inlineDualGap: 0,
-      textTopBox: null,
-      textBottomBox: null
-    };
-  }
-
-  /** @param {DyniRect} contentRect @returns {DyniLinearLayoutBlock} */
-  function computeGraphicsOnlyHighLayout(contentRect) {
-    return {
-      scaleX0: contentRect.x,
-      scaleX1: contentRect.x + contentRect.w,
-      trackY: contentRect.y + Math.floor(contentRect.h / 2),
-      trackBox: makeRect(contentRect.x, contentRect.y, contentRect.w, contentRect.h),
-      captionBox: null,
-      valueBox: null,
-      inlineBox: null,
-      dualRowGap: 0,
-      inlineDualGap: 0,
-      textTopBox: null,
-      textBottomBox: null
-    };
-  }
-
-  /** @param {DyniRect} contentRect @param {number} right @param {number} bottom @param {number} gap @param {DyniResponsiveScaleProfile} responsive @param {DyniResponsiveScaleProfileApi} profileApi @returns {DyniLinearLayoutBlock} */
-  function computeInlineLayout(contentRect, right, bottom, gap, responsive, profileApi) {
-    const inset = Math.max(1, Math.floor(contentRect.w * NORMAL_INSET_RATIO));
-    const topMargin = Math.max(1, Math.floor(contentRect.h * NORMAL_TOP_MARGIN_RATIO));
-    const trackGap = Math.max(1, gap);
-    const availableHeight = Math.max(1, contentRect.h - topMargin - trackGap);
-    const scaleH = Math.max(1, Math.floor(availableHeight * NORMAL_SCALE_HEIGHT_RATIO));
-    const inlineBandH = Math.max(1, Math.floor(contentRect.h * NORMAL_INLINE_HEIGHT_RATIO));
-    const inlineY = Math.min(
-      bottom - 1,
-      Math.max(
-        contentRect.y + topMargin + scaleH + trackGap,
-        bottom - inlineBandH
+  /**
+   * Derives stroke/tick/pointer/label pixel geometry from theme factors and the track's primary dimension.
+   * @param {DyniGeometryScaleApi} gs @param {DyniLinearLayoutTheme} theme @param {number} primaryDim
+   * @param {DyniRect} trackBox @param {"flat" | "high" | "normal"} mode @param {DyniResponsiveScaleProfile} responsive
+   */
+  function computeStrokeGeometry(gs, theme, primaryDim, trackBox, mode, responsive) {
+    const linearTheme = theme.linear;
+    const strokeWeight = clampNumber(theme.strokeWeight, 0, Number.MAX_SAFE_INTEGER, 1);
+    const pointerDepthWeight = clampNumber(theme.pointerDepthWeight, 0, Number.MAX_SAFE_INTEGER, 1);
+    const pointerSideWeight = clampNumber(theme.pointerSideWeight, 0, Number.MAX_SAFE_INTEGER, 1);
+    const sFloor = gs.strokeFloor(strokeWeight);
+    const eFloor = gs.extentFloor(strokeWeight);
+    const trackLineWidth = gs.scaleStroke(
+      primaryDim,
+      clampNumber(linearTheme.track.lineWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.018),
+      strokeWeight,
+      sFloor
+    );
+    const majorTickLen = gs.scale(
+      primaryDim,
+      clampNumber(linearTheme.ticks.majorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.109),
+      eFloor
+    );
+    const majorTickWidth = gs.scaleStroke(
+      primaryDim,
+      clampNumber(linearTheme.ticks.majorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.027),
+      strokeWeight,
+      sFloor
+    );
+    const minorTickLen = gs.scale(
+      primaryDim,
+      clampNumber(linearTheme.ticks.minorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.064),
+      eFloor
+    );
+    const minorTickWidth = gs.scaleStroke(
+      primaryDim,
+      clampNumber(linearTheme.ticks.minorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.014),
+      strokeWeight,
+      sFloor
+    );
+    const pointerDepth = gs.scalePointer(
+      primaryDim,
+      clampNumber(linearTheme.pointer.depthFactor, 0, Number.MAX_SAFE_INTEGER, 0.24),
+      pointerDepthWeight,
+      eFloor
+    );
+    const pointerSide = gs.scalePointer(
+      primaryDim,
+      clampNumber(linearTheme.pointer.sideFactor, 0, Number.MAX_SAFE_INTEGER, 0.12),
+      pointerSideWeight,
+      eFloor
+    );
+    const trackThickness = gs.scale(
+      primaryDim,
+      clampNumber(linearTheme.track.widthFactor, 0, Number.MAX_SAFE_INTEGER, 0.16),
+      eFloor
+    );
+    let labelBoost;
+    if (mode === "high") {
+      labelBoost = 1.2;
+    } else if (mode === "normal") {
+      labelBoost = 1.26;
+    } else {
+      labelBoost = 1.0;
+    }
+    const labelFontPx = Math.max(
+      1,
+      Math.min(
+        trackBox.h,
+        Math.floor(
+          trackBox.h *
+            clampNumber(linearTheme.labels.fontFactor, 0, Number.MAX_SAFE_INTEGER, 0.14) *
+            labelBoost *
+            (responsive.textFillScale || 1)
+        )
       )
     );
-    const scaleX0 = contentRect.x + inset;
-    const scaleX1 = Math.max(scaleX0 + 1, right - inset);
-    const inlineBox = makeRect(contentRect.x, inlineY, contentRect.w, Math.max(1, bottom - inlineY));
+    const labelInsetPx = Math.max(
+      1,
+      Math.floor(
+        (labelFontPx * clampNumber(linearTheme.labels.insetFactor, 0, Number.MAX_SAFE_INTEGER, 1.8) * 0.2) /
+          (responsive.textFillScale || 1)
+      )
+    );
     return {
-      scaleX0: scaleX0,
-      scaleX1: scaleX1,
-      trackY: contentRect.y + topMargin + Math.floor(scaleH * NORMAL_TRACK_Y_RATIO),
-      trackBox: makeRect(scaleX0, contentRect.y + topMargin, Math.max(1, scaleX1 - scaleX0), scaleH),
-      captionBox: null,
-      valueBox: null,
-      inlineBox: inlineBox,
-      dualRowGap: 0,
-      inlineDualGap: profileApi.computeIntrinsicSpacePx(responsive, inlineBox.w, DUAL_INLINE_GAP_RATIO, 2, 1),
-      textTopBox: null,
-      textBottomBox: null
+      trackLineWidth: trackLineWidth,
+      majorTickLen: majorTickLen,
+      majorTickWidth: majorTickWidth,
+      minorTickLen: minorTickLen,
+      minorTickWidth: minorTickWidth,
+      pointerDepth: pointerDepth,
+      pointerSide: pointerSide,
+      trackThickness: trackThickness,
+      labelFontPx: labelFontPx,
+      labelInsetPx: labelInsetPx
     };
   }
 
@@ -232,24 +151,15 @@
     const profileApi = componentContext.components.require("ResponsiveScaleProfile");
     const rectApi = componentContext.components.require("LayoutRectMath");
     const gs = componentContext.components.require("GeometryScale");
+    const variants = componentContext.components.require("LinearGaugeLayoutVariants");
     clampNumber = componentContext.components.require("ValueMath").clampNumber;
     makeRect = rectApi.makeRect;
 
     /** @param {unknown} W @param {unknown} H @param {unknown} thresholdNormal @param {unknown} thresholdFlat @returns {"flat" | "high" | "normal"} */
     function computeMode(W, H, thresholdNormal, thresholdFlat) {
       const ratio = (Number(W) || 0) / Math.max(1, Number(H) || 0);
-      const normal = clampNumber(
-        thresholdNormal,
-        0.1,
-        Number.MAX_SAFE_INTEGER,
-        STRUCTURAL_RATIO_THRESHOLD_NORMAL
-      );
-      const flat = clampNumber(
-        thresholdFlat,
-        normal,
-        Number.MAX_SAFE_INTEGER,
-        STRUCTURAL_RATIO_THRESHOLD_FLAT
-      );
+      const normal = clampNumber(thresholdNormal, 0.1, Number.MAX_SAFE_INTEGER, STRUCTURAL_RATIO_THRESHOLD_NORMAL);
+      const flat = clampNumber(thresholdFlat, normal, Number.MAX_SAFE_INTEGER, STRUCTURAL_RATIO_THRESHOLD_FLAT);
       if (ratio < normal) {
         return "high";
       }
@@ -275,18 +185,8 @@
     function createContentRect(W, H, insets) {
       const width = Math.max(1, Math.floor(Number(W) || 0));
       const height = Math.max(1, Math.floor(Number(H) || 0));
-      const pad = Math.max(0, Math.floor(clampNumber(
-        insets && insets.pad,
-        0,
-        Math.max(width, height),
-        0
-      )));
-      return makeRect(
-        pad,
-        pad,
-        Math.max(1, width - pad * 2),
-        Math.max(1, height - pad * 2)
-      );
+      const pad = Math.max(0, Math.floor(clampNumber(insets && insets.pad, 0, Math.max(width, height), 0)));
+      return makeRect(pad, pad, Math.max(1, width - pad * 2), Math.max(1, height - pad * 2));
     }
 
     /** @param {DyniRect | null | undefined} captionBox @param {DyniRect | null | undefined} valueBox @param {unknown} secScale @returns {{ captionBox: DyniRect | null | undefined, valueBox: DyniRect | null | undefined }} */
@@ -302,9 +202,10 @@
 
       const ratio = clampNumber(secScale, 0.3, 3.0, 0.8);
       const captionShare = ratio / (1 + ratio);
-      const capH = totalH <= 1
-        ? totalH
-        : clampNumber(Math.round(totalH * captionShare), 1, totalH - 1, Math.round(totalH * captionShare));
+      const capH =
+        totalH <= 1
+          ? totalH
+          : clampNumber(Math.round(totalH * captionShare), 1, totalH - 1, Math.round(totalH * captionShare));
       const valueH = Math.max(0, totalH - capH);
 
       return {
@@ -318,13 +219,19 @@
       const cfg = /** @type {DyniLinearLayoutConfig} */ (args || {});
       const theme = cfg.theme;
       const contentRect = resolveContentRect(cfg, computeInsets, createContentRect);
-      const responsive = cfg.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
-      const gap = Math.max(1, Math.floor(clampNumber(
-        cfg.gap,
+      const responsive =
+        cfg.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
+      const gap = Math.max(
         1,
-        Math.max(contentRect.w, contentRect.h),
-        profileApi.computeInsetPx(responsive, GAP_RATIO, 1)
-      )));
+        Math.floor(
+          clampNumber(
+            cfg.gap,
+            1,
+            Math.max(contentRect.w, contentRect.h),
+            profileApi.computeInsetPx(responsive, GAP_RATIO, 1)
+          )
+        )
+      );
       const right = contentRect.x + contentRect.w;
       const bottom = contentRect.y + contentRect.h;
       const mode = cfg.mode === "flat" || cfg.mode === "high" ? cfg.mode : "normal";
@@ -332,20 +239,20 @@
       const highVariant = resolveHighVariant(cfg.layoutConfig);
       const hideTextualMetrics = cfg.hideTextualMetrics === true;
       const modeLayout = hideTextualMetrics
-        ? (mode === "flat"
-          ? computeGraphicsOnlyFlatLayout(contentRect)
-          : (mode === "high"
-            ? computeGraphicsOnlyHighLayout(contentRect)
-            : computeGraphicsOnlyNormalLayout(contentRect, right)))
-        : (mode === "flat"
-          ? computeFlatLayout(contentRect, right, gap, responsive, profileApi)
-          : (mode === "high"
-            ? (highVariant === "split"
-              ? computeSplitHighLayout(contentRect, gap)
-              : computeStackedLayout(contentRect, bottom, gap, responsive, profileApi))
-            : (normalVariant === "stacked"
-              ? computeStackedLayout(contentRect, bottom, gap, responsive, profileApi)
-              : computeInlineLayout(contentRect, right, bottom, gap, responsive, profileApi))));
+        ? mode === "flat"
+          ? variants.computeGraphicsOnlyFlatLayout(contentRect)
+          : mode === "high"
+            ? variants.computeGraphicsOnlyHighLayout(contentRect)
+            : variants.computeGraphicsOnlyNormalLayout(contentRect, right)
+        : mode === "flat"
+          ? variants.computeFlatLayout(contentRect, right, gap, responsive, profileApi)
+          : mode === "high"
+            ? highVariant === "split"
+              ? variants.computeSplitHighLayout(contentRect, gap)
+              : variants.computeStackedLayout(contentRect, bottom, gap, responsive, profileApi)
+            : normalVariant === "stacked"
+              ? variants.computeStackedLayout(contentRect, bottom, gap, responsive, profileApi)
+              : variants.computeInlineLayout(contentRect, right, bottom, gap, responsive, profileApi);
 
       const trackBox = modeLayout.trackBox;
       const primaryDim = Math.max(1, Math.min(trackBox.w, trackBox.h));
@@ -354,28 +261,7 @@
       const clearedX1 = Math.min(modeLayout.scaleX1, right - pointerEdgeClearance);
       const scaleX0 = clearedX0 < clearedX1 ? clearedX0 : modeLayout.scaleX0;
       const scaleX1 = clearedX0 < clearedX1 ? clearedX1 : modeLayout.scaleX1;
-      const linearTheme = theme.linear;
-      const strokeWeight = clampNumber(theme.strokeWeight, 0, Number.MAX_SAFE_INTEGER, 1);
-      const pointerDepthWeight = clampNumber(theme.pointerDepthWeight, 0, Number.MAX_SAFE_INTEGER, 1);
-      const pointerSideWeight = clampNumber(theme.pointerSideWeight, 0, Number.MAX_SAFE_INTEGER, 1);
-      const sFloor = gs.strokeFloor(strokeWeight);
-      const eFloor = gs.extentFloor(strokeWeight);
-      const trackLineWidth = gs.scaleStroke(primaryDim, clampNumber(linearTheme.track.lineWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.018), strokeWeight, sFloor);
-      const majorTickLen = gs.scale(primaryDim, clampNumber(linearTheme.ticks.majorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.109), eFloor);
-      const majorTickWidth = gs.scaleStroke(primaryDim, clampNumber(linearTheme.ticks.majorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.027), strokeWeight, sFloor);
-      const minorTickLen = gs.scale(primaryDim, clampNumber(linearTheme.ticks.minorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.064), eFloor);
-      const minorTickWidth = gs.scaleStroke(primaryDim, clampNumber(linearTheme.ticks.minorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.014), strokeWeight, sFloor);
-      const pointerDepth = gs.scalePointer(primaryDim, clampNumber(linearTheme.pointer.depthFactor, 0, Number.MAX_SAFE_INTEGER, 0.24), pointerDepthWeight, eFloor);
-      const pointerSide = gs.scalePointer(primaryDim, clampNumber(linearTheme.pointer.sideFactor, 0, Number.MAX_SAFE_INTEGER, 0.12), pointerSideWeight, eFloor);
-      const trackThickness = gs.scale(primaryDim, clampNumber(linearTheme.track.widthFactor, 0, Number.MAX_SAFE_INTEGER, 0.16), eFloor);
-      const labelBoost = mode === "high" ? 1.2 : (mode === "normal" ? 1.26 : 1.0);
-      const labelFontPx = Math.max(1, Math.min(
-        trackBox.h,
-        Math.floor(trackBox.h * clampNumber(linearTheme.labels.fontFactor, 0, Number.MAX_SAFE_INTEGER, 0.14) * labelBoost * (responsive.textFillScale || 1))
-      ));
-      const labelInsetPx = Math.max(1, Math.floor(
-        (labelFontPx * clampNumber(linearTheme.labels.insetFactor, 0, Number.MAX_SAFE_INTEGER, 1.8) * 0.2) / (responsive.textFillScale || 1)
-      ));
+      const strokeGeometry = computeStrokeGeometry(gs, theme, primaryDim, trackBox, mode, responsive);
 
       return {
         mode: mode,
@@ -389,16 +275,16 @@
         scaleX1: scaleX1,
         trackY: modeLayout.trackY,
         trackBox: trackBox,
-        trackLineWidth: trackLineWidth,
-        majorTickLen: majorTickLen,
-        majorTickWidth: majorTickWidth,
-        minorTickLen: minorTickLen,
-        minorTickWidth: minorTickWidth,
-        pointerDepth: pointerDepth,
-        pointerSide: pointerSide,
-        trackThickness: trackThickness,
-        labelFontPx: labelFontPx,
-        labelInsetPx: labelInsetPx,
+        trackLineWidth: strokeGeometry.trackLineWidth,
+        majorTickLen: strokeGeometry.majorTickLen,
+        majorTickWidth: strokeGeometry.majorTickWidth,
+        minorTickLen: strokeGeometry.minorTickLen,
+        minorTickWidth: strokeGeometry.minorTickWidth,
+        pointerDepth: strokeGeometry.pointerDepth,
+        pointerSide: strokeGeometry.pointerSide,
+        trackThickness: strokeGeometry.trackThickness,
+        labelFontPx: strokeGeometry.labelFontPx,
+        labelInsetPx: strokeGeometry.labelInsetPx,
         captionBox: modeLayout.captionBox,
         valueBox: modeLayout.valueBox,
         inlineBox: modeLayout.inlineBox,
@@ -420,4 +306,4 @@
   }
 
   return { id: "LinearGaugeLayout", create: create };
-}));
+});

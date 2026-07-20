@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniCenterDisplayStateAdapter = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -23,12 +23,12 @@
 
     /** @param {unknown} args @returns {boolean} */
     function renderStateScreenIfNeeded(args) {
-      const cfg = /** @type {{ props?: unknown, ctx?: unknown, W?: unknown, H?: unknown, family?: unknown, color?: unknown, labelWeight?: unknown }} */ (
-        args && typeof args === "object" ? args : {}
-      );
-      const props = cfg.props && typeof cfg.props === "object"
-        ? /** @type {{ disconnect?: unknown }} */ (cfg.props)
-        : null;
+      const cfg =
+        /** @type {{ props?: unknown, ctx?: unknown, W?: unknown, H?: unknown, family?: unknown, color?: unknown, labelWeight?: unknown }} */ (
+          args && typeof args === "object" ? args : {}
+        );
+      const props =
+        cfg.props && typeof cfg.props === "object" ? /** @type {{ disconnect?: unknown }} */ (cfg.props) : null;
       const kind = stateScreenPrecedence.pickFirst([
         { kind: "disconnected", when: props && props.disconnect === true },
         { kind: "data", when: true }
@@ -57,4 +57,4 @@
   }
 
   return { id: "CenterDisplayStateAdapter", create: create };
-}));
+});

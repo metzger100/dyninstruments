@@ -1,30 +1,38 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
 describe("runtime/format-runtime.js", function () {
+  /** @param {Record<string, any>} [extra] */
   function loadRuntimeFormat(extra) {
-    const context = createScriptContext(Object.assign({
-      DyniPlugin: {
-        avnavApi: {
-          formatter: {
-            formatSpeed(value, unit) {
-              return `spd:${value}:${unit}`;
+    const context = createScriptContext(
+      Object.assign(
+        {
+          DyniPlugin: {
+            avnavApi: {
+              formatter: {
+                /** @param {any} value @param {any} unit */
+                formatSpeed(value, unit) {
+                  return `spd:${value}:${unit}`;
+                }
+              }
+            },
+            runtime: {},
+            state: {},
+            config: { shared: {}, clusters: [] }
+          },
+          avnav: {
+            api: {
+              formatter: {
+                /** @param {any} value @param {any} unit */
+                formatSpeed(value, unit) {
+                  return `spd:${value}:${unit}`;
+                }
+              }
             }
           }
         },
-        runtime: {},
-        state: {},
-        config: { shared: {}, clusters: [] }
-      },
-      avnav: {
-        api: {
-          formatter: {
-            formatSpeed(value, unit) {
-              return `spd:${value}:${unit}`;
-            }
-          }
-        }
-      }
-    }, extra || {}));
+        extra || {}
+      )
+    );
 
     runIifeScript("runtime/namespace.js", context);
     runIifeScript("runtime/format-runtime.js", context);
@@ -34,17 +42,22 @@ describe("runtime/format-runtime.js", function () {
   it("handles function formatter, named formatter, and fallback defaults", function () {
     const runtime = loadRuntimeFormat();
 
-    expect(runtime.format.applyFormatter(5, {
-      formatter(value, suffix) {
-        return String(value) + suffix;
-      },
-      formatterParameters: ["kn"]
-    })).toBe("5kn");
+    expect(
+      runtime.format.applyFormatter(5, {
+        /** @param {any} value @param {any} suffix */
+        formatter(value, suffix) {
+          return String(value) + suffix;
+        },
+        formatterParameters: ["kn"]
+      })
+    ).toBe("5kn");
 
-    expect(runtime.format.applyFormatter(6, {
-      formatter: "formatSpeed",
-      formatterParameters: ["kn"]
-    })).toBe("spd:6:kn");
+    expect(
+      runtime.format.applyFormatter(6, {
+        formatter: "formatSpeed",
+        formatterParameters: ["kn"]
+      })
+    ).toBe("spd:6:kn");
 
     expect(runtime.format.applyFormatter(null, { default: "---" })).toBe("---");
     expect(runtime.format.applyFormatter(null, { default: "" })).toBe("");

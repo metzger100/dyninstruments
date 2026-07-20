@@ -314,28 +314,28 @@
           throw new Error("HtmlSurfaceController: attach() after destroy()");
         }
         ensurePayload("attach", payload);
-          state.mountEl = ensureMountHost(payload.shellEl);
-          state.shadowRoot = ensureShadowRoot(state.mountEl);
-          state.shellEl = payload.shellEl;
-          injectBaseShadowStyle(state.shadowRoot);
-          injectShadowStyles(state.shadowRoot, shadowCssUrls, themeRuntime);
+        state.mountEl = ensureMountHost(payload.shellEl);
+        state.shadowRoot = ensureShadowRoot(state.mountEl);
+        state.shellEl = payload.shellEl;
+        injectBaseShadowStyle(state.shadowRoot);
+        injectShadowStyles(state.shadowRoot, shadowCssUrls, themeRuntime);
 
-          const rendererInstance = rendererSpec.createCommittedRenderer({
-            hostContext: hostContext,
-            shadowRoot: state.shadowRoot,
-            mountEl: state.mountEl
-          });
-          ensureRendererInstance("attach", rendererInstance);
-          state.renderer = rendererInstance;
-          state.latestPayload = payload;
+        const rendererInstance = rendererSpec.createCommittedRenderer({
+          hostContext: hostContext,
+          shadowRoot: state.shadowRoot,
+          mountEl: state.mountEl
+        });
+        ensureRendererInstance("attach", rendererInstance);
+        state.renderer = rendererInstance;
+        state.latestPayload = payload;
 
-          const rendererPayload = createRendererPayload(state, payload, true, 0);
-          lastLayoutSignature = resolveLayoutSignature(rendererInstance, rendererPayload, "attach");
-          rendererInstance.mount(state.shadowRoot, rendererPayload);
-          runPostPatch(payload, rendererPayload);
-          scheduleFontMetricsRefresh();
+        const rendererPayload = createRendererPayload(state, payload, true, 0);
+        lastLayoutSignature = resolveLayoutSignature(rendererInstance, rendererPayload, "attach");
+        rendererInstance.mount(state.shadowRoot, rendererPayload);
+        runPostPatch(payload, rendererPayload);
+        scheduleFontMetricsRefresh();
 
-          attached = true;
+        attached = true;
       }
 
       /** @param {DyniHtmlSurfacePayload} payload */
@@ -347,21 +347,21 @@
         if (payload.shellEl !== state.shellEl) {
           throw new Error("HtmlSurfaceController: update() received a different shellEl; remount required");
         }
-          const signaturePayload = createRendererPayload(state, payload, false, 0);
-          const nextLayoutSignature = resolveLayoutSignature(state.renderer, signaturePayload, "update");
-          const layoutChanged = nextLayoutSignature !== lastLayoutSignature;
-          lastLayoutSignature = nextLayoutSignature;
+        const signaturePayload = createRendererPayload(state, payload, false, 0);
+        const nextLayoutSignature = resolveLayoutSignature(state.renderer, signaturePayload, "update");
+        const layoutChanged = nextLayoutSignature !== lastLayoutSignature;
+        lastLayoutSignature = nextLayoutSignature;
 
-          const rendererPayload = createRendererPayload(state, payload, layoutChanged, 0);
-          state.latestPayload = payload;
-          state.renderer.update(rendererPayload);
-          runPostPatch(payload, rendererPayload);
+        const rendererPayload = createRendererPayload(state, payload, layoutChanged, 0);
+        state.latestPayload = payload;
+        state.renderer.update(rendererPayload);
+        runPostPatch(payload, rendererPayload);
 
-          return {
-            updated: true,
-            changed: true,
-            layoutChanged: layoutChanged
-          };
+        return {
+          updated: true,
+          changed: true,
+          layoutChanged: layoutChanged
+        };
       }
 
       /** @param {string} reason */

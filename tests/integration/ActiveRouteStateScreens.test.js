@@ -43,9 +43,11 @@ function createActiveRouteWidget() {
     };
   });
   const htmlFitStub = {
+    /** @param {Record<string, any>} props */
     ensureDisplayProps(props) {
       return props;
     },
+    /** @param {Record<string, any>} props @param {any} shellRect @param {any} htmlUtils */
     resolveDisplayMode(props, shellRect, htmlUtils) {
       return htmlUtils.resolveRatioModeForRect({
         shellRect: shellRect,
@@ -56,17 +58,22 @@ function createActiveRouteWidget() {
         defaultMode: "normal"
       });
     },
+    /** @param {any} rawValue @param {any} formatter @param {any} formatterParameters @param {any} defaultText @param {any} placeholderNormalize */
     formatActiveRouteMetric(rawValue, formatter, formatterParameters, defaultText, placeholderNormalize) {
-      const out = String(componentContext.format.applyFormatter(rawValue, {
-        formatter: formatter,
-        formatterParameters: formatterParameters,
-        default: defaultText
-      }));
+      const out = String(
+        componentContext.format.applyFormatter(rawValue, {
+          formatter: formatter,
+          formatterParameters: formatterParameters,
+          default: defaultText
+        })
+      );
       return placeholderNormalize.normalize(out, defaultText);
     },
+    /** @param {any} value */
     textLength(value) {
       return value == null ? 0 : String(value).length;
     },
+    /** @param {any} rawText @param {any} stableDigitsEnabled @param {any} stableDigits @param {any} minWidth */
     normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
       if (!stableDigitsEnabled) {
         return { padded: rawText, plain: rawText };
@@ -93,6 +100,7 @@ function createActiveRouteWidget() {
     },
     services: {
       format: {
+        /** @param {any} value @param {Record<string, any>} [formatterOptions] */
         applyFormatter(value, formatterOptions) {
           const cfg = formatterOptions || {};
           return value == null ? cfg.default : String(value);
@@ -115,6 +123,7 @@ function createActiveRouteWidget() {
   return loadFresh("widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js").create({}, componentContext);
 }
 
+/** @param {any} rendererSpec @param {Record<string, any>} props */
 function mountHtml(rendererSpec, props) {
   const hostContext = {};
   const rootEl = document.createElement("div");
@@ -142,20 +151,25 @@ function mountHtml(rendererSpec, props) {
   return mountEl.innerHTML;
 }
 
+/** @param {Record<string, any>} [overrides] */
 function makeRawProps(overrides) {
-  return Object.assign({
-    kind: "activeRoute",
-    activeRouteName: "R1",
-    activeRouteRemain: 18.2,
-    activeRouteEta: new Date("2026-03-06T11:45:00Z"),
-    activeRouteNextCourse: 93,
-    activeRouteApproaching: true,
-    wpServer: true,
-    disconnect: false,
-    default: "---"
-  }, overrides || {});
+  return Object.assign(
+    {
+      kind: "activeRoute",
+      activeRouteName: "R1",
+      activeRouteRemain: 18.2,
+      activeRouteEta: new Date("2026-03-06T11:45:00Z"),
+      activeRouteNextCourse: 93,
+      activeRouteApproaching: true,
+      wpServer: true,
+      disconnect: false,
+      default: "---"
+    },
+    overrides || {}
+  );
 }
 
+/** @param {Record<string, any>} props */
 function withSurfacePolicy(props) {
   return Object.assign({}, props, {
     surfacePolicy: {
@@ -178,38 +192,50 @@ describe("ActiveRoute state-screen integration", function () {
     const activeRouteViewModel = createActiveRouteViewModel();
     const widget = createActiveRouteWidget();
 
+    /** @param {Record<string, any>} rawProps */
     function renderFromRaw(rawProps) {
-      const mapped = mapper.translate(rawProps, makeRouteContext({
-        routeId: "nav/activeRoute",
-        cluster: "nav",
-        kind: "activeRoute",
-        toolkit: toolkit,
-        viewModel: activeRouteViewModel
-      }));
+      const mapped = mapper.translate(
+        rawProps,
+        makeRouteContext({
+          routeId: "nav/activeRoute",
+          cluster: "nav",
+          kind: "activeRoute",
+          toolkit: toolkit,
+          viewModel: activeRouteViewModel
+        })
+      );
       const merged = withSurfacePolicy(Object.assign({}, rawProps, mapped));
       return mountHtml(widget, merged);
     }
 
-    const dataHtml = renderFromRaw(makeRawProps({
-      disconnect: false,
-      wpServer: true,
-      activeRouteName: "R1"
-    }));
-    const disconnectedHtml = renderFromRaw(makeRawProps({
-      disconnect: true,
-      wpServer: true,
-      activeRouteName: "R1"
-    }));
-    const noRouteByNameHtml = renderFromRaw(makeRawProps({
-      disconnect: false,
-      wpServer: true,
-      activeRouteName: ""
-    }));
-    const noRouteByWpServerHtml = renderFromRaw(makeRawProps({
-      disconnect: false,
-      wpServer: false,
-      activeRouteName: "R1"
-    }));
+    const dataHtml = renderFromRaw(
+      makeRawProps({
+        disconnect: false,
+        wpServer: true,
+        activeRouteName: "R1"
+      })
+    );
+    const disconnectedHtml = renderFromRaw(
+      makeRawProps({
+        disconnect: true,
+        wpServer: true,
+        activeRouteName: "R1"
+      })
+    );
+    const noRouteByNameHtml = renderFromRaw(
+      makeRawProps({
+        disconnect: false,
+        wpServer: true,
+        activeRouteName: ""
+      })
+    );
+    const noRouteByWpServerHtml = renderFromRaw(
+      makeRawProps({
+        disconnect: false,
+        wpServer: false,
+        activeRouteName: "R1"
+      })
+    );
 
     expect(dataHtml).toContain("dyni-active-route-html");
     expect(dataHtml).not.toContain("dyni-state-disconnected");

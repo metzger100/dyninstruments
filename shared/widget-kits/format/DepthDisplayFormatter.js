@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniDepthDisplayFormatter = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
@@ -41,12 +41,8 @@
     }
 
     const formatter = hasOwn.call(p, "formatter") ? p.formatter : "formatDistance";
-    const formatterParameters = hasOwn.call(p, "formatterParameters")
-      ? p.formatterParameters
-      : ["m"];
-    const token = Array.isArray(formatterParameters) && formatterParameters.length > 0
-      ? formatterParameters[0]
-      : "m";
+    const formatterParameters = hasOwn.call(p, "formatterParameters") ? p.formatterParameters : ["m"];
+    const token = Array.isArray(formatterParameters) && formatterParameters.length > 0 ? formatterParameters[0] : "m";
     const formatted = unitFormatter.formatWithToken(n, formatter, token, defaultText);
     const parsed = unitFormatter.extractNumericDisplay(formatted, NaN);
 
@@ -117,4 +113,4 @@
   }
 
   return { id: "DepthDisplayFormatter", create: create };
-}));
+});

@@ -10,25 +10,26 @@ It exists to prevent formatter/key/unit regressions like the roll/pitch incident
 ## Key Details
 
 - Canonical upstream sources are read from `avnav-master.zip` snapshot and mapped to plugin behavior.
-- Mapper output must remain declarative; formatter semantics come from core formatter contracts and `componentContext.format.applyFormatter`.
+- Mapper output must remain declarative; formatter semantics come from core formatter contracts and
+  `componentContext.format.applyFormatter`.
 - Contract changes are fail-closed at review time: mapper formatter changes require doc updates in the same PR.
 - The contract tuple below is the required format for each formatter-bearing kind.
 
 ## Upstream Source Snapshot
 
-| Source | Contract extracted | Verified |
-|---|---|---|
-| `viewer/util/formatter.js` | Built-in formatter signatures, parameter order, and unit behavior | 2026-02-22 |
-| `viewer/components/WidgetFactory.jsx` | Formatter resolution shape (`formatter` + `formatterParameters`) in widget flow | 2026-02-22 |
-| `server/handler/signalkhandler.py` | SignalK values are stored under `gps.signalk.<path>` and passed through as raw values | 2026-02-22 |
+| Source                                | Contract extracted                                                                    | Verified   |
+| ------------------------------------- | ------------------------------------------------------------------------------------- | ---------- |
+| `viewer/util/formatter.js`            | Built-in formatter signatures, parameter order, and unit behavior                     | 2026-02-22 |
+| `viewer/components/WidgetFactory.jsx` | Formatter resolution shape (`formatter` + `formatterParameters`) in widget flow       | 2026-02-22 |
+| `server/handler/signalkhandler.py`    | SignalK values are stored under `gps.signalk.<path>` and passed through as raw values | 2026-02-22 |
 
 ## Boundary Contracts
 
-| Layer | Must do | Must not do |
-|---|---|---|
-| Cluster mapper (`cluster/mappers/*`) | Route kind, normalize value presence, choose formatter key and parameters | Re-implement formatter math or unit conversion logic |
-| Renderer (`widgets/*`, `runtime/surface/*`) | Render layout and display text from mapper/runtime contracts | Invent new formatter semantics that contradict core catalog |
-| Component-context formatter boundary (`componentContext.format.applyFormatter`) | Resolve formatter calls and fallback behavior centrally | Use truthy fallback that clobbers explicit falsy defaults |
+| Layer                                                                           | Must do                                                                   | Must not do                                                 |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Cluster mapper (`cluster/mappers/*`)                                            | Route kind, normalize value presence, choose formatter key and parameters | Re-implement formatter math or unit conversion logic        |
+| Renderer (`widgets/*`, `runtime/surface/*`)                                     | Render layout and display text from mapper/runtime contracts              | Invent new formatter semantics that contradict core catalog |
+| Component-context formatter boundary (`componentContext.format.applyFormatter`) | Resolve formatter calls and fallback behavior centrally                   | Use truthy fallback that clobbers explicit falsy defaults   |
 
 ## Contract Tuple Schema
 
@@ -45,16 +46,16 @@ kind
 
 ## Worked Example: Vessel Pitch/Roll
 
-| Field | Contract |
-|---|---|
-| kind | `pitch`, `roll` |
-| storeKey(s) | `nav.gps.signalk.navigation.attitude.pitch`, `nav.gps.signalk.navigation.attitude.roll` |
-| rawType | finite number or `undefined` (missing/blank normalized) |
-| rawUnit | radians |
-| formatter | `formatDirection` |
-| formatterParameters | `[true, true, false]` |
-| expected output | signed degree string in `-180..180` without forced leading zero |
-| source + verified | `viewer/util/formatter.js`, `cluster/mappers/VesselMapper.js` (2026-02-22) |
+| Field               | Contract                                                                                |
+| ------------------- | --------------------------------------------------------------------------------------- |
+| kind                | `pitch`, `roll`                                                                         |
+| storeKey(s)         | `nav.gps.signalk.navigation.attitude.pitch`, `nav.gps.signalk.navigation.attitude.roll` |
+| rawType             | finite number or `undefined` (missing/blank normalized)                                 |
+| rawUnit             | radians                                                                                 |
+| formatter           | `formatDirection`                                                                       |
+| formatterParameters | `[true, true, false]`                                                                   |
+| expected output     | signed degree string in `-180..180` without forced leading zero                         |
+| source + verified   | `viewer/util/formatter.js`, `cluster/mappers/VesselMapper.js` (2026-02-22)              |
 
 ### Incident Failure Mode (2026-02-22)
 

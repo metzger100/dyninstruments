@@ -8,11 +8,14 @@
 
 ## Key Details
 
-- Route tuple: `cluster: "vessel"`, `kind: "alarm"`, `viewModelId: "AlarmViewModel"`, `rendererId: "AlarmTextHtmlWidget"`, `surface: "html"`
+- Route tuple: `cluster: "vessel"`, `kind: "alarm"`, `viewModelId: "AlarmViewModel"`,
+  `rendererId: "AlarmTextHtmlWidget"`, `surface: "html"`
 - Source of truth: `nav.alarms.all`
 - Active alarm names come from the alarm-map object keys, not from nested alarm labels
-- Theme ownership lives in `runtime.theme` via `colors.alarmWidget.bg`, `colors.alarmWidget.fg`, and `colors.alarmWidget.strip`
-- `user.css` can override the widget through `--dyni-alarm-widget-bg`, `--dyni-alarm-widget-fg`, and `--dyni-alarm-widget-strip`
+- Theme ownership lives in `runtime.theme` via `colors.alarmWidget.bg`, `colors.alarmWidget.fg`, and
+  `colors.alarmWidget.strip`
+- `user.css` can override the widget through `--dyni-alarm-widget-bg`, `--dyni-alarm-widget-fg`, and
+  `--dyni-alarm-widget-strip`
 - `--dyni-alarm-widget-strip` cascades from global `--dyni-ok` when no explicit strip input is set
 - Active summary rules:
   - `0` active alarms -> `NONE`
@@ -43,22 +46,25 @@
   - flat: one inline row with caption and value
   - normal: value row then caption row
   - high: caption row then value row
-- Inner text fit applies a small proportional horizontal inset so captions and values do not touch the shell edges in any mode.
+- Inner text fit applies a small proportional horizontal inset so captions and values do not touch the shell edges in
+  any mode.
 - Caption/value text is owned by the fit layer and never uses CSS ellipsis.
 - Fit is computed against the inner content rect after shell padding and idle strip chrome are removed.
-- Idle strip chrome geometry (left/top/bottom/width/radius and content reservation) is sourced from AIS layout sizing (`AisTargetLayoutSizing.resolveVisualChrome(...)`) from shell dimensions only, independent of Alarm text-fit mode, so Alarm and AIS stay pixel-aligned at the same shell size.
+- Idle strip chrome geometry (left/top/bottom/width/radius and content reservation) is sourced from AIS layout sizing
+  (`AisTargetLayoutSizing.resolveVisualChrome(...)`) from shell dimensions only, independent of Alarm text-fit mode, so
+  Alarm and AIS stay pixel-aligned at the same shell size.
 - Idle accent styling follows the AIS nearest/okay family through `colors.alarmWidget.strip`.
 
 ## API / Interfaces
 
-| Path | Contract |
-|---|---|
+| Path                                    | Contract                                                           |
+| --------------------------------------- | ------------------------------------------------------------------ |
 | `surfacePolicy.actions.alarm.stopAll()` | Dispatches the core stop-all workflow when capability is available |
-| `surfacePolicy.interaction.mode` | `dispatch` or `passive` |
-| `shellSizing` route metadata | `{ kind: "ratio", aspectRatio: 2 }` |
-| `colors.alarmWidget.bg` | Alarm background token |
-| `colors.alarmWidget.fg` | Alarm foreground token |
-| `colors.alarmWidget.strip` | Idle strip token |
+| `surfacePolicy.interaction.mode`        | `dispatch` or `passive`                                            |
+| `shellSizing` route metadata            | `{ kind: "ratio", aspectRatio: 2 }`                                |
+| `colors.alarmWidget.bg`                 | Alarm background token                                             |
+| `colors.alarmWidget.fg`                 | Alarm foreground token                                             |
+| `colors.alarmWidget.strip`              | Idle strip token                                                   |
 
 ## Scope Boundary
 

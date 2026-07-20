@@ -19,6 +19,7 @@ describe("runtime/SurfaceSessionController.js", function () {
     return context.DyniPlugin.runtime.surfaces.getCommonShadowCssUrl();
   }
 
+  /** @param {Record<string, any>} [overrides] */
   function loadFactory(overrides) {
     const context = createScriptContext({
       ...(overrides || {}),
@@ -33,6 +34,7 @@ describe("runtime/SurfaceSessionController.js", function () {
     return context.DyniPlugin.runtime.createSurfaceSessionController;
   }
 
+  /** @param {any} id */
   function createControllerMock(id) {
     return {
       id: id,
@@ -43,6 +45,7 @@ describe("runtime/SurfaceSessionController.js", function () {
     };
   }
 
+  /** @param {Record<string, any>} [controllers] */
   function createSurfacesMock(controllers) {
     const bySurface = controllers || {
       html: createControllerMock("html"),
@@ -61,15 +64,24 @@ describe("runtime/SurfaceSessionController.js", function () {
     };
   }
 
+  /** @param {Record<string, any>} [overrides] */
   function createPayload(overrides) {
     const opts = overrides || {};
     const surface = Object.prototype.hasOwnProperty.call(opts, "surface") ? opts.surface : "html";
     const routeId = Object.prototype.hasOwnProperty.call(opts, "routeId") ? opts.routeId : "nav/activeRoute";
-    const rendererId = Object.prototype.hasOwnProperty.call(opts, "rendererId") ? opts.rendererId : "ActiveRouteTextHtmlWidget";
-    const rootEl = Object.prototype.hasOwnProperty.call(opts, "rootEl") ? opts.rootEl : { id: "root-" + String(routeId) };
-    const shellEl = Object.prototype.hasOwnProperty.call(opts, "shellEl") ? opts.shellEl : { id: "shell-" + String(routeId) };
+    const rendererId = Object.prototype.hasOwnProperty.call(opts, "rendererId")
+      ? opts.rendererId
+      : "ActiveRouteTextHtmlWidget";
+    const rootEl = Object.prototype.hasOwnProperty.call(opts, "rootEl")
+      ? opts.rootEl
+      : { id: "root-" + String(routeId) };
+    const shellEl = Object.prototype.hasOwnProperty.call(opts, "shellEl")
+      ? opts.shellEl
+      : { id: "shell-" + String(routeId) };
     const revision = Object.prototype.hasOwnProperty.call(opts, "revision") ? opts.revision : 1;
-    const hostContext = Object.prototype.hasOwnProperty.call(opts, "hostContext") ? opts.hostContext : { id: "host-context" };
+    const hostContext = Object.prototype.hasOwnProperty.call(opts, "hostContext")
+      ? opts.hostContext
+      : { id: "host-context" };
     const props = Object.prototype.hasOwnProperty.call(opts, "props") ? opts.props : { routeId: routeId };
     const rendererSpec = Object.prototype.hasOwnProperty.call(opts, "rendererSpec")
       ? opts.rendererSpec
@@ -131,12 +143,14 @@ describe("runtime/SurfaceSessionController.js", function () {
     expect(session.reconcileSession(payload)).toBe(true);
 
     expect(surfaces.createController).toHaveBeenCalledTimes(1);
-    expect(surfaces.createController).toHaveBeenCalledWith(expect.objectContaining({
-      surface: "html",
-      rendererSpec: payload.rendererSpec,
-      hostContext: payload.hostContext,
-      shadowCssUrls: payload.shadowCssUrls
-    }));
+    expect(surfaces.createController).toHaveBeenCalledWith(
+      expect.objectContaining({
+        surface: "html",
+        rendererSpec: payload.rendererSpec,
+        hostContext: payload.hostContext,
+        shadowCssUrls: payload.shadowCssUrls
+      })
+    );
     expect(htmlController.attach).toHaveBeenCalledTimes(1);
     expect(htmlController.attach).toHaveBeenCalledWith(payload);
     expect(htmlController.update).not.toHaveBeenCalled();
@@ -251,14 +265,16 @@ describe("runtime/SurfaceSessionController.js", function () {
     const surfaces = createSurfacesMock({
       html: firstController
     });
-    surfaces.createController.mockImplementationOnce(function () {
-      return firstController;
-    }).mockImplementationOnce(function (options) {
-      if (options.surface !== "html") {
-        throw new Error("unexpected surface: " + options.surface);
-      }
-      return secondController;
-    });
+    surfaces.createController
+      .mockImplementationOnce(function () {
+        return firstController;
+      })
+      .mockImplementationOnce(function (options) {
+        if (options.surface !== "html") {
+          throw new Error("unexpected surface: " + options.surface);
+        }
+        return secondController;
+      });
     const session = createSurfaceSessionController({
       surfaces: surfaces
     });
@@ -294,5 +310,4 @@ describe("runtime/SurfaceSessionController.js", function () {
       shellEl: secondPayload.shellEl
     });
   });
-
 });

@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
@@ -112,7 +113,7 @@ describe("CenterDisplayTextWidget", function () {
         measure: {
           activeMeasure: Object.prototype.hasOwnProperty.call(opts, "activeMeasure")
             ? opts.activeMeasure
-            : { getPointAtIndex: (index) => index === 0 ? { lat: 54.18, lon: 10.52 } : undefined },
+            : { getPointAtIndex: (index) => (index === 0 ? { lat: 54.18, lon: 10.52 } : undefined) },
           useRhumbLine: opts.useRhumbLine === true
         }
       },
@@ -132,8 +133,12 @@ describe("CenterDisplayTextWidget", function () {
         boat: "nm",
         measure: "nm"
       },
-      ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal") ? opts.ratioThresholdNormal : 1.1,
-      ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat") ? opts.ratioThresholdFlat : 2.4,
+      ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal")
+        ? opts.ratioThresholdNormal
+        : 1.1,
+      ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat")
+        ? opts.ratioThresholdFlat
+        : 2.4,
       coordinatesTabular: opts.coordinatesTabular,
       stableDigits: opts.stableDigits === true,
       disconnect: opts.disconnect === true,
@@ -224,28 +229,38 @@ describe("CenterDisplayTextWidget", function () {
 
   it("uses mono family for tabular coordinates and stable-digit relation rows", function () {
     const helpersMono = makeComponentContext();
-    const specMono = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
-      .create({}, helpersMono);
+    const specMono = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js").create(
+      {},
+      helpersMono
+    );
     const monoCtx = createMockContext2D();
     const monoFonts = captureTextFonts(monoCtx);
     const monoCanvas = createMockCanvas({ rectWidth: 260, rectHeight: 180, ctx: monoCtx });
-    specMono.renderCanvas(monoCanvas, makeProps({
-      activeMeasure: undefined,
-      coordinatesTabular: true,
-      stableDigits: true
-    }));
+    specMono.renderCanvas(
+      monoCanvas,
+      makeProps({
+        activeMeasure: undefined,
+        coordinatesTabular: true,
+        stableDigits: true
+      })
+    );
 
     const helpersPlain = makeComponentContext();
-    const specPlain = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
-      .create({}, helpersPlain);
+    const specPlain = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js").create(
+      {},
+      helpersPlain
+    );
     const plainCtx = createMockContext2D();
     const plainFonts = captureTextFonts(plainCtx);
     const plainCanvas = createMockCanvas({ rectWidth: 260, rectHeight: 180, ctx: plainCtx });
-    specPlain.renderCanvas(plainCanvas, makeProps({
-      activeMeasure: undefined,
-      coordinatesTabular: false,
-      stableDigits: false
-    }));
+    specPlain.renderCanvas(
+      plainCanvas,
+      makeProps({
+        activeMeasure: undefined,
+        coordinatesTabular: false,
+        stableDigits: false
+      })
+    );
 
     const monoLat = monoFonts.find((entry) => entry.text.indexOf("LAT:") === 0);
     const plainLat = plainFonts.find((entry) => entry.text.indexOf("LAT:") === 0);
@@ -261,5 +276,4 @@ describe("CenterDisplayTextWidget", function () {
     expect(String(plainLat.font)).toContain("sans-serif");
     expect(String(plainRelation.font)).toContain("sans-serif");
   });
-
 });

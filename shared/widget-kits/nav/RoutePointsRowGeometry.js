@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRoutePointsRowGeometry = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -172,4 +172,4 @@
   }
 
   return { id: "RoutePointsRowGeometry", create: create };
-}));
+});

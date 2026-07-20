@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniGeometryScale = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniValueMathApi} */
@@ -96,4 +96,4 @@
   }
 
   return { id: "GeometryScale", create: create };
-}));
+});

@@ -10,6 +10,7 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   unit_radialGauge: ""
 });
 
+/** @param {any} kind @param {any} activeToolkit */
 function routeContext(kind, activeToolkit) {
   return makeRouteContext({
     routeId: "default:" + kind,
@@ -23,12 +24,17 @@ describe("DefaultMapper", function () {
   it("maps text, linearGauge, and radialGauge payloads without inventing formatter metadata", function () {
     const mapper = loadFresh("cluster/mappers/DefaultMapper.js").create();
 
-    expect(mapper.translate({
-      kind: "text",
-      value: "nav.gps.speed",
-      formatter: "formatSpeed",
-      formatterParameters: ["kn"]
-    }, routeContext("text", toolkit))).toEqual({
+    expect(
+      mapper.translate(
+        {
+          kind: "text",
+          value: "nav.gps.speed",
+          formatter: "formatSpeed",
+          formatterParameters: ["kn"]
+        },
+        routeContext("text", toolkit)
+      )
+    ).toEqual({
       value: "nav.gps.speed",
       caption: "VALUE",
       unit: "",
@@ -36,35 +42,38 @@ describe("DefaultMapper", function () {
       formatterParameters: ["kn"]
     });
 
-    const linear = mapper.translate({
-      kind: "linearGauge",
-      value: 12.3,
-      formatter: "formatDecimal",
-      formatterParameters: ["kn"],
-      defaultLinearRatioThresholdNormal: 1.1,
-      defaultLinearRatioThresholdFlat: 3.5,
-      defaultLinearMinValue: 0,
-      defaultLinearMaxValue: 100,
-      defaultLinearTickMajor: 10,
-      defaultLinearTickMinor: 2,
-      defaultLinearShowEndLabels: false,
-      defaultLinearAlarmLowEnabled: false,
-      defaultLinearAlarmLowAt: 10,
-      defaultLinearAlarmLowColor: "#d9534a",
-      defaultLinearWarningLowEnabled: false,
-      defaultLinearWarningLowAt: 25,
-      defaultLinearWarningLowColor: "#e0a92e",
-      defaultLinearWarningHighEnabled: false,
-      defaultLinearWarningHighAt: 75,
-      defaultLinearWarningHighColor: "#e0a92e",
-      defaultLinearAlarmHighEnabled: false,
-      defaultLinearAlarmHighAt: 90,
-      defaultLinearAlarmHighColor: "#d9534a",
-      captionUnitScale: 0.8,
-      stableDigits: false,
-      easing: true,
-      defaultLinearHideTextualMetrics: 0
-    }, routeContext("linearGauge", toolkit));
+    const linear = mapper.translate(
+      {
+        kind: "linearGauge",
+        value: 12.3,
+        formatter: "formatDecimal",
+        formatterParameters: ["kn"],
+        defaultLinearRatioThresholdNormal: 1.1,
+        defaultLinearRatioThresholdFlat: 3.5,
+        defaultLinearMinValue: 0,
+        defaultLinearMaxValue: 100,
+        defaultLinearTickMajor: 10,
+        defaultLinearTickMinor: 2,
+        defaultLinearShowEndLabels: false,
+        defaultLinearAlarmLowEnabled: false,
+        defaultLinearAlarmLowAt: 10,
+        defaultLinearAlarmLowColor: "#d9534a",
+        defaultLinearWarningLowEnabled: false,
+        defaultLinearWarningLowAt: 25,
+        defaultLinearWarningLowColor: "#e0a92e",
+        defaultLinearWarningHighEnabled: false,
+        defaultLinearWarningHighAt: 75,
+        defaultLinearWarningHighColor: "#e0a92e",
+        defaultLinearAlarmHighEnabled: false,
+        defaultLinearAlarmHighAt: 90,
+        defaultLinearAlarmHighColor: "#d9534a",
+        captionUnitScale: 0.8,
+        stableDigits: false,
+        easing: true,
+        defaultLinearHideTextualMetrics: 0
+      },
+      routeContext("linearGauge", toolkit)
+    );
 
     expect(linear).toMatchObject({
       value: 12.3,
@@ -99,35 +108,38 @@ describe("DefaultMapper", function () {
       }
     });
 
-    const radial = mapper.translate({
-      kind: "radialGauge",
-      value: 12.3,
-      formatter: "formatDecimal",
-      formatterParameters: ["kn"],
-      defaultRadialRatioThresholdNormal: 1.1,
-      defaultRadialRatioThresholdFlat: 3.5,
-      defaultRadialMinValue: 0,
-      defaultRadialMaxValue: 100,
-      defaultRadialTickMajor: 10,
-      defaultRadialTickMinor: 2,
-      defaultRadialShowEndLabels: false,
-      defaultRadialAlarmLowEnabled: false,
-      defaultRadialAlarmLowAt: 10,
-      defaultRadialAlarmLowColor: "#d9534a",
-      defaultRadialWarningLowEnabled: false,
-      defaultRadialWarningLowAt: 25,
-      defaultRadialWarningLowColor: "#e0a92e",
-      defaultRadialWarningHighEnabled: false,
-      defaultRadialWarningHighAt: 75,
-      defaultRadialWarningHighColor: "#e0a92e",
-      defaultRadialAlarmHighEnabled: false,
-      defaultRadialAlarmHighAt: 90,
-      defaultRadialAlarmHighColor: "#d9534a",
-      captionUnitScale: 0.8,
-      stableDigits: true,
-      easing: false,
-      defaultRadialHideTextualMetrics: 1
-    }, routeContext("radialGauge", toolkit));
+    const radial = mapper.translate(
+      {
+        kind: "radialGauge",
+        value: 12.3,
+        formatter: "formatDecimal",
+        formatterParameters: ["kn"],
+        defaultRadialRatioThresholdNormal: 1.1,
+        defaultRadialRatioThresholdFlat: 3.5,
+        defaultRadialMinValue: 0,
+        defaultRadialMaxValue: 100,
+        defaultRadialTickMajor: 10,
+        defaultRadialTickMinor: 2,
+        defaultRadialShowEndLabels: false,
+        defaultRadialAlarmLowEnabled: false,
+        defaultRadialAlarmLowAt: 10,
+        defaultRadialAlarmLowColor: "#d9534a",
+        defaultRadialWarningLowEnabled: false,
+        defaultRadialWarningLowAt: 25,
+        defaultRadialWarningLowColor: "#e0a92e",
+        defaultRadialWarningHighEnabled: false,
+        defaultRadialWarningHighAt: 75,
+        defaultRadialWarningHighColor: "#e0a92e",
+        defaultRadialAlarmHighEnabled: false,
+        defaultRadialAlarmHighAt: 90,
+        defaultRadialAlarmHighColor: "#d9534a",
+        captionUnitScale: 0.8,
+        stableDigits: true,
+        easing: false,
+        defaultRadialHideTextualMetrics: 1
+      },
+      routeContext("radialGauge", toolkit)
+    );
 
     expect(radial).toMatchObject({
       value: 12.3,
@@ -162,29 +174,40 @@ describe("DefaultMapper", function () {
       }
     });
 
-    expect(mapper.translate({
-      kind: "unknown"
-    }, routeContext("unknown", toolkit))).toEqual({});
+    expect(
+      mapper.translate(
+        {
+          kind: "unknown"
+        },
+        routeContext("unknown", toolkit)
+      )
+    ).toEqual({});
   });
 
   it("omits formatter metadata when it is not provided by the user", function () {
     const mapper = loadFresh("cluster/mappers/DefaultMapper.js").create();
 
-    const linear = mapper.translate({
-      kind: "linearGauge",
-      value: 4.2,
-      defaultLinearMinValue: 0,
-      defaultLinearMaxValue: 100
-    }, routeContext("linearGauge", toolkit));
+    const linear = mapper.translate(
+      {
+        kind: "linearGauge",
+        value: 4.2,
+        defaultLinearMinValue: 0,
+        defaultLinearMaxValue: 100
+      },
+      routeContext("linearGauge", toolkit)
+    );
     expect(Object.prototype.hasOwnProperty.call(linear, "formatter")).toBe(false);
     expect(Object.prototype.hasOwnProperty.call(linear, "formatterParameters")).toBe(false);
 
-    const radial = mapper.translate({
-      kind: "radialGauge",
-      value: 4.2,
-      defaultRadialMinValue: 0,
-      defaultRadialMaxValue: 100
-    }, routeContext("radialGauge", toolkit));
+    const radial = mapper.translate(
+      {
+        kind: "radialGauge",
+        value: 4.2,
+        defaultRadialMinValue: 0,
+        defaultRadialMaxValue: 100
+      },
+      routeContext("radialGauge", toolkit)
+    );
     expect(Object.prototype.hasOwnProperty.call(radial, "formatter")).toBe(false);
     expect(Object.prototype.hasOwnProperty.call(radial, "formatterParameters")).toBe(false);
   });
@@ -202,11 +225,12 @@ describe("DefaultMapper", function () {
         return "unit:" + kind;
       }),
       out: vi.fn(function (value, caption, unit, formatter, formatterParameters) {
-        const out = {
-          value: value,
-          caption: caption,
-          unit: unit
-        };
+        const out =
+          /** @type {{ value: any, caption: any, unit: any, formatter?: any, formatterParameters?: any }} */ ({
+            value: value,
+            caption: caption,
+            unit: unit
+          });
         if (typeof formatter !== "undefined") {
           out.formatter = formatter;
         }
@@ -218,33 +242,36 @@ describe("DefaultMapper", function () {
       num: num
     };
 
-    const linear = mapper.translate({
-      kind: "linearGauge",
-      value: "12.3",
-      defaultLinearRatioThresholdNormal: "1.1",
-      defaultLinearRatioThresholdFlat: "3.5",
-      defaultLinearMinValue: "0",
-      defaultLinearMaxValue: "100",
-      defaultLinearTickMajor: "10",
-      defaultLinearTickMinor: "2",
-      defaultLinearShowEndLabels: 0,
-      defaultLinearAlarmLowEnabled: "",
-      defaultLinearAlarmLowAt: "10",
-      defaultLinearAlarmLowColor: "#d9534a",
-      defaultLinearWarningLowEnabled: 0,
-      defaultLinearWarningLowAt: "25",
-      defaultLinearWarningLowColor: "#e0a92e",
-      defaultLinearWarningHighEnabled: false,
-      defaultLinearWarningHighAt: "75",
-      defaultLinearWarningHighColor: "#e0a92e",
-      defaultLinearAlarmHighEnabled: 0,
-      defaultLinearAlarmHighAt: "90",
-      defaultLinearAlarmHighColor: "#d9534a",
-      captionUnitScale: "0.8",
-      stableDigits: 0,
-      easing: 1,
-      defaultLinearHideTextualMetrics: "yes"
-    }, routeContext("linearGauge", toolkitSpy));
+    const linear = mapper.translate(
+      {
+        kind: "linearGauge",
+        value: "12.3",
+        defaultLinearRatioThresholdNormal: "1.1",
+        defaultLinearRatioThresholdFlat: "3.5",
+        defaultLinearMinValue: "0",
+        defaultLinearMaxValue: "100",
+        defaultLinearTickMajor: "10",
+        defaultLinearTickMinor: "2",
+        defaultLinearShowEndLabels: 0,
+        defaultLinearAlarmLowEnabled: "",
+        defaultLinearAlarmLowAt: "10",
+        defaultLinearAlarmLowColor: "#d9534a",
+        defaultLinearWarningLowEnabled: 0,
+        defaultLinearWarningLowAt: "25",
+        defaultLinearWarningLowColor: "#e0a92e",
+        defaultLinearWarningHighEnabled: false,
+        defaultLinearWarningHighAt: "75",
+        defaultLinearWarningHighColor: "#e0a92e",
+        defaultLinearAlarmHighEnabled: 0,
+        defaultLinearAlarmHighAt: "90",
+        defaultLinearAlarmHighColor: "#d9534a",
+        captionUnitScale: "0.8",
+        stableDigits: 0,
+        easing: 1,
+        defaultLinearHideTextualMetrics: "yes"
+      },
+      routeContext("linearGauge", toolkitSpy)
+    );
 
     expect(num).toHaveBeenCalledWith("1.1");
     expect(num).toHaveBeenCalledWith("3.5");
@@ -274,33 +301,36 @@ describe("DefaultMapper", function () {
       defaultLinearHideTextualMetrics: true
     });
 
-    const radial = mapper.translate({
-      kind: "radialGauge",
-      value: "12.3",
-      defaultRadialRatioThresholdNormal: "1.1",
-      defaultRadialRatioThresholdFlat: "3.5",
-      defaultRadialMinValue: "0",
-      defaultRadialMaxValue: "100",
-      defaultRadialTickMajor: "10",
-      defaultRadialTickMinor: "2",
-      defaultRadialShowEndLabels: 0,
-      defaultRadialAlarmLowEnabled: "",
-      defaultRadialAlarmLowAt: "10",
-      defaultRadialAlarmLowColor: "#d9534a",
-      defaultRadialWarningLowEnabled: 0,
-      defaultRadialWarningLowAt: "25",
-      defaultRadialWarningLowColor: "#e0a92e",
-      defaultRadialWarningHighEnabled: false,
-      defaultRadialWarningHighAt: "75",
-      defaultRadialWarningHighColor: "#e0a92e",
-      defaultRadialAlarmHighEnabled: 0,
-      defaultRadialAlarmHighAt: "90",
-      defaultRadialAlarmHighColor: "#d9534a",
-      captionUnitScale: "0.8",
-      stableDigits: 1,
-      easing: 0,
-      defaultRadialHideTextualMetrics: "yes"
-    }, routeContext("radialGauge", toolkitSpy));
+    const radial = mapper.translate(
+      {
+        kind: "radialGauge",
+        value: "12.3",
+        defaultRadialRatioThresholdNormal: "1.1",
+        defaultRadialRatioThresholdFlat: "3.5",
+        defaultRadialMinValue: "0",
+        defaultRadialMaxValue: "100",
+        defaultRadialTickMajor: "10",
+        defaultRadialTickMinor: "2",
+        defaultRadialShowEndLabels: 0,
+        defaultRadialAlarmLowEnabled: "",
+        defaultRadialAlarmLowAt: "10",
+        defaultRadialAlarmLowColor: "#d9534a",
+        defaultRadialWarningLowEnabled: 0,
+        defaultRadialWarningLowAt: "25",
+        defaultRadialWarningLowColor: "#e0a92e",
+        defaultRadialWarningHighEnabled: false,
+        defaultRadialWarningHighAt: "75",
+        defaultRadialWarningHighColor: "#e0a92e",
+        defaultRadialAlarmHighEnabled: 0,
+        defaultRadialAlarmHighAt: "90",
+        defaultRadialAlarmHighColor: "#d9534a",
+        captionUnitScale: "0.8",
+        stableDigits: 1,
+        easing: 0,
+        defaultRadialHideTextualMetrics: "yes"
+      },
+      routeContext("radialGauge", toolkitSpy)
+    );
 
     expect(radial.rendererProps).toMatchObject({
       defaultRadialRatioThresholdNormal: 1.1,

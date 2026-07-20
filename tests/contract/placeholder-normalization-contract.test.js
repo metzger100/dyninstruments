@@ -5,7 +5,7 @@ const { loadFresh } = require("../helpers/load-umd");
 const SOURCE_ROOTS = ["cluster", "shared/widget-kits", "widgets"];
 const EXEMPT_SOURCES = new Set([
   "shared/widget-kits/format/PlaceholderNormalize.js",
-  "shared/widget-kits/nav/RoutePointsRenderModel.js",
+  "shared/widget-kits/nav/RoutePointsRenderModel.js"
 ]);
 const SENTINEL_TOKENS = ["NaN", "undefined", "null", "Infinity", "-Infinity"];
 const APPLY_RE = /componentContext\.format\.applyFormatter\s*\(/g;
@@ -26,12 +26,12 @@ describe("placeholder normalization contract", function () {
         "    default: '---',",
         "  });",
         "  return text;",
-        "}",
-      ].join("\n"),
+        "}"
+      ].join("\n")
     );
 
     expect(findings).toContain(
-      "shared/widget-kits/nav/EditRouteRenderModel.js:2 applyFormatter output must be normalized through PlaceholderNormalize nearby.",
+      "shared/widget-kits/nav/EditRouteRenderModel.js:2 applyFormatter output must be normalized through PlaceholderNormalize nearby."
     );
   });
 
@@ -45,8 +45,8 @@ describe("placeholder normalization contract", function () {
         "    default: '---',",
         "  });",
         "  return placeholderNormalize.normalize(text, '---');",
-        "}",
-      ].join("\n"),
+        "}"
+      ].join("\n")
     );
 
     expect(findings).toEqual([]);
@@ -60,12 +60,13 @@ describe("placeholder normalization contract", function () {
 
   it("rejects placeholder APIs that do not normalize sentinel strings", function () {
     const api = {
+      /** @param {any} value */
       normalize(value) {
         return String(value);
       },
       isPlaceholder() {
         return false;
-      },
+      }
     };
 
     expect(sentinelNormalizationFailures(api)).toEqual(SENTINEL_TOKENS);
@@ -78,6 +79,7 @@ function scanRepository() {
   });
 }
 
+/** @param {string} rel @param {string} text */
 function validateSource(rel, text) {
   if (EXEMPT_SOURCES.has(rel)) return [];
   const applyLines = findLineMatches(text, APPLY_RE);
@@ -91,29 +93,27 @@ function validateSource(rel, text) {
       });
     })
     .map(function (line) {
-      return (
-        rel +
-        ":" +
-        line +
-        " applyFormatter output must be normalized through PlaceholderNormalize nearby."
-      );
+      return rel + ":" + line + " applyFormatter output must be normalized through PlaceholderNormalize nearby.";
     });
 }
 
+/** @param {any} api */
 function sentinelNormalizationFailures(api) {
   return SENTINEL_TOKENS.filter(function (token) {
     return api.normalize(token, "---") !== "---" || api.isPlaceholder(token) !== true;
   });
 }
 
+/** @param {string[]} roots */
 function collectSourceFiles(roots) {
-  const out = [];
+  const out = /** @type {string[]} */ ([]);
   roots.forEach(function (relRoot) {
     walkJsFiles(path.join(process.cwd(), relRoot), relRoot, out);
   });
   return out.sort();
 }
 
+/** @param {string} absDir @param {string} relDir @param {string[]} out */
 function walkJsFiles(absDir, relDir, out) {
   if (!fs.existsSync(absDir)) return;
   fs.readdirSync(absDir, { withFileTypes: true }).forEach(function (entry) {
@@ -124,6 +124,7 @@ function walkJsFiles(absDir, relDir, out) {
   });
 }
 
+/** @param {string} text @param {RegExp} regex */
 function findLineMatches(text, regex) {
   const matches = [];
   let match;
@@ -134,6 +135,7 @@ function findLineMatches(text, regex) {
   return matches;
 }
 
+/** @param {string} text @param {number} index */
 function lineFromIndex(text, index) {
   return text.slice(0, index).split(/\r?\n/).length;
 }

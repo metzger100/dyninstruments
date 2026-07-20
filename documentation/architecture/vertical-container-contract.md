@@ -9,7 +9,8 @@ Vertical sizing is a shell contract shared across HTML and canvas surfaces.
 - outside .widgetContainer.vertical: host owns dimensions
 - inside .widgetContainer.vertical: host owns width, widget owns height
 
-Runtime owns request/materialization timing; route metadata owns pre-activation shell sizing, and committed renderers own post-activation sizing in shadow CSS.
+Runtime owns request/materialization timing; route metadata owns pre-activation shell sizing, and committed renderers
+own post-activation sizing in shadow CSS.
 
 ## Canonical Vertical Context
 
@@ -32,7 +33,8 @@ Supported route metadata forms:
 
 - ratio sizing: `{ kind: "ratio", aspectRatio: number }`
 - natural sizing: `{ kind: "natural" }`
-- `shellSizing.kind === "natural"` emits no inline height or aspect-ratio and reserves no cold-load height; the committed renderer shadow CSS owns the final size after activation
+- `shellSizing.kind === "natural"` emits no inline height or aspect-ratio and reserves no cold-load height; the
+  committed renderer shadow CSS owns the final size after activation
 
 ## RoutePoints Exception
 

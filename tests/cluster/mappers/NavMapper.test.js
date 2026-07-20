@@ -1,9 +1,8 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  installUnitFormatFamilies,
-} = require("../../helpers/unit-format-families");
+const { installUnitFormatFamilies } = require("../../helpers/unit-format-families");
 const { makeRouteContext } = require("../../helpers/mapper-route-context");
 
+/** @param {Record<string, any>} [overrides] @param {Record<string, any>} [bindingOverrides] */
 function makeToolkit(overrides, bindingOverrides) {
   installUnitFormatFamilies(bindingOverrides);
   return loadFresh("cluster/mappers/ClusterMapperToolkit.js")
@@ -57,10 +56,10 @@ function makeToolkit(overrides, bindingOverrides) {
           caption_editRouteRte: "RTE CAP",
           formatUnit_editRouteRte: "km",
           unit_editRouteRte_km: "kmR",
-          caption_editRouteEta: "ETA CAP",
+          caption_editRouteEta: "ETA CAP"
         },
-        overrides || {},
-      ),
+        overrides || {}
+      )
     );
 }
 
@@ -70,188 +69,50 @@ function createMapper() {
   return loadFresh("cluster/mappers/NavMapper.js").create();
 }
 
+/** @param {any} kind @param {any} activeToolkit @param {any} [viewModel] */
 function routeContext(kind, activeToolkit, viewModel) {
   return makeRouteContext({
     routeId: "nav:" + kind,
     cluster: "nav",
     kind: kind,
     toolkit: activeToolkit,
-    viewModel: viewModel,
+    viewModel: viewModel
   });
-}
-
-function trimText(value) {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function toMaybeNumber(value) {
-  if (typeof value === "undefined" || value === null) {
-    return undefined;
-  }
-  if (typeof value === "string" && value.trim() === "") {
-    return undefined;
-  }
-  const numeric = Number(value);
-  return Number.isFinite(numeric) ? numeric : undefined;
-}
-
-function makeActiveRouteViewModel() {
-  return {
-    build(props) {
-      return {
-        display: {
-          remain: toMaybeNumber(props.activeRouteRemain),
-          rteEta: props.activeRouteEta,
-          nextCourse: toMaybeNumber(props.activeRouteNextCourse),
-          isApproaching: props.activeRouteApproaching === true,
-        },
-        routeName: trimText(props.activeRouteName),
-        captions: {
-          remain: "RTE CAP",
-          rteEta: "ETA CAP",
-          nextCourse: "NEXT CAP",
-        },
-        units: {
-          remain: "nmA",
-          rteEta: "",
-          nextCourse: "degN",
-        },
-        formatUnits: {
-          remain: "nm",
-        },
-        hideSeconds: props.hideSeconds === true,
-      };
-    },
-  };
-}
-
-function makeRoutePointsViewModel() {
-  return {
-    build(props) {
-      const editingRoute = props.editingRoute;
-      const routeName = editingRoute ? trimText(editingRoute.name) : "";
-      const points =
-        editingRoute && Array.isArray(editingRoute.points)
-          ? editingRoute.points.map(function (point, index) {
-              return {
-                name: trimText(point.name) || String(index),
-                lat: toMaybeNumber(point.lat),
-                lon: toMaybeNumber(point.lon),
-              };
-            })
-          : [];
-
-      return {
-        route: editingRoute
-          ? {
-              name: routeName,
-              points: points,
-              sourceRoute: editingRoute,
-            }
-          : null,
-        selectedIndex:
-          typeof props.editingIndex === "undefined"
-            ? undefined
-            : Number(props.editingIndex),
-        isActiveRoute: trimText(props.activeName) === routeName,
-        showLatLon: props.routeShowLL === true,
-        useRhumbLine: props.useRhumbLine === true,
-      };
-    },
-  };
-}
-
-function makeEditRouteViewModel() {
-  return {
-    build(props) {
-      const editingRoute = props.editingRoute;
-      const routeName = editingRoute
-        ? trimText(editingRoute.name).replace(/^local@/, "")
-        : "";
-      const pointCount =
-        editingRoute && Array.isArray(editingRoute.points)
-          ? editingRoute.points.length
-          : 0;
-      const isLocalRoute = !!(
-        editingRoute && /^local@/.test(editingRoute.name)
-      );
-      const isServerRoute = !!(
-        editingRoute && /^server@/.test(editingRoute.name)
-      );
-
-      return {
-        hasRoute: !!editingRoute,
-        route: editingRoute
-          ? {
-              displayName: routeName,
-              pointCount: pointCount,
-              totalDistance:
-                editingRoute && typeof editingRoute.computeLength === "function"
-                  ? editingRoute.computeLength()
-                  : undefined,
-              isLocalRoute: isLocalRoute,
-              isServerRoute: isServerRoute,
-            }
-          : null,
-        remainingDistance: toMaybeNumber(props.rteDistance),
-        rteEta: props.rteEta,
-        hideSeconds: props.hideSeconds === true,
-        isActiveRoute:
-          !!editingRoute &&
-          trimText(props.activeName) === trimText(editingRoute.name),
-        isLocalRoute: isLocalRoute,
-        isServerRoute: isServerRoute,
-      };
-    },
-  };
 }
 
 describe("NavMapper", function () {
   it("maps ETA kinds with formatTime", function () {
     const mapper = createMapper();
-    expect(
-      mapper.translate(
-        { kind: "wpEta", wpEta: 1700000000 },
-        routeContext("wpEta", toolkit),
-      ).formatter,
-    ).toBe("formatTime");
-    expect(
-      mapper.translate(
-        { kind: "rteEta", rteEta: 1700000100 },
-        routeContext("rteEta", toolkit),
-      ).formatter,
-    ).toBe("formatTime");
+    expect(mapper.translate({ kind: "wpEta", wpEta: 1700000000 }, routeContext("wpEta", toolkit)).formatter).toBe(
+      "formatTime"
+    );
+    expect(mapper.translate({ kind: "rteEta", rteEta: 1700000100 }, routeContext("rteEta", toolkit)).formatter).toBe(
+      "formatTime"
+    );
   });
 
   it("maps ETA kinds with formatClock when hideSeconds is enabled", function () {
     const mapper = createMapper();
     expect(
-      mapper.translate(
-        { kind: "wpEta", wpEta: 1700000000, hideSeconds: true },
-        routeContext("wpEta", toolkit),
-      ).formatter,
+      mapper.translate({ kind: "wpEta", wpEta: 1700000000, hideSeconds: true }, routeContext("wpEta", toolkit))
+        .formatter
     ).toBe("formatClock");
     expect(
-      mapper.translate(
-        { kind: "rteEta", rteEta: 1700000100, hideSeconds: true },
-        routeContext("rteEta", toolkit),
-      ).formatter,
+      mapper.translate({ kind: "rteEta", rteEta: 1700000100, hideSeconds: true }, routeContext("rteEta", toolkit))
+        .formatter
     ).toBe("formatClock");
   });
 
   it("maps distance kinds with formatDistance", function () {
     const mapper = createMapper();
-    const out = mapper.translate(
-      { kind: "rteDistance", rteDistance: 12.3 },
-      routeContext("rteDistance", toolkit),
-    );
+    const out = mapper.translate({ kind: "rteDistance", rteDistance: 12.3 }, routeContext("rteDistance", toolkit));
 
     expect(out).toEqual({
       value: 12.3,
       caption: "RTE",
       unit: "nm",
       formatter: "formatDistance",
-      formatterParameters: ["nm"],
+      formatterParameters: ["nm"]
     });
   });
 
@@ -267,54 +128,62 @@ describe("NavMapper", function () {
         unit_rteDistance_ft: "feet custom",
         caption_vmg: "VMG",
         formatUnit_vmg: undefined,
-        unit_vmg_ms: "m/s custom",
+        unit_vmg_ms: "m/s custom"
       },
       {
         dst: { defaultToken: "km" },
         rteDistance: { defaultToken: "ft" },
-        vmg: { defaultToken: "ms" },
-      },
+        vmg: { defaultToken: "ms" }
+      }
     );
 
-    expect(
-      mapper.translate(
-        { kind: "dst", dst: 3.4 },
-        routeContext("dst", customToolkit),
-      ),
-    ).toEqual({
+    expect(mapper.translate({ kind: "dst", dst: 3.4 }, routeContext("dst", customToolkit))).toEqual({
       value: 3.4,
       caption: "DST",
       unit: "kilometers custom",
       formatter: "formatDistance",
       formatterParameters: ["km"],
-      disconnect: false,
+      disconnect: false
     });
 
     expect(
-      mapper.translate(
-        { kind: "rteDistance", rteDistance: 12.3 },
-        routeContext("rteDistance", customToolkit),
-      ),
+      mapper.translate({ kind: "rteDistance", rteDistance: 12.3 }, routeContext("rteDistance", customToolkit))
     ).toEqual({
       value: 12.3,
       caption: "RTE",
       unit: "feet custom",
       formatter: "formatDistance",
-      formatterParameters: ["ft"],
+      formatterParameters: ["ft"]
     });
 
-    expect(
-      mapper.translate(
-        { kind: "vmg", vmg: 4.2 },
-        routeContext("vmg", customToolkit),
-      ),
-    ).toEqual({
+    expect(mapper.translate({ kind: "vmg", vmg: 4.2 }, routeContext("vmg", customToolkit))).toEqual({
       value: 4.2,
       caption: "VMG",
       unit: "m/s custom",
       formatter: "formatSpeed",
-      formatterParameters: ["ms"],
+      formatterParameters: ["ms"]
     });
   });
 
+  it("owns XTE waypoint and positive-scale normalization at the mapper boundary", function () {
+    const mapper = createMapper();
+    const customToolkit = makeToolkit({
+      xteDisplayScale_nm: "0",
+      xteLinearScale_nm: "invalid"
+    });
+
+    const highway = mapper.translate(
+      { kind: "xteDisplay", wpName: "  Harbor  " },
+      routeContext("xteDisplay", customToolkit)
+    );
+    const linear = mapper.translate(
+      { kind: "xteDisplayLinear", wpName: "   " },
+      routeContext("xteDisplayLinear", customToolkit)
+    );
+
+    expect(highway.display.wpName).toBe("Harbor");
+    expect(highway.xteScale).toBe(1);
+    expect(linear.display.wpName).toBe("");
+    expect(linear.xteScale).toBe(1);
+  });
 });

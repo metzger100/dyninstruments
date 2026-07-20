@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
@@ -112,7 +113,7 @@ describe("CenterDisplayTextWidget", function () {
         measure: {
           activeMeasure: Object.prototype.hasOwnProperty.call(opts, "activeMeasure")
             ? opts.activeMeasure
-            : { getPointAtIndex: (index) => index === 0 ? { lat: 54.18, lon: 10.52 } : undefined },
+            : { getPointAtIndex: (index) => (index === 0 ? { lat: 54.18, lon: 10.52 } : undefined) },
           useRhumbLine: opts.useRhumbLine === true
         }
       },
@@ -132,8 +133,12 @@ describe("CenterDisplayTextWidget", function () {
         boat: "nm",
         measure: "nm"
       },
-      ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal") ? opts.ratioThresholdNormal : 1.1,
-      ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat") ? opts.ratioThresholdFlat : 2.4,
+      ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal")
+        ? opts.ratioThresholdNormal
+        : 1.1,
+      ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat")
+        ? opts.ratioThresholdFlat
+        : 2.4,
       coordinatesTabular: opts.coordinatesTabular,
       stableDigits: opts.stableDigits === true,
       disconnect: opts.disconnect === true,
@@ -227,9 +232,7 @@ describe("CenterDisplayTextWidget", function () {
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (cfg.formatter === "formatLonLatsDecimal") {
-          return cfg.formatterParameters && cfg.formatterParameters[0] === "lat"
-            ? "-----"
-            : "--:--";
+          return cfg.formatterParameters && cfg.formatterParameters[0] === "lat" ? "-----" : "--:--";
         }
         if (cfg.formatter === "formatDirection") {
           return "--:--:--";
@@ -240,15 +243,17 @@ describe("CenterDisplayTextWidget", function () {
         return cfg.default;
       }
     });
-    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
-      .create({}, helpers);
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js").create({}, helpers);
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({ rectWidth: 260, rectHeight: 180, ctx });
 
-    spec.renderCanvas(canvas, makeProps({
-      activeMeasure: undefined,
-      default: "---"
-    }));
+    spec.renderCanvas(
+      canvas,
+      makeProps({
+        activeMeasure: undefined,
+        default: "---"
+      })
+    );
 
     const texts = fillTextCalls(ctx).map((entry) => entry.text);
     expect(texts.filter((entry) => entry === "---").length).toBeGreaterThanOrEqual(2);
@@ -256,5 +261,4 @@ describe("CenterDisplayTextWidget", function () {
     expect(texts).not.toContain("-----");
     expect(texts).not.toContain("--:--");
   });
-
 });

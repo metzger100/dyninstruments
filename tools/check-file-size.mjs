@@ -15,7 +15,6 @@ const ONELINER_OPERATOR_DENSE_MIN_OPERATORS = 8;
 const ONELINER_NESTED_PARENS_MIN_COUNT = 14;
 const ONELINER_STACKED_DECLARATORS_MIN = 2;
 const ONELINER_SEQUENCE_ASSIGNMENTS_MIN = 2;
-const ONELINER_PACKED_DESTRUCTURING_MIN_BINDINGS = 4;
 const ONELINER_PACKED_FOR_HEADER_MIN_COMMAS = 3;
 const ONELINER_PACKED_FOR_HEADER_MIN_ASSIGNMENTS = 2;
 const SCAN_ROOTS = [
@@ -35,14 +34,7 @@ const SCAN_ROOTS = [
   "ARCHITECTURE.md"
 ];
 const SCAN_EXTENSIONS = new Set([".js", ".md"]);
-const EXEMPT_PATTERNS = [
-  /\.css$/,
-  /\.json$/,
-  /^exec-plans\//,
-  /^\.agents\/skills\//,
-  /^tools\//,
-  /\.config\./
-];
+const EXEMPT_PATTERNS = [/\.css$/, /\.json$/, /^exec-plans\//, /^\.agents\/skills\//, /^tools\//, /\.config\./];
 const EXCLUDED_DIRS = new Set(["node_modules", ".git"]);
 const VALID_ONELINER_MODES = new Set(["warn", "block"]);
 const ONELINER_KINDS = [
@@ -65,9 +57,7 @@ export function runFileSizeCheck(options = {}) {
   for (const file of targetFiles) {
     const content = fs.readFileSync(file.abs, "utf8");
     const lines = countLinesByFileType(file.rel, content);
-    const fileOnelinerFindings = shouldCheckOneliners(file.rel)
-      ? detectOnelinerFindings(content)
-      : [];
+    const fileOnelinerFindings = shouldCheckOneliners(file.rel) ? detectOnelinerFindings(content) : [];
 
     if (lines > MAX_ALLOWED_LINES) {
       violations.push({ path: file.rel, lines, lineType: getLineTypeLabel(file.rel) });
@@ -228,11 +218,9 @@ function isBraceFreeGuardClauseLine(maskedTrimmedLine) {
   let keywordEnd;
   if (matchesToken(maskedTrimmedLine, statementStart, "return")) {
     keywordEnd = statementStart + "return".length;
-  }
-  else if (matchesToken(maskedTrimmedLine, statementStart, "throw")) {
+  } else if (matchesToken(maskedTrimmedLine, statementStart, "throw")) {
     keywordEnd = statementStart + "throw".length;
-  }
-  else {
+  } else {
     return false;
   }
 
@@ -248,7 +236,11 @@ function detectDenseOneliner(maskedTrimmedLine) {
   if (!startsWithForHeader && countMatches(maskedTrimmedLine, /;/g) >= 2) return true;
   if (startsWithForHeader && isPackedForHeaderLine(maskedTrimmedLine)) return true;
   if (isStackedDeclaratorLine(maskedTrimmedLine)) return true;
-  if (isPackedDestructuringDeclaratorLine(maskedTrimmedLine)) return true;
+  // Packed destructuring declarators are intentionally NOT checked here, for the
+  // same reason array literals are excluded from collapsed-literal: a
+  // destructuring pattern is not an object/array expression, so Prettier's
+  // objectWrap:preserve does not apply to it either, and Prettier always
+  // collapses one onto one line when it fits regardless of source authoring.
   if (isCommaSequenceAssignmentLine(maskedTrimmedLine)) return true;
   if (hasMultipleStatementLeaders(maskedTrimmedLine)) return true;
   if (hasCommaOperatorCallChain(maskedTrimmedLine)) return true;
@@ -263,22 +255,17 @@ function detectLongPackedOneliner(maskedTrimmedLine) {
   const parenCount = countMatches(maskedTrimmedLine, /[()]/g);
   const operatorCount = countMatches(maskedTrimmedLine, /[+\-*/%&|^?:<>!=]/g);
 
-  const packedByStructure = (
+  const packedByStructure =
     lineLength > ONELINER_LONG_PACKED_LINE_THRESHOLD &&
-    (braceCount >= ONELINER_LONG_PACKED_MIN_BRACES || commaCount >= ONELINER_LONG_PACKED_MIN_COMMAS)
-  );
+    (braceCount >= ONELINER_LONG_PACKED_MIN_BRACES || commaCount >= ONELINER_LONG_PACKED_MIN_COMMAS);
   if (packedByStructure) return true;
 
-  const packedByOperatorDensity = (
-    lineLength > ONELINER_OPERATOR_DENSE_LINE_THRESHOLD &&
-    operatorCount >= ONELINER_OPERATOR_DENSE_MIN_OPERATORS
-  );
+  const packedByOperatorDensity =
+    lineLength > ONELINER_OPERATOR_DENSE_LINE_THRESHOLD && operatorCount >= ONELINER_OPERATOR_DENSE_MIN_OPERATORS;
   if (packedByOperatorDensity) return true;
 
-  const packedByNestedParens = (
-    lineLength > ONELINER_NESTED_PARENS_LINE_THRESHOLD &&
-    parenCount >= ONELINER_NESTED_PARENS_MIN_COUNT
-  );
+  const packedByNestedParens =
+    lineLength > ONELINER_NESTED_PARENS_LINE_THRESHOLD && parenCount >= ONELINER_NESTED_PARENS_MIN_COUNT;
   return packedByNestedParens;
 }
 
@@ -379,8 +366,13 @@ function detectCollapsedLiteral(maskedTrimmedLine) {
   if (/require\s*\(/.test(maskedTrimmedLine)) return false;
   if (isDestructuringAssignmentLine(maskedTrimmedLine)) return false;
 
-  if (containsCollapsedLiteral(maskedTrimmedLine, "{", "}")) return true;
-  return containsCollapsedLiteral(maskedTrimmedLine, "[", "]");
+  // Array literals are intentionally excluded here: Prettier has no
+  // objectWrap-equivalent option for arrays, so it always collapses a short
+  // array onto one line regardless of source authoring, and there is no
+  // non-suppression-comment way to keep it multi-line. Object literals stay
+  // checked because Prettier's objectWrap:preserve respects our authored
+  // multi-line choice for those.
+  return containsCollapsedLiteral(maskedTrimmedLine, "{", "}");
 }
 
 function detectCollapsedBlock(maskedTrimmedLine) {
@@ -438,31 +430,13 @@ function isCommaSequenceAssignmentLine(maskedTrimmedLine) {
   return assignmentCount >= ONELINER_SEQUENCE_ASSIGNMENTS_MIN;
 }
 
-function isPackedDestructuringDeclaratorLine(maskedTrimmedLine) {
-  const declMatch = maskedTrimmedLine.match(/^(?:const|let|var)\s+(.+)$/);
-  if (!declMatch) return false;
-
-  const assignmentIndex = findTopLevelAssignmentIndex(maskedTrimmedLine);
-  if (assignmentIndex < 0) return false;
-
-  const leftSide = maskedTrimmedLine
-    .slice(0, assignmentIndex)
-    .replace(/^(?:const|let|var)\s+/, "")
-    .trim();
-
-  if (!(leftSide.startsWith("{") || leftSide.startsWith("["))) return false;
-  const bindingCount = countMatches(leftSide, /,/g) + 1;
-  return bindingCount >= ONELINER_PACKED_DESTRUCTURING_MIN_BINDINGS;
-}
-
 function isPackedForHeaderLine(maskedTrimmedLine) {
   if (!/^for\s*\(/.test(maskedTrimmedLine)) return false;
 
   const commaCount = countMatches(maskedTrimmedLine, /,/g);
   const assignmentCount = countStandaloneAssignments(maskedTrimmedLine);
   return (
-    commaCount >= ONELINER_PACKED_FOR_HEADER_MIN_COMMAS &&
-    assignmentCount >= ONELINER_PACKED_FOR_HEADER_MIN_ASSIGNMENTS
+    commaCount >= ONELINER_PACKED_FOR_HEADER_MIN_COMMAS && assignmentCount >= ONELINER_PACKED_FOR_HEADER_MIN_ASSIGNMENTS
   );
 }
 
@@ -474,61 +448,21 @@ function hasMultipleStatementLeaders(maskedTrimmedLine) {
 }
 
 function hasCommaOperatorCallChain(maskedTrimmedLine) {
-  const callChainPattern = /(?:^|[;{]\s*)(?:[A-Za-z_$][A-Za-z0-9_$]*\s*\([^()]*\)\s*,\s*){2,}[A-Za-z_$][A-Za-z0-9_$]*\s*\([^()]*\)/;
+  const callChainPattern =
+    /(?:^|[;{]\s*)(?:[A-Za-z_$][A-Za-z0-9_$]*\s*\([^()]*\)\s*,\s*){2,}[A-Za-z_$][A-Za-z0-9_$]*\s*\([^()]*\)/;
   return callChainPattern.test(maskedTrimmedLine);
 }
 
 function hasBackToBackBlockStatements(maskedTrimmedLine) {
-  return /(?:\)|\})\s*(?:if|for|while|switch|try|function|class|const|let|var|return|throw|do)\b/.test(maskedTrimmedLine);
-}
-
-function findTopLevelAssignmentIndex(text) {
-  let parenDepth = 0;
-  let bracketDepth = 0;
-  let braceDepth = 0;
-
-  for (let i = 0; i < text.length; i += 1) {
-    const ch = text[i];
-    const prev = text[i - 1] || "";
-    const next = text[i + 1] || "";
-
-    if (ch === "(") {
-      parenDepth += 1;
-      continue;
-    }
-    if (ch === ")") {
-      parenDepth = Math.max(0, parenDepth - 1);
-      continue;
-    }
-    if (ch === "[") {
-      bracketDepth += 1;
-      continue;
-    }
-    if (ch === "]") {
-      bracketDepth = Math.max(0, bracketDepth - 1);
-      continue;
-    }
-    if (ch === "{") {
-      braceDepth += 1;
-      continue;
-    }
-    if (ch === "}") {
-      braceDepth = Math.max(0, braceDepth - 1);
-      continue;
-    }
-
-    if (ch !== "=") continue;
-    if (next === "=" || next === ">") continue;
-    if (prev === "=" || prev === "!" || prev === "<" || prev === ">") continue;
-    if (parenDepth !== 0 || bracketDepth !== 0 || braceDepth !== 0) continue;
-    return i;
-  }
-
-  return -1;
+  return /(?:\)|\})\s*(?:if|for|while|switch|try|function|class|const|let|var|return|throw|do)\b/.test(
+    maskedTrimmedLine
+  );
 }
 
 function stripTrailingSemicolon(text) {
-  return String(text || "").replace(/;\s*$/, "").trim();
+  return String(text || "")
+    .replace(/;\s*$/, "")
+    .trim();
 }
 
 function countTopLevelCommas(text) {
@@ -614,9 +548,11 @@ function printOnelinerFindings(findings, onelinerMode) {
   const messageByKind = {
     dense: "Dense one-liner detected (>=2 statements on one line). One-liners are not allowed.",
     "long-packed": "Very long packed one-liner detected (use multiline formatting). One-liners are not allowed.",
-    "chained-ternary": "Chained ternary on one line (use separate if/else or intermediate variables). One-liners are not allowed.",
+    "chained-ternary":
+      "Chained ternary on one line (use separate if/else or intermediate variables). One-liners are not allowed.",
     "single-line-body": "Function body collapsed onto one line (use multiline formatting). One-liners are not allowed.",
-    "collapsed-literal": "Object/array literal collapsed onto one line (use multiline formatting). One-liners are not allowed.",
+    "collapsed-literal":
+      "Object/array literal collapsed onto one line (use multiline formatting). One-liners are not allowed.",
     "collapsed-block": "if/else block collapsed onto one line (use multiline formatting). One-liners are not allowed."
   };
 
@@ -677,11 +613,11 @@ function parseOnelinerModeArg(argv) {
 }
 
 function normalizeOnelinerMode(mode) {
-  const normalized = String(mode || "block").trim().toLowerCase();
+  const normalized = String(mode || "block")
+    .trim()
+    .toLowerCase();
   if (!VALID_ONELINER_MODES.has(normalized)) {
-    throw new Error(
-      `[file-size] Invalid --oneliner mode '${mode}'. Use --oneliner=warn or --oneliner=block.`
-    );
+    throw new Error(`[file-size] Invalid --oneliner mode '${mode}'. Use --oneliner=warn or --oneliner=block.`);
   }
   return normalized;
 }
@@ -866,8 +802,7 @@ function isCliEntrypoint() {
 if (isCliEntrypoint()) {
   try {
     runFileSizeCheckCli();
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error && error.message ? error.message : String(error));
     process.exit(1);
   }

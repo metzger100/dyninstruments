@@ -28,7 +28,9 @@
     def: {
       name: "dyni_Map_Instruments",
       description: "Map values (Center display / Zoom / AIS target)",
-      caption: "", unit: "", default: "---",
+      caption: "",
+      unit: "",
+      default: "---",
       cluster: "map",
       storeKeys: {
         zoom: "map.currentZoom",
@@ -48,34 +50,46 @@
       editableParameters: {
         kind: {
           type: "SELECT",
-          list: [
-            opt("Center display", "centerDisplay"),
-            opt("Zoom", "zoom"),
-            opt("AIS target", "aisTarget")
-          ],
+          list: [opt("Center display", "centerDisplay"), opt("Zoom", "zoom"), opt("AIS target", "aisTarget")],
           default: "centerDisplay",
           name: "Instrument"
         },
         centerDisplayRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.1,
           internal: true,
           name: "CenterDisplay: 3-Rows Threshold",
           condition: CENTER_DISPLAY_CONDITION
         },
         centerDisplayRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.4,
+          type: "FLOAT",
+          min: 1.0,
+          max: 6.0,
+          step: 0.05,
+          default: 2.4,
           internal: true,
           name: "CenterDisplay: 1-Row Threshold",
           condition: CENTER_DISPLAY_CONDITION
         },
         aisTargetRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.2,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.2,
           internal: true,
           name: "AisTarget: 3-Rows Threshold",
           condition: AIS_TARGET_CONDITION
         },
         aisTargetRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.8,
+          type: "FLOAT",
+          min: 1.0,
+          max: 6.0,
+          step: 0.05,
+          default: 3.8,
           internal: true,
           name: "AisTarget: 1-Row Threshold",
           condition: AIS_TARGET_CONDITION
@@ -90,11 +104,7 @@
           type: "BOOLEAN",
           default: false,
           name: "Stable digits",
-          condition: [
-            CENTER_DISPLAY_CONDITION,
-            { kind: "zoom" },
-            { kind: "aisTarget" }
-          ]
+          condition: [CENTER_DISPLAY_CONDITION, { kind: "zoom" }, { kind: "aisTarget" }]
         },
         caption: false,
         unit: false,
@@ -118,4 +128,4 @@
       }
     }
   });
-}(this));
+})(this);

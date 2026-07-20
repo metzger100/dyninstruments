@@ -3,22 +3,25 @@ const { loadFresh } = require("../../helpers/load-umd");
 describe("ActiveRouteViewModel", function () {
   function createToolkit() {
     return {
+      /** @param {string} key @returns {string} */
       cap(key) {
         const captions = {
           activeRouteRemain: "RTE CAP",
           activeRouteEta: "ETA CAP",
           activeRouteNextCourse: "NEXT CAP"
         };
-        return captions[key];
+        return captions[/** @type {keyof typeof captions} */ (key)];
       },
+      /** @param {string} key @returns {string} */
       unit(key) {
         const units = {
           activeRouteRemain: "nmA",
           activeRouteEta: "",
           activeRouteNextCourse: "degN"
         };
-        return units[key];
+        return units[/** @type {keyof typeof units} */ (key)];
       },
+      /** @param {any} value @returns {number | undefined} */
       num(value) {
         if (value == null) {
           return undefined;
@@ -39,14 +42,17 @@ describe("ActiveRouteViewModel", function () {
   it("builds normalized active-route domain payload", function () {
     const vm = createViewModel();
     const rawEta = new Date("2026-03-06T11:45:00Z");
-    const out = vm.build({
-      activeRouteName: "  Harbor Run  ",
-      activeRouteRemain: "18.2",
-      activeRouteEta: rawEta,
-      activeRouteNextCourse: "93",
-      activeRouteApproaching: true,
-      wpServer: true
-    }, createToolkit());
+    const out = vm.build(
+      {
+        activeRouteName: "  Harbor Run  ",
+        activeRouteRemain: "18.2",
+        activeRouteEta: rawEta,
+        activeRouteNextCourse: "93",
+        activeRouteApproaching: true,
+        wpServer: true
+      },
+      createToolkit()
+    );
 
     expect(out).toEqual({
       routeName: "Harbor Run",
@@ -72,11 +78,14 @@ describe("ActiveRouteViewModel", function () {
 
   it("threads hideSeconds from props", function () {
     const vm = createViewModel();
-    const out = vm.build({
-      activeRouteName: "Harbor Run",
-      hideSeconds: true,
-      wpServer: true
-    }, createToolkit());
+    const out = vm.build(
+      {
+        activeRouteName: "Harbor Run",
+        hideSeconds: true,
+        wpServer: true
+      },
+      createToolkit()
+    );
 
     expect(out.hideSeconds).toBe(true);
   });
@@ -85,36 +94,48 @@ describe("ActiveRouteViewModel", function () {
     const vm = createViewModel();
     const toolkit = createToolkit();
 
-    const explicit = vm.build({
-      activeRouteName: "Harbor Run",
-      disconnect: true,
-      wpServer: true
-    }, toolkit);
+    const explicit = vm.build(
+      {
+        activeRouteName: "Harbor Run",
+        disconnect: true,
+        wpServer: true
+      },
+      toolkit
+    );
     expect(explicit.disconnect).toBe(true);
 
-    const wpServerDown = vm.build({
-      activeRouteName: "Harbor Run",
-      wpServer: false
-    }, toolkit);
+    const wpServerDown = vm.build(
+      {
+        activeRouteName: "Harbor Run",
+        wpServer: false
+      },
+      toolkit
+    );
     expect(wpServerDown.disconnect).toBe(true);
 
-    const emptyName = vm.build({
-      activeRouteName: "   ",
-      wpServer: true
-    }, toolkit);
+    const emptyName = vm.build(
+      {
+        activeRouteName: "   ",
+        wpServer: true
+      },
+      toolkit
+    );
     expect(emptyName.disconnect).toBe(true);
   });
 
   it("handles null or invalid values with strict normalization", function () {
     const vm = createViewModel();
-    const out = vm.build({
-      activeRouteName: null,
-      activeRouteRemain: "bad",
-      activeRouteEta: null,
-      activeRouteNextCourse: "bad",
-      activeRouteApproaching: 1,
-      wpServer: true
-    }, createToolkit());
+    const out = vm.build(
+      {
+        activeRouteName: null,
+        activeRouteRemain: "bad",
+        activeRouteEta: null,
+        activeRouteNextCourse: "bad",
+        activeRouteApproaching: 1,
+        wpServer: true
+      },
+      createToolkit()
+    );
 
     expect(out.routeName).toBe("");
     expect(out.disconnect).toBe(true);
@@ -128,11 +149,14 @@ describe("ActiveRouteViewModel", function () {
 
   it("keeps active-route numeric display fields missing for blank strings", function () {
     const vm = createViewModel();
-    const out = vm.build({
-      activeRouteName: "Harbor Run",
-      activeRouteRemain: "   ",
-      activeRouteNextCourse: ""
-    }, createToolkit());
+    const out = vm.build(
+      {
+        activeRouteName: "Harbor Run",
+        activeRouteRemain: "   ",
+        activeRouteNextCourse: ""
+      },
+      createToolkit()
+    );
 
     expect(out.display.remain).toBeUndefined();
     expect(out.display.nextCourse).toBeUndefined();

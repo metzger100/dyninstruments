@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRadialFrameRenderer = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
@@ -80,44 +80,48 @@
       const major = Object.assign({ len: 8, width: 2 }, majorSource || {});
       const minor = Object.assign({ len: 5, width: 1 }, minorSource || {});
 
-      withCtx(ctx, function () {
-        ctx.lineCap = /** @type {CanvasLineCap} */ (hasOwn.call(opts, "lineCap") ? opts.lineCap : "butt");
+      withCtx(
+        ctx,
+        function () {
+          ctx.lineCap = /** @type {CanvasLineCap} */ (hasOwn.call(opts, "lineCap") ? opts.lineCap : "butt");
 
-        if (angles.minors && angles.minors.length) {
-          ctx.beginPath();
-          ctx.lineWidth = minor.width;
-          for (let i = 0; i < angles.minors.length; i++) {
-            const deg = angles.minors[i];
-            const t = toCanvas(deg, cfg, rot);
-            const x1 = cx + Math.cos(t) * (rOuter - minor.len);
-            const y1 = cy + Math.sin(t) * (rOuter - minor.len);
-            const x2 = cx + Math.cos(t) * rOuter;
-            const y2 = cy + Math.sin(t) * rOuter;
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
+          if (angles.minors && angles.minors.length) {
+            ctx.beginPath();
+            ctx.lineWidth = minor.width;
+            for (let i = 0; i < angles.minors.length; i++) {
+              const deg = angles.minors[i];
+              const t = toCanvas(deg, cfg, rot);
+              const x1 = cx + Math.cos(t) * (rOuter - minor.len);
+              const y1 = cy + Math.sin(t) * (rOuter - minor.len);
+              const x2 = cx + Math.cos(t) * rOuter;
+              const y2 = cy + Math.sin(t) * rOuter;
+              ctx.moveTo(x1, y1);
+              ctx.lineTo(x2, y2);
+            }
+            ctx.stroke();
           }
-          ctx.stroke();
-        }
 
-        if (angles.majors && angles.majors.length) {
-          ctx.beginPath();
-          ctx.lineWidth = major.width;
-          for (let i = 0; i < angles.majors.length; i++) {
-            const deg = angles.majors[i];
-            const t = toCanvas(deg, cfg, rot);
-            const x1 = cx + Math.cos(t) * (rOuter - major.len);
-            const y1 = cy + Math.sin(t) * (rOuter - major.len);
-            const x2 = cx + Math.cos(t) * rOuter;
-            const y2 = cy + Math.sin(t) * rOuter;
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
+          if (angles.majors && angles.majors.length) {
+            ctx.beginPath();
+            ctx.lineWidth = major.width;
+            for (let i = 0; i < angles.majors.length; i++) {
+              const deg = angles.majors[i];
+              const t = toCanvas(deg, cfg, rot);
+              const x1 = cx + Math.cos(t) * (rOuter - major.len);
+              const y1 = cy + Math.sin(t) * (rOuter - major.len);
+              const x2 = cx + Math.cos(t) * rOuter;
+              const y2 = cy + Math.sin(t) * rOuter;
+              ctx.moveTo(x1, y1);
+              ctx.lineTo(x2, y2);
+            }
+            ctx.stroke();
           }
-          ctx.stroke();
+        },
+        {
+          strokeStyle: opts.strokeStyle,
+          alpha: opts.alpha != null ? opts.alpha : 1
         }
-      }, {
-        strokeStyle: opts.strokeStyle,
-        alpha: (opts.alpha != null) ? opts.alpha : 1
-      });
+      );
     }
 
     /**
@@ -167,58 +171,66 @@
       }
 
       const labelsMap = /** @type {Record<string, unknown> | null} */ (
-        hasOwn.call(opts, "labelsMap") ? opts.labelsMap : (opts.labels || null)
+        hasOwn.call(opts, "labelsMap") ? opts.labelsMap : opts.labels || null
       );
-      const labelFormatter = /** @type {(deg: unknown) => string} */ ((typeof opts.labelFormatter === "function")
-        ? opts.labelFormatter
-        : function (deg) {
-          return String(deg);
-        });
-      const labelFilter = /** @type {(deg: unknown) => unknown} */ ((typeof opts.labelFilter === "function")
-        ? opts.labelFilter
-        : function () {
-          return true;
-        });
+      const labelFormatter = /** @type {(deg: unknown) => string} */ (
+        typeof opts.labelFormatter === "function"
+          ? opts.labelFormatter
+          : function (deg) {
+              return String(deg);
+            }
+      );
+      const labelFilter = /** @type {(deg: unknown) => unknown} */ (
+        typeof opts.labelFilter === "function"
+          ? opts.labelFilter
+          : function () {
+              return true;
+            }
+      );
       const textRotation = hasOwn.call(opts, "textRotation") ? opts.textRotation : "upright";
 
-      withCtx(ctx, function () {
-        ctx.font = font;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
+      withCtx(
+        ctx,
+        function () {
+          ctx.font = font;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
 
-        for (let i = 0; i < angles.length; i++) {
-          const deg = angles[i];
-          if (!labelFilter(deg)) {
-            continue;
+          for (let i = 0; i < angles.length; i++) {
+            const deg = angles[i];
+            if (!labelFilter(deg)) {
+              continue;
+            }
+
+            let text;
+            if (labelsMap && labelsMap[deg] != null) text = String(labelsMap[deg]);
+            else text = labelFormatter(deg);
+
+            if (!text) {
+              continue;
+            }
+
+            const t = toCanvas(deg, cfg, rot);
+            const x = cx + Math.cos(t) * rr;
+            const y = cy + Math.sin(t) * rr;
+
+            if (textRotation === "upright") {
+              ctx.fillText(text, x, y);
+            } else {
+              ctx.save();
+              ctx.translate(x, y);
+              if (textRotation === "tangent") ctx.rotate(t + Math.PI / 2);
+              else if (textRotation === "radial") ctx.rotate(t);
+              ctx.fillText(text, 0, 0);
+              ctx.restore();
+            }
           }
-
-          let text;
-          if (labelsMap && labelsMap[deg] != null) text = String(labelsMap[deg]);
-          else text = labelFormatter(deg);
-
-          if (!text) {
-            continue;
-          }
-
-          const t = toCanvas(deg, cfg, rot);
-          const x = cx + Math.cos(t) * rr;
-          const y = cy + Math.sin(t) * rr;
-
-          if (textRotation === "upright") {
-            ctx.fillText(text, x, y);
-          } else {
-            ctx.save();
-            ctx.translate(x, y);
-            if (textRotation === "tangent") ctx.rotate(t + Math.PI / 2);
-            else if (textRotation === "radial") ctx.rotate(t);
-            ctx.fillText(text, 0, 0);
-            ctx.restore();
-          }
+        },
+        {
+          fillStyle: opts.fillStyle,
+          alpha: opts.alpha != null ? opts.alpha : 1
         }
-      }, {
-        fillStyle: opts.fillStyle,
-        alpha: (opts.alpha != null) ? opts.alpha : 1
-      });
+      );
     }
 
     /**
@@ -241,13 +253,13 @@
 
       if (opts.ticks) {
         const tOpts = /** @type {DyniRadialDrawOptions} */ (Object.assign({}, opts.ticks));
-        tOpts.rotationDeg = (tOpts.rotationDeg != null) ? tOpts.rotationDeg : rot;
+        tOpts.rotationDeg = tOpts.rotationDeg != null ? tOpts.rotationDeg : rot;
         drawTicks(ctx, cx, cy, rOuter, tOpts);
       }
 
       if (opts.labels) {
         const lOpts = /** @type {DyniRadialDrawOptions} */ (Object.assign({}, opts.labels));
-        lOpts.rotationDeg = (lOpts.rotationDeg != null) ? lOpts.rotationDeg : rot;
+        lOpts.rotationDeg = lOpts.rotationDeg != null ? lOpts.rotationDeg : rot;
         drawLabels(ctx, cx, cy, rOuter, lOpts);
       }
     }
@@ -262,4 +274,4 @@
   }
 
   return { id: "RadialFrameRenderer", create };
-}));
+});

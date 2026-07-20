@@ -1,7 +1,6 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("EditRouteHtmlFit", function () {
   function createMeasureContext() {
@@ -13,7 +12,7 @@ describe("EditRouteHtmlFit", function () {
         const px = match ? Number(match[1]) : 12;
         const safePx = Number.isFinite(px) ? px : 12;
         return { width: String(text).length * safePx * 0.56 };
-      },
+      }
     };
   }
 
@@ -22,34 +21,18 @@ describe("EditRouteHtmlFit", function () {
     api.setFont = vi.fn((ctx, px, weight, family) => {
       const safePx = Math.max(1, Math.floor(Number(px) || 1));
       const safeWeight = Number.isFinite(Number(weight)) ? Number(weight) : 700;
-      const safeFamily =
-        typeof family === "string" && family ? family : "sans-serif";
+      const safeFamily = typeof family === "string" && family ? family : "sans-serif";
       ctx.font = safeWeight + " " + safePx + "px " + safeFamily;
     });
-    api.measureTextWidth = vi.fn(
-      (ctx, text) => ctx.measureText(String(text || "")).width,
-    );
+    api.measureTextWidth = vi.fn((ctx, text) => ctx.measureText(String(text || "")).width);
     api.measureValueUnitFit = vi.fn(
-      (
-        ctx,
-        family,
-        value,
-        unit,
-        w,
-        h,
-        secScale,
-        valueWeight,
-        labelWeight,
-        textOptions,
-      ) => {
+      (ctx, family, value, unit, w, h, secScale, valueWeight, labelWeight, textOptions) => {
         const maxH = Math.max(0.5, Number(h) || 0.5);
         const maxW = Math.max(0, Number(w) || 0);
         const ratio = Number(secScale);
         const scale = Number.isFinite(ratio) ? ratio : 0.8;
-        const opts =
-          textOptions && typeof textOptions === "object" ? textOptions : null;
-        const valueFamily =
-          opts && opts.useMono === true ? opts.monoFamily || family : family;
+        const opts = textOptions && typeof textOptions === "object" ? textOptions : null;
+        const valueFamily = opts && opts.useMono === true ? opts.monoFamily || family : family;
 
         if (maxW <= 0 || !value) {
           return { vPx: 0.5, uPx: unit ? 0.5 : 0, gap: 0, total: 0 };
@@ -87,24 +70,19 @@ describe("EditRouteHtmlFit", function () {
         }
 
         return { vPx, uPx, gap, total };
-      },
+      }
     );
-    api.fitSingleTextPx = vi.fn(
-      (ctx, text, maxPx, maxW, maxH, family, weight) => {
-        const start = Math.max(
-          1,
-          Math.floor(Math.min(Number(maxPx) || 1, Number(maxH) || 1)),
-        );
-        const safeText = String(text);
-        for (let px = start; px >= 1; px -= 1) {
-          api.setFont(ctx, px, weight, family);
-          if (ctx.measureText(safeText).width <= maxW) {
-            return px;
-          }
+    api.fitSingleTextPx = vi.fn((ctx, text, maxPx, maxW, maxH, family, weight) => {
+      const start = Math.max(1, Math.floor(Math.min(Number(maxPx) || 1, Number(maxH) || 1)));
+      const safeText = String(text);
+      for (let px = start; px >= 1; px -= 1) {
+        api.setFont(ctx, px, weight, family);
+        if (ctx.measureText(safeText).width <= maxW) {
+          return px;
         }
-        return 1;
-      },
-    );
+      }
+      return 1;
+    });
     return api;
   }
 
@@ -124,85 +102,64 @@ describe("EditRouteHtmlFit", function () {
           labelText: "PTS:",
           valueText: "005",
           plainValueText: "005",
-          unitText: "",
+          unitText: ""
         },
         dst: {
           labelText: "DST:",
           valueText: "12.3",
           plainValueText: "12.3",
-          unitText: "nm",
+          unitText: "nm"
         },
         rte: {
           labelText: "RTE:",
           valueText: "4.9",
           plainValueText: "4.9",
-          unitText: "nm",
+          unitText: "nm"
         },
         rteEta: {
           labelText: "ETA:",
           valueText: "12:34",
           plainValueText: "12:34",
-          unitText: "",
-        },
-      },
+          unitText: ""
+        }
+      }
     };
 
     const out = Object.assign({}, base, patch);
-    const patchedMetrics =
-      patch.metrics && typeof patch.metrics === "object" ? patch.metrics : {};
+    const patchedMetrics = patch.metrics && typeof patch.metrics === "object" ? patch.metrics : {};
     out.metrics = Object.create(null);
     Object.keys(base.metrics).forEach((id) => {
-      out.metrics[id] = Object.assign(
-        {},
-        base.metrics[id],
-        patchedMetrics[id] || {},
-      );
+      out.metrics[id] = Object.assign({}, base.metrics[id], patchedMetrics[id] || {});
     });
     return out;
   }
 
   function createHarness() {
-    const htmlUtilsModule = loadFresh(
-      "shared/widget-kits/html/HtmlWidgetUtils.js",
-    );
-    const responsiveScaleProfileModule = loadFresh(
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-    );
-    const layoutRectMathModule = loadFresh(
-      "shared/widget-kits/layout/LayoutRectMath.js",
-    );
-    const editRouteLayoutMathModule = loadFresh(
-      "shared/widget-kits/nav/EditRouteLayoutMath.js",
-    );
-    const editRouteLayoutGeometryModule = loadFresh(
-      "shared/widget-kits/nav/EditRouteLayoutGeometry.js",
-    );
-    const editRouteLayoutModule = loadFresh(
-      "shared/widget-kits/nav/EditRouteLayout.js",
-    );
-    const editRouteHtmlFitSupportModule = loadFresh(
-      "shared/widget-kits/nav/EditRouteHtmlFitSupport.js",
-    );
-    const textTileLayoutModule = loadFresh(
-      "shared/widget-kits/text/TextTileLayout.js",
-    );
+    const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
+    const responsiveScaleProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMathModule = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const editRouteLayoutMathModule = loadFresh("shared/widget-kits/nav/EditRouteLayoutMath.js");
+    const editRouteLayoutGeometryModule = loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js");
+    const editRouteLayoutModule = loadFresh("shared/widget-kits/nav/EditRouteLayout.js");
+    const editRouteHtmlFitSupportModule = loadFresh("shared/widget-kits/nav/EditRouteHtmlFitSupport.js");
+    const textTileLayoutModule = loadFresh("shared/widget-kits/text/TextTileLayout.js");
     const textTileLayout = textTileLayoutModule.create();
     const textTileLayoutSpy = Object.assign({}, textTileLayout, {
-      measureMetricTile: vi.fn(textTileLayout.measureMetricTile),
+      measureMetricTile: vi.fn(textTileLayout.measureMetricTile)
     });
     const radialTextApi = createRadialTextApi();
     const themeTokens = {
       font: {
         weight: 720,
-        labelWeight: 610,
-      },
+        labelWeight: 610
+      }
     };
     const themeApi = {
-      resolveForRoot: vi.fn(() => themeTokens),
+      resolveForRoot: vi.fn(() => themeTokens)
     };
     const targetEl = document.createElement("div");
     const hostContext = {
-      __dyniEditRouteTextMeasureCtx: createMeasureContext(),
+      __dyniEditRouteTextMeasureCtx: createMeasureContext()
     };
 
     const componentContext = createComponentContextMock({
@@ -211,7 +168,7 @@ describe("EditRouteHtmlFit", function () {
         TextTileLayout: {
           create() {
             return textTileLayoutSpy;
-          },
+          }
         },
         EditRouteLayout: editRouteLayoutModule,
         EditRouteHtmlFitSupport: editRouteHtmlFitSupportModule,
@@ -220,11 +177,11 @@ describe("EditRouteHtmlFit", function () {
         HtmlWidgetUtils: htmlUtilsModule,
         ResponsiveScaleProfile: responsiveScaleProfileModule,
         LayoutRectMath: layoutRectMathModule,
-        TextFitMath: loadFresh("shared/widget-kits/text/TextFitMath.js"),
+        TextFitMath: loadFresh("shared/widget-kits/text/TextFitMath.js")
       },
       services: {
         themeTokens: {
-          resolveForRoot: themeApi.resolveForRoot,
+          resolveForRoot: themeApi.resolveForRoot
         },
         dom: {
           requirePluginRoot(target) {
@@ -232,14 +189,11 @@ describe("EditRouteHtmlFit", function () {
           },
           getNightModeState() {
             return false;
-          },
-        },
-      },
+          }
+        }
+      }
     });
-    const fit = loadFresh("shared/widget-kits/nav/EditRouteHtmlFit.js").create(
-      {},
-      componentContext,
-    );
+    const fit = loadFresh("shared/widget-kits/nav/EditRouteHtmlFit.js").create({}, componentContext);
     return { fit, targetEl, hostContext, themeApi, textTileLayoutSpy };
   }
 
@@ -263,11 +217,11 @@ describe("EditRouteHtmlFit", function () {
       model: buildModel({
         hasRoute: false,
         isLocalRoute: false,
-        sourceBadgeText: "LOCAL",
+        sourceBadgeText: "LOCAL"
       }),
       targetEl: h.targetEl,
       hostContext: h.hostContext,
-      shellRect: { width: 320, height: 190 },
+      shellRect: { width: 320, height: 190 }
     });
 
     expect(out).not.toBeNull();
@@ -287,13 +241,13 @@ describe("EditRouteHtmlFit", function () {
             labelText: "DST:",
             valueText: " " + "0".repeat(400) + ".0",
             plainValueText: "123.4",
-            unitText: "nm",
-          },
-        },
+            unitText: "nm"
+          }
+        }
       }),
       targetEl: h.targetEl,
       hostContext: h.hostContext,
-      shellRect: { width: 120, height: 120 },
+      shellRect: { width: 120, height: 120 }
     });
 
     expect(out.metricValues.dst).toBe("123.4");

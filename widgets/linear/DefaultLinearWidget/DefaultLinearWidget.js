@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniDefaultLinearWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {DyniLinearGaugeProps & { defaultLinearAlarmLowEnabled?: boolean, defaultLinearWarningLowEnabled?: boolean, defaultLinearWarningHighEnabled?: boolean, defaultLinearAlarmHighEnabled?: boolean, defaultLinearAlarmLowAt?: number, defaultLinearWarningLowAt?: number, defaultLinearWarningHighAt?: number, defaultLinearAlarmHighAt?: number, defaultLinearAlarmLowColor?: unknown, defaultLinearWarningLowColor?: unknown, defaultLinearWarningHighColor?: unknown, defaultLinearAlarmHighColor?: unknown }} DyniDefaultLinearProps */
 
@@ -41,7 +41,7 @@
 
       if (warningLowEnabled && Number.isFinite(warningLowAt)) {
         sectors.push({
-          from: valueApi.clamp((alarmLowEnabled && Number.isFinite(alarmLowAt)) ? alarmLowAt : minV, axis.min, axis.max),
+          from: valueApi.clamp(alarmLowEnabled && Number.isFinite(alarmLowAt) ? alarmLowAt : minV, axis.min, axis.max),
           to: valueApi.clamp(warningLowAt, axis.min, axis.max),
           color: p.defaultLinearWarningLowColor || theme.colors.warning
         });
@@ -50,7 +50,7 @@
       if (warningHighEnabled && Number.isFinite(warningHighAt)) {
         sectors.push({
           from: valueApi.clamp(warningHighAt, axis.min, axis.max),
-          to: valueApi.clamp((alarmHighEnabled && Number.isFinite(alarmHighAt)) ? alarmHighAt : maxV, axis.min, axis.max),
+          to: valueApi.clamp(alarmHighEnabled && Number.isFinite(alarmHighAt) ? alarmHighAt : maxV, axis.min, axis.max),
           color: p.defaultLinearWarningHighColor || theme.colors.warning
         });
       }
@@ -89,7 +89,14 @@
       tickSteps: valueMath.resolveStandardTickSteps,
       formatDisplay: function (raw, props) {
         const applyFormatter = componentContext.format.applyFormatter;
-        return valueMath.formatGaugeDisplay(raw, props, applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
+        return valueMath.formatGaugeDisplay(
+          raw,
+          props,
+          applyFormatter,
+          placeholderNormalize.normalize,
+          "formatDecimal",
+          [3, 1, true]
+        );
       },
       buildSectors: buildSectors
     });
@@ -107,4 +114,4 @@
   }
 
   return { id: "DefaultLinearWidget", create: create };
-}));
+});

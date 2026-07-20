@@ -1,16 +1,12 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("StateScreenTextFit", function () {
   function createFit() {
-    return loadFresh("shared/widget-kits/state/StateScreenTextFit.js").create(
-      {},
-      createComponentContextMock(),
-    );
+    return loadFresh("shared/widget-kits/state/StateScreenTextFit.js").create({}, createComponentContextMock());
   }
 
+  /** @param {any} styleText */
   function extractPx(styleText) {
     const match = String(styleText || "").match(new RegExp("font-size:(\\d+)px\\x3b"));
     return match ? Number(match[1]) : 0;
@@ -19,11 +15,12 @@ describe("StateScreenTextFit", function () {
   function createMeasureCtx() {
     return {
       font: "700 12px sans-serif",
+      /** @param {any} text */
       measureText(text) {
         const match = String(this.font || "").match(/(\d+(?:\.\d+)?)px/);
         const px = match ? Number(match[1]) : 12;
         return { width: String(text || "").length * Math.max(1, px) * 0.56 };
-      },
+      }
     };
   }
 
@@ -34,7 +31,7 @@ describe("StateScreenTextFit", function () {
       shellRect: { width: 320, height: 180 },
       measureCtx: createMeasureCtx(),
       family: "sans-serif",
-      weight: 700,
+      weight: 700
     });
 
     expect(style).toMatch(new RegExp("^font-size:\\d+px\\x3b$"));
@@ -48,7 +45,7 @@ describe("StateScreenTextFit", function () {
       shellRect: { width: 2, height: 2 },
       measureCtx: createMeasureCtx(),
       family: "sans-serif",
-      weight: 700,
+      weight: 700
     });
 
     expect(style).toBe("font-size:1px;");
@@ -65,14 +62,14 @@ describe("StateScreenTextFit", function () {
       shellRect: { width: 320, height: 180 },
       measureCtx: measureCtx,
       family: "sans-serif",
-      weight: 700,
+      weight: 700
     });
     const smaller = fit.compute({
       label: label,
       shellRect: { width: 140, height: 80 },
       measureCtx: measureCtx,
       family: "sans-serif",
-      weight: 700,
+      weight: 700
     });
 
     expect(extractPx(smaller)).toBeLessThan(extractPx(larger));

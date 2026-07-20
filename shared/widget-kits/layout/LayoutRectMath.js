@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniLayoutRectMath = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @returns {DyniLayoutRectMathApi} */
@@ -43,9 +43,8 @@
 
       for (let i = 0; i < safeCount; i += 1) {
         const remainingCols = safeCount - i;
-        const width = remainingCols <= 1
-          ? Math.max(1, remainingWidth)
-          : Math.max(1, Math.floor(remainingWidth / remainingCols));
+        const width =
+          remainingCols <= 1 ? Math.max(1, remainingWidth) : Math.max(1, Math.floor(remainingWidth / remainingCols));
         out.push(buildRect(cursorX, source.y, width, source.h));
         cursorX += width + safeGap;
         remainingWidth = Math.max(0, source.x + source.w - cursorX - safeGap * Math.max(0, safeCount - i - 2));
@@ -73,9 +72,8 @@
 
       for (let i = 0; i < safeCount; i += 1) {
         const remainingRows = safeCount - i;
-        const height = remainingRows <= 1
-          ? Math.max(1, remainingHeight)
-          : Math.max(1, Math.floor(remainingHeight / remainingRows));
+        const height =
+          remainingRows <= 1 ? Math.max(1, remainingHeight) : Math.max(1, Math.floor(remainingHeight / remainingRows));
         out.push(buildRect(source.x, cursorY, source.w, height));
         cursorY += height + safeGap;
         remainingHeight = Math.max(0, source.y + source.h - cursorY - safeGap * Math.max(0, safeCount - i - 2));
@@ -92,4 +90,4 @@
   }
 
   return { id: "LayoutRectMath", create: create };
-}));
+});

@@ -1,11 +1,8 @@
-const {
-  createHarness,
-  createMockCanvas,
-} = require("./XteDisplayLinearWidget.harness.js");
+const { createHarness, createCanvas, makeProps, findPointerTriangles } = require("./XteDisplayLinearWidget.harness.js");
 
 describe("XteDisplayLinearWidget", function () {
   it("creates widget with expected id and wantsHideNativeHead", function () {
-    const h = createHarness();
+    const h = /** @type {any} */ (createHarness());
 
     expect(h.spec.id).toBe("XteDisplayLinearWidget");
     expect(h.spec.wantsHideNativeHead).toBe(true);
@@ -13,7 +10,7 @@ describe("XteDisplayLinearWidget", function () {
   });
 
   it("renders disconnected and noTarget states through the state-screen overlay", function () {
-    const h = createHarness();
+    const h = /** @type {any} */ (createHarness());
     const disconnected = createCanvas(320, 180);
     const noTarget = createCanvas(320, 180);
 
@@ -22,18 +19,18 @@ describe("XteDisplayLinearWidget", function () {
       makeProps({
         display: {
           disconnect: true,
-          wpName: "Fairway Buoy",
-        },
-      }),
+          wpName: "Fairway Buoy"
+        }
+      })
     );
     h.spec.renderCanvas(
       noTarget.canvas,
       makeProps({
         display: {
           disconnect: false,
-          wpName: "   ",
-        },
-      }),
+          wpName: ""
+        }
+      })
     );
 
     expect(h.calls.stateKinds).toEqual(["disconnected", "noTarget"]);
@@ -41,7 +38,7 @@ describe("XteDisplayLinearWidget", function () {
   });
 
   it("draws static gauge layer and uses flat/normal/high modes by canvas ratio", function () {
-    const h = createHarness();
+    const h = /** @type {any} */ (createHarness());
 
     h.spec.renderCanvas(createCanvas(520, 140).canvas, makeProps());
     h.spec.renderCanvas(createCanvas(220, 220).canvas, makeProps());
@@ -55,7 +52,7 @@ describe("XteDisplayLinearWidget", function () {
   });
 
   it("draws an upward-pointing pointer below the track at the expected x position", function () {
-    const h = createHarness();
+    const h = /** @type {any} */ (createHarness());
     const cv = createCanvas(360, 180);
 
     h.spec.renderCanvas(
@@ -63,9 +60,9 @@ describe("XteDisplayLinearWidget", function () {
       makeProps({
         display: {
           xte: 0,
-          wpName: "Fairway Buoy",
-        },
-      }),
+          wpName: "Fairway Buoy"
+        }
+      })
     );
 
     const track = h.calls.tracks[0];
@@ -81,15 +78,15 @@ describe("XteDisplayLinearWidget", function () {
   });
 
   it("clamps overflow pointer to the gauge edge and uses alarm color", function () {
-    const h = createHarness();
+    const h = /** @type {any} */ (createHarness());
     const cv = createCanvas(360, 180);
 
     h.spec.renderCanvas(
       cv.canvas,
       makeProps({
         display: { xte: 3 },
-        xteScale: 1,
-      }),
+        xteScale: 1
+      })
     );
 
     const track = h.calls.tracks[0];
@@ -101,22 +98,22 @@ describe("XteDisplayLinearWidget", function () {
   });
 
   it("uses pointer color within range", function () {
-    const h = createHarness();
+    const h = /** @type {any} */ (createHarness());
     const cv = createCanvas(360, 180);
 
     h.spec.renderCanvas(
       cv.canvas,
       makeProps({
         display: { xte: 0.4 },
-        xteScale: 1,
-      }),
+        xteScale: 1
+      })
     );
 
     expect(cv.fillColors).toContain(h.theme.colors.pointer);
   });
 
   it("returns wantsFollowUpFrame when spring easing is active", function () {
-    const h = createHarness();
+    const h = /** @type {any} */ (createHarness());
     const cv = createCanvas(360, 180);
     const nowSpy = vi.spyOn(Date, "now");
     let now = 1000;
@@ -128,14 +125,14 @@ describe("XteDisplayLinearWidget", function () {
     h.spec.renderCanvas(
       cv.canvas,
       makeProps({
-        display: { xte: 0.1 },
-      }),
+        display: { xte: 0.1 }
+      })
     );
     const followUp = h.spec.renderCanvas(
       cv.canvas,
       makeProps({
-        display: { xte: 0.9 },
-      }),
+        display: { xte: 0.9 }
+      })
     );
 
     expect(followUp).toEqual({ wantsFollowUpFrame: true });
@@ -143,23 +140,23 @@ describe("XteDisplayLinearWidget", function () {
   });
 
   it("suppresses text metrics when hideTextualMetrics is enabled", function () {
-    const h = createHarness();
+    const h = /** @type {any} */ (createHarness());
     const cv = createCanvas(360, 180);
 
     h.spec.renderCanvas(
       cv.canvas,
       makeProps({
         layout: {
-          hideTextualMetrics: true,
-        },
-      }),
+          hideTextualMetrics: true
+        }
+      })
     );
 
     expect(h.calls.metricTiles).toHaveLength(0);
   });
 
   it("renders four metric tiles with expected captions and L/R suffix on XTE", function () {
-    const h = createHarness();
+    const h = /** @type {any} */ (createHarness());
     const cv = createCanvas(360, 180);
 
     h.spec.renderCanvas(
@@ -169,25 +166,29 @@ describe("XteDisplayLinearWidget", function () {
           xte: -0.52,
           cog: 8,
           dtw: 1.24,
-          btw: 12,
-        },
-      }),
+          btw: 12
+        }
+      })
     );
 
     expect(h.calls.metricTiles).toHaveLength(4);
     expect(
-      h.calls.metricTiles.map(function (metric) {
-        return metric.caption;
-      }),
+      h.calls.metricTiles.map(
+        /** @param {any} metric */ function (metric) {
+          return metric.caption;
+        }
+      )
     ).toEqual(["COG", "XTE", "DST", "BRG"]);
-    const xteMetric = h.calls.metricTiles.find(function (metric) {
-      return metric.caption === "XTE";
-    });
+    const xteMetric = h.calls.metricTiles.find(
+      /** @param {any} metric */ function (metric) {
+        return metric.caption === "XTE";
+      }
+    );
     expect(xteMetric.value.endsWith("L")).toBe(true);
   });
 
   it("falls back from padded stable digits to plain text when tile fit clips", function () {
-    const h = createHarness({ forceStableDigitsClip: true });
+    const h = /** @type {any} */ (createHarness({ forceStableDigitsClip: true }));
     const cv = createCanvas(360, 180);
 
     h.spec.renderCanvas(
@@ -195,62 +196,64 @@ describe("XteDisplayLinearWidget", function () {
       makeProps({
         stableDigits: true,
         display: {
-          xte: 1.2,
-        },
-      }),
+          xte: 1.2
+        }
+      })
     );
 
-    const xteMetric = h.calls.metricTiles.find(function (metric) {
-      return metric.caption === "XTE";
-    });
+    const xteMetric = h.calls.metricTiles.find(
+      /** @param {any} metric */ function (metric) {
+        return metric.caption === "XTE";
+      }
+    );
     expect(xteMetric.value).toBe("1.20R");
   });
 
   it("draws tick labels only for min/max and hides labels when showEndLabels is false", function () {
-    const withLabels = createHarness();
+    const withLabels = /** @type {any} */ (createHarness());
     withLabels.spec.renderCanvas(
       createCanvas(360, 180).canvas,
       makeProps({
         xteScale: 1,
         layout: {
           tickMajor: 1,
-          showEndLabels: true,
-        },
-      }),
+          showEndLabels: true
+        }
+      })
     );
     expect(withLabels.calls.tickLabelValues).toEqual([-1, 1]);
 
-    const withoutLabels = createHarness();
+    const withoutLabels = /** @type {any} */ (createHarness());
     withoutLabels.spec.renderCanvas(
       createCanvas(360, 180).canvas,
       makeProps({
         xteScale: 1,
         layout: {
           tickMajor: 1,
-          showEndLabels: false,
-        },
-      }),
+          showEndLabels: false
+        }
+      })
     );
     expect(withoutLabels.calls.tickLabelValues).toEqual([]);
   });
 
   it("renders waypoint name only when enabled and space check succeeds", function () {
-    const shown = createHarness();
-    const hidden = createHarness({ blockWaypointName: true });
+    const shown = /** @type {any} */ (createHarness());
+    const hidden = /** @type {any} */ (createHarness({ blockWaypointName: true }));
 
     shown.spec.renderCanvas(
       createCanvas(360, 180).canvas,
       makeProps({
         layout: { showWpName: true },
-        display: { wpName: "Waypoint Alpha" },
-      }),
+        display: { wpName: "Waypoint Alpha" }
+      })
     );
     hidden.spec.renderCanvas(
       createCanvas(360, 180).canvas,
       makeProps({
         layout: { showWpName: true },
-        display: { wpName: "Waypoint Alpha" },
-      }),
+        display: { wpName: "Waypoint Alpha" }
+      })
     );
 
     expect(shown.calls.waypointMeasures.length).toBeGreaterThan(0);
@@ -259,7 +262,7 @@ describe("XteDisplayLinearWidget", function () {
   });
 
   it("invalidates static layer cache in finalizeFunction", function () {
-    const h = createHarness();
+    const h = /** @type {any} */ (createHarness());
     const cv = createCanvas(360, 180);
     const props = makeProps();
 

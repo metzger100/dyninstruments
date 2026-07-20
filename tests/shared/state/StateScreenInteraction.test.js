@@ -1,9 +1,25 @@
 const { loadFresh } = require("../../helpers/load-umd");
+const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 
 describe("StateScreenInteraction", function () {
   function createApi() {
     return loadFresh("shared/widget-kits/state/StateScreenInteraction.js").create();
   }
+
+  it("registers itself on the global DyniComponents root in a non-module browser load", function () {
+    const context = createScriptContext();
+
+    runIifeScript("shared/widget-kits/state/StateScreenInteraction.js", context);
+
+    expect(context.DyniComponents.DyniStateScreenInteraction).toBeTruthy();
+    expect(context.DyniComponents.DyniStateScreenInteraction.id).toBe("StateScreenInteraction");
+  });
+
+  it("defaults to passive when called without options", function () {
+    const interaction = createApi();
+
+    expect(interaction.resolveInteraction()).toBe("passive");
+  });
 
   it("passes through baseInteraction in data state", function () {
     const interaction = createApi();

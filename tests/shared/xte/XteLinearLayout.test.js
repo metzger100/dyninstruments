@@ -3,16 +3,20 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 
 describe("XteLinearLayout", function () {
   function createLayout() {
-    return loadFresh("shared/widget-kits/xte/XteLinearLayout.js").create({}, createComponentContextMock({
-      modules: {
-        ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
-        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-        LayoutSizingHelpers: loadFresh("shared/widget-kits/layout/LayoutSizingHelpers.js"),
-        ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
-      }
-    }));
+    return loadFresh("shared/widget-kits/xte/XteLinearLayout.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+          LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+          LayoutSizingHelpers: loadFresh("shared/widget-kits/layout/LayoutSizingHelpers.js"),
+          ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js")
+        }
+      })
+    );
   }
 
+  /** @param {any} inner @param {any} outer */
   function expectRectInside(inner, outer) {
     expect(inner.x).toBeGreaterThanOrEqual(outer.x);
     expect(inner.y).toBeGreaterThanOrEqual(outer.y);
@@ -20,6 +24,13 @@ describe("XteLinearLayout", function () {
     expect(inner.y + inner.h).toBeLessThanOrEqual(outer.y + outer.h);
   }
 
+  /**
+   * @param {any} layout
+   * @param {number} width
+   * @param {number} height
+   * @param {string} mode
+   * @param {Record<string, any>} [options]
+   */
   function buildSnapshot(layout, width, height, mode, options) {
     const cfg = options || {};
     const insets = layout.computeInsets(width, height);

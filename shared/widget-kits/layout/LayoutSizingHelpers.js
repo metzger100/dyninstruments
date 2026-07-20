@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniLayoutSizingHelpers = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -49,12 +49,7 @@
      * @returns {DyniIntrinsicTileSpacing}
      */
     return function computeMetricTileSpacing(rect, responsive) {
-      return profileApi.computeIntrinsicTileSpacing(
-        responsive,
-        rect,
-        tilePadRatio,
-        captionRatio
-      );
+      return profileApi.computeIntrinsicTileSpacing(responsive, rect, tilePadRatio, captionRatio);
     };
   }
 
@@ -68,4 +63,4 @@
   }
 
   return { id: "LayoutSizingHelpers", create: create };
-}));
+});

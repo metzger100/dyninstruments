@@ -1,41 +1,24 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createMockCanvas,
-  createMockContext2D,
-} = require("../../helpers/mock-canvas");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("ThreeValueTextWidget", function () {
   function makeComponentContext(options) {
     const opts = options || {};
     const defaultApplyFormatter = (raw, props) => {
-      const fallback =
-        props && Object.prototype.hasOwnProperty.call(props, "default")
-          ? props.default
-          : "---";
+      const fallback = props && Object.prototype.hasOwnProperty.call(props, "default") ? props.default : "---";
       if (raw == null || Number.isNaN(raw)) return fallback;
       return String(raw);
     };
     const applyFormatter = vi.fn(
-      typeof opts.applyFormatter === "function"
-        ? opts.applyFormatter
-        : defaultApplyFormatter,
+      typeof opts.applyFormatter === "function" ? opts.applyFormatter : defaultApplyFormatter
     );
     const modules = {
-      TextLayoutEngine: loadFresh(
-        "shared/widget-kits/text/TextLayoutEngine.js",
-      ),
-      TextLayoutPrimitives: loadFresh(
-        "shared/widget-kits/text/TextLayoutPrimitives.js",
-      ),
-      TextLayoutComposite: loadFresh(
-        "shared/widget-kits/text/TextLayoutComposite.js",
-      ),
-      ResponsiveScaleProfile: loadFresh(
-        "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-      ),
+      TextLayoutEngine: loadFresh("shared/widget-kits/text/TextLayoutEngine.js"),
+      TextLayoutPrimitives: loadFresh("shared/widget-kits/text/TextLayoutPrimitives.js"),
+      TextLayoutComposite: loadFresh("shared/widget-kits/text/TextLayoutComposite.js"),
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
       ThemeResolver: {
         resolveForRoot() {
           return {
@@ -44,10 +27,10 @@ describe("ThreeValueTextWidget", function () {
               family: "sans-serif",
               familyMono: "monospace",
               weight: 730,
-              labelWeight: 610,
-            },
+              labelWeight: 610
+            }
           };
-        },
+        }
       },
       CanvasTextLayout: {
         create() {
@@ -61,16 +44,11 @@ describe("ThreeValueTextWidget", function () {
             setFont(ctx, px, weight, family) {
               const size = Math.max(1, Math.floor(Number(px) || 0));
               const fontWeight = Math.floor(Number(weight));
-              ctx.font =
-                String(fontWeight) +
-                " " +
-                size +
-                "px " +
-                (family || "sans-serif");
+              ctx.font = String(fontWeight) + " " + size + "px " + (family || "sans-serif");
             },
-            drawDisconnectOverlay() {},
+            drawDisconnectOverlay() {}
           };
-        },
+        }
       },
       ValueMath: {
         create() {
@@ -100,23 +78,15 @@ describe("ThreeValueTextWidget", function () {
               if (ratio < thresholdNormal) return "high";
               if (ratio > thresholdFlat) return "flat";
               return "normal";
-            },
+            }
           };
-        },
+        }
       },
-      PlaceholderNormalize: loadFresh(
-        "shared/widget-kits/format/PlaceholderNormalize.js",
-      ),
+      PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
       StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-      StateScreenLabels: loadFresh(
-        "shared/widget-kits/state/StateScreenLabels.js",
-      ),
-      StateScreenPrecedence: loadFresh(
-        "shared/widget-kits/state/StateScreenPrecedence.js",
-      ),
-      StateScreenCanvasOverlay: loadFresh(
-        "shared/widget-kits/state/StateScreenCanvasOverlay.js",
-      ),
+      StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+      StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+      StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js")
     };
     return createComponentContextMock({
       modules,
@@ -129,16 +99,16 @@ describe("ThreeValueTextWidget", function () {
             return {
               ctx,
               W: Math.round(rect.width),
-              H: Math.round(rect.height),
+              H: Math.round(rect.height)
             };
-          },
+          }
         },
         dom: {
           requirePluginRoot(target) {
             return target;
-          },
-        },
-      },
+          }
+        }
+      }
     });
   }
 
@@ -159,8 +129,8 @@ describe("ThreeValueTextWidget", function () {
         .map((entry) => ({
           text: String(entry.args[0]),
           x: entry.args[1],
-          y: entry.args[2],
-        })),
+          y: entry.args[2]
+        }))
     };
   }
 
@@ -172,7 +142,7 @@ describe("ThreeValueTextWidget", function () {
         text: String(arguments[0]),
         x: arguments[1],
         y: arguments[2],
-        font: ctx.font,
+        font: ctx.font
       });
       return originalFillText.apply(this, arguments);
     };
@@ -189,7 +159,7 @@ describe("ThreeValueTextWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: width,
       rectHeight: height,
-      ctx: ctx,
+      ctx: ctx
     });
     const captured = captureTextCalls(ctx);
     spec.renderCanvas(canvas, props);
@@ -204,16 +174,14 @@ describe("ThreeValueTextWidget", function () {
     const helpers = makeComponentContext({
       applyFormatter() {
         return "--:--:--";
-      },
+      }
     });
-    const spec = loadFresh(
-      "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
-    ).create({}, helpers);
+    const spec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, helpers);
     const captured = renderCaptured(spec, 220, 140, {
       value: 12.3,
       caption: "SPD",
       unit: "kn",
-      default: "---",
+      default: "---"
     });
 
     const textValues = captured.map((entry) => entry.text);
@@ -223,15 +191,13 @@ describe("ThreeValueTextWidget", function () {
 
   it("renders disconnected state-screen instead of numeric content", function () {
     const helpers = makeComponentContext();
-    const spec = loadFresh(
-      "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
-    ).create({}, helpers);
+    const spec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, helpers);
     const captured = renderCaptured(spec, 220, 140, {
       value: 12.3,
       caption: "SPD",
       unit: "kn",
       disconnect: true,
-      default: "---",
+      default: "---"
     });
 
     const textValues = captured.map((entry) => entry.text);
@@ -241,14 +207,12 @@ describe("ThreeValueTextWidget", function () {
 
   it("uses padded mono value text when stableDigits is enabled", function () {
     const helpers = makeComponentContext();
-    const spec = loadFresh(
-      "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
-    ).create({}, helpers);
+    const spec = loadFresh("widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js").create({}, helpers);
     const captured = renderCaptured(spec, 220, 140, {
       value: 7.5,
       caption: "SPD",
       unit: "kn",
-      stableDigits: true,
+      stableDigits: true
     });
     const valueCall = findTextCall(captured, " 07.5");
 

@@ -3,11 +3,11 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 
 describe("TextLayoutComposite", function () {
   function createHarness() {
-    const calls = {
+    const calls = /** @type {{ fitSingleLineBinary: any[], fitValueUnitRow: any[], fitMultiRowBinary: any[] }} */ ({
       fitSingleLineBinary: [],
       fitValueUnitRow: [],
       fitMultiRowBinary: []
-    };
+    });
 
     const primitive = {
       fitSingleLineBinary: vi.fn(function (args) {
@@ -38,15 +38,18 @@ describe("TextLayoutComposite", function () {
     };
 
     const compositeModule = loadFresh("shared/widget-kits/text/TextLayoutComposite.js");
-    const composite = compositeModule.create({}, createComponentContextMock({
-      modules: {
-        TextLayoutPrimitives: {
-          create() {
-            return primitive;
+    const composite = compositeModule.create(
+      {},
+      createComponentContextMock({
+        modules: {
+          TextLayoutPrimitives: {
+            create() {
+              return primitive;
+            }
           }
         }
-      }
-    }));
+      })
+    );
 
     return {
       composite,
@@ -54,6 +57,7 @@ describe("TextLayoutComposite", function () {
     };
   }
 
+  /** @param {any[]} calls @param {any} text @returns {any} */
   function findCall(calls, text) {
     return calls.find(function (call) {
       return call && call.text === text;

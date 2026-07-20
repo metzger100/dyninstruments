@@ -20,11 +20,7 @@
 
     Object.keys(editableParams).forEach(function (k) {
       const spec = editableParams[k];
-      if (
-        spec &&
-        typeof spec === "object" &&
-        Object.prototype.hasOwnProperty.call(spec, "default")
-      ) {
+      if (spec && typeof spec === "object" && Object.prototype.hasOwnProperty.call(spec, "default")) {
         const parameterSpec = /** @type {DyniEditableParameterSpec} */ (spec);
         out[k] = parameterSpec.default;
       }
@@ -45,11 +41,7 @@
 
     Object.keys(editableParams).forEach(function (k) {
       const spec = editableParams[k];
-      if (
-        spec &&
-        typeof spec === "object" &&
-        /** @type {DyniEditableParameterSpec} */ (spec).internal === true
-      ) {
+      if (spec && typeof spec === "object" && /** @type {DyniEditableParameterSpec} */ (spec).internal === true) {
         return;
       }
       out[k] = spec;
@@ -60,4 +52,4 @@
 
   runtime.defaultsFromEditableParams = defaultsFromEditableParams;
   runtime.editableParamsForRegistration = editableParamsForRegistration;
-}(this));
+})(this);

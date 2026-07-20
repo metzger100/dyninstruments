@@ -30,14 +30,14 @@
       const condition = makeKindCondition(d.kind, k);
       out["caption_" + k] = {
         type: "STRING",
-        displayName: (typeof d.captionName === "string" && d.captionName.length) ? d.captionName : "Caption",
-        default: (typeof d.cap === "string") ? d.cap : "",
+        displayName: typeof d.captionName === "string" && d.captionName.length ? d.captionName : "Caption",
+        default: typeof d.cap === "string" ? d.cap : "",
         condition: condition
       };
       out["unit_" + k] = {
         type: "STRING",
-        displayName: (typeof d.unitName === "string" && d.unitName.length) ? d.unitName : "Unit",
-        default: (typeof d.unit === "string") ? d.unit : "",
+        displayName: typeof d.unitName === "string" && d.unitName.length ? d.unitName : "Unit",
+        default: typeof d.unit === "string" ? d.unit : "",
         condition: condition
       };
     });
@@ -52,4 +52,4 @@
   shared.makePerKindTextParams = makePerKindTextParams;
   shared.makeKindCondition = makeKindCondition;
   shared.opt = opt;
-}(this));
+})(this);

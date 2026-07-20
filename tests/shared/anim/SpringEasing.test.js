@@ -2,15 +2,22 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("SpringEasing", function () {
+  /** @param {Record<string, any>} [options] */
   function createSpring(options) {
     const mod = loadFresh("shared/widget-kits/anim/SpringEasing.js").create({}, createComponentContextMock());
     return mod.create(options || {});
   }
 
+  /**
+   * @param {any} spring
+   * @param {number} steps
+   * @param {number} startMs
+   * @param {number} stepMs
+   */
   function advanceSeries(spring, steps, startMs, stepMs) {
     const values = [];
     for (let i = 0; i < steps; i += 1) {
-      values.push(spring.advance(startMs + (i * stepMs)));
+      values.push(spring.advance(startMs + i * stepMs));
     }
     return values;
   }

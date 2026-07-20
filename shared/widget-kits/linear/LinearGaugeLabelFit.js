@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniLinearGaugeLabelFit = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -179,9 +179,8 @@
       if (!Number.isFinite(x) || !Number.isFinite(naturalX)) {
         continue;
       }
-      const labelRaw = (typeof labelFormatter === "function")
-        ? labelFormatter(tickV, state)
-        : math.formatTickLabel(tickV);
+      const labelRaw =
+        typeof labelFormatter === "function" ? labelFormatter(tickV, state) : math.formatTickLabel(tickV);
       if (labelRaw == null) {
         continue;
       }
@@ -265,8 +264,7 @@
       if (labelPassFits(layerCtx, state, labels, candidate, setCanvasFont, resolveLabelEdgePolicy)) {
         best = candidate;
         low = candidate + 1;
-      }
-      else {
+      } else {
         high = candidate - 1;
       }
     }
@@ -280,16 +278,10 @@
    * @returns {number}
    */
   function resolveLabelY(state, fontPx) {
-    const tickReach = Math.max(
-      Number(state.layout.majorTickLen) || 0,
-      Number(state.layout.minorTickLen) || 0
-    );
+    const tickReach = Math.max(Number(state.layout.majorTickLen) || 0, Number(state.layout.minorTickLen) || 0);
     const baseFontPx = Math.max(1, Math.floor(Number(state.labelFontPx) || 0));
     const insetScale = fontPx / Math.max(1, baseFontPx);
-    const labelInsetPx = Math.max(
-      2,
-      Math.floor((Number(state.labelInsetPx) || 2) * insetScale)
-    );
+    const labelInsetPx = Math.max(2, Math.floor((Number(state.labelInsetPx) || 2) * insetScale));
     const trackBottomLimit = Math.round(state.layout.trackBox.y + state.layout.trackBox.h - fontPx - 1);
     const inlineTopLimit = state.layout.inlineBox
       ? Math.round(state.layout.inlineBox.y - fontPx - 2)
@@ -361,4 +353,4 @@
   }
 
   return { id: "LinearGaugeLabelFit", create: create };
-}));
+});

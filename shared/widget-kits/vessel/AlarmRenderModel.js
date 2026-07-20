@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAlarmRenderModel = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const DEFAULT_CAPTION = "ALARM";
@@ -36,9 +36,7 @@
     if (state !== "active") {
       return "passive";
     }
-    return htmlUtils.canDispatchSurfaceInteraction(props)
-      ? "dispatch"
-      : "passive";
+    return htmlUtils.canDispatchSurfaceInteraction(props) ? "dispatch" : "passive";
   }
 
   /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniAlarmRenderModelApi} */
@@ -89,4 +87,4 @@
   }
 
   return { id: "AlarmRenderModel", create: create };
-}));
+});

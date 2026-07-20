@@ -1,6 +1,7 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
 describe("runtime/TemporaryHostActionBridge.js", function () {
+  /** @param {Record<string, any>} [options] */
   function makeElement(options) {
     const opts = options || {};
     return Object.assign(
@@ -8,12 +9,13 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
         parentElement: null,
         querySelectorAll() {
           return [];
-        },
+        }
       },
-      opts,
+      opts
     );
   }
 
+  /** @param {Record<string, any>} [options] */
   function createBridgeContext(options) {
     const opts = options || {};
     const pageRoots = opts.pageRoots || {};
@@ -25,10 +27,11 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       (includeGlobalApi
         ? {
             routePoints: {
-              activate: routePointsActivate,
-            },
+              activate: routePointsActivate
+            }
           }
         : null);
+    /** @param {any} root @param {any} className */
     function hasClassName(root, className) {
       const value = root && root.className;
       if (typeof value !== "string") {
@@ -37,13 +40,11 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       return value.split(/\s+/).indexOf(className) >= 0;
     }
     const getElementById = vi.fn(function (id) {
-      return Object.prototype.hasOwnProperty.call(pageRoots, id)
-        ? pageRoots[id]
-        : null;
+      return Object.prototype.hasOwnProperty.call(pageRoots, id) ? pageRoots[id] : null;
     });
     const querySelectorAll = vi.fn(function (selector) {
       if (selector === ".alarmWidget") {
-        return alarmWidgetRoots.filter(function (root) {
+        return alarmWidgetRoots.filter(function (/** @type {any} */ root) {
           return hasClassName(root, "alarmWidget");
         });
       }
@@ -54,21 +55,21 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
         runtime: {},
         state: {},
         config: { shared: {}, clusters: [] },
-        ...(capturedApi ? { avnavApi: capturedApi } : {}),
+        ...(capturedApi ? { avnavApi: capturedApi } : {})
       },
       avnav: includeGlobalApi
         ? {
             api: {
               routePoints: {
-                activate: routePointsActivate,
-              },
-            },
+                activate: routePointsActivate
+              }
+            }
           }
         : {},
       document: {
         getElementById: getElementById,
-        querySelectorAll: querySelectorAll,
-      },
+        querySelectorAll: querySelectorAll
+      }
     });
 
     runIifeScript("runtime/namespace.js", context);
@@ -78,10 +79,11 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       context,
       bridge: context.DyniPlugin.runtime.createTemporaryHostActionBridge(),
       routePointsActivate,
-      getElementById,
+      getElementById
     };
   }
 
+  /** @param {any} index @param {Record<string, any>} [overrides] */
   function makeRoutePointPayload(index, overrides) {
     const basePoint = {
       idx: index,
@@ -89,11 +91,11 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       lat: 54 + index * 0.01,
       lon: 10 + index * 0.01,
       routeName: "Harbor Run",
-      selected: false,
+      selected: false
     };
     return {
       index: index,
-      pointSnapshot: Object.assign(basePoint, overrides || {}),
+      pointSnapshot: Object.assign(basePoint, overrides || {})
     };
   }
 
@@ -101,8 +103,8 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     const navRoot = makeElement({
       __reactFiber$nav: {
         memoizedProps: { onItemClick: vi.fn() },
-        return: null,
-      },
+        return: null
+      }
     });
     const { bridge } = createBridgeContext({ pageRoots: { navpage: navRoot } });
 
@@ -131,21 +133,19 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
         editroutepage: makeElement({
           __reactFiber$edit: {
             memoizedProps: { widgetClick: vi.fn() },
-            return: null,
-          },
-        }),
-      },
+            return: null
+          }
+        })
+      }
     })
       .bridge.getHostActions()
       .getCapabilities();
     const editRouteNoParity = createBridgeContext({
-      pageRoots: { editroutepage: makeElement() },
+      pageRoots: { editroutepage: makeElement() }
     })
       .bridge.getHostActions()
       .getCapabilities();
-    const other = createBridgeContext({ pageRoots: {} })
-      .bridge.getHostActions()
-      .getCapabilities();
+    const other = createBridgeContext({ pageRoots: {} }).bridge.getHostActions().getCapabilities();
 
     expect(nav).toEqual({
       pageId: "navpage",
@@ -153,10 +153,10 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       map: { checkAutoZoom: "dispatch" },
       routeEditor: {
         openActiveRoute: "dispatch",
-        openEditRoute: "unsupported",
+        openEditRoute: "unsupported"
       },
       ais: { showInfo: "dispatch" },
-      alarm: { stopAll: "unsupported" },
+      alarm: { stopAll: "unsupported" }
     });
     expect(gps).toEqual({
       pageId: "gpspage",
@@ -164,7 +164,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       map: { checkAutoZoom: "unsupported" },
       routeEditor: { openActiveRoute: "passive", openEditRoute: "unsupported" },
       ais: { showInfo: "dispatch" },
-      alarm: { stopAll: "unsupported" },
+      alarm: { stopAll: "unsupported" }
     });
     expect(editRoute).toEqual({
       pageId: "editroutepage",
@@ -172,10 +172,10 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       map: { checkAutoZoom: "unsupported" },
       routeEditor: {
         openActiveRoute: "unsupported",
-        openEditRoute: "dispatch",
+        openEditRoute: "dispatch"
       },
       ais: { showInfo: "unsupported" },
-      alarm: { stopAll: "unsupported" },
+      alarm: { stopAll: "unsupported" }
     });
     expect(editRouteNoParity.routePoints.activate).toBe("unsupported");
     expect(other).toEqual({
@@ -184,15 +184,15 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       map: { checkAutoZoom: "unsupported" },
       routeEditor: {
         openActiveRoute: "unsupported",
-        openEditRoute: "unsupported",
+        openEditRoute: "unsupported"
       },
       ais: { showInfo: "unsupported" },
-      alarm: { stopAll: "unsupported" },
+      alarm: { stopAll: "unsupported" }
     });
   });
 
   it("memoizes and freezes capability snapshots until page or relay inputs change", function () {
-    const pageRoots = { gpspage: makeElement() };
+    const pageRoots = /** @type {Record<string, any>} */ ({ gpspage: makeElement() });
     const { bridge, context } = createBridgeContext({ pageRoots: pageRoots });
     const hostActions = bridge.getHostActions();
     const first = hostActions.getCapabilities();
@@ -220,14 +220,14 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
   it("updates capabilities and dispatch behavior when the same bridge sees a page change", function () {
     const navHandler = vi.fn();
     const gpsHandler = vi.fn();
-    const pageRoots = {
+    const pageRoots = /** @type {Record<string, any>} */ ({
       navpage: makeElement({
         __reactFiber$nav: {
           memoizedProps: { onItemClick: navHandler },
-          return: null,
-        },
-      }),
-    };
+          return: null
+        }
+      })
+    });
     const { bridge } = createBridgeContext({ pageRoots: pageRoots });
     const hostActions = bridge.getHostActions();
 
@@ -239,8 +239,8 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     pageRoots.gpspage = makeElement({
       __reactFiber$gps: {
         memoizedProps: { onItemClick: gpsHandler },
-        return: null,
-      },
+        return: null
+      }
     });
 
     const gpsCapabilities = hostActions.getCapabilities();
@@ -258,11 +258,11 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     const navRoot = makeElement({
       __reactFiber$nav: {
         memoizedProps: { onItemClick: navHandler },
-        return: null,
-      },
+        return: null
+      }
     });
     const { bridge, getElementById } = createBridgeContext({
-      pageRoots: { navpage: navRoot },
+      pageRoots: { navpage: navRoot }
     });
 
     getElementById.mockClear();
@@ -272,7 +272,7 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
       "editroutepage",
       "gpspage",
       "navpage",
-      "navpage",
+      "navpage"
     ]);
   });
 
@@ -280,22 +280,15 @@ describe("runtime/TemporaryHostActionBridge.js", function () {
     const routePointsActivate = vi.fn(() => true);
     const { bridge } = createBridgeContext({
       pageRoots: { gpspage: makeElement() },
-      routePointsActivate,
+      routePointsActivate
     });
 
-    expect(
-      bridge.getHostActions().routePoints.activate(makeRoutePointPayload(3)),
-    ).toBe(true);
+    expect(bridge.getHostActions().routePoints.activate(makeRoutePointPayload(3))).toBe(true);
     expect(routePointsActivate).toHaveBeenCalledWith(3);
 
     const unsupported = createBridgeContext({
-      pageRoots: { navpage: makeElement() },
+      pageRoots: { navpage: makeElement() }
     }).bridge;
-    expect(
-      unsupported
-        .getHostActions()
-        .routePoints.activate(makeRoutePointPayload(1)),
-    ).toBe(false);
+    expect(unsupported.getHostActions().routePoints.activate(makeRoutePointPayload(1))).toBe(false);
   });
-
 });

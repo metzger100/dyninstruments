@@ -40,10 +40,13 @@
     /** @type {Record<string, DyniSpeedTokenSpec>} */
     const out = {};
     Object.keys(SPEED_UNIT_RANGES).forEach(function (token) {
-      out[token] = Object.assign({
-        default: defaults[token],
-        label: SPEED_UNIT_LABELS[token] || token
-      }, SPEED_UNIT_RANGES[token]);
+      out[token] = Object.assign(
+        {
+          default: defaults[token],
+          label: SPEED_UNIT_LABELS[token] || token
+        },
+        SPEED_UNIT_RANGES[token]
+      );
     });
     return out;
   }
@@ -92,7 +95,9 @@
     def: {
       name: "dyni_Speed_Instruments",
       description: "SOG/STW selection (numeric, linear, or SpeedRadialWidget radial)",
-      caption: "", unit: "", default: "---",
+      caption: "",
+      unit: "",
+      default: "---",
       cluster: "speed",
       storeKeys: { sog: "nav.gps.speed", stw: "nav.gps.waterSpeed" },
       editableParameters: {
@@ -112,13 +117,21 @@
 
         // ThreeValueTextWidget thresholds — only numeric kinds
         ratioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.0,
           internal: true,
           name: "3-Rows Threshold (numeric)",
           condition: [{ kind: "sog" }, { kind: "stw" }]
         },
         ratioThresholdFlat: {
-          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+          type: "FLOAT",
+          min: 1.5,
+          max: 6.0,
+          step: 0.05,
+          default: 3.0,
           internal: true,
           name: "1-Row Threshold (numeric)",
           condition: [{ kind: "sog" }, { kind: "stw" }]
@@ -126,13 +139,21 @@
 
         // SpeedLinearWidget thresholds — only linear kinds
         speedLinearRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.1,
           internal: true,
           name: "SpeedLinearWidget: Normal Threshold",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedLinearRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          type: "FLOAT",
+          min: 1.0,
+          max: 6.0,
+          step: 0.05,
+          default: 3.5,
           internal: true,
           name: "SpeedLinearWidget: Flat Threshold",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
@@ -159,7 +180,8 @@
           kmh: 2
         }),
         speedLinearShowEndLabels: {
-          type: "BOOLEAN", default: false,
+          type: "BOOLEAN",
+          default: false,
           name: "Show min/max labels",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
@@ -175,30 +197,50 @@
           name: "Show alarm sector",
           condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
-        ...buildPerUnitFloatParams(SPEED_LINEAR_KIND_KEYS, "speedLinearWarningFrom", "Warning at or above", {
-          kn: 20,
-          ms: 10,
-          kmh: 40
-        }, {
-          condition: { speedLinearWarningEnabled: true }
-        }),
-        ...buildPerUnitFloatParams(SPEED_LINEAR_KIND_KEYS, "speedLinearAlarmFrom", "Alarm at or above", {
-          kn: 25,
-          ms: 12.5,
-          kmh: 50
-        }, {
-          condition: { speedLinearAlarmEnabled: true }
-        }),
+        ...buildPerUnitFloatParams(
+          SPEED_LINEAR_KIND_KEYS,
+          "speedLinearWarningFrom",
+          "Warning at or above",
+          {
+            kn: 20,
+            ms: 10,
+            kmh: 40
+          },
+          {
+            condition: { speedLinearWarningEnabled: true }
+          }
+        ),
+        ...buildPerUnitFloatParams(
+          SPEED_LINEAR_KIND_KEYS,
+          "speedLinearAlarmFrom",
+          "Alarm at or above",
+          {
+            kn: 25,
+            ms: 12.5,
+            kmh: 50
+          },
+          {
+            condition: { speedLinearAlarmEnabled: true }
+          }
+        ),
 
         // SpeedRadialWidget thresholds — only radial kinds
         speedRadialRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.1,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.1,
           internal: true,
           name: "SpeedRadialWidget: Normal Threshold",
           condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
         speedRadialRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3.5,
+          type: "FLOAT",
+          min: 1.0,
+          max: 6.0,
+          step: 0.05,
+          default: 3.5,
           internal: true,
           name: "SpeedRadialWidget: Flat Threshold",
           condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
@@ -228,7 +270,8 @@
           kmh: 2
         }),
         speedRadialShowEndLabels: {
-          type: "BOOLEAN", default: false,
+          type: "BOOLEAN",
+          default: false,
           name: "Show min/max labels",
           condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
@@ -248,24 +291,40 @@
         },
 
         // SpeedRadialWidget sectors (only show when enabled)
-        ...buildPerUnitFloatParams(SPEED_RADIAL_KIND_KEYS, "speedRadialWarningFrom", "Warning at or above", {
-          kn: 20,
-          ms: 10,
-          kmh: 40
-        }, {
-          condition: { speedRadialWarningEnabled: true }
-        }),
-        ...buildPerUnitFloatParams(SPEED_RADIAL_KIND_KEYS, "speedRadialAlarmFrom", "Alarm at or above", {
-          kn: 25,
-          ms: 12.5,
-          kmh: 50
-        }, {
-          condition: { speedRadialAlarmEnabled: true }
-        }),
+        ...buildPerUnitFloatParams(
+          SPEED_RADIAL_KIND_KEYS,
+          "speedRadialWarningFrom",
+          "Warning at or above",
+          {
+            kn: 20,
+            ms: 10,
+            kmh: 40
+          },
+          {
+            condition: { speedRadialWarningEnabled: true }
+          }
+        ),
+        ...buildPerUnitFloatParams(
+          SPEED_RADIAL_KIND_KEYS,
+          "speedRadialAlarmFrom",
+          "Alarm at or above",
+          {
+            kn: 25,
+            ms: 12.5,
+            kmh: 50
+          },
+          {
+            condition: { speedRadialAlarmEnabled: true }
+          }
+        ),
 
         // Shared caption/unit-to-value scale (used by SpeedRadialWidget + also fine for numeric)
         captionUnitScale: {
-          type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
+          type: "FLOAT",
+          min: 0.5,
+          max: 1.5,
+          step: 0.05,
+          default: 0.8,
           name: "Caption/Unit size"
         },
         stableDigits: {
@@ -285,30 +344,19 @@
           type: "BOOLEAN",
           default: true,
           name: "Smooth motion",
-          condition: [
-            { kind: "sogLinear" },
-            { kind: "stwLinear" },
-            { kind: "sogRadial" },
-            { kind: "stwRadial" }
-          ]
+          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }, { kind: "sogRadial" }, { kind: "stwRadial" }]
         },
         speedLinearHideTextualMetrics: {
           type: "BOOLEAN",
           default: false,
           name: "Hide textual metrics",
-          condition: [
-            { kind: "sogLinear" },
-            { kind: "stwLinear" }
-          ]
+          condition: [{ kind: "sogLinear" }, { kind: "stwLinear" }]
         },
         speedRadialHideTextualMetrics: {
           type: "BOOLEAN",
           default: false,
           name: "Hide textual metrics",
-          condition: [
-            { kind: "sogRadial" },
-            { kind: "stwRadial" }
-          ]
+          condition: [{ kind: "sogRadial" }, { kind: "stwRadial" }]
         },
 
         caption: false,
@@ -322,4 +370,4 @@
       }
     }
   });
-}(this));
+})(this);

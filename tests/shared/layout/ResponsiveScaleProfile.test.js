@@ -13,6 +13,7 @@ describe("ResponsiveScaleProfile", function () {
     return loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js").create();
   }
 
+  /** @param {any} profile @param {any} expected */
   function expectProfile(profile, expected) {
     expect(profile.minDim).toBe(expected.minDim);
     expect(profile.t).toBeCloseTo(expected.t, 6);

@@ -6,11 +6,14 @@ describe("CenterDisplayMath", function () {
     expect(math.normalizePoint({ lat: 54.1, lon: 10.2 })).toEqual({ lat: 54.1, lon: 10.2 });
     expect(math.normalizePoint([10.2, 54.1])).toEqual({ lat: 54.1, lon: 10.2 });
     expect(math.normalizePoint({ lat: "x", lon: 10.2 })).toBeNull();
-    expect(math.extractMeasureStart({
-      getPointAtIndex(index) {
-        return index === 0 ? { lat: 53.9, lon: 9.8 } : undefined;
-      }
-    })).toEqual({ lat: 53.9, lon: 9.8 });
+    expect(
+      math.extractMeasureStart({
+        /** @param {number} index */
+        getPointAtIndex(index) {
+          return index === 0 ? { lat: 53.9, lon: 9.8 } : undefined;
+        }
+      })
+    ).toEqual({ lat: 53.9, lon: 9.8 });
     expect(math.extractMeasureStart({ points: [{ lat: 1, lon: 2 }] })).toBeNull();
   });
 

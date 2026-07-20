@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRadialValueMath = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -98,4 +98,4 @@
   }
 
   return { id: "RadialValueMath", create: create };
-}));
+});

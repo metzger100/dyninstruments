@@ -8,38 +8,23 @@ const proofFiles = [
   {
     label: "direct configuration",
     relPath: "tests/tools/dyni-focused-direct.proof.test.js",
-    args: ["run", "--config", "vitest.config.js", "tests/tools/dyni-focused-direct.proof.test.js"],
+    args: ["run", "--config", "vitest.config.js", "tests/tools/dyni-focused-direct.proof.test.js"]
   },
   {
     label: "unit-node workspace project",
     relPath: "tests/tools/dyni-focused-node.proof.test.js",
-    args: [
-      "run",
-      "--project",
-      "unit-node",
-      "tests/tools/dyni-focused-node.proof.test.js",
-    ],
+    args: ["run", "--project", "unit-node", "tests/tools/dyni-focused-node.proof.test.js"]
   },
   {
     label: "contract workspace project",
     relPath: "tests/contract/dyni-focused-contract.proof.test.js",
-    args: [
-      "run",
-      "--project",
-      "contract",
-      "tests/contract/dyni-focused-contract.proof.test.js",
-    ],
+    args: ["run", "--project", "contract", "tests/contract/dyni-focused-contract.proof.test.js"]
   },
   {
     label: "unit-dom workspace project",
     relPath: "tests/runtime/dyni-focused-dom.proof.test.js",
-    args: [
-      "run",
-      "--project",
-      "unit-dom",
-      "tests/runtime/dyni-focused-dom.proof.test.js",
-    ],
-  },
+    args: ["run", "--project", "unit-dom", "tests/runtime/dyni-focused-dom.proof.test.js"]
+  }
 ];
 
 try {
@@ -55,11 +40,10 @@ try {
 }
 
 function verifyFocusedTestRejection(proof) {
-  const result = spawnSync(
-    process.execPath,
-    [path.join(root, "node_modules/vitest/vitest.mjs")].concat(proof.args),
-    { cwd: root, encoding: "utf8" },
-  );
+  const result = spawnSync(process.execPath, [path.join(root, "node_modules/vitest/vitest.mjs")].concat(proof.args), {
+    cwd: root,
+    encoding: "utf8"
+  });
   const output = `${result.stdout}\n${result.stderr}`;
 
   if (result.error || result.status === 0 || !/only|focused-test/i.test(output)) {

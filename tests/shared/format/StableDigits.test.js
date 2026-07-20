@@ -4,11 +4,14 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 describe("StableDigits", function () {
   function createApi() {
     const placeholderNormalize = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-    return loadFresh("shared/widget-kits/format/StableDigits.js").create({}, createComponentContextMock({
-      modules: {
-        PlaceholderNormalize: placeholderNormalize
-      }
-    }));
+    return loadFresh("shared/widget-kits/format/StableDigits.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          PlaceholderNormalize: placeholderNormalize
+        }
+      })
+    );
   }
 
   it("returns padded and plain text pair for finite numeric values", function () {

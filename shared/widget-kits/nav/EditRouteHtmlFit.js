@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniEditRouteHtmlFit = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const SOURCE_BADGE_MAX_PX_RATIO = 0.7;
@@ -23,9 +23,9 @@
    * @returns {DyniEditRouteHtmlFitApi}
    */
   function create(def, componentContext) {
-    const theme = /** @type {DyniEditRouteThemeResolver} */ (/** @type {unknown} */ (
-      componentContext.theme && componentContext.theme.tokens
-    ));
+    const theme = /** @type {DyniEditRouteThemeResolver} */ (
+      /** @type {unknown} */ (componentContext.theme && componentContext.theme.tokens)
+    );
     const textApi = componentContext.components.require("CanvasTextLayout");
     const tileLayout = componentContext.components.require("TextTileLayout");
     const layoutApi = componentContext.components.require("EditRouteLayout");
@@ -61,9 +61,12 @@
       const shellHeight = Math.max(1, Math.round(shellRect.height));
       const explicitLayoutHeight = htmlUtils.toFiniteNumber(model.layoutShellHeight);
       const verticalHeight = htmlUtils.toFiniteNumber(model.effectiveLayoutHeight);
-      const layoutHeight = typeof explicitLayoutHeight === "number" && explicitLayoutHeight > 0
-        ? explicitLayoutHeight
-        : (typeof verticalHeight === "number" && verticalHeight > 0 ? verticalHeight : shellHeight);
+      const layoutHeight =
+        typeof explicitLayoutHeight === "number" && explicitLayoutHeight > 0
+          ? explicitLayoutHeight
+          : typeof verticalHeight === "number" && verticalHeight > 0
+            ? verticalHeight
+            : shellHeight;
 
       const layout = layoutApi.computeLayout({
         W: shellWidth,
@@ -80,12 +83,13 @@
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       const textFillScale = layout.responsive && layout.responsive.textFillScale;
-      const valueTextOptions = model.stableDigitsEnabled === true
-        ? {
-          useMono: true,
-          monoFamily: tokens.font.familyMono || family
-        }
-        : null;
+      const valueTextOptions =
+        model.stableDigitsEnabled === true
+          ? {
+              useMono: true,
+              monoFamily: tokens.font.familyMono || family
+            }
+          : null;
       /** @type {DyniEditRouteComputedFit} */
       const fitOut = {
         nameTextStyle: fitSupport.measureEditRouteStyle({
@@ -176,69 +180,37 @@
             }),
             valueRowStyle: "",
             valueStyle: htmlMeasureUtils.toStyle(valuePx, htmlUtils),
-            unitStyle: box.unitRect ? fitSupport.measureEditRouteStyle({
-              rect: box.unitRect,
-              text: unitText,
-              maxPx: secondaryMaxPx,
-              maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
-              textApi: textApi,
-              tileLayout: tileLayout,
-              ctx: measureCtx,
-              family: family,
-              weight: labelWeight,
-              textFillScale: 1,
-              htmlUtils: htmlUtils
-            }) : ""
+            unitStyle: box.unitRect
+              ? fitSupport.measureEditRouteStyle({
+                  rect: box.unitRect,
+                  text: unitText,
+                  maxPx: secondaryMaxPx,
+                  maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+                  textApi: textApi,
+                  tileLayout: tileLayout,
+                  ctx: measureCtx,
+                  family: family,
+                  weight: labelWeight,
+                  textFillScale: 1,
+                  htmlUtils: htmlUtils
+                })
+              : ""
           };
           fitOut.metricValues[id] = selectedValue.text;
           continue;
         }
 
-        const primaryMeasurement = /** @type {DyniMetricTileMeasurement} */ (tileLayout.measureMetricTile({
-          textApi: textApi,
-          ctx: measureCtx,
-          metric: {
-            id: id,
-            caption: labelText,
-            value: valueText,
-            plainValue: plainValueText,
-            unit: unitText
-          },
-          rect: metricRect,
-          textFillScale: layout.responsive.textFillScale,
-          family: family,
-          valueWeight: valueWeight,
-          labelWeight: labelWeight,
-          secScale: METRIC_SECONDARY_TO_VALUE_RATIO,
-          padX: spacing.padX,
-          captionHeightPx: spacing.captionHeightPx,
-          valueTextOptions: valueTextOptions
-        }));
-        const primaryClipped = primaryMeasurement.fit.total > primaryMeasurement.textW + 0.01;
-        const usePlain = model.stableDigitsEnabled === true &&
-          primaryClipped &&
-          typeof plainValueText === "string" &&
-          plainValueText !== valueText;
-        const activeMetric = usePlain
-          ? {
-            id: id,
-            caption: labelText,
-            value: plainValueText,
-            plainValue: plainValueText,
-            unit: unitText
-          }
-          : {
-            id: id,
-            caption: labelText,
-            value: valueText,
-            plainValue: plainValueText,
-            unit: unitText
-          };
-        const measurement = usePlain
-          ? /** @type {DyniMetricTileMeasurement} */ (tileLayout.measureMetricTile({
+        const primaryMeasurement = /** @type {DyniMetricTileMeasurement} */ (
+          tileLayout.measureMetricTile({
             textApi: textApi,
             ctx: measureCtx,
-            metric: activeMetric,
+            metric: {
+              id: id,
+              caption: labelText,
+              value: valueText,
+              plainValue: plainValueText,
+              unit: unitText
+            },
             rect: metricRect,
             textFillScale: layout.responsive.textFillScale,
             family: family,
@@ -248,21 +220,62 @@
             padX: spacing.padX,
             captionHeightPx: spacing.captionHeightPx,
             valueTextOptions: valueTextOptions
-          }))
+          })
+        );
+        const primaryClipped = primaryMeasurement.fit.total > primaryMeasurement.textW + 0.01;
+        const usePlain =
+          model.stableDigitsEnabled === true &&
+          primaryClipped &&
+          typeof plainValueText === "string" &&
+          plainValueText !== valueText;
+        const activeMetric = usePlain
+          ? {
+              id: id,
+              caption: labelText,
+              value: plainValueText,
+              plainValue: plainValueText,
+              unit: unitText
+            }
+          : {
+              id: id,
+              caption: labelText,
+              value: valueText,
+              plainValue: plainValueText,
+              unit: unitText
+            };
+        const measurement = usePlain
+          ? /** @type {DyniMetricTileMeasurement} */ (
+              tileLayout.measureMetricTile({
+                textApi: textApi,
+                ctx: measureCtx,
+                metric: activeMetric,
+                rect: metricRect,
+                textFillScale: layout.responsive.textFillScale,
+                family: family,
+                valueWeight: valueWeight,
+                labelWeight: labelWeight,
+                secScale: METRIC_SECONDARY_TO_VALUE_RATIO,
+                padX: spacing.padX,
+                captionHeightPx: spacing.captionHeightPx,
+                valueTextOptions: valueTextOptions
+              })
+            )
           : primaryMeasurement;
         const captionText = labelText;
         const captionFit = captionText
-          ? /** @type {DyniFittedLineMeasurement} */ (tileLayout.measureFittedLine({
-            textApi: textApi,
-            ctx: measureCtx,
-            text: captionText,
-            maxW: measurement.textW,
-            maxH: measurement.capH,
-            maxPx: measurement.capMaxPx,
-            textFillScale: layout.responsive.textFillScale,
-            family: family,
-            weight: labelWeight
-          }))
+          ? /** @type {DyniFittedLineMeasurement} */ (
+              tileLayout.measureFittedLine({
+                textApi: textApi,
+                ctx: measureCtx,
+                text: captionText,
+                maxW: measurement.textW,
+                maxH: measurement.capH,
+                maxPx: measurement.capMaxPx,
+                textFillScale: layout.responsive.textFillScale,
+                family: family,
+                weight: labelWeight
+              })
+            )
           : null;
 
         fitOut.metrics[id] = {
@@ -285,4 +298,4 @@
 
   /** @type {DyniEditRouteHtmlFitModule} */
   return { id: "EditRouteHtmlFit", create: create };
-}));
+});

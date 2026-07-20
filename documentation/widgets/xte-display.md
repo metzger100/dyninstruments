@@ -12,25 +12,34 @@ Graphic navigation widget with a 2.5D highway view for cross-track guidance and 
 - `BRG` (bearing to waypoint)
 - waypoint name (optional, hidden first when space is constrained)
 
-The highway frame follows the same solid-line visual language as the radial and linear instruments: foreground road rails, horizon line, clean perspective bars, and a pointer-colored live guidance overlay without translucent lane-surface shading.
+The highway frame follows the same solid-line visual language as the radial and linear instruments: foreground road
+rails, horizon line, clean perspective bars, and a pointer-colored live guidance overlay without translucent
+lane-surface shading.
 
 Renderer now resolves canvas state-screens before highway drawing:
 
 - `disconnected` when `p.display.disconnect === true` (label: `GPS Lost`)
-- `noTarget` when `typeof p.display.wpName === "string" && p.display.wpName.trim() === ""` (label: `No Waypoint`)
+- `noTarget` when mapper-normalized `p.display.wpName === ""` (label: `No Waypoint`)
 - `data` otherwise
 
-In `data`, the static highway frame is always visible; the dynamic XTE overlay renders iff `xte` is finite. `cog`, `dtw`, and `btw` no longer gate the dynamic overlay and only affect their textual placeholder rows when textual metrics are visible.
+In `data`, the static highway frame is always visible; the dynamic XTE overlay renders iff `xte` is finite. `cog`,
+`dtw`, and `btw` no longer gate the dynamic overlay and only affect their textual placeholder rows when textual metrics
+are visible.
 
-The mapper now passes nested `display`, `captions`, `units`, `formatUnits`, and `layout` objects. Formatter tokens live in `formatUnits.*`; display labels live in `units.*`.
+The mapper now passes nested `display`, `captions`, `units`, `formatUnits`, and `layout` objects. Formatter tokens live
+in `formatUnits.*`; display labels live in `units.*`.
 
 Layout ownership:
 
-- `shared/widget-kits/xte/XteHighwayLayout.js` owns responsive insets, mode selection, and highway/name/metric rectangles
-- `shared/widget-kits/xte/XteHighwayLayout.js` also owns metric-tile padding and caption-band compaction for `TextTileLayout`
-- `shared/widget-kits/xte/XteHighwayPrimitives.js` owns highway geometry drawing, dynamic marker drawing, and waypoint visibility heuristics
+- `shared/widget-kits/xte/XteHighwayLayout.js` owns responsive insets, mode selection, and highway/name/metric
+  rectangles
+- `shared/widget-kits/xte/XteHighwayLayout.js` also owns metric-tile padding and caption-band compaction for
+  `TextTileLayout`
+- `shared/widget-kits/xte/XteHighwayPrimitives.js` owns highway geometry drawing, dynamic marker drawing, and waypoint
+  visibility heuristics
 - `shared/widget-kits/layout/ResponsiveScaleProfile.js` owns the shared compact curve consumed by `XteHighwayLayout`
-- `shared/widget-kits/layout/GeometryScale.js` scales the highway graphics from the primary dimension `min(highway.w, highway.h)`
+- `shared/widget-kits/layout/GeometryScale.js` scales the highway graphics from the primary dimension
+  `min(highway.w, highway.h)`
 
 ## Module Registration
 
@@ -57,30 +66,30 @@ XteDisplayWidget: {
 
 The mapper passes nested payload objects to the renderer.
 
-| Prop path | Type | Default | Description |
-|---|---|---|---|
-| `display.xte` | number | — | Cross-track error |
-| `display.cog` | number | — | Course over ground |
-| `display.dtw` | number | — | Distance to waypoint |
-| `display.btw` | number | — | Bearing to waypoint |
-| `display.wpName` | string | `""` | Waypoint name |
-| `display.disconnect` | boolean | `false` | Render `disconnected` state-screen and suppress normal highway/metric content |
-| `captions.xte` | string | `"XTE"` | Caption for XTE field |
-| `captions.track` | string | `"COG"` | Caption for track field |
-| `captions.dtw` | string | `"DST"` | Caption for distance field |
-| `captions.brg` | string | `"BRG"` | Caption for bearing field |
-| `units.xte` | string | `"nm"` | XTE display label only |
-| `units.track` | string | `"°"` | Track display label only |
-| `units.dtw` | string | `"nm"` | Distance-to-waypoint display label only |
-| `units.brg` | string | `"°"` | Bearing display label only |
-| `formatUnits.xte` | string | `"nm"` | Formatter token for XTE distance conversion |
-| `formatUnits.dtw` | string | `"nm"` | Formatter token for distance-to-waypoint conversion |
-| `layout.leadingZero` | boolean | `true` | Heading zero-padding (e.g. `093`) |
-| `layout.showWpName` | boolean | `false` | Enable waypoint name if space allows |
-| `layout.hideTextualMetrics` | boolean | `false` | Hide live metric readouts and waypoint name in `data` state while keeping the highway visible; state screens still render normally |
-| `layout.easing` | boolean | `true` | Spring animation toggle for the XTE marker |
-| `layout.xteRatioThresholdNormal` | number | `0.85` | Ratio below -> `high` |
-| `layout.xteRatioThresholdFlat` | number | `2.3` | Ratio above -> `flat` |
+| Prop path                        | Type    | Default | Description                                                                                                                        |
+| -------------------------------- | ------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `display.xte`                    | number  | —       | Cross-track error                                                                                                                  |
+| `display.cog`                    | number  | —       | Course over ground                                                                                                                 |
+| `display.dtw`                    | number  | —       | Distance to waypoint                                                                                                               |
+| `display.btw`                    | number  | —       | Bearing to waypoint                                                                                                                |
+| `display.wpName`                 | string  | `""`    | Waypoint name                                                                                                                      |
+| `display.disconnect`             | boolean | `false` | Render `disconnected` state-screen and suppress normal highway/metric content                                                      |
+| `captions.xte`                   | string  | `"XTE"` | Caption for XTE field                                                                                                              |
+| `captions.track`                 | string  | `"COG"` | Caption for track field                                                                                                            |
+| `captions.dtw`                   | string  | `"DST"` | Caption for distance field                                                                                                         |
+| `captions.brg`                   | string  | `"BRG"` | Caption for bearing field                                                                                                          |
+| `units.xte`                      | string  | `"nm"`  | XTE display label only                                                                                                             |
+| `units.track`                    | string  | `"°"`   | Track display label only                                                                                                           |
+| `units.dtw`                      | string  | `"nm"`  | Distance-to-waypoint display label only                                                                                            |
+| `units.brg`                      | string  | `"°"`   | Bearing display label only                                                                                                         |
+| `formatUnits.xte`                | string  | `"nm"`  | Formatter token for XTE distance conversion                                                                                        |
+| `formatUnits.dtw`                | string  | `"nm"`  | Formatter token for distance-to-waypoint conversion                                                                                |
+| `layout.leadingZero`             | boolean | `true`  | Heading zero-padding (e.g. `093`)                                                                                                  |
+| `layout.showWpName`              | boolean | `false` | Enable waypoint name if space allows                                                                                               |
+| `layout.hideTextualMetrics`      | boolean | `false` | Hide live metric readouts and waypoint name in `data` state while keeping the highway visible; state screens still render normally |
+| `layout.easing`                  | boolean | `true`  | Spring animation toggle for the XTE marker                                                                                         |
+| `layout.xteRatioThresholdNormal` | number  | `0.85`  | Ratio below -> `high`                                                                                                              |
+| `layout.xteRatioThresholdFlat`   | number  | `2.3`   | Ratio above -> `flat`                                                                                                              |
 
 ## Guidance Data Contract
 
@@ -88,7 +97,8 @@ In `data` state, the widget always renders the static highway frame.
 
 The moving XTE indicator renders only if `display.xte` is finite.
 
-`formatUnits.xte` and `formatUnits.dtw` carry the formatter tokens. The matching `units.*` values are rendered as display text only.
+`formatUnits.xte` and `formatUnits.dtw` carry the formatter tokens. The matching `units.*` values are rendered as
+display text only.
 
 When textual metrics are visible, the widget still shows placeholder text for missing non-XTE values.
 
@@ -96,18 +106,19 @@ When textual metrics are visible, the widget still shows placeholder text for mi
 
 Theme is resolved once per frame via `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
 
-| Visual element | Token |
-|---|---|
-| Boat marker + active centerline | `tokens.colors.pointer` |
-| Out-of-scale clamp marker | `tokens.colors.alarm` |
-| Road edge + horizon strokes | `tokens.surface.fg` |
-| Perspective bars + center seam markers | `tokens.surface.fg` |
-| Highway line widths | internal factors via `GeometryScale.scaleStroke(..., strokeWeight)` |
-| Boat marker size | internal factors via `GeometryScale.scalePointer(..., pointerDepthWeight)` |
-| Value text weight | `tokens.font.weight` |
-| Label text weight | `tokens.font.labelWeight` |
+| Visual element                         | Token                                                                      |
+| -------------------------------------- | -------------------------------------------------------------------------- |
+| Boat marker + active centerline        | `tokens.colors.pointer`                                                    |
+| Out-of-scale clamp marker              | `tokens.colors.alarm`                                                      |
+| Road edge + horizon strokes            | `tokens.surface.fg`                                                        |
+| Perspective bars + center seam markers | `tokens.surface.fg`                                                        |
+| Highway line widths                    | internal factors via `GeometryScale.scaleStroke(..., strokeWeight)`        |
+| Boat marker size                       | internal factors via `GeometryScale.scalePointer(..., pointerDepthWeight)` |
+| Value text weight                      | `tokens.font.weight`                                                       |
+| Label text weight                      | `tokens.font.labelWeight`                                                  |
 
-XTE geometry does not read `theme.xte.*`. Line widths and boat size are derived from internal highway factors plus the shared `strokeWeight` and `pointerDepthWeight` inputs.
+XTE geometry does not read `theme.xte.*`. Line widths and boat size are derived from internal highway factors plus the
+shared `strokeWeight` and `pointerDepthWeight` inputs.
 
 ## Layout Modes
 
@@ -119,8 +130,9 @@ ratio > xteRatioThresholdFlat -> flat
 otherwise -> normal
 ```
 
-When waypoint name display is disabled (or no waypoint name is available), the highway perspective starts higher in all modes to reduce unused whitespace above the road.
-Compact widgets also reduce waypoint/header shares, increase text fill, and tighten metric-tile inner spacing through `XteHighwayLayout`.
+When waypoint name display is disabled (or no waypoint name is available), the highway perspective starts higher in all
+modes to reduce unused whitespace above the road. Compact widgets also reduce waypoint/header shares, increase text
+fill, and tighten metric-tile inner spacing through `XteHighwayLayout`.
 
 When `hideTextualMetrics === true`, the layout switches to a graphics-only branch:
 
@@ -129,7 +141,8 @@ When `hideTextualMetrics === true`, the layout switches to a graphics-only branc
 - enlarged highway rect
 - no waypoint-name fit work in the renderer
 
-State-screen selection is independent of `hideTextualMetrics`; empty waypoint names still render `No Waypoint`, and `disconnected` still takes precedence.
+State-screen selection is independent of `hideTextualMetrics`; empty waypoint names still render `No Waypoint`, and
+`disconnected` still takes precedence.
 
 ### flat
 
@@ -168,8 +181,13 @@ XTE marker placement uses a mapper-resolved full-scale range:
 If `abs(xte) > xteScale`, marker position is clamped to the edge and overflow alarm cue is rendered.
 
 Implementation note:
-- `xteScale` comes from the selected `xteDisplayScale_<token>` field in the mapper, with a safe fallback of `1` when missing or invalid.
-- normalization uses formatter-parsed XTE magnitude (`formatDistance` output), so raw store-unit differences (for example meters) do not distort marker placement.
+
+- `xteScale` comes from the selected `xteDisplayScale_<token>` field in the mapper, with a safe fallback of `1` when
+  missing or invalid.
+- `XteDisplayPropsNormalize.read(p)` only projects the already-normalized nested prop bags; it does not validate,
+  coerce, or default renderer values.
+- normalization uses formatter-parsed XTE magnitude (`formatDistance` output), so raw store-unit differences (for
+  example meters) do not distort marker placement.
 
 ## Caching
 
@@ -199,7 +217,8 @@ Offscreen layer transform contract:
 - `primitives.drawStaticHighway(...)` then draws in the same CSS-space geometry used by the widget.
 - This keeps cached static geometry aligned with the visible DPR-transformed canvas path.
 
-The boat marker size is dynamic and comes from the shared `pointerDepthWeight` input plus internal marker factors; it is not cached as a `theme.xte.*` token.
+The boat marker size is dynamic and comes from the shared `pointerDepthWeight` input plus internal marker factors; it is
+not cached as a `theme.xte.*` token.
 
 ## Phase 6 Options
 

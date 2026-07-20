@@ -1,9 +1,8 @@
+// @ts-nocheck
 const fs = require("node:fs");
 const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("EditRouteTextHtmlWidget", function () {
   function createRenderer(options) {
@@ -29,7 +28,7 @@ describe("EditRouteTextHtmlWidget", function () {
           visibleMetricIds: [],
           flatMetricRows: 1,
           metricsStyle: "",
-          wrapperStyle: "",
+          wrapperStyle: ""
         };
       });
     const fitCompute =
@@ -37,7 +36,7 @@ describe("EditRouteTextHtmlWidget", function () {
       vi.fn(() => ({
         nameTextStyle: "font-size:12px;",
         sourceBadgeStyle: "font-size:9px;",
-        metrics: Object.create(null),
+        metrics: Object.create(null)
       }));
     const markupRender =
       opts.markupRender ||
@@ -49,9 +48,7 @@ describe("EditRouteTextHtmlWidget", function () {
           '<div class="dyni-edit-route-html dyni-edit-route-open-' +
           state +
           '" data-dyni-action="edit-route-open">' +
-          (model.canOpenEditRoute
-            ? '<div class="dyni-edit-route-open-hotspot"></div>'
-            : "") +
+          (model.canOpenEditRoute ? '<div class="dyni-edit-route-open-hotspot"></div>' : "") +
           "</div>"
         );
       });
@@ -61,21 +58,19 @@ describe("EditRouteTextHtmlWidget", function () {
         EditRouteHtmlFit: {
           create() {
             return { compute: fitCompute };
-          },
+          }
         },
-        HtmlWidgetUtils: loadFresh(
-          "shared/widget-kits/html/HtmlWidgetUtils.js",
-        ),
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
         EditRouteRenderModel: {
           create() {
             return { buildModel };
-          },
+          }
         },
         EditRouteMarkup: {
           create() {
             return { render: markupRender };
-          },
-        },
+          }
+        }
       },
       services: {
         themeTokens: {
@@ -85,29 +80,29 @@ describe("EditRouteTextHtmlWidget", function () {
                 family: "sans-serif",
                 familyMono: "monospace",
                 weight: 720,
-                labelWeight: 610,
-              },
+                labelWeight: 610
+              }
             };
-          },
-        },
-      },
+          }
+        }
+      }
     });
 
     return {
-      renderer: loadFresh(
-        "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js",
-      ).create({}, componentContext),
+      renderer: loadFresh("widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js").create(
+        {},
+        componentContext
+      ),
       buildModel,
       fitCompute,
-      markupRender,
+      markupRender
     };
   }
 
   function withSurfacePolicy(props, options) {
     const opts = options || {};
     const mode = opts.mode === "passive" ? "passive" : "dispatch";
-    const orientation =
-      opts.orientation === "vertical" ? "vertical" : "default";
+    const orientation = opts.orientation === "vertical" ? "vertical" : "default";
     const openEditRoute = opts.openEditRoute || vi.fn(() => true);
 
     return Object.assign({}, props || {}, {
@@ -117,10 +112,10 @@ describe("EditRouteTextHtmlWidget", function () {
         containerOrientation: orientation,
         actions: {
           routeEditor: {
-            openEditRoute,
-          },
-        },
-      },
+            openEditRoute
+          }
+        }
+      }
     });
   }
 
@@ -140,13 +135,13 @@ describe("EditRouteTextHtmlWidget", function () {
 
     mountEl.getBoundingClientRect = vi.fn(() => ({
       width: shellSize.width,
-      height: shellSize.height,
+      height: shellSize.height
     }));
 
     const committed = rendererSpec.createCommittedRenderer({
       hostContext,
       mountEl,
-      shadowRoot: null,
+      shadowRoot: null
     });
 
     let revision = 0;
@@ -163,7 +158,7 @@ describe("EditRouteTextHtmlWidget", function () {
         shellRect: { width: shellSize.width, height: shellSize.height },
         hostContext,
         layoutChanged: layoutChanged === true,
-        relayoutPass: 0,
+        relayoutPass: 0
       };
     }
 
@@ -181,7 +176,7 @@ describe("EditRouteTextHtmlWidget", function () {
       },
       html() {
         return mountEl.innerHTML;
-      },
+      }
     };
   }
 
@@ -205,7 +200,7 @@ describe("EditRouteTextHtmlWidget", function () {
           visibleMetricIds: ["pts", "dst", "rte", "rteEta"],
           flatMetricRows: 1,
           metricsStyle: "",
-          wrapperStyle: "",
+          wrapperStyle: ""
         };
       }),
       markupRender(args) {
@@ -220,22 +215,19 @@ describe("EditRouteTextHtmlWidget", function () {
           "</div>" +
           "</div>"
         );
-      },
+      }
     });
 
     const mounted = mountCommitted(
       setup.renderer,
-      withSurfacePolicy(
-        { __canOpen: true, __token: "high" },
-        { mode: "dispatch" },
-      ),
-      { shellSize: { width: 180, height: 280 } },
+      withSurfacePolicy({ __canOpen: true, __token: "high" }, { mode: "dispatch" }),
+      { shellSize: { width: 180, height: 280 } }
     );
 
     expect(setup.buildModel).toHaveBeenCalledWith(
       expect.objectContaining({
-        shellRect: { width: 180, height: 280 },
-      }),
+        shellRect: { width: 180, height: 280 }
+      })
     );
     expect(setup.fitCompute).toHaveBeenCalledTimes(1);
     expect(mounted.html()).toContain("dyni-edit-route-mode-high");
@@ -245,32 +237,22 @@ describe("EditRouteTextHtmlWidget", function () {
 
   it("respects layoutChanged for fit recomputation and layout signature", function () {
     const setup = createRenderer();
-    const mounted = mountCommitted(
-      setup.renderer,
-      withSurfacePolicy({ __canOpen: true, __token: "1" }, {}),
-    );
+    const mounted = mountCommitted(setup.renderer, withSurfacePolicy({ __canOpen: true, __token: "1" }, {}));
 
-    mounted.update(
-      withSurfacePolicy({ __canOpen: true, __token: "2" }, {}),
-      false,
-    );
+    mounted.update(withSurfacePolicy({ __canOpen: true, __token: "2" }, {}), false);
     expect(setup.fitCompute).toHaveBeenCalledTimes(1);
 
-    mounted.update(
-      withSurfacePolicy({ __canOpen: true, __token: "3" }, {}),
-      true,
-    );
+    mounted.update(withSurfacePolicy({ __canOpen: true, __token: "3" }, {}), true);
     expect(setup.fitCompute).toHaveBeenCalledTimes(2);
 
     const sigA = mounted.committed.layoutSignature({
       props: { __token: "A" },
-      shellRect: { width: 320, height: 180 },
+      shellRect: { width: 320, height: 180 }
     });
     const sigB = mounted.committed.layoutSignature({
       props: { __token: "B" },
-      shellRect: { width: 320, height: 180 },
+      shellRect: { width: 320, height: 180 }
     });
     expect(sigB).not.toBe(sigA);
   });
-
 });

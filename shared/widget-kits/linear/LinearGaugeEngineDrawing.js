@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniLinearGaugeEngineDrawing = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
@@ -62,11 +62,13 @@
 
       for (let i = 0; i < ticks.minor.length; i++) {
         const x = mapValueToX(ticks.minor[i], true);
-        if (Number.isFinite(x)) primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, layout.minorTickLen, minorStyle);
+        if (Number.isFinite(x))
+          primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, layout.minorTickLen, minorStyle);
       }
       for (let i = 0; i < ticks.major.length; i++) {
         const x = mapValueToX(ticks.major[i], true);
-        if (Number.isFinite(x)) primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, layout.majorTickLen, majorStyle);
+        if (Number.isFinite(x))
+          primitives.drawTick(layerCtx, Math.round(x), state.layout.trackY, layout.majorTickLen, majorStyle);
       }
 
       textLayout.drawTickLabels(layerCtx, state, ticks, showEndLabels, math, labelFormatter);
@@ -85,7 +87,18 @@
      * @param {DyniLinearDrawOptions} [opts]
      * @returns {void}
      */
-    function drawPointerAtValue(ctx, state, layout, theme, primitives, mapValueToX, markerValue, pointerDepthBase, markerSizeBase, opts) {
+    function drawPointerAtValue(
+      ctx,
+      state,
+      layout,
+      theme,
+      primitives,
+      mapValueToX,
+      markerValue,
+      pointerDepthBase,
+      markerSizeBase,
+      opts
+    ) {
       const pointerNum = Number(markerValue);
       if (!Number.isFinite(pointerNum)) {
         return;
@@ -97,7 +110,9 @@
       const markerOpts = opts || {};
       const optDepth = Number(markerOpts.depth);
       const optSide = Number(markerOpts.side);
-      const basePointerSize = Number.isFinite(optDepth) ? Math.max(1, Math.floor(optDepth)) : Math.max(1, Math.floor(pointerDepthBase));
+      const basePointerSize = Number.isFinite(optDepth)
+        ? Math.max(1, Math.floor(optDepth))
+        : Math.max(1, Math.floor(pointerDepthBase));
       const defaultSide = Number.isFinite(Number(layout.pointerSide))
         ? Math.max(1, Math.floor(layout.pointerSide / 2))
         : Math.max(1, Math.floor(basePointerSize / 2));
@@ -133,7 +148,9 @@
       const optLen = Number(markerOpts.len);
       const optLineWidth = Number(markerOpts.lineWidth);
       const len = Number.isFinite(optLen) ? Math.max(1, optLen) : Math.max(1, Math.floor(markerSizeBase * 0.45));
-      const width = Number.isFinite(optLineWidth) ? Math.max(1, optLineWidth) : Math.max(1, Math.floor(markerSizeBase * 0.2));
+      const width = Number.isFinite(optLineWidth)
+        ? Math.max(1, optLineWidth)
+        : Math.max(1, Math.floor(markerSizeBase * 0.2));
       primitives.drawTick(ctx, Math.round(markerX), layout.trackY + len, len, {
         lineWidth: width,
         lineCap: "butt",
@@ -151,4 +168,4 @@
   }
 
   return { id: "LinearGaugeEngineDrawing", create: create };
-}));
+});

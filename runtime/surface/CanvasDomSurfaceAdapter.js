@@ -267,11 +267,11 @@
         }
 
         let paintResult;
-          if (hostContext) {
-            paintResult = rendererSpec.renderCanvas.call(hostContext, canvasEl, props);
-          } else {
-            paintResult = rendererSpec.renderCanvas(canvasEl, props);
-          }
+        if (hostContext) {
+          paintResult = rendererSpec.renderCanvas.call(hostContext, canvasEl, props);
+        } else {
+          paintResult = rendererSpec.renderCanvas(canvasEl, props);
+        }
         clearRenderFlags();
         if (paintResult && paintResult.wantsFollowUpFrame === true && consecutiveAnimateFrames < 600) {
           if (schedulePaint("animate")) {

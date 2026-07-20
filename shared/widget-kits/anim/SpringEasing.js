@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniSpringEasing = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const DEFAULT_STIFFNESS = 40;
@@ -49,9 +49,7 @@
      * @returns {DyniSpring}
      */
     function createSpring(spec) {
-      const cfg = /** @type {DyniSpringSpec} */ (
-        spec && typeof spec === "object" ? spec : {}
-      );
+      const cfg = /** @type {DyniSpringSpec} */ (spec && typeof spec === "object" ? spec : {});
       const stiffness = Math.max(1e-6, resolveFiniteNumber(cfg.stiffness, DEFAULT_STIFFNESS));
       const damping = 2 * Math.sqrt(stiffness);
       const maxDtMs = Math.max(1, Math.floor(resolveFiniteNumber(cfg.maxDtMs, DEFAULT_MAX_DT_MS)));
@@ -144,12 +142,8 @@
      * @returns {DyniSpringMotion}
      */
     function createMotion(spec) {
-      const cfg = /** @type {DyniSpringMotionSpec} */ (
-        spec && typeof spec === "object" ? spec : {}
-      );
-      const springSpec = /** @type {DyniSpringSpec} */ (
-        cfg.spring && typeof cfg.spring === "object" ? cfg.spring : {}
-      );
+      const cfg = /** @type {DyniSpringMotionSpec} */ (spec && typeof spec === "object" ? spec : {});
+      const springSpec = /** @type {DyniSpringSpec} */ (cfg.spring && typeof cfg.spring === "object" ? cfg.spring : {});
       const motionSpringSpec = Object.assign({}, springSpec);
       if (Number.isFinite(Number(cfg.wrap)) && Number(cfg.wrap) > 0) {
         motionSpringSpec.wrap = cfg.wrap;
@@ -213,4 +207,4 @@
   }
 
   return { id: "SpringEasing", create: create };
-}));
+});

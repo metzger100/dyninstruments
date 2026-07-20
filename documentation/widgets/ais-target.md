@@ -10,7 +10,8 @@ AisTargetTextHtmlWidget renders AIS target summary state on the committed HTML s
 - policy source: runtime surfacePolicy
 - style scope: shadow-local CSS
 - formatter fallback outputs are normalized through `PlaceholderNormalize`; missing metric values render as `---`
-- Mapper payloads split formatter tokens from display labels: `formatUnits.dst` / `formatUnits.cpa` carry the distance tokens while `units.dst` / `units.cpa` stay display-only.
+- Mapper payloads split formatter tokens from display labels: `formatUnits.dst` / `formatUnits.cpa` carry the distance
+  tokens while `units.dst` / `units.cpa` stay display-only.
 
 ## State Screens
 
@@ -29,8 +30,10 @@ AisTargetTextHtmlWidget renders AIS target summary state on the committed HTML s
 - shellRect is the canonical committed geometry source
 - layoutSignature handles branch-sensitive layout rerun triggers
 - postPatch can request one bounded relayout pass
-- `AisTargetLayoutSizing.resolveVisualChrome(...)` is the authoritative accent/shell-chrome geometry contract for AIS-aligned strips.
-- `AisTargetLayoutGeometry` owns metric sub-rectangles, while `AisTargetLayoutGeometryStyles` serializes those rectangles into CSS-grid styles through an explicit component dependency.
+- `AisTargetLayoutSizing.resolveVisualChrome(...)` is the authoritative accent/shell-chrome geometry contract for
+  AIS-aligned strips.
+- `AisTargetLayoutGeometry` owns metric sub-rectangles, while `AisTargetLayoutGeometryStyles` serializes those
+  rectangles into CSS-grid styles through an explicit component dependency.
 
 ## Vertical Contract
 

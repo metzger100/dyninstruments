@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniSpeedRadialWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @param {unknown} def @param {DyniComponentContext} componentContext */
@@ -36,7 +36,14 @@
       hideTextualMetricsProp: "speedRadialHideTextualMetrics",
       tickSteps: valueMath.resolveStandardTickSteps,
       formatDisplay: function (raw, props, unit) {
-        const display = valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatSpeed", [unit || "kn"]);
+        const display = valueMath.formatGaugeDisplay(
+          raw,
+          props,
+          componentContext.format.applyFormatter,
+          placeholderNormalize.normalize,
+          "formatSpeed",
+          [unit || "kn"]
+        );
         return { num: display.num, text: placeholderNormalize.normalize(display.text, undefined) };
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
@@ -65,4 +72,4 @@
   }
 
   return { id: "SpeedRadialWidget", create };
-}));
+});

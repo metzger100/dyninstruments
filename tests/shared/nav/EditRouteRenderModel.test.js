@@ -2,32 +2,35 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("EditRouteRenderModel", function () {
+  /** @param {any} [options] */
   function createRenderModel(options) {
     const opts = options || {};
-    const applyFormatter = opts.applyFormatter || function (value, formatterOptions) {
-      const cfg = formatterOptions || {};
-      const defaultText = Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
-      if (value == null || Number.isNaN(value)) {
-        return defaultText;
-      }
+    const applyFormatter =
+      opts.applyFormatter ||
+      function (/** @type {any} */ value, /** @type {any} */ formatterOptions) {
+        const cfg = formatterOptions || {};
+        const defaultText = Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
+        if (value == null || Number.isNaN(value)) {
+          return defaultText;
+        }
 
-      if (cfg.formatter === "formatDecimal") {
-        const precision = Array.isArray(cfg.formatterParameters) ? Number(cfg.formatterParameters[0]) : 0;
-        const places = Number.isFinite(precision) ? Math.max(0, Math.floor(precision)) : 0;
-        return Number(value).toFixed(places);
-      }
-      if (cfg.formatter === "formatDistance") {
-        const unit = Array.isArray(cfg.formatterParameters) ? String(cfg.formatterParameters[0] || "") : "";
-        return "DST(" + unit + "):" + Number(value).toFixed(1);
-      }
-      if (cfg.formatter === "formatTime") {
-        return "TIME:" + String(value);
-      }
-      if (cfg.formatter === "formatClock") {
-        return "CLOCK:" + String(value);
-      }
-      return String(value);
-    };
+        if (cfg.formatter === "formatDecimal") {
+          const precision = Array.isArray(cfg.formatterParameters) ? Number(cfg.formatterParameters[0]) : 0;
+          const places = Number.isFinite(precision) ? Math.max(0, Math.floor(precision)) : 0;
+          return Number(value).toFixed(places);
+        }
+        if (cfg.formatter === "formatDistance") {
+          const unit = Array.isArray(cfg.formatterParameters) ? String(cfg.formatterParameters[0] || "") : "";
+          return "DST(" + unit + "):" + Number(value).toFixed(1);
+        }
+        if (cfg.formatter === "formatTime") {
+          return "TIME:" + String(value);
+        }
+        if (cfg.formatter === "formatClock") {
+          return "CLOCK:" + String(value);
+        }
+        return String(value);
+      };
 
     const componentContext = createComponentContextMock({
       modules: {
@@ -55,6 +58,7 @@ describe("EditRouteRenderModel", function () {
     return loadFresh("shared/widget-kits/nav/EditRouteRenderModel.js").create({}, componentContext);
   }
 
+  /** @param {any} props @param {any} [options] */
   function withSurfacePolicy(props, options) {
     const opts = options || {};
     return Object.assign({}, props || {}, {
@@ -67,56 +71,63 @@ describe("EditRouteRenderModel", function () {
     });
   }
 
+  /** @param {any} [overrides] */
   function makeProps(overrides) {
-    return Object.assign({
-      domain: {
-        hasRoute: true,
-        routeName: "Harbor Run",
-        pointCount: 5,
-        totalDistance: 1234.5,
-        remainingDistance: 321.4,
-        rteEta: "2026-03-06T11:45:00Z",
-        isActiveRoute: true,
-        isLocalRoute: true,
-        isServerRoute: false
+    return Object.assign(
+      {
+        domain: {
+          hasRoute: true,
+          routeName: "Harbor Run",
+          pointCount: 5,
+          totalDistance: 1234.5,
+          remainingDistance: 321.4,
+          rteEta: "2026-03-06T11:45:00Z",
+          isActiveRoute: true,
+          isLocalRoute: true,
+          isServerRoute: false
+        },
+        layout: {
+          ratioThresholdNormal: 1.2,
+          ratioThresholdFlat: 3.8
+        },
+        captions: {
+          pts: "PTS",
+          dst: "DST",
+          rte: "RTE",
+          rteEta: "ETA"
+        },
+        units: {
+          dst: "nm",
+          rte: "nm"
+        },
+        formatUnits: {
+          dst: "nm",
+          rte: "nm"
+        }
       },
-      layout: {
-        ratioThresholdNormal: 1.2,
-        ratioThresholdFlat: 3.8
-      },
-      captions: {
-        pts: "PTS",
-        dst: "DST",
-        rte: "RTE",
-        rteEta: "ETA"
-      },
-      units: {
-        dst: "nm",
-        rte: "nm"
-      },
-      formatUnits: {
-        dst: "nm",
-        rte: "nm"
-      }
-    }, overrides || {});
+      overrides || {}
+    );
   }
 
   it("builds no-route state-screen model with passive interaction and no metrics", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: withSurfacePolicy(makeProps({
-        domain: {
-          hasRoute: false,
-          routeName: "",
-          pointCount: 0,
-          totalDistance: undefined,
-          remainingDistance: undefined,
-          rteEta: undefined,
-          isActiveRoute: false,
-          isLocalRoute: false,
-          isServerRoute: false
-        }
-      }), { mode: "dispatch" }),
+      props: withSurfacePolicy(
+        makeProps({
+          domain: {
+            hasRoute: false,
+            routeName: "",
+            pointCount: 0,
+            totalDistance: undefined,
+            remainingDistance: undefined,
+            rteEta: undefined,
+            isActiveRoute: false,
+            isLocalRoute: false,
+            isServerRoute: false
+          }
+        }),
+        { mode: "dispatch" }
+      ),
       shellRect: { width: 320, height: 160 },
       isVerticalCommitted: false
     });
@@ -135,20 +146,23 @@ describe("EditRouteRenderModel", function () {
   it("classifies disconnected state-screen from raw disconnect signal", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: withSurfacePolicy(makeProps({
-        disconnect: true,
-        domain: {
-          hasRoute: true,
-          routeName: "Harbor Run",
-          pointCount: 5,
-          totalDistance: 1234.5,
-          remainingDistance: 321.4,
-          rteEta: "2026-03-06T11:45:00Z",
-          isActiveRoute: true,
-          isLocalRoute: false,
-          isServerRoute: true
-        }
-      }), { mode: "dispatch" }),
+      props: withSurfacePolicy(
+        makeProps({
+          disconnect: true,
+          domain: {
+            hasRoute: true,
+            routeName: "Harbor Run",
+            pointCount: 5,
+            totalDistance: 1234.5,
+            remainingDistance: 321.4,
+            rteEta: "2026-03-06T11:45:00Z",
+            isActiveRoute: true,
+            isLocalRoute: false,
+            isServerRoute: true
+          }
+        }),
+        { mode: "dispatch" }
+      ),
       shellRect: { width: 320, height: 160 },
       isVerticalCommitted: false
     });
@@ -164,19 +178,22 @@ describe("EditRouteRenderModel", function () {
   it("keeps flat no-route wrapper geometry aligned via inline layout style", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: withSurfacePolicy(makeProps({
-        domain: {
-          hasRoute: false,
-          routeName: "",
-          pointCount: 0,
-          totalDistance: undefined,
-          remainingDistance: undefined,
-          rteEta: undefined,
-          isActiveRoute: false,
-          isLocalRoute: false,
-          isServerRoute: false
-        }
-      }), { mode: "dispatch" }),
+      props: withSurfacePolicy(
+        makeProps({
+          domain: {
+            hasRoute: false,
+            routeName: "",
+            pointCount: 0,
+            totalDistance: undefined,
+            remainingDistance: undefined,
+            rteEta: undefined,
+            isActiveRoute: false,
+            isLocalRoute: false,
+            isServerRoute: false
+          }
+        }),
+        { mode: "dispatch" }
+      ),
       shellRect: { width: 620, height: 120 },
       isVerticalCommitted: false
     });
@@ -219,19 +236,22 @@ describe("EditRouteRenderModel", function () {
   it("keeps RTE and ETA placeholders in non-flat mode for inactive routes", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: withSurfacePolicy(makeProps({
-        domain: {
-          hasRoute: true,
-          routeName: "Harbor Run",
-          pointCount: 5,
-          totalDistance: 1234.5,
-          remainingDistance: 321.4,
-          rteEta: "2026-03-06T11:45:00Z",
-          isActiveRoute: false,
-          isLocalRoute: false,
-          isServerRoute: true
-        }
-      }), { mode: "dispatch" }),
+      props: withSurfacePolicy(
+        makeProps({
+          domain: {
+            hasRoute: true,
+            routeName: "Harbor Run",
+            pointCount: 5,
+            totalDistance: 1234.5,
+            remainingDistance: 321.4,
+            rteEta: "2026-03-06T11:45:00Z",
+            isActiveRoute: false,
+            isLocalRoute: false,
+            isServerRoute: true
+          }
+        }),
+        { mode: "dispatch" }
+      ),
       shellRect: { width: 320, height: 210 },
       isVerticalCommitted: false
     });
@@ -263,19 +283,22 @@ describe("EditRouteRenderModel", function () {
   it("keeps RTE/ETA placeholders in flat mode for inactive routes", function () {
     const renderModel = createRenderModel();
     const model = renderModel.buildModel({
-      props: withSurfacePolicy(makeProps({
-        domain: {
-          hasRoute: true,
-          routeName: "Harbor Run",
-          pointCount: 5,
-          totalDistance: 1234.5,
-          remainingDistance: 321.4,
-          rteEta: "2026-03-06T11:45:00Z",
-          isActiveRoute: false,
-          isLocalRoute: false,
-          isServerRoute: true
-        }
-      }), { mode: "dispatch" }),
+      props: withSurfacePolicy(
+        makeProps({
+          domain: {
+            hasRoute: true,
+            routeName: "Harbor Run",
+            pointCount: 5,
+            totalDistance: 1234.5,
+            remainingDistance: 321.4,
+            rteEta: "2026-03-06T11:45:00Z",
+            isActiveRoute: false,
+            isLocalRoute: false,
+            isServerRoute: true
+          }
+        }),
+        { mode: "dispatch" }
+      ),
       shellRect: { width: 620, height: 120 },
       isVerticalCommitted: false
     });
@@ -285,5 +308,4 @@ describe("EditRouteRenderModel", function () {
     expect(model.metrics.rte.valueText).toBe("---");
     expect(model.metrics.rteEta.valueText).toBe("---");
   });
-
 });

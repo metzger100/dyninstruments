@@ -1,66 +1,52 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
-const {
-  createMockCanvas,
-  createMockContext2D,
-} = require("../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("FullCircleRadialEngine", function () {
   function createHarness() {
-    const engineMod = loadFresh(
-      "shared/widget-kits/radial/FullCircleRadialEngine.js",
-    );
+    const engineMod = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
     const cacheMod = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
-    const fullCircleLayoutMod = loadFresh(
-      "shared/widget-kits/radial/FullCircleRadialLayout.js",
-    );
-    const responsiveScaleProfileMod = loadFresh(
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-    );
-    const layoutRectMathMod = loadFresh(
-      "shared/widget-kits/layout/LayoutRectMath.js",
-    );
-    const geometryScaleMod = loadFresh(
-      "shared/widget-kits/layout/GeometryScale.js",
-    );
+    const fullCircleLayoutMod = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
+    const responsiveScaleProfileMod = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    const layoutRectMathMod = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
+    const geometryScaleMod = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     const calls = {
       ring: [],
       ticks: [],
       pointer: [],
       mode: [],
       rebuild: [],
-      meta: [],
+      meta: []
     };
     const theme = {
       surface: {
-        fg: "#fff",
+        fg: "#fff"
       },
       colors: {
         pointer: "#3366cc",
         laylineStb: "#2e9e6b",
-        laylinePort: "#d9534a",
+        laylinePort: "#d9534a"
       },
       radial: {
         ticks: {
           majorLenFactor: 0.08,
           majorWidthFactor: 0.02,
           minorLenFactor: 0.047,
-          minorWidthFactor: 0.01,
+          minorWidthFactor: 0.01
         },
         pointer: {
           depthFactor: 0.22,
-          sideFactor: 0.11,
+          sideFactor: 0.11
         },
         ring: {
           arcLineWidthFactor: 0.013,
-          widthFactor: 0.35,
+          widthFactor: 0.35
         },
         labels: {
           insetFactor: 2.1,
-          fontFactor: 0.35,
-        },
+          fontFactor: 0.35
+        }
       },
       strokeWeight: 1,
       pointerDepthWeight: 1,
@@ -68,8 +54,8 @@ describe("FullCircleRadialEngine", function () {
       font: {
         family: "sans-serif",
         weight: 700,
-        labelWeight: 650,
-      },
+        labelWeight: 650
+      }
     };
     const layoutApi = fullCircleLayoutMod.create(
       {},
@@ -77,24 +63,18 @@ describe("FullCircleRadialEngine", function () {
         modules: {
           ResponsiveScaleProfile: responsiveScaleProfileMod,
           LayoutRectMath: layoutRectMathMod,
-          GeometryScale: geometryScaleMod,
-        },
-      }),
+          GeometryScale: geometryScaleMod
+        }
+      })
     );
 
     const engine = engineMod.create(
       {},
       createComponentContextMock({
         modules: {
-          StateScreenLabels: loadFresh(
-            "shared/widget-kits/state/StateScreenLabels.js",
-          ),
-          StateScreenPrecedence: loadFresh(
-            "shared/widget-kits/state/StateScreenPrecedence.js",
-          ),
-          StateScreenCanvasOverlay: loadFresh(
-            "shared/widget-kits/state/StateScreenCanvasOverlay.js",
-          ),
+          StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+          StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+          StateScreenCanvasOverlay: loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js"),
           CanvasLayerCache: cacheMod,
           FullCircleRadialLayout: fullCircleLayoutMod,
           ResponsiveScaleProfile: responsiveScaleProfileMod,
@@ -115,10 +95,10 @@ describe("FullCircleRadialEngine", function () {
                   },
                   drawLabels() {},
                   drawRimMarker() {},
-                  drawAnnularSector() {},
+                  drawAnnularSector() {}
                 },
                 text: {
-                  drawDisconnectOverlay() {},
+                  drawDisconnectOverlay() {}
                 },
                 value: {
                   isFiniteNumber(n) {
@@ -127,23 +107,23 @@ describe("FullCircleRadialEngine", function () {
                   resolveFiniteNumber(value, defaultValue) {
                     const n = Number(value);
                     return isFinite(n) ? n : defaultValue;
-                  },
+                  }
                 },
                 angle: {
                   degToCanvasRad(deg, cfg, rotationDeg) {
                     const d = Number(deg) + (Number(rotationDeg) || 0);
                     const norm = ((d % 360) + 360) % 360;
                     return ((norm - 90) * Math.PI) / 180;
-                  },
+                  }
                 },
                 theme: {
                   resolveForRoot() {
                     return theme;
-                  },
-                },
+                  }
+                }
               };
-            },
-          },
+            }
+          }
         },
         services: {
           canvas: {
@@ -153,17 +133,17 @@ describe("FullCircleRadialEngine", function () {
               return {
                 ctx,
                 W: Math.round(rect.width),
-                H: Math.round(rect.height),
+                H: Math.round(rect.height)
               };
-            },
+            }
           },
           dom: {
             requirePluginRoot(target) {
               return target;
-            },
-          },
-        },
-      }),
+            }
+          }
+        }
+      })
     );
 
     return { engine, calls, theme, layoutApi };
@@ -183,24 +163,24 @@ describe("FullCircleRadialEngine", function () {
                 labelFontPx: state.labels.fontPx,
                 fixedPointerDepth: state.geom.fixedPointerDepth,
                 textFillScale: state.textFillScale,
-                compactGeometryScale: state.layout.compactGeometryScale,
+                compactGeometryScale: state.layout.compactGeometryScale
               };
-            },
+            }
           },
-          specOverrides || {},
-        ),
+          specOverrides || {}
+        )
       );
 
       renderer(
         createMockCanvas({
           rectWidth: 225,
           rectHeight: 300,
-          ctx: createMockContext2D(),
+          ctx: createMockContext2D()
         }),
         {
           n: 0.8,
-          f: 2.2,
-        },
+          f: 2.2
+        }
       );
 
       return snapshot;
@@ -208,8 +188,8 @@ describe("FullCircleRadialEngine", function () {
 
     expect(
       captureState({
-        ratioDefaults: { normal: 0.8, flat: 2.2 },
-      }),
+        ratioDefaults: { normal: 0.8, flat: 2.2 }
+      })
     ).toEqual(captureState());
   });
 
@@ -227,36 +207,35 @@ describe("FullCircleRadialEngine", function () {
         },
         flat(state) {
           harness.calls.mode.push(state.mode);
-        },
-      },
+        }
+      }
     });
 
     renderer(
       createMockCanvas({
         rectWidth: 90,
         rectHeight: 300,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
-      {},
+      {}
     );
     renderer(
       createMockCanvas({
         rectWidth: 300,
         rectHeight: 300,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
-      {},
+      {}
     );
     renderer(
       createMockCanvas({
         rectWidth: 500,
         rectHeight: 120,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
-      {},
+      {}
     );
 
     expect(harness.calls.mode).toEqual(["high", "normal", "flat"]);
   });
-
 });

@@ -41,10 +41,7 @@ describe("config/shared/editable-param-utils.js", function () {
       { kind: "angleTrueRadial" },
       { kind: "angleApparentRadial" }
     ]);
-    expect(params.unit_bothGraphics.condition).toEqual([
-      { kind: "angleTrueRadial" },
-      { kind: "angleApparentRadial" }
-    ]);
+    expect(params.unit_bothGraphics.condition).toEqual([{ kind: "angleTrueRadial" }, { kind: "angleApparentRadial" }]);
 
     expect(shared.opt("Label", "value")).toEqual({ name: "Label", value: "value" });
   });

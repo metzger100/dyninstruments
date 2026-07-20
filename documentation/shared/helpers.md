@@ -4,8 +4,8 @@
 
 ## Overview
 
-`componentContext` is passed as the second argument to component `create(def, componentContext)`.
-It is the explicit boundary between runtime-owned services and component code.
+`componentContext` is passed as the second argument to component `create(def, componentContext)`. It is the explicit
+boundary between runtime-owned services and component code.
 
 Current context surfaces include:
 
@@ -17,7 +17,8 @@ Current context surfaces include:
 - `componentContext.dom.getNightModeState(rootEl)`
 - `componentContext.hostActions()` function reference
 
-Legacy helper theme fallbacks (resolveTextColor, resolveFontFamily, resolveWidgetRoot) are not part of the production contract.
+Legacy helper theme fallbacks (resolveTextColor, resolveFontFamily, resolveWidgetRoot) are not part of the production
+contract.
 
 ## API Reference
 
@@ -78,7 +79,8 @@ Rules:
 
 - The function re-reads the current runtime-owned host action facade on every call.
 - Components that need host actions call `componentContext.hostActions()` and use the returned snapshot object.
-- When the widget registrar wraps lifecycle methods, it snapshots the current actions onto the AvNav widget context via `ctx.hostActions = runtime.hostActions()`.
+- When the widget registrar wraps lifecycle methods, it snapshots the current actions onto the AvNav widget context via
+  `ctx.hostActions = runtime.hostActions()`.
 
 Returned facade includes:
 
@@ -93,7 +95,8 @@ Renderers should consume normalized callbacks through runtime surface policy.
 
 ### componentContext.components.require
 
-Returns the already-created declared dependency instance for the current component, loaded by `runtime.componentLoader` from the matching `config.components` ID.
+Returns the already-created declared dependency instance for the current component, loaded by `runtime.componentLoader`
+from the matching `config.components` ID.
 
 ## Theme Consumer Pattern
 

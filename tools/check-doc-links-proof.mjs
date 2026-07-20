@@ -6,19 +6,32 @@ import { check } from "linkinator";
 
 const config = JSON.parse(fs.readFileSync("linkinator.config.json", "utf8"));
 
-await expectPass({
-  "a.md": "# A\n\n[valid](b.md#real-heading)\n[duplicate](b.md#repeat-1)\n[external](https://example.invalid/no-network)\n",
-  "b.md": "# Real Heading\n\n# Repeat\n\n# Repeat\n"
-}, true, "valid links and duplicate heading slugs");
+await expectPass(
+  {
+    "a.md":
+      "# A\n\n[valid](b.md#real-heading)\n[duplicate](b.md#repeat-1)\n[external](https://example.invalid/no-network)\n",
+    "b.md": "# Real Heading\n\n# Repeat\n\n# Repeat\n"
+  },
+  true,
+  "valid links and duplicate heading slugs"
+);
 
-await expectPass({
-  "a.md": "# A\n\n[gone](missing.md)\n"
-}, false, "missing local files");
+await expectPass(
+  {
+    "a.md": "# A\n\n[gone](missing.md)\n"
+  },
+  false,
+  "missing local files"
+);
 
-await expectPass({
-  "a.md": "# A\n\n[missing](b.md#missing-heading)\n",
-  "b.md": "# B\n"
-}, false, "missing local heading fragments");
+await expectPass(
+  {
+    "a.md": "# A\n\n[missing](b.md#missing-heading)\n",
+    "b.md": "# B\n"
+  },
+  false,
+  "missing local heading fragments"
+);
 
 console.log("Linkinator fixture proofs passed: files, fragments, duplicate slugs, and external skips.");
 

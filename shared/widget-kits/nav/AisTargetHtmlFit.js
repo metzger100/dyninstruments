@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetHtmlFit = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const NAME_MAX_PX_RATIO = { flat: 0.52, normal: 0.78, high: 0.72 };
@@ -42,36 +42,49 @@
    * @param {DyniTextTileLayoutApi} tileLayout
    * @param {DyniHtmlMeasureUtilsApi} htmlMeasureUtils
    * @returns {DyniAisTargetMetricValueFit}
-  */
+   */
   function selectMetricValueFit(args, htmlUtils, tileLayout, htmlMeasureUtils) {
     const cfg = /** @type {DyniAisTargetMetricValueFitArgs} */ (args || {});
     const valueText = toText(cfg.valueText);
     const plainText = cfg.plainText == null ? valueText : toText(cfg.plainText);
-    const valueFit = htmlMeasureUtils.measurePx({
-      rect: cfg.rect,
-      text: valueText,
-      maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
-      textApi: cfg.textApi,
-      tileLayout: tileLayout,
-      ctx: cfg.ctx,
-      family: cfg.family,
-      weight: cfg.weight,
-      textFillScale: cfg.textFillScale
-    }, htmlUtils, tileLayout);
-    if (!valueFit || !plainText || plainText === valueText || valueFit.width <= Math.max(1, Math.floor(cfg.rect.w)) + 0.01) {
+    const valueFit = htmlMeasureUtils.measurePx(
+      {
+        rect: cfg.rect,
+        text: valueText,
+        maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+        textApi: cfg.textApi,
+        tileLayout: tileLayout,
+        ctx: cfg.ctx,
+        family: cfg.family,
+        weight: cfg.weight,
+        textFillScale: cfg.textFillScale
+      },
+      htmlUtils,
+      tileLayout
+    );
+    if (
+      !valueFit ||
+      !plainText ||
+      plainText === valueText ||
+      valueFit.width <= Math.max(1, Math.floor(cfg.rect.w)) + 0.01
+    ) {
       return { valueText: valueText, valuePx: valueFit && valueFit.px ? valueFit.px : 0 };
     }
-    const plainFit = htmlMeasureUtils.measurePx({
-      rect: cfg.rect,
-      text: plainText,
-      maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
-      textApi: cfg.textApi,
-      tileLayout: tileLayout,
-      ctx: cfg.ctx,
-      family: cfg.family,
-      weight: cfg.weight,
-      textFillScale: cfg.textFillScale
-    }, htmlUtils, tileLayout);
+    const plainFit = htmlMeasureUtils.measurePx(
+      {
+        rect: cfg.rect,
+        text: plainText,
+        maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+        textApi: cfg.textApi,
+        tileLayout: tileLayout,
+        ctx: cfg.ctx,
+        family: cfg.family,
+        weight: cfg.weight,
+        textFillScale: cfg.textFillScale
+      },
+      htmlUtils,
+      tileLayout
+    );
     return { valueText: plainText, valuePx: plainFit && plainFit.px ? plainFit.px : 0 };
   }
 
@@ -86,9 +99,7 @@
     }
     const colorRole = toText(model.colorRole);
     const aisTokens = tokens && tokens.colors && tokens.colors.ais ? tokens.colors.ais : null;
-    const color = aisTokens && typeof aisTokens[colorRole] === "string"
-      ? aisTokens[colorRole].trim()
-      : "";
+    const color = aisTokens && typeof aisTokens[colorRole] === "string" ? aisTokens[colorRole].trim() : "";
     if (!color) {
       return "";
     }
@@ -108,9 +119,7 @@
 
   /** @param {unknown} box @returns {DyniAisTargetStackedMetricRects | null} */
   function resolveStackedMetricBox(box) {
-    const tile = box && typeof box === "object"
-      ? /** @type {Partial<DyniAisTargetStackedMetricRects>} */ (box)
-      : null;
+    const tile = box && typeof box === "object" ? /** @type {Partial<DyniAisTargetStackedMetricRects>} */ (box) : null;
     if (!tile || !tile.captionRect || !tile.valueRect || !tile.unitRect) {
       return null;
     }
@@ -123,9 +132,7 @@
 
   /** @param {unknown} box @returns {DyniAisTargetInlineMetricRects | null} */
   function resolveInlineMetricBox(box) {
-    const tile = box && typeof box === "object"
-      ? /** @type {Partial<DyniAisTargetInlineMetricRects>} */ (box)
-      : null;
+    const tile = box && typeof box === "object" ? /** @type {Partial<DyniAisTargetInlineMetricRects>} */ (box) : null;
     if (!tile || !tile.labelRect || !tile.valueRect || !tile.unitRect) {
       return null;
     }
@@ -143,9 +150,9 @@
    * @returns {DyniAisTargetHtmlFitApi}
    */
   function create(def, componentContext) {
-    const theme = /** @type {DyniAisTargetThemeResolver} */ (/** @type {unknown} */ (
-      componentContext.theme && componentContext.theme.tokens
-    ));
+    const theme = /** @type {DyniAisTargetThemeResolver} */ (
+      /** @type {unknown} */ (componentContext.theme && componentContext.theme.tokens)
+    );
     const textApi = componentContext.components.require("CanvasTextLayout");
     const tileLayout = componentContext.components.require("TextTileLayout");
     const layoutApi = componentContext.components.require("AisTargetLayout");
@@ -179,15 +186,17 @@
       const shellWidth = Math.max(1, Math.round(shellRect.width));
       const shellHeight = Math.max(1, Math.round(shellRect.height));
       const kind = typeof model.kind === "string" ? model.kind : "data";
-      const layout = model.layout || layoutApi.computeLayout({
-        W: shellWidth,
-        H: shellHeight,
-        mode: model.mode,
-        renderState: kind === "data" ? "data" : "placeholder",
-        showTcpaBranch: model.showTcpaBranch === true,
-        isVerticalCommitted: model.isVerticalCommitted === true,
-        effectiveLayoutHeight: model.effectiveLayoutHeight
-      });
+      const layout =
+        model.layout ||
+        layoutApi.computeLayout({
+          W: shellWidth,
+          H: shellHeight,
+          mode: model.mode,
+          renderState: kind === "data" ? "data" : "placeholder",
+          showTcpaBranch: model.showTcpaBranch === true,
+          isVerticalCommitted: model.isVerticalCommitted === true,
+          effectiveLayoutHeight: model.effectiveLayoutHeight
+        });
       const valueWeight = tokens.font.weight;
       const labelWeight = tokens.font.labelWeight;
       const textFillScale = layout.responsive && layout.responsive.textFillScale;
@@ -202,28 +211,36 @@
       if (kind !== "data") {
         return out;
       }
-      out.nameStyle = htmlMeasureUtils.measureStyle({
-        rect: layout.nameRect,
-        text: toText(model.nameText),
-        maxPxRatio: modeRatio.resolve(layout.mode, NAME_MAX_PX_RATIO),
-        textApi: textApi,
-        tileLayout: tileLayout,
-        ctx: measureCtx,
-        family: family,
-        weight: valueWeight,
-        textFillScale: textFillScale
-      }, htmlUtils, tileLayout);
-      out.frontStyle = htmlMeasureUtils.measureStyle({
-        rect: layout.frontRect,
-        text: toText(model.frontText),
-        maxPxRatio: resolveFrontRatio(layout.mode),
-        textApi: textApi,
-        tileLayout: tileLayout,
-        ctx: measureCtx,
-        family: family,
-        weight: labelWeight,
-        textFillScale: textFillScale
-      }, htmlUtils, tileLayout);
+      out.nameStyle = htmlMeasureUtils.measureStyle(
+        {
+          rect: layout.nameRect,
+          text: toText(model.nameText),
+          maxPxRatio: modeRatio.resolve(layout.mode, NAME_MAX_PX_RATIO),
+          textApi: textApi,
+          tileLayout: tileLayout,
+          ctx: measureCtx,
+          family: family,
+          weight: valueWeight,
+          textFillScale: textFillScale
+        },
+        htmlUtils,
+        tileLayout
+      );
+      out.frontStyle = htmlMeasureUtils.measureStyle(
+        {
+          rect: layout.frontRect,
+          text: toText(model.frontText),
+          maxPxRatio: resolveFrontRatio(layout.mode),
+          textApi: textApi,
+          tileLayout: tileLayout,
+          ctx: measureCtx,
+          family: family,
+          weight: labelWeight,
+          textFillScale: textFillScale
+        },
+        htmlUtils,
+        tileLayout
+      );
       const metricIds = model.visibleMetricIds;
       const metrics = toObject(model.metrics);
       const isFlatMode = layout.mode === "flat";
@@ -235,16 +252,21 @@
           if (!flatRects) {
             continue;
           }
-          const flatValueFit = selectMetricValueFit({
-            rect: flatRects.valueRect,
-            valueText: metric.valueText,
-            plainText: metric.plainValueText,
-            textApi: textApi,
-            ctx: measureCtx,
-            family: metricFamily,
-            weight: valueWeight,
-            textFillScale: textFillScale
-          }, htmlUtils, tileLayout, htmlMeasureUtils);
+          const flatValueFit = selectMetricValueFit(
+            {
+              rect: flatRects.valueRect,
+              valueText: metric.valueText,
+              plainText: metric.plainValueText,
+              textApi: textApi,
+              ctx: measureCtx,
+              family: metricFamily,
+              weight: valueWeight,
+              textFillScale: textFillScale
+            },
+            htmlUtils,
+            tileLayout,
+            htmlMeasureUtils
+          );
           const flatSecondaryMaxPx = fitMath.resolveSecondaryMaxPx({
             valuePx: flatValueFit.valuePx,
             valueRect: flatRects.valueRect,
@@ -253,33 +275,41 @@
           });
 
           out.metrics[id] = {
-            captionStyle: htmlMeasureUtils.measureStyle({
-              rect: flatRects.captionRect,
-              text: toText(metric.captionText),
-              maxPx: flatSecondaryMaxPx,
-              maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
-              textApi: textApi,
-              tileLayout: tileLayout,
-              ctx: measureCtx,
-              family: family,
-              weight: labelWeight,
-              textFillScale: 1
-            }, htmlUtils, tileLayout),
+            captionStyle: htmlMeasureUtils.measureStyle(
+              {
+                rect: flatRects.captionRect,
+                text: toText(metric.captionText),
+                maxPx: flatSecondaryMaxPx,
+                maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+                textApi: textApi,
+                tileLayout: tileLayout,
+                ctx: measureCtx,
+                family: family,
+                weight: labelWeight,
+                textFillScale: 1
+              },
+              htmlUtils,
+              tileLayout
+            ),
             valueRowStyle: "",
             valueStyle: htmlMeasureUtils.toStyle(flatValueFit.valuePx, htmlUtils),
             valueText: flatValueFit.valueText,
-            unitStyle: htmlMeasureUtils.measureStyle({
-              rect: flatRects.unitRect,
-              text: toText(metric.unitText),
-              maxPx: flatSecondaryMaxPx,
-              maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
-              textApi: textApi,
-              tileLayout: tileLayout,
-              ctx: measureCtx,
-              family: family,
-              weight: labelWeight,
-              textFillScale: 1
-            }, htmlUtils, tileLayout)
+            unitStyle: htmlMeasureUtils.measureStyle(
+              {
+                rect: flatRects.unitRect,
+                text: toText(metric.unitText),
+                maxPx: flatSecondaryMaxPx,
+                maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+                textApi: textApi,
+                tileLayout: tileLayout,
+                ctx: measureCtx,
+                family: family,
+                weight: labelWeight,
+                textFillScale: 1
+              },
+              htmlUtils,
+              tileLayout
+            )
           };
           continue;
         }
@@ -290,16 +320,21 @@
         }
 
         const inlineValueRect = inlineRects.valueTextRect || inlineRects.valueRect;
-        const inlineValueFit = selectMetricValueFit({
-          rect: inlineValueRect,
-          valueText: metric.valueText,
-          plainText: metric.plainValueText,
-          textApi: textApi,
-          ctx: measureCtx,
-          family: metricFamily,
-          weight: valueWeight,
-          textFillScale: textFillScale
-        }, htmlUtils, tileLayout, htmlMeasureUtils);
+        const inlineValueFit = selectMetricValueFit(
+          {
+            rect: inlineValueRect,
+            valueText: metric.valueText,
+            plainText: metric.plainValueText,
+            textApi: textApi,
+            ctx: measureCtx,
+            family: metricFamily,
+            weight: valueWeight,
+            textFillScale: textFillScale
+          },
+          htmlUtils,
+          tileLayout,
+          htmlMeasureUtils
+        );
         const inlineSecondaryMaxPx = fitMath.resolveSecondaryMaxPx({
           valuePx: inlineValueFit.valuePx,
           valueRect: inlineValueRect,
@@ -308,33 +343,41 @@
         });
 
         out.metrics[id] = {
-          captionStyle: htmlMeasureUtils.measureStyle({
-            rect: inlineRects.labelRect,
-            text: toText(metric.captionText),
-            maxPx: inlineSecondaryMaxPx,
-            maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
-            textApi: textApi,
-            tileLayout: tileLayout,
-            ctx: measureCtx,
-            family: family,
-            weight: labelWeight,
-            textFillScale: 1
-          }, htmlUtils, tileLayout),
+          captionStyle: htmlMeasureUtils.measureStyle(
+            {
+              rect: inlineRects.labelRect,
+              text: toText(metric.captionText),
+              maxPx: inlineSecondaryMaxPx,
+              maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+              textApi: textApi,
+              tileLayout: tileLayout,
+              ctx: measureCtx,
+              family: family,
+              weight: labelWeight,
+              textFillScale: 1
+            },
+            htmlUtils,
+            tileLayout
+          ),
           valueRowStyle: "",
           valueStyle: htmlMeasureUtils.toStyle(inlineValueFit.valuePx, htmlUtils),
           valueText: inlineValueFit.valueText,
-          unitStyle: htmlMeasureUtils.measureStyle({
-            rect: inlineRects.unitRect,
-            text: toText(metric.unitText),
-            maxPx: inlineSecondaryMaxPx,
-            maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
-            textApi: textApi,
-            tileLayout: tileLayout,
-            ctx: measureCtx,
-            family: family,
-            weight: labelWeight,
-            textFillScale: 1
-          }, htmlUtils, tileLayout)
+          unitStyle: htmlMeasureUtils.measureStyle(
+            {
+              rect: inlineRects.unitRect,
+              text: toText(metric.unitText),
+              maxPx: inlineSecondaryMaxPx,
+              maxPxRatio: METRIC_VALUE_MAX_PX_RATIO,
+              textApi: textApi,
+              tileLayout: tileLayout,
+              ctx: measureCtx,
+              family: family,
+              weight: labelWeight,
+              textFillScale: 1
+            },
+            htmlUtils,
+            tileLayout
+          )
         };
       }
 
@@ -346,4 +389,4 @@
     };
   }
   return { id: "AisTargetHtmlFit", create: create };
-}));
+});

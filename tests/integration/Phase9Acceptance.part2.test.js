@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { loadFresh } = require("../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../helpers/mock-canvas");
 const { createComponentContextMock } = require("../helpers/component-context-mock");
@@ -28,11 +29,13 @@ function createActiveRouteWidget() {
       });
     },
     formatActiveRouteMetric(rawValue, formatter, formatterParameters, defaultText, placeholderNormalize) {
-      const out = String(componentContext.format.applyFormatter(rawValue, {
-        formatter: formatter,
-        formatterParameters: formatterParameters,
-        default: defaultText
-      }));
+      const out = String(
+        componentContext.format.applyFormatter(rawValue, {
+          formatter: formatter,
+          formatterParameters: formatterParameters,
+          default: defaultText
+        })
+      );
       return placeholderNormalize.normalize(out, defaultText);
     },
     textLength(value) {
@@ -118,83 +121,57 @@ function createRenderModelContext() {
     if (!moduleCache[id]) {
       if (id === "EditRouteLayout") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayout.js");
-      }
-      else if (id === "EditRouteLayoutMath") {
+      } else if (id === "EditRouteLayoutMath") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayoutMath.js");
-      }
-      else if (id === "EditRouteLayoutGeometry") {
+      } else if (id === "EditRouteLayoutGeometry") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/EditRouteLayoutGeometry.js");
-      }
-      else if (id === "ResponsiveScaleProfile") {
+      } else if (id === "ResponsiveScaleProfile") {
         moduleCache[id] = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-      }
-      else if (id === "LayoutRectMath") {
+      } else if (id === "LayoutRectMath") {
         moduleCache[id] = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
-      }
-      else if (id === "RoutePointsLayout") {
+      } else if (id === "RoutePointsLayout") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayout.js");
-      }
-      else if (id === "RadialTextFitting") {
+      } else if (id === "RadialTextFitting") {
         moduleCache[id] = loadFresh("shared/widget-kits/radial/RadialTextFitting.js");
-      }
-      else if (id === "CanvasTextLayout") {
+      } else if (id === "CanvasTextLayout") {
         moduleCache[id] = loadFresh("shared/widget-kits/text/CanvasTextLayout.js");
-      }
-      else if (id === "TextTileLayout") {
+      } else if (id === "TextTileLayout") {
         moduleCache[id] = loadFresh("shared/widget-kits/text/TextTileLayout.js");
-      }
-      else if (id === "RoutePointsInfoText") {
+      } else if (id === "RoutePointsInfoText") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsInfoText.js");
-      }
-      else if (id === "RoutePointsHtmlFit") {
+      } else if (id === "RoutePointsHtmlFit") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsHtmlFit.js");
-      }
-      else if (id === "RoutePointsLayoutSizing") {
+      } else if (id === "RoutePointsLayoutSizing") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
-      }
-      else if (id === "RoutePointsRowGeometry") {
+      } else if (id === "RoutePointsRowGeometry") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/RoutePointsRowGeometry.js");
-      }
-      else if (id === "CenterDisplayMath") {
+      } else if (id === "CenterDisplayMath") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/CenterDisplayMath.js");
-      }
-      else if (id === "AisTargetLayout") {
+      } else if (id === "AisTargetLayout") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayout.js");
-      }
-      else if (id === "AisTargetLayoutSizing") {
+      } else if (id === "AisTargetLayoutSizing") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
-      }
-      else if (id === "AisTargetLayoutGeometry") {
+      } else if (id === "AisTargetLayoutGeometry") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
-      }
-      else if (id === "AisTargetLayoutMath") {
+      } else if (id === "AisTargetLayoutMath") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
-      }
-      else if (id === "HtmlWidgetUtils") {
+      } else if (id === "HtmlWidgetUtils") {
         moduleCache[id] = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
-      }
-      else if (id === "UnitAwareFormatter") {
+      } else if (id === "UnitAwareFormatter") {
         moduleCache[id] = loadFresh("shared/widget-kits/format/UnitAwareFormatter.js");
-      }
-      else if (id === "NavInteractionPolicy") {
+      } else if (id === "NavInteractionPolicy") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/NavInteractionPolicy.js");
-      }
-      else if (id === "PlaceholderNormalize") {
+      } else if (id === "PlaceholderNormalize") {
         moduleCache[id] = loadFresh("shared/widget-kits/format/PlaceholderNormalize.js");
-      }
-      else if (id === "StableDigits") {
+      } else if (id === "StableDigits") {
         moduleCache[id] = loadFresh("shared/widget-kits/format/StableDigits.js");
-      }
-      else if (id === "StateScreenLabels") {
+      } else if (id === "StateScreenLabels") {
         moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenLabels.js");
-      }
-      else if (id === "StateScreenPrecedence") {
+      } else if (id === "StateScreenPrecedence") {
         moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenPrecedence.js");
-      }
-      else if (id === "StateScreenInteraction") {
+      } else if (id === "StateScreenInteraction") {
         moduleCache[id] = loadFresh("shared/widget-kits/state/StateScreenInteraction.js");
-      }
-      else {
+      } else {
         throw new Error("unexpected module: " + id);
       }
     }
@@ -237,25 +214,25 @@ function createRenderModelContext() {
     services: {
       format: {
         applyFormatter(value, formatterOptions) {
-      const cfg = formatterOptions || {};
-      if (value == null || Number.isNaN(value)) {
-        return Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
-      }
-      if (cfg.formatter === "formatDecimal") {
-        const precision = Array.isArray(cfg.formatterParameters) ? Number(cfg.formatterParameters[0]) : 0;
-        const places = Number.isFinite(precision) ? Math.max(0, Math.floor(precision)) : 0;
-        return Number(value).toFixed(places);
-      }
-      if (cfg.formatter === "formatDistance") {
-        return Number(value).toFixed(1);
-      }
-      if (cfg.formatter === "formatTime") {
-        return "TIME:" + String(value);
-      }
-      if (cfg.formatter === "formatClock") {
-        return "CLOCK:" + String(value);
-      }
-      return String(value);
+          const cfg = formatterOptions || {};
+          if (value == null || Number.isNaN(value)) {
+            return Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
+          }
+          if (cfg.formatter === "formatDecimal") {
+            const precision = Array.isArray(cfg.formatterParameters) ? Number(cfg.formatterParameters[0]) : 0;
+            const places = Number.isFinite(precision) ? Math.max(0, Math.floor(precision)) : 0;
+            return Number(value).toFixed(places);
+          }
+          if (cfg.formatter === "formatDistance") {
+            return Number(value).toFixed(1);
+          }
+          if (cfg.formatter === "formatTime") {
+            return "TIME:" + String(value);
+          }
+          if (cfg.formatter === "formatClock") {
+            return "CLOCK:" + String(value);
+          }
+          return String(value);
         }
       },
       themeTokens: {
@@ -287,11 +264,14 @@ function createAisTargetRenderModel() {
 }
 
 function createStateOverlay() {
-  return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js").create({}, createComponentContextMock({
-    modules: {
-      StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js")
-    }
-  }));
+  return loadFresh("shared/widget-kits/state/StateScreenCanvasOverlay.js").create(
+    {},
+    createComponentContextMock({
+      modules: {
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js")
+      }
+    })
+  );
 }
 
 function createSpringMotion() {
@@ -326,7 +306,13 @@ describe("Phase 9 acceptance coverage", function () {
         interaction: { mode: "dispatch" },
         pageId: "navpage",
         containerOrientation: "default",
-        actions: { routeEditor: { openActiveRoute() { return true; } } }
+        actions: {
+          routeEditor: {
+            openActiveRoute() {
+              return true;
+            }
+          }
+        }
       }
     });
 
@@ -375,5 +361,4 @@ describe("Phase 9 acceptance coverage", function () {
     expect(routePointsModel.points[0].infoText).toBe("--kt/--nm");
     expect(routePointsModel.points[0].infoText).not.toBe("---");
   });
-
 });

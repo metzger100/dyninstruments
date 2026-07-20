@@ -65,12 +65,7 @@
         type: "BOOLEAN",
         default: true,
         name: "Smooth motion",
-        condition: [
-          { kind: "depthLinear" },
-          { kind: "depthRadial" },
-          { kind: "tempLinear" },
-          { kind: "tempRadial" }
-        ]
+        condition: [{ kind: "depthLinear" }, { kind: "depthRadial" }, { kind: "tempLinear" }, { kind: "tempRadial" }]
       },
       depthLinearHideTextualMetrics: {
         type: "BOOLEAN",
@@ -104,7 +99,11 @@
     return {
       // Shared scale (numeric + radial)
       captionUnitScale: {
-        type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
+        type: "FLOAT",
+        min: 0.5,
+        max: 1.5,
+        step: 0.05,
+        default: 0.8,
         name: "Caption/Unit size"
       },
       stableDigits: {
@@ -144,17 +143,25 @@
     return {
       // ThreeValueTextWidget thresholds (numeric kinds)
       ratioThresholdNormal: {
-        type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+        type: "FLOAT",
+        min: 0.5,
+        max: 2.0,
+        step: 0.05,
+        default: 1.0,
         internal: true,
         name: "3-Rows Threshold (numeric)",
         condition: [{ kind: "depth" }, { kind: "temp" }, { kind: "pressure" }]
       },
       ratioThresholdFlat: {
-        type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+        type: "FLOAT",
+        min: 1.5,
+        max: 6.0,
+        step: 0.05,
+        default: 3.0,
         internal: true,
         name: "1-Row Threshold (numeric)",
         condition: [{ kind: "depth" }, { kind: "temp" }, { kind: "pressure" }]
       }
     };
   };
-}(this));
+})(this);

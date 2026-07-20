@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniStateScreenTextFit = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const MIN_FONT_PX = 0.5;
@@ -82,44 +82,35 @@
         return "";
       }
 
-      const measureCtx = cfg.measureCtx && typeof cfg.measureCtx.measureText === "function"
-        ? cfg.measureCtx
-        : htmlMeasureUtils.resolveMeasureContext(
-          cfg.hostContext,
-          cfg.targetEl || cfg.ownerDocument || null
-        );
+      const measureCtx =
+        cfg.measureCtx && typeof cfg.measureCtx.measureText === "function"
+          ? cfg.measureCtx
+          : htmlMeasureUtils.resolveMeasureContext(cfg.hostContext, cfg.targetEl || cfg.ownerDocument || null);
       if (!measureCtx || typeof measureCtx.measureText !== "function") {
         return "";
       }
 
-      const textApi = cfg.textApi && typeof cfg.textApi.fitSingleTextPx === "function"
-        ? cfg.textApi
-        : {
-          /**
-           * @param {CanvasRenderingContext2D} ctx
-           * @param {unknown} text
-           * @param {unknown} basePx
-           * @param {unknown} maxW
-           * @param {unknown} maxH
-           * @param {unknown} family
-           * @param {unknown} weight
-           * @returns {number}
-           */
-          fitSingleTextPx: function (ctx, text, basePx, maxW, maxH, family, weight) {
-            return fitStateScreenTextPx(ctx, text, basePx, maxW, maxH, family, weight, fitting);
-          }
-        };
+      const textApi =
+        cfg.textApi && typeof cfg.textApi.fitSingleTextPx === "function"
+          ? cfg.textApi
+          : {
+              /**
+               * @param {CanvasRenderingContext2D} ctx
+               * @param {unknown} text
+               * @param {unknown} basePx
+               * @param {unknown} maxW
+               * @param {unknown} maxH
+               * @param {unknown} family
+               * @param {unknown} weight
+               * @returns {number}
+               */
+              fitSingleTextPx: function (ctx, text, basePx, maxW, maxH, family, weight) {
+                return fitStateScreenTextPx(ctx, text, basePx, maxW, maxH, family, weight, fitting);
+              }
+            };
       const family = String(cfg.family || DEFAULT_FAMILY);
       const weight = clampPositive(cfg.weight, DEFAULT_WEIGHT);
-      const fittedPx = textApi.fitSingleTextPx(
-        measureCtx,
-        label,
-        maxH,
-        maxW,
-        maxH,
-        family,
-        weight
-      );
+      const fittedPx = textApi.fitSingleTextPx(measureCtx, label, maxH, maxW, maxH, family, weight);
 
       return htmlUtils.toFontStyle(fittedPx);
     }
@@ -134,4 +125,4 @@
     id: "StateScreenTextFit",
     create: create
   };
-}));
+});

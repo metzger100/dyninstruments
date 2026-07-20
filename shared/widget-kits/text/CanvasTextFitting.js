@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniCanvasTextFitting = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const hasOwn = Object.prototype.hasOwnProperty;
@@ -145,12 +145,11 @@
       const hasUnit = !!unit;
       const ratio = Number(secScale);
       const scale = Number.isFinite(ratio) ? ratio : 0.8;
-      const opts = textOptions && typeof textOptions === "object"
-        ? /** @type {{ useMono?: unknown, monoFamily?: unknown }} */ (textOptions)
-        : null;
-      const valueFamily = opts && opts.useMono === true
-        ? (opts.monoFamily || family)
-        : family;
+      const opts =
+        textOptions && typeof textOptions === "object"
+          ? /** @type {{ useMono?: unknown, monoFamily?: unknown }} */ (textOptions)
+          : null;
+      const valueFamily = opts && opts.useMono === true ? opts.monoFamily || family : family;
 
       if (maxW <= 0) {
         return { vPx: MIN_FONT_PX, uPx: hasUnit ? MIN_FONT_PX : 0, gap: 0, total: 0 };
@@ -291,4 +290,4 @@
   }
 
   return { id: "CanvasTextFitting", create: create };
-}));
+});

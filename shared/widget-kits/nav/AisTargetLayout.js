@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAisTargetLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -82,10 +82,7 @@
       const identityMetricsGap = Math.max(0, insets.identityMetricsGap);
       const maxIdentityHeight = Math.max(1, contentRect.h - identityMetricsGap - 1);
       const boundedRowMinHeight = Math.max(1, Math.floor(Number(rowMinHeight) || 1));
-      const minIdentityHeight = Math.min(
-        maxIdentityHeight,
-        Math.max(1, boundedRowMinHeight * 2 + identityGap)
-      );
+      const minIdentityHeight = Math.min(maxIdentityHeight, Math.max(1, boundedRowMinHeight * 2 + identityGap));
       let identityHeight = Math.max(1, Math.floor(contentRect.h * identityShare));
       identityHeight = Math.max(minIdentityHeight, Math.min(maxIdentityHeight, identityHeight));
       const metricsHeight = Math.max(1, contentRect.h - identityHeight - identityMetricsGap);
@@ -110,9 +107,7 @@
      */
     function computeLayout(args) {
       const cfg = /** @type {DyniAisTargetLayoutArgs} */ (args || {});
-      const renderState = cfg.renderState === "data" || cfg.renderState === "placeholder"
-        ? cfg.renderState
-        : "hidden";
+      const renderState = cfg.renderState === "data" || cfg.renderState === "placeholder" ? cfg.renderState : "hidden";
       const showTcpaBranch = cfg.showTcpaBranch === true;
       const hasAccent = cfg.hasAccent === true && renderState === "data";
       const shellWidth = Math.max(1, Math.floor(clampNumber(cfg.W, 1, Number.MAX_SAFE_INTEGER, 1)));
@@ -133,13 +128,7 @@
         ratioThresholdFlat: cfg.ratioThresholdFlat,
         isVerticalCommitted: verticalShell.isVerticalCommitted
       });
-      const insets = computeInsets(
-        shellWidth,
-        effectiveHeight,
-        verticalShell.isVerticalCommitted,
-        mode,
-        hasAccent
-      );
+      const insets = computeInsets(shellWidth, effectiveHeight, verticalShell.isVerticalCommitted, mode, hasAccent);
       const contentRect = createContentRect(shellWidth, effectiveHeight, insets);
       const metricVisibility = resolveMetricVisibility(renderState);
       const metricOrder = resolveMetricOrder(renderState);
@@ -160,11 +149,11 @@
         contentRect: contentRect,
         accentRect: hasAccent
           ? makeRect(
-            insets.padX,
-            insets.padY,
-            Math.max(1, insets.accentWidth),
-            Math.max(1, effectiveHeight - insets.padY * 2)
-          )
+              insets.padX,
+              insets.padY,
+              Math.max(1, insets.accentWidth),
+              Math.max(1, effectiveHeight - insets.padY * 2)
+            )
           : null,
         placeholderRect: contentRect,
         identityRect: null,
@@ -216,7 +205,11 @@
         );
         out.metricsRect = metricsRect;
 
-        fillStackedMetricBoxes(out, rectApi.splitRow(metricsRect, insets.metricGridGap, 4, rectApi.makeRect), insets.responsive);
+        fillStackedMetricBoxes(
+          out,
+          rectApi.splitRow(metricsRect, insets.metricGridGap, 4, rectApi.makeRect),
+          insets.responsive
+        );
         return finalize(out);
       }
 
@@ -227,17 +220,8 @@
           0.42,
           0.62
         );
-        const rowMinHeight = profileApi.computeInsetPx(
-          insets.responsive,
-          NORMAL_IDENTITY_ROW_MIN_HEIGHT_RATIO,
-          3
-        );
-        const equalIdentityLayout = resolveEqualIdentityLayout(
-          contentRect,
-          insets,
-          identityShare,
-          rowMinHeight
-        );
+        const rowMinHeight = profileApi.computeInsetPx(insets.responsive, NORMAL_IDENTITY_ROW_MIN_HEIGHT_RATIO, 3);
+        const equalIdentityLayout = resolveEqualIdentityLayout(contentRect, insets, identityShare, rowMinHeight);
 
         out.identityRect = equalIdentityLayout.identityRect;
         out.nameRect = equalIdentityLayout.nameRect;
@@ -247,12 +231,7 @@
         const metricRows = rectApi.splitStack(out.metricsRect, insets.metricGridGap, 2, rectApi.makeRect);
         const rowA = rectApi.splitRow(metricRows[0], insets.metricGridGap, 2, rectApi.makeRect);
         const rowB = rectApi.splitRow(metricRows[1], insets.metricGridGap, 2, rectApi.makeRect);
-        fillInlineMetricBoxes(
-          out,
-          [rowA[0], rowA[1], rowB[0], rowB[1]],
-          insets.responsive,
-          mode
-        );
+        fillInlineMetricBoxes(out, [rowA[0], rowA[1], rowB[0], rowB[1]], insets.responsive, mode);
         return finalize(out);
       }
 
@@ -262,24 +241,20 @@
         0.3,
         0.52
       );
-      const rowMinHeight = profileApi.computeInsetPx(
-        insets.responsive,
-        HIGH_IDENTITY_ROW_MIN_HEIGHT_RATIO,
-        3
-      );
-      const equalIdentityLayout = resolveEqualIdentityLayout(
-        contentRect,
-        insets,
-        identityShare,
-        rowMinHeight
-      );
+      const rowMinHeight = profileApi.computeInsetPx(insets.responsive, HIGH_IDENTITY_ROW_MIN_HEIGHT_RATIO, 3);
+      const equalIdentityLayout = resolveEqualIdentityLayout(contentRect, insets, identityShare, rowMinHeight);
 
       out.identityRect = equalIdentityLayout.identityRect;
       out.nameRect = equalIdentityLayout.nameRect;
       out.frontRect = equalIdentityLayout.frontRect;
       out.metricsRect = equalIdentityLayout.metricsRect;
 
-      fillInlineMetricBoxes(out, rectApi.splitStack(out.metricsRect, insets.metricGridGap, 4, rectApi.makeRect), insets.responsive, mode);
+      fillInlineMetricBoxes(
+        out,
+        rectApi.splitStack(out.metricsRect, insets.metricGridGap, 4, rectApi.makeRect),
+        insets.responsive,
+        mode
+      );
       return finalize(out);
     }
 
@@ -296,4 +271,4 @@
 
   /** @type {DyniAisTargetLayoutModule} */
   return { id: "AisTargetLayout", create: create };
-}));
+});

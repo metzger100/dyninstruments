@@ -1,3 +1,4 @@
+// @ts-nocheck
 const {
   makeThemeDefaults,
   makeComponentContext,
@@ -5,7 +6,7 @@ const {
   createBaseSequence,
   createValueMath,
   makeBaseSpec,
-  createRenderHarness,
+  createRenderHarness
 } = require("./SemicircleRadialEngine.harness");
 
 describe("SemicircleRadialEngine", function () {
@@ -18,10 +19,10 @@ describe("SemicircleRadialEngine", function () {
             theme: {
               resolveForRoot() {
                 return makeThemeDefaults();
-              },
+              }
             },
             text: {
-              drawDisconnectOverlay() {},
+              drawDisconnectOverlay() {}
             },
             value: createValueMath(),
             draw: {
@@ -29,29 +30,25 @@ describe("SemicircleRadialEngine", function () {
               drawAnnularSector() {},
               drawPointerAtRim() {},
               drawTicksFromAngles() {},
-              drawLabels() {},
-            },
+              drawLabels() {}
+            }
           };
-        },
+        }
       },
-      SemicircleRadialLayout: loadFresh(
-        "shared/widget-kits/radial/SemicircleRadialLayout.js",
-      ),
+      SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
       SemicircleRadialTextLayout: {
         create() {
           return {
             createFitCache() {
               return {};
             },
-            drawModeText() {},
+            drawModeText() {}
           };
-        },
+        }
       },
-      ResponsiveScaleProfile: loadFresh(
-        "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-      ),
+      ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
       LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-      GeometryScale: geometryScale,
+      GeometryScale: geometryScale
     };
     const spec = makeBaseSpec();
     delete spec.rangeDefaults;
@@ -59,9 +56,7 @@ describe("SemicircleRadialEngine", function () {
       capturedRange = { min: minV, max: maxV };
       return [];
     };
-    const renderer = loadFresh(
-      "shared/widget-kits/radial/SemicircleRadialEngine.js",
-    )
+    const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
       .create({}, makeComponentContext(modules))
       .createRenderer(spec);
 
@@ -69,18 +64,17 @@ describe("SemicircleRadialEngine", function () {
       createMockCanvas({
         rectWidth: 300,
         rectHeight: 300,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
       {
         value: 12.3,
         caption: "SPD",
         unit: "kn",
         speedRadialRatioThresholdNormal: 1.1,
-        speedRadialRatioThresholdFlat: 3.5,
-      },
+        speedRadialRatioThresholdFlat: 3.5
+      }
     );
 
     expect(capturedRange).toEqual({ min: 0, max: 30 });
   });
-
 });

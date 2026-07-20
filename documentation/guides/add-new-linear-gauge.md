@@ -13,28 +13,32 @@ Read first:
 
 ## Overview
 
-Linear gauges should be thin wrappers over `LinearGaugeEngine`.
-Cluster host registration remains `renderHtml`; linear canvas wrappers run on internal `surface: "canvas-dom"` routes.
-Route selection lives in `config.clusterRoutes.byRouteId`; it owns `mapperId`, `rendererId`, `surface`, optional `viewModelId`, and `shellSizing`.
+Linear gauges should be thin wrappers over `LinearGaugeEngine`. Cluster host registration remains `renderHtml`; linear
+canvas wrappers run on internal `surface: "canvas-dom"` routes. Route selection lives in
+`config.clusterRoutes.byRouteId`; it owns `mapperId`, `rendererId`, `surface`, optional `viewModelId`, and
+`shellSizing`.
 
 Select a profile first, then keep the wrapper focused on formatter, ticks, axis mode, and sectors.
 
 Responsive ownership:
 
 - `ResponsiveScaleProfile` is consumed by `LinearGaugeLayout`, not by wrapper widgets.
-- `GeometryScale` converts the linear primary dimension into graphical pixels; wrapper widgets do not scale linework directly.
-- `LinearGaugeEngine` exposes layout-owned `state.responsive`, `state.textFillScale`, and `state.compactGeometryScale` to hooks and shared text helpers.
-- Do not add wrapper-local user-visible responsive `Math.max(...)` / `clamp(...)` floors or import `ResponsiveScaleProfile` directly in linear wrappers.
+- `GeometryScale` converts the linear primary dimension into graphical pixels; wrapper widgets do not scale linework
+  directly.
+- `LinearGaugeEngine` exposes layout-owned `state.responsive`, `state.textFillScale`, and `state.compactGeometryScale`
+  to hooks and shared text helpers.
+- Do not add wrapper-local user-visible responsive `Math.max(...)` / `clamp(...)` floors or import
+  `ResponsiveScaleProfile` directly in linear wrappers.
 
 ## Step 0: Choose Profile
 
-| Profile | `axisMode` | Typical kinds | Domain | Sector style |
-|---|---|---|---|---|
-| Range high-end | `range` | `sogLinear`, `stwLinear` | Editable `min/max` | Warning/Alarm near max |
-| Range low-end | `range` | `depthLinear`, `voltageLinear` | Editable `min/max` | Alarm/Warning near min |
-| Range optional high-end | `range` | `tempLinear` | Editable `min/max` | Optional high-end thresholds |
-| Centered wind-angle | `centered180` | `angleTrueLinear`, `angleApparentLinear` | Fixed `-180..180` | Optional mirrored laylines |
-| Fixed compass | `fixed360` | `hdtLinear`, `hdmLinear` | Fixed `0..360` | Usually none |
+| Profile                 | `axisMode`    | Typical kinds                            | Domain             | Sector style                 |
+| ----------------------- | ------------- | ---------------------------------------- | ------------------ | ---------------------------- |
+| Range high-end          | `range`       | `sogLinear`, `stwLinear`                 | Editable `min/max` | Warning/Alarm near max       |
+| Range low-end           | `range`       | `depthLinear`, `voltageLinear`           | Editable `min/max` | Alarm/Warning near min       |
+| Range optional high-end | `range`       | `tempLinear`                             | Editable `min/max` | Optional high-end thresholds |
+| Centered wind-angle     | `centered180` | `angleTrueLinear`, `angleApparentLinear` | Fixed `-180..180`  | Optional mirrored laylines   |
+| Fixed compass           | `fixed360`    | `hdtLinear`, `hdmLinear`                 | Fixed `0..360`     | Usually none                 |
 
 ## Step 1: Create Wrapper Module
 
@@ -59,11 +63,13 @@ const valueMath = componentContext.components.require("ValueMath");
 function formatDisplay(raw, props, unit) {
   const n = raw == null ? NaN : Number(raw);
   if (!isFinite(n)) return { num: NaN, text: "---" };
-  const out = String(componentContext.format.applyFormatter(n, {
-    formatter: "formatDecimal",
-    formatterParameters: [3, 1, true],
-    default: "---"
-  }));
+  const out = String(
+    componentContext.format.applyFormatter(n, {
+      formatter: "formatDecimal",
+      formatterParameters: [3, 1, true],
+      default: "---"
+    })
+  );
   const text = valueMath.extractNumberText(out);
   const numeric = Number(text);
   return isFinite(numeric) ? { num: numeric, text: text } : { num: NaN, text: "---" };
@@ -74,7 +80,9 @@ function formatDisplay(raw, props, unit) {
 
 ### A) Range profile template
 
-For config-backed plugin wrappers, pass `rangeProps` and `ratioProps` only. `rangeDefaults` and `ratioDefaults` stay available for non-config consumers, but plugin wrappers should trust the editable/default pipeline instead of duplicating those literals.
+For config-backed plugin wrappers, pass `rangeProps` and `ratioProps` only. `rangeDefaults` and `ratioDefaults` stay
+available for non-config consumers, but plugin wrappers should trust the editable/default pipeline instead of
+duplicating those literals.
 
 ```javascript
 const renderCanvas = engine.createRenderer({
@@ -150,7 +158,8 @@ Use gauge-prefixed editable keys:
 - Ratio thresholds: `{gauge}LinearRatioThresholdNormal`, `{gauge}LinearRatioThresholdFlat`
 - Ticks: `{gauge}LinearTickMajor`, `{gauge}LinearTickMinor`, `{gauge}LinearShowEndLabels`
 - Range domain: `{gauge}LinearMinValue`, `{gauge}LinearMaxValue`
-- High/low-end sectors: `{gauge}LinearWarningEnabled`, `{gauge}LinearAlarmEnabled`, `{gauge}LinearWarningFrom`, `{gauge}LinearAlarmFrom`
+- High/low-end sectors: `{gauge}LinearWarningEnabled`, `{gauge}LinearAlarmEnabled`, `{gauge}LinearWarningFrom`,
+  `{gauge}LinearAlarmFrom`
 - Wind mirrored sectors: `{gauge}LinearLayEnabled`, `{gauge}LinearLayMin`, `{gauge}LinearLayMax`
 
 Only expose keys relevant for the selected kind via `condition`.
@@ -158,9 +167,11 @@ Only expose keys relevant for the selected kind via `condition`.
 ## Step 4: Register Component
 
 1. `config/components/registry-widgets-gauge.js`
+
 - Add `NewLinearWidget` entry
 
-If the linear gauge needs a new renderer component, register that component in the relevant `config/components/registry-*.js` fragment and keep its shadow CSS with the component.
+If the linear gauge needs a new renderer component, register that component in the relevant
+`config/components/registry-*.js` fragment and keep its shadow CSS with the component.
 
 ## Step 5: Add Route Metadata
 
@@ -174,7 +185,8 @@ Set:
 - optional `viewModelId`
 - `shellSizing`
 
-Do not add ad hoc router, catalog, or renderer-props wiring here; route metadata plus `ClusterWidget`, `RouteActivationController`, and `RouteActivationPayloadBuilder` own the live route selection.
+Do not add ad hoc router, catalog, or renderer-props wiring here; route metadata plus `ClusterWidget`,
+`RouteActivationController`, and `RouteActivationPayloadBuilder` own the live route selection.
 
 ## Step 6: Mapper Wiring
 

@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRoutePointsTextHtmlWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {DyniComponentContext & { theme: { tokens: DyniRoutePointsThemeResolver } }} DyniRoutePointsWidgetContext */
   /** @typedef {{ props: DyniWidgetValues, shellRect?: DyniHtmlShellRect | null, rootEl?: HTMLElement | null, layoutChanged?: boolean }} DyniRoutePointsWidgetPayload */
@@ -69,7 +69,9 @@
 
     /** @param {unknown} rendererContext */
     function createCommittedRenderer(rendererContext) {
-      const context = /** @type {Record<string, unknown>} */ (rendererContext && typeof rendererContext === "object" ? rendererContext : {});
+      const context = /** @type {Record<string, unknown>} */ (
+        rendererContext && typeof rendererContext === "object" ? rendererContext : {}
+      );
       const hostContext = context.hostContext || {};
 
       /** @type {HTMLElement | null} */
@@ -84,7 +86,7 @@
       let lastProps = null;
       /** @type {DyniRoutePointsRenderModel | null} */
       let lastModel = null;
-    /** @type {DyniRoutePointsHtmlFitResult} */
+      /** @type {DyniRoutePointsHtmlFitResult} */
       let lastFit = { headerFit: null, rowFits: [], emptyStyle: "" };
       let scrollbarGutterPx = 0;
 
@@ -109,9 +111,10 @@
           }
 
           const policy = htmlUtils.resolveSurfacePolicy(lastProps);
-          const actions = policy && policy.actions
-            ? /** @type {{ routePoints?: { activate?: (args: unknown) => void } }} */ (policy.actions)
-            : null;
+          const actions =
+            policy && policy.actions
+              ? /** @type {{ routePoints?: { activate?: (args: unknown) => void } }} */ (policy.actions)
+              : null;
           const routePointActions = actions ? actions.routePoints : null;
           if (!routePointActions || typeof routePointActions.activate !== "function") {
             return;
@@ -133,29 +136,33 @@
         const shouldComputeFit = model.kind === "data" && (payload.layoutChanged || !lastFit);
         const computedFit = shouldComputeFit
           ? htmlFit.compute({
-            model: model,
-            hostContext: hostContext,
-            targetEl: payload.rootEl,
-            shellRect: shellRect
-          }) : null;
+              model: model,
+              hostContext: hostContext,
+              targetEl: payload.rootEl,
+              shellRect: shellRect
+            })
+          : null;
         const rawFit = computedFit || lastFit;
         const fit = rawFit
           ? {
-            headerFit: rawFit.headerFit || { routeNameStyle: "", metaStyle: "" },
-            rowFits: rawFit.rowFits
-          }
+              headerFit: rawFit.headerFit || { routeNameStyle: "", metaStyle: "" },
+              rowFits: rawFit.rowFits
+            }
           : { headerFit: { routeNameStyle: "", metaStyle: "" }, rowFits: [] };
 
         htmlUtils.applyMirroredContext(rootEl, payload.props);
-        wrapperEl = htmlUtils.patchInnerHtml(rootEl, markup.render({
-          model: model,
-          fit: fit,
-          coordinatesTabular: payload.props && payload.props.coordinatesTabular !== false,
-          htmlUtils: htmlUtils,
-          shellRect: shellRect,
-          fontFamily: theme.font.family,
-          fontWeight: theme.font.labelWeight
-        }));
+        wrapperEl = htmlUtils.patchInnerHtml(
+          rootEl,
+          markup.render({
+            model: model,
+            fit: fit,
+            coordinatesTabular: payload.props && payload.props.coordinatesTabular !== false,
+            htmlUtils: htmlUtils,
+            shellRect: shellRect,
+            fontFamily: theme.font.family,
+            fontWeight: theme.font.labelWeight
+          })
+        );
         lastProps = payload.props;
         lastModel = model;
         lastFit = rawFit;
@@ -251,4 +258,4 @@
   }
 
   return { id: "RoutePointsTextHtmlWidget", create: create };
-}));
+});

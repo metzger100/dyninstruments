@@ -1,31 +1,29 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
-const {
-  createMockCanvas,
-  createMockContext2D,
-} = require("../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
+const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("CanvasLayerCache", function () {
+  /** @param {any} [spec] */
   function createCache(spec) {
     const mod = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
     return mod.create({}, createComponentContextMock()).createLayerCache(spec);
   }
 
+  /** @param {number} bufferW @param {number} bufferH @param {number} rectW @param {number} rectH */
   function createSizedCanvas(bufferW, bufferH, rectW, rectH) {
     const canvas = createMockCanvas({
       rectWidth: rectW,
       rectHeight: rectH,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     canvas.width = bufferW;
     canvas.height = bufferH;
     return canvas;
   }
 
+  /** @param {any} ctx */
   function drawImageCalls(ctx) {
-    return ctx.calls.filter(function (entry) {
+    return ctx.calls.filter(function (/** @type {any} */ entry) {
       return entry.name === "drawImage";
     });
   }
@@ -33,14 +31,18 @@ describe("CanvasLayerCache", function () {
   it("rebuilds on first ensure, skips same key, and rebuilds on key change", function () {
     const cache = createCache();
     const canvas = createSizedCanvas(640, 360, 320, 180);
-    const rebuilt = [];
+    const rebuilt = /** @type {any[]} */ ([]);
 
-    const rebuild = function (layerCtx, layerName, layerCanvas) {
+    const rebuild = function (
+      /** @type {any} */ layerCtx,
+      /** @type {any} */ layerName,
+      /** @type {any} */ layerCanvas
+    ) {
       rebuilt.push({
         layerName: layerName,
         width: layerCanvas.width,
         height: layerCanvas.height,
-        layerCtx: layerCtx,
+        layerCtx: layerCtx
       });
     };
 
@@ -88,10 +90,14 @@ describe("CanvasLayerCache", function () {
     const cache = createCache({ layers: ["back", "front"] });
     const canvas = createSizedCanvas(500, 250, 250, 125);
     const targetCtx = createMockContext2D();
-    const rebuilt = [];
-    const byName = {};
+    const rebuilt = /** @type {any[]} */ ([]);
+    const byName = /** @type {Record<string, any>} */ ({});
 
-    const rebuild = function (layerCtx, layerName, layerCanvas) {
+    const rebuild = function (
+      /** @type {any} */ layerCtx,
+      /** @type {any} */ layerName,
+      /** @type {any} */ layerCanvas
+    ) {
       rebuilt.push(layerName);
       byName[layerName] = layerCanvas;
     };
@@ -111,9 +117,13 @@ describe("CanvasLayerCache", function () {
   it("rebuilds when layer buffer size changes even with the same key", function () {
     const cache = createCache();
     const canvas = createSizedCanvas(400, 200, 200, 100);
-    const sizes = [];
+    const sizes = /** @type {number[][]} */ ([]);
 
-    const rebuild = function (layerCtx, layerName, layerCanvas) {
+    const rebuild = function (
+      /** @type {any} */ layerCtx,
+      /** @type {any} */ layerName,
+      /** @type {any} */ layerCanvas
+    ) {
       sizes.push([layerCanvas.width, layerCanvas.height]);
     };
 
@@ -124,7 +134,7 @@ describe("CanvasLayerCache", function () {
 
     expect(sizes).toEqual([
       [400, 200],
-      [800, 400],
+      [800, 400]
     ]);
   });
 });

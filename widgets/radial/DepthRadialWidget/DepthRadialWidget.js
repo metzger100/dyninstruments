@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniDepthRadialWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @param {unknown} def @param {DyniComponentContext} componentContext */
@@ -65,4 +65,4 @@
   }
 
   return { id: "DepthRadialWidget", create };
-}));
+});

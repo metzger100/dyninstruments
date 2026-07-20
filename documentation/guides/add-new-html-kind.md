@@ -33,39 +33,49 @@ Core rules:
 ## Steps
 
 1. Add mapper output and route metadata
+
 - map normalized payload in cluster mapper
-- add route entry in `config/cluster-routes/<cluster>.js` with `mapperId`, `rendererId`, `surface: "html"`, optional `viewModelId`, and `shellSizing`
+- add route entry in `config/cluster-routes/<cluster>.js` with `mapperId`, `rendererId`, `surface: "html"`, optional
+  `viewModelId`, and `shellSizing`
 - point `rendererId` at your renderer component
 - keep transitive dependencies in `config/components`; the route entry stays data-only
 
 2. Register component
-- add renderer entry in the appropriate fragment: `config/components/registry-widgets-nav.js` for nav/route HTML kinds or `config/components/registry-widgets-vessel.js` for vessel HTML kinds
+
+- add renderer entry in the appropriate fragment: `config/components/registry-widgets-nav.js` for nav/route HTML kinds
+  or `config/components/registry-widgets-vessel.js` for vessel HTML kinds
 - declare shadowCss bundle via shadowCss array
 - do not move route-specific shadowCss into route metadata
 
 3. Implement renderer component
+
 - expose createCommittedRenderer(rendererContext)
 - implement mount/update/postPatch/detach/destroy
 - optionally implement layoutSignature(payload)
 - if vertical mode is supported, keep sizing behavior in the renderer's shadow CSS and committed layout logic
 
 4. Keep shell and committed DOM separated
+
 - shell remains inert and payload-invariant except route/sizing metadata
 - semantic markup is produced only in committed renderer mount/update
-- route metadata owns the pre-activation shell size, and the committed renderer shadow CSS owns the post-activation size behavior
+- route metadata owns the pre-activation shell size, and the committed renderer shadow CSS owns the post-activation size
+  behavior
 
 5. Implement interaction policy
+
 - use payload.props.surfacePolicy.interaction.mode
 - dispatch mode: attach listeners and suppress blank-space click propagation inside wrapper
 - passive mode: no action listeners
 - dispatch via normalized callbacks in surfacePolicy.actions
 
 6. Implement shadow-local CSS
+
 - root selectors under .dyni-html-root
 - do not depend on outer-document ancestry selectors
 - consume migrated output vars for typography weights
 
 7. Validate layout contract
+
 - use payload.shellRect as authoritative committed layout source
 - use layoutSignature + bounded postPatch relayout for layout-sensitive updates
 - avoid observer loops and triggerResize-style rerender shims
@@ -84,7 +94,8 @@ Core rules:
 
 ## Step 8: Shared Editable Integration
 
-When adding a new kind to an existing cluster, audit all shared editables in that cluster config and scope each one for relevance.
+When adding a new kind to an existing cluster, audit all shared editables in that cluster config and scope each one for
+relevance.
 
 - `stableDigits`:
   - If the kind displays numeric or time text, add the kind to the `stableDigits` condition array.
@@ -92,7 +103,8 @@ When adding a new kind to an existing cluster, audit all shared editables in tha
   - Contract reference: [../shared/stable-digits.md](../shared/stable-digits.md).
   - Use existing cluster condition arrays as reference examples.
 - `captionUnitScale`:
-  - If the kind does not render caption/unit text (for example interactive controls, timers, map zoom), exclude it from `captionUnitScale`.
+  - If the kind does not render caption/unit text (for example interactive controls, timers, map zoom), exclude it from
+    `captionUnitScale`.
   - If `captionUnitScale` is currently unconditional, add a condition list that includes only relevant kinds.
   - Pattern reference: `NAV_TEXT_KIND_CONDITION` in `config/clusters/nav.js`.
 - `caption_{kind}` and `unit_{kind}` hiding:
@@ -107,7 +119,8 @@ When adding a new kind to an existing cluster, audit all shared editables in tha
 
 ## Grouped Mapper Output for Complex Payloads
 
-If a kind needs a larger payload, keep mapper output grouped and declarative instead of returning a flat oversized object.
+If a kind needs a larger payload, keep mapper output grouped and declarative instead of returning a flat oversized
+object.
 
 Recommended grouped keys:
 

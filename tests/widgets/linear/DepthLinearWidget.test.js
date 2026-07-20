@@ -2,6 +2,7 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("DepthLinearWidget", function () {
+  /** @param {any} value @returns {any} */
   function toOptionalFiniteNumber(value) {
     if (value == null) return undefined;
     if (typeof value === "string" && value.trim() === "") return undefined;
@@ -10,8 +11,9 @@ describe("DepthLinearWidget", function () {
   }
 
   it("passes LinearGaugeEngine config with range axis and low-end sectors", function () {
+    /** @type {any} */
     let captured;
-    const requestedModules = [];
+    const requestedModules = /** @type {string[]} */ ([]);
     const resolveStandardTickSteps = vi.fn((range) => {
       if (range <= 6) return { major: 1, minor: 0.5 };
       if (range <= 30) return { major: 5, minor: 1 };
@@ -35,6 +37,7 @@ describe("DepthLinearWidget", function () {
           create() {
             requestedModules.push("LinearGaugeEngine");
             return {
+              /** @param {any} cfg @returns {any} */
               createRenderer(cfg) {
                 captured = cfg;
                 return renderCanvas;
@@ -47,6 +50,7 @@ describe("DepthLinearWidget", function () {
             requestedModules.push("ValueMath");
             return {
               toOptionalFiniteNumber,
+              /** @param {any} v @param {any} lo @param {any} hi @returns {any} */
               clamp(v, lo, hi) {
                 return Math.max(lo, Math.min(hi, Number(v)));
               },
@@ -64,12 +68,17 @@ describe("DepthLinearWidget", function () {
           create() {
             requestedModules.push("PlaceholderNormalize");
             return {
+              /** @param {any} text @param {any} defaultText @returns {any} */
               normalize(text, defaultText) {
                 if (text == null) {
                   return defaultText == null ? "---" : defaultText;
                 }
                 const value = String(text).trim();
-                return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+                return value === "NO DATA" || /^-+$/.test(value)
+                  ? defaultText == null
+                    ? "---"
+                    : defaultText
+                  : String(text);
               }
             };
           }
@@ -116,10 +125,17 @@ describe("DepthLinearWidget", function () {
     expect(unitFormatter.extractNumericDisplay).toHaveBeenCalledWith("3.24", NaN);
 
     const theme = { colors: { warning: "#123456", alarm: "#654321" } };
-    const sectors = captured.buildSectors({
-      depthLinearAlarmFrom: 2,
-      depthLinearWarningFrom: 5
-    }, 0, 30, { min: 0, max: 30 }, {}, theme);
+    const sectors = captured.buildSectors(
+      {
+        depthLinearAlarmFrom: 2,
+        depthLinearWarningFrom: 5
+      },
+      0,
+      30,
+      { min: 0, max: 30 },
+      {},
+      theme
+    );
 
     expect(sectors).toEqual([
       { from: 0, to: 2, color: "#654321" },
@@ -128,6 +144,7 @@ describe("DepthLinearWidget", function () {
   });
 
   it("returns warning-only sector when alarm threshold is missing", function () {
+    /** @type {any} */
     let captured;
     const unitFormatter = {
       formatWithToken: vi.fn(function (value, formatter, token, defaultText) {
@@ -145,6 +162,7 @@ describe("DepthLinearWidget", function () {
         LinearGaugeEngine: {
           create() {
             return {
+              /** @param {any} cfg @returns {any} */
               createRenderer(cfg) {
                 captured = cfg;
                 return function () {};
@@ -156,6 +174,7 @@ describe("DepthLinearWidget", function () {
           create() {
             return {
               toOptionalFiniteNumber,
+              /** @param {any} v @param {any} lo @param {any} hi @returns {any} */
               clamp(v, lo, hi) {
                 return Math.max(lo, Math.min(hi, Number(v)));
               },
@@ -173,12 +192,17 @@ describe("DepthLinearWidget", function () {
         PlaceholderNormalize: {
           create() {
             return {
+              /** @param {any} text @param {any} defaultText @returns {any} */
               normalize(text, defaultText) {
                 if (text == null) {
                   return defaultText == null ? "---" : defaultText;
                 }
                 const value = String(text).trim();
-                return value === "NO DATA" || /^-+$/.test(value) ? (defaultText == null ? "---" : defaultText) : String(text);
+                return value === "NO DATA" || /^-+$/.test(value)
+                  ? defaultText == null
+                    ? "---"
+                    : defaultText
+                  : String(text);
               }
             };
           }
@@ -192,15 +216,23 @@ describe("DepthLinearWidget", function () {
     });
     mod.create({}, componentContext);
 
-    const sectors = captured.buildSectors({ depthLinearWarningFrom: 5 }, 0, 30, { min: 0, max: 30 }, {}, {
-      colors: { warning: "#123456", alarm: "#654321" }
-    });
+    const sectors = captured.buildSectors(
+      { depthLinearWarningFrom: 5 },
+      0,
+      30,
+      { min: 0, max: 30 },
+      {},
+      {
+        colors: { warning: "#123456", alarm: "#654321" }
+      }
+    );
 
     expect(sectors).toEqual([{ from: 0, to: 5, color: "#123456" }]);
     expect(captured.formatDisplay("nope")).toEqual({ num: NaN, text: "---" });
   });
 
   it("returns placeholder output for null depth values", function () {
+    /** @type {any} */
     let captured;
     const unitFormatter = {
       formatWithToken: vi.fn(function (value) {
@@ -218,6 +250,7 @@ describe("DepthLinearWidget", function () {
         LinearGaugeEngine: {
           create() {
             return {
+              /** @param {any} cfg @returns {any} */
               createRenderer(cfg) {
                 captured = cfg;
                 return function () {};
@@ -229,6 +262,7 @@ describe("DepthLinearWidget", function () {
           create() {
             return {
               toOptionalFiniteNumber,
+              /** @param {any} v @param {any} lo @param {any} hi @returns {any} */
               clamp(v, lo, hi) {
                 return Math.max(lo, Math.min(hi, Number(v)));
               },
@@ -246,6 +280,7 @@ describe("DepthLinearWidget", function () {
         PlaceholderNormalize: {
           create() {
             return {
+              /** @param {any} text @param {any} defaultText @returns {any} */
               normalize(text, defaultText) {
                 if (text == null) {
                   return defaultText == null ? "---" : defaultText;
@@ -270,6 +305,7 @@ describe("DepthLinearWidget", function () {
   });
 
   it("treats blank and missing low-end thresholds as unset", function () {
+    /** @type {any} */
     let captured;
     const unitFormatter = {
       formatWithToken: vi.fn(function (value) {
@@ -287,6 +323,7 @@ describe("DepthLinearWidget", function () {
         LinearGaugeEngine: {
           create() {
             return {
+              /** @param {any} cfg @returns {any} */
               createRenderer(cfg) {
                 captured = cfg;
                 return function () {};
@@ -298,6 +335,7 @@ describe("DepthLinearWidget", function () {
           create() {
             return {
               toOptionalFiniteNumber,
+              /** @param {any} v @param {any} lo @param {any} hi @returns {any} */
               clamp(v, lo, hi) {
                 return Math.max(lo, Math.min(hi, Number(v)));
               },
@@ -315,6 +353,7 @@ describe("DepthLinearWidget", function () {
         PlaceholderNormalize: {
           create() {
             return {
+              /** @param {any} text @param {any} defaultText @returns {any} */
               normalize(text, defaultText) {
                 if (text == null) {
                   return defaultText == null ? "---" : defaultText;
@@ -337,16 +376,34 @@ describe("DepthLinearWidget", function () {
     const axis = { min: 0, max: 30 };
 
     [null, undefined, "", "   "].forEach(function (rawThreshold) {
-      expect(captured.buildSectors({
-        depthLinearWarningFrom: rawThreshold,
-        depthLinearAlarmFrom: rawThreshold
-      }, 0, 30, axis, {}, theme)).toEqual([]);
+      expect(
+        captured.buildSectors(
+          {
+            depthLinearWarningFrom: rawThreshold,
+            depthLinearAlarmFrom: rawThreshold
+          },
+          0,
+          30,
+          axis,
+          {},
+          theme
+        )
+      ).toEqual([]);
     });
 
-    expect(captured.buildSectors({
-      depthLinearWarningFrom: 5,
-      depthLinearAlarmFrom: 2
-    }, 0, 30, axis, {}, theme)).toEqual([
+    expect(
+      captured.buildSectors(
+        {
+          depthLinearWarningFrom: 5,
+          depthLinearAlarmFrom: 2
+        },
+        0,
+        30,
+        axis,
+        {},
+        theme
+      )
+    ).toEqual([
       { from: 0, to: 2, color: "#654321" },
       { from: 2, to: 5, color: "#123456" }
     ]);

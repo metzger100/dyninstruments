@@ -25,7 +25,9 @@
     def: {
       name: "dyni_Wind_Instruments",
       description: "Wind (angle/speed numbers, radial dials, or linear dual gauges)",
-      caption: "", unit: "", default: "---",
+      caption: "",
+      unit: "",
+      default: "---",
       cluster: "wind",
       storeKeys: {
         awa: "nav.gps.windAngle",
@@ -69,13 +71,21 @@
 
         // WindRadialWidget-only row thresholds
         windRadialRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.7,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 0.7,
           internal: true,
           name: "Dial 3-Rows Threshold",
           condition: [{ kind: "angleTrueRadial" }, { kind: "angleApparentRadial" }]
         },
         windRadialRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 2.0,
+          type: "FLOAT",
+          min: 1.0,
+          max: 6.0,
+          step: 0.05,
+          default: 2.0,
           internal: true,
           name: "Dial 1-Row Threshold",
           condition: [{ kind: "angleTrueRadial" }, { kind: "angleApparentRadial" }]
@@ -83,36 +93,57 @@
 
         // WindLinearWidget-only row thresholds
         windLinearRatioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 0.9,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 0.9,
           internal: true,
           name: "Linear split threshold",
           condition: [{ kind: "angleTrueLinear" }, { kind: "angleApparentLinear" }]
         },
         windLinearRatioThresholdFlat: {
-          type: "FLOAT", min: 1.0, max: 6.0, step: 0.05, default: 3,
+          type: "FLOAT",
+          min: 1.0,
+          max: 6.0,
+          step: 0.05,
+          default: 3,
           internal: true,
           name: "Linear flat threshold",
           condition: [{ kind: "angleTrueLinear" }, { kind: "angleApparentLinear" }]
         },
         windLinearTickMajor: {
-          type: "FLOAT", min: 1, max: 180, step: 1, default: 30,
+          type: "FLOAT",
+          min: 1,
+          max: 180,
+          step: 1,
+          default: 30,
           name: "Major tick step",
           condition: [{ kind: "angleTrueLinear" }, { kind: "angleApparentLinear" }]
         },
         windLinearTickMinor: {
-          type: "FLOAT", min: 1, max: 90, step: 1, default: 10,
+          type: "FLOAT",
+          min: 1,
+          max: 90,
+          step: 1,
+          default: 10,
           name: "Minor tick step",
           condition: [{ kind: "angleTrueLinear" }, { kind: "angleApparentLinear" }]
         },
         windLinearShowEndLabels: {
-          type: "BOOLEAN", default: false,
+          type: "BOOLEAN",
+          default: false,
           name: "Show min/max labels",
           condition: [{ kind: "angleTrueLinear" }, { kind: "angleApparentLinear" }]
         },
 
         // ThreeValueTextWidget thresholds — only for numeric kinds
         ratioThresholdNormal: {
-          type: "FLOAT", min: 0.5, max: 2.0, step: 0.05, default: 1.0,
+          type: "FLOAT",
+          min: 0.5,
+          max: 2.0,
+          step: 0.05,
+          default: 1.0,
           internal: true,
           name: "3-Rows Threshold (numeric)",
           condition: [
@@ -124,7 +155,11 @@
           ]
         },
         ratioThresholdFlat: {
-          type: "FLOAT", min: 1.5, max: 6.0, step: 0.05, default: 3.0,
+          type: "FLOAT",
+          min: 1.5,
+          max: 6.0,
+          step: 0.05,
+          default: 3.0,
           internal: true,
           name: "1-Row Threshold (numeric)",
           condition: [
@@ -144,7 +179,11 @@
           condition: [{ kind: "angleTrueRadial" }, { kind: "angleApparentRadial" }]
         },
         windRadialLayMin: {
-          type: "FLOAT", min: 0, max: 180, step: 1, default: 25,
+          type: "FLOAT",
+          min: 0,
+          max: 180,
+          step: 1,
+          default: 25,
           name: "Min layline angle",
           condition: [
             { kind: "angleTrueRadial", windRadialLayEnabled: true },
@@ -152,7 +191,11 @@
           ]
         },
         windRadialLayMax: {
-          type: "FLOAT", min: 0, max: 180, step: 1, default: 45,
+          type: "FLOAT",
+          min: 0,
+          max: 180,
+          step: 1,
+          default: 45,
           name: "Max layline angle",
           condition: [
             { kind: "angleTrueRadial", windRadialLayEnabled: true },
@@ -166,7 +209,11 @@
           condition: [{ kind: "angleTrueLinear" }, { kind: "angleApparentLinear" }]
         },
         windLinearLayMin: {
-          type: "FLOAT", min: 0, max: 180, step: 1, default: 25,
+          type: "FLOAT",
+          min: 0,
+          max: 180,
+          step: 1,
+          default: 25,
           name: "Min layline angle",
           condition: [
             { kind: "angleTrueLinear", windLinearLayEnabled: true },
@@ -174,7 +221,11 @@
           ]
         },
         windLinearLayMax: {
-          type: "FLOAT", min: 0, max: 180, step: 1, default: 45,
+          type: "FLOAT",
+          min: 0,
+          max: 180,
+          step: 1,
+          default: 45,
           name: "Max layline angle",
           condition: [
             { kind: "angleTrueLinear", windLinearLayEnabled: true },
@@ -184,7 +235,11 @@
 
         // Shared caption/unit-to-value scale applies to numeric, radial, and linear
         captionUnitScale: {
-          type: "FLOAT", min: 0.5, max: 1.5, step: 0.05, default: 0.8,
+          type: "FLOAT",
+          min: 0.5,
+          max: 1.5,
+          step: 0.05,
+          default: 0.8,
           name: "Caption/Unit size"
         },
         stableDigits: {
@@ -218,19 +273,13 @@
           type: "BOOLEAN",
           default: false,
           name: "Hide textual metrics",
-          condition: [
-            { kind: "angleTrueRadial" },
-            { kind: "angleApparentRadial" }
-          ]
+          condition: [{ kind: "angleTrueRadial" }, { kind: "angleApparentRadial" }]
         },
         windLinearHideTextualMetrics: {
           type: "BOOLEAN",
           default: false,
           name: "Hide textual metrics",
-          condition: [
-            { kind: "angleTrueLinear" },
-            { kind: "angleApparentLinear" }
-          ]
+          condition: [{ kind: "angleTrueLinear" }, { kind: "angleApparentLinear" }]
         },
 
         caption: false,
@@ -245,4 +294,4 @@
       }
     }
   });
-}(this));
+})(this);

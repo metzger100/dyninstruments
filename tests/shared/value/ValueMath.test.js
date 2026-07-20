@@ -101,59 +101,23 @@ describe("ValueMath", function () {
       return text == null ? defaultText || "---" : String(text);
     });
 
-    expect(
-      value.formatGaugeDisplay(
-        null,
-        {},
-        applyFormatter,
-        normalize,
-        "formatSpeed",
-        ["kn"],
-      ),
-    ).toEqual({
+    expect(value.formatGaugeDisplay(null, {}, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
       num: NaN,
-      text: "---",
+      text: "---"
     });
-    expect(
-      value.formatGaugeDisplay(
-        "",
-        {},
-        applyFormatter,
-        normalize,
-        "formatSpeed",
-        ["kn"],
-      ),
-    ).toEqual({
+    expect(value.formatGaugeDisplay("", {}, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
       num: NaN,
-      text: "---",
+      text: "---"
     });
-    expect(
-      value.formatGaugeDisplay(
-        "   ",
-        {},
-        applyFormatter,
-        normalize,
-        "formatSpeed",
-        ["kn"],
-      ),
-    ).toEqual({
+    expect(value.formatGaugeDisplay("   ", {}, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
       num: NaN,
-      text: "---",
+      text: "---"
     });
     expect(applyFormatter).not.toHaveBeenCalled();
 
-    expect(
-      value.formatGaugeDisplay(
-        4.2,
-        {},
-        applyFormatter,
-        normalize,
-        "formatSpeed",
-        ["kn"],
-      ),
-    ).toEqual({
+    expect(value.formatGaugeDisplay(4.2, {}, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({
       num: 4.2,
-      text: "4.2",
+      text: "4.2"
     });
   });
 
@@ -176,12 +140,10 @@ describe("ValueMath", function () {
     expect(value.resolveStandardTickSteps(6)).toEqual({ major: 1, minor: 0.5 });
     expect(value.resolveTemperatureTickSteps(20)).toEqual({
       major: 2,
-      minor: 1,
+      minor: 1
     });
     expect(value.resolveVoltageTickSteps(12)).toEqual({ major: 2, minor: 0.5 });
-    expect(value.resolveStandardTickSteps(6)).toEqual(
-      value.resolveStandardTickSteps(6),
-    );
+    expect(value.resolveStandardTickSteps(6)).toEqual(value.resolveStandardTickSteps(6));
     expect(value.valueToAngle).toBeUndefined();
     expect(value.angleToValue).toBeUndefined();
     expect(value.sectorAngles).toBeUndefined();

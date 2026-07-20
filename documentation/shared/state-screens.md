@@ -4,15 +4,16 @@
 
 ## Overview
 
-State-screens are semantic full-body replacement states for disconnected/empty conditions.
-Each widget owns resolver logic and uses shared helpers for labels, precedence, interaction gating, and HTML/canvas rendering primitives.
+State-screens are semantic full-body replacement states for disconnected/empty conditions. Each widget owns resolver
+logic and uses shared helpers for labels, precedence, interaction gating, and HTML/canvas rendering primitives.
 
 ## Key Details
 
 - Canonical kinds: `disconnected`, `noRoute`, `noTarget`, `noAis`, `hidden`, `data`.
 - Canonical precedence order: `disconnected > noRoute > noTarget > noAis > hidden > data`.
 - `disconnected` is mandatory in every resolver and is normally first.
-- AIS exception: AIS is the only resolver that allows `hidden` before `disconnected` (`hidden > disconnected > noAis > data`) so non-applicable pages stay invisible during disconnect.
+- AIS exception: AIS is the only resolver that allows `hidden` before `disconnected`
+  (`hidden > disconnected > noAis > data`) so non-applicable pages stay invisible during disconnect.
 - `data` is always the final catch-all candidate (`{ kind: "data", when: true }`).
 - Shared labels:
   - `disconnected` -> `GPS Lost`
@@ -21,11 +22,14 @@ Each widget owns resolver logic and uses shared helpers for labels, precedence, 
   - `noAis` -> `No AIS`
 - `StateScreenPrecedence.pickFirst([...])` returns the first truthy `when` candidate or `data` when none match.
 - `StateScreenInteraction.resolveInteraction({ kind, baseInteraction })` forces `passive` for any non-`data` kind.
-- `StateScreenMarkup.renderStateScreen(...)` emits wrapper markup with `dyni-state-<kind>` class and passive interaction class normalization.
-- `StateScreenCanvasOverlay.drawStateScreen(...)` draws label-only canvas state screens for non-`hidden` non-`data` kinds, matching the HTML state-screen look (no dim background fill).
+- `StateScreenMarkup.renderStateScreen(...)` emits wrapper markup with `dyni-state-<kind>` class and passive interaction
+  class normalization.
+- `StateScreenCanvasOverlay.drawStateScreen(...)` draws label-only canvas state screens for non-`hidden` non-`data`
+  kinds, matching the HTML state-screen look (no dim background fill).
 - Canvas label sizing uses measured width fitting with an 80% height ceiling and 80% width cap.
 - `pickFirst([...])` call sites stay inline so the precedence contract can validate the candidate order mechanically.
-- Canonical order is enforced at the call site: `disconnected > noRoute > noTarget > noAis > hidden > data`, with AIS allowed to use `hidden > disconnected > noAis > data`.
+- Canonical order is enforced at the call site: `disconnected > noRoute > noTarget > noAis > hidden > data`, with AIS
+  allowed to use `hidden > disconnected > noAis > data`.
 
 ## API/Interfaces
 

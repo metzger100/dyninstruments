@@ -1,6 +1,5 @@
-const {
-  loadClusters,
-} = require("./static-clusters.harness.js");
+// @ts-nocheck
+const { loadClusters } = require("./static-clusters.harness.js");
 
 describe("static cluster configs", function () {
   it("registers wind/course/warning parameter conditions", function () {
@@ -10,33 +9,53 @@ describe("static cluster configs", function () {
     expect(byCluster.wind.editableParameters.speedCaption_TWS).toBeUndefined();
     expect(byCluster.wind.editableParameters.angleUnitGraphic).toBeUndefined();
     expect(byCluster.wind.editableParameters.speedUnitGraphic).toBeUndefined();
-    expect(byCluster.wind.editableParameters.caption_angleTrueRadialAngle.condition).toEqual({ kind: "angleTrueRadial" });
+    expect(byCluster.wind.editableParameters.caption_angleTrueRadialAngle.condition).toEqual({
+      kind: "angleTrueRadial"
+    });
     expect(byCluster.wind.editableParameters.unit_angleTrueRadialAngle.condition).toEqual({ kind: "angleTrueRadial" });
-    expect(byCluster.wind.editableParameters.caption_angleTrueRadialSpeed.condition).toEqual({ kind: "angleTrueRadial" });
+    expect(byCluster.wind.editableParameters.caption_angleTrueRadialSpeed.condition).toEqual({
+      kind: "angleTrueRadial"
+    });
     expect(byCluster.wind.editableParameters.formatUnit_angleTrueRadialSpeed.default).toBe("kn");
     expect(byCluster.wind.editableParameters.unit_angleTrueRadialSpeed_kn.condition).toEqual({
       kind: "angleTrueRadial",
       formatUnit_angleTrueRadialSpeed: "kn"
     });
-    expect(byCluster.wind.editableParameters.caption_angleApparentRadialAngle.condition).toEqual({ kind: "angleApparentRadial" });
-    expect(byCluster.wind.editableParameters.unit_angleApparentRadialAngle.condition).toEqual({ kind: "angleApparentRadial" });
-    expect(byCluster.wind.editableParameters.caption_angleApparentRadialSpeed.condition).toEqual({ kind: "angleApparentRadial" });
+    expect(byCluster.wind.editableParameters.caption_angleApparentRadialAngle.condition).toEqual({
+      kind: "angleApparentRadial"
+    });
+    expect(byCluster.wind.editableParameters.unit_angleApparentRadialAngle.condition).toEqual({
+      kind: "angleApparentRadial"
+    });
+    expect(byCluster.wind.editableParameters.caption_angleApparentRadialSpeed.condition).toEqual({
+      kind: "angleApparentRadial"
+    });
     expect(byCluster.wind.editableParameters.formatUnit_angleApparentRadialSpeed.default).toBe("kn");
     expect(byCluster.wind.editableParameters.unit_angleApparentRadialSpeed_ms.condition).toEqual({
       kind: "angleApparentRadial",
       formatUnit_angleApparentRadialSpeed: "ms"
     });
-    expect(byCluster.wind.editableParameters.caption_angleTrueLinearAngle.condition).toEqual({ kind: "angleTrueLinear" });
+    expect(byCluster.wind.editableParameters.caption_angleTrueLinearAngle.condition).toEqual({
+      kind: "angleTrueLinear"
+    });
     expect(byCluster.wind.editableParameters.unit_angleTrueLinearAngle.condition).toEqual({ kind: "angleTrueLinear" });
-    expect(byCluster.wind.editableParameters.caption_angleTrueLinearSpeed.condition).toEqual({ kind: "angleTrueLinear" });
+    expect(byCluster.wind.editableParameters.caption_angleTrueLinearSpeed.condition).toEqual({
+      kind: "angleTrueLinear"
+    });
     expect(byCluster.wind.editableParameters.formatUnit_angleTrueLinearSpeed.default).toBe("kn");
     expect(byCluster.wind.editableParameters.unit_angleTrueLinearSpeed_kn.condition).toEqual({
       kind: "angleTrueLinear",
       formatUnit_angleTrueLinearSpeed: "kn"
     });
-    expect(byCluster.wind.editableParameters.caption_angleApparentLinearAngle.condition).toEqual({ kind: "angleApparentLinear" });
-    expect(byCluster.wind.editableParameters.unit_angleApparentLinearAngle.condition).toEqual({ kind: "angleApparentLinear" });
-    expect(byCluster.wind.editableParameters.caption_angleApparentLinearSpeed.condition).toEqual({ kind: "angleApparentLinear" });
+    expect(byCluster.wind.editableParameters.caption_angleApparentLinearAngle.condition).toEqual({
+      kind: "angleApparentLinear"
+    });
+    expect(byCluster.wind.editableParameters.unit_angleApparentLinearAngle.condition).toEqual({
+      kind: "angleApparentLinear"
+    });
+    expect(byCluster.wind.editableParameters.caption_angleApparentLinearSpeed.condition).toEqual({
+      kind: "angleApparentLinear"
+    });
     expect(byCluster.wind.editableParameters.formatUnit_angleApparentLinearSpeed.default).toBe("kn");
     expect(byCluster.wind.editableParameters.unit_angleApparentLinearSpeed_ms.condition).toEqual({
       kind: "angleApparentLinear",
@@ -49,8 +68,9 @@ describe("static cluster configs", function () {
     expect(byCluster.courseHeading.editableParameters.compassLinearRatioThresholdNormal.internal).toBe(true);
     expect(byCluster.courseHeading.editableParameters.compassLinearRange.default).toBe(360);
     expect(byCluster.courseHeading.editableParameters.compassLinearRange.name).toBe("Visible range");
-    expect(byCluster.courseHeading.editableParameters.compassLinearRange.list.map((entry) => entry.value))
-      .toEqual([360, 180]);
+    expect(byCluster.courseHeading.editableParameters.compassLinearRange.list.map((entry) => entry.value)).toEqual([
+      360, 180
+    ]);
     expect(byCluster.courseHeading.editableParameters.compassLinearRange.condition).toEqual([
       { kind: "hdtLinear" },
       { kind: "hdmLinear" }
@@ -110,13 +130,21 @@ describe("static cluster configs", function () {
       { kind: "pressure" }
     ]);
     expect(byCluster.environment.editableParameters.depthLinearHideTextualMetrics.default).toBe(false);
-    expect(byCluster.environment.editableParameters.depthLinearHideTextualMetrics.condition).toEqual({ kind: "depthLinear" });
+    expect(byCluster.environment.editableParameters.depthLinearHideTextualMetrics.condition).toEqual({
+      kind: "depthLinear"
+    });
     expect(byCluster.environment.editableParameters.depthRadialHideTextualMetrics.default).toBe(false);
-    expect(byCluster.environment.editableParameters.depthRadialHideTextualMetrics.condition).toEqual({ kind: "depthRadial" });
+    expect(byCluster.environment.editableParameters.depthRadialHideTextualMetrics.condition).toEqual({
+      kind: "depthRadial"
+    });
     expect(byCluster.environment.editableParameters.tempLinearHideTextualMetrics.default).toBe(false);
-    expect(byCluster.environment.editableParameters.tempLinearHideTextualMetrics.condition).toEqual({ kind: "tempLinear" });
+    expect(byCluster.environment.editableParameters.tempLinearHideTextualMetrics.condition).toEqual({
+      kind: "tempLinear"
+    });
     expect(byCluster.environment.editableParameters.tempRadialHideTextualMetrics.default).toBe(false);
-    expect(byCluster.environment.editableParameters.tempRadialHideTextualMetrics.condition).toEqual({ kind: "tempRadial" });
+    expect(byCluster.environment.editableParameters.tempRadialHideTextualMetrics.condition).toEqual({
+      kind: "tempRadial"
+    });
     expect(byCluster.wind.editableParameters.stableDigits.condition).toEqual([
       { kind: "angleTrue" },
       { kind: "angleApparent" },
@@ -152,9 +180,13 @@ describe("static cluster configs", function () {
       { kind: "roll" }
     ]);
     expect(byCluster.vessel.editableParameters.voltageLinearHideTextualMetrics.default).toBe(false);
-    expect(byCluster.vessel.editableParameters.voltageLinearHideTextualMetrics.condition).toEqual({ kind: "voltageLinear" });
+    expect(byCluster.vessel.editableParameters.voltageLinearHideTextualMetrics.condition).toEqual({
+      kind: "voltageLinear"
+    });
     expect(byCluster.vessel.editableParameters.voltageRadialHideTextualMetrics.default).toBe(false);
-    expect(byCluster.vessel.editableParameters.voltageRadialHideTextualMetrics.condition).toEqual({ kind: "voltageRadial" });
+    expect(byCluster.vessel.editableParameters.voltageRadialHideTextualMetrics.condition).toEqual({
+      kind: "voltageRadial"
+    });
     expect(byCluster.vessel.editableParameters.caption_regattaTimer).toBe(false);
     expect(byCluster.vessel.editableParameters.unit_regattaTimer).toBe(false);
     expect(byCluster.vessel.editableParameters.captionUnitScale.condition).toEqual([
@@ -168,7 +200,9 @@ describe("static cluster configs", function () {
       { kind: "pitch" },
       { kind: "roll" }
     ]);
-    expect(Object.prototype.hasOwnProperty.call(byCluster.vessel.editableParameters.stableDigits, "default")).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(byCluster.vessel.editableParameters.stableDigits, "default")).toBe(
+      false
+    );
     expect(byCluster.anchor.editableParameters.stableDigits.default).toBe(false);
     expect(byCluster.anchor.editableParameters.stableDigits.condition).toEqual([
       { kind: "anchorDistance" },
@@ -183,57 +217,79 @@ describe("static cluster configs", function () {
     expect(byCluster.nav.editableParameters.xteHideTextualMetrics.default).toBe(false);
     expect(byCluster.nav.editableParameters.xteHideTextualMetrics.condition).toEqual({ kind: "xteDisplay" });
     expect(byCluster.nav.editableParameters.xteLinearHideTextualMetrics.default).toBe(false);
-    expect(byCluster.nav.editableParameters.xteLinearHideTextualMetrics.condition).toEqual({ kind: "xteDisplayLinear" });
-    expect(byCluster.nav.editableParameters.xteDisplayScale_nm).toEqual(expect.objectContaining({
-      default: 1,
-      step: 0.1,
-      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "nm" }
-    }));
-    expect(byCluster.nav.editableParameters.xteDisplayScale_m).toEqual(expect.objectContaining({
-      default: 1852,
-      step: 10,
-      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "m" }
-    }));
-    expect(byCluster.nav.editableParameters.xteDisplayScale_km).toEqual(expect.objectContaining({
-      default: 1.852,
-      step: 0.01,
-      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "km" }
-    }));
-    expect(byCluster.nav.editableParameters.xteDisplayScale_ft).toEqual(expect.objectContaining({
-      default: 6076,
-      step: 10,
-      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "ft" }
-    }));
-    expect(byCluster.nav.editableParameters.xteDisplayScale_yd).toEqual(expect.objectContaining({
-      default: 2025,
-      step: 1,
-      condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "yd" }
-    }));
-    expect(byCluster.nav.editableParameters.xteLinearScale_nm).toEqual(expect.objectContaining({
-      default: 1,
-      step: 0.1,
-      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "nm" }
-    }));
-    expect(byCluster.nav.editableParameters.xteLinearScale_m).toEqual(expect.objectContaining({
-      default: 1852,
-      step: 10,
-      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "m" }
-    }));
-    expect(byCluster.nav.editableParameters.xteLinearScale_km).toEqual(expect.objectContaining({
-      default: 1.852,
-      step: 0.01,
-      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "km" }
-    }));
-    expect(byCluster.nav.editableParameters.xteLinearScale_ft).toEqual(expect.objectContaining({
-      default: 6076,
-      step: 10,
-      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "ft" }
-    }));
-    expect(byCluster.nav.editableParameters.xteLinearScale_yd).toEqual(expect.objectContaining({
-      default: 2025,
-      step: 1,
-      condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "yd" }
-    }));
+    expect(byCluster.nav.editableParameters.xteLinearHideTextualMetrics.condition).toEqual({
+      kind: "xteDisplayLinear"
+    });
+    expect(byCluster.nav.editableParameters.xteDisplayScale_nm).toEqual(
+      expect.objectContaining({
+        default: 1,
+        step: 0.1,
+        condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "nm" }
+      })
+    );
+    expect(byCluster.nav.editableParameters.xteDisplayScale_m).toEqual(
+      expect.objectContaining({
+        default: 1852,
+        step: 10,
+        condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "m" }
+      })
+    );
+    expect(byCluster.nav.editableParameters.xteDisplayScale_km).toEqual(
+      expect.objectContaining({
+        default: 1.852,
+        step: 0.01,
+        condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "km" }
+      })
+    );
+    expect(byCluster.nav.editableParameters.xteDisplayScale_ft).toEqual(
+      expect.objectContaining({
+        default: 6076,
+        step: 10,
+        condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "ft" }
+      })
+    );
+    expect(byCluster.nav.editableParameters.xteDisplayScale_yd).toEqual(
+      expect.objectContaining({
+        default: 2025,
+        step: 1,
+        condition: { kind: "xteDisplay", formatUnit_xteDisplayXte: "yd" }
+      })
+    );
+    expect(byCluster.nav.editableParameters.xteLinearScale_nm).toEqual(
+      expect.objectContaining({
+        default: 1,
+        step: 0.1,
+        condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "nm" }
+      })
+    );
+    expect(byCluster.nav.editableParameters.xteLinearScale_m).toEqual(
+      expect.objectContaining({
+        default: 1852,
+        step: 10,
+        condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "m" }
+      })
+    );
+    expect(byCluster.nav.editableParameters.xteLinearScale_km).toEqual(
+      expect.objectContaining({
+        default: 1.852,
+        step: 0.01,
+        condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "km" }
+      })
+    );
+    expect(byCluster.nav.editableParameters.xteLinearScale_ft).toEqual(
+      expect.objectContaining({
+        default: 6076,
+        step: 10,
+        condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "ft" }
+      })
+    );
+    expect(byCluster.nav.editableParameters.xteLinearScale_yd).toEqual(
+      expect.objectContaining({
+        default: 2025,
+        step: 1,
+        condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "yd" }
+      })
+    );
   });
 
   it("updates default cluster storeKeys.value from the KEY editable", function () {

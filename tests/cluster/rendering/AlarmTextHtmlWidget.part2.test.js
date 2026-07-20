@@ -1,3 +1,4 @@
+// @ts-nocheck
 const {
   readCss,
   escapeRegExp,
@@ -12,23 +13,17 @@ const {
   createAisRendererWithRealLayout,
   mountRenderer,
   readStyleFields,
-  createAlarmMeasureContext,
+  createAlarmMeasureContext
 } = require("./AlarmTextHtmlWidget.harness.js");
 
 describe("AlarmTextHtmlWidget", function () {
   it("uses the committed HTML widget css contract", function () {
-    const css = readCss(
-      "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css",
-    );
+    const css = readCss("widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css");
 
     expect(css).toContain(".dyni-html-root .dyni-alarm-html");
     expect(css).toContain(".dyni-html-root .dyni-alarm-root");
-    expect(css).toContain(
-      ".dyni-html-root .dyni-alarm-html.dyni-alarm-open-dispatch",
-    );
-    expect(css).toContain(
-      ".dyni-html-root .dyni-alarm-html.dyni-alarm-open-passive",
-    );
+    expect(css).toContain(".dyni-html-root .dyni-alarm-html.dyni-alarm-open-dispatch");
+    expect(css).toContain(".dyni-html-root .dyni-alarm-html.dyni-alarm-open-passive");
     expect(css).toContain(".dyni-html-root .dyni-alarm-state-accent");
     expect(css).toContain(".dyni-html-root .dyni-alarm-main");
     expect(css).toContain(".dyni-html-root .dyni-alarm-main-flat");
@@ -37,19 +32,13 @@ describe("AlarmTextHtmlWidget", function () {
     expect(css).toContain(".dyni-html-root .dyni-alarm-inline-row");
     expect(css).toContain(".dyni-html-root .dyni-alarm-caption-row");
     expect(css).toContain(".dyni-html-root .dyni-alarm-value-row");
-    expect(css).toContain(
-      "font-weight: var(--dyni-theme-font-label-weight, 700);",
-    );
+    expect(css).toContain("font-weight: var(--dyni-theme-font-label-weight, 700);");
     expect(css).toContain("font-weight: var(--dyni-theme-font-weight, 700);");
     expect(css).toContain("inset: 0 auto 0 0;");
     expect(css).toContain("z-index: 0;");
     expect(css).toContain("gap: 0.16em;");
-    expect(css).not.toMatch(
-      /\.dyni-html-root\s+\.dyni-alarm-main-flat[\s\S]*?\{[\s\S]*?width:\s*100%/,
-    );
-    expect(css).not.toMatch(
-      /\.dyni-html-root\s+\.dyni-alarm-main-flat[\s\S]*?\{[\s\S]*?height:\s*100%/,
-    );
+    expect(css).not.toMatch(/\.dyni-html-root\s+\.dyni-alarm-main-flat[\s\S]*?\{[\s\S]*?width:\s*100%/);
+    expect(css).not.toMatch(/\.dyni-html-root\s+\.dyni-alarm-main-flat[\s\S]*?\{[\s\S]*?height:\s*100%/);
     expect(css).not.toContain("text-overflow: ellipsis;");
     expect(css).not.toContain("dyni-alarm-shell");
     expect(css).not.toContain("dyni-alarm-strip");
@@ -60,21 +49,11 @@ describe("AlarmTextHtmlWidget", function () {
   });
 
   it("keeps AIS shell parity for accent, hotspot, and layering contract", function () {
-    const alarmCss = readCss(
-      "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css",
-    );
-    const aisCss = readCss(
-      "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css",
-    );
+    const alarmCss = readCss("widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css");
+    const aisCss = readCss("widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css");
 
-    const alarmShell = readRuleBody(
-      alarmCss,
-      ".dyni-html-root .dyni-alarm-html",
-    );
-    const aisShell = readRuleBody(
-      aisCss,
-      ".dyni-html-root .dyni-ais-target-html",
-    );
+    const alarmShell = readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-html");
+    const aisShell = readRuleBody(aisCss, ".dyni-html-root .dyni-ais-target-html");
     expectDeclaration(alarmShell, "position: relative");
     expectDeclaration(alarmShell, "width: 100%");
     expectDeclaration(alarmShell, "height: 100%");
@@ -92,34 +71,16 @@ describe("AlarmTextHtmlWidget", function () {
     expectDeclaration(aisShell, "display: grid");
     expectDeclaration(aisShell, "color: inherit");
 
-    const alarmAccent = readRuleBody(
-      alarmCss,
-      ".dyni-html-root .dyni-alarm-state-accent",
-    );
-    const aisAccent = readRuleBody(
-      aisCss,
-      ".dyni-html-root .dyni-ais-target-state-accent",
-    );
-    const alarmHotspot = readRuleBody(
-      alarmCss,
-      ".dyni-html-root .dyni-alarm-open-hotspot",
-    );
-    const aisHotspot = readRuleBody(
-      aisCss,
-      ".dyni-html-root .dyni-ais-target-open-hotspot",
-    );
+    const alarmAccent = readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-state-accent");
+    const aisAccent = readRuleBody(aisCss, ".dyni-html-root .dyni-ais-target-state-accent");
+    const alarmHotspot = readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-open-hotspot");
+    const aisHotspot = readRuleBody(aisCss, ".dyni-html-root .dyni-ais-target-open-hotspot");
     expect(alarmAccent).toBe(aisAccent);
     expect(alarmHotspot).toBe(aisHotspot);
     expectDeclaration(alarmAccent, "inset: 0 auto 0 0");
 
-    const alarmMain = readRuleBody(
-      alarmCss,
-      ".dyni-html-root .dyni-alarm-main",
-    );
-    const aisIdentity = readRuleBody(
-      aisCss,
-      ".dyni-html-root .dyni-ais-target-identity",
-    );
+    const alarmMain = readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-main");
+    const aisIdentity = readRuleBody(aisCss, ".dyni-html-root .dyni-ais-target-identity");
     expectDeclaration(alarmAccent, "z-index: 0");
     expectDeclaration(alarmMain, "z-index: 1");
     expectDeclaration(alarmHotspot, "z-index: 2");
@@ -129,29 +90,19 @@ describe("AlarmTextHtmlWidget", function () {
   });
 
   it("keeps MapZoom inner layout parity for main/rows and typography", function () {
-    const alarmCss = readCss(
-      "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css",
-    );
-    const mapZoomCss = readCss(
-      "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css",
-    );
-    const alarmMain = readRuleBody(
-      alarmCss,
-      ".dyni-html-root .dyni-alarm-main",
-    );
-    const mapZoomMain = readRuleBody(
-      mapZoomCss,
-      ".dyni-html-root .dyni-map-zoom-main",
-    );
+    const alarmCss = readCss("widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css");
+    const mapZoomCss = readCss("widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css");
+    const alarmMain = readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-main");
+    const mapZoomMain = readRuleBody(mapZoomCss, ".dyni-html-root .dyni-map-zoom-main");
     const alarmMainModes = readCombinedRuleBody(alarmCss, [
       ".dyni-html-root .dyni-alarm-main-flat",
       ".dyni-html-root .dyni-alarm-main-normal",
-      ".dyni-html-root .dyni-alarm-main-high",
+      ".dyni-html-root .dyni-alarm-main-high"
     ]);
     const mapZoomMainModes = readCombinedRuleBody(mapZoomCss, [
       ".dyni-html-root .dyni-map-zoom-main-flat",
       ".dyni-html-root .dyni-map-zoom-main-normal",
-      ".dyni-html-root .dyni-map-zoom-main-high",
+      ".dyni-html-root .dyni-map-zoom-main-high"
     ]);
     const alarmMainModesWithoutPadding = alarmMainModes
       .split(";")
@@ -164,88 +115,36 @@ describe("AlarmTextHtmlWidget", function () {
       readCombinedRuleBody(alarmCss, [
         ".dyni-html-root .dyni-alarm-inline-row",
         ".dyni-html-root .dyni-alarm-caption-row",
-        ".dyni-html-root .dyni-alarm-value-row",
-      ]),
+        ".dyni-html-root .dyni-alarm-value-row"
+      ])
     ).toBe(
       readCombinedRuleBody(mapZoomCss, [
         ".dyni-html-root .dyni-map-zoom-inline-row",
         ".dyni-html-root .dyni-map-zoom-value-row",
         ".dyni-html-root .dyni-map-zoom-caption-row",
-        ".dyni-html-root .dyni-map-zoom-unit-row",
-      ]),
+        ".dyni-html-root .dyni-map-zoom-unit-row"
+      ])
     );
-    expect(
-      readRuleBody(
-        alarmCss,
-        ".dyni-html-root .dyni-alarm-main-flat .dyni-alarm-inline-row",
-      ),
-    ).toBe(
-      readRuleBody(
-        mapZoomCss,
-        ".dyni-html-root .dyni-map-zoom-main-flat .dyni-map-zoom-inline-row",
-      ),
+    expect(readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-main-flat .dyni-alarm-inline-row")).toBe(
+      readRuleBody(mapZoomCss, ".dyni-html-root .dyni-map-zoom-main-flat .dyni-map-zoom-inline-row")
     );
-    expect(
-      readRuleBody(
-        alarmCss,
-        ".dyni-html-root .dyni-alarm-main-normal .dyni-alarm-value-row",
-      ),
-    ).toBe(
-      readRuleBody(
-        mapZoomCss,
-        ".dyni-html-root .dyni-map-zoom-main-normal .dyni-map-zoom-value-row",
-      ),
+    expect(readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-main-normal .dyni-alarm-value-row")).toBe(
+      readRuleBody(mapZoomCss, ".dyni-html-root .dyni-map-zoom-main-normal .dyni-map-zoom-value-row")
     );
-    expect(
-      readRuleBody(
-        alarmCss,
-        ".dyni-html-root .dyni-alarm-main-normal .dyni-alarm-caption-row",
-      ),
-    ).toBe(
-      readRuleBody(
-        mapZoomCss,
-        ".dyni-html-root .dyni-map-zoom-main-normal .dyni-map-zoom-caption-row",
-      ),
+    expect(readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-main-normal .dyni-alarm-caption-row")).toBe(
+      readRuleBody(mapZoomCss, ".dyni-html-root .dyni-map-zoom-main-normal .dyni-map-zoom-caption-row")
     );
-    expect(
-      readRuleBody(
-        alarmCss,
-        ".dyni-html-root .dyni-alarm-main-high .dyni-alarm-caption-row",
-      ),
-    ).toBe(
-      readRuleBody(
-        mapZoomCss,
-        ".dyni-html-root .dyni-map-zoom-main-high .dyni-map-zoom-caption-row",
-      ),
+    expect(readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-main-high .dyni-alarm-caption-row")).toBe(
+      readRuleBody(mapZoomCss, ".dyni-html-root .dyni-map-zoom-main-high .dyni-map-zoom-caption-row")
     );
-    expect(
-      readRuleBody(
-        alarmCss,
-        ".dyni-html-root .dyni-alarm-main-high .dyni-alarm-value-row",
-      ),
-    ).toBe(
-      readRuleBody(
-        mapZoomCss,
-        ".dyni-html-root .dyni-map-zoom-main-high .dyni-map-zoom-value-row",
-      ),
+    expect(readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-main-high .dyni-alarm-value-row")).toBe(
+      readRuleBody(mapZoomCss, ".dyni-html-root .dyni-map-zoom-main-high .dyni-map-zoom-value-row")
     );
 
-    const alarmCaption = readRuleBody(
-      alarmCss,
-      ".dyni-html-root .dyni-alarm-caption",
-    );
-    const mapZoomCaption = readRuleBody(
-      mapZoomCss,
-      ".dyni-html-root .dyni-map-zoom-caption",
-    );
-    const alarmValue = readRuleBody(
-      alarmCss,
-      ".dyni-html-root .dyni-alarm-value",
-    );
-    const mapZoomValue = readRuleBody(
-      mapZoomCss,
-      ".dyni-html-root .dyni-map-zoom-value",
-    );
+    const alarmCaption = readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-caption");
+    const mapZoomCaption = readRuleBody(mapZoomCss, ".dyni-html-root .dyni-map-zoom-caption");
+    const alarmValue = readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-value");
+    const mapZoomValue = readRuleBody(mapZoomCss, ".dyni-html-root .dyni-map-zoom-value");
     expect(alarmCaption).toBe(mapZoomCaption);
     expect(alarmValue).toBe(mapZoomValue);
     expect(alarmCss).not.toContain("text-overflow: ellipsis;");

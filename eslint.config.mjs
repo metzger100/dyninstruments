@@ -1,7 +1,18 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import eslintComments from "@eslint-community/eslint-plugin-eslint-comments";
 import js from "@eslint/js";
 import jsdoc from "eslint-plugin-jsdoc";
 import globals from "globals";
+
+const repoRoot = path.dirname(fileURLToPath(import.meta.url));
+const testInventory = JSON.parse(
+  fs.readFileSync(path.join(repoRoot, "tools/quality-policy/test-inventory.json"), "utf8")
+);
+const relaxedTestFiles = Object.entries(testInventory.entries)
+  .filter(([, entry]) => entry.classification !== "strict")
+  .map(([relativePath]) => relativePath);
 
 const browserRuntimeGlobals = {
   ...globals.browser,
@@ -64,7 +75,10 @@ export default [
       "eslint-comments/no-duplicate-disable": "error",
       "eslint-comments/no-unused-disable": "error",
       "no-unused-vars": ["error", { args: "none", caughtErrors: "none" }],
-      "no-useless-assignment": "error"
+      "no-useless-assignment": "error",
+      "no-eval": "error",
+      "no-implied-eval": "error",
+      "no-new-func": "error"
     }
   },
   {
@@ -146,9 +160,13 @@ export default [
     languageOptions: {
       globals: testGlobals,
       sourceType: "commonjs"
-    },
+    }
+  },
+  {
+    files: relaxedTestFiles,
     rules: {
-      // Split test files share setup globals and partial-harness bindings by design.
+      // Temporary fragment/fixture files share setup globals or deliberate invalid bindings by design;
+      // see tools/quality-policy/test-inventory.json for the classification that drives this list.
       "no-empty": "off",
       "no-undef": "off",
       "no-unused-vars": "off",

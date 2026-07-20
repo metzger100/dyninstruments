@@ -1,10 +1,4 @@
-import {
-  escapeRegex,
-  findMatchingParen,
-  findTopLevelComma,
-  getFileData,
-  lineAt
-} from "./shared.mjs";
+import { escapeRegex, findMatchingParen, findTopLevelComma, getFileData, lineAt } from "./shared.mjs";
 
 const RESPONSIVE_OWNER_SPECS = [
   {
@@ -64,12 +58,26 @@ const RESPONSIVE_CONSUMER_FILES = new Set([
   "widgets/text/XteDisplayWidget/XteDisplayWidget.js"
 ]);
 
+const RESPONSIVE_HARD_FLOOR_ALLOWLIST = {
+  // documentation/shared/text-layout-engine.md documents computeInsets(...) as an
+  // intentionally retained low-level non-responsive helper; computeResponsiveInsets(...)
+  // is the stable responsive contract every production caller uses instead.
+  "shared/widget-kits/text/TextLayoutEngine.js": new Set([
+    "Math.max(6, Math.floor(Math.min(W, H) * 0.04))",
+    "Math.max(3, Math.floor(Math.min(W, H) * 0.035))",
+    "Math.max(6, Math.floor(Math.min(W, H) * 0.06))"
+  ])
+};
+
 const DIRECT_PROFILE_REQUIRE_RE = /componentContext\.components\.require\(\s*["'`]ResponsiveScaleProfile["'`]\s*\)/;
 const FLOOR_LITERAL_RE = /^(?:[3-9]|[1-9]\d+)(?:\.0+)?$/;
-const LAYOUT_CONTEXT_RE = /(?:Math\.(?:floor|ceil|round)|\.(?:h|w)\b|\b(?:rect|box|layout|contentRect|content|track|slot|band|label|caption|value|unit|font|gap|pad|width|height|radius|minDim|safeVp|px|Px|availableWidth|availableHeight|line|fit)\b)/;
+const LAYOUT_CONTEXT_RE =
+  /(?:Math\.(?:floor|ceil|round)|\.(?:h|w)\b|\b(?:rect|box|layout|contentRect|content|track|slot|band|label|caption|value|unit|font|gap|pad|width|height|radius|minDim|safeVp|px|Px|availableWidth|availableHeight|line|fit)\b)/;
 
 function normalizeExpression(value) {
-  return String(value || "").replace(/\s+/g, " ").trim();
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function buildAliasRegex(alias, method) {
@@ -77,7 +85,10 @@ function buildAliasRegex(alias, method) {
 }
 
 function findResponsiveAlias(text) {
-  const match = /\bconst\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*componentContext\.components\.require\(\s*["'`]ResponsiveScaleProfile["'`]\s*\)/.exec(text);
+  const match =
+    /\bconst\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*componentContext\.components\.require\(\s*["'`]ResponsiveScaleProfile["'`]\s*\)/.exec(
+      text
+    );
   return match ? { alias: match[1], index: match.index } : null;
 }
 
@@ -179,9 +190,13 @@ export function runResponsiveLayoutHardFloorRule(rule, files) {
   for (const file of files) {
     const data = getFileData(file);
     const seen = new Set();
+    const allowlisted = RESPONSIVE_HARD_FLOOR_ALLOWLIST[file] || new Set();
     const findings = collectMathMaxFindings(data).concat(collectClampFindings(data));
 
     for (const entry of findings) {
+      if (allowlisted.has(entry.expression)) {
+        continue;
+      }
       const line = lineAt(entry.index, data.lineStarts);
       const key = `${file}:${line}:${entry.expression}`;
       if (seen.has(key)) {
@@ -259,7 +274,8 @@ export function runResponsiveProfileOwnershipRule(rule, files) {
       message: rule.message({
         file,
         line,
-        detail: "Consumer modules must not resolve ResponsiveScaleProfile directly; read layout-owned responsive state instead."
+        detail:
+          "Consumer modules must not resolve ResponsiveScaleProfile directly; read layout-owned responsive state instead."
       })
     });
   }

@@ -8,19 +8,25 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRadialAngleMath = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
 
   function create() {
     /** @param {number} deg @returns {number} */
-    function degToRad(deg) { return (deg * Math.PI) / 180; }
+    function degToRad(deg) {
+      return (deg * Math.PI) / 180;
+    }
 
     /** @param {number} rad @returns {number} */
-    function radToDeg(rad) { return (rad * 180) / Math.PI; }
+    function radToDeg(rad) {
+      return (rad * 180) / Math.PI;
+    }
 
     /** @param {number} n @param {number} m @returns {number} */
-    function mod(n, m) { return ((n % m) + m) % m; }
+    function mod(n, m) {
+      return ((n % m) + m) % m;
+    }
 
     /** @param {number} deg @returns {number} */
     function norm360(deg) {
@@ -49,13 +55,13 @@
     function degToCanvasRad(deg, cfg, rotationDeg) {
       cfg = cfg || {};
       const zeroDegAt = hasOwn.call(cfg, "zeroDegAt") ? cfg.zeroDegAt : "north";
-      const clockwise = (cfg.clockwise !== false);
+      const clockwise = cfg.clockwise !== false;
 
       let d = Number(deg);
       if (!Number.isFinite(d)) d = 0;
       d = d + (Number(rotationDeg) || 0);
 
-      const shift = (zeroDegAt === "east") ? 0 : -90;
+      const shift = zeroDegAt === "east" ? 0 : -90;
       const signed = clockwise ? d : -d;
       return degToRad(norm360(signed + shift));
     }
@@ -81,10 +87,10 @@
         return NaN;
       }
 
-      const clampValue = (opts.clamp !== false);
+      const clampValue = opts.clamp !== false;
       if (clampValue) v = Math.max(min, Math.min(max, v));
 
-      const t = (max === min) ? 0 : (v - min) / (max - min);
+      const t = max === min ? 0 : (v - min) / (max - min);
       return startDeg + (endDeg - startDeg) * t;
     }
 
@@ -127,11 +133,11 @@
         return NaN;
       }
 
-      const denom = (endDeg - startDeg);
-      const t = (denom === 0) ? 0 : (a - startDeg) / denom;
+      const denom = endDeg - startDeg;
+      const t = denom === 0 ? 0 : (a - startDeg) / denom;
       let v = min + (max - min) * t;
 
-      const clampValue = (opts.clamp !== false);
+      const clampValue = opts.clamp !== false;
       if (clampValue) v = Math.max(min, Math.min(max, v));
 
       return v;
@@ -165,4 +171,4 @@
   }
 
   return { id: "RadialAngleMath", create };
-}));
+});

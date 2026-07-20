@@ -1,10 +1,4 @@
-import {
-  asGlobal,
-  compareFindings,
-  findMatchingBrace,
-  getFileData,
-  lineAt
-} from "./shared.mjs";
+import { asGlobal, compareFindings, findMatchingBrace, getFileData, lineAt } from "./shared.mjs";
 import {
   compareDuplicateGroups,
   countControlTokens,
@@ -42,8 +36,7 @@ export function runDuplicateFunctions(rule, files) {
         });
       }
       groupsExact.get(key).records.push(entry);
-    }
-    else if (entry.tokensExact.length >= DUPLICATE_FN_SMALL_MIN_EXACT_TOKENS) {
+    } else if (entry.tokensExact.length >= DUPLICATE_FN_SMALL_MIN_EXACT_TOKENS) {
       const key = entry.signatureExact;
       if (!groupsExactSmall.has(key)) {
         groupsExactSmall.set(key, {
@@ -55,9 +48,9 @@ export function runDuplicateFunctions(rule, files) {
       groupsExactSmall.get(key).records.push(entry);
     }
     if (
-      entry.tokensShape.length >= DUPLICATE_FN_MIN_SHAPE_TOKENS
-      && entry.controlCount >= DUPLICATE_FN_MIN_SHAPE_CONTROL
-      && entry.statementCount >= DUPLICATE_FN_MIN_SHAPE_STATEMENTS
+      entry.tokensShape.length >= DUPLICATE_FN_MIN_SHAPE_TOKENS &&
+      entry.controlCount >= DUPLICATE_FN_MIN_SHAPE_CONTROL &&
+      entry.statementCount >= DUPLICATE_FN_MIN_SHAPE_STATEMENTS
     ) {
       const key = entry.signatureShape;
       if (!groupsShape.has(key)) {
@@ -73,14 +66,15 @@ export function runDuplicateFunctions(rule, files) {
 
   const out = [];
   const exactMarkedSignatures = new Set();
-  const exactGroups = [...groupsExact.values()]
-    .sort(compareDuplicateGroups);
+  const exactGroups = [...groupsExact.values()].sort(compareDuplicateGroups);
   for (const group of exactGroups) {
     const uniqueFiles = new Set(group.records.map((rec) => rec.file));
     if (uniqueFiles.size < 2) continue;
-    const locations = dedupeLocations(group.records.map(function (rec) {
-      return { file: rec.file, line: rec.line };
-    })).sort(compareFindings);
+    const locations = dedupeLocations(
+      group.records.map(function (rec) {
+        return { file: rec.file, line: rec.line };
+      })
+    ).sort(compareFindings);
     for (const rec of group.records) exactMarkedSignatures.add(rec.signatureExact);
     out.push({
       file: locations[0].file,
@@ -94,17 +88,18 @@ export function runDuplicateFunctions(rule, files) {
     });
   }
 
-  const smallGroups = [...groupsExactSmall.values()]
-    .sort(compareDuplicateGroups);
+  const smallGroups = [...groupsExactSmall.values()].sort(compareDuplicateGroups);
   for (const group of smallGroups) {
     const uniqueFiles = new Set(group.records.map((rec) => rec.file));
     if (uniqueFiles.size < 2) continue;
     const exactSignatures = new Set(group.records.map((rec) => rec.signatureExact));
     if (exactSignatures.size === 1 && exactMarkedSignatures.has([...exactSignatures][0])) continue;
 
-    const locations = dedupeLocations(group.records.map(function (rec) {
-      return { file: rec.file, line: rec.line };
-    })).sort(compareFindings);
+    const locations = dedupeLocations(
+      group.records.map(function (rec) {
+        return { file: rec.file, line: rec.line };
+      })
+    ).sort(compareFindings);
     out.push({
       file: locations[0].file,
       line: locations[0].line,
@@ -117,8 +112,7 @@ export function runDuplicateFunctions(rule, files) {
     });
   }
 
-  const shapeGroups = [...groupsShape.values()]
-    .sort(compareDuplicateGroups);
+  const shapeGroups = [...groupsShape.values()].sort(compareDuplicateGroups);
   for (const group of shapeGroups) {
     const uniqueFiles = new Set(group.records.map((rec) => rec.file));
     if (uniqueFiles.size < 2) continue;
@@ -126,9 +120,11 @@ export function runDuplicateFunctions(rule, files) {
     const exactSignatures = new Set(group.records.map((rec) => rec.signatureExact));
     if (exactSignatures.size === 1 && exactMarkedSignatures.has([...exactSignatures][0])) continue;
 
-    const locations = dedupeLocations(group.records.map(function (rec) {
-      return { file: rec.file, line: rec.line };
-    })).sort(compareFindings);
+    const locations = dedupeLocations(
+      group.records.map(function (rec) {
+        return { file: rec.file, line: rec.line };
+      })
+    ).sort(compareFindings);
     out.push({
       file: locations[0].file,
       line: locations[0].line,
@@ -199,10 +195,9 @@ export function runDuplicateBlockClones(rule, files) {
   }
 
   const seen = new Set();
-  const sortedGroups = [...pairDeltaGroups.values()]
-    .sort(function (a, b) {
-      return a.leftId - b.leftId || a.rightId - b.rightId;
-    });
+  const sortedGroups = [...pairDeltaGroups.values()].sort(function (a, b) {
+    return a.leftId - b.leftId || a.rightId - b.rightId;
+  });
   for (const group of sortedGroups) {
     const leftFn = byId.get(group.leftId);
     const rightFn = byId.get(group.rightId);
@@ -212,20 +207,12 @@ export function runDuplicateBlockClones(rule, files) {
     for (const segment of merged) {
       const tokenCount = segment.leftEnd - segment.leftStart;
       if (tokenCount < DUPLICATE_BLOCK_MIN_TOKENS) continue;
-      const statementCount = countStatementMarkers(
-        leftFn.tokensExact.slice(segment.leftStart, segment.leftEnd)
-      );
+      const statementCount = countStatementMarkers(leftFn.tokensExact.slice(segment.leftStart, segment.leftEnd));
       if (statementCount < DUPLICATE_BLOCK_MIN_STATEMENTS) continue;
 
       const leftLine = tokenLineAt(leftFn, segment.leftStart);
       const rightLine = tokenLineAt(rightFn, segment.rightStart);
-      const signature = [
-        leftFn.file,
-        leftLine,
-        rightFn.file,
-        rightLine,
-        tokenCount
-      ].join(":");
+      const signature = [leftFn.file, leftLine, rightFn.file, rightLine, tokenCount].join(":");
       if (seen.has(signature)) continue;
       seen.add(signature);
       const locations = [
@@ -277,7 +264,9 @@ function extractFunctionsForDuplication(files, allowlist) {
         const bodyStartLine = lineAt(bodyStart, data.lineStarts);
         const tokens = tokenizeDuplicationBody(bodyText, bodyStartLine);
         if (!tokens.length) continue;
-        const tokensExact = tokens.map(function (token) { return token.value; });
+        const tokensExact = tokens.map(function (token) {
+          return token.value;
+        });
         const tokensShape = tokens.map(toShapeToken);
         out.push({
           id: -1,

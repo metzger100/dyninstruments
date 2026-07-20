@@ -1,7 +1,6 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("SemicircleRadialTextLayout", function () {
@@ -11,46 +10,40 @@ describe("SemicircleRadialTextLayout", function () {
         majorLenFactor: 0.08,
         majorWidthFactor: 0.02,
         minorLenFactor: 0.047,
-        minorWidthFactor: 0.01,
+        minorWidthFactor: 0.01
       },
       pointer: {
         depthFactor: 0.22,
-        sideFactor: 0.11,
+        sideFactor: 0.11
       },
       ring: { widthFactor: 0.18, arcLineWidthFactor: 0.013 },
       labels: {
         insetFactor: 2.2,
-        fontFactor: 0.2,
-      },
+        fontFactor: 0.2
+      }
     },
     strokeWeight: 1,
     pointerDepthWeight: 1,
     pointerSideWeight: 1,
     font: {
       weight: 710,
-      labelWeight: 680,
-    },
+      labelWeight: 680
+    }
   };
 
   const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
 
   function createLayoutApi() {
-    const responsiveScaleProfile = loadFresh(
-      "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-    );
-    return loadFresh(
-      "shared/widget-kits/radial/SemicircleRadialLayout.js",
-    ).create(
+    const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
+    return loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js").create(
       {},
       createComponentContextMock({
         modules: {
           ResponsiveScaleProfile: responsiveScaleProfile,
-          LayoutRectMath: loadFresh(
-            "shared/widget-kits/layout/LayoutRectMath.js",
-          ),
-          GeometryScale: geometryScale,
-        },
-      }),
+          LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+          GeometryScale: geometryScale
+        }
+      })
     );
   }
 
@@ -60,9 +53,9 @@ describe("SemicircleRadialTextLayout", function () {
       {},
       createComponentContextMock({
         modules: {
-          RadialTextFitting: fitting,
-        },
-      }),
+          RadialTextFitting: fitting
+        }
+      })
     );
   }
 
@@ -75,7 +68,7 @@ describe("SemicircleRadialTextLayout", function () {
       mode: mode,
       theme: themeDefaults,
       insets: insets,
-      responsive: insets.responsive,
+      responsive: insets.responsive
     });
     const calls = {
       measureValueUnitFit: 0,
@@ -84,7 +77,7 @@ describe("SemicircleRadialTextLayout", function () {
       drawCaptionMax: [],
       drawValueUnitWithFit: [],
       drawInlineCapValUnit: [],
-      drawThreeRowsBlock: [],
+      drawThreeRowsBlock: []
     };
     const textApi = {
       measureValueUnitFit() {
@@ -110,21 +103,10 @@ describe("SemicircleRadialTextLayout", function () {
           h,
           valueText,
           unitText,
-          fit: { ...fit },
+          fit: { ...fit }
         });
       },
-      drawInlineCapValUnit(
-        ctx,
-        family,
-        x,
-        y,
-        w,
-        h,
-        caption,
-        valueText,
-        unitText,
-        fit,
-      ) {
+      drawInlineCapValUnit(ctx, family, x, y, w, h, caption, valueText, unitText, fit) {
         calls.drawInlineCapValUnit.push({
           x,
           y,
@@ -133,23 +115,10 @@ describe("SemicircleRadialTextLayout", function () {
           caption,
           valueText,
           unitText,
-          fit: { ...fit },
+          fit: { ...fit }
         });
       },
-      drawThreeRowsBlock(
-        ctx,
-        family,
-        x,
-        y,
-        w,
-        h,
-        caption,
-        valueText,
-        unitText,
-        secScale,
-        align,
-        sizes,
-      ) {
+      drawThreeRowsBlock(ctx, family, x, y, w, h, caption, valueText, unitText, secScale, align, sizes) {
         calls.drawThreeRowsBlock.push({
           x,
           y,
@@ -160,9 +129,9 @@ describe("SemicircleRadialTextLayout", function () {
           unitText,
           secScale,
           align,
-          sizes: { ...sizes },
+          sizes: { ...sizes }
         });
-      },
+      }
     };
 
     return {
@@ -178,8 +147,8 @@ describe("SemicircleRadialTextLayout", function () {
         layout: layout,
         geom: layout.geom,
         responsive: layout.responsive,
-        textFillScale: layout.textFillScale,
-      },
+        textFillScale: layout.textFillScale
+      }
     };
   }
 
@@ -192,12 +161,12 @@ describe("SemicircleRadialTextLayout", function () {
       mode: mode,
       theme: themeDefaults,
       insets: insets,
-      responsive: insets.responsive,
+      responsive: insets.responsive
     });
     const realText = createRadialTextApi();
     const captures = {
       valueUnit: [],
-      threeRows: [],
+      threeRows: []
     };
     const ctx = createMockContext2D({ charWidth: 1 });
     ctx.measureText = function (text) {
@@ -214,20 +183,7 @@ describe("SemicircleRadialTextLayout", function () {
       drawCaptionMax: realText.drawCaptionMax,
       drawInlineCapValUnit: realText.drawInlineCapValUnit,
       drawDisconnectOverlay: realText.drawDisconnectOverlay,
-      drawValueUnitWithFit(
-        ctxArg,
-        family,
-        x,
-        y,
-        w,
-        h,
-        valueText,
-        unitText,
-        fit,
-        align,
-        valueWeight,
-        labelWeight,
-      ) {
+      drawValueUnitWithFit(ctxArg, family, x, y, w, h, valueText, unitText, fit, align, valueWeight, labelWeight) {
         const start = ctxArg.calls.length;
         realText.drawValueUnitWithFit(
           ctxArg,
@@ -241,11 +197,9 @@ describe("SemicircleRadialTextLayout", function () {
           fit,
           align,
           valueWeight,
-          labelWeight,
+          labelWeight
         );
-        const scaled = ctxArg.calls
-          .slice(start)
-          .some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
+        const scaled = ctxArg.calls.slice(start).some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
         captures.valueUnit.push({ w, valueText, unitText, fit, scaled });
       },
       drawThreeRowsBlock(
@@ -262,7 +216,7 @@ describe("SemicircleRadialTextLayout", function () {
         align,
         sizes,
         valueWeight,
-        labelWeight,
+        labelWeight
       ) {
         const start = ctxArg.calls.length;
         realText.drawThreeRowsBlock(
@@ -279,20 +233,18 @@ describe("SemicircleRadialTextLayout", function () {
           align,
           sizes,
           valueWeight,
-          labelWeight,
+          labelWeight
         );
-        const scaled = ctxArg.calls
-          .slice(start)
-          .some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
+        const scaled = ctxArg.calls.slice(start).some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
         captures.threeRows.push({
           w,
           caption,
           valueText,
           unitText,
           sizes,
-          scaled,
+          scaled
         });
-      },
+      }
     };
     return {
       captures: captures,
@@ -308,8 +260,8 @@ describe("SemicircleRadialTextLayout", function () {
         layout: layout,
         geom: layout.geom,
         responsive: layout.responsive,
-        textFillScale: layout.textFillScale,
-      },
+        textFillScale: layout.textFillScale
+      }
     };
   }
 
@@ -318,14 +270,12 @@ describe("SemicircleRadialTextLayout", function () {
       caption: "SPD",
       valueText: "12.3",
       unit: "kn",
-      secScale: 0.8,
+      secScale: 0.8
     };
   }
 
   it("applies normal-mode draw-time clamp for long caption/unit strings", function () {
-    const textLayout = loadFresh(
-      "shared/widget-kits/radial/SemicircleRadialTextLayout.js",
-    ).create();
+    const textLayout = loadFresh("shared/widget-kits/radial/SemicircleRadialTextLayout.js").create();
     const harness = createRealTextHarness("normal", 220, 120);
     const cache = textLayout.createFitCache();
 
@@ -335,45 +285,21 @@ describe("SemicircleRadialTextLayout", function () {
         caption: "Water Temperature - Radial",
         valueText: "17.3",
         unit: "Degree Celsius",
-        secScale: 0.8,
+        secScale: 0.8
       },
-      cache,
+      cache
     );
 
     expect(harness.captures.threeRows.length).toBe(1);
     const block = harness.captures.threeRows[0];
-    harness.realText.setFont(
-      harness.state.ctx,
-      block.sizes.cPx,
-      harness.state.labelWeight,
-      harness.state.family,
-    );
-    const captionWidth = harness.state.ctx.measureText(
-      String(block.caption),
-    ).width;
-    harness.realText.setFont(
-      harness.state.ctx,
-      block.sizes.vPx,
-      harness.state.valueWeight,
-      harness.state.family,
-    );
-    const valueWidth = harness.state.ctx.measureText(
-      String(block.valueText),
-    ).width;
-    harness.realText.setFont(
-      harness.state.ctx,
-      block.sizes.uPx,
-      harness.state.labelWeight,
-      harness.state.family,
-    );
-    const unitWidth = harness.state.ctx.measureText(
-      String(block.unitText),
-    ).width;
+    harness.realText.setFont(harness.state.ctx, block.sizes.cPx, harness.state.labelWeight, harness.state.family);
+    const captionWidth = harness.state.ctx.measureText(String(block.caption)).width;
+    harness.realText.setFont(harness.state.ctx, block.sizes.vPx, harness.state.valueWeight, harness.state.family);
+    const valueWidth = harness.state.ctx.measureText(String(block.valueText)).width;
+    harness.realText.setFont(harness.state.ctx, block.sizes.uPx, harness.state.labelWeight, harness.state.family);
+    const unitWidth = harness.state.ctx.measureText(String(block.unitText)).width;
 
-    const overflows =
-      captionWidth > block.w + 0.01 ||
-      valueWidth > block.w + 0.01 ||
-      unitWidth > block.w + 0.01;
+    const overflows = captionWidth > block.w + 0.01 || valueWidth > block.w + 0.01 || unitWidth > block.w + 0.01;
     expect(overflows ? block.scaled : true).toBe(true);
   });
 });

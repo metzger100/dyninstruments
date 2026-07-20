@@ -1,8 +1,10 @@
 const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 
 describe("runtime/surface/ClusterSurfacePolicy.js", function () {
+  /** @type {number | undefined} */
   let originalInnerHeight;
 
+  /** @param {number} [innerHeight] */
   function createPolicy(innerHeight) {
     const context = createScriptContext({
       innerHeight: typeof innerHeight === "number" ? innerHeight : 0,
@@ -18,6 +20,11 @@ describe("runtime/surface/ClusterSurfacePolicy.js", function () {
     return context.DyniPlugin.runtime._createClusterSurfacePolicy();
   }
 
+  /**
+   * @param {string} rendererId
+   * @param {Record<string, any>} props
+   * @param {Record<string, any>} [rendererSpec]
+   */
   function makeRouteState(rendererId, props, rendererSpec) {
     return {
       route: { rendererId: rendererId },
@@ -26,10 +33,11 @@ describe("runtime/surface/ClusterSurfacePolicy.js", function () {
     };
   }
 
+  /** @param {Record<string, any>} [options] */
   function makeHostActions(options) {
     const opts = options || {};
     return {
-      getCapabilities: opts.getCapabilities || vi.fn(() => (opts.capabilities || {})),
+      getCapabilities: opts.getCapabilities || vi.fn(() => opts.capabilities || {}),
       routePoints: {
         activate: opts.routePointsActivate || vi.fn(() => true)
       },
@@ -56,7 +64,7 @@ describe("runtime/surface/ClusterSurfacePolicy.js", function () {
   afterEach(function () {
     vi.restoreAllMocks();
     if (typeof originalInnerHeight === "undefined") {
-      delete globalThis.innerHeight;
+      delete (/** @type {any} */ (globalThis).innerHeight);
       return;
     }
     globalThis.innerHeight = originalInnerHeight;
@@ -85,12 +93,16 @@ describe("runtime/surface/ClusterSurfacePolicy.js", function () {
     expect(routed.props.viewportHeight).toBe(812);
     expect(Object.keys(props)).toEqual(["cluster", "kind", "mode"]);
 
-    const surfacePolicyDescriptor = Object.getOwnPropertyDescriptor(props, "surfacePolicy");
+    const surfacePolicyDescriptor = /** @type {PropertyDescriptor} */ (
+      Object.getOwnPropertyDescriptor(props, "surfacePolicy")
+    );
     expect(surfacePolicyDescriptor.enumerable).toBe(false);
     expect(surfacePolicyDescriptor.configurable).toBe(true);
     expect(surfacePolicyDescriptor.writable).toBe(true);
 
-    const viewportDescriptor = Object.getOwnPropertyDescriptor(props, "viewportHeight");
+    const viewportDescriptor = /** @type {PropertyDescriptor} */ (
+      Object.getOwnPropertyDescriptor(props, "viewportHeight")
+    );
     expect(viewportDescriptor.enumerable).toBe(false);
     expect(viewportDescriptor.configurable).toBe(true);
     expect(viewportDescriptor.writable).toBe(true);
@@ -158,7 +170,8 @@ describe("runtime/surface/ClusterSurfacePolicy.js", function () {
         return { openActiveRoute: "passive" };
       }
     });
-    const getCapabilities = vi.fn()
+    const getCapabilities = vi
+      .fn()
       .mockReturnValueOnce(capabilityA)
       .mockReturnValueOnce(capabilityA)
       .mockReturnValueOnce(capabilityB);

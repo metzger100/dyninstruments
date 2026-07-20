@@ -4,7 +4,8 @@
 
 ## Overview
 
-Use this guide when writing execution plans for complex work that spans files or sessions. The structure below is the required baseline for consistent first-attempt implementation success.
+Use this guide when writing execution plans for complex work that spans files or sessions. The structure below is the
+required baseline for consistent first-attempt implementation success.
 
 ## Key Details
 
@@ -14,16 +15,16 @@ Use this guide when writing execution plans for complex work that spans files or
 
 ## Required Plan Sections
 
-| Section | Purpose | Contract |
-|---|---|---|
-| Status | Scope and authority | State what the plan covers and what is prescriptive vs flexible |
-| Goal | Observable outcomes | List all user-visible/repo-visible results after completion |
-| Verified Baseline | Repository-verified facts | Numbered facts checked against current repository state |
-| Hard Constraints | Non-negotiable boundaries | Explicit "must not change" rules, scope limits, architecture limits |
-| Implementation Order | Phased delivery | Per phase: intent, dependencies, deliverables, exit conditions |
+| Section                          | Purpose                   | Contract                                                                                    |
+| -------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------- |
+| Status                           | Scope and authority       | State what the plan covers and what is prescriptive vs flexible                             |
+| Goal                             | Observable outcomes       | List all user-visible/repo-visible results after completion                                 |
+| Verified Baseline                | Repository-verified facts | Numbered facts checked against current repository state                                     |
+| Hard Constraints                 | Non-negotiable boundaries | Explicit "must not change" rules, scope limits, architecture limits                         |
+| Implementation Order             | Phased delivery           | Per phase: intent, dependencies, deliverables, exit conditions                              |
 | User-Facing Documentation Impact | Public docs sync contract | Explicitly state whether `README.md` changes are required and list exact sections to update |
-| Acceptance Criteria | Done definition | Group criteria by area and tie to implementation owners when needed |
-| Related | Dependency chain | Link dependent docs/plans needed to execute safely |
+| Acceptance Criteria              | Done definition           | Group criteria by area and tie to implementation owners when needed                         |
+| Related                          | Dependency chain          | Link dependent docs/plans needed to execute safely                                          |
 
 ## Verified Baseline Rules
 
@@ -44,14 +45,16 @@ Use this guide when writing execution plans for complex work that spans files or
 - Declare dependencies on previous phases explicitly.
 - Keep deliverables concrete: file paths, section names, registration entries, command gates.
 - Keep exit conditions executable: required checks, required tests, required numeric/line-count limits.
-- If the plan touches theming, clusters/kinds, layouts, installation, configuration, requirements, or development workflow, include explicit `README.md` deliverables and exit conditions in the relevant phase(s).
+- If the plan touches theming, clusters/kinds, layouts, installation, configuration, requirements, or development
+  workflow, include explicit `README.md` deliverables and exit conditions in the relevant phase(s).
 
 ## Anti-Patterns
 
 - Writing a plan without a verified baseline.
 - Mixing implementation and documentation work inside the same phase.
 - Defining acceptance criteria only after coding starts.
-- Omitting `README.md` updates for user-facing changes in theming, clusters/kinds, layouts, installation, configuration, requirements, or development workflow.
+- Omitting `README.md` updates for user-facing changes in theming, clusters/kinds, layouts, installation, configuration,
+  requirements, or development workflow.
 
 ## Related
 

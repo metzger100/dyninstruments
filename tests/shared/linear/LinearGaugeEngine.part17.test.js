@@ -1,8 +1,5 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./LinearGaugeEngine.harness");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
 describe("LinearGaugeEngine", function () {
   it("preserves explicit empty unit and falsy caption values", function () {
@@ -18,20 +15,20 @@ describe("LinearGaugeEngine", function () {
       tickProps: {
         major: "major",
         minor: "minor",
-        showEndLabels: "showEndLabels",
+        showEndLabels: "showEndLabels"
       },
       formatDisplay(raw, props, unit) {
         receivedUnit = unit;
         const n = Number(raw);
         return { num: n, text: String(n) };
-      },
+      }
     });
 
     renderer(
       createMockCanvas({
         rectWidth: 280,
         rectHeight: 220,
-        ctx: createMockContext2D(),
+        ctx: createMockContext2D()
       }),
       {
         value: 10,
@@ -42,12 +39,11 @@ describe("LinearGaugeEngine", function () {
         n: 1.1,
         f: 3.5,
         caption: 0,
-        unit: "",
-      },
+        unit: ""
+      }
     );
 
     expect(receivedUnit).toBe("");
     expect(harness.calls.fitInlineCaptions).toEqual([0]);
   });
-
 });

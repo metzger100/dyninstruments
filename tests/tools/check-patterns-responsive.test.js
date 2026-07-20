@@ -5,7 +5,8 @@ const { pathToFileURL } = require("node:url");
 
 describe("tools/check-patterns responsive rules", function () {
   const toolPath = path.resolve(__dirname, "../../tools/check-patterns.mjs");
-  const tempDirs = [];
+  const tempDirs = /** @type {string[]} */ ([]);
+  /** @type {any} */
   let runPatternCheck;
 
   beforeAll(async function () {
@@ -15,10 +16,11 @@ describe("tools/check-patterns responsive rules", function () {
 
   afterEach(function () {
     while (tempDirs.length) {
-      fs.rmSync(tempDirs.pop(), { recursive: true, force: true });
+      fs.rmSync(/** @type {string} */ (tempDirs.pop()), { recursive: true, force: true });
     }
   });
 
+  /** @param {Record<string, string>} files */
   function createWorkspace(files) {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-check-patterns-responsive-"));
     tempDirs.push(dir);
@@ -31,8 +33,9 @@ describe("tools/check-patterns responsive rules", function () {
     return dir;
   }
 
+  /** @param {any} result */
   function findingMessages(result) {
-    return result.findings.map((item) => item.message).join("\n");
+    return result.findings.map((/** @type {any} */ item) => item.message).join("\n");
   }
 
   it("fails on Math.max hard floors in scoped responsive layout files", function () {
@@ -99,7 +102,7 @@ measureMetricTile({ h: 20 });
     expect(result.summary.byRuleFailures["responsive-layout-hard-floor"]).toBe(0);
   });
 
-  it("ignores valid suppressions for intentional technical floors", function () {
+  it("rejects generic suppressions for intentional technical floors", function () {
     const cwd = createWorkspace({
       "shared/widget-kits/text/TextTileLayout.js": `
 function measureMetricTile(rect) {
@@ -112,7 +115,9 @@ measureMetricTile({ h: 20 });
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["responsive-layout-hard-floor"]).toBe(0);
+    expect(result.summary.ok).toBe(false);
+    expect(result.summary.byRuleFailures["responsive-layout-hard-floor"]).toBe(1);
+    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(1);
   });
 
   it("fails when an owner stops resolving ResponsiveScaleProfile", function () {

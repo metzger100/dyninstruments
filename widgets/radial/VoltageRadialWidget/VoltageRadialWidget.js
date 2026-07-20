@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniVoltageRadialWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @param {unknown} def @param {DyniComponentContext} componentContext */
@@ -36,13 +36,20 @@
       hideTextualMetricsProp: "voltageRadialHideTextualMetrics",
       tickSteps: valueMath.resolveVoltageTickSteps,
       formatDisplay: function (raw, props) {
-        const display = valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatDecimal", [3, 1, true]);
+        const display = valueMath.formatGaugeDisplay(
+          raw,
+          props,
+          componentContext.format.applyFormatter,
+          placeholderNormalize.normalize,
+          "formatDecimal",
+          [3, 1, true]
+        );
         return { num: display.num, text: placeholderNormalize.normalize(display.text, undefined) };
       },
       buildSectors: function (props, minV, maxV, arc, valueUtils, theme) {
         const p = props || {};
-        const warningEnabled = (p.voltageRadialWarningEnabled !== false);
-        const alarmEnabled = (p.voltageRadialAlarmEnabled !== false);
+        const warningEnabled = p.voltageRadialWarningEnabled !== false;
+        const alarmEnabled = p.voltageRadialAlarmEnabled !== false;
         if (!warningEnabled && !alarmEnabled) {
           return [];
         }
@@ -78,4 +85,4 @@
   }
 
   return { id: "VoltageRadialWidget", create };
-}));
+});

@@ -23,7 +23,9 @@
 
   /** @param {unknown} value @param {string} name @returns {Record<string, unknown>} */
   const ensureObject = function (value, name) {
-    return /** @type {Record<string, unknown>} */ (valueMath.ensureObject(value, "RouteActivationPayloadBuilder: " + name));
+    return /** @type {Record<string, unknown>} */ (
+      valueMath.ensureObject(value, "RouteActivationPayloadBuilder: " + name)
+    );
   };
   const trimText = valueMath.trimText;
 
@@ -83,8 +85,8 @@
     const componentDef = components && components[rendererId] ? components[rendererId] : null;
     return componentDef && Array.isArray(componentDef.shadowCss)
       ? componentDef.shadowCss.filter(function (url) {
-        return typeof url === "string" && !!url;
-      })
+          return typeof url === "string" && !!url;
+        })
       : [];
   }
 
@@ -101,7 +103,11 @@
 
   /** @param {Record<string, unknown>} finalProps @param {Record<string, unknown>} mappedProps @returns {Record<string, unknown>} */
   function mergeRendererProps(finalProps, mappedProps) {
-    if (mappedProps.rendererProps && typeof mappedProps.rendererProps === "object" && !Array.isArray(mappedProps.rendererProps)) {
+    if (
+      mappedProps.rendererProps &&
+      typeof mappedProps.rendererProps === "object" &&
+      !Array.isArray(mappedProps.rendererProps)
+    ) {
       Object.assign(finalProps, mappedProps.rendererProps);
     }
 
@@ -118,10 +124,14 @@
   /** @param {DyniActivatedPayloadOptions} options */
   function buildActivatedPayload(options) {
     const snapshot = /** @type {DyniActivationSnapshot} */ (ensureObject(options.snapshot, "snapshot"));
-    const routeMeta = /** @type {DyniActivationRouteMeta} */ (/** @type {unknown} */ (ensureObject(options.routeMeta, "routeMeta")));
+    const routeMeta = /** @type {DyniActivationRouteMeta} */ (
+      /** @type {unknown} */ (ensureObject(options.routeMeta, "routeMeta"))
+    );
     const routeCache = /** @type {DyniActivationRouteCache} */ (ensureObject(options.routeCache, "routeCache"));
     const toolkitSpec = /** @type {DyniActivationToolkitSpec} */ (ensureObject(options.toolkitSpec, "toolkitSpec"));
-    const surfaces = /** @type {DyniSurfaceRuntimeApi} */ (/** @type {unknown} */ (ensureObject(options.surfaces, "surfaces")));
+    const surfaces = /** @type {DyniSurfaceRuntimeApi} */ (
+      /** @type {unknown} */ (ensureObject(options.surfaces, "surfaces"))
+    );
     const routeFrame = snapshot.routeFrame;
     const mapperProps = cloneRouteProps(routeFrame);
     const routeContext = createRouteContext(routeMeta, routeCache, mapperProps, toolkitSpec);
@@ -176,7 +186,9 @@
   function createPayloadBuilder(options) {
     const loader = /** @type {DyniActivationLoader} */ (ensureObject(options.loader, "loader"));
     const themeRuntime = /** @type {DyniActivationThemeRuntime} */ (ensureObject(options.themeRuntime, "themeRuntime"));
-    const surfaces = /** @type {DyniSurfaceRuntimeApi} */ (/** @type {unknown} */ (ensureObject(options.surfaces, "surfaces")));
+    const surfaces = /** @type {DyniSurfaceRuntimeApi} */ (
+      /** @type {unknown} */ (ensureObject(options.surfaces, "surfaces"))
+    );
 
     if (typeof loader.areComponentsLoaded !== "function") {
       throw new Error("RouteActivationPayloadBuilder: loader.areComponentsLoaded must be a function");
@@ -211,7 +223,9 @@
     });
   }
 
-  /** @type {DyniRuntimeNamespace & Record<string, unknown>} */ (runtime).routeActivationPayloadBuilder = Object.freeze({
-    createPayloadBuilder: createPayloadBuilder
-  });
-}(this));
+  /** @type {DyniRuntimeNamespace & Record<string, unknown>} */ (runtime).routeActivationPayloadBuilder = Object.freeze(
+    {
+      createPayloadBuilder: createPayloadBuilder
+    }
+  );
+})(this);

@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniSpeedLinearWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @typedef {DyniLinearGaugeProps & { speedLinearWarningFrom?: number, speedLinearAlarmFrom?: number }} DyniSpeedLinearProps */
@@ -20,7 +20,14 @@
     const placeholderNormalize = componentContext.components.require("PlaceholderNormalize");
     /** @param {unknown} raw @param {DyniLinearGaugeProps} props @param {unknown} unit @returns {{ num: number, text: unknown }} */
     function formatDisplay(raw, props, unit) {
-      return valueMath.formatGaugeDisplay(raw, props, componentContext.format.applyFormatter, placeholderNormalize.normalize, "formatSpeed", [unit || "kn"]);
+      return valueMath.formatGaugeDisplay(
+        raw,
+        props,
+        componentContext.format.applyFormatter,
+        placeholderNormalize.normalize,
+        "formatSpeed",
+        [unit || "kn"]
+      );
     }
 
     /** @param {DyniSpeedLinearProps} props @param {number} minV @param {number} maxV @param {DyniLinearRange} axis @param {DyniValueMathApi} valueApi @param {DyniLinearGaugeTheme} theme @returns {DyniLinearColoredRange[]} */
@@ -28,10 +35,14 @@
       const p = props || {};
       const warningFrom = p.speedLinearWarningFrom;
       const alarmFrom = p.speedLinearAlarmFrom;
-      const warningTo = (typeof alarmFrom === "number" && Number.isFinite(alarmFrom)
-        && typeof warningFrom === "number" && Number.isFinite(warningFrom) && alarmFrom > warningFrom)
-        ? alarmFrom
-        : maxV;
+      const warningTo =
+        typeof alarmFrom === "number" &&
+        Number.isFinite(alarmFrom) &&
+        typeof warningFrom === "number" &&
+        Number.isFinite(warningFrom) &&
+        alarmFrom > warningFrom
+          ? alarmFrom
+          : maxV;
 
       const sectors = [];
       if (Number.isFinite(warningFrom)) {
@@ -89,4 +100,4 @@
   }
 
   return { id: "SpeedLinearWidget", create: create };
-}));
+});

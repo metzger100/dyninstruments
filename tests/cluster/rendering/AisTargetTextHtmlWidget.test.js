@@ -1,11 +1,8 @@
-const fs = require("node:fs");
-const path = require("node:path");
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("AisTargetTextHtmlWidget", function () {
+  /** @param {Record<string, any>} [options] @returns {any} */
   function createRenderer(options) {
     const opts = options || {};
     const fitCompute =
@@ -20,39 +17,38 @@ describe("AisTargetTextHtmlWidget", function () {
               captionStyle: "font-size:8px;",
               valueRowStyle: "",
               valueStyle: "font-size:11px;",
-              unitStyle: "font-size:7px;",
+              unitStyle: "font-size:7px;"
             },
             cpa: {
               captionStyle: "font-size:8px;",
               valueRowStyle: "",
               valueStyle: "font-size:11px;",
-              unitStyle: "font-size:7px;",
+              unitStyle: "font-size:7px;"
             },
             tcpa: {
               captionStyle: "font-size:8px;",
               valueRowStyle: "",
               valueStyle: "font-size:11px;",
-              unitStyle: "font-size:7px;",
+              unitStyle: "font-size:7px;"
             },
             brg: {
               captionStyle: "font-size:8px;",
               valueRowStyle: "",
               valueStyle: "font-size:11px;",
-              unitStyle: "font-size:7px;",
-            },
+              unitStyle: "font-size:7px;"
+            }
           },
-          accentStyle: "background-color:#c33;",
+          accentStyle: "background-color:#c33;"
         };
       });
 
     const applyFormatter =
       opts.applyFormatter ||
+      /** @param {any} value @param {any} formatterOptions @returns {any} */
       function (value, formatterOptions) {
         const cfg = formatterOptions || {};
         const formatter = cfg.formatter;
-        const params = Array.isArray(cfg.formatterParameters)
-          ? cfg.formatterParameters
-          : [];
+        const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
         if (value == null) {
           return cfg.default;
         }
@@ -72,56 +68,26 @@ describe("AisTargetTextHtmlWidget", function () {
         AisTargetHtmlFit: {
           create() {
             return { compute: fitCompute };
-          },
+          }
         },
-        HtmlWidgetUtils: loadFresh(
-          "shared/widget-kits/html/HtmlWidgetUtils.js",
-        ),
-        AisTargetRenderModel: loadFresh(
-          "shared/widget-kits/nav/AisTargetRenderModel.js",
-        ),
-        UnitAwareFormatter: loadFresh(
-          "shared/widget-kits/format/UnitAwareFormatter.js",
-        ),
+        HtmlWidgetUtils: loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js"),
+        AisTargetRenderModel: loadFresh("shared/widget-kits/nav/AisTargetRenderModel.js"),
+        UnitAwareFormatter: loadFresh("shared/widget-kits/format/UnitAwareFormatter.js"),
         AisTargetMarkup: loadFresh("shared/widget-kits/nav/AisTargetMarkup.js"),
         AisTargetLayout: loadFresh("shared/widget-kits/nav/AisTargetLayout.js"),
-        AisTargetLayoutSizing: loadFresh(
-          "shared/widget-kits/nav/AisTargetLayoutSizing.js",
-        ),
-        ResponsiveScaleProfile: loadFresh(
-          "shared/widget-kits/layout/ResponsiveScaleProfile.js",
-        ),
-        LayoutRectMath: loadFresh(
-          "shared/widget-kits/layout/LayoutRectMath.js",
-        ),
-        AisTargetLayoutGeometry: loadFresh(
-          "shared/widget-kits/nav/AisTargetLayoutGeometry.js",
-        ),
-        AisTargetLayoutGeometryStyles: loadFresh(
-          "shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js",
-        ),
-        AisTargetLayoutMath: loadFresh(
-          "shared/widget-kits/nav/AisTargetLayoutMath.js",
-        ),
-        PlaceholderNormalize: loadFresh(
-          "shared/widget-kits/format/PlaceholderNormalize.js",
-        ),
+        AisTargetLayoutSizing: loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js"),
+        ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
+        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+        AisTargetLayoutGeometry: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js"),
+        AisTargetLayoutGeometryStyles: loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js"),
+        AisTargetLayoutMath: loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js"),
+        PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
         StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
-        StateScreenLabels: loadFresh(
-          "shared/widget-kits/state/StateScreenLabels.js",
-        ),
-        StateScreenPrecedence: loadFresh(
-          "shared/widget-kits/state/StateScreenPrecedence.js",
-        ),
-        StateScreenInteraction: loadFresh(
-          "shared/widget-kits/state/StateScreenInteraction.js",
-        ),
-        StateScreenMarkup: loadFresh(
-          "shared/widget-kits/state/StateScreenMarkup.js",
-        ),
-        StateScreenTextFit: loadFresh(
-          "shared/widget-kits/state/StateScreenTextFit.js",
-        ),
+        StateScreenLabels: loadFresh("shared/widget-kits/state/StateScreenLabels.js"),
+        StateScreenPrecedence: loadFresh("shared/widget-kits/state/StateScreenPrecedence.js"),
+        StateScreenInteraction: loadFresh("shared/widget-kits/state/StateScreenInteraction.js"),
+        StateScreenMarkup: loadFresh("shared/widget-kits/state/StateScreenMarkup.js"),
+        StateScreenTextFit: loadFresh("shared/widget-kits/state/StateScreenTextFit.js")
       },
       services: {
         format: { applyFormatter },
@@ -132,22 +98,24 @@ describe("AisTargetTextHtmlWidget", function () {
                 family: "sans-serif",
                 familyMono: "monospace",
                 weight: 720,
-                labelWeight: 610,
-              },
+                labelWeight: 610
+              }
             };
-          },
-        },
-      },
+          }
+        }
+      }
     });
 
     return {
-      renderer: loadFresh(
-        "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js",
-      ).create({}, componentContext),
-      fitCompute,
+      renderer: loadFresh("widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js").create(
+        {},
+        componentContext
+      ),
+      fitCompute
     };
   }
 
+  /** @param {Record<string, any>} [overrides] @returns {any} */
   function makeProps(overrides) {
     const base = {
       domain: {
@@ -162,61 +130,44 @@ describe("AisTargetTextHtmlWidget", function () {
         distance: 4.2,
         cpa: 0.7,
         tcpa: 42,
-        headingTo: 112,
+        headingTo: 112
       },
       layout: {
         ratioThresholdNormal: 1.2,
-        ratioThresholdFlat: 3.8,
+        ratioThresholdFlat: 3.8
       },
       captions: {
         dst: "DST",
         cpa: "DCPA",
         tcpa: "TCPA",
-        brg: "BRG",
+        brg: "BRG"
       },
       units: {
         dst: "nm",
         cpa: "nm",
         tcpa: "min",
-        brg: "°",
+        brg: "°"
       },
       formatUnits: {
         dst: "nm",
-        cpa: "nm",
+        cpa: "nm"
       },
-      default: "---",
+      default: "---"
     };
 
     const out = Object.assign({}, base, overrides || {});
-    out.domain = Object.assign(
-      {},
-      base.domain,
-      overrides && overrides.domain ? overrides.domain : {},
-    );
-    out.layout = Object.assign(
-      {},
-      base.layout,
-      overrides && overrides.layout ? overrides.layout : {},
-    );
-    out.captions = Object.assign(
-      {},
-      base.captions,
-      overrides && overrides.captions ? overrides.captions : {},
-    );
-    out.units = Object.assign(
-      {},
-      base.units,
-      overrides && overrides.units ? overrides.units : {},
-    );
+    out.domain = Object.assign({}, base.domain, overrides && overrides.domain ? overrides.domain : {});
+    out.layout = Object.assign({}, base.layout, overrides && overrides.layout ? overrides.layout : {});
+    out.captions = Object.assign({}, base.captions, overrides && overrides.captions ? overrides.captions : {});
+    out.units = Object.assign({}, base.units, overrides && overrides.units ? overrides.units : {});
     return out;
   }
 
+  /** @param {any} props @param {Record<string, any>} [options] @returns {any} */
   function withSurfacePolicy(props, options) {
     const opts = options || {};
-    const interactionMode =
-      opts.interactionMode === "passive" ? "passive" : "dispatch";
-    const containerOrientation =
-      opts.containerOrientation === "vertical" ? "vertical" : "default";
+    const interactionMode = opts.interactionMode === "passive" ? "passive" : "dispatch";
+    const containerOrientation = opts.containerOrientation === "vertical" ? "vertical" : "default";
     const showInfo = opts.showInfo || vi.fn(() => true);
 
     return Object.assign({}, props || {}, {
@@ -226,13 +177,14 @@ describe("AisTargetTextHtmlWidget", function () {
         interaction: { mode: interactionMode },
         actions: {
           ais: {
-            showInfo,
-          },
-        },
-      },
+            showInfo
+          }
+        }
+      }
     });
   }
 
+  /** @param {any} rendererSpec @param {any} props @param {Record<string, any>} [options] @returns {any} */
   function mountCommitted(rendererSpec, props, options) {
     const opts = options || {};
     const shellSize = opts.shellSize || { width: 320, height: 180 };
@@ -247,17 +199,21 @@ describe("AisTargetTextHtmlWidget", function () {
     rootEl.appendChild(shellEl);
     hostContext.__dyniHostCommitState = { rootEl, shellEl };
 
-    mountEl.getBoundingClientRect = vi.fn(() => ({
-      width: shellSize.width,
-      height: shellSize.height,
-    }));
+    mountEl.getBoundingClientRect = vi.fn(
+      () =>
+        /** @type {DOMRect} */ ({
+          width: shellSize.width,
+          height: shellSize.height
+        })
+    );
 
     const committed = rendererSpec.createCommittedRenderer({
       hostContext,
       mountEl,
-      shadowRoot: null,
+      shadowRoot: null
     });
 
+    /** @param {any} nextProps @param {number} revision @param {boolean} layoutChanged @returns {any} */
     function payload(nextProps, revision, layoutChanged) {
       return {
         props: nextProps,
@@ -269,7 +225,7 @@ describe("AisTargetTextHtmlWidget", function () {
         shellRect: { width: shellSize.width, height: shellSize.height },
         hostContext,
         layoutChanged: layoutChanged === true,
-        relayoutPass: 0,
+        relayoutPass: 0
       };
     }
 
@@ -282,13 +238,8 @@ describe("AisTargetTextHtmlWidget", function () {
       committed,
       html() {
         return mountEl.innerHTML;
-      },
+      }
     };
-  }
-
-  function readInlinePx(styleValue) {
-    const match = String(styleValue || "").match(/^(\d+)px$/);
-    return match ? Number(match[1]) : NaN;
   }
 
   it("exposes committed renderer contract", function () {
@@ -305,8 +256,8 @@ describe("AisTargetTextHtmlWidget", function () {
       setup.renderer,
       withSurfacePolicy(makeProps(), {
         interactionMode: "dispatch",
-        showInfo,
-      }),
+        showInfo
+      })
     );
 
     const html = mounted.html();
@@ -316,12 +267,9 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(html).toContain('data-dyni-action="ais-target-open"');
     expect(html).toContain("dyni-ais-target-open-hotspot");
 
-    const wrapper = mounted.mountEl.querySelector(".dyni-ais-target-html");
-    wrapper.dispatchEvent(
-      new MouseEvent("click", { bubbles: true, cancelable: true }),
-    );
+    const wrapper = /** @type {HTMLElement} */ (mounted.mountEl.querySelector(".dyni-ais-target-html"));
+    wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(showInfo).toHaveBeenCalledWith("211234560");
     expect(setup.fitCompute).toHaveBeenCalledTimes(1);
   });
-
 });

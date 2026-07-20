@@ -1,3 +1,12 @@
+/**
+ * @typedef {{
+ *   failScriptIds?: string[], failLinkIds?: string[],
+ *   shouldFailScript?: (node: any) => boolean, shouldFailLink?: (node: any) => boolean,
+ *   onScriptAppended?: (node: any) => void, onLinkAppended?: (node: any) => void
+ * }} DomHarnessOptions
+ */
+
+/** @param {DomHarnessOptions} [options] @returns {any} */
 function createDomHarness(options) {
   const opts = options || {};
   const failScriptIds = new Set(opts.failScriptIds || []);
@@ -7,17 +16,19 @@ function createDomHarness(options) {
   const onScriptAppended = typeof opts.onScriptAppended === "function" ? opts.onScriptAppended : null;
   const onLinkAppended = typeof opts.onLinkAppended === "function" ? opts.onLinkAppended : null;
 
-  const elementsById = new Map();
-  const appendedScripts = [];
-  const appendedLinks = [];
+  const elementsById = /** @type {Map<string, any>} */ (new Map());
+  const appendedScripts = /** @type {any[]} */ ([]);
+  const appendedLinks = /** @type {any[]} */ ([]);
 
+  /** @param {() => void} cb */
   function schedule(cb) {
     Promise.resolve().then(cb);
   }
 
+  /** @param {any} tagName @returns {any} */
   function createElement(tagName) {
     const tag = String(tagName || "").toUpperCase();
-    const attrs = new Map();
+    const attrs = /** @type {Map<string, string>} */ (new Map());
 
     const el = {
       tagName: tag,
@@ -27,17 +38,21 @@ function createDomHarness(options) {
       src: "",
       href: "",
       rel: "",
-      onload: null,
-      onerror: null,
+      onload: /** @type {(() => void) | null} */ (null),
+      onerror: /** @type {((error: Error) => void) | null} */ (null),
+      parentNode: /** @type {any} */ (null),
+      /** @param {any} name @param {any} value */
       setAttribute(name, value) {
         const key = String(name);
         attrs.set(key, String(value));
         if (key === "id") this.id = String(value);
       },
+      /** @param {any} name */
       getAttribute(name) {
         const key = String(name);
         return attrs.has(key) ? attrs.get(key) : null;
       },
+      /** @param {any} name */
       hasAttribute(name) {
         return attrs.has(String(name));
       },
@@ -52,6 +67,7 @@ function createDomHarness(options) {
   }
 
   const head = {
+    /** @param {any} node */
     appendChild(node) {
       if (node && node.id) elementsById.set(node.id, node);
       if (node) node.parentNode = head;
@@ -86,6 +102,7 @@ function createDomHarness(options) {
 
       return node;
     },
+    /** @param {any} node */
     removeChild(node) {
       if (node && node.id && elementsById.get(node.id) === node) {
         elementsById.delete(node.id);
@@ -98,6 +115,7 @@ function createDomHarness(options) {
   const document = {
     head,
     createElement,
+    /** @param {any} id */
     getElementById(id) {
       return elementsById.get(String(id)) || null;
     }

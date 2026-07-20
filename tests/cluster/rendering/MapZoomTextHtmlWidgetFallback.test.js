@@ -27,15 +27,21 @@ describe("MapZoomTextHtmlWidget fallback rendering", function () {
       },
       services: {
         format: {
+          /** @param {any} value @param {Record<string, any>} [formatterOptions] */
           applyFormatter(value, formatterOptions) {
-        const cfg = formatterOptions || {};
-        if (value == null) return cfg.default;
-        return String(value);
+            const cfg = formatterOptions || {};
+            if (value == null) return cfg.default;
+            return String(value);
           }
         },
         dom: {
-          requirePluginRoot(target) { return target || null; },
-          getNightModeState() { return false; }
+          /** @param {any} target */
+          requirePluginRoot(target) {
+            return target || null;
+          },
+          getNightModeState() {
+            return false;
+          }
         },
         themeTokens: {
           resolveForRoot() {
@@ -48,6 +54,7 @@ describe("MapZoomTextHtmlWidget fallback rendering", function () {
     return loadFresh("widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js").create({}, componentContext);
   }
 
+  /** @param {Record<string, any>} [props] */
   function withSurfacePolicy(props) {
     return Object.assign({}, props || {}, {
       surfacePolicy: {
@@ -59,6 +66,7 @@ describe("MapZoomTextHtmlWidget fallback rendering", function () {
     });
   }
 
+  /** @param {any} rendererSpec @param {Record<string, any>} props */
   function mountCommitted(rendererSpec, props) {
     const hostContext = {};
     const rootEl = document.createElement("div");
@@ -70,7 +78,7 @@ describe("MapZoomTextHtmlWidget fallback rendering", function () {
     shellEl.appendChild(mountEl);
     rootEl.appendChild(shellEl);
     hostContext.__dyniHostCommitState = { rootEl, shellEl };
-    mountEl.getBoundingClientRect = vi.fn(() => ({ width: 120, height: 90 }));
+    mountEl.getBoundingClientRect = vi.fn(() => /** @type {DOMRect} */ ({ width: 120, height: 90 }));
 
     const committed = rendererSpec.createCommittedRenderer({ hostContext, mountEl, shadowRoot: null });
     const payload = {
@@ -92,14 +100,17 @@ describe("MapZoomTextHtmlWidget fallback rendering", function () {
 
   it("renders the fit-selected fallback zoom and required text", function () {
     const renderer = createRenderer();
-    const html = mountCommitted(renderer, withSurfacePolicy({
-      caption: "ZOOM",
-      unit: "",
-      zoom: 7.2,
-      requiredZoom: 6.5,
-      stableDigits: true,
-      default: "---"
-    }));
+    const html = mountCommitted(
+      renderer,
+      withSurfacePolicy({
+        caption: "ZOOM",
+        unit: "",
+        zoom: 7.2,
+        requiredZoom: 6.5,
+        stableDigits: true,
+        default: "---"
+      })
+    );
 
     expect(html).toContain("7.2");
     expect(html).toContain("(6.5)");

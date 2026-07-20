@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniMapMapper = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @param {unknown} def @param {unknown} componentContext */
@@ -48,9 +48,21 @@
             measure: cap("centerDisplayMeasure")
           },
           units: {
-            marker: toolkit.unitText("centerDisplayMarker", "distance", toolkit.formatUnit("centerDisplayMarker", "distance")),
-            boat: toolkit.unitText("centerDisplayBoat", "distance", toolkit.formatUnit("centerDisplayBoat", "distance")),
-            measure: toolkit.unitText("centerDisplayMeasure", "distance", toolkit.formatUnit("centerDisplayMeasure", "distance"))
+            marker: toolkit.unitText(
+              "centerDisplayMarker",
+              "distance",
+              toolkit.formatUnit("centerDisplayMarker", "distance")
+            ),
+            boat: toolkit.unitText(
+              "centerDisplayBoat",
+              "distance",
+              toolkit.formatUnit("centerDisplayBoat", "distance")
+            ),
+            measure: toolkit.unitText(
+              "centerDisplayMeasure",
+              "distance",
+              toolkit.formatUnit("centerDisplayMeasure", "distance")
+            )
           },
           formatUnits: {
             marker: toolkit.formatUnit("centerDisplayMarker", "distance"),
@@ -111,4 +123,4 @@
   }
 
   return { id: "MapMapper", create: create };
-}));
+});

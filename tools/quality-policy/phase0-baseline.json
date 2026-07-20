@@ -1,0 +1,107 @@
+{
+  "capturedFor": "pre-tightening baseline",
+  "capturedAgainst": "npm run check:all on a clean worktree before strict quality-policy enforcement began",
+  "capturedCommit": "4dbb579cd9247bbaf5f1630337d292b5ef4b46bc",
+  "inventories": {
+    "productionJsFileCount": 211,
+    "productionJsGlobs": [
+      "plugin.js",
+      "config/**/*.js",
+      "runtime/**/*.js",
+      "cluster/**/*.js",
+      "shared/**/*.js",
+      "widgets/**/*.js"
+    ],
+    "productionMjsEntry": "plugin.mjs",
+    "testFileCount": 416,
+    "testSpecFileCount": 384,
+    "testSpecFileCountExecuted": 383,
+    "toolFileCount": 26,
+    "inventoryNote": "These counts are the immutable pre-tightening snapshot identified by capturedCommit. Current completeness is enforced by the live coverage and test inventories, not by mutating this historical record."
+  },
+  "coverage": {
+    "measuredProductionFileCount": 78,
+    "measuredBreakdown": {
+      "plugin.js": "1/1",
+      "config": "18/41",
+      "runtime": "25/25",
+      "cluster": "16/16",
+      "shared": "11/101",
+      "widgets": "7/27"
+    },
+    "observedGlobalResults": {
+      "statements": 89.06,
+      "branches": 76.91,
+      "functions": 95.26,
+      "lines": 89.69
+    },
+    "configuredThresholds": {
+      "lines": 80,
+      "functions": 80,
+      "statements": 80,
+      "branches": 65,
+      "cluster/mappers/**/*.js": {
+        "lines": 92,
+        "branches": 55
+      },
+      "runtime/**/*.js": {
+        "lines": 85,
+        "branches": 70
+      },
+      "shared/widget-kits/radial/Radial{Angle,Tick,Value}Math.js": {
+        "lines": 90,
+        "branches": 50
+      },
+      "config/clusters/{nav,environment,vessel}.js": {
+        "lines": 95,
+        "branches": 70
+      }
+    },
+    "vitestRun": {
+      "testFilesPassed": 383,
+      "testsPassed": 1405
+    }
+  },
+  "suppression": {
+    "productionDyniLintDisableDirectiveCount": 29,
+    "productionStandardSuppressionDirectiveCount": 0,
+    "note": "The frozen capture recorded 29 generic dyni-lint-disable-* directives and zero standard suppressions. Live enforcement now also covers plugin.mjs and @ts-nocheck; test-only exceptions are owned by the checked test inventory."
+  },
+  "unsafeSinks": {
+    "innerHtmlAssignmentSites": [
+      "shared/widget-kits/html/HtmlDomPatchUtils.js:156",
+      "shared/widget-kits/html/HtmlDomPatchUtils.js:163"
+    ],
+    "evalOrNewFunctionUsageCount": 0
+  },
+  "checkPatterns": {
+    "checkedFiles": 794,
+    "failures": 0,
+    "warnings": 0,
+    "warnOnlyRuleIds": [
+      "catch-fallback-without-suppression",
+      "css-js-default-duplication",
+      "editable-threshold-missing-internal"
+    ],
+    "mapperOutputComplexityBlockThreshold": 12,
+    "mapperOutputComplexityWarnThreshold": 8
+  },
+  "checkFileSize": {
+    "checkedFiles": 706,
+    "violations": 0,
+    "onelinerMode": "block",
+    "onelinerFindings": 0
+  },
+  "delivery": {
+    "hooksDirPresent": false,
+    "workflows": ["publish-release.yml"],
+    "codeownersPresent": false
+  },
+  "complexityDiagnostic": {
+    "note": "The original diagnostic reported 189 aggregate violations. The checked stable-identity capture reproducibly rescans capturedCommit with the current identity-aware scanner and records 188 function/metric findings; the one-count difference is retained explicitly instead of assigning an invented identity.",
+    "originalAggregateViolationCount": 189,
+    "stableIdentityFindingCount": 188,
+    "stableIdentityFindings": "tools/quality-policy/phase0-complexity-findings.json",
+    "worstComplexityObserved": [77, 96]
+  }
+}

@@ -91,17 +91,20 @@
         return response.text();
       })
       .then(function (cssText) {
-        const normalizedText = (typeof cssText === "string") ? cssText : String(cssText || "");
+        const normalizedText = typeof cssText === "string" ? cssText : String(cssText || "");
         shadowCssTextCache.set(url, normalizedText);
         return normalizedText;
       })
-      .then(function (cssText) {
-        shadowCssLoadCache.delete(url);
-        return cssText;
-      }, function (error) {
-        shadowCssLoadCache.delete(url);
-        throw error;
-      });
+      .then(
+        function (cssText) {
+          shadowCssLoadCache.delete(url);
+          return cssText;
+        },
+        function (error) {
+          shadowCssLoadCache.delete(url);
+          throw error;
+        }
+      );
 
     shadowCssLoadCache.set(url, loadPromise);
     return loadPromise;
@@ -139,9 +142,8 @@
     if (!style || typeof style.getPropertyValue !== "function") {
       return null;
     }
-    // dyni-lint-disable-next-line css-js-default-duplication -- Theme preset selection is intentionally read from the documented CSS boundary.
     const raw = style.getPropertyValue("--dyni-theme-preset");
-    const value = (typeof raw === "string") ? raw.trim() : "";
+    const value = typeof raw === "string" ? raw.trim() : "";
     return value || null;
   }
 
@@ -235,4 +237,4 @@
       return shadowCssTextCache.has(url);
     }
   });
-}(this));
+})(this);

@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
@@ -112,7 +113,7 @@ describe("CenterDisplayTextWidget", function () {
         measure: {
           activeMeasure: Object.prototype.hasOwnProperty.call(opts, "activeMeasure")
             ? opts.activeMeasure
-            : { getPointAtIndex: (index) => index === 0 ? { lat: 54.18, lon: 10.52 } : undefined },
+            : { getPointAtIndex: (index) => (index === 0 ? { lat: 54.18, lon: 10.52 } : undefined) },
           useRhumbLine: opts.useRhumbLine === true
         }
       },
@@ -132,8 +133,12 @@ describe("CenterDisplayTextWidget", function () {
         boat: "nm",
         measure: "nm"
       },
-      ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal") ? opts.ratioThresholdNormal : 1.1,
-      ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat") ? opts.ratioThresholdFlat : 2.4,
+      ratioThresholdNormal: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdNormal")
+        ? opts.ratioThresholdNormal
+        : 1.1,
+      ratioThresholdFlat: Object.prototype.hasOwnProperty.call(opts, "ratioThresholdFlat")
+        ? opts.ratioThresholdFlat
+        : 2.4,
       coordinatesTabular: opts.coordinatesTabular,
       stableDigits: opts.stableDigits === true,
       disconnect: opts.disconnect === true,
@@ -224,8 +229,7 @@ describe("CenterDisplayTextWidget", function () {
 
   it("centers relation rows while keeping the WP and POS captions attached to their values", function () {
     const helpers = makeComponentContext();
-    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
-      .create({}, helpers);
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js").create({}, helpers);
     const cases = [
       { width: 140, height: 260, mode: "high" },
       { width: 260, height: 180, mode: "normal" },
@@ -253,16 +257,15 @@ describe("CenterDisplayTextWidget", function () {
       expect(latCall.textAlign).toBe("right");
       expect(lonCall.textAlign).toBe("right");
       expect(wp.x).toBeGreaterThan(layout.rowRects[0].x);
-      expect(wp.x).toBeLessThan(layout.rowRects[0].x + (layout.rowRects[0].w / 2));
+      expect(wp.x).toBeLessThan(layout.rowRects[0].x + layout.rowRects[0].w / 2);
       expect(pos.x).toBeGreaterThan(layout.rowRects[1].x);
-      expect(pos.x).toBeLessThan(layout.rowRects[1].x + (layout.rowRects[1].w / 2));
+      expect(pos.x).toBeLessThan(layout.rowRects[1].x + layout.rowRects[1].w / 2);
     });
   });
 
   it("omits the measure row when no active measure is available", function () {
     const helpers = makeComponentContext();
-    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js")
-      .create({}, helpers);
+    const spec = loadFresh("widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js").create({}, helpers);
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({ rectWidth: 260, rectHeight: 180, ctx });
 
@@ -273,5 +276,4 @@ describe("CenterDisplayTextWidget", function () {
     expect(findFirstText(texts, "WP")).toBeTruthy();
     expect(findFirstText(texts, "POS")).toBeTruthy();
   });
-
 });

@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniNavModeRatio = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -35,4 +35,4 @@
   }
 
   return { id: "NavModeRatio", create: create };
-}));
+});

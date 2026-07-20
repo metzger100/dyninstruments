@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniSemicircleRadialTextLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
   /** @type {DyniTextLayoutScaleHelpersApi} */
@@ -104,15 +104,11 @@
   /** @param {DyniSemicircleDisplay} display @param {DyniBlockSizes} sizes @param {number} boxW @param {number} blockH */
   function scoreThreeRowsCandidate(display, sizes, boxW, blockH) {
     const valuePx = Math.max(0, Number(sizes && sizes.vPx) || 0);
-    const captionPx = display.caption
-      ? Math.max(0, Number(sizes && sizes.cPx) || 0)
-      : valuePx;
-    const unitPx = display.unit
-      ? Math.max(0, Number(sizes && sizes.uPx) || 0)
-      : valuePx;
+    const captionPx = display.caption ? Math.max(0, Number(sizes && sizes.cPx) || 0) : valuePx;
+    const unitPx = display.unit ? Math.max(0, Number(sizes && sizes.uPx) || 0) : valuePx;
     const minLegibility = Math.min(captionPx, valuePx, unitPx);
     const avgLegibility = (captionPx + valuePx + unitPx) / 3;
-    return (minLegibility * 1000000) + (avgLegibility * 10000) + (boxW * 10) + blockH;
+    return minLegibility * 1000000 + avgLegibility * 10000 + boxW * 10 + blockH;
   }
 
   /** @param {DyniSemicircleRenderState} state @param {DyniSemicircleDisplay} display @param {DyniFitCache} fitCache */
@@ -141,25 +137,28 @@
       gaugeTop: state.geom.gaugeTop,
       radius: state.geom.R
     });
-    const fit = /** @type {DyniValueUnitFitResult} */ (readFitCache(fitCache, "flat", key) || writeFitCache(
-      fitCache,
-      "flat",
-      key,
-      text.measureValueUnitFit(
-        state.ctx,
-        state.family,
-        display.valueText,
-        display.unit,
-        boxes.bottomBox.w,
-        boxes.bottomBox.h,
-        display.secScale,
-        state.valueWeight,
-        state.labelWeight
-      )
-    ));
-    const scaledFit = /** @type {DyniValueUnitFitResult} */ (fit
-      ? scaleHelpersApi.scaleValueUnitFit(state, display.valueText, display.unit, fit, boxes.bottomBox.h)
-      : fit);
+    const fit = /** @type {DyniValueUnitFitResult} */ (
+      readFitCache(fitCache, "flat", key) ||
+        writeFitCache(
+          fitCache,
+          "flat",
+          key,
+          text.measureValueUnitFit(
+            state.ctx,
+            state.family,
+            display.valueText,
+            display.unit,
+            boxes.bottomBox.w,
+            boxes.bottomBox.h,
+            display.secScale,
+            state.valueWeight,
+            state.labelWeight
+          )
+        )
+    );
+    const scaledFit = /** @type {DyniValueUnitFitResult} */ (
+      fit ? scaleHelpersApi.scaleValueUnitFit(state, display.valueText, display.unit, fit, boxes.bottomBox.h) : fit
+    );
     const captionBasePx = Math.max(1, Math.floor(scaledFit.vPx * normalizeSecondaryScale(display.secScale)));
     const captionMaxPx = scaleTextCeilingFromHelpers(captionBasePx, boxes.topBox.h, state.textFillScale);
 
@@ -200,13 +199,7 @@
     if (!box || box.w <= 0 || box.h <= 0) {
       return;
     }
-    const valueWidthClass = measureWidthClass(
-      state.ctx,
-      display.valueText,
-      box.h,
-      state.valueWeight,
-      state.family
-    );
+    const valueWidthClass = measureWidthClass(state.ctx, display.valueText, box.h, state.valueWeight, state.family);
 
     const key = makeFitCacheKey({
       common: buildCommonFitKey(state, display, valueWidthClass),
@@ -214,26 +207,29 @@
       boxH: box.h,
       bandY: box.y
     });
-    const fit = /** @type {DyniInlineCapValUnitFitResult} */ (readFitCache(fitCache, "high", key) || writeFitCache(
-      fitCache,
-      "high",
-      key,
-      text.fitInlineCapValUnit(
-        state.ctx,
-        state.family,
-        display.caption,
-        display.valueText,
-        display.unit,
-        box.w,
-        box.h,
-        display.secScale,
-        state.valueWeight,
-        state.labelWeight
-      )
-    ));
-    const scaledFit = /** @type {DyniInlineCapValUnitFitResult} */ (fit
-      ? scaleHelpersApi.scaleInlineFit(state, display.caption, display.valueText, display.unit, fit, box.h)
-      : fit);
+    const fit = /** @type {DyniInlineCapValUnitFitResult} */ (
+      readFitCache(fitCache, "high", key) ||
+        writeFitCache(
+          fitCache,
+          "high",
+          key,
+          text.fitInlineCapValUnit(
+            state.ctx,
+            state.family,
+            display.caption,
+            display.valueText,
+            display.unit,
+            box.w,
+            box.h,
+            display.secScale,
+            state.valueWeight,
+            state.labelWeight
+          )
+        )
+    );
+    const scaledFit = /** @type {DyniInlineCapValUnitFitResult} */ (
+      fit ? scaleHelpersApi.scaleInlineFit(state, display.caption, display.valueText, display.unit, fit, box.h) : fit
+    );
     if (scaledFit && fit && hasOwn.call(fit, "total")) {
       scaledFit.total = fit.total;
     }
@@ -262,17 +258,8 @@
     if (!normal || normal.rSafe <= 0) {
       return;
     }
-    const refHeight = Math.max(
-      1,
-      Math.floor(normal.mhMax / (1 + 2 * normalizeSecondaryScale(display.secScale)))
-    );
-    const valueWidthClass = measureWidthClass(
-      state.ctx,
-      display.valueText,
-      refHeight,
-      state.valueWeight,
-      state.family
-    );
+    const refHeight = Math.max(1, Math.floor(normal.mhMax / (1 + 2 * normalizeSecondaryScale(display.secScale))));
+    const valueWidthClass = measureWidthClass(state.ctx, display.valueText, refHeight, state.valueWeight, state.family);
 
     const key = makeFitCacheKey({
       common: buildCommonFitKey(state, display, valueWidthClass),
@@ -316,11 +303,13 @@
 
       const blockH = best ? best.blockH : Math.max(1, Math.floor(normal.rSafe * 0.75));
       const boxW = best ? best.boxW : Math.max(1, Math.floor(normal.rSafe * 1.6));
-      layout = /** @type {{ blockH: number, boxW: number, sizes: DyniBlockSizes }} */ (writeFitCache(fitCache, "normal", key, {
-        blockH: blockH,
-        boxW: boxW,
-        sizes: best && best.sizes ? best.sizes : computeThreeRowsSizes(state, display, boxW, blockH)
-      }));
+      layout = /** @type {{ blockH: number, boxW: number, sizes: DyniBlockSizes }} */ (
+        writeFitCache(fitCache, "normal", key, {
+          blockH: blockH,
+          boxW: boxW,
+          sizes: best && best.sizes ? best.sizes : computeThreeRowsSizes(state, display, boxW, blockH)
+        })
+      );
     }
 
     text.drawThreeRowsBlock(
@@ -384,4 +373,4 @@
   }
 
   return { id: "SemicircleRadialTextLayout", create: create };
-}));
+});

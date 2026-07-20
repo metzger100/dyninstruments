@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniXteLinearLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const PAD_X_RATIO = 0.04;
@@ -114,16 +114,12 @@
     function computeLayout(args) {
       const input = /** @type {DyniXteLayoutArgs} */ (args && typeof args === "object" ? args : {});
       const contentRect = input.contentRect || makeRect(0, 0, 0, 0);
-      const responsive = input.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
+      const responsive =
+        input.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
       const maxSpan = Math.max(contentRect.w, contentRect.h);
       const defaultGap = profileApi.computeInsetPx(responsive, GAP_RATIO, 1);
-      const gap = Math.max(0, Math.floor(clampNumber(
-        input.gap,
-        0,
-        maxSpan,
-        defaultGap
-      )));
-      const mode = (input.mode === "flat" || input.mode === "high") ? input.mode : "normal";
+      const gap = Math.max(0, Math.floor(clampNumber(input.gap, 0, maxSpan, defaultGap)));
+      const mode = input.mode === "flat" || input.mode === "high" ? input.mode : "normal";
       const hideTextualMetrics = input.hideTextualMetrics === true;
       const showWpName = input.showWpName === true;
       const hasWaypointName = input.hasWaypointName === true;
@@ -131,9 +127,7 @@
 
       if (hideTextualMetrics) {
         if (mode === "high") {
-          const nameReserve = reserveWaypointSpace
-            ? Math.max(1, Math.floor(contentRect.h * HIGH_NAME_MIN_SHARE))
-            : 0;
+          const nameReserve = reserveWaypointSpace ? Math.max(1, Math.floor(contentRect.h * HIGH_NAME_MIN_SHARE)) : 0;
           return {
             mode: mode,
             gap: gap,
@@ -169,11 +163,11 @@
         );
         const headerShare = reserveWaypointSpace
           ? profileApi.scaleShare(
-            clampNumber(input.flatHeaderRatio, FLAT_HEADER_MIN_RATIO, FLAT_HEADER_MAX_RATIO, FLAT_HEADER_RATIO),
-            responsive.flatHeaderShareScale,
-            FLAT_HEADER_MIN_RATIO,
-            FLAT_HEADER_MAX_RATIO
-          )
+              clampNumber(input.flatHeaderRatio, FLAT_HEADER_MIN_RATIO, FLAT_HEADER_MAX_RATIO, FLAT_HEADER_RATIO),
+              responsive.flatHeaderShareScale,
+              FLAT_HEADER_MIN_RATIO,
+              FLAT_HEADER_MAX_RATIO
+            )
           : 0;
         const usableWidth = Math.max(1, contentRect.w - gap);
         const gaugeWidth = Math.max(1, Math.floor(usableWidth * gaugeShare));
@@ -231,11 +225,11 @@
         const bottomRow = splitRow(makeRect(contentRect.x, bottomY, contentRect.w, bottomH), gap, 2, makeRect);
         const nameRect = reserveWaypointSpace
           ? makeRect(
-            contentRect.x + Math.floor(contentRect.w * HIGH_NAME_X_RATIO),
-            contentRect.y,
-            Math.max(1, Math.floor(contentRect.w * HIGH_NAME_W_RATIO)),
-            topHeight
-          )
+              contentRect.x + Math.floor(contentRect.w * HIGH_NAME_X_RATIO),
+              contentRect.y,
+              Math.max(1, Math.floor(contentRect.w * HIGH_NAME_W_RATIO)),
+              topHeight
+            )
           : null;
 
         return {
@@ -267,22 +261,31 @@
       const rowH = Math.max(1, contentRect.h - gaugeHeight - gap);
       const columns = splitRow(makeRect(contentRect.x, rowY, contentRect.w, rowH), gap, 4, makeRect);
       const nameHeight = reserveWaypointSpace
-        ? Math.max(1, Math.floor(
-          gaugeHeight * profileApi.scaleShare(
-            clampNumber(input.normalNameHeightRatio, NORMAL_NAME_H_MIN_RATIO, NORMAL_NAME_H_MAX_RATIO, NORMAL_NAME_H_RATIO),
-            responsive.normalNameHeightScale,
-            NORMAL_NAME_H_MIN_RATIO,
-            NORMAL_NAME_H_MAX_RATIO
+        ? Math.max(
+            1,
+            Math.floor(
+              gaugeHeight *
+                profileApi.scaleShare(
+                  clampNumber(
+                    input.normalNameHeightRatio,
+                    NORMAL_NAME_H_MIN_RATIO,
+                    NORMAL_NAME_H_MAX_RATIO,
+                    NORMAL_NAME_H_RATIO
+                  ),
+                  responsive.normalNameHeightScale,
+                  NORMAL_NAME_H_MIN_RATIO,
+                  NORMAL_NAME_H_MAX_RATIO
+                )
+            )
           )
-        ))
         : 0;
       const nameRect = reserveWaypointSpace
         ? makeRect(
-          contentRect.x + Math.floor(contentRect.w * NORMAL_NAME_X_RATIO),
-          contentRect.y + Math.floor(gaugeHeight * NORMAL_NAME_Y_RATIO),
-          Math.max(1, Math.floor(contentRect.w * NORMAL_NAME_W_RATIO)),
-          nameHeight
-        )
+            contentRect.x + Math.floor(contentRect.w * NORMAL_NAME_X_RATIO),
+            contentRect.y + Math.floor(gaugeHeight * NORMAL_NAME_Y_RATIO),
+            Math.max(1, Math.floor(contentRect.w * NORMAL_NAME_W_RATIO)),
+            nameHeight
+          )
         : null;
 
       return {
@@ -312,4 +315,4 @@
   }
 
   return { id: "XteLinearLayout", create: create };
-}));
+});

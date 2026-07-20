@@ -6,10 +6,10 @@
   "use strict";
 
   var ns = root.DyniPlugin;
-  var config = ns.config = ns.config || {};
+  var config = (ns.config = ns.config || {});
 
   config.clusterRoutes = {
     schemaVersion: 1,
     routes: []
   };
-}(this));
+})(this);

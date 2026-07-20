@@ -15,7 +15,7 @@ describe("config/clusters/vessel.js", function () {
     runIifeScript("config/shared/vessel-voltage-editables.js", context);
     runIifeScript("config/clusters/vessel.js", context);
 
-    return context.DyniPlugin.config.clusters.find((c) => c.def && c.def.cluster === "vessel").def;
+    return context.DyniPlugin.config.clusters.find((/** @type {any} */ c) => c.def && c.def.cluster === "vessel").def;
   }
 
   it("registers vessel cluster definition", function () {
@@ -28,20 +28,22 @@ describe("config/clusters/vessel.js", function () {
     expect(def.storeKeys.roll).toBe("nav.gps.signalk.navigation.attitude.roll");
     expect(def.editableParameters.kind.default).toBe("voltage");
     expect(def.editableParameters.kind.name).toBe("Instrument");
-    const kinds = def.editableParameters.kind.list.map((entry) => entry.value);
-    expect(kinds).toEqual(expect.arrayContaining([
-      "voltage",
-      "voltageLinear",
-      "voltageRadial",
-      "regattaTimer",
-      "alarm",
-      "clock",
-      "clockRadial",
-      "dateTime",
-      "timeStatus",
-      "pitch",
-      "roll"
-    ]));
+    const kinds = def.editableParameters.kind.list.map((/** @type {any} */ entry) => entry.value);
+    expect(kinds).toEqual(
+      expect.arrayContaining([
+        "voltage",
+        "voltageLinear",
+        "voltageRadial",
+        "regattaTimer",
+        "alarm",
+        "clock",
+        "clockRadial",
+        "dateTime",
+        "timeStatus",
+        "pitch",
+        "roll"
+      ])
+    );
     expect(def.editableParameters.pitchKey.default).toBe("nav.gps.signalk.navigation.attitude.pitch");
     expect(def.editableParameters.rollKey.default).toBe("nav.gps.signalk.navigation.attitude.roll");
     expect(def.editableParameters.value.name).toBe("Voltage store path");

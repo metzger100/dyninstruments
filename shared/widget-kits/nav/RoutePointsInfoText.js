@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRoutePointsInfoText = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @param {DyniRoutePointInfoPoint} point @param {string} defaultText @param {DyniUnitAwareFormatterApi} unitFormatter @returns {string} */
@@ -42,18 +42,20 @@
 
     const courseText = unitFormatter.formatWithToken(leg.course, "formatDirection", undefined, cfg.defaultText);
     const distanceText = unitFormatter.formatDistance(leg.distance, formatDistanceUnit, cfg.defaultText);
-    const courseStable = stableDigitsEnabled === true
-      ? stableDigits.normalize(courseText, {
-          integerWidth: stableDigits.resolveIntegerWidth(courseText, 3),
-          reserveSignSlot: false
-        })
-      : { padded: courseText, plain: courseText };
-    const distanceStable = stableDigitsEnabled === true
-      ? stableDigits.normalize(distanceText, {
-        integerWidth: stableDigits.resolveIntegerWidth(distanceText, 2),
-        reserveSignSlot: false
-      })
-      : { padded: distanceText, plain: distanceText };
+    const courseStable =
+      stableDigitsEnabled === true
+        ? stableDigits.normalize(courseText, {
+            integerWidth: stableDigits.resolveIntegerWidth(courseText, 3),
+            reserveSignSlot: false
+          })
+        : { padded: courseText, plain: courseText };
+    const distanceStable =
+      stableDigitsEnabled === true
+        ? stableDigits.normalize(distanceText, {
+            integerWidth: stableDigits.resolveIntegerWidth(distanceText, 2),
+            reserveSignSlot: false
+          })
+        : { padded: distanceText, plain: distanceText };
 
     return {
       valueText: courseStable.padded + courseUnit + "/" + distanceStable.padded + distanceUnit,
@@ -88,4 +90,4 @@
   }
 
   return { id: "RoutePointsInfoText", create: create };
-}));
+});

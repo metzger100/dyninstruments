@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniUnitAwareFormatter = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @type {DyniValueMathApi["toText"]} */
@@ -53,9 +53,7 @@
    */
   function extractNumericDisplay(valueText, defaultValue) {
     const text = toText(valueText).trim();
-    const match = text.match(
-      new RegExp("^([+-]?(?:\\d+(?:[.,]\\d+)?|\\.\\d+))")
-    );
+    const match = text.match(new RegExp("^([+-]?(?:\\d+(?:[.,]\\d+)?|\\.\\d+))"));
     if (!match) {
       return defaultValue;
     }
@@ -104,4 +102,4 @@
     id: "UnitAwareFormatter",
     create: create
   };
-}));
+});

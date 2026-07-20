@@ -9,6 +9,7 @@ function makeTempRoot() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "dyni-actionlint-test-"));
 }
 
+/** @param {string} filePath @param {string} content */
 function writeExecutable(filePath, content) {
   fs.writeFileSync(filePath, content, { mode: 0o755 });
   fs.chmodSync(filePath, 0o755);
@@ -20,26 +21,29 @@ function platformKey() {
   return `${platform}_${arch}`;
 }
 
+/** @param {string} root */
 function cacheBinary(root) {
   const targetDir = path.join(root, "v1.7.12", platformKey());
   fs.mkdirSync(targetDir, { recursive: true });
-  writeExecutable(
-    path.join(targetDir, "actionlint"),
-    "#!/bin/sh\nprintf '%s\\n' \"$*\"\n",
-  );
+  writeExecutable(path.join(targetDir, "actionlint"), "#!/bin/sh\nprintf '%s\\n' \"$*\"\n");
   fs.writeFileSync(path.join(targetDir, ".verified"), "verified\n");
   return targetDir;
 }
 
+/**
+ * @param {string} cacheRoot
+ * @param {string[]} [args]
+ * @param {Record<string, string>} [extraEnv]
+ */
 function runScript(cacheRoot, args, extraEnv) {
   return spawnSync("bash", [SCRIPT, ...(args || [])], {
     cwd: process.cwd(),
     env: {
       ...process.env,
       ACTIONLINT_CACHE_DIR: cacheRoot,
-      ...(extraEnv || {}),
+      ...(extraEnv || {})
     },
-    encoding: "utf8",
+    encoding: "utf8"
   });
 }
 
@@ -78,13 +82,13 @@ describe("tools/actionlint.sh", function () {
     fs.writeFileSync(fixture, "not the actionlint archive\n");
     writeExecutable(
       path.join(binDir, "curl"),
-      "#!/bin/sh\nwhile [ $# -gt 0 ]; do\n  if [ \"$1\" = \"-o\" ]; then\n    shift\n    cp \"$ACTIONLINT_FIXTURE\" \"$1\"\n  fi\n  shift\ndone\n",
+      '#!/bin/sh\nwhile [ $# -gt 0 ]; do\n  if [ "$1" = "-o" ]; then\n    shift\n    cp "$ACTIONLINT_FIXTURE" "$1"\n  fi\n  shift\ndone\n'
     );
 
     try {
       const result = runScript(path.join(root, "cache"), ["--install"], {
         ACTIONLINT_FIXTURE: fixture,
-        PATH: `${binDir}:${process.env.PATH}`,
+        PATH: `${binDir}:${process.env.PATH}`
       });
 
       expect(result.status).not.toBe(0);

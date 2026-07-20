@@ -2,10 +2,11 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
 describe("CanvasTextLayout", function () {
+  /** @returns {any} */
   function createCtx() {
-    const fillCalls = [];
-    const alphaStack = [];
-    const ctx = {
+    const fillCalls = /** @type {any[]} */ ([]);
+    const alphaStack = /** @type {any[]} */ ([]);
+    const ctx = /** @type {any} */ ({
       globalAlpha: 1,
       textAlign: "left",
       textBaseline: "alphabetic",
@@ -24,13 +25,15 @@ describe("CanvasTextLayout", function () {
       },
       translate() {},
       scale() {},
+      /** @param {any} text */
       measureText(text) {
         return { width: String(text || "").length * 10 };
       },
+      /** @param {any} text */
       fillText(text) {
         fillCalls.push({ text: String(text), alpha: this.globalAlpha });
       }
-    };
+    });
     ctx.fillCalls = fillCalls;
     return ctx;
   }
@@ -39,13 +42,21 @@ describe("CanvasTextLayout", function () {
     const fitting = {
       MIN_FONT_PX: 1,
       WIDTH_EPSILON: 0.01,
+      /** @param {any} value @param {any} fallback */
       clampPositive(value, fallback) {
         const n = Number(value);
         return Number.isFinite(n) && n > 0 ? n : fallback;
       },
+      /** @param {any} ctx @param {any} px @param {any} weight @param {any} family */
       setFont(ctx, px, weight, family) {
-        ctx.font = Math.floor(Number(weight) || 0) + " " + Math.max(1, Math.floor(Number(px) || 0)) + "px " + (family || "sans-serif");
+        ctx.font =
+          Math.floor(Number(weight) || 0) +
+          " " +
+          Math.max(1, Math.floor(Number(px) || 0)) +
+          "px " +
+          (family || "sans-serif");
       },
+      /** @param {any} ctx @param {any} text */
       measureTextWidth(ctx, text) {
         return ctx.measureText(String(text || "")).width;
       },
@@ -63,15 +74,18 @@ describe("CanvasTextLayout", function () {
       }
     };
     const moduleApi = loadFresh("shared/widget-kits/text/CanvasTextLayout.js");
-    return moduleApi.create({}, createComponentContextMock({
-      modules: {
-        CanvasTextFitting: {
-          create() {
-            return fitting;
+    return moduleApi.create(
+      {},
+      createComponentContextMock({
+        modules: {
+          CanvasTextFitting: {
+            create() {
+              return fitting;
+            }
           }
         }
-      }
-    }));
+      })
+    );
   }
 
   it("drawCaptionMax applies captionOpacity via globalAlpha", function () {

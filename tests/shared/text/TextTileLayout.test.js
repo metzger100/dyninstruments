@@ -1,9 +1,11 @@
 const { loadFresh } = require("../../helpers/load-umd");
 
 describe("TextTileLayout", function () {
+  /** @param {any} [counter] */
   function createTextApi(counter) {
     return {
       setFont() {},
+      /** @param {any} ctx @param {any} text */
       measureTextWidth(ctx, text) {
         return ctx.measureText(String(text || "")).width;
       },
@@ -30,6 +32,7 @@ describe("TextTileLayout", function () {
     };
   }
 
+  /** @param {Record<string, any>} [overrides] */
   function createMetricTileArgs(overrides) {
     const opts = overrides || {};
     const base = {
@@ -54,7 +57,11 @@ describe("TextTileLayout", function () {
     const tileLayout = loadFresh("shared/widget-kits/text/TextTileLayout.js").create();
     const measurement = tileLayout.measureMetricTile({
       textApi: createTextApi(),
-      ctx: { measureText() { return { width: 10 }; } },
+      ctx: {
+        measureText() {
+          return { width: 10 };
+        }
+      },
       metric: { caption: "COG", value: "123", unit: "°" },
       rect: { x: 4, y: 6, w: 30, h: 12 },
       padX: 2,
@@ -77,7 +84,11 @@ describe("TextTileLayout", function () {
     const tileLayout = loadFresh("shared/widget-kits/text/TextTileLayout.js").create();
     const measurement = tileLayout.measureMetricTile({
       textApi: createTextApi(),
-      ctx: { measureText() { return { width: 10 }; } },
+      ctx: {
+        measureText() {
+          return { width: 10 };
+        }
+      },
       metric: { caption: "XTE", value: "0.12", unit: "nm" },
       rect: { x: 0, y: 0, w: 18, h: 5 },
       padX: 1,

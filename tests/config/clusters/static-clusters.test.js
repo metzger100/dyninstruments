@@ -1,11 +1,9 @@
-const {
-  loadClusters,
-} = require("./static-clusters.harness.js");
+const { loadClusters } = require("./static-clusters.harness.js");
 
 describe("static cluster configs", function () {
   it("registers course/speed/default/wind/map/anchor definitions with expected defaults", function () {
     const defs = loadClusters();
-    const byCluster = Object.fromEntries(defs.map((d) => [d.cluster, d]));
+    const byCluster = Object.fromEntries(defs.map((/** @type {any} */ d) => [d.cluster, d]));
 
     expect(byCluster.courseHeading.name).toBe("dyni_CourseHeading_Instruments");
     expect(byCluster.default.name).toBe("dyni_Default_Instruments");
@@ -16,7 +14,7 @@ describe("static cluster configs", function () {
 
     expect(byCluster.courseHeading.editableParameters.kind.default).toBe("cog");
     expect(byCluster.default.editableParameters.kind.default).toBe("text");
-    expect(byCluster.default.editableParameters.kind.list.map((entry) => entry.value)).toEqual([
+    expect(byCluster.default.editableParameters.kind.list.map((/** @type {any} */ entry) => entry.value)).toEqual([
       "text",
       "linearGauge",
       "radialGauge"
@@ -26,7 +24,7 @@ describe("static cluster configs", function () {
     expect(byCluster.map.editableParameters.kind.default).toBe("centerDisplay");
     expect(byCluster.anchor.editableParameters.kind.default).toBe("anchorDistance");
     expect(byCluster.courseHeading.editableParameters.kind.name).toBe("Instrument");
-    expect(byCluster.default.editableParameters.kind.list.map((entry) => entry.value)).toEqual([
+    expect(byCluster.default.editableParameters.kind.list.map((/** @type {any} */ entry) => entry.value)).toEqual([
       "text",
       "linearGauge",
       "radialGauge"
@@ -40,28 +38,36 @@ describe("static cluster configs", function () {
     expect(byCluster.default.editableParameters.formatter).toBe(true);
     expect(byCluster.default.editableParameters.formatterParameters).toBe(true);
     expect(byCluster.default.editableParameters.className).toBe(true);
-    expect(byCluster.default.editableParameters.caption_text).toEqual(expect.objectContaining({
-      condition: { kind: "text" }
-    }));
-    expect(byCluster.default.editableParameters.unit_text).toEqual(expect.objectContaining({
-      condition: { kind: "text" }
-    }));
-    expect(byCluster.default.editableParameters.ratioThresholdNormal).toEqual(expect.objectContaining({
-      default: 1.0,
-      min: 0.5,
-      max: 2.0,
-      step: 0.05,
-      internal: true,
-      condition: { kind: "text" }
-    }));
-    expect(byCluster.default.editableParameters.ratioThresholdFlat).toEqual(expect.objectContaining({
-      default: 3.0,
-      min: 1.5,
-      max: 6.0,
-      step: 0.05,
-      internal: true,
-      condition: { kind: "text" }
-    }));
+    expect(byCluster.default.editableParameters.caption_text).toEqual(
+      expect.objectContaining({
+        condition: { kind: "text" }
+      })
+    );
+    expect(byCluster.default.editableParameters.unit_text).toEqual(
+      expect.objectContaining({
+        condition: { kind: "text" }
+      })
+    );
+    expect(byCluster.default.editableParameters.ratioThresholdNormal).toEqual(
+      expect.objectContaining({
+        default: 1.0,
+        min: 0.5,
+        max: 2.0,
+        step: 0.05,
+        internal: true,
+        condition: { kind: "text" }
+      })
+    );
+    expect(byCluster.default.editableParameters.ratioThresholdFlat).toEqual(
+      expect.objectContaining({
+        default: 3.0,
+        min: 1.5,
+        max: 6.0,
+        step: 0.05,
+        internal: true,
+        condition: { kind: "text" }
+      })
+    );
     expect(byCluster.default.editableParameters.textRatioThresholdNormal).toBeUndefined();
     expect(byCluster.default.editableParameters.textRatioThresholdFlat).toBeUndefined();
     expect(byCluster.default.editableParameters.stableDigits.condition).toEqual([
@@ -75,9 +81,13 @@ describe("static cluster configs", function () {
       { kind: "radialGauge" }
     ]);
     expect(byCluster.default.editableParameters.defaultLinearHideTextualMetrics.default).toBe(false);
-    expect(byCluster.default.editableParameters.defaultLinearHideTextualMetrics.condition).toEqual({ kind: "linearGauge" });
+    expect(byCluster.default.editableParameters.defaultLinearHideTextualMetrics.condition).toEqual({
+      kind: "linearGauge"
+    });
     expect(byCluster.default.editableParameters.defaultRadialHideTextualMetrics.default).toBe(false);
-    expect(byCluster.default.editableParameters.defaultRadialHideTextualMetrics.condition).toEqual({ kind: "radialGauge" });
+    expect(byCluster.default.editableParameters.defaultRadialHideTextualMetrics.condition).toEqual({
+      kind: "radialGauge"
+    });
     expect(byCluster.default.editableParameters.captionUnitScale.default).toBe(0.8);
     expect(byCluster.default.editableParameters.value.type).toBe("KEY");
     expect(byCluster.default.editableParameters.defaultLinearRatioThresholdNormal.default).toBe(1.1);
@@ -136,17 +146,23 @@ describe("static cluster configs", function () {
     expect(byCluster.default.editableParameters.defaultRadialWarningLowColor.type).toBe("COLOR");
     expect(byCluster.default.editableParameters.defaultRadialWarningHighColor.type).toBe("COLOR");
     expect(byCluster.default.editableParameters.defaultRadialAlarmHighColor.type).toBe("COLOR");
-    expect(byCluster.map.editableParameters.kind.list.map((entry) => entry.value))
-      .toEqual(expect.arrayContaining(["centerDisplay", "zoom"]));
-    expect(byCluster.map.editableParameters.centerDisplayRatioThresholdNormal.condition).toEqual({ kind: "centerDisplay" });
+    expect(byCluster.map.editableParameters.kind.list.map((/** @type {any} */ entry) => entry.value)).toEqual(
+      expect.arrayContaining(["centerDisplay", "zoom"])
+    );
+    expect(byCluster.map.editableParameters.centerDisplayRatioThresholdNormal.condition).toEqual({
+      kind: "centerDisplay"
+    });
     expect(byCluster.map.editableParameters.centerDisplayRatioThresholdNormal.internal).toBe(true);
     expect(byCluster.map.editableParameters.caption_zoom.condition).toEqual({ kind: "zoom" });
-    expect(byCluster.speed.editableParameters.kind.list.map((entry) => entry.value))
-      .toEqual(expect.arrayContaining(["sogLinear", "stwLinear"]));
-    expect(byCluster.courseHeading.editableParameters.kind.list.map((entry) => entry.value))
-      .toEqual(expect.arrayContaining(["hdtLinear", "hdmLinear"]));
-    expect(byCluster.wind.editableParameters.kind.list.map((entry) => entry.value))
-      .toEqual(expect.arrayContaining(["angleTrueLinear", "angleApparentLinear"]));
+    expect(byCluster.speed.editableParameters.kind.list.map((/** @type {any} */ entry) => entry.value)).toEqual(
+      expect.arrayContaining(["sogLinear", "stwLinear"])
+    );
+    expect(byCluster.courseHeading.editableParameters.kind.list.map((/** @type {any} */ entry) => entry.value)).toEqual(
+      expect.arrayContaining(["hdtLinear", "hdmLinear"])
+    );
+    expect(byCluster.wind.editableParameters.kind.list.map((/** @type {any} */ entry) => entry.value)).toEqual(
+      expect.arrayContaining(["angleTrueLinear", "angleApparentLinear"])
+    );
     expect(byCluster.speed.editableParameters.speedLinearRatioThresholdNormal.condition).toEqual([
       { kind: "sogLinear" },
       { kind: "stwLinear" }

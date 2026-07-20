@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 describe("phase 4 selector migration guard", function () {
+  /** @param {string} dir @returns {string[]} */
   function collectFiles(dir) {
     if (!fs.existsSync(dir)) {
       return [];
@@ -23,7 +24,7 @@ describe("phase 4 selector migration guard", function () {
     });
     files.push(path.join(process.cwd(), "plugin.css"));
 
-    const violations = [];
+    const violations = /** @type {string[]} */ ([]);
     files.forEach(function (filePath) {
       if (!/\.(js|css)$/.test(filePath)) {
         return;

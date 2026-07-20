@@ -1,9 +1,10 @@
+// @ts-nocheck
 const {
   originalDyniPlugin,
   createDeferred,
   createLoaderHarness,
   loadController,
-  createBaseContext,
+  createBaseContext
 } = require("./RouteActivationController.harness.js");
 
 describe("runtime/cluster/RouteActivationController.js", function () {
@@ -12,45 +13,41 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       return {
         value: 12.3,
         rendererProps: {
-          mappedKind: "sog",
-        },
+          mappedKind: "sog"
+        }
       };
     });
     const loader = createLoaderHarness({
-      initialLoadedIds: [
-        "ClusterMapperToolkit",
-        "SpeedMapper",
-        "SpeedRadialWidget",
-      ],
+      initialLoadedIds: ["ClusterMapperToolkit", "SpeedMapper", "SpeedRadialWidget"],
       modules: {
         ClusterMapperToolkit: {
           create: function () {
             return {
               createToolkit: function () {
                 return {};
-              },
+              }
             };
-          },
+          }
         },
         SpeedMapper: {
           create: function () {
             return {
-              translate: mapperTranslate,
+              translate: mapperTranslate
             };
-          },
+          }
         },
         SpeedRadialWidget: {
           create: function () {
             return {
-              renderCanvas: vi.fn(),
+              renderCanvas: vi.fn()
             };
-          },
-        },
-      },
+          }
+        }
+      }
     });
     const themeRuntime = {
       preloadShadowCssUrls: vi.fn(),
-      hasShadowCssText: vi.fn(() => true),
+      hasShadowCssText: vi.fn(() => true)
     };
     const widgetDef = { cluster: "speed" };
     const context = createBaseContext({
@@ -58,8 +55,8 @@ describe("runtime/cluster/RouteActivationController.js", function () {
         componentLoader: loader,
         theme: themeRuntime,
         surfaces: {
-          materializeSurfacePolicyProps: vi.fn(),
-        },
+          materializeSurfacePolicyProps: vi.fn()
+        }
       },
       config: {
         shared: {},
@@ -73,11 +70,11 @@ describe("runtime/cluster/RouteActivationController.js", function () {
               mapperId: "SpeedMapper",
               rendererId: "SpeedRadialWidget",
               surface: "canvas-dom",
-              shellSizing: { kind: "ratio", aspectRatio: 1 },
-            },
-          },
-        },
-      },
+              shellSizing: { kind: "ratio", aspectRatio: 1 }
+            }
+          }
+        }
+      }
     });
     const routeActivation = loadController(context);
     const controller = routeActivation.createWidgetController(widgetDef);
@@ -85,7 +82,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       cluster: "speed",
       kind: "sog",
       nightMode: false,
-      editing: false,
+      editing: false
     };
 
     const first = controller.activateCommittedRoute({
@@ -93,14 +90,14 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       revision: 1,
       rootEl: { id: "root-a" },
       shellEl: { id: "shell-a" },
-      hostContext: { marker: "a" },
+      hostContext: { marker: "a" }
     });
     const second = controller.activateCommittedRoute({
       routeFrame: routeFrame,
       revision: 2,
       rootEl: { id: "root-b" },
       shellEl: { id: "shell-b" },
-      hostContext: { marker: "b" },
+      hostContext: { marker: "b" }
     });
 
     expect(first).not.toBe(routeActivation.DISCARDED_ACTIVATION);
@@ -114,45 +111,41 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       return {
         value: 12.3,
         rendererProps: {
-          mappedKind: "sog",
-        },
+          mappedKind: "sog"
+        }
       };
     });
     const loader = createLoaderHarness({
-      initialLoadedIds: [
-        "ClusterMapperToolkit",
-        "SpeedMapper",
-        "SpeedRadialWidget",
-      ],
+      initialLoadedIds: ["ClusterMapperToolkit", "SpeedMapper", "SpeedRadialWidget"],
       modules: {
         ClusterMapperToolkit: {
           create: function () {
             return {
               createToolkit: function () {
                 return {};
-              },
+              }
             };
-          },
+          }
         },
         SpeedMapper: {
           create: function () {
             return {
-              translate: mapperTranslate,
+              translate: mapperTranslate
             };
-          },
+          }
         },
         SpeedRadialWidget: {
           create: function () {
             return {
-              renderCanvas: vi.fn(),
+              renderCanvas: vi.fn()
             };
-          },
-        },
-      },
+          }
+        }
+      }
     });
     const themeRuntime = {
       preloadShadowCssUrls: vi.fn(),
-      hasShadowCssText: vi.fn(() => true),
+      hasShadowCssText: vi.fn(() => true)
     };
     const widgetDef = { cluster: "speed" };
     const context = createBaseContext({
@@ -160,8 +153,8 @@ describe("runtime/cluster/RouteActivationController.js", function () {
         componentLoader: loader,
         theme: themeRuntime,
         surfaces: {
-          materializeSurfacePolicyProps: vi.fn(),
-        },
+          materializeSurfacePolicyProps: vi.fn()
+        }
       },
       config: {
         shared: {},
@@ -175,11 +168,11 @@ describe("runtime/cluster/RouteActivationController.js", function () {
               mapperId: "SpeedMapper",
               rendererId: "SpeedRadialWidget",
               surface: "canvas-dom",
-              shellSizing: { kind: "ratio", aspectRatio: 1 },
-            },
-          },
-        },
-      },
+              shellSizing: { kind: "ratio", aspectRatio: 1 }
+            }
+          }
+        }
+      }
     });
     const routeActivation = loadController(context);
     const controller = routeActivation.createWidgetController(widgetDef);
@@ -189,7 +182,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       cluster: "speed",
       kind: "sog",
       nightMode: false,
-      editing: false,
+      editing: false
     };
 
     const first = controller.activateCommittedRoute({
@@ -197,14 +190,14 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       revision: 1,
       rootEl: stableRootEl,
       shellEl: stableShellEl,
-      hostContext: { marker: "a" },
+      hostContext: { marker: "a" }
     });
     const second = controller.activateCommittedRoute({
       routeFrame: routeFrame,
       revision: 2,
       rootEl: stableRootEl,
       shellEl: stableShellEl,
-      hostContext: { marker: "b" },
+      hostContext: { marker: "b" }
     });
     controller.invalidateMemoState();
     const third = controller.activateCommittedRoute({
@@ -212,7 +205,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       revision: 3,
       rootEl: stableRootEl,
       shellEl: stableShellEl,
-      hostContext: { marker: "c" },
+      hostContext: { marker: "c" }
     });
 
     expect(first).not.toBe(routeActivation.DISCARDED_ACTIVATION);
@@ -221,5 +214,4 @@ describe("runtime/cluster/RouteActivationController.js", function () {
     expect(third.revision).toBe(3);
     expect(mapperTranslate).toHaveBeenCalledTimes(3);
   });
-
 });

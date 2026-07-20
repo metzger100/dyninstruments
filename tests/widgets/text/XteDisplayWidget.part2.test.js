@@ -1,12 +1,6 @@
-const {
-  createHarness,
-  createMockCanvas,
-  createMockContext2D,
-} = require("./XteDisplayWidget.harness.js");
-const {
-  makeProps,
-  fillTextValues,
-} = require("./XteDisplayWidget.test-model.js");
+// @ts-nocheck
+const { createHarness, createMockCanvas, createMockContext2D } = require("./XteDisplayWidget.harness.js");
+const { makeProps, fillTextValues } = require("./XteDisplayWidget.test-model.js");
 
 describe("XteDisplayWidget", function () {
   it("reuses static cache for stable inputs and invalidates on geometry changes", function () {
@@ -14,12 +8,12 @@ describe("XteDisplayWidget", function () {
     const canvasA = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     const canvasB = createMockCanvas({
       rectWidth: 360,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(canvasA, makeProps());
@@ -35,7 +29,7 @@ describe("XteDisplayWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
     canvas.width = 640;
     canvas.height = 360;
@@ -46,24 +40,14 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.staticDraws).toHaveLength(1);
     expect(harness.calls.dynamicDraws).toHaveLength(2);
 
-    const drawImageCalls = canvas.__ctx.calls.filter(
-      (entry) => entry.name === "drawImage",
-    );
+    const drawImageCalls = canvas.__ctx.calls.filter((entry) => entry.name === "drawImage");
     expect(drawImageCalls.length).toBeGreaterThan(0);
     const layerCanvas = drawImageCalls[0].args[0];
     const layerCalls = layerCanvas.__ctx.calls;
-    const layerSetTransform = layerCalls.find(
-      (entry) => entry.name === "setTransform",
-    );
-    const layerClearRect = layerCalls.find(
-      (entry) => entry.name === "clearRect",
-    );
-    const setTransformIndex = layerCalls.findIndex(
-      (entry) => entry.name === "setTransform",
-    );
-    const clearRectIndex = layerCalls.findIndex(
-      (entry) => entry.name === "clearRect",
-    );
+    const layerSetTransform = layerCalls.find((entry) => entry.name === "setTransform");
+    const layerClearRect = layerCalls.find((entry) => entry.name === "clearRect");
+    const setTransformIndex = layerCalls.findIndex((entry) => entry.name === "setTransform");
+    const clearRectIndex = layerCalls.findIndex((entry) => entry.name === "clearRect");
 
     expect(layerSetTransform.args).toEqual([2, 0, 0, 2, 0, 0]);
     expect(layerClearRect.args).toEqual([0, 0, 320, 180]);
@@ -75,13 +59,13 @@ describe("XteDisplayWidget", function () {
   it("invalidates static cache when strokeWeight changes", function () {
     const harness = createHarness({
       theme: {
-        strokeWeight: 1,
-      },
+        strokeWeight: 1
+      }
     });
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(canvas, makeProps());
@@ -95,13 +79,13 @@ describe("XteDisplayWidget", function () {
   it("keeps the static cache when only pointerDepthWeight changes", function () {
     const harness = createHarness({
       theme: {
-        pointerDepthWeight: 1,
-      },
+        pointerDepthWeight: 1
+      }
     });
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(canvas, makeProps());
@@ -121,7 +105,7 @@ describe("XteDisplayWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(canvas, makeProps());
@@ -143,7 +127,7 @@ describe("XteDisplayWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(canvas, makeProps({ xte: undefined }));
@@ -165,7 +149,7 @@ describe("XteDisplayWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(
@@ -173,8 +157,8 @@ describe("XteDisplayWidget", function () {
       makeProps({
         cog: undefined,
         dtw: undefined,
-        btw: undefined,
-      }),
+        btw: undefined
+      })
     );
 
     expect(harness.calls.staticDraws).toHaveLength(1);
@@ -189,7 +173,7 @@ describe("XteDisplayWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(canvas, makeProps({ wpName: "" }));
@@ -205,15 +189,15 @@ describe("XteDisplayWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(
       canvas,
       makeProps({
         wpName: "",
-        hideTextualMetrics: true,
-      }),
+        hideTextualMetrics: true
+      })
     );
 
     expect(harness.calls.staticDraws).toHaveLength(0);
@@ -228,7 +212,7 @@ describe("XteDisplayWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(
@@ -236,8 +220,8 @@ describe("XteDisplayWidget", function () {
       makeProps({
         disconnect: true,
         wpName: "",
-        hideTextualMetrics: true,
-      }),
+        hideTextualMetrics: true
+      })
     );
 
     expect(harness.calls.staticDraws).toHaveLength(0);
@@ -252,7 +236,7 @@ describe("XteDisplayWidget", function () {
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(
@@ -260,8 +244,8 @@ describe("XteDisplayWidget", function () {
       makeProps({
         hideTextualMetrics: true,
         wpName: "Fairway Buoy",
-        showWpName: true,
-      }),
+        showWpName: true
+      })
     );
 
     expect(harness.calls.layoutHistory[0].nameRect).toBeNull();
@@ -284,12 +268,12 @@ describe("XteDisplayWidget", function () {
           return "--:--:--";
         }
         return cfg.default;
-      },
+      }
     });
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 180,
-      ctx: createMockContext2D(),
+      ctx: createMockContext2D()
     });
 
     harness.spec.renderCanvas(canvas, makeProps());
@@ -299,5 +283,4 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.valueRows[2].value).toBe("---");
     expect(harness.calls.valueRows[3].value).toBe("---");
   });
-
 });

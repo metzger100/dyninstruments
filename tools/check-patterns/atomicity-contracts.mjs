@@ -1,4 +1,12 @@
-import { filesForScope, findMatchingBrace, findMatchingParen, getAtomicityContractCache, getFileData, lineAt, setAtomicityContractCache } from "./shared.mjs";
+import {
+  filesForScope,
+  findMatchingBrace,
+  findMatchingParen,
+  getAtomicityContractCache,
+  getFileData,
+  lineAt,
+  setAtomicityContractCache
+} from "./shared.mjs";
 import {
   findNamedObjectLiterals,
   parseExactLiteral,

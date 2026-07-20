@@ -4,12 +4,14 @@
 
 ## Overview
 
-ClusterWidget is the live shell/orchestrator boundary for cluster-based widgets. Route identity, renderer choice, and shell sizing come from `config.clusterRoutes.byRouteId`.
+ClusterWidget is the live shell/orchestrator boundary for cluster-based widgets. Route identity, renderer choice, and
+shell sizing come from `config.clusterRoutes.byRouteId`.
 
 Primary owners:
 
 - cluster/ClusterWidget.js: lifecycle orchestration and commit ordering
-- config/cluster-routes/*.js: route metadata assembly into `config.clusterRoutes.byRouteId` (`routeId`, `mapperId`, `rendererId`, `surface`, optional `viewModelId`, `shellSizing`)
+- config/cluster-routes/*.js: route metadata assembly into `config.clusterRoutes.byRouteId` (`routeId`, `mapperId`,
+  `rendererId`, `surface`, optional `viewModelId`, `shellSizing`)
 - cluster/mappers/*Mapper.js: declarative route-props mapping only; no renderer identity
 - runtime/cluster/ClusterShellRenderer.js: route-frame normalization and pre-activation shell sizing materialization
 - runtime/cluster/RouteActivationController.js: lazy route activation service composition
@@ -33,10 +35,15 @@ It owns:
 Mapper output is route props only.
 
 - mappers do not emit renderer identity
+- mappers resolve finite/trimmed renderer values and required defaults once; renderers and widget-kit helpers trust the
+  resulting `rendererProps`
+- `ClusterMapperToolkit.positiveUnitNumber(baseKey, token, defaultValue)` owns positive unit-aware config defaults
 - `rendererProps` is merged into the activated props during route activation
 - `renderer` and `rendererProps` are stripped from the activated payload after merge
-- route activation memoization compares payload `__mappedSignature` plus `nightMode` and `editing`, and also requires unchanged committed `rootEl`/`shellEl` attachment targets before returning `DISCARDED_ACTIVATION`
-- ClusterWidget invalidates route-activation memo state when it detaches an active surface for an invalid/diagnostic route commit (no activation path for that commit)
+- route activation memoization compares payload `__mappedSignature` plus `nightMode` and `editing`, and also requires
+  unchanged committed `rootEl`/`shellEl` attachment targets before returning `DISCARDED_ACTIVATION`
+- ClusterWidget invalidates route-activation memo state when it detaches an active surface for an invalid/diagnostic
+  route commit (no activation path for that commit)
 
 ## Runtime Flow
 
@@ -46,11 +53,16 @@ Mapper output is route props only.
 4. HostCommitController resolves committed root/shell
 5. ClusterWidget applies runtime.theme to the committed root
 6. ClusterWidget records the committed revision floor on SurfaceSessionController
-7. ClusterWidget calls SurfaceSessionController.detachForShellReplacement() only when the shell was actually replaced or the route is invalid/diagnostic and an active surface must be torn down
+7. ClusterWidget calls SurfaceSessionController.detachForShellReplacement() only when the shell was actually replaced or
+   the route is invalid/diagnostic and an active surface must be torn down
 8. runtime.routeActivation activates the committed route from `config.clusterRoutes.byRouteId`
-9. RouteActivationPayloadBuilder merges `rendererProps` into route props, strips renderer identity fields, and emits payload `__mappedSignature`
-10. RouteActivationController memo-compares `__mappedSignature` + `nightMode` + `editing` and committed `rootEl`/`shellEl` identity; only unchanged data with unchanged attachment targets returns `DISCARDED_ACTIVATION` before surface reconcile
-11. ClusterWidget calls `activationController.invalidateMemoState()` when it detaches for invalid/diagnostic commits that skip activation
+9. RouteActivationPayloadBuilder merges `rendererProps` into route props, strips renderer identity fields, and emits
+   payload `__mappedSignature`
+10. RouteActivationController memo-compares `__mappedSignature` + `nightMode` + `editing` and committed
+    `rootEl`/`shellEl` identity; only unchanged data with unchanged attachment targets returns `DISCARDED_ACTIVATION`
+    before surface reconcile
+11. ClusterWidget calls `activationController.invalidateMemoState()` when it detaches for invalid/diagnostic commits
+    that skip activation
 12. SurfaceSessionController reconciles only non-discarded activated payloads
 
 ## Theme and Commit Ordering
@@ -86,7 +98,8 @@ Route-prop materialization contract:
 Host-context cache contract:
 
 - normalized action wrappers are cached per hostContext and refreshed when hostActions owner changes
-- `hostContext.hostActions` is the snapshot object attached by `runtime/widget-registrar.js` on each wrapped lifecycle call
+- `hostContext.hostActions` is the snapshot object attached by `runtime/widget-registrar.js` on each wrapped lifecycle
+  call
 - normalized capabilities are cached per hostContext and recomputed only when raw capability object identity changes
 
 Renderers do not call host capability APIs directly.
@@ -102,7 +115,8 @@ In vertical mode:
 - there is no renderer-spec vertical-sizing hook
 - route-specific natural-height behavior is finalized after activation inside the committed renderer, not by the shell
 
-RoutePoints is the only width-derived natural-height exception, and its committed renderer shadow CSS owns the final size after activation.
+RoutePoints is the only width-derived natural-height exception, and its committed renderer shadow CSS owns the final
+size after activation.
 
 ## HTML Route Contract
 

@@ -4,7 +4,8 @@
 
 ## Overview
 
-`runtime/HostCommitController.js` owns deferred DOM commit after `renderHtml` returns shell markup. It is consumed by `cluster/ClusterWidget.js` to resolve mounted shell/root elements before surface-session reconciliation.
+`runtime/HostCommitController.js` owns deferred DOM commit after `renderHtml` returns shell markup. It is consumed by
+`cluster/ClusterWidget.js` to resolve mounted shell/root elements before surface-session reconciliation.
 
 ## Key Details
 
@@ -23,14 +24,17 @@
   - `MutationObserver(document.body, { childList: true, subtree: true })`
   - `setTimeout(..., 2000)` observer ceiling final probe
   - `setTimeout(..., 0)` final probe only when `MutationObserver` is unavailable
-- Observer scope intentionally remains `document.body`: shell markup is mounted asynchronously and no stable per-instance ancestor is guaranteed before first commit.
+- Observer scope intentionally remains `document.body`: shell markup is mounted asynchronously and no stable
+  per-instance ancestor is guaranteed before first commit.
 - Stale guard: scheduled commit revision must equal current `renderRevision`
 - Dedup: repeated `scheduleCommit()` for the same revision is a no-op
-- Timeout ceiling behavior: after observer ceiling expires, one final readiness probe runs; unresolved commits are explicitly abandoned and pending state is cleared.
+- Timeout ceiling behavior: after observer ceiling expires, one final readiness probe runs; unresolved commits are
+  explicitly abandoned and pending state is cleared.
 - Cleanup always tears down pending rAF/observer/timeout handles (success, stale, timeout-abandon, cleanup/reset)
 - `timeoutHandle` is the single timeout owner for both no-observer fallback probes and observer-ceiling teardown.
 - `getState()` uses snapshot memoization: repeated reads return the same object reference until controller state mutates
-- Wait-stage tags: `raf-1`, `raf-2`, `raf-3`, `raf-4`, `mutation-observer`, `observer-timeout`, `timeout`, `cleanup`, `reset`, `stale`
+- Wait-stage tags: `raf-1`, `raf-2`, `raf-3`, `raf-4`, `mutation-observer`, `observer-timeout`, `timeout`, `cleanup`,
+  `reset`, `stale`
 
 ## API/Interfaces
 
@@ -38,31 +42,37 @@
 const controller = runtime.createHostCommitController(options);
 controller.initState();
 controller.recordRender(props);
-controller.scheduleCommit({ onCommit(payload) { /* optional */ } });
+controller.scheduleCommit({
+  onCommit(payload) {
+    /* optional */
+  }
+});
 controller.cleanup();
 controller.getState();
 ```
 
 ### `options` (all optional)
 
-| Key | Type | Purpose |
-|---|---|---|
-| `instancePrefix` | `string` | Prefix for generated `instanceId` values |
-| `document` | `Document` | DOM query target (`querySelector`, `body`) |
+| Key                     | Type       | Purpose                                                   |
+| ----------------------- | ---------- | --------------------------------------------------------- |
+| `instancePrefix`        | `string`   | Prefix for generated `instanceId` values                  |
+| `document`              | `Document` | DOM query target (`querySelector`, `body`)                |
 | `requestAnimationFrame` | `function` | Inject scheduler for deterministic tests/runtime adapters |
-| `cancelAnimationFrame` | `function` | Inject rAF cancellation |
-| `setTimeout` | `function` | Inject timeout scheduler |
-| `clearTimeout` | `function` | Inject timeout cancellation |
-| `MutationObserver` | `function|null` | Inject observer constructor or disable observer fallback |
+| `cancelAnimationFrame`  | `function` | Inject rAF cancellation                                   |
+| `setTimeout`            | `function` | Inject timeout scheduler                                  |
+| `clearTimeout`          | `function` | Inject timeout cancellation                               |
+| `MutationObserver`      | `function  | null`                                                     | Inject observer constructor or disable observer fallback |
 
 ### State Shape (`getState`)
 
-`instanceId`, `renderRevision`, `mountedRevision`, `lastProps`, `rootEl`, `shellEl`, `scheduledRevision`, `rafHandle`, `observer`, `timeoutHandle`, `commitPending`
+`instanceId`, `renderRevision`, `mountedRevision`, `lastProps`, `rootEl`, `shellEl`, `scheduledRevision`, `rafHandle`,
+`observer`, `timeoutHandle`, `commitPending`
 
 Snapshot semantics:
 
 - reference is stable across repeated reads while state is unchanged
-- a new snapshot object is created after each meaningful state mutation boundary (`recordRender`, scheduling, commit resolution, cleanup/reset, async-handle teardown)
+- a new snapshot object is created after each meaningful state mutation boundary (`recordRender`, scheduling, commit
+  resolution, cleanup/reset, async-handle teardown)
 
 ### `onCommit(payload)` Shape
 
@@ -70,10 +80,12 @@ Snapshot semantics:
 
 ## Renderer-Side Consumption (`__dyniHostCommitState`)
 
-- `cluster/ClusterWidget.js` writes `hostContext.__dyniHostCommitState` on init (`initRuntimeState`), refreshes it on each render pass (`renderHtml`), and nulls it on finalize (`finalizeFunction`).
+- `cluster/ClusterWidget.js` writes `hostContext.__dyniHostCommitState` on init (`initRuntimeState`), refreshes it on
+  each render pass (`renderHtml`), and nulls it on finalize (`finalizeFunction`).
 - HTML renderers consume committed element references from that state: `shellEl` and `rootEl`.
 - Standard resolution contract: `targetEl = commitState.shellEl || commitState.rootEl`.
-- If `__dyniHostCommitState` is missing or null, renderers must fail closed: skip committed-DOM logic and use host-sized assumptions.
+- If `__dyniHostCommitState` is missing or null, renderers must fail closed: skip committed-DOM logic and use host-sized
+  assumptions.
 - Ownership is single-writer (`ClusterWidget` / `HostCommitController`); renderer modules treat the state as read-only.
 - For full timing rules and corrective-rerender flow, see [html-renderer-lifecycle.md](html-renderer-lifecycle.md).
 

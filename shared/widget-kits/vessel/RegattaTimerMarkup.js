@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRegattaTimerMarkup = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const DEFAULT_DURATION_MINUTES = 5;
@@ -105,56 +105,58 @@
         "dyni-regatta-open-" + interactionState
       ];
 
-      const barHtml = config.progressBarEnabled === true
-        ? (
-          '<div class="dyni-regatta-bar"'
-          + htmlUtils.toStyleAttr(
-            htmlUtils.joinStyles(
-              "width:" + toBarPercent(model, config, phaseApi) + "%;",
-              fit.barStyle
-            )
-          )
-          + "></div>"
-        )
-        : "";
+      const barHtml =
+        config.progressBarEnabled === true
+          ? '<div class="dyni-regatta-bar"' +
+            htmlUtils.toStyleAttr(
+              htmlUtils.joinStyles("width:" + toBarPercent(model, config, phaseApi) + "%;", fit.barStyle)
+            ) +
+            "></div>"
+          : "";
 
-      return ""
-        + '<div class="' + wrapperClasses.join(" ") + '"'
-        + htmlUtils.toStyleAttr(fit.wrapperStyle)
-        + ">"
-        + barHtml
-        + '<div class="dyni-regatta-display"'
-        + htmlUtils.toStyleAttr(fit.displayStyle)
-        + ">"
-        + '<div class="dyni-regatta-time' + (stableDigitsEnabled ? " dyni-tabular" : "") + '"'
-        + htmlUtils.toStyleAttr(fit.timerStyle)
-        + ">"
-        + htmlUtils.escapeHtml(displayText)
-        + "</div>"
-        + "</div>"
-        + '<div class="dyni-regatta-controls"'
-        + htmlUtils.toStyleAttr(fit.controlsStyle)
-        + ">"
-        + '<div class="dyni-regatta-btn dyni-regatta-btn-start"'
-        + ' data-dyni-action="regatta-start"'
-        + htmlUtils.toStyleAttr(htmlUtils.joinStyles(baseButtonStyle, fit.startButtonStyle))
-        + ">"
-        + htmlUtils.escapeHtml("START")
-        + "</div>"
-        + '<div class="dyni-regatta-btn dyni-regatta-btn-sync"'
-        + ' data-dyni-action="regatta-sync"'
-        + htmlUtils.toStyleAttr(htmlUtils.joinStyles(baseButtonStyle, fit.syncButtonStyle))
-        + ">"
-        + htmlUtils.escapeHtml("SYNC")
-        + "</div>"
-        + '<div class="dyni-regatta-btn dyni-regatta-btn-reset"'
-        + ' data-dyni-action="regatta-reset"'
-        + htmlUtils.toStyleAttr(htmlUtils.joinStyles(baseButtonStyle, fit.resetButtonStyle))
-        + ">"
-        + htmlUtils.escapeHtml("RESET")
-        + "</div>"
-        + "</div>"
-        + "</div>";
+      return (
+        "" +
+        '<div class="' +
+        wrapperClasses.join(" ") +
+        '"' +
+        htmlUtils.toStyleAttr(fit.wrapperStyle) +
+        ">" +
+        barHtml +
+        '<div class="dyni-regatta-display"' +
+        htmlUtils.toStyleAttr(fit.displayStyle) +
+        ">" +
+        '<div class="dyni-regatta-time' +
+        (stableDigitsEnabled ? " dyni-tabular" : "") +
+        '"' +
+        htmlUtils.toStyleAttr(fit.timerStyle) +
+        ">" +
+        htmlUtils.escapeHtml(displayText) +
+        "</div>" +
+        "</div>" +
+        '<div class="dyni-regatta-controls"' +
+        htmlUtils.toStyleAttr(fit.controlsStyle) +
+        ">" +
+        '<div class="dyni-regatta-btn dyni-regatta-btn-start"' +
+        ' data-dyni-action="regatta-start"' +
+        htmlUtils.toStyleAttr(htmlUtils.joinStyles(baseButtonStyle, fit.startButtonStyle)) +
+        ">" +
+        htmlUtils.escapeHtml("START") +
+        "</div>" +
+        '<div class="dyni-regatta-btn dyni-regatta-btn-sync"' +
+        ' data-dyni-action="regatta-sync"' +
+        htmlUtils.toStyleAttr(htmlUtils.joinStyles(baseButtonStyle, fit.syncButtonStyle)) +
+        ">" +
+        htmlUtils.escapeHtml("SYNC") +
+        "</div>" +
+        '<div class="dyni-regatta-btn dyni-regatta-btn-reset"' +
+        ' data-dyni-action="regatta-reset"' +
+        htmlUtils.toStyleAttr(htmlUtils.joinStyles(baseButtonStyle, fit.resetButtonStyle)) +
+        ">" +
+        htmlUtils.escapeHtml("RESET") +
+        "</div>" +
+        "</div>" +
+        "</div>"
+      );
     }
 
     return {
@@ -164,4 +166,4 @@
   }
 
   return { id: "RegattaTimerMarkup", create: create };
-}));
+});

@@ -4,11 +4,14 @@
 
 ## Overview
 
-`RegattaTimerTextHtmlWidget` is the committed HTML renderer for the vessel `regattaTimer` kind. It provides Start/Sync/Reset controls, countdown-to-elapsed transition, optional progress strip, and Web Audio signal playback for regatta start sequences.
+`RegattaTimerTextHtmlWidget` is the committed HTML renderer for the vessel `regattaTimer` kind. It provides
+Start/Sync/Reset controls, countdown-to-elapsed transition, optional progress strip, and Web Audio signal playback for
+regatta start sequences.
 
 Bundled layout integration:
 
-- `layouts/dyni-sailboat.json` includes a dedicated `regattapage` with a `dyni_Vessel_Instruments` entry using `kind: "regattaTimer"` plus race-start companion instruments.
+- `layouts/dyni-sailboat.json` includes a dedicated `regattapage` with a `dyni_Vessel_Instruments` entry using
+  `kind: "regattaTimer"` plus race-start companion instruments.
 
 ## Visual Contract
 
@@ -29,7 +32,8 @@ Bundled layout integration:
   - actions: `.dyni-regatta-btn-*` with `data-dyni-action` (`regatta-start`, `regatta-sync`, `regatta-reset`)
 - Core layout constants from fit owner (`shared/widget-kits/vessel/RegattaTimerHtmlFit.js`):
   - `BAR_HEIGHT_FROM_WIDGET_HEIGHT_RATIO = 0.03`
-  - Button outline width is computed from `GeometryScale.scaleStroke(minSide, 0.026, strokeWeight, 1)` and capped to 18% of the smaller button side.
+  - Button outline width is computed from `GeometryScale.scaleStroke(minSide, 0.026, strokeWeight, 1)` and capped to 18%
+    of the smaller button side.
   - high mode share: display `0.68`, controls `0.32`
   - normal mode share: display `0.62`, controls `0.38`
   - flat mode share: display `1.0`, controls `1.0`
@@ -37,11 +41,11 @@ Bundled layout integration:
 
 ## State Machine
 
-| State | Display | Actions |
-|---|---|---|
-| `idle` | configured duration (`MM:00`) | `START` |
-| `countdown` | remaining `MM:SS` | `SYNC`, `RESET` |
-| `elapsed` | elapsed `MM:SS` | `RESET` |
+| State       | Display                       | Actions         |
+| ----------- | ----------------------------- | --------------- |
+| `idle`      | configured duration (`MM:00`) | `START`         |
+| `countdown` | remaining `MM:SS`             | `SYNC`, `RESET` |
+| `elapsed`   | elapsed `MM:SS`               | `RESET`         |
 
 Transitions:
 
@@ -52,17 +56,18 @@ Transitions:
 
 ## Sync Algorithm
 
-- Signal points are derived from duration and include: `duration:00`, `(duration-1):00`, `4:00`, `1:00`, `0:00` (deduped and range-clamped).
+- Signal points are derived from duration and include: `duration:00`, `(duration-1):00`, `4:00`, `1:00`, `0:00` (deduped
+  and range-clamped).
 - `sync()` selects the highest point strictly below the current value, using `SYNC_GRACE_SECONDS = 1`.
 - If target is `0`, the model transitions immediately to `elapsed`.
 
 ## Audio Signal Contract
 
-| Event | Signal | Constants |
-|---|---|---|
-| Whole-minute boundaries during countdown | low beep | `440 Hz`, `300 ms` |
-| Final `0:10` to `0:01` | high beep every second | `880 Hz`, `150 ms` |
-| Countdown reaches `0:00` | long high tone | `880 Hz`, `800 ms` |
+| Event                                    | Signal                 | Constants          |
+| ---------------------------------------- | ---------------------- | ------------------ |
+| Whole-minute boundaries during countdown | low beep               | `440 Hz`, `300 ms` |
+| Final `0:10` to `0:01`                   | high beep every second | `880 Hz`, `150 ms` |
+| Countdown reaches `0:00`                 | long high tone         | `880 Hz`, `800 ms` |
 
 Audio engine details:
 
@@ -72,11 +77,11 @@ Audio engine details:
 
 ## Theme Tokens
 
-| Token path | Output var | Default | Night default |
-|---|---|---|---|
-| `colors.regatta.barWarning` | `--dyni-theme-regatta-bar-warning` | `#e0a92e` | `#8b6914` |
+| Token path                   | Output var                          | Default   | Night default             |
+| ---------------------------- | ----------------------------------- | --------- | ------------------------- |
+| `colors.regatta.barWarning`  | `--dyni-theme-regatta-bar-warning`  | `#e0a92e` | `#8b6914`                 |
 | `colors.regatta.barCritical` | `--dyni-theme-regatta-bar-critical` | `#d9534a` | `rgba(250, 88, 74, 0.60)` |
-| `colors.regatta.barDefault` | `--dyni-theme-regatta-bar-default` | `#3366cc` | `#cc2222` |
+| `colors.regatta.barDefault`  | `--dyni-theme-regatta-bar-default`  | `#3366cc` | `#cc2222`                 |
 
 Presets:
 
@@ -84,30 +89,33 @@ Presets:
 - `barWarning` cascades from global `--dyni-warning` when `--dyni-regatta-bar-warning` is not explicitly set.
 - `barCritical` cascades from global `--dyni-alarm` when `--dyni-regatta-bar-critical` is not explicitly set.
 - `barDefault` cascades from global `--dyni-info` when `--dyni-regatta-bar-default` is not explicitly set.
-- Button outline width uses `--dyni-regatta-button-stroke-weight`, which inherits from `--dyni-stroke-weight` when unset.
-- Deprecated input aliases still resolve with warning: `--dyni-regatta-barWarning`, `--dyni-regatta-barCritical`, and `--dyni-regatta-barDefault`.
+- Button outline width uses `--dyni-regatta-button-stroke-weight`, which inherits from `--dyni-stroke-weight` when
+  unset.
+- Deprecated input aliases still resolve with warning: `--dyni-regatta-barWarning`, `--dyni-regatta-barCritical`, and
+  `--dyni-regatta-barDefault`.
 
 ## Editable Parameters
 
-| Key | Type | Default | Condition |
-|---|---|---|---|
-| `regattaSoundEnabled` | `BOOLEAN` | `true` | `{ kind: "regattaTimer" }` |
-| `regattaProgressBar` | `BOOLEAN` | `true` | `{ kind: "regattaTimer" }` |
-| `regattaDuration` | `SELECT` (`3`, `5`, `6`) | `5` | `{ kind: "regattaTimer" }` |
-| `stableDigits` | `BOOLEAN` | `false` | `{ kind: "regattaTimer" }` |
-| `regattaTimerRatioThresholdNormal` | `FLOAT` (`0.5..2.0`) | `1.0` | `{ kind: "regattaTimer" }` |
-| `regattaTimerRatioThresholdFlat` | `FLOAT` (`1.5..6.0`) | `3.0` | `{ kind: "regattaTimer" }` |
+| Key                                | Type                     | Default | Condition                  |
+| ---------------------------------- | ------------------------ | ------- | -------------------------- |
+| `regattaSoundEnabled`              | `BOOLEAN`                | `true`  | `{ kind: "regattaTimer" }` |
+| `regattaProgressBar`               | `BOOLEAN`                | `true`  | `{ kind: "regattaTimer" }` |
+| `regattaDuration`                  | `SELECT` (`3`, `5`, `6`) | `5`     | `{ kind: "regattaTimer" }` |
+| `stableDigits`                     | `BOOLEAN`                | `false` | `{ kind: "regattaTimer" }` |
+| `regattaTimerRatioThresholdNormal` | `FLOAT` (`0.5..2.0`)     | `1.0`   | `{ kind: "regattaTimer" }` |
+| `regattaTimerRatioThresholdFlat`   | `FLOAT` (`1.5..6.0`)     | `3.0`   | `{ kind: "regattaTimer" }` |
 
 Notes:
+
 - `caption_regattaTimer` and `unit_regattaTimer` are hidden in editor UI (renderer does not display them).
 
 ## Responsive Mode Matrix
 
-| Mode | Layout |
-|---|---|
-| `high` | single-column grid, display above controls |
+| Mode     | Layout                                                                |
+| -------- | --------------------------------------------------------------------- |
+| `high`   | single-column grid, display above controls                            |
 | `normal` | single-column grid, display above controls with tighter display share |
-| `flat` | two-column grid, timer block left and controls right |
+| `flat`   | two-column grid, timer block left and controls right                  |
 
 ## Required HTML-Kind Test Matrix Checklist
 

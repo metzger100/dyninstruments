@@ -4,44 +4,67 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 describe("LinearGaugeLayout", function () {
   function createLayout() {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
-    return loadFresh("shared/widget-kits/linear/LinearGaugeLayout.js").create({}, createComponentContextMock({
-      modules: {
-        ResponsiveScaleProfile: responsiveScaleProfile,
-        GeometryScale: loadFresh("shared/widget-kits/layout/GeometryScale.js"),
-        LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js")
-      }
-    }));
+    return loadFresh("shared/widget-kits/linear/LinearGaugeLayout.js").create(
+      {},
+      createComponentContextMock({
+        modules: {
+          ResponsiveScaleProfile: responsiveScaleProfile,
+          GeometryScale: loadFresh("shared/widget-kits/layout/GeometryScale.js"),
+          LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
+          LinearGaugeLayoutVariants: loadFresh("shared/widget-kits/linear/LinearGaugeLayoutVariants.js")
+        }
+      })
+    );
   }
 
+  /** @param {Record<string, any>} [overrides] */
   function createTheme(overrides) {
     const extra = overrides || {};
     return {
       strokeWeight: Object.prototype.hasOwnProperty.call(extra, "strokeWeight") ? extra.strokeWeight : 1,
-      pointerDepthWeight: Object.prototype.hasOwnProperty.call(extra, "pointerDepthWeight") ? extra.pointerDepthWeight : 1,
+      pointerDepthWeight: Object.prototype.hasOwnProperty.call(extra, "pointerDepthWeight")
+        ? extra.pointerDepthWeight
+        : 1,
       pointerSideWeight: Object.prototype.hasOwnProperty.call(extra, "pointerSideWeight") ? extra.pointerSideWeight : 1,
       linear: {
-        track: Object.assign({
-          widthFactor: 0.16,
-          lineWidthFactor: 0.018
-        }, extra.linear && extra.linear.track ? extra.linear.track : {}),
-        ticks: Object.assign({
-          majorLenFactor: 0.109,
-          majorWidthFactor: 0.027,
-          minorLenFactor: 0.064,
-          minorWidthFactor: 0.014
-        }, extra.linear && extra.linear.ticks ? extra.linear.ticks : {}),
-        pointer: Object.assign({
-          sideFactor: 0.12,
-          depthFactor: 0.24
-        }, extra.linear && extra.linear.pointer ? extra.linear.pointer : {}),
-        labels: Object.assign({
-          insetFactor: 1.8,
-          fontFactor: 0.14
-        }, extra.linear && extra.linear.labels ? extra.linear.labels : {})
+        track: Object.assign(
+          {
+            widthFactor: 0.16,
+            lineWidthFactor: 0.018
+          },
+          extra.linear && extra.linear.track ? extra.linear.track : {}
+        ),
+        ticks: Object.assign(
+          {
+            majorLenFactor: 0.109,
+            majorWidthFactor: 0.027,
+            minorLenFactor: 0.064,
+            minorWidthFactor: 0.014
+          },
+          extra.linear && extra.linear.ticks ? extra.linear.ticks : {}
+        ),
+        pointer: Object.assign(
+          {
+            sideFactor: 0.12,
+            depthFactor: 0.24
+          },
+          extra.linear && extra.linear.pointer ? extra.linear.pointer : {}
+        ),
+        labels: Object.assign(
+          {
+            insetFactor: 1.8,
+            fontFactor: 0.14
+          },
+          extra.linear && extra.linear.labels ? extra.linear.labels : {}
+        )
       }
     };
   }
 
+  /**
+   * @param {{ x: number, y: number, w: number, h: number }} inner
+   * @param {{ x: number, y: number, w: number, h: number }} outer
+   */
   function expectRectInside(inner, outer) {
     expect(inner.x).toBeGreaterThanOrEqual(outer.x);
     expect(inner.y).toBeGreaterThanOrEqual(outer.y);
@@ -49,22 +72,35 @@ describe("LinearGaugeLayout", function () {
     expect(inner.y + inner.h).toBeLessThanOrEqual(outer.y + outer.h);
   }
 
+  /**
+   * @param {any} layout
+   * @param {number} width
+   * @param {number} height
+   * @param {string} mode
+   * @param {any} [layoutConfig]
+   * @param {Record<string, any>} [extraArgs]
+   */
   function buildSnapshot(layout, width, height, mode, layoutConfig, extraArgs) {
     const insets = layout.computeInsets(width, height);
     const contentRect = layout.createContentRect(width, height, insets);
     return {
       insets: insets,
       contentRect: contentRect,
-      out: layout.computeLayout(Object.assign({
-        W: width,
-        H: height,
-        theme: createTheme(),
-        mode: mode,
-        gap: insets.gap,
-        contentRect: contentRect,
-        responsive: insets.responsive,
-        layoutConfig: layoutConfig
-      }, extraArgs || {}))
+      out: layout.computeLayout(
+        Object.assign(
+          {
+            W: width,
+            H: height,
+            theme: createTheme(),
+            mode: mode,
+            gap: insets.gap,
+            contentRect: contentRect,
+            responsive: insets.responsive,
+            layoutConfig: layoutConfig
+          },
+          extraArgs || {}
+        )
+      )
     };
   }
 
@@ -204,16 +240,10 @@ describe("LinearGaugeLayout", function () {
 
   it("splits caption and value rows without fixed pixel floors", function () {
     const layout = createLayout();
-    const lowScale = layout.splitCaptionValueRows(
-      { x: 0, y: 2, w: 40, h: 3 },
-      { x: 0, y: 5, w: 40, h: 5 },
-      0.5
-    );
-    const highScale = layout.splitCaptionValueRows(
-      { x: 0, y: 2, w: 40, h: 3 },
-      { x: 0, y: 5, w: 40, h: 5 },
-      1.2
-    );
+    const captionBox = { x: 0, y: 2, w: 40, h: 3 };
+    const valueBox = { x: 0, y: 5, w: 40, h: 5 };
+    const lowScale = layout.splitCaptionValueRows(captionBox, valueBox, 0.5);
+    const highScale = layout.splitCaptionValueRows(captionBox, valueBox, 1.2);
 
     expect(lowScale.captionBox.h).toBeGreaterThan(0);
     expect(lowScale.valueBox.h).toBeGreaterThan(0);

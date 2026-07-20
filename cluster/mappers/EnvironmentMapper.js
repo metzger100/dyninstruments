@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniEnvironmentMapper = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   function create() {
@@ -26,8 +26,8 @@
       if (req === "depthLinear") {
         const token = toolkit.formatUnit("depthLinear", "distance");
         const displayUnit = toolkit.unitText("depthLinear", "distance", token);
-        const depthWarnOn = (p.depthLinearWarningEnabled !== false);
-        const depthAlarmOn = (p.depthLinearAlarmEnabled !== false);
+        const depthWarnOn = p.depthLinearWarningEnabled !== false;
+        const depthAlarmOn = p.depthLinearAlarmEnabled !== false;
 
         return {
           value: p.depth,
@@ -54,8 +54,8 @@
       if (req === "depthRadial") {
         const token = toolkit.formatUnit("depthRadial", "distance");
         const displayUnit = toolkit.unitText("depthRadial", "distance", token);
-        const depthWarnOn = (p.depthRadialWarningEnabled !== false);
-        const depthAlarmOn = (p.depthRadialAlarmEnabled !== false);
+        const depthWarnOn = p.depthRadialWarningEnabled !== false;
+        const depthAlarmOn = p.depthRadialAlarmEnabled !== false;
 
         return {
           value: p.depth,
@@ -82,8 +82,8 @@
       if (req === "tempRadial") {
         const token = toolkit.formatUnit("tempRadial", "temperature");
         const displayUnit = toolkit.unitText("tempRadial", "temperature", token);
-        const tempWarnOn = (p.tempRadialWarningEnabled === true);
-        const tempAlarmOn = (p.tempRadialAlarmEnabled === true);
+        const tempWarnOn = p.tempRadialWarningEnabled === true;
+        const tempAlarmOn = p.tempRadialAlarmEnabled === true;
         return {
           value: p.temp,
           caption: cap("tempRadial"),
@@ -109,8 +109,8 @@
       if (req === "tempLinear") {
         const token = toolkit.formatUnit("tempLinear", "temperature");
         const displayUnit = toolkit.unitText("tempLinear", "temperature", token);
-        const tempWarnOn = (p.tempLinearWarningEnabled === true);
-        const tempAlarmOn = (p.tempLinearAlarmEnabled === true);
+        const tempWarnOn = p.tempLinearWarningEnabled === true;
+        const tempAlarmOn = p.tempLinearAlarmEnabled === true;
         return {
           value: p.temp,
           caption: cap("tempLinear"),
@@ -139,7 +139,9 @@
       }
       if (req === "pressure") {
         const token = toolkit.formatUnit("pressure", "pressure");
-        return out(p.value, cap("pressure"), toolkit.unitText("pressure", "pressure", token), "formatPressure", [token]);
+        return out(p.value, cap("pressure"), toolkit.unitText("pressure", "pressure", token), "formatPressure", [
+          token
+        ]);
       }
       if (req === "depth") {
         const token = toolkit.formatUnit("depth", "distance");
@@ -155,4 +157,4 @@
   }
 
   return { id: "EnvironmentMapper", create: create };
-}));
+});

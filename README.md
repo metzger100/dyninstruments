@@ -1,20 +1,21 @@
 # dyninstruments
 
-`dyninstruments` is an [AvNav](https://github.com/wellenvogel/avnav) plugin that adds readable, configurable marine instrument widgets for navigation, wind, environment, alarms, and route handling.
+`dyninstruments` is an [AvNav](https://github.com/wellenvogel/avnav) plugin that adds readable, configurable marine
+instrument widgets for navigation, wind, environment, alarms, and route handling.
 
 <img width="1920" height="1080" alt="Bildschirmfoto vom 2026-07-09 21-41-43" src="https://github.com/user-attachments/assets/565746cc-cc50-405e-b3fe-d542e2ae7506" />
 
 ## What you get
 
-| Cluster | Includes |
-|---|---|
-| Course & Heading | Compass radial, compass linear, COG, HDT, HDM |
-| Speed | SOG and STW as radial, linear, or text |
-| Environment | Depth, temperature, voltage as radial, linear, or text |
-| Wind | AWA/AWS and TWA/TWS radial with optional layline sectors |
-| Navigation | Active route, route points, edit route, AIS target, map zoom, XTE, XTE linear gauge |
-| Anchor | Anchor watch circle |
-| Vessel | Alarms, regatta timer, position coordinates, center display, three-value text |
+| Cluster          | Includes                                                                            |
+| ---------------- | ----------------------------------------------------------------------------------- |
+| Course & Heading | Compass radial, compass linear, COG, HDT, HDM                                       |
+| Speed            | SOG and STW as radial, linear, or text                                              |
+| Environment      | Depth, temperature, voltage as radial, linear, or text                              |
+| Wind             | AWA/AWS and TWA/TWS radial with optional layline sectors                            |
+| Navigation       | Active route, route points, edit route, AIS target, map zoom, XTE, XTE linear gauge |
+| Anchor           | Anchor watch circle                                                                 |
+| Vessel           | Alarms, regatta timer, position coordinates, center display, three-value text       |
 
 <img width="1920" height="1080" alt="Bildschirmfoto vom 2026-07-08 20-29-00" src="https://github.com/user-attachments/assets/6be666cf-df3c-4832-9ba3-265f5497e152" />
 <img width="1920" height="1080" alt="Bildschirmfoto vom 2026-07-08 20-28-44" src="https://github.com/user-attachments/assets/097ad058-a6ca-43f8-b2bf-6879a877ef5d" />
@@ -27,7 +28,9 @@ Linux AvNav servers can install or update from the latest GitHub Release with:
 bash <(curl -sSL https://raw.githubusercontent.com/metzger100/dyninstruments/main/install.sh)
 ```
 
-The installer targets AvNav user plugins by default. It detects existing user plugin installs, AvNav service data directories, and documented Linux defaults before writing files. For custom setups, pass the AvNav data directory or the final plugin directory:
+The installer targets AvNav user plugins by default. It detects existing user plugin installs, AvNav service data
+directories, and documented Linux defaults before writing files. For custom setups, pass the AvNav data directory or the
+final plugin directory:
 
 ```bash
 bash <(curl -sSL https://raw.githubusercontent.com/metzger100/dyninstruments/main/install.sh) --data-dir <AVNAV_DATA_DIR>
@@ -46,8 +49,7 @@ Beta prerelease example:
 bash <(curl -sSL https://raw.githubusercontent.com/metzger100/dyninstruments/main/install.sh) --version 4.0.0-beta.1
 ```
 
-The same pinned version can be supplied as
-`DYNINSTRUMENTS_VERSION=4.0.0-beta.1`.
+The same pinned version can be supplied as `DYNINSTRUMENTS_VERSION=4.0.0-beta.1`.
 
 Manual install:
 
@@ -57,11 +59,14 @@ Manual install:
 4. Optional: open AvNav's layout selector and choose one of the bundled layouts:
    - `Dyni Motorboat`
    - `Dyni Sailboat`
-5. Open the AvNav layout editor for further customization. Widgets are listed under `dyninstruments` (`dyni_*_Instruments`).
+5. Open the AvNav layout editor for further customization. Widgets are listed under `dyninstruments`
+   (`dyni_*_Instruments`).
 
-AvNav documents user plugins under the data directory's `plugins` folder and system plugins under `/usr/lib/avnav/plugins`. Use the installer `--system` option only when you intentionally want a system plugin install.
+AvNav documents user plugins under the data directory's `plugins` folder and system plugins under
+`/usr/lib/avnav/plugins`. Use the installer `--system` option only when you intentionally want a system plugin install.
 
 Bundled layouts are stored in:
+
 - `layouts/dyni-motorboat.json`
 - `layouts/dyni-sailboat.json`
 - registered through root `plugin.json`
@@ -75,7 +80,9 @@ dyninstruments ships all current AvNav plugin surfaces:
 - `plugin.json` is declarative metadata for bundled layouts and does not duplicate widget runtime registration.
 - `plugin.css` is loaded by AvNav as the plugin-wide stylesheet.
 
-On AvNav versions that load `plugin.mjs` first, `plugin.js` is not used as an in-browser fallback. Module startup treats each AvNav API/timestamp invocation as a fresh generation, registers widgets against that API, and returns a shutdown function so AvNav reloads can clear generation-bound state.
+On AvNav versions that load `plugin.mjs` first, `plugin.js` is not used as an in-browser fallback. Module startup treats
+each AvNav API/timestamp invocation as a fresh generation, registers widgets against that API, and returns a shutdown
+function so AvNav reloads can clear generation-bound state.
 
 ## Configuration
 
@@ -84,8 +91,8 @@ On AvNav versions that load `plugin.mjs` first, `plugin.js` is not used as an in
 3. Override captions and units with `caption_*` and `unit_*` fields.
 4. Set scale/range values for gauge kinds as needed.
 5. Enable warning/alarm sectors on supported gauges.
-6. Override SignalK data paths with `KEY` fields when you need custom store keys.
-   Depth widgets default to depth below keel; use `Depth store path` to select below transducer, below surface/waterline, or another AvNav store key.
+6. Override SignalK data paths with `KEY` fields when you need custom store keys. Depth widgets default to depth below
+   keel; use `Depth store path` to select below transducer, below surface/waterline, or another AvNav store key.
 
 ## Theming
 
@@ -93,10 +100,11 @@ dyninstruments follows AvNav day/night mode and supports `user.css` overrides vi
 
 Preset selector:
 
-- `--dyni-theme-preset`: `default` (supported presets: `default`, `slim`, `bold`, `darkmode`, `highcontrast`; `night` is a mode, not a preset)
+- `--dyni-theme-preset`: `default` (supported presets: `default`, `slim`, `bold`, `darkmode`, `highcontrast`; `night` is
+  a mode, not a preset)
 
-`darkmode` is a built-in black-surface preset with white foreground/borders and tuned semantic accents for warning/alarm, laylines, and AIS roles.
-`night` remains the dim red AvNav navigation mode, not a preset family.
+`darkmode` is a built-in black-surface preset with white foreground/borders and tuned semantic accents for
+warning/alarm, laylines, and AIS roles. `night` remains the dim red AvNav navigation mode, not a preset family.
 
 Theming uses a two-level hierarchy:
 
@@ -106,78 +114,80 @@ Theming uses a two-level hierarchy:
 
 Global tokens:
 
-| Category | Input var | Default |
-|---|---|---|
-| Surface | `--dyni-fg` | `#000000` |
-| Surface | `--dyni-bg` | `#ffffff` |
-| Surface | `--dyni-border` | Optional. If omitted, border follows resolved `surface.fg`; if set, explicit value wins. |
-| Typography | `--dyni-font` | `"Roboto","Inter","SF Pro Text",-apple-system,"Segoe UI","Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"` |
-| Typography | `--dyni-font-mono` | `"Roboto Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace` |
-| Typography | `--dyni-font-weight` | `700` |
-| Typography | `--dyni-label-weight` | `700` |
-| Opacity | `--dyni-caption-opacity` | `1.0` |
-| Opacity | `--dyni-unit-opacity` | `1.0` |
-| Semantic color | `--dyni-info` | `#3366cc` |
-| Semantic color | `--dyni-warning` | `#e0a92e` |
-| Semantic color | `--dyni-alarm` | `#d9534a` |
-| Semantic color | `--dyni-ok` | `#2e9e6b` |
-| Geometry weight | `--dyni-stroke-weight` | `1.28` |
-| Geometry weight | `--dyni-pointer-depth-weight` | `1.15` |
-| Geometry weight | `--dyni-pointer-side-weight` | `2.0` |
+| Category        | Input var                     | Default                                                                                                                                                                                           |
+| --------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Surface         | `--dyni-fg`                   | `#000000`                                                                                                                                                                                         |
+| Surface         | `--dyni-bg`                   | `#ffffff`                                                                                                                                                                                         |
+| Surface         | `--dyni-border`               | Optional. If omitted, border follows resolved `surface.fg`; if set, explicit value wins.                                                                                                          |
+| Typography      | `--dyni-font`                 | `"Roboto","Inter","SF Pro Text",-apple-system,"Segoe UI","Helvetica Neue","Noto Sans",Ubuntu,Cantarell,"Liberation Sans",Arial,system-ui,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"` |
+| Typography      | `--dyni-font-mono`            | `"Roboto Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace`                                                                                                       |
+| Typography      | `--dyni-font-weight`          | `700`                                                                                                                                                                                             |
+| Typography      | `--dyni-label-weight`         | `700`                                                                                                                                                                                             |
+| Opacity         | `--dyni-caption-opacity`      | `1.0`                                                                                                                                                                                             |
+| Opacity         | `--dyni-unit-opacity`         | `1.0`                                                                                                                                                                                             |
+| Semantic color  | `--dyni-info`                 | `#3366cc`                                                                                                                                                                                         |
+| Semantic color  | `--dyni-warning`              | `#e0a92e`                                                                                                                                                                                         |
+| Semantic color  | `--dyni-alarm`                | `#d9534a`                                                                                                                                                                                         |
+| Semantic color  | `--dyni-ok`                   | `#2e9e6b`                                                                                                                                                                                         |
+| Geometry weight | `--dyni-stroke-weight`        | `1.28`                                                                                                                                                                                            |
+| Geometry weight | `--dyni-pointer-depth-weight` | `1.15`                                                                                                                                                                                            |
+| Geometry weight | `--dyni-pointer-side-weight`  | `2.0`                                                                                                                                                                                             |
 
 Scoped tokens by family:
 
-| Family | Input var | Default | Cascades from |
-|---|---|---|---|
-| Pointer | `--dyni-pointer` | inherits global when unset | `--dyni-info` |
-| Alarm widget | `--dyni-alarm-widget-bg` | inherits global when unset | `--dyni-alarm` |
-| Alarm widget | `--dyni-alarm-widget-fg` | `#ffffff` | — |
-| Alarm widget | `--dyni-alarm-widget-strip` | inherits global when unset | `--dyni-ok` |
-| AIS | `--dyni-ais-warning` | inherits global when unset | `--dyni-alarm` |
-| AIS | `--dyni-ais-nearest` | inherits global when unset | `--dyni-ok` |
-| AIS | `--dyni-ais-tracking` | inherits global when unset | `--dyni-warning` |
-| AIS | `--dyni-ais-normal` | inherits global when unset | `--dyni-ok` |
-| Regatta | `--dyni-regatta-bar-warning` | inherits global when unset | `--dyni-warning` |
-| Regatta | `--dyni-regatta-bar-critical` | inherits global when unset | `--dyni-alarm` |
-| Regatta | `--dyni-regatta-bar-default` | inherits global when unset | `--dyni-info` |
+| Family          | Input var                             | Default                    | Cascades from          |
+| --------------- | ------------------------------------- | -------------------------- | ---------------------- |
+| Pointer         | `--dyni-pointer`                      | inherits global when unset | `--dyni-info`          |
+| Alarm widget    | `--dyni-alarm-widget-bg`              | inherits global when unset | `--dyni-alarm`         |
+| Alarm widget    | `--dyni-alarm-widget-fg`              | `#ffffff`                  | —                      |
+| Alarm widget    | `--dyni-alarm-widget-strip`           | inherits global when unset | `--dyni-ok`            |
+| AIS             | `--dyni-ais-warning`                  | inherits global when unset | `--dyni-alarm`         |
+| AIS             | `--dyni-ais-nearest`                  | inherits global when unset | `--dyni-ok`            |
+| AIS             | `--dyni-ais-tracking`                 | inherits global when unset | `--dyni-warning`       |
+| AIS             | `--dyni-ais-normal`                   | inherits global when unset | `--dyni-ok`            |
+| Regatta         | `--dyni-regatta-bar-warning`          | inherits global when unset | `--dyni-warning`       |
+| Regatta         | `--dyni-regatta-bar-critical`         | inherits global when unset | `--dyni-alarm`         |
+| Regatta         | `--dyni-regatta-bar-default`          | inherits global when unset | `--dyni-info`          |
 | Regatta outline | `--dyni-regatta-button-stroke-weight` | inherits global when unset | `--dyni-stroke-weight` |
-| Wind/layline | `--dyni-layline-stb` | inherits global when unset | `--dyni-ok` |
-| Wind/layline | `--dyni-layline-port` | inherits global when unset | `--dyni-alarm` |
+| Wind/layline    | `--dyni-layline-stb`                  | inherits global when unset | `--dyni-ok`            |
+| Wind/layline    | `--dyni-layline-port`                 | inherits global when unset | `--dyni-alarm`         |
 
-Regatta input vars should use kebab-case (`--dyni-regatta-bar-*`). Existing camelCase aliases still resolve with a deprecation warning.
+Regatta input vars should use kebab-case (`--dyni-regatta-bar-*`). Existing camelCase aliases still resolve with a
+deprecation warning.
 
 Family geometry factors (advanced):
 
-| Family | Input var | Default |
-|---|---|---|
-| Radial | `--dyni-radial-tick-major-len-factor` | `0.087` |
-| Radial | `--dyni-radial-tick-major-width-factor` | `0.022` |
-| Radial | `--dyni-radial-tick-minor-len-factor` | `0.051` |
-| Radial | `--dyni-radial-tick-minor-width-factor` | `0.011` |
-| Radial | `--dyni-radial-pointer-side-factor` | `0.11` |
-| Radial | `--dyni-radial-pointer-depth-factor` | `0.22` |
-| Radial | `--dyni-radial-arc-linewidth-factor` | `0.0145` |
-| Radial | `--dyni-radial-ring-width` | `0.16` |
-| Radial | `--dyni-radial-label-inset` | `1.8` |
-| Radial | `--dyni-radial-label-font` | `0.14` |
-| Radial | `--dyni-radial-fullcircle-normal-inner-margin` | `0.03` |
-| Radial | `--dyni-radial-fullcircle-normal-min-height` | `0.45` |
-| Radial | `--dyni-radial-fullcircle-normal-dual-gap` | `0.05` |
-| Radial | `--dyni-radial-fullcircle-tick-major-len-factor` | `0.131` |
-| Radial | `--dyni-radial-fullcircle-tick-minor-len-factor` | `0.077` |
-| Linear | `--dyni-linear-track-width` | `0.16` |
-| Linear | `--dyni-linear-track-linewidth-factor` | `0.018` |
-| Linear | `--dyni-linear-tick-major-len-factor` | `0.109` |
-| Linear | `--dyni-linear-tick-major-width-factor` | `0.027` |
-| Linear | `--dyni-linear-tick-minor-len-factor` | `0.064` |
-| Linear | `--dyni-linear-tick-minor-width-factor` | `0.014` |
-| Linear | `--dyni-linear-pointer-side-factor` | `0.12` |
-| Linear | `--dyni-linear-pointer-depth-factor` | `0.24` |
-| Linear | `--dyni-linear-label-inset` | `1.8` |
-| Linear | `--dyni-linear-label-font` | `0.14` |
+| Family | Input var                                        | Default  |
+| ------ | ------------------------------------------------ | -------- |
+| Radial | `--dyni-radial-tick-major-len-factor`            | `0.087`  |
+| Radial | `--dyni-radial-tick-major-width-factor`          | `0.022`  |
+| Radial | `--dyni-radial-tick-minor-len-factor`            | `0.051`  |
+| Radial | `--dyni-radial-tick-minor-width-factor`          | `0.011`  |
+| Radial | `--dyni-radial-pointer-side-factor`              | `0.11`   |
+| Radial | `--dyni-radial-pointer-depth-factor`             | `0.22`   |
+| Radial | `--dyni-radial-arc-linewidth-factor`             | `0.0145` |
+| Radial | `--dyni-radial-ring-width`                       | `0.16`   |
+| Radial | `--dyni-radial-label-inset`                      | `1.8`    |
+| Radial | `--dyni-radial-label-font`                       | `0.14`   |
+| Radial | `--dyni-radial-fullcircle-normal-inner-margin`   | `0.03`   |
+| Radial | `--dyni-radial-fullcircle-normal-min-height`     | `0.45`   |
+| Radial | `--dyni-radial-fullcircle-normal-dual-gap`       | `0.05`   |
+| Radial | `--dyni-radial-fullcircle-tick-major-len-factor` | `0.131`  |
+| Radial | `--dyni-radial-fullcircle-tick-minor-len-factor` | `0.077`  |
+| Linear | `--dyni-linear-track-width`                      | `0.16`   |
+| Linear | `--dyni-linear-track-linewidth-factor`           | `0.018`  |
+| Linear | `--dyni-linear-tick-major-len-factor`            | `0.109`  |
+| Linear | `--dyni-linear-tick-major-width-factor`          | `0.027`  |
+| Linear | `--dyni-linear-tick-minor-len-factor`            | `0.064`  |
+| Linear | `--dyni-linear-tick-minor-width-factor`          | `0.014`  |
+| Linear | `--dyni-linear-pointer-side-factor`              | `0.12`   |
+| Linear | `--dyni-linear-pointer-depth-factor`             | `0.24`   |
+| Linear | `--dyni-linear-label-inset`                      | `1.8`    |
+| Linear | `--dyni-linear-label-font`                       | `0.14`   |
 
-
-`user.css` input overrides always win over Dyni defaults. If you override colors only on `.widget.dyniplugin`, those values stay active in AvNav Night Mode too. Add matching `.nightMode .widget.dyniplugin` rules when you want separate night colors.
+`user.css` input overrides always win over Dyni defaults. If you override colors only on `.widget.dyniplugin`, those
+values stay active in AvNav Night Mode too. Add matching `.nightMode .widget.dyniplugin` rules when you want separate
+night colors.
 
 Example day + night override:
 
@@ -189,7 +199,7 @@ Example day + night override:
 }
 
 .nightMode .widget.dyniplugin {
-  --dyni-fg: rgba(252, 11, 11, 0.60);
+  --dyni-fg: rgba(252, 11, 11, 0.6);
   --dyni-bg: black;
   --dyni-info: #cc2222;
 }
@@ -214,7 +224,8 @@ Cascade recipe example:
 }
 ```
 
-Setting `--dyni-alarm` updates every token cascading from alarm (for example AIS warning and regatta critical) unless those scoped tokens are explicitly overridden.
+Setting `--dyni-alarm` updates every token cascading from alarm (for example AIS warning and regatta critical) unless
+those scoped tokens are explicitly overridden.
 
 ## Requirements
 
@@ -224,11 +235,11 @@ Setting `--dyni-alarm` updates every token cascading from alarm (for example AIS
 
 ## Development
 
-dyninstruments is developed with AI-assisted tooling. See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, architecture, coding standards, and release process.
+dyninstruments is developed with AI-assisted tooling. See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup,
+architecture, coding standards, and release process.
 
-Use Node 26 with npm 12.0.1. Run `npm run setup` once; it installs the locked
-dependencies and provisions the checksum-verified actionlint binary outside
-`node_modules`.
+Use Node 26 with npm 12.0.1. Run `npm run setup` once; it installs the locked dependencies and provisions the
+checksum-verified actionlint binary outside `node_modules`.
 
 The complete local gate is:
 
@@ -242,42 +253,47 @@ For fast local feedback during development:
 npm run check:fast
 ```
 
-`check:fast` runs the standard static layer, strict `checkJs`, and Node-only
-unit/tool tests without the full coverage gate.
-`check:standard` runs scoped Prettier formatting checks for quality/config files,
-ESLint (including required shipped-file `@file` overviews), Stylelint, pinned
-actionlint workflow validation, and jscpd before the project-specific gates in
-`check:core`; any detected clone makes this standard layer fail.
-`check:core` also runs the scoped no-emit TypeScript `checkJs` baseline via
-`npm run typecheck`, Ajv schema validation via `npm run schema:check`, and the
-release/package contract via `npm run package:check`. It verifies `.only`
-rejection through the direct Vitest configuration and every configured project.
-Documentation checks run through `npm run docs:check`, including the markdownlint
-baseline.
+`check:fast` runs the standard static layer, strict `checkJs`, and Node-only unit/tool tests without the full coverage
+gate. `check:standard` runs full-repository Prettier formatting checks (every maintained JS/MJS, CSS, and Markdown file
+plus quality/config files, agent skills, and active execution plans), ESLint (including required shipped-file `@file`
+overviews), Stylelint, pinned actionlint workflow validation, and jscpd before the project-specific gates in
+`check:core`; any detected clone makes this standard layer fail. `check:core` also runs the scoped no-emit TypeScript
+`checkJs` baseline via `npm run typecheck`, Ajv schema validation via `npm run schema:check`, the release/package
+contract via `npm run package:check`, the complexity no-regression budget via `npm run check:complexity`, and the
+deterministic scaling contracts via `npm run check:scaling` (operation-count checks, never timing). It verifies `.only`
+rejection through the direct Vitest configuration and every configured project. Documentation checks run through
+`npm run docs:check`, including the markdownlint baseline.
 
-Optional local pre-commit hooks can run the fast formatting, lint, actionlint,
-and documentation checks before the full local gate.
+Scaling measurements fail closed unless every observed operation count is a non-negative finite integer.
 
-For test-environment work, `npm run test:split` runs the configured projects:
-`unit-node` for pure/tool tests without jsdom, `contract` for VM-based registry
-and bootstrap contracts, and `unit-dom` for jsdom/canvas-backed runtime/widget
-tests. Required local and CI checks do not require Playwright, a downloaded
-browser, or a browser driver; browser-facing behavior is covered by the DOM and
-contract projects.
-Coverage uses Vitest/V8 global and critical-area thresholds, with the legacy
-coverage-summary parser retired after native threshold proof.
+Coverage policy is fail-closed: every shipped JS/MJS file is classified, the captured per-file baseline is hash-locked,
+new measured files start at 80% lines / 65% branches, and only 12 frozen Phase 0 paths retain exact below-default
+values. Complexity checks regenerate the immutable Phase 0 debt capture from its recorded Git commit before requiring
+every active entry to exactly match its current over-limit metric. Test files likewise default to the separate strict
+`checkJs`/ESLint boundary. The hash-locked test-exception capture permits only the 229 existing non-strict paths to
+remain exempt; temporary harness/split-spec debt requires an inventory-owned removal path, and negative fixtures must be
+referenced by their canonical owner test. Pull-request CI checks `github.sha`, which is the proposed merge result for
+the `pull_request` event, rather than testing only the branch head.
 
-The local `check:all` command is the complete quality authority. A tag push
-reruns locked setup and `check:all` in a read-only GitHub job; only after it
-passes does the publisher upload the committed ZIP and matching notes. SemVer
-prerelease tags publish as GitHub prereleases; stable tags publish as normal
-releases. GitHub does not rebuild release artifacts.
+Optional local pre-commit hooks can run the fast formatting, lint, actionlint, and documentation checks before the full
+local gate.
 
-Before release creation, perform the manual AvNav smoke checklist in
-`CONTRIBUTING.md`: load the plugin, inspect representative radial/linear/HTML
-widgets in a bundled layout, switch day/night appearance, and exercise the
-interactive route/AIS controls.
+For test-environment work, `npm run test:split` runs the configured projects: `unit-node` for pure/tool tests without
+jsdom, `contract` for VM-based registry and bootstrap contracts, and `unit-dom` for jsdom/canvas-backed runtime/widget
+tests. Required local and CI checks do not require Playwright, a downloaded browser, or a browser driver; browser-facing
+behavior is covered by the DOM and contract projects. Coverage uses Vitest/V8 global and critical-area thresholds, with
+the legacy coverage-summary parser retired after native threshold proof.
+
+The local `check:all` command is the complete quality authority. A tag push reruns locked setup and `check:all` in a
+read-only GitHub job; only after it passes does the publisher upload the committed ZIP and matching notes. SemVer
+prerelease tags publish as GitHub prereleases; stable tags publish as normal releases. GitHub does not rebuild release
+artifacts.
+
+Before release creation, perform the manual AvNav smoke checklist in `CONTRIBUTING.md`: load the plugin, inspect
+representative radial/linear/HTML widgets in a bundled layout, switch day/night appearance, and exercise the interactive
+route/AIS controls.
 
 ## License
 
-Bundled Roboto and Roboto Mono font assets include Apache 2.0 license text and attribution in [assets/fonts/LICENSE.txt](assets/fonts/LICENSE.txt).
+Bundled Roboto and Roboto Mono font assets include Apache 2.0 license text and attribution in
+[assets/fonts/LICENSE.txt](assets/fonts/LICENSE.txt).

@@ -2,15 +2,26 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const SOURCE_ROOTS = ["cluster", "shared/widget-kits", "widgets"];
+/** @type {Record<string, number>} */
 const CANONICAL_RANK = {
   disconnected: 0,
   noRoute: 1,
   noTarget: 2,
   noAis: 3,
   hidden: 4,
-  data: 5,
+  data: 5
 };
 const AIS_EXCEPTION_KINDS = new Set(["disconnected", "noAis", "data"]);
+
+/**
+ * @typedef {{
+ *   line: number,
+ *   inlineArray: boolean,
+ *   kinds: string[],
+ *   dataWhenTrue: boolean,
+ *   nextIndex: number
+ * }} CallSite
+ */
 
 describe("state screen precedence call-site contract", function () {
   it("keeps repository pickFirst call sites inline and canonical", function () {
@@ -20,20 +31,16 @@ describe("state screen precedence call-site contract", function () {
   it("rejects indirect candidates", function () {
     const findings = validateSource("fixture.js", "return precedence.pickFirst(items);");
 
-    expect(findings).toContain(
-      "fixture.js:1 pickFirst() calls must pass an inline array literal.",
-    );
+    expect(findings).toContain("fixture.js:1 pickFirst() calls must pass an inline array literal.");
   });
 
   it("rejects missing data catch-all candidates", function () {
     const findings = validateSource(
       "fixture.js",
-      "return precedence.pickFirst([{ kind: 'disconnected', when: true }]);",
+      "return precedence.pickFirst([{ kind: 'disconnected', when: true }]);"
     );
 
-    expect(findings).toContain(
-      "fixture.js:1 pickFirst([...]) must include a data catch-all candidate.",
-    );
+    expect(findings).toContain("fixture.js:1 pickFirst([...]) must include a data catch-all candidate.");
   });
 
   it("rejects non-canonical candidate order", function () {
@@ -44,12 +51,12 @@ describe("state screen precedence call-site contract", function () {
         "  { kind: 'noRoute', when: props.routeName === '' },",
         "  { kind: 'disconnected', when: props.disconnect === true },",
         "  { kind: 'data', when: true },",
-        "]);",
-      ].join("\n"),
+        "]);"
+      ].join("\n")
     );
 
     expect(findings).toContain(
-      "fixture.js:1 disconnected must be the first state-screen candidate unless the AIS hidden exception is used.",
+      "fixture.js:1 disconnected must be the first state-screen candidate unless the AIS hidden exception is used."
     );
   });
 
@@ -62,13 +69,11 @@ describe("state screen precedence call-site contract", function () {
         "  { kind: 'disconnected', when: disconnected },",
         "  { kind: 'noRoute', when: missingRoute },",
         "  { kind: 'data', when: true },",
-        "]);",
-      ].join("\n"),
+        "]);"
+      ].join("\n")
     );
 
-    expect(findings).toContain(
-      "fixture.js:1 AIS state-screen order must be hidden > disconnected > noAis > data.",
-    );
+    expect(findings).toContain("fixture.js:1 AIS state-screen order must be hidden > disconnected > noAis > data.");
   });
 });
 
@@ -82,12 +87,14 @@ function scanRepository() {
     });
 }
 
+/** @param {string} rel @param {string} text @returns {string[]} */
 function validateSource(rel, text) {
   return findPickFirstCallSites(text).flatMap(function (callSite) {
     return validateCallSite(rel, callSite);
   });
 }
 
+/** @param {string} rel @param {CallSite} callSite @returns {string[]} */
 function validateCallSite(rel, callSite) {
   const findings = [];
   const prefix = rel + ":" + callSite.line + " ";
@@ -103,6 +110,7 @@ function validateCallSite(rel, callSite) {
   return findings;
 }
 
+/** @param {string} prefix @param {CallSite} callSite @returns {string[]} */
 function validateDataCandidate(prefix, callSite) {
   const findings = [];
   const dataIndex = callSite.kinds.indexOf("data");
@@ -119,17 +127,16 @@ function validateDataCandidate(prefix, callSite) {
   return findings;
 }
 
+/** @param {string} prefix @param {string[]} kinds @returns {string[]} */
 function validateOrder(prefix, kinds) {
   if (kinds[0] === "hidden") return validateAisException(prefix, kinds);
   if (kinds[0] !== "disconnected") {
-    return [
-      prefix +
-        "disconnected must be the first state-screen candidate unless the AIS hidden exception is used.",
-    ];
+    return [prefix + "disconnected must be the first state-screen candidate unless the AIS hidden exception is used."];
   }
   return validateCanonicalOrder(prefix, kinds);
 }
 
+/** @param {string} prefix @param {string[]} kinds @returns {string[]} */
 function validateAisException(prefix, kinds) {
   if (kinds[1] !== "disconnected") {
     return [prefix + "AIS exception requires hidden to be followed immediately by disconnected."];
@@ -144,6 +151,7 @@ function validateAisException(prefix, kinds) {
   return orderFindings;
 }
 
+/** @param {string} prefix @param {string[]} kinds @returns {string[]} */
 function validateCanonicalOrder(prefix, kinds) {
   let previousRank = -1;
   for (const kind of kinds) {
@@ -154,7 +162,7 @@ function validateCanonicalOrder(prefix, kinds) {
     if (rank < previousRank) {
       return [
         prefix +
-          "pickFirst([...]) candidates must follow canonical order disconnected > noRoute > noTarget > noAis > hidden > data.",
+          "pickFirst([...]) candidates must follow canonical order disconnected > noRoute > noTarget > noAis > hidden > data."
       ];
     }
     previousRank = rank;
@@ -162,8 +170,9 @@ function validateCanonicalOrder(prefix, kinds) {
   return [];
 }
 
+/** @param {string} text @returns {CallSite[]} */
 function findPickFirstCallSites(text) {
-  const out = [];
+  const out = /** @type {CallSite[]} */ ([]);
   let index = 0;
   while ((index = text.indexOf("pickFirst", index)) !== -1) {
     const callSite = readPickFirstCallSite(text, index);
@@ -173,12 +182,29 @@ function findPickFirstCallSites(text) {
   return out;
 }
 
+/** @param {string} text @param {number} index @returns {CallSite} */
 function readPickFirstCallSite(text, index) {
   const line = lineFromIndex(text, index);
   let cursor = skipWhitespace(text, index + "pickFirst".length);
-  if (text[cursor] !== "(") return { line, inlineArray: false, nextIndex: cursor };
+  if (text[cursor] !== "(") {
+    return {
+      line,
+      inlineArray: false,
+      kinds: [],
+      dataWhenTrue: false,
+      nextIndex: cursor
+    };
+  }
   cursor = skipWhitespace(text, cursor + 1);
-  if (text[cursor] !== "[") return { line, inlineArray: false, nextIndex: cursor };
+  if (text[cursor] !== "[") {
+    return {
+      line,
+      inlineArray: false,
+      kinds: [],
+      dataWhenTrue: false,
+      nextIndex: cursor
+    };
+  }
 
   const arrayEnd = findMatchingBracket(text, cursor, "[", "]");
   if (arrayEnd === -1) return emptyInlineCall(line, cursor + 1);
@@ -189,28 +215,29 @@ function readPickFirstCallSite(text, index) {
   return {
     line,
     inlineArray: true,
-    kinds: Array.from(arrayText.matchAll(/kind:\s*["']([^"']+)["']/g)).map(
-      function (match) {
-        return match[1];
-      },
-    ),
+    kinds: Array.from(arrayText.matchAll(/kind:\s*["']([^"']+)["']/g)).map(function (match) {
+      return match[1];
+    }),
     dataWhenTrue: /kind:\s*["']data["'][\s\S]*?when:\s*true/.test(arrayText),
-    nextIndex: arrayEnd + 1,
+    nextIndex: arrayEnd + 1
   };
 }
 
+/** @param {number} line @param {number} nextIndex @returns {CallSite} */
 function emptyInlineCall(line, nextIndex) {
   return { line, inlineArray: true, kinds: [], dataWhenTrue: false, nextIndex };
 }
 
+/** @param {string[]} roots @returns {string[]} */
 function collectSourceFiles(roots) {
-  const out = [];
+  const out = /** @type {string[]} */ ([]);
   roots.forEach(function (relRoot) {
     walkJsFiles(path.join(process.cwd(), relRoot), relRoot, out);
   });
   return out.sort();
 }
 
+/** @param {string} absDir @param {string} relDir @param {string[]} out */
 function walkJsFiles(absDir, relDir, out) {
   if (!fs.existsSync(absDir)) return;
   fs.readdirSync(absDir, { withFileTypes: true }).forEach(function (entry) {
@@ -221,6 +248,7 @@ function walkJsFiles(absDir, relDir, out) {
   });
 }
 
+/** @param {string} text @param {number} startIndex @param {string} openChar @param {string} closeChar @returns {number} */
 function findMatchingBracket(text, startIndex, openChar, closeChar) {
   let depth = 0;
   for (let i = startIndex; i < text.length; i += 1) {
@@ -233,12 +261,14 @@ function findMatchingBracket(text, startIndex, openChar, closeChar) {
   return -1;
 }
 
+/** @param {string} text @param {number} index @returns {number} */
 function skipWhitespace(text, index) {
   let i = index;
   while (i < text.length && /\s/.test(text[i])) i += 1;
   return i;
 }
 
+/** @param {string} text @param {number} index @returns {number} */
 function lineFromIndex(text, index) {
   return text.slice(0, index).split(/\r?\n/).length;
 }

@@ -69,8 +69,7 @@ export function runPatternCheck(options = {}) {
       const print = getWarnMode() ? console.log : console.error;
       for (const finding of findings) print(finding.message);
       print("SUMMARY_JSON=" + JSON.stringify(summary));
-    }
-    else {
+    } else {
       console.log("Pattern check passed.");
       console.log("SUMMARY_JSON=" + JSON.stringify(summary));
     }

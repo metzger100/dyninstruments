@@ -1,9 +1,10 @@
+// @ts-nocheck
 const {
   originalDyniPlugin,
   createDeferred,
   createLoaderHarness,
   loadController,
-  createBaseContext,
+  createBaseContext
 } = require("./RouteActivationController.harness.js");
 
 describe("runtime/cluster/RouteActivationController.js", function () {
@@ -12,21 +13,21 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       return {
         rendererProps: {
           marker: props.marker,
-          routeId: routeContext.routeId,
-        },
+          routeId: routeContext.routeId
+        }
       };
     });
     const toolkitCreate = vi.fn(function (props) {
       return {
         fromToolkit: props.marker,
-        snapshot: props,
+        snapshot: props
       };
     });
     const deferredLoads = {
       NavMapper: createDeferred(),
       ActiveRouteViewModel: createDeferred(),
       ActiveRouteTextHtmlWidget: createDeferred(),
-      ClusterMapperToolkit: createDeferred(),
+      ClusterMapperToolkit: createDeferred()
     };
     const loader = createLoaderHarness({
       deferredLoads: deferredLoads,
@@ -34,27 +35,27 @@ describe("runtime/cluster/RouteActivationController.js", function () {
         ClusterMapperToolkit: {
           create: function () {
             return {
-              createToolkit: toolkitCreate,
+              createToolkit: toolkitCreate
             };
-          },
+          }
         },
         NavMapper: {
           create: function () {
             return {
-              translate: mapperTranslate,
+              translate: mapperTranslate
             };
-          },
+          }
         },
         ActiveRouteViewModel: {
           create: function () {
             return {
               build: vi.fn(function (props) {
                 return {
-                  marker: props.marker,
+                  marker: props.marker
                 };
-              }),
+              })
             };
-          },
+          }
         },
         ActiveRouteTextHtmlWidget: {
           create: function () {
@@ -65,19 +66,19 @@ describe("runtime/cluster/RouteActivationController.js", function () {
                   update: vi.fn(),
                   postPatch: vi.fn(() => false),
                   detach: vi.fn(),
-                  destroy: vi.fn(),
+                  destroy: vi.fn()
                 };
-              }),
+              })
             };
-          },
-        },
-      },
+          }
+        }
+      }
     });
     const themeRuntime = {
       preloadShadowCssUrls: vi.fn(function (urls) {
         return Promise.resolve(urls);
       }),
-      hasShadowCssText: vi.fn(() => false),
+      hasShadowCssText: vi.fn(() => false)
     };
     const widgetDef = { cluster: "nav" };
     const context = createBaseContext({
@@ -88,15 +89,15 @@ describe("runtime/cluster/RouteActivationController.js", function () {
           materializeSurfacePolicyProps: vi.fn(function (options) {
             options.props.surfacePolicy = { rendererId: options.rendererId };
             return options.props;
-          }),
-        },
+          })
+        }
       },
       config: {
         shared: {},
         components: {
           ActiveRouteTextHtmlWidget: {
-            shadowCss: ["/css/active-route.css"],
-          },
+            shadowCss: ["/css/active-route.css"]
+          }
         },
         clusterRoutes: {
           byRouteId: {
@@ -108,14 +109,13 @@ describe("runtime/cluster/RouteActivationController.js", function () {
               viewModelId: "ActiveRouteViewModel",
               rendererId: "ActiveRouteTextHtmlWidget",
               surface: "html",
-              shellSizing: { kind: "ratio", aspectRatio: 2 },
-            },
-          },
-        },
-      },
+              shellSizing: { kind: "ratio", aspectRatio: 2 }
+            }
+          }
+        }
+      }
     });
-    const routeMeta =
-      context.DyniPlugin.config.clusterRoutes.byRouteId["nav/activeRoute"];
+    const routeMeta = context.DyniPlugin.config.clusterRoutes.byRouteId["nav/activeRoute"];
     const routeActivation = loadController(context);
     const controller = routeActivation.createWidgetController(widgetDef);
     const firstRouteFrame = {
@@ -123,14 +123,14 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       kind: "activeRoute",
       marker: "first",
       __dyniRouteId: "nav/activeRoute",
-      __dyniRawProps: { cluster: "nav", kind: "activeRoute", marker: "first" },
+      __dyniRawProps: { cluster: "nav", kind: "activeRoute", marker: "first" }
     };
     const secondRouteFrame = {
       cluster: "nav",
       kind: "activeRoute",
       marker: "second",
       __dyniRouteId: "nav/activeRoute",
-      __dyniRawProps: { cluster: "nav", kind: "activeRoute", marker: "second" },
+      __dyniRawProps: { cluster: "nav", kind: "activeRoute", marker: "second" }
     };
 
     const first = controller.activateCommittedRoute({
@@ -138,14 +138,14 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       revision: 1,
       rootEl: { id: "root-a" },
       shellEl: { id: "shell-a" },
-      hostContext: { marker: "a" },
+      hostContext: { marker: "a" }
     });
     const second = controller.activateCommittedRoute({
       routeFrame: secondRouteFrame,
       revision: 2,
       rootEl: { id: "root-b" },
       shellEl: { id: "shell-b" },
-      hostContext: { marker: "b" },
+      hostContext: { marker: "b" }
     });
 
     expect(first).toBe(second);
@@ -159,23 +159,23 @@ describe("runtime/cluster/RouteActivationController.js", function () {
     expect(
       loader.createRecords.every(function (entry) {
         return entry.def === widgetDef;
-      }),
+      })
     ).toBe(true);
     expect(
       loader.createRecords.every(function (entry) {
         return entry.def !== routeMeta;
-      }),
+      })
     ).toBe(true);
     expect(payload.revision).toBe(2);
     expect(payload.rootEl).toEqual({ id: "root-b" });
     expect(payload.shellEl).toEqual({ id: "shell-b" });
     expect(payload.hostContext).toEqual({ marker: "b" });
     expect(payload.rawProps).toMatchObject({
-      marker: "second",
+      marker: "second"
     });
     expect(payload.props).toMatchObject({
       marker: "second",
-      routeId: "nav/activeRoute",
+      routeId: "nav/activeRoute"
     });
 
     const inFlight = controller.activateCommittedRoute({
@@ -183,7 +183,7 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       revision: 3,
       rootEl: { id: "root-c" },
       shellEl: { id: "shell-c" },
-      hostContext: { marker: "c" },
+      hostContext: { marker: "c" }
     });
     controller.destroy();
 
@@ -194,9 +194,8 @@ describe("runtime/cluster/RouteActivationController.js", function () {
         revision: 4,
         rootEl: { id: "root-d" },
         shellEl: { id: "shell-d" },
-        hostContext: { marker: "d" },
+        hostContext: { marker: "d" }
       });
     }).toThrow("RouteActivationError: controller destroyed");
   });
-
 });

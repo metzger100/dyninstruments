@@ -5,7 +5,8 @@ const { pathToFileURL } = require("node:url");
 
 describe("tools/check-patterns atomicity rules", function () {
   const toolPath = path.resolve(__dirname, "../../tools/check-patterns.mjs");
-  const tempDirs = [];
+  const tempDirs = /** @type {string[]} */ ([]);
+  /** @type {any} */
   let runPatternCheck;
 
   beforeAll(async function () {
@@ -15,10 +16,11 @@ describe("tools/check-patterns atomicity rules", function () {
 
   afterEach(function () {
     while (tempDirs.length) {
-      fs.rmSync(tempDirs.pop(), { recursive: true, force: true });
+      fs.rmSync(/** @type {string} */ (tempDirs.pop()), { recursive: true, force: true });
     }
   });
 
+  /** @param {Record<string, string>} files */
   function createWorkspace(files) {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-check-patterns-atomicity-"));
     tempDirs.push(dir);
@@ -31,10 +33,12 @@ describe("tools/check-patterns atomicity rules", function () {
     return dir;
   }
 
+  /** @param {Record<string, string>} files */
   function run(files) {
     return runPatternCheck({ root: createWorkspace(files), warnMode: false, print: false });
   }
 
+  /** @param {any} result @param {string} ruleName */
   function failureCount(result, ruleName) {
     return result.summary.byRuleFailures[ruleName] || 0;
   }
@@ -269,7 +273,7 @@ draw({});
     expect(failureCount(result, "inline-config-default-duplication")).toBe(0);
   });
 
-  it("respects valid suppressions for new atomicity rules", function () {
+  it("rejects generic suppressions for new atomicity rules", function () {
     const result = run({
       "shared/widget-kits/linear/LinearCanvasPrimitives.js": `
 function draw(ctx) {
@@ -280,12 +284,12 @@ draw({ strokeRect() {} });
 `
     });
 
-    expect(result.summary.ok).toBe(true);
-    expect(failureCount(result, "canvas-api-typeof-guard")).toBe(0);
-    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(0);
+    expect(result.summary.ok).toBe(false);
+    expect(failureCount(result, "canvas-api-typeof-guard")).toBe(1);
+    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(1);
   });
 
-  it("respects framework-method suppressions for ThemeResolver bootstrap boundaries", function () {
+  it("rejects framework-method suppressions for ThemeResolver bootstrap boundaries", function () {
     const result = run({
       "shared/theme/ThemeResolver.js": `
 function resolvePresetDefs(Helpers) {
@@ -297,8 +301,8 @@ resolvePresetDefs({ getModule() { return null; } });
 `
     });
 
-    expect(result.summary.ok).toBe(true);
-    expect(failureCount(result, "framework-method-typeof-guard")).toBe(0);
-    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(0);
+    expect(result.summary.ok).toBe(false);
+    expect(failureCount(result, "framework-method-typeof-guard")).toBe(1);
+    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(2);
   });
 });

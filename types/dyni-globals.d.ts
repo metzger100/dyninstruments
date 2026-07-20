@@ -87,6 +87,7 @@ interface DyniPluginSharedConfig {
   buildEnvironmentPerKindEditableParameters?: () => DyniEditableParameters;
   buildEnvironmentThresholdEditableParameters?: () => DyniEditableParameters;
   buildVesselVoltageGaugeParams?: () => DyniEditableParameters;
+  buildDefaultRadialEditableParameters?: () => DyniEditableParameters;
 }
 
 interface DyniXteScaleFieldSpec {
@@ -120,6 +121,7 @@ interface DyniNavClusterSharedConfig extends DyniPluginSharedConfig {
     kindDef?: DyniPerKindTextParameterDescriptor
   ) => DyniEditableParameters;
   opt: (name: unknown, value: unknown) => DyniEditableOption;
+  buildNavRatioThresholdEditableParameters: () => DyniEditableParameters;
 }
 
 interface DyniNavClusterRoot {
@@ -396,6 +398,7 @@ interface DyniMapperToolkit {
   unitText(kind: string, metric: string, token: unknown): unknown;
   formatUnit(kind: string, metric: string): unknown;
   unitNumber(key: string, token: unknown): number | undefined;
+  positiveUnitNumber(key: string, token: unknown, defaultValue: number): number;
   makeAngleFormatter(direction: boolean, leadingZero: boolean, defaultValue: unknown): unknown;
   num(value: unknown): number | undefined;
   out(

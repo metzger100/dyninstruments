@@ -10,6 +10,7 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js").create().cr
   unit_brg: "°"
 });
 
+/** @param {any} kind @param {any} activeToolkit */
 function routeContext(kind, activeToolkit) {
   return makeRouteContext({
     routeId: "courseHeading:" + kind,
@@ -22,16 +23,19 @@ function routeContext(kind, activeToolkit) {
 describe("CourseHeadingMapper", function () {
   it("maps radial heading kinds to CompassRadialWidget", function () {
     const mapper = loadFresh("cluster/mappers/CourseHeadingMapper.js").create();
-    const out = mapper.translate({
-      kind: "hdtRadial",
-      hdt: 123,
-      brg: 230,
-      leadingZero: true,
-      captionUnitScale: "0.8",
-      compassRadialRatioThresholdNormal: "0.8",
-      compassRadialRatioThresholdFlat: "2.2",
-      compassRadialHideTextualMetrics: "yes"
-    }, routeContext("hdtRadial", toolkit));
+    const out = mapper.translate(
+      {
+        kind: "hdtRadial",
+        hdt: 123,
+        brg: 230,
+        leadingZero: true,
+        captionUnitScale: "0.8",
+        compassRadialRatioThresholdNormal: "0.8",
+        compassRadialRatioThresholdFlat: "2.2",
+        compassRadialHideTextualMetrics: "yes"
+      },
+      routeContext("hdtRadial", toolkit)
+    );
 
     expect(out).not.toHaveProperty("renderer");
     expect(out.heading).toBe(123);
@@ -55,20 +59,23 @@ describe("CourseHeadingMapper", function () {
 
   it("maps linear heading kinds to CompassLinearWidget", function () {
     const mapper = loadFresh("cluster/mappers/CourseHeadingMapper.js").create();
-    const out = mapper.translate({
-      kind: "hdtLinear",
-      hdt: 311,
-      brg: 12,
-      leadingZero: true,
-      captionUnitScale: "0.75",
-      compassLinearRatioThresholdNormal: "1.1",
-      compassLinearRatioThresholdFlat: "3.5",
-      compassLinearTickMajor: "30",
-      compassLinearTickMinor: "10",
-      compassLinearShowEndLabels: false,
-      compassLinearRange: "180",
-      compassLinearHideTextualMetrics: 0
-    }, routeContext("hdtLinear", toolkit));
+    const out = mapper.translate(
+      {
+        kind: "hdtLinear",
+        hdt: 311,
+        brg: 12,
+        leadingZero: true,
+        captionUnitScale: "0.75",
+        compassLinearRatioThresholdNormal: "1.1",
+        compassLinearRatioThresholdFlat: "3.5",
+        compassLinearTickMajor: "30",
+        compassLinearTickMinor: "10",
+        compassLinearShowEndLabels: false,
+        compassLinearRange: "180",
+        compassLinearHideTextualMetrics: 0
+      },
+      routeContext("hdtLinear", toolkit)
+    );
 
     expect(out).not.toHaveProperty("renderer");
     expect(out.heading).toBe(311);

@@ -373,6 +373,24 @@ interface DyniSemicircleLabels {
   fontPx: number;
 }
 
+interface DyniRadialMajorValueLabelsOptions {
+  ctx: CanvasRenderingContext2D;
+  family: unknown;
+  geom: DyniSemicircleGeom;
+  labels: DyniSemicircleLabels;
+  minV: number;
+  maxV: number;
+  majorStep: unknown;
+  arc: DyniArc;
+  showEndLabels: unknown;
+  labelWeight: unknown;
+}
+
+interface DyniRadialMajorValueLabelsApi {
+  id: "RadialMajorValueLabels";
+  drawMajorValueLabels(options: DyniRadialMajorValueLabelsOptions): void;
+}
+
 interface DyniSemicircleNormal {
   extra: number;
   innerMargin: number;
@@ -452,6 +470,98 @@ interface DyniFullCircleModeOptions {
   slot?: unknown;
   leftAlign?: unknown;
   rightAlign?: unknown;
+}
+
+interface DyniFullCircleNormalConfig {
+  innerMarginFactor: number;
+  minHeightFactor: number;
+  dualGapFactor: number;
+}
+
+interface DyniFullCircleSingleCandidate {
+  blockHeight: number;
+  boxWidth: number;
+  score: number;
+  sizes: DyniBlockSizes;
+}
+
+interface DyniFullCircleDualCandidate {
+  blockHeight: number;
+  halfWidth: number;
+  score: number;
+  leftSizes: DyniBlockSizes;
+  rightSizes: DyniBlockSizes;
+}
+
+interface DyniFullCircleRadialMeasureApi {
+  id: "FullCircleRadialMeasure";
+  resolveSecondaryScale(value: unknown): number;
+  growSize(currentSize: unknown, ceilingSize: unknown, textFillScale: unknown): number;
+  normalConfig(state: DyniFullCircleRenderState): DyniFullCircleNormalConfig;
+  boostValueUnitFit(
+    state: DyniFullCircleRenderState,
+    fit: DyniValueUnitFitResult | null,
+    unitText: unknown,
+    boxHeight: unknown
+  ): DyniValueUnitFitResult;
+  boostInlineFit(
+    state: DyniFullCircleRenderState,
+    fit: DyniInlineCapValUnitFitResult | null,
+    caption: unknown,
+    unitText: unknown,
+    boxHeight: unknown
+  ): DyniInlineCapValUnitFitResult;
+  measureBlockSizes(
+    state: DyniFullCircleRenderState,
+    display: DyniFullCircleDisplay,
+    boxWidth: unknown,
+    blockHeight: unknown
+  ): DyniBlockSizes;
+  mergeBlockSizes(leftSizes: DyniBlockSizes, rightSizes: DyniBlockSizes): DyniBlockSizes;
+  scoreSingleCandidate(
+    display: DyniFullCircleDisplay,
+    sizes: DyniBlockSizes,
+    boxWidth: number,
+    blockHeight: number
+  ): number;
+  scoreDualCandidate(
+    leftDisplay: DyniFullCircleDisplay,
+    rightDisplay: DyniFullCircleDisplay,
+    leftSizes: DyniBlockSizes,
+    rightSizes: DyniBlockSizes,
+    halfWidth: number,
+    blockHeight: number
+  ): number;
+  selectSingleCandidate(
+    state: DyniFullCircleRenderState,
+    display: DyniFullCircleDisplay,
+    effectiveRadius: number,
+    minHeightFactor: number
+  ): DyniFullCircleSingleCandidate | null;
+  selectDualCandidate(
+    state: DyniFullCircleRenderState,
+    left: DyniFullCircleDisplay,
+    right: DyniFullCircleDisplay,
+    effectiveRadius: number,
+    columnGap: number,
+    minHeightFactor: number
+  ): DyniFullCircleDualCandidate | null;
+}
+
+interface DyniFullCircleRadialDrawingApi {
+  id: "FullCircleRadialDrawing";
+  drawSingleFlat(
+    state: DyniFullCircleRenderState,
+    display: DyniFullCircleDisplay,
+    opts?: DyniFullCircleModeOptions
+  ): void;
+  drawSingleHigh(
+    state: DyniFullCircleRenderState,
+    display: DyniFullCircleDisplay,
+    opts?: DyniFullCircleModeOptions
+  ): void;
+  drawSingleNormal(state: DyniFullCircleRenderState, display: DyniFullCircleDisplay): void;
+  drawDualNormal(state: DyniFullCircleRenderState, left: DyniFullCircleDisplay, right: DyniFullCircleDisplay): void;
 }
 
 interface DyniFullCircleRadialTextLayoutApi {
@@ -660,9 +770,12 @@ interface DyniComponentRequire {
   (id: "RadialValueMath"): DyniRadialValueMathApi;
   (id: "CanvasLayerCache"): DyniCanvasLayerCacheApi;
   (id: "FullCircleRadialLayout"): DyniFullCircleRadialLayoutApi;
+  (id: "FullCircleRadialMeasure"): DyniFullCircleRadialMeasureApi;
+  (id: "FullCircleRadialDrawing"): DyniFullCircleRadialDrawingApi;
   (id: "FullCircleRadialTextLayout"): DyniFullCircleRadialTextLayoutApi;
   (id: "FullCircleRadialEngine"): DyniFullCircleRadialEngineApi;
   (id: "SemicircleRadialLayout"): DyniSemicircleRadialLayoutApi;
   (id: "SemicircleRadialTextLayout"): DyniSemicircleRadialTextLayoutApi;
+  (id: "RadialMajorValueLabels"): DyniRadialMajorValueLabelsApi;
   (id: "SemicircleRadialEngine"): DyniSemicircleRadialEngineApi;
 }

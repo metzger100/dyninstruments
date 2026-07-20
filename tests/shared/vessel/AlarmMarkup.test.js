@@ -16,37 +16,46 @@ describe("AlarmMarkup", function () {
     return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js").create();
   }
 
+  /** @param {any} html */
   function parseHtml(html) {
     const host = document.createElement("div");
     host.innerHTML = html;
     return host;
   }
 
+  /** @param {any} [overrides] */
   function makeModel(overrides) {
-    return Object.assign({
-      state: "active",
-      interactionState: "dispatch",
-      showStrip: true,
-      showActiveBackground: true,
-      captionText: "ALARM",
-      valueText: "ENGINE, FIRE",
-      idleValueText: "NONE",
-      activeValueText: "ENGINE, FIRE",
-      alarmText: "ENGINE, FIRE"
-    }, overrides || {});
+    return Object.assign(
+      {
+        state: "active",
+        interactionState: "dispatch",
+        showStrip: true,
+        showActiveBackground: true,
+        captionText: "ALARM",
+        valueText: "ENGINE, FIRE",
+        idleValueText: "NONE",
+        activeValueText: "ENGINE, FIRE",
+        alarmText: "ENGINE, FIRE"
+      },
+      overrides || {}
+    );
   }
 
+  /** @param {any} [overrides] */
   function makeFit(overrides) {
-    return Object.assign({
-      mode: "high",
-      captionStyle: "font-size:10px;",
-      valueStyle: "font-size:14px;",
-      shellStyle: "padding:2px 2px 2px 21px;",
-      accentStyle: "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#2e9e6b;",
-      activeBackgroundStyle: "",
-      activeForegroundStyle: "",
-      idleStripStyle: "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#2e9e6b;"
-    }, overrides || {});
+    return Object.assign(
+      {
+        mode: "high",
+        captionStyle: "font-size:10px;",
+        valueStyle: "font-size:14px;",
+        shellStyle: "padding:2px 2px 2px 21px;",
+        accentStyle: "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#2e9e6b;",
+        activeBackgroundStyle: "",
+        activeForegroundStyle: "",
+        idleStripStyle: "left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#2e9e6b;"
+      },
+      overrides || {}
+    );
   }
 
   it("renders high mode with caption above value inside the main content wrapper", function () {
@@ -60,10 +69,12 @@ describe("AlarmMarkup", function () {
       }),
       htmlUtils: createHtmlUtils()
     });
-    const root = parseHtml(html).querySelector(".dyni-alarm-html");
+    const root = /** @type {Element} */ (parseHtml(html).querySelector(".dyni-alarm-html"));
 
     expect(html).toContain('style="padding:2px 2px 2px 21px;background-color:#d9534a;color:#ffffff;"');
-    expect(html).toContain('class="dyni-alarm-state-accent" style="left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#2e9e6b;"');
+    expect(html).toContain(
+      'class="dyni-alarm-state-accent" style="left:2px;top:2px;bottom:2px;width:16px;border-radius:16px;background-color:#2e9e6b;"'
+    );
     expect(html).not.toContain("dyni-alarm-shell");
     expect(root.children).toHaveLength(3);
     expect(root.children[0].className).toContain("dyni-alarm-state-accent");
@@ -86,7 +97,7 @@ describe("AlarmMarkup", function () {
       fit: makeFit({ mode: "normal", shellStyle: "padding:2px;" }),
       htmlUtils: createHtmlUtils()
     });
-    const root = parseHtml(html).querySelector(".dyni-alarm-html");
+    const root = /** @type {Element} */ (parseHtml(html).querySelector(".dyni-alarm-html"));
 
     expect(html).toContain('style="padding:2px;"');
     expect(root.children).toHaveLength(1);
@@ -107,7 +118,7 @@ describe("AlarmMarkup", function () {
       fit: makeFit({ mode: "flat", shellStyle: "padding:2px;" }),
       htmlUtils: createHtmlUtils()
     });
-    const root = parseHtml(html).querySelector(".dyni-alarm-html");
+    const root = /** @type {Element} */ (parseHtml(html).querySelector(".dyni-alarm-html"));
 
     expect(root.children).toHaveLength(1);
     expect(root.children[0].className).toContain("dyni-alarm-main");
@@ -130,8 +141,8 @@ describe("AlarmMarkup", function () {
       fit: makeFit(),
       htmlUtils: createHtmlUtils()
     });
-    const rootDispatch = parseHtml(htmlDispatch).querySelector(".dyni-alarm-html");
-    const rootPassive = parseHtml(htmlPassive).querySelector(".dyni-alarm-html");
+    const rootDispatch = /** @type {Element} */ (parseHtml(htmlDispatch).querySelector(".dyni-alarm-html"));
+    const rootPassive = /** @type {Element} */ (parseHtml(htmlPassive).querySelector(".dyni-alarm-html"));
 
     expect(htmlDispatch).not.toContain("dyni-alarm-strip");
     expect(htmlDispatch).not.toContain("dyni-alarm-hotspot");

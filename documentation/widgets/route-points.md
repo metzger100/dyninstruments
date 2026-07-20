@@ -10,7 +10,8 @@ RoutePointsTextHtmlWidget is the committed HTML renderer for nav route points.
 - committed DOM owner: mount/update/postPatch/detach/destroy
 - interaction callbacks: surfacePolicy.actions.routePoints.activate({ index, pointSnapshot })
 - host parity bridge: TemporaryHostActionBridge runtime boundary
-- Mapper payloads split formatter tokens from display labels: `formatUnits.distance` feeds the distance formatter and `units.distance` remains display-only while `courseUnit` stays in `formatting`.
+- Mapper payloads split formatter tokens from display labels: `formatUnits.distance` feeds the distance formatter and
+  `units.distance` remains display-only while `courseUnit` stays in `formatting`.
 
 ## State Screens
 
@@ -20,8 +21,10 @@ RoutePointsTextHtmlWidget is the committed HTML renderer for nav route points.
 
 ## Placeholder Contract
 
-- Per-field formatter fallback values are normalized through `PlaceholderNormalize`; missing per-field text renders as `---`.
-- Missing-leg compound placeholders remain an explicit carve-out and keep the route-segment form (`"--°/--nm"` and equivalent unit combinations).
+- Per-field formatter fallback values are normalized through `PlaceholderNormalize`; missing per-field text renders as
+  `---`.
+- Missing-leg compound placeholders remain an explicit carve-out and keep the route-segment form (`"--°/--nm"` and
+  equivalent unit combinations).
 
 ## Interaction Contract
 
@@ -33,9 +36,11 @@ RoutePointsTextHtmlWidget is the committed HTML renderer for nav route points.
 
 RoutePoints is the only width-derived natural-height widget.
 
-- route metadata `shellSizing.kind === "natural"` emits no inline height or aspect-ratio and reserves no cold-load height
+- route metadata `shellSizing.kind === "natural"` emits no inline height or aspect-ratio and reserves no cold-load
+  height
 - committed renderer shadow CSS owns the final natural height after activation in vertical mode
-- viewport cap remains widget-owned (60vh policy) and applies only in vertical orientation (`data-dyni-orientation="vertical"`)
+- viewport cap remains widget-owned (60vh policy) and applies only in vertical orientation
+  (`data-dyni-orientation="vertical"`)
 
 ## widgetContainer.vertical Behavior
 

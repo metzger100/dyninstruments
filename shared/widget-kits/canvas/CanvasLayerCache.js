@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniCanvasLayerCache = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -70,7 +70,11 @@
       const canvasEl = /** @type {HTMLCanvasElement | null | undefined} */ (canvas);
       let W = Number(canvasEl && canvasEl.clientWidth);
       let H = Number(canvasEl && canvasEl.clientHeight);
-      if ((!Number.isFinite(W) || W <= 0 || !Number.isFinite(H) || H <= 0) && canvasEl && typeof canvasEl.getBoundingClientRect === "function") {
+      if (
+        (!Number.isFinite(W) || W <= 0 || !Number.isFinite(H) || H <= 0) &&
+        canvasEl &&
+        typeof canvasEl.getBoundingClientRect === "function"
+      ) {
         const rect = canvasEl.getBoundingClientRect();
         W = Number(rect && rect.width);
         H = Number(rect && rect.height);
@@ -117,8 +121,12 @@
         for (let i = 0; i < layerNames.length; i++) {
           const layerName = layerNames[i];
           const existing = layers[layerName];
-          const needsRecreate = !existing || !existing.canvas || !existing.ctx ||
-            existing.canvas.width !== nextBufferW || existing.canvas.height !== nextBufferH;
+          const needsRecreate =
+            !existing ||
+            !existing.canvas ||
+            !existing.ctx ||
+            existing.canvas.width !== nextBufferW ||
+            existing.canvas.height !== nextBufferH;
           if (needsRecreate) {
             layers[layerName] = createLayer(canvasEl, nextBufferW, nextBufferH);
           }
@@ -187,4 +195,4 @@
   }
 
   return { id: "CanvasLayerCache", create: create };
-}));
+});

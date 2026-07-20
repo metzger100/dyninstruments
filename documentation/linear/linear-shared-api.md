@@ -1,6 +1,7 @@
 # Linear Shared API
 
-**Status:** ✅ Implemented | `LinearGaugeEngine` contracts for range/centered180/fixed360 wrappers, including hook extensions used by Wind/Compass linear widgets and the hide-textual-metrics graphics-only layout
+**Status:** ✅ Implemented | `LinearGaugeEngine` contracts for range/centered180/fixed360 wrappers, including hook
+extensions used by Wind/Compass linear widgets and the hide-textual-metrics graphics-only layout
 
 ## Overview
 
@@ -12,8 +13,8 @@ Linear instruments use a shared engine pipeline:
 - `shared/widget-kits/linear/LinearGaugeTextLayout.js`
 - `shared/widget-kits/linear/LinearGaugeEngine.js`
 
-New linear widgets should delegate rendering to `LinearGaugeEngine.createRenderer(spec)`.
-`GeometryScale` turns the linear primary dimension (`min(trackBox.w, trackBox.h)`) into graphical pixels.
+New linear widgets should delegate rendering to `LinearGaugeEngine.createRenderer(spec)`. `GeometryScale` turns the
+linear primary dimension (`min(trackBox.w, trackBox.h)`) into graphical pixels.
 
 ## Components
 
@@ -43,19 +44,27 @@ New linear widgets should delegate rendering to `LinearGaugeEngine.createRendere
 Ownership:
 
 - `ResponsiveScaleProfile` owns the shared `minDim -> textFillScale` curve.
-- `LinearGaugeLayout` owns linear-family ratio mode selection, insets/gaps, track/text rectangles, row splitting, and the family primary dimension.
-- `GeometryScale` converts the linear primary dimension into track, tick, and pointer pixels from the layout-owned factors.
-- `hideTextualMetrics` is a layout-owned switch. When true, `computeLayout(...)` removes the live caption/value/unit text boxes and returns reclaimed graphics-only geometry for `flat`, `normal`, and `high`.
-- Optional `layoutConfig` lets wrappers remap `normal` / `high` geometry without reimplementing the shared gauge pipeline.
-- `LinearGaugeEngine` and `LinearGaugeTextLayout` are consumers of that layout state; they do not own a second compact curve.
+- `LinearGaugeLayout` owns linear-family ratio mode selection, insets/gaps, track/text rectangles, row splitting, and
+  the family primary dimension.
+- `GeometryScale` converts the linear primary dimension into track, tick, and pointer pixels from the layout-owned
+  factors.
+- `hideTextualMetrics` is a layout-owned switch. When true, `computeLayout(...)` removes the live caption/value/unit
+  text boxes and returns reclaimed graphics-only geometry for `flat`, `normal`, and `high`.
+- Optional `layoutConfig` lets wrappers remap `normal` / `high` geometry without reimplementing the shared gauge
+  pipeline.
+- `LinearGaugeEngine` and `LinearGaugeTextLayout` are consumers of that layout state; they do not own a second compact
+  curve.
 - `compactGeometryScale` only affects text/layout spacing and fitted text ceilings, not graphical geometry.
 
 ## Responsive Ownership Contract
 
 - `ResponsiveScaleProfile` owns the shared `minDim -> t -> textFillScale` compaction contract.
-- `LinearGaugeLayout` maps that contract into linear-family insets, track/text rectangles, marker sizing inputs, geometry scalars, and the dual-column gap values consumed by `WindLinearWidget`.
-- `LinearGaugeEngine`, `LinearGaugeTextLayout`, and wrapper hooks consume layout-owned `responsive`, `textFillScale`, `compactGeometryScale`, and `layout` spacing state.
-- Wrapper modules stay thin: do not import `ResponsiveScaleProfile` directly and do not add user-visible responsive `Math.max(...)` / `clamp(...)` floors in wrapper code.
+- `LinearGaugeLayout` maps that contract into linear-family insets, track/text rectangles, marker sizing inputs,
+  geometry scalars, and the dual-column gap values consumed by `WindLinearWidget`.
+- `LinearGaugeEngine`, `LinearGaugeTextLayout`, and wrapper hooks consume layout-owned `responsive`, `textFillScale`,
+  `compactGeometryScale`, and `layout` spacing state.
+- Wrapper modules stay thin: do not import `ResponsiveScaleProfile` directly and do not add user-visible responsive
+  `Math.max(...)` / `clamp(...)` floors in wrapper code.
 
 ### LinearGaugeTextLayout
 
@@ -83,15 +92,18 @@ Common `spec` fields:
 - `tickProps`: `{ major, minor, showEndLabels }`
 - `ratioProps`: `{ normal, flat }` for config-owned editable threshold bindings
 - `hideTextualMetricsProp`: optional prop name for the graphics-only text toggle
-- `ratioDefaults`: optional `{ normal, flat }` engine-level safety fallback; config-backed plugin wrappers should omit it
+- `ratioDefaults`: optional `{ normal, flat }` engine-level safety fallback; config-backed plugin wrappers should omit
+  it
 - `labelEdgePolicy`: optional `"inset" | "sliding"` label placement mode; compass wrappers use `"sliding"`
 - `tickSteps(range)`
 - `formatDisplay(raw, props, unit, Helpers) -> { num, text }`
 - `buildSectors(props, minV, maxV, axis, valueApi, theme) -> [{ from, to, color }]`
 - `buildStaticKey(state, props)`
 - `resolveAxis(props, range, defaultAxis, api) -> { min, max }` (optional)
-- `springTarget`: `"pointer" | "axis"` (optional; compass wrappers use `"axis"` when the scale should ease around a fixed center pointer)
-- `springWrap`: numeric wrap span for `SpringEasing.createMotion()` when the spring should take the shortest wrapped arc (optional; compass wrappers use `360`)
+- `springTarget`: `"pointer" | "axis"` (optional; compass wrappers use `"axis"` when the scale should ease around a
+  fixed center pointer)
+- `springWrap`: numeric wrap span for `SpringEasing.createMotion()` when the spring should take the shortest wrapped arc
+  (optional; compass wrappers use `360`)
 - `buildTicks(axis, tickMajor, tickMinor, props, api) -> { major, minor }` (optional)
 - `formatTickLabel(value, state, props, api) -> string` (optional)
 - `drawFrame(state, props, display, api)` (optional)
@@ -103,9 +115,11 @@ Hook `api` surface:
 - `mapValueToX(value, axisOverride?, doClamp?)`
 - `primitives`, `math`, `textLayout`, `text`, `value`, `theme`
 - `drawDefaultPointer(opts)`, `drawPointerAtValue(value, opts)`, `drawMarkerAtValue(value, opts)` (frame hooks)
-- `drawMarkerAtValue(value, opts)` uses layout-based defaults when `opts.len`/`opts.lineWidth` are omitted, keeps the marker at or below the scale line, and renders it with flat rectangular ends.
+- `drawMarkerAtValue(value, opts)` uses layout-based defaults when `opts.len`/`opts.lineWidth` are omitted, keeps the
+  marker at or below the scale line, and renders it with flat rectangular ends.
 
-The public UI label for `hideTextualMetricsProp` is `Hide textual metrics`. The default is `false`, and shipped linear wrappers apply it to Speed, Depth, Temperature, Voltage, Compass, Wind, and Default linear gauges.
+The public UI label for `hideTextualMetricsProp` is `Hide textual metrics`. The default is `false`, and shipped linear
+wrappers apply it to Speed, Depth, Temperature, Voltage, Compass, Wind, and Default linear gauges.
 
 Hook `state` additions:
 
@@ -115,27 +129,33 @@ Hook `state` additions:
 - `state.textFillScale`
 - `state.layout.responsive`
 
-Wrappers should consume these layout-owned state fields instead of recomputing compact geometry locally.
-`state.canvas` and `state.nowMs` let wrappers keep canvas-keyed spring motion aligned with the engine's per-frame timestamp.
-`WindLinearWidget` now reads `state.layout.dualRowGap`, uses `spec.layout` to remap `normal` / `high`, and consumes split-high `state.layout.textTopBox` / `state.layout.textBottomBox` for inline top and bottom metric rows while `LinearGaugeTextLayout` trusts the layout-owned `labelFontPx` without adding a second readable-floor policy.
-`LinearGaugeTextLayout` also resolves a shared fitted label font for the full major-label set, using the layout-owned `labelFontPx` as the ceiling and shrinking in compact graphics-only cases before drawing.
-When `hideTextualMetrics` is enabled, those Wind-specific text target boxes are null, so the custom angle/speed text disappears with the rest of the live metric text.
+Wrappers should consume these layout-owned state fields instead of recomputing compact geometry locally. `state.canvas`
+and `state.nowMs` let wrappers keep canvas-keyed spring motion aligned with the engine's per-frame timestamp.
+`WindLinearWidget` now reads `state.layout.dualRowGap`, uses `spec.layout` to remap `normal` / `high`, and consumes
+split-high `state.layout.textTopBox` / `state.layout.textBottomBox` for inline top and bottom metric rows while
+`LinearGaugeTextLayout` trusts the layout-owned `labelFontPx` without adding a second readable-floor policy.
+`LinearGaugeTextLayout` also resolves a shared fitted label font for the full major-label set, using the layout-owned
+`labelFontPx` as the ceiling and shrinking in compact graphics-only cases before drawing. When `hideTextualMetrics` is
+enabled, those Wind-specific text target boxes are null, so the custom angle/speed text disappears with the rest of the
+live metric text.
 
 ### Axis Profile Matrix
 
-| Field | `range` | `centered180` | `fixed360` |
-|---|---|---|---|
-| `axisMode` | Required | Required | Required |
-| `rangeDefaults` | Optional fallback domain when live bounds are absent | Ignored by axis resolver | Ignored by axis resolver |
-| `rangeProps` | Used for live domain overrides | Ignored by axis resolver | Ignored by axis resolver |
-| `buildSectors` bounds | Usually `min..max` from config | Fixed `-180..180` | Fixed `0..360` |
-| Typical kinds | Speed/Depth/Temp/Voltage linear | Wind-angle linear | Compass/heading linear |
+| Field                 | `range`                                              | `centered180`            | `fixed360`               |
+| --------------------- | ---------------------------------------------------- | ------------------------ | ------------------------ |
+| `axisMode`            | Required                                             | Required                 | Required                 |
+| `rangeDefaults`       | Optional fallback domain when live bounds are absent | Ignored by axis resolver | Ignored by axis resolver |
+| `rangeProps`          | Used for live domain overrides                       | Ignored by axis resolver | Ignored by axis resolver |
+| `buildSectors` bounds | Usually `min..max` from config                       | Fixed `-180..180`        | Fixed `0..360`           |
+| Typical kinds         | Speed/Depth/Temp/Voltage linear                      | Wind-angle linear        | Compass/heading linear   |
 
 ## Profile Templates
 
 ### Range Profile (Speed/Depth/Temp/Voltage)
 
-Config-backed wrappers should pass `rangeProps` and `ratioProps` only and rely on the editable/default pipeline to populate those props. `rangeDefaults` and `ratioDefaults` remain available only as the engine's last-resort fallbacks for non-config consumers.
+Config-backed wrappers should pass `rangeProps` and `ratioProps` only and rely on the editable/default pipeline to
+populate those props. `rangeDefaults` and `ratioDefaults` remain available only as the engine's last-resort fallbacks
+for non-config consumers.
 
 ```javascript
 const renderCanvas = engine.createRenderer({
@@ -206,19 +226,31 @@ const renderCanvas = engine.createRenderer({
 
 ## Runtime Behavior
 
-- Static cached layers: `back` (track + sectors) and `front` (ticks + labels), composited via `CanvasLayerCache.blitLayer()`.
+- Static cached layers: `back` (track + sectors) and `front` (ticks + labels), composited via
+  `CanvasLayerCache.blitLayer()`.
 - Dynamic per frame: pointer plus caption/value/unit text when textual metrics are shown.
-- Z-order matches the full-circle dial: `back` → live pointer/marker (`drawFrame`) → `front` → text. The pointer sits over the track/sectors but behind ticks and labels.
-- `LinearGaugeLayout` reserves symmetric pointer edge clearance (`POINTER_EDGE_CLEARANCE_FACTOR`) between the value scale ends (`scaleX0`/`scaleX1`) and the content edges so the pointer at the extreme values does not clip the left/right border with default pointer width; wider user-configured pointers may clip.
-- `disconnect === true` short-circuits normal drawing and renders the shared canvas state-screen (`GPS Lost`) on a cleared canvas.
+- Z-order matches the full-circle dial: `back` → live pointer/marker (`drawFrame`) → `front` → text. The pointer sits
+  over the track/sectors but behind ticks and labels.
+- `LinearGaugeLayout` reserves symmetric pointer edge clearance (`POINTER_EDGE_CLEARANCE_FACTOR`) between the value
+  scale ends (`scaleX0`/`scaleX1`) and the content edges so the pointer at the extreme values does not clip the
+  left/right border with default pointer width; wider user-configured pointers may clip.
+- `disconnect === true` short-circuits normal drawing and renders the shared canvas state-screen (`GPS Lost`) on a
+  cleared canvas.
 - Cache key excludes live values and includes geometry/theme/tick/sector signatures.
 - `showEndLabels` defaults to false unless mapper sets it true.
-- `drawTickLabels()` keeps the full major-label set visible after fitting, including graphics-only layouts that need a smaller shared font to stay inside the scale bounds.
-- `drawTickLabels()` uses the shared `labelEdgePolicy`: the default inset mode edge-protects static labels, while sliding mode keeps compass labels centered on their natural moving positions and clips the label row instead of pushing edge labels inward.
-- Compact tiles now get smaller insets/gaps from `LinearGaugeLayout`, slimmer default track/pointer/marker geometry, and larger fitted text ceilings via `state.textFillScale`.
-- Default row rendering still uses `display.rowBoxes.captionBox` / `valueBox` for stacked layouts and `state.layout.inlineBox` for inline layouts.
-- Split-high layouts expose `display.rowBoxes.top` and `display.rowBoxes.bottom`, each pre-split into caption/value boxes using the shared `captionUnitScale` logic.
-- When `hideTextualMetrics` is true, the engine keeps tick labels, end labels, scale labels, pointers, sectors, and state screens visible while omitting the live caption/value/unit text.
+- `drawTickLabels()` keeps the full major-label set visible after fitting, including graphics-only layouts that need a
+  smaller shared font to stay inside the scale bounds.
+- `drawTickLabels()` uses the shared `labelEdgePolicy`: the default inset mode edge-protects static labels, while
+  sliding mode keeps compass labels centered on their natural moving positions and clips the label row instead of
+  pushing edge labels inward.
+- Compact tiles now get smaller insets/gaps from `LinearGaugeLayout`, slimmer default track/pointer/marker geometry, and
+  larger fitted text ceilings via `state.textFillScale`.
+- Default row rendering still uses `display.rowBoxes.captionBox` / `valueBox` for stacked layouts and
+  `state.layout.inlineBox` for inline layouts.
+- Split-high layouts expose `display.rowBoxes.top` and `display.rowBoxes.bottom`, each pre-split into caption/value
+  boxes using the shared `captionUnitScale` logic.
+- When `hideTextualMetrics` is true, the engine keeps tick labels, end labels, scale labels, pointers, sectors, and
+  state screens visible while omitting the live caption/value/unit text.
 - In `flat`, the gauge uses the full width and centers vertically.
 - In `normal`, the inline text band is removed and the gauge grows into the reclaimed height.
 - In `high`, stacked or split text bands are removed and the gauge centers without dead strips.
@@ -235,10 +267,12 @@ Reads `componentContext.theme.tokens.resolveForRoot(rootEl)`:
 - `tokens.colors.pointer`, `tokens.colors.warning`, `tokens.colors.alarm`
 
 Default linear pointer and marker sizing stays geometry-driven:
+
 - base pointer/marker size is derived from `primaryDim = min(layout.trackBox.w, layout.trackBox.h)`
 - pointer depth uses `tokens.pointerDepthWeight` with `tokens.linear.pointer.depthFactor`
 - pointer side uses `tokens.pointerSideWeight` with `tokens.linear.pointer.sideFactor`
-- default marker length is `floor(markerSizeBase * 0.45)` and default marker line width is `floor(markerSizeBase * 0.2)` when explicit overrides are absent
+- default marker length is `floor(markerSizeBase * 0.45)` and default marker line width is `floor(markerSizeBase * 0.2)`
+  when explicit overrides are absent
 - compact tiles reduce text/layout spacing via the shared compact profile instead of fixed pixel floors
 
 ## Testing Contract for New Linear Wrappers

@@ -1,6 +1,7 @@
 # Linear Gauge Style Guide
 
-**Status:** ✅ Implemented | Speed/Depth/Temperature/Voltage/Wind/Compass linear wrappers shipped, profile contracts documented for range/centered180/fixed360 kinds
+**Status:** ✅ Implemented | Speed/Depth/Temperature/Voltage/Wind/Compass linear wrappers shipped, profile contracts
+documented for range/centered180/fixed360 kinds
 
 ## Overview
 
@@ -15,44 +16,62 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - `normal` mode uses boosted tick labels and a taller inline text band for readability.
 - A linear wrapper should provide only profile-specific formatting, ticks, axis choice, and sectors.
 - Shared theme tokens come from `tokens.linear.*` and `tokens.colors.*`.
-- Resolve the immutable token snapshot once per render via `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
+- Resolve the immutable token snapshot once per render via
+  `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
 - Compass linear (`hdtLinear`, `hdmLinear`) keeps the pointer fixed at center and scrolls the `0..360` scale under it.
 - Compass linear supports waypoint marker display (`markerCourse`) relative to current heading.
-- Compass linear uses `springTarget: "axis"` and `springWrap: 360` so the scale eases around a fixed center pointer on the shortest wrapped arc, and `compassLinearRange` selects a 360° or 180° visible window.
-- Compass linear sets `labelEdgePolicy: "sliding"` so tick labels behave like a moving tape: they stay centered on their natural positions, clip at the viewport, and do not force the row to shrink when edge labels drift in or out.
-- Wind linear (`angleTrueLinear`, `angleApparentLinear`) renders angle+speed together and supports mirrored layline sectors.
-- Wind linear overrides the generic `normal` / `high` text geometry: `normal` uses the stacked dual block below the gauge, and `high` uses inline top metric + middle gauge + inline bottom metric.
-- `hideTextualMetrics` is the public `Hide textual metrics` toggle, defaults to `false`, and applies to Speed, Depth, Temperature, Voltage, Compass, Wind, and Default linear gauges.
-- When `hideTextualMetrics` is enabled, linear gauges keep tick labels, end labels, scale labels, pointers, sectors, and state screens visible while removing the live caption/value/unit text.
-- Migrated linear gauges resolve formatter tokens separately from display labels; the token selects conversion and the display label stays editable per token.
+- Compass linear uses `springTarget: "axis"` and `springWrap: 360` so the scale eases around a fixed center pointer on
+  the shortest wrapped arc, and `compassLinearRange` selects a 360° or 180° visible window.
+- Compass linear sets `labelEdgePolicy: "sliding"` so tick labels behave like a moving tape: they stay centered on their
+  natural positions, clip at the viewport, and do not force the row to shrink when edge labels drift in or out.
+- Wind linear (`angleTrueLinear`, `angleApparentLinear`) renders angle+speed together and supports mirrored layline
+  sectors.
+- Wind linear overrides the generic `normal` / `high` text geometry: `normal` uses the stacked dual block below the
+  gauge, and `high` uses inline top metric + middle gauge + inline bottom metric.
+- `hideTextualMetrics` is the public `Hide textual metrics` toggle, defaults to `false`, and applies to Speed, Depth,
+  Temperature, Voltage, Compass, Wind, and Default linear gauges.
+- When `hideTextualMetrics` is enabled, linear gauges keep tick labels, end labels, scale labels, pointers, sectors, and
+  state screens visible while removing the live caption/value/unit text.
+- Migrated linear gauges resolve formatter tokens separately from display labels; the token selects conversion and the
+  display label stays editable per token.
 - Shared geometry weights come from `tokens.strokeWeight`, `tokens.pointerDepthWeight`, and `tokens.pointerSideWeight`.
-- Canvas state-screen behavior is engine-owned: `p.disconnect === true` resolves to `disconnected`, clears the canvas, and renders shared `StateScreenCanvasOverlay` (`GPS Lost`) before any gauge drawing.
+- Canvas state-screen behavior is engine-owned: `p.disconnect === true` resolves to `disconnected`, clears the canvas,
+  and renders shared `StateScreenCanvasOverlay` (`GPS Lost`) before any gauge drawing.
 
 ## Supported Profiles
 
-| Profile | Typical kinds | `axisMode` | Domain source | Formatter baseline | Sector model |
-|---|---|---|---|---|---|
-| Speed linear | `sogLinear`, `stwLinear` | `range` | Editable `min/max` | `formatSpeed` | High-end warning/alarm; selector token drives speed conversion |
-| Depth linear | `depthLinear` | `range` | Editable `min/max`; store source via `depthKey`, default below keel | `formatDistance` | Low-end warning/alarm; selector token drives distance conversion |
-| Temperature linear | `tempLinear` | `range` | Editable `min/max` | `formatTemperature` | Optional high-end warning/alarm; selector token drives temperature conversion |
-| Voltage linear | `voltageLinear` | `range` | Editable `min/max` | `formatDecimal` | Low-end warning/alarm |
-| Wind angle linear | `angleTrueLinear`, `angleApparentLinear` | `centered180` | Fixed `-180..180` | Angle formatter contract | Mirrored layline sectors (optional) |
-| Compass linear | `hdtLinear`, `hdmLinear`, `cogLinear` | `fixed360` | Fixed `0..360` visible window, optionally 180° | `formatDirection360` | Usually none |
+| Profile            | Typical kinds                            | `axisMode`    | Domain source                                                       | Formatter baseline       | Sector model                                                                  |
+| ------------------ | ---------------------------------------- | ------------- | ------------------------------------------------------------------- | ------------------------ | ----------------------------------------------------------------------------- |
+| Speed linear       | `sogLinear`, `stwLinear`                 | `range`       | Editable `min/max`                                                  | `formatSpeed`            | High-end warning/alarm; selector token drives speed conversion                |
+| Depth linear       | `depthLinear`                            | `range`       | Editable `min/max`; store source via `depthKey`, default below keel | `formatDistance`         | Low-end warning/alarm; selector token drives distance conversion              |
+| Temperature linear | `tempLinear`                             | `range`       | Editable `min/max`                                                  | `formatTemperature`      | Optional high-end warning/alarm; selector token drives temperature conversion |
+| Voltage linear     | `voltageLinear`                          | `range`       | Editable `min/max`                                                  | `formatDecimal`          | Low-end warning/alarm                                                         |
+| Wind angle linear  | `angleTrueLinear`, `angleApparentLinear` | `centered180` | Fixed `-180..180`                                                   | Angle formatter contract | Mirrored layline sectors (optional)                                           |
+| Compass linear     | `hdtLinear`, `hdmLinear`, `cogLinear`    | `fixed360`    | Fixed `0..360` visible window, optionally 180°                      | `formatDirection360`     | Usually none                                                                  |
 
 ## Style and Proportions
 
 - Track stays centered in a dedicated scale box.
 - Sector bands render above the scale line so the track stroke remains visible.
-- Pointer z-order matches the full-circle dial: the static background is split into a `back` cache layer (track + sectors) and a `front` cache layer (ticks + labels), with the live pointer/marker drawn between them (`back` → pointer → `front`). The pointer sits over track/sectors but behind ticks and labels.
-- The value scale ends (`scaleX0`/`scaleX1`) reserve symmetric pointer edge clearance so the pointer at the extreme values does not clip the left/right border with default pointer width; wider user-configured pointers may clip.
+- Pointer z-order matches the full-circle dial: the static background is split into a `back` cache layer (track +
+  sectors) and a `front` cache layer (ticks + labels), with the live pointer/marker drawn between them (`back` → pointer
+  → `front`). The pointer sits over track/sectors but behind ticks and labels.
+- The value scale ends (`scaleX0`/`scaleX1`) reserve symmetric pointer edge clearance so the pointer at the extreme
+  values does not clip the left/right border with default pointer width; wider user-configured pointers may clip.
 - Tick lengths/widths use `tokens.linear.ticks.*Factor` plus `tokens.strokeWeight`.
-- Pointer triangle uses `tokens.linear.pointer.sideFactor`, `tokens.linear.pointer.depthFactor`, `tokens.pointerSideWeight`, `tokens.pointerDepthWeight`, and `tokens.colors.pointer`.
-- Waypoint/course markers use layout-based default sizing independent from rendered track thickness, end at the scale line, render as flat rectangular bars instead of rounded caps, and default to `floor(markerSizeBase * 0.45)` long by `floor(markerSizeBase * 0.2)` wide when no explicit override is supplied.
+- Pointer triangle uses `tokens.linear.pointer.sideFactor`, `tokens.linear.pointer.depthFactor`,
+  `tokens.pointerSideWeight`, `tokens.pointerDepthWeight`, and `tokens.colors.pointer`.
+- Waypoint/course markers use layout-based default sizing independent from rendered track thickness, end at the scale
+  line, render as flat rectangular bars instead of rounded caps, and default to `floor(markerSizeBase * 0.45)` long by
+  `floor(markerSizeBase * 0.2)` wide when no explicit override is supplied.
 - Tick labels use `tokens.linear.labels.insetFactor` and `tokens.linear.labels.fontFactor`.
-- In graphics-only and compact linear layouts, major tick labels are dynamically fitted to the usable scale width before drawing, so narrow tall widgets shrink labels instead of clipping them.
-- Major labels are not removed just because they overlap at the base font size; the engine keeps drawing the full major-label set after fitting.
+- In graphics-only and compact linear layouts, major tick labels are dynamically fitted to the usable scale width before
+  drawing, so narrow tall widgets shrink labels instead of clipping them.
+- Major labels are not removed just because they overlap at the base font size; the engine keeps drawing the full
+  major-label set after fitting.
 - Caption/value rows use `captionUnitScale` in `high` and `flat`.
-- `GeometryScale` converts the linear primary dimension (`min(trackBox.w, trackBox.h)`) into graphical pixels; `compactGeometryScale` only changes text/layout spacing.
+- `GeometryScale` converts the linear primary dimension (`min(trackBox.w, trackBox.h)`) into graphical pixels;
+  `compactGeometryScale` only changes text/layout spacing.
 
 ## Colors
 
@@ -75,8 +94,10 @@ Use gauge-prefixed keys to avoid cross-kind collisions.
 - Ratio thresholds: `{gauge}LinearRatioThresholdNormal`, `{gauge}LinearRatioThresholdFlat`
 - Ticks: `{gauge}LinearTickMajor`, `{gauge}LinearTickMinor`, `{gauge}LinearShowEndLabels`
 - Range-only domain: `{gauge}LinearMinValue`, `{gauge}LinearMaxValue`
-- High-end sectors: `{gauge}LinearWarningEnabled`, `{gauge}LinearAlarmEnabled`, `{gauge}LinearWarningFrom`, `{gauge}LinearAlarmFrom`
-- Low-end sectors: `{gauge}LinearWarningEnabled`, `{gauge}LinearAlarmEnabled`, `{gauge}LinearWarningFrom`, `{gauge}LinearAlarmFrom`
+- High-end sectors: `{gauge}LinearWarningEnabled`, `{gauge}LinearAlarmEnabled`, `{gauge}LinearWarningFrom`,
+  `{gauge}LinearAlarmFrom`
+- Low-end sectors: `{gauge}LinearWarningEnabled`, `{gauge}LinearAlarmEnabled`, `{gauge}LinearWarningFrom`,
+  `{gauge}LinearAlarmFrom`
 - Mirrored sectors: `{gauge}LinearLayEnabled`, `{gauge}LinearLayMin`, `{gauge}LinearLayMax`
 - Unit selectors: `formatUnit_{metricKey}`
 - Unit display labels: `unit_{metricKey}_{token}`
@@ -105,7 +126,8 @@ Graphics-only layout:
 
 ## Extension Readiness Checklist
 
-- Define kind defaults (`caption_*`) and unit-aware selector/display fields (`formatUnit_*`, `unit_*_<token>`) before mapper wiring.
+- Define kind defaults (`caption_*`) and unit-aware selector/display fields (`formatUnit_*`, `unit_*_<token>`) before
+  mapper wiring.
 - Keep mapper output declarative; numeric normalization stays at mapper boundary.
 - Use `LinearGaugeEngine` axis profile matching the kind semantics.
 - Add widget and mapper tests for new renderer contracts.

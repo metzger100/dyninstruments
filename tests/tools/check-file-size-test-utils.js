@@ -5,14 +5,16 @@ const { pathToFileURL } = require("node:url");
 
 const toolPath = path.resolve(__dirname, "../../tools/check-file-size.mjs");
 
+/** @returns {Promise<any>} */
 async function loadRunFileSizeCheck() {
   const mod = await import(pathToFileURL(toolPath).href);
   return mod.runFileSizeCheck;
 }
 
 function createWorkspaceManager() {
-  const tempDirs = [];
+  const tempDirs = /** @type {string[]} */ ([]);
 
+  /** @param {Record<string, string>} files */
   function createWorkspace(files) {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-check-file-size-"));
     tempDirs.push(dir);
@@ -28,7 +30,7 @@ function createWorkspaceManager() {
 
   function cleanup() {
     while (tempDirs.length) {
-      fs.rmSync(tempDirs.pop(), { recursive: true, force: true });
+      fs.rmSync(/** @type {string} */ (tempDirs.pop()), { recursive: true, force: true });
     }
   }
 
@@ -38,9 +40,14 @@ function createWorkspaceManager() {
   };
 }
 
+/**
+ * @param {any} runFileSizeCheck
+ * @param {string} cwd
+ * @param {Record<string, any>} [options]
+ */
 function runCheck(runFileSizeCheck, cwd, options = {}) {
-  const logs = [];
-  const errors = [];
+  const logs = /** @type {string[]} */ ([]);
+  const errors = /** @type {string[]} */ ([]);
   const originalLog = console.log;
   const originalError = console.error;
 
@@ -54,8 +61,7 @@ function runCheck(runFileSizeCheck, cwd, options = {}) {
       onelinerMode: options.onelinerMode || "block",
       print: options.print !== false
     });
-  }
-  finally {
+  } finally {
     console.log = originalLog;
     console.error = originalError;
   }
@@ -66,10 +72,12 @@ function runCheck(runFileSizeCheck, cwd, options = {}) {
   };
 }
 
+/** @param {number} count @param {string} [prefix] */
 function buildNonEmptyLines(count, prefix = "const v") {
   return Array.from({ length: count }, (_, i) => `${prefix}${i} = ${i};`).join("\n");
 }
 
+/** @param {number} count @param {string} [prefix] */
 function buildTotalLines(count, prefix = "line") {
   if (count <= 0) return "";
   return Array.from({ length: count }, (_, i) => `${prefix} ${i + 1}`).join("\n");

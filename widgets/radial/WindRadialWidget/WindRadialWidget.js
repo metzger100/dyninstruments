@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniWindRadialWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {Record<string, unknown> & { angle?: unknown, speed?: unknown, angleUnit?: unknown, speedUnit?: unknown, angleCaption?: unknown, speedCaption?: unknown, leadingZero?: boolean, stableDigits?: boolean, captionUnitScale?: unknown, easing?: boolean, layEnabled?: boolean, windRadialLayMin?: unknown, windRadialLayMax?: unknown, formatter?: unknown, formatterParameters?: unknown, default?: unknown }} DyniWindRadialProps */
   /** @typedef {{ caption: unknown, value: unknown, unit: unknown, secScale: number }} DyniWindRadialMetric */
@@ -41,11 +41,18 @@
       const formatter = p.formatter;
       const formatterParameters = p.formatterParameters;
 
-      return placeholderNormalize.normalize(String(componentContext.format.applyFormatter(n, {
-        formatter: formatter,
-        formatterParameters: formatterParameters,
-        default: defaultText
-      })), Object.prototype.hasOwnProperty.call(p, "default") ? p.default : placeholderNormalize.normalize(undefined, undefined));
+      return placeholderNormalize.normalize(
+        String(
+          componentContext.format.applyFormatter(n, {
+            formatter: formatter,
+            formatterParameters: formatterParameters,
+            default: defaultText
+          })
+        ),
+        Object.prototype.hasOwnProperty.call(p, "default")
+          ? p.default
+          : placeholderNormalize.normalize(undefined, undefined)
+      );
     }
 
     /** @param {DyniFullCircleEngineState} state @param {DyniWindRadialProps} props @returns {DyniWindRadialDisplay} */
@@ -71,9 +78,9 @@
       }
       const speedValueText = stableDigitsEnabled
         ? stableDigits.normalize(speedText, {
-          integerWidth: stableDigits.resolveIntegerWidth(speedText, 2),
-          reserveSignSlot: true
-        }).padded
+            integerWidth: stableDigits.resolveIntegerWidth(speedText, 2),
+            reserveSignSlot: true
+          }).padded
         : speedText;
 
       return {
@@ -212,4 +219,4 @@
   }
 
   return { id: "WindRadialWidget", create };
-}));
+});

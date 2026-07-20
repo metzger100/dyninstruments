@@ -1,3 +1,4 @@
+// @ts-nocheck
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -47,5 +48,5 @@ module.exports = {
   runPatternCheck,
   createWorkspace,
   joinMessages,
-  joinWarningMessages,
+  joinWarningMessages
 };

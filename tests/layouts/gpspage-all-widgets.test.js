@@ -8,24 +8,27 @@ describe("tests/layouts/gpspage-all-widgets.json", function () {
     return JSON.parse(fs.readFileSync(fixturePath, "utf8"));
   }
 
+  /** @param {any} page @param {string} slotName */
   function slotKinds(page, slotName) {
-    return (page[slotName] || []).map(function (entry) {
+    return (page[slotName] || []).map(function (/** @type {any} */ entry) {
       return entry.kind;
     });
   }
 
+  /** @param {any} page @param {string} slotName */
   function slotNames(page, slotName) {
-    return (page[slotName] || []).map(function (entry) {
+    return (page[slotName] || []).map(function (/** @type {any} */ entry) {
       return entry.name;
     });
   }
 
+  /** @param {any} page @param {string} kindOrName */
   function findWidget(page, kindOrName) {
     const pageSlotNames = Object.keys(page);
     for (let i = 0; i < pageSlotNames.length; i += 1) {
       const slot = page[pageSlotNames[i]];
       if (!Array.isArray(slot)) continue;
-      const widget = slot.find(function (entry) {
+      const widget = slot.find(function (/** @type {any} */ entry) {
         return entry && (entry.kind === kindOrName || entry.name === kindOrName);
       });
       if (widget) return widget;
@@ -372,27 +375,27 @@ describe("tests/layouts/gpspage-all-widgets.json", function () {
     ]);
 
     ["left", "m2"].forEach(function (slotName) {
-      page3[slotName].forEach(function (entry) {
+      page3[slotName].forEach(function (/** @type {any} */ entry) {
         expect(entry.name.indexOf("dyni_")).toBe(0);
       });
     });
 
     ["m1", "right"].forEach(function (slotName) {
-      page3[slotName].forEach(function (entry) {
+      page3[slotName].forEach(function (/** @type {any} */ entry) {
         expect(entry.name.indexOf("dyni_")).toBe(-1);
       });
     });
 
-    page4.left.forEach(function (entry) {
+    page4.left.forEach(function (/** @type {any} */ entry) {
       expect(entry.name.indexOf("dyni_")).toBe(0);
     });
 
-    page4.m2.forEach(function (entry) {
+    page4.m2.forEach(function (/** @type {any} */ entry) {
       expect(entry.name.indexOf("dyni_")).toBe(0);
     });
 
     ["m1", "right"].forEach(function (slotName) {
-      page4[slotName].forEach(function (entry) {
+      page4[slotName].forEach(function (/** @type {any} */ entry) {
         expect(entry.name.indexOf("dyni_")).toBe(-1);
       });
     });

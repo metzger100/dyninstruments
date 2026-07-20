@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniTextTileLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const hasOwn = Object.prototype.hasOwnProperty;
@@ -132,9 +132,10 @@
     const rect = /** @type {Record<string, unknown>} */ (cfg && cfg.rect ? cfg.rect : {});
     const metric = /** @type {Record<string, unknown>} */ (cfg && cfg.metric ? cfg.metric : {});
     const family = cfg && cfg.family;
-    const valueTextOptions = cfg && cfg.valueTextOptions && typeof cfg.valueTextOptions === "object"
-      ? /** @type {{ useMono?: unknown, monoFamily?: unknown }} */ (cfg.valueTextOptions)
-      : null;
+    const valueTextOptions =
+      cfg && cfg.valueTextOptions && typeof cfg.valueTextOptions === "object"
+        ? /** @type {{ useMono?: unknown, monoFamily?: unknown }} */ (cfg.valueTextOptions)
+        : null;
     const captionMaxPx = Number(cfg && cfg.captionMaxPx);
     const valueMaxPx = Number(cfg && cfg.valueMaxPx);
     const useMono = valueTextOptions && valueTextOptions.useMono === true;
@@ -296,15 +297,7 @@
       const maxH = Math.max(1, toNumberOrDefault(cfg.maxH, 0));
       const basePx = resolveScaledMaxPx(toNumberOrDefault(cfg.maxPx, maxH), maxH, cfg.textFillScale);
       const source = String(cfg.text);
-      const px = textApi.fitSingleTextPx(
-        cfg.ctx,
-        source,
-        basePx,
-        maxW,
-        maxH,
-        cfg.family,
-        cfg.weight
-      );
+      const px = textApi.fitSingleTextPx(cfg.ctx, source, basePx, maxW, maxH, cfg.family, cfg.weight);
       const fittedText = trimToWidth(cfg.ctx, textApi, source, px, maxW, cfg.family, cfg.weight);
       const fit = {
         px: px,
@@ -324,17 +317,20 @@
         return null;
       }
       const textApi = /** @type {DyniCanvasTextLayoutApi} */ (cfg.textApi);
-      const fit = /** @type {{ px?: unknown, text: string }} */ (cfg.fit || measureFittedLine({
-        textApi: textApi,
-        ctx: cfg.ctx,
-        text: cfg.text,
-        maxW: rect.w,
-        maxH: rect.h,
-        maxPx: cfg.maxPx,
-        textFillScale: cfg.textFillScale,
-        family: cfg.family,
-        weight: cfg.weight
-      }));
+      const fit = /** @type {{ px?: unknown, text: string }} */ (
+        cfg.fit ||
+          measureFittedLine({
+            textApi: textApi,
+            ctx: cfg.ctx,
+            text: cfg.text,
+            maxW: rect.w,
+            maxH: rect.h,
+            maxPx: cfg.maxPx,
+            textFillScale: cfg.textFillScale,
+            family: cfg.family,
+            weight: cfg.weight
+          })
+      );
       cfg.ctx.save();
       if (typeof cfg.alpha === "number") {
         cfg.ctx.globalAlpha = cfg.alpha;
@@ -370,4 +366,4 @@
   }
 
   return { id: "TextTileLayout", create: create };
-}));
+});

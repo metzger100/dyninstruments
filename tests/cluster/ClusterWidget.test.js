@@ -1,5 +1,9 @@
 const {
-  originalDyniPlugin,
+  createHostCommitControllerMock,
+  createSurfaceSessionControllerMock,
+  createActivationControllerMock,
+  createRuntimeHarness,
+  createClusterWidget
 } = require("./ClusterWidget.harness.js");
 
 describe("ClusterWidget", function () {
@@ -16,7 +20,7 @@ describe("ClusterWidget", function () {
         aspectRatio: 1.5
       }
     };
-    const activationController = createActivationControllerMock(function (payload) {
+    const activationController = createActivationControllerMock(function (/** @type {any} */ payload) {
       return {
         routeId: routeMeta.routeId,
         surface: routeMeta.surface,
@@ -36,6 +40,7 @@ describe("ClusterWidget", function () {
       activationController: activationController
     });
     const widget = createClusterWidget({ cluster: "speed" });
+    /** @type {{ eventHandler: any[], __dyniHostCommitState?: any, __dyniClusterState?: any }} */
     const widgetContext = { eventHandler: [] };
     const rawProps = { kind: "sog", mode: "vertical" };
     const routeFrame = widget.translateFunction(rawProps);
@@ -67,7 +72,7 @@ describe("ClusterWidget", function () {
     });
 
     const html = widget.renderHtml.call(widgetContext, routeFrame);
-    expect(html).toBe("<div class=\"dyni-shell\">shell</div>");
+    expect(html).toBe('<div class="dyni-shell">shell</div>');
     expect(harness.hostCommitController.recordRender).toHaveBeenCalledWith(routeFrame);
     expect(harness.shellRenderer.renderRouteShell).toHaveBeenCalledWith(
       routeFrame,
@@ -87,12 +92,14 @@ describe("ClusterWidget", function () {
       hostContext: widgetContext
     });
     expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledTimes(1);
-    expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledWith(expect.objectContaining({
-      routeId: "speed/sog",
-      surface: "canvas-dom",
-      rendererId: "SpeedLinearWidget",
-      revision: 1
-    }));
+    expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledWith(
+      expect.objectContaining({
+        routeId: "speed/sog",
+        surface: "canvas-dom",
+        rendererId: "SpeedLinearWidget",
+        revision: 1
+      })
+    );
     expect(harness.runtime.theme.applyToRoot.mock.invocationCallOrder[0]).toBeLessThan(
       harness.surfaceSessionController.recordCommittedRevision.mock.invocationCallOrder[0]
     );
@@ -124,7 +131,7 @@ describe("ClusterWidget", function () {
       }
     };
     const stableShell = { id: "shell-stable" };
-    const activationController = createActivationControllerMock(function (payload) {
+    const activationController = createActivationControllerMock(function (/** @type {any} */ payload) {
       return {
         routeId: routeMeta.routeId,
         surface: routeMeta.surface,
@@ -187,7 +194,7 @@ describe("ClusterWidget", function () {
         aspectRatio: 1.5
       }
     };
-    const activationController = createActivationControllerMock(function (payload) {
+    const activationController = createActivationControllerMock(function (/** @type {any} */ payload) {
       return {
         routeId: routeMeta.routeId,
         surface: routeMeta.surface,
@@ -225,10 +232,12 @@ describe("ClusterWidget", function () {
     );
     expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledTimes(2);
     expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledTimes(2);
-    expect(harness.surfaceSessionController.reconcileSession.mock.calls[1][0]).toEqual(expect.objectContaining({
-      revision: 2,
-      shellEl: { id: "shell-2" }
-    }));
+    expect(harness.surfaceSessionController.reconcileSession.mock.calls[1][0]).toEqual(
+      expect.objectContaining({
+        revision: 2,
+        shellEl: { id: "shell-2" }
+      })
+    );
   });
 
   it("destroys the previous controllers when AvNav reuses the widget context", function () {
@@ -271,6 +280,7 @@ describe("ClusterWidget", function () {
       });
 
     const widget = createClusterWidget({ cluster: "nav" });
+    /** @type {{ __dyniHostCommitState?: any, __dyniClusterState?: any }} */
     const widgetContext = {};
 
     widget.initFunction.call(widgetContext);
@@ -295,7 +305,7 @@ describe("ClusterWidget", function () {
       clusterRoutes: {
         byRouteId: {}
       },
-      shellHtml: "<div class=\"dyni-shell dyni-shell-unknown\">diagnostic</div>"
+      shellHtml: '<div class="dyni-shell dyni-shell-unknown">diagnostic</div>'
     });
     const widget = createClusterWidget({ cluster: "nav" });
     const widgetContext = {};
@@ -304,7 +314,7 @@ describe("ClusterWidget", function () {
     widget.initFunction.call(widgetContext);
     const html = widget.renderHtml.call(widgetContext, routeFrame);
 
-    expect(html).toBe("<div class=\"dyni-shell dyni-shell-unknown\">diagnostic</div>");
+    expect(html).toBe('<div class="dyni-shell dyni-shell-unknown">diagnostic</div>');
     expect(harness.shellRenderer.renderRouteShell).toHaveBeenCalledWith(
       routeFrame,
       null,
@@ -317,5 +327,4 @@ describe("ClusterWidget", function () {
     expect(harness.activationController.activateCommittedRoute).not.toHaveBeenCalled();
     expect(harness.surfaceSessionController.reconcileSession).not.toHaveBeenCalled();
   });
-
 });

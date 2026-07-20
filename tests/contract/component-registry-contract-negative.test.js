@@ -1,6 +1,7 @@
 const contract = require("../helpers/component-registry-contract");
 const retiredOwners = require("../helpers/retired-component-owners");
 
+/** @param {string} globalKey @param {string} returnedId @param {string} [createExport] */
 function componentSource(globalKey, returnedId, createExport) {
   const exportLine = createExport || 'return { id: "' + returnedId + '", create: create };';
   return [
@@ -166,7 +167,7 @@ describe("component registry contract negative fixtures", function () {
       }
     };
     const types = contract
-      .dependencyViolations(components, retiredOwners.FORBIDDEN_COMPONENT_IDS)
+      .dependencyViolations(components, /** @type {string[]} */ (retiredOwners.FORBIDDEN_COMPONENT_IDS))
       .map(function (violation) {
         return violation.type;
       });

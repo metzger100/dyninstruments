@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniXteHighwayLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const PAD_RATIO = 0.04;
@@ -119,25 +119,26 @@
 
     /** @param {number} W @param {number} H @param {{ pad: number }} insets @returns {DyniRect} */
     function createContentRect(W, H, insets) {
-      return makeRect(
-        insets.pad,
-        insets.pad,
-        Math.max(1, W - insets.pad * 2),
-        Math.max(1, H - insets.pad * 2)
-      );
+      return makeRect(insets.pad, insets.pad, Math.max(1, W - insets.pad * 2), Math.max(1, H - insets.pad * 2));
     }
 
     /** @param {unknown} args @returns {DyniXteHighwayLayoutResult} */
     function computeLayout(args) {
       const cfg = /** @type {DyniXteLayoutArgs} */ (args || {});
       const contentRect = cfg.contentRect || makeRect(0, 0, 0, 0);
-      const responsive = cfg.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
-      const gap = Math.max(0, Math.floor(clampNumber(
-        cfg.gap,
+      const responsive =
+        cfg.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
+      const gap = Math.max(
         0,
-        Math.max(contentRect.w, contentRect.h),
-        profileApi.computeInsetPx(responsive, GAP_RATIO, 1)
-      )));
+        Math.floor(
+          clampNumber(
+            cfg.gap,
+            0,
+            Math.max(contentRect.w, contentRect.h),
+            profileApi.computeInsetPx(responsive, GAP_RATIO, 1)
+          )
+        )
+      );
       const mode = cfg.mode === "flat" || cfg.mode === "high" ? cfg.mode : "normal";
       const hideTextualMetrics = cfg.hideTextualMetrics === true;
       const showWpName = cfg.showWpName !== false;
@@ -165,11 +166,11 @@
         );
         const headerShare = reserveWaypointSpace
           ? profileApi.scaleShare(
-            clampNumber(cfg.flatHeaderRatio, FLAT_HEADER_MIN_RATIO, FLAT_HEADER_MAX_RATIO, FLAT_HEADER_RATIO),
-            responsive.flatHeaderShareScale,
-            FLAT_HEADER_MIN_RATIO,
-            FLAT_HEADER_MAX_RATIO
-          )
+              clampNumber(cfg.flatHeaderRatio, FLAT_HEADER_MIN_RATIO, FLAT_HEADER_MAX_RATIO, FLAT_HEADER_RATIO),
+              responsive.flatHeaderShareScale,
+              FLAT_HEADER_MIN_RATIO,
+              FLAT_HEADER_MAX_RATIO
+            )
           : 0;
         const usableWidth = Math.max(1, contentRect.w - gap);
         const highwayWidth = Math.max(1, Math.floor(usableWidth * highwayShare));
@@ -180,7 +181,10 @@
           contentRect.h
         );
         const nameHeight = reserveWaypointSpace ? Math.max(1, Math.floor(contentRect.h * headerShare)) : 0;
-        const topHeight = Math.max(1, Math.floor((Math.max(1, dataRect.h - (reserveWaypointSpace ? nameHeight + gap : 0)) - gap) / 2));
+        const topHeight = Math.max(
+          1,
+          Math.floor((Math.max(1, dataRect.h - (reserveWaypointSpace ? nameHeight + gap : 0)) - gap) / 2)
+        );
         const topRect = makeRect(
           dataRect.x,
           dataRect.y + (reserveWaypointSpace ? nameHeight + gap : 0),
@@ -274,14 +278,23 @@
         Math.max(1, contentRect.h - highwayHeight - gap)
       );
       const columns = splitColumns(bandRect, gap, 4);
-      const nameHeight = Math.max(1, Math.floor(
-        highwayHeight * profileApi.scaleShare(
-          clampNumber(cfg.normalNameHeightRatio, NORMAL_NAME_H_MIN_RATIO, NORMAL_NAME_H_MAX_RATIO, NORMAL_NAME_H_RATIO),
-          responsive.normalNameHeightScale,
-          NORMAL_NAME_H_MIN_RATIO,
-          NORMAL_NAME_H_MAX_RATIO
+      const nameHeight = Math.max(
+        1,
+        Math.floor(
+          highwayHeight *
+            profileApi.scaleShare(
+              clampNumber(
+                cfg.normalNameHeightRatio,
+                NORMAL_NAME_H_MIN_RATIO,
+                NORMAL_NAME_H_MAX_RATIO,
+                NORMAL_NAME_H_RATIO
+              ),
+              responsive.normalNameHeightScale,
+              NORMAL_NAME_H_MIN_RATIO,
+              NORMAL_NAME_H_MAX_RATIO
+            )
         )
-      ));
+      );
 
       return {
         mode: mode,
@@ -315,4 +328,4 @@
   }
 
   return { id: "XteHighwayLayout", create: create };
-}));
+});

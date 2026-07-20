@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniLinearGaugeMath = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -69,11 +69,17 @@
     const majorTicks = [];
     /** @type {number[]} */
     const minorTicks = [];
-    if (!Number.isFinite(minV) || !Number.isFinite(maxV) || maxV <= minV || !Number.isFinite(majorStep) || majorStep <= 0) {
+    if (
+      !Number.isFinite(minV) ||
+      !Number.isFinite(maxV) ||
+      maxV <= minV ||
+      !Number.isFinite(majorStep) ||
+      majorStep <= 0
+    ) {
       return { major: majorTicks, minor: minorTicks };
     }
 
-    const minor = (Number.isFinite(minorStep) && minorStep > 0) ? minorStep : majorStep / 2;
+    const minor = Number.isFinite(minorStep) && minorStep > 0 ? minorStep : majorStep / 2;
     const eps = 1e-6;
     const majorCount = Math.max(1, Math.round((maxV - minV) / majorStep));
     const minorCount = Math.max(1, Math.round((maxV - minV) / minor));
@@ -143,4 +149,4 @@
   }
 
   return { id: "LinearGaugeMath", create: create };
-}));
+});

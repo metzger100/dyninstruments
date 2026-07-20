@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniTextLayoutEngine = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
   const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.0;
@@ -34,9 +34,7 @@
 
     /** @param {unknown} modeList @returns {DyniFitCache} */
     function createFitCache(modeList) {
-      const modes = Array.isArray(modeList) && modeList.length
-        ? modeList
-        : ["high", "normal", "flat"];
+      const modes = Array.isArray(modeList) && modeList.length ? modeList : ["high", "normal", "flat"];
       const out = Object.create(null);
       for (let i = 0; i < modes.length; i++) out[String(modes[i])] = null;
       return out;
@@ -80,7 +78,10 @@
      */
     function writeFitCache(cache, mode, key, result) {
       if (cache && typeof cache === "object") {
-        (/** @type {Record<string, DyniFitCacheEntry>} */ (cache))[/** @type {string} */ (mode)] = { key: key, result: result };
+        /** @type {Record<string, DyniFitCacheEntry>} */ (cache)[/** @type {string} */ (mode)] = {
+          key: key,
+          result: result
+        };
       }
       return result;
     }
@@ -100,11 +101,8 @@
     /** @param {number} W @param {number} H @returns {DyniTextInsets} */
     function computeInsets(W, H) {
       return {
-        // dyni-lint-disable-next-line responsive-layout-hard-floor -- legacy non-responsive API kept for comparison coverage; responsive callers use computeResponsiveInsets
         padX: Math.max(6, Math.floor(Math.min(W, H) * 0.04)),
-        // dyni-lint-disable-next-line responsive-layout-hard-floor -- legacy non-responsive API kept for comparison coverage; responsive callers use computeResponsiveInsets
         innerY: Math.max(3, Math.floor(Math.min(W, H) * 0.035)),
-        // dyni-lint-disable-next-line responsive-layout-hard-floor -- legacy non-responsive API kept for comparison coverage; responsive callers use computeResponsiveInsets
         gapBase: Math.max(6, Math.floor(Math.min(W, H) * 0.06))
       };
     }
@@ -134,9 +132,7 @@
       const tNormal = hasOwn.call(cfg, "ratioThresholdNormal")
         ? cfg.ratioThresholdNormal
         : DEFAULT_RATIO_THRESHOLD_NORMAL;
-      const tFlat = hasOwn.call(cfg, "ratioThresholdFlat")
-        ? cfg.ratioThresholdFlat
-        : DEFAULT_RATIO_THRESHOLD_FLAT;
+      const tFlat = hasOwn.call(cfg, "ratioThresholdFlat") ? cfg.ratioThresholdFlat : DEFAULT_RATIO_THRESHOLD_FLAT;
       const secScale = value.clamp(
         hasOwn.call(cfg, "captionUnitScale") ? cfg.captionUnitScale : DEFAULT_CAPTION_UNIT_SCALE,
         0.3,
@@ -192,4 +188,4 @@
   }
 
   return { id: "TextLayoutEngine", create: create };
-}));
+});

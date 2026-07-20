@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAlarmViewModel = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @typedef {{ name: string, category: unknown, repeat: unknown, index: number }} DyniActiveAlarm */
@@ -120,4 +120,4 @@
   }
 
   return { id: "AlarmViewModel", create: create };
-}));
+});

@@ -1,11 +1,7 @@
+// @ts-nocheck
 const { loadFresh } = require("../../../helpers/load-umd");
-const {
-  createMockContext2D,
-  createMockCanvas,
-} = require("../../../helpers/mock-canvas");
-const {
-  createComponentContextMock,
-} = require("../../../helpers/component-context-mock");
+const { createMockContext2D, createMockCanvas } = require("../../../helpers/mock-canvas");
+const { createComponentContextMock } = require("../../../helpers/component-context-mock");
 
 function mockDegToCanvasRad(deg) {
   const d = Number(deg);
@@ -27,26 +23,26 @@ function makeMockState(ctx, overrides) {
     geom: {
       cx: o.cx || 120,
       cy: o.cy || 120,
-      rOuter: o.rOuter || 100,
+      rOuter: o.rOuter || 100
     },
     labels: {
       fontPx: 14,
-      spriteRadius: 75,
+      spriteRadius: 75
     },
     theme: {
       colors: { pointer: "#3366cc" },
-      surface: { fg: "#000" },
+      surface: { fg: "#000" }
     },
     angle: {
-      degToCanvasRad: mockDegToCanvasRad,
+      degToCanvasRad: mockDegToCanvasRad
     },
     value: {
       clamp: function (v, lo, hi) {
         var n = Number(v);
         if (!isFinite(n)) return lo;
         return Math.max(lo, Math.min(hi, n));
-      },
-    },
+      }
+    }
   };
 }
 
@@ -58,7 +54,7 @@ function makeMockApi() {
     getCacheMeta: function () {
       return null;
     },
-    setCacheMeta: function () {},
+    setCacheMeta: function () {}
   };
 }
 
@@ -83,7 +79,7 @@ describe("ClockRadialWidget", function () {
           captured.lastProps = props;
           cfg.drawFrame(state, props, makeMockApi());
         };
-      },
+      }
     };
     var geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     var mod = loadWidget();
@@ -94,9 +90,9 @@ describe("ClockRadialWidget", function () {
           FullCircleRadialEngine: {
             create: function () {
               return mockEngine;
-            },
+            }
           },
-          GeometryScale: geometryScale,
+          GeometryScale: geometryScale
         },
         services: {
           canvas: {
@@ -106,12 +102,12 @@ describe("ClockRadialWidget", function () {
               return {
                 ctx: ctx,
                 W: Math.round(rect.width),
-                H: Math.round(rect.height),
+                H: Math.round(rect.height)
               };
-            },
-          },
-        },
-      }),
+            }
+          }
+        }
+      })
     );
     return { spec: spec, captured: captured };
   }
@@ -122,11 +118,11 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     result.spec.renderCanvas(canvas, {
       value: "not-a-time",
-      hideSeconds: false,
+      hideSeconds: false
     });
     var strokes = ctx.calls.filter(function (c) {
       return c.name === "stroke";
@@ -140,7 +136,7 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     result.spec.renderCanvas(canvas, { value: NaN, hideSeconds: false });
     var strokes = ctx.calls.filter(function (c) {
@@ -155,7 +151,7 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     var d = new Date("2026-05-25T15:30:00Z");
     result.spec.renderCanvas(canvas, { value: d, hideSeconds: false });
@@ -171,7 +167,7 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     var ts = new Date("2026-05-25T12:00:00Z").getTime();
     result.spec.renderCanvas(canvas, { value: ts, hideSeconds: false });
@@ -187,7 +183,7 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     result.spec.renderCanvas(canvas, { value: "12:00:00", hideSeconds: true });
     var lineTos = ctx.calls.filter(function (c) {
@@ -202,7 +198,7 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     result.spec.renderCanvas(canvas, { value: "12:00:00", hideSeconds: false });
     var lineTos = ctx.calls.filter(function (c) {
@@ -217,7 +213,7 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     result.spec.renderCanvas(canvas, { value: "12:00:00", hideSeconds: false });
     var strokeCalls = ctx.calls.filter(function (c) {
@@ -232,7 +228,7 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     result.spec.renderCanvas(canvas, { value: "12:00:00", hideSeconds: false });
     var arcCalls = ctx.calls.filter(function (c) {
@@ -247,7 +243,7 @@ describe("ClockRadialWidget", function () {
     var canvas = createMockCanvas({
       rectWidth: 240,
       rectHeight: 240,
-      ctx: ctx,
+      ctx: ctx
     });
     result.spec.renderCanvas(canvas, { value: "12:00:00", hideSeconds: false });
     expect(ctx.lineCap).toBe("round");

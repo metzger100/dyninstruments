@@ -1,9 +1,10 @@
+// @ts-nocheck
 const {
   makeComponentContext,
   fillTextValues,
   captureTextCalls,
   parseFontPx,
-  findTextCall,
+  findTextCall
 } = require("./PositionCoordinateWidget.harness.js");
 
 describe("PositionCoordinateWidget", function () {
@@ -16,15 +17,13 @@ describe("PositionCoordinateWidget", function () {
       return raw === rawClock ? "TIME_OBJ" : "TIME_BAD";
     });
     const helpers = makeComponentContext();
-    const spec = loadFresh(
-      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-    ).create({}, helpers);
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
 
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({
       rectWidth: 420,
       rectHeight: 100,
-      ctx,
+      ctx
     });
 
     spec.renderCanvas(canvas, {
@@ -35,7 +34,7 @@ describe("PositionCoordinateWidget", function () {
       coordinateFormatterLon: timeFormatter,
       ratioThresholdNormal: 1.0,
       ratioThresholdFlat: 3.0,
-      default: "NA",
+      default: "NA"
     });
 
     expect(fillTextValues(ctx)).toContain("🟢 TIME_OBJ");
@@ -50,21 +49,19 @@ describe("PositionCoordinateWidget", function () {
         formatter: {
           formatTime(value) {
             return value === rawClock ? "TIME_OBJ" : "TIME_BAD";
-          },
-        },
-      },
+          }
+        }
+      }
     };
 
     const helpers = makeComponentContext();
-    const spec = loadFresh(
-      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-    ).create({}, helpers);
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
 
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({
       rectWidth: 420,
       rectHeight: 100,
-      ctx,
+      ctx
     });
 
     spec.renderCanvas(canvas, {
@@ -72,7 +69,7 @@ describe("PositionCoordinateWidget", function () {
       displayVariant: "timeStatus",
       ratioThresholdNormal: 1.0,
       ratioThresholdFlat: 3.0,
-      default: "NA",
+      default: "NA"
     });
 
     expect(fillTextValues(ctx)).toContain("🟢 TIME_OBJ");
@@ -80,8 +77,8 @@ describe("PositionCoordinateWidget", function () {
       rawClock,
       expect.objectContaining({
         formatter: "formatTime",
-        formatterParameters: [],
-      }),
+        formatterParameters: []
+      })
     );
   });
 
@@ -92,21 +89,19 @@ describe("PositionCoordinateWidget", function () {
         formatter: {
           formatClock(value) {
             return value === rawClock ? "CLOCK_OBJ" : "CLOCK_BAD";
-          },
-        },
-      },
+          }
+        }
+      }
     };
 
     const helpers = makeComponentContext();
-    const spec = loadFresh(
-      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-    ).create({}, helpers);
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
 
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({
       rectWidth: 420,
       rectHeight: 100,
-      ctx,
+      ctx
     });
 
     spec.renderCanvas(canvas, {
@@ -115,7 +110,7 @@ describe("PositionCoordinateWidget", function () {
       hideSeconds: true,
       ratioThresholdNormal: 1.0,
       ratioThresholdFlat: 3.0,
-      default: "NA",
+      default: "NA"
     });
 
     expect(fillTextValues(ctx)).toContain("🟢 CLOCK_OBJ");
@@ -123,23 +118,21 @@ describe("PositionCoordinateWidget", function () {
       rawClock,
       expect.objectContaining({
         formatter: "formatClock",
-        formatterParameters: [],
-      }),
+        formatterParameters: []
+      })
     );
   });
 
   it("downscales timeStatus emoji lines in flat mode to avoid clipping", function () {
     function renderFlatCase(statusText) {
       const helpers = makeComponentContext();
-      const spec = loadFresh(
-        "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-      ).create({}, helpers);
+      const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
       const ctx = createMockContext2D();
       const captured = captureTextCalls(ctx);
       const canvas = createMockCanvas({
         rectWidth: 420,
         rectHeight: 100,
-        ctx,
+        ctx
       });
       spec.renderCanvas(canvas, {
         value: [new Date("2026-02-22T15:00:00Z"), true],
@@ -153,13 +146,11 @@ describe("PositionCoordinateWidget", function () {
         },
         ratioThresholdNormal: 1.0,
         ratioThresholdFlat: 3.0,
-        default: "NA",
+        default: "NA"
       });
       return {
         texts: fillTextValues(ctx),
-        finalValuePx: parseFontPx(
-          findTextCall(captured, statusText + " 15:49:45").font,
-        ),
+        finalValuePx: parseFontPx(findTextCall(captured, statusText + " 15:49:45").font)
       };
     }
 
@@ -176,14 +167,12 @@ describe("PositionCoordinateWidget", function () {
   it("downscales timeStatus emoji in high mode to avoid top-line clipping", function () {
     function renderHighCase(statusText) {
       const helpers = makeComponentContext();
-      const spec = loadFresh(
-        "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-      ).create({}, helpers);
+      const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
       const ctx = createMockContext2D();
       const canvas = createMockCanvas({
         rectWidth: 220,
         rectHeight: 250,
-        ctx,
+        ctx
       });
       const rawClock = new Date("2026-02-22T15:59:26Z");
       spec.renderCanvas(canvas, {
@@ -197,14 +186,12 @@ describe("PositionCoordinateWidget", function () {
         },
         ratioThresholdNormal: 1.0,
         ratioThresholdFlat: 3.0,
-        default: "NA",
+        default: "NA"
       });
-      const valuePx = helpers.fontCalls
-        .filter((entry) => entry.weight === 730)
-        .map((entry) => entry.px);
+      const valuePx = helpers.fontCalls.filter((entry) => entry.weight === 730).map((entry) => entry.px);
       return {
         texts: fillTextValues(ctx),
-        finalValuePx: valuePx.length ? valuePx[valuePx.length - 1] : 0,
+        finalValuePx: valuePx.length ? valuePx[valuePx.length - 1] : 0
       };
     }
 
@@ -230,21 +217,19 @@ describe("PositionCoordinateWidget", function () {
           },
           formatTime(value) {
             return value === rawClock ? "TIME_RAW" : "TIME_BAD";
-          },
-        },
-      },
+          }
+        }
+      }
     };
 
     const helpers = makeComponentContext();
-    const spec = loadFresh(
-      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-    ).create({}, helpers);
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
 
     const ctx = createMockContext2D();
     const canvas = createMockCanvas({
       rectWidth: 220,
       rectHeight: 140,
-      ctx,
+      ctx
     });
 
     spec.renderCanvas(canvas, {
@@ -254,7 +239,7 @@ describe("PositionCoordinateWidget", function () {
       coordinateFormatterLon: "formatTime",
       ratioThresholdNormal: 1.0,
       ratioThresholdFlat: 3.0,
-      default: "NA",
+      default: "NA"
     });
 
     const texts = fillTextValues(ctx);
@@ -264,28 +249,24 @@ describe("PositionCoordinateWidget", function () {
 
   it("renders stacked coordinates in normal and high modes", function () {
     const formatter = vi.fn((value, axis) => {
-      return axis === "lat"
-        ? "LAT:" + Number(value).toFixed(2)
-        : "LON:" + Number(value).toFixed(2);
+      return axis === "lat" ? "LAT:" + Number(value).toFixed(2) : "LON:" + Number(value).toFixed(2);
     });
     globalThis.avnav = {
-      api: { formatter: { formatLonLatsDecimal: formatter } },
+      api: { formatter: { formatLonLatsDecimal: formatter } }
     };
     const helpers = makeComponentContext();
 
-    const spec = loadFresh(
-      "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-    ).create({}, helpers);
+    const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
 
     [
       { w: 220, h: 140 }, // normal
-      { w: 120, h: 220 }, // high
+      { w: 120, h: 220 } // high
     ].forEach((size) => {
       const ctx = createMockContext2D();
       const canvas = createMockCanvas({
         rectWidth: size.w,
         rectHeight: size.h,
-        ctx,
+        ctx
       });
 
       spec.renderCanvas(canvas, {
@@ -293,7 +274,7 @@ describe("PositionCoordinateWidget", function () {
         caption: "POS",
         unit: "",
         ratioThresholdNormal: 1.0,
-        ratioThresholdFlat: 3.0,
+        ratioThresholdFlat: 3.0
       });
 
       const texts = fillTextValues(ctx);
@@ -306,16 +287,15 @@ describe("PositionCoordinateWidget", function () {
       54.1234,
       expect.objectContaining({
         formatter: "formatLonLatsDecimal",
-        formatterParameters: ["lat"],
-      }),
+        formatterParameters: ["lat"]
+      })
     );
     expect(helpers.format.applyFormatter).toHaveBeenCalledWith(
       10.9876,
       expect.objectContaining({
         formatter: "formatLonLatsDecimal",
-        formatterParameters: ["lon"],
-      }),
+        formatterParameters: ["lon"]
+      })
     );
   });
-
 });

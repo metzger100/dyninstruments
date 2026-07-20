@@ -9,14 +9,12 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniPreparedPayloadModelCache = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @param {unknown} payload @returns {DyniPreparedPayloadInput} */
   function resolvePayload(payload) {
-    return /** @type {DyniPreparedPayloadInput} */ (
-      payload && typeof payload === "object" ? payload : {}
-    );
+    return /** @type {DyniPreparedPayloadInput} */ (payload && typeof payload === "object" ? payload : {});
   }
 
   /** @param {DyniPreparedPayloadInput} payload @returns {unknown} */
@@ -40,9 +38,7 @@
 
   /** @param {DyniPreparedPayloadInput} payload @returns {number | null} */
   function resolveRevision(payload) {
-    return typeof payload.revision === "number" && Number.isFinite(payload.revision)
-      ? payload.revision
-      : null;
+    return typeof payload.revision === "number" && Number.isFinite(payload.revision) ? payload.revision : null;
   }
 
   /**
@@ -50,9 +46,7 @@
    * @returns {DyniPreparedModelCache}
    */
   function createPreparedModelCache(options) {
-    const opts = /** @type {DyniPreparedModelCacheOptions} */ (
-      options && typeof options === "object" ? options : {}
-    );
+    const opts = /** @type {DyniPreparedModelCacheOptions} */ (options && typeof options === "object" ? options : {});
     if (typeof opts.buildModel !== "function") {
       throw new Error("PreparedPayloadModelCache: buildModel option is required");
     }
@@ -75,11 +69,11 @@
       const shellHeight = resolveShellDimension(shellRect, "height");
 
       if (
-        preparedPayload
-        && preparedPayload.revision === revision
-        && preparedPayload.props === props
-        && preparedPayload.shellWidth === shellWidth
-        && preparedPayload.shellHeight === shellHeight
+        preparedPayload &&
+        preparedPayload.revision === revision &&
+        preparedPayload.props === props &&
+        preparedPayload.shellWidth === shellWidth &&
+        preparedPayload.shellHeight === shellHeight
       ) {
         return preparedPayload;
       }
@@ -114,4 +108,4 @@
   }
 
   return { id: "PreparedPayloadModelCache", create: create };
-}));
+});

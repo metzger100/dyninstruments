@@ -1,33 +1,21 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const JS_SCAN_ROOTS = [
-  "plugin.js",
-  "runtime",
-  "cluster",
-  "config",
-  "shared",
-  "widgets",
-];
-const JS_EXCLUDED_DIRS = new Set([
-  ".git",
-  "node_modules",
-  "tests",
-  "tools",
-  "coverage",
-]);
+const JS_SCAN_ROOTS = ["plugin.js", "runtime", "cluster", "config", "shared", "widgets"];
+const JS_EXCLUDED_DIRS = new Set([".git", "node_modules", "tests", "tools", "coverage"]);
 
 const STALE_PHRASES = [
   "In COMPONENTS (plugin.js)",
   "composeUpdates() in runtime/widget-registrar.js",
   "runtime/init.js calls runtime.registerWidget()",
-  "Update `ClusterWidget.js`",
+  "Update `ClusterWidget.js`"
 ];
 
 const ROOT_REACHABILITY_DOCS = ["AGENTS.md", "CLAUDE.md", "ARCHITECTURE.md"];
 const REACHABILITY_ENTRY_FILES = ["AGENTS.md", "CLAUDE.md"];
 const REACHABILITY_EXCLUDED = ["documentation/exec-plans/TEMPLATE.md"];
 
+/** @param {string} curr @param {string[]} out @param {((name: string) => boolean) | undefined} keepDir */
 function walk(curr, out, keepDir) {
   const stat = fs.statSync(curr);
   if (stat.isFile()) {
@@ -41,13 +29,15 @@ function walk(curr, out, keepDir) {
   }
 }
 
+/** @param {string} start @param {((name: string) => boolean) | undefined} [keepDir] @returns {string[]} */
 function collectMarkdown(start, keepDir) {
   if (!fs.existsSync(start)) return [];
-  const out = [];
+  const out = /** @type {string[]} */ ([]);
   walk(start, out, keepDir);
   return out;
 }
 
+/** @param {string} curr @param {Set<string>} out */
 function walkJs(curr, out) {
   const stat = fs.statSync(curr);
   if (stat.isFile()) {
@@ -60,6 +50,7 @@ function walkJs(curr, out) {
   }
 }
 
+/** @param {string} root @returns {string[]} */
 function collectJsFiles(root) {
   const collected = new Set();
   for (const scanRoot of JS_SCAN_ROOTS) {
@@ -70,23 +61,26 @@ function collectJsFiles(root) {
   return Array.from(collected).sort();
 }
 
+/** @param {string} link @returns {boolean} */
 function isExternalLink(link) {
   return /^(https?:|mailto:|tel:|data:)/i.test(link);
 }
 
+/** @param {string} root @param {string} file @returns {string} */
 function rel(root, file) {
   return path.relative(root, file).replace(/\\/g, "/") || ".";
 }
 
+/** @param {string} root @returns {{ ok: boolean, checkedMarkdownFiles: number, checkedJsFiles: number, failures: Array<{ type: string, file: string, message: string }> }} */
 function checkDocumentationContracts(root) {
   const resolvedRoot = path.resolve(root);
-  const failures = [];
-  const fail = (type, file, message) =>
-    failures.push({ type, file: rel(resolvedRoot, file), message });
+  const failures = /** @type {Array<{ type: string, file: string, message: string }>} */ ([]);
+  /** @param {string} type @param {string} file @param {string} message */
+  const fail = (type, file, message) => failures.push({ type, file: rel(resolvedRoot, file), message });
 
   const targets = [
     ...collectMarkdown(path.join(resolvedRoot, "documentation")),
-    path.join(resolvedRoot, "CLAUDE.md"),
+    path.join(resolvedRoot, "CLAUDE.md")
   ].filter((p) => fs.existsSync(p));
 
   for (const file of targets) {
@@ -110,10 +104,11 @@ function checkDocumentationContracts(root) {
     ok: failures.length === 0,
     checkedMarkdownFiles: targets.length,
     checkedJsFiles: jsFiles.length,
-    failures,
+    failures
   };
 }
 
+/** @param {string} file @returns {Array<{ target: string, abs: string }>} */
 function fileLinkTargets(file) {
   if (!fs.existsSync(file) || !file.endsWith(".md")) return [];
   const links = [];
@@ -135,14 +130,19 @@ function fileLinkTargets(file) {
   return links;
 }
 
+/** @param {string} root @returns {{ ok: boolean, discovered: number, reachable: number, orphans: string[], broken: Array<{ file: string, target: string }> }} */
 function checkReachability(root) {
   const resolvedRoot = path.resolve(root);
+  /** @param {string} p */
   const abs = (p) => path.join(resolvedRoot, p);
   const excluded = new Set(REACHABILITY_EXCLUDED.map(abs));
   const rootDocs = ROOT_REACHABILITY_DOCS.map(abs).filter((p) => fs.existsSync(p));
   const entryFiles = REACHABILITY_ENTRY_FILES.map(abs).filter((p) => fs.existsSync(p));
   const discovered = Array.from(
-    new Set([...collectMarkdown(path.join(resolvedRoot, "documentation"), (name) => name !== "node_modules"), ...rootDocs]),
+    new Set([
+      ...collectMarkdown(path.join(resolvedRoot, "documentation"), (name) => name !== "node_modules"),
+      ...rootDocs
+    ])
   ).filter((p) => !excluded.has(p));
 
   const broken = [];
@@ -160,7 +160,7 @@ function checkReachability(root) {
   const reachable = new Set(entryFiles);
   const queue = [...entryFiles];
   while (queue.length > 0) {
-    const current = queue.shift();
+    const current = /** @type {string} */ (queue.shift());
     for (const link of fileLinkTargets(current)) {
       if (!fs.existsSync(link.abs) || reachable.has(link.abs)) continue;
       reachable.add(link.abs);
@@ -174,12 +174,12 @@ function checkReachability(root) {
     discovered: discovered.length,
     reachable: discovered.filter((file) => reachable.has(file)).length,
     orphans,
-    broken,
+    broken
   };
 }
 
 module.exports = {
   STALE_PHRASES,
   checkDocumentationContracts,
-  checkReachability,
+  checkReachability
 };

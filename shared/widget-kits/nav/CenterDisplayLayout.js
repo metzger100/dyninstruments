@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniCenterDisplayLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const HIGH_CENTER_WEIGHT = 2.4;
@@ -74,7 +74,8 @@
     function computeLayout(args) {
       const cfg = args || {};
       const contentRect = cfg.contentRect || makeRect(0, 0, 0, 0);
-      const responsive = cfg.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
+      const responsive =
+        cfg.responsive || profileApi.computeProfile(contentRect.w, contentRect.h, { scales: RESPONSIVE_SCALES });
       const defaultGap = profileApi.computeInsetPx(responsive, GAP_RATIO, 1);
       const mode = cfg.mode === "high" || cfg.mode === "flat" ? cfg.mode : "normal";
       const relationCount = Math.max(1, Math.floor(Number(cfg.relationCount) || 0));
@@ -127,26 +128,28 @@
         };
       }
 
-      const vertical = mode === "high"
-        ? computeVerticalRects(
-          contentRect,
-          relationCount,
-          gap,
-          HIGH_CENTER_WEIGHT * /** @type {number} */ (responsive.highCenterWeightScale)
-        )
-        : computeNormalVerticalRects(contentRect, relationCount, gap);
+      const vertical =
+        mode === "high"
+          ? computeVerticalRects(
+              contentRect,
+              relationCount,
+              gap,
+              HIGH_CENTER_WEIGHT * /** @type {number} */ (responsive.highCenterWeightScale)
+            )
+          : computeNormalVerticalRects(contentRect, relationCount, gap);
       const highCaptionBase = clampNumber(cfg.highCaptionRatio, 0.16, 0.34, HIGH_STACKED_CAPTION_RATIO);
 
       return {
         mode: mode,
         gap: gap,
-        center: mode === "high"
-          ? splitStackedPanel(
-            vertical.centerRect,
-            profileApi.scaleShare(highCaptionBase, responsive.stackedCaptionScale, 0.16, 0.34),
-            cfg.coordAlign
-          )
-          : splitNormalPanel(vertical.centerRect, gap, normalCaptionShare, cfg.coordAlign),
+        center:
+          mode === "high"
+            ? splitStackedPanel(
+                vertical.centerRect,
+                profileApi.scaleShare(highCaptionBase, responsive.stackedCaptionScale, 0.16, 0.34),
+                cfg.coordAlign
+              )
+            : splitNormalPanel(vertical.centerRect, gap, normalCaptionShare, cfg.coordAlign),
         rowRects: splitRows(vertical.rowsRect, relationCount, gap),
         responsive: responsive
       };
@@ -196,9 +199,7 @@
     let y = rect.y;
     for (let i = 0; i < rowCount; i++) {
       const isLast = i === rowCount - 1;
-      const height = isLast
-        ? Math.max(1, rect.y + rect.h - y)
-        : baseHeight;
+      const height = isLast ? Math.max(1, rect.y + rect.h - y) : baseHeight;
       rows.push(makeRect(rect.x, y, rect.w, height));
       y += height + gap;
     }
@@ -265,7 +266,7 @@
     const rowGapTotal = safeGap * Math.max(0, relationCount - 1);
     const usableHeight = Math.max(1, contentRect.h - safeGap - rowGapTotal);
     const weight = Math.max(0.1, Number(centerWeight) || 0);
-    const centerHeight = Math.max(1, Math.floor(usableHeight * weight / (weight + relationCount)));
+    const centerHeight = Math.max(1, Math.floor((usableHeight * weight) / (weight + relationCount)));
     return {
       centerRect: makeRect(contentRect.x, contentRect.y, contentRect.w, centerHeight),
       rowsRect: makeRect(
@@ -289,10 +290,7 @@
     const totalRhythmHeight = Math.max(1, contentRect.h - safeGap - rowGapTotal);
     const centerHeight = Math.max(
       1,
-      Math.floor(
-        totalRhythmHeight * NORMAL_COORD_LINE_COUNT /
-        Math.max(1, relationCount + NORMAL_COORD_LINE_COUNT)
-      )
+      Math.floor((totalRhythmHeight * NORMAL_COORD_LINE_COUNT) / Math.max(1, relationCount + NORMAL_COORD_LINE_COUNT))
     );
     return {
       centerRect: makeRect(contentRect.x, contentRect.y, contentRect.w, centerHeight),
@@ -306,4 +304,4 @@
   }
 
   return { id: "CenterDisplayLayout", create: create };
-}));
+});

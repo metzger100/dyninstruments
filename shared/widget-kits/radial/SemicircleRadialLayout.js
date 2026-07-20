@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniSemicircleRadialLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const STRUCTURAL_RATIO_THRESHOLD_NORMAL = 1.0;
@@ -59,13 +59,46 @@
     const sFloor = gs.strokeFloor(strokeWeight);
     const eFloor = gs.extentFloor(strokeWeight);
     const ringW = gs.scale(primaryDim, clampNumber(ringTheme.widthFactor, 0, Number.MAX_SAFE_INTEGER, 0.12), eFloor);
-    const majorTickLen = gs.scale(primaryDim, clampNumber(ticksTheme.majorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.08), eFloor);
-    const majorTickWidth = gs.scaleStroke(primaryDim, clampNumber(ticksTheme.majorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.02), strokeWeight, sFloor);
-    const minorTickLen = gs.scale(primaryDim, clampNumber(ticksTheme.minorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.047), eFloor);
-    const minorTickWidth = gs.scaleStroke(primaryDim, clampNumber(ticksTheme.minorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.01), strokeWeight, sFloor);
-    const arcLineWidth = gs.scaleStroke(primaryDim, clampNumber(ringTheme.arcLineWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.013), strokeWeight, sFloor);
-    const pointerDepth = gs.scalePointer(primaryDim, clampNumber(pointerTheme.depthFactor, 0, Number.MAX_SAFE_INTEGER, 0.22), pointerDepthWeight, eFloor);
-    const pointerSide = gs.scalePointer(primaryDim, clampNumber(pointerTheme.sideFactor, 0, Number.MAX_SAFE_INTEGER, 0.11), pointerSideWeight, eFloor);
+    const majorTickLen = gs.scale(
+      primaryDim,
+      clampNumber(ticksTheme.majorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.08),
+      eFloor
+    );
+    const majorTickWidth = gs.scaleStroke(
+      primaryDim,
+      clampNumber(ticksTheme.majorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.02),
+      strokeWeight,
+      sFloor
+    );
+    const minorTickLen = gs.scale(
+      primaryDim,
+      clampNumber(ticksTheme.minorLenFactor, 0, Number.MAX_SAFE_INTEGER, 0.047),
+      eFloor
+    );
+    const minorTickWidth = gs.scaleStroke(
+      primaryDim,
+      clampNumber(ticksTheme.minorWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.01),
+      strokeWeight,
+      sFloor
+    );
+    const arcLineWidth = gs.scaleStroke(
+      primaryDim,
+      clampNumber(ringTheme.arcLineWidthFactor, 0, Number.MAX_SAFE_INTEGER, 0.013),
+      strokeWeight,
+      sFloor
+    );
+    const pointerDepth = gs.scalePointer(
+      primaryDim,
+      clampNumber(pointerTheme.depthFactor, 0, Number.MAX_SAFE_INTEGER, 0.22),
+      pointerDepthWeight,
+      eFloor
+    );
+    const pointerSide = gs.scalePointer(
+      primaryDim,
+      clampNumber(pointerTheme.sideFactor, 0, Number.MAX_SAFE_INTEGER, 0.11),
+      pointerSideWeight,
+      eFloor
+    );
 
     return {
       availW: availableWidth,
@@ -110,7 +143,7 @@
     function computeMode(W, H, thresholdNormal, thresholdFlat) {
       const width = Number(W) || 0;
       const height = Number(H) || 0;
-      const ratio = height > 0 ? (width / height) : width;
+      const ratio = height > 0 ? width / height : width;
       const normalThreshold = clampNumber(
         thresholdNormal,
         0.1,
@@ -154,27 +187,31 @@
       const W = Math.max(1, Math.floor(Number(cfg.W) || 0));
       const H = Math.max(1, Math.floor(Number(cfg.H) || 0));
       const insets = cfg.insets || computeInsets(W, H);
-      const responsive = cfg.responsive || insets.responsive || profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
+      const responsive =
+        cfg.responsive || insets.responsive || profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
       const textFillScale = scaleHelpers.resolveTextFillScale(responsive);
       const compactGeometryScale = scaleHelpers.resolveCompactGeometryScale(textFillScale);
       const theme = /** @type {DyniRadialResolvedTheme} */ (cfg.theme);
       const radialTheme = theme.radial;
       const labelTheme = radialTheme.labels;
       const geom = computeGeometry(W, H, insets.pad, theme, gs);
-      const labelInset = Math.max(1, Math.floor(geom.ringW * clampNumber(
-        labelTheme.insetFactor,
-        0,
-        Number.MAX_SAFE_INTEGER,
-        1.8
-      ) * compactGeometryScale));
-      const labelFontPx = Math.max(1, Math.floor(geom.R * clampNumber(
-        labelTheme.fontFactor,
-        0,
-        Number.MAX_SAFE_INTEGER,
-        0.14
-      ) * compactGeometryScale));
+      const labelInset = Math.max(
+        1,
+        Math.floor(
+          geom.ringW * clampNumber(labelTheme.insetFactor, 0, Number.MAX_SAFE_INTEGER, 1.8) * compactGeometryScale
+        )
+      );
+      const labelFontPx = Math.max(
+        1,
+        Math.floor(geom.R * clampNumber(labelTheme.fontFactor, 0, Number.MAX_SAFE_INTEGER, 0.14) * compactGeometryScale)
+      );
       const mode = cfg.mode === "flat" || cfg.mode === "high" ? cfg.mode : "normal";
-      const contentRect = makeRect(insets.pad, insets.pad, Math.max(1, W - insets.pad * 2), Math.max(1, H - insets.pad * 2));
+      const contentRect = makeRect(
+        insets.pad,
+        insets.pad,
+        Math.max(1, W - insets.pad * 2),
+        Math.max(1, H - insets.pad * 2)
+      );
       const rightEdge = W - insets.pad;
       const bottomEdge = H - insets.pad;
       const flatBox = makeRect(
@@ -243,4 +280,4 @@
   }
 
   return { id: "SemicircleRadialLayout", create: create };
-}));
+});

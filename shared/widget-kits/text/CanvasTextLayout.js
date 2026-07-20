@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniCanvasTextLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @param {number} x @param {number} w @param {unknown} align @returns {number} */
@@ -17,16 +17,17 @@
       return x + w;
     }
     if (align === "center") {
-      return x + (w * 0.5);
+      return x + w * 0.5;
     }
     return x;
   }
 
   /** @param {unknown} family @param {unknown} options @returns {unknown} */
   function resolveFamily(family, options) {
-    const opts = options && typeof options === "object"
-      ? /** @type {{ useMono?: unknown, monoFamily?: unknown }} */ (options)
-      : null;
+    const opts =
+      options && typeof options === "object"
+        ? /** @type {{ useMono?: unknown, monoFamily?: unknown }} */ (options)
+        : null;
     if (!opts || opts.useMono !== true) {
       return family;
     }
@@ -147,13 +148,30 @@
      * @param {unknown} textOptions
      * @returns {void}
      */
-    function drawValueUnitWithFit(ctx, family, x, y, w, h, value, unit, fit, align, valueWeight, labelWeight, textOptions) {
+    function drawValueUnitWithFit(
+      ctx,
+      family,
+      x,
+      y,
+      w,
+      h,
+      value,
+      unit,
+      fit,
+      align,
+      valueWeight,
+      labelWeight,
+      textOptions
+    ) {
       if (w <= 0 || h <= 0 || !value) {
         return;
       }
 
-      const data = /** @type {{ vPx?: unknown, uPx?: unknown, gap?: unknown }} */ (fit)
-        || { vPx: MIN_FONT_PX, uPx: MIN_FONT_PX, gap: 0 };
+      const data = /** @type {{ vPx?: unknown, uPx?: unknown, gap?: unknown }} */ (fit) || {
+        vPx: MIN_FONT_PX,
+        uPx: MIN_FONT_PX,
+        gap: 0
+      };
       const vPx = Math.max(MIN_FONT_PX, Number(data.vPx) || 0);
       const uPx = Math.max(MIN_FONT_PX, Number(data.uPx) || 0);
       const gap = Math.max(0, Math.floor(Number(data.gap) || 0));
@@ -167,14 +185,20 @@
         unitW = measureTextWidth(ctx, unit);
       }
 
-      const total = valueW + (unit ? (gap + unitW) : 0);
+      const total = valueW + (unit ? gap + unitW : 0);
       const widthLimit = Math.max(0, Number(w) || 0);
       const mode = align || "left";
-      const rowScale = total > widthLimit + WIDTH_EPSILON
-        ? Math.max(0.01, widthLimit / Math.max(WIDTH_EPSILON, total))
-        : 1;
+      const rowScale =
+        total > widthLimit + WIDTH_EPSILON ? Math.max(0.01, widthLimit / Math.max(WIDTH_EPSILON, total)) : 1;
       const anchorX = lineAnchor(x, w, mode);
-      const xStart = mode === "right" ? -total : (mode === "center" ? -(total * 0.5) : 0);
+      let xStart;
+      if (mode === "right") {
+        xStart = -total;
+      } else if (mode === "center") {
+        xStart = -(total * 0.5);
+      } else {
+        xStart = 0;
+      }
       const yVal = y + Math.floor((h - vPx) * 0.5);
 
       ctx.save();
@@ -211,24 +235,38 @@
      * @param {unknown} textOptions
      * @returns {void}
      */
-    function drawInlineCapValUnit(ctx, family, x, y, w, h, caption, value, unit, fit, valueWeight, labelWeight, textOptions) {
+    function drawInlineCapValUnit(
+      ctx,
+      family,
+      x,
+      y,
+      w,
+      h,
+      caption,
+      value,
+      unit,
+      fit,
+      valueWeight,
+      labelWeight,
+      textOptions
+    ) {
       if (w <= 0 || h <= 0 || !value) {
         return;
       }
 
-      const data = /** @type {DyniInlineCapValUnitFitResult} */ (fit)
-        || fitInlineCapValUnit(ctx, family, caption, value, unit, w, h, 0.8, valueWeight, labelWeight);
+      const data =
+        /** @type {DyniInlineCapValUnitFitResult} */ (fit) ||
+        fitInlineCapValUnit(ctx, family, caption, value, unit, w, h, 0.8, valueWeight, labelWeight);
       const widthLimit = Math.max(0, Number(w) || 0);
-      const rowScale = data.total > widthLimit + WIDTH_EPSILON
-        ? Math.max(0.01, widthLimit / Math.max(WIDTH_EPSILON, data.total))
-        : 1;
+      const rowScale =
+        data.total > widthLimit + WIDTH_EPSILON ? Math.max(0.01, widthLimit / Math.max(WIDTH_EPSILON, data.total)) : 1;
       const capOpacity = resolveTextOptionOpacity(textOptions, "captionOpacity");
       const unitOpacity = resolveTextOptionOpacity(textOptions, "unitOpacity");
       let xStart = -(data.total * 0.5);
       const yMid = y + Math.floor(h / 2);
 
       ctx.save();
-      ctx.translate(x + (w * 0.5), 0);
+      ctx.translate(x + w * 0.5, 0);
       ctx.scale(rowScale, 1);
       ctx.textBaseline = "middle";
       ctx.textAlign = "left";
@@ -279,7 +317,23 @@
      * @param {unknown} textOptions
      * @returns {void}
      */
-    function drawThreeRowsBlock(ctx, family, x, y, w, h, caption, value, unit, secScale, align, sizes, valueWeight, labelWeight, textOptions) {
+    function drawThreeRowsBlock(
+      ctx,
+      family,
+      x,
+      y,
+      w,
+      h,
+      caption,
+      value,
+      unit,
+      secScale,
+      align,
+      sizes,
+      valueWeight,
+      labelWeight,
+      textOptions
+    ) {
       const mode = align || "center";
       /** @type {number} */
       let cPx;
@@ -363,4 +417,4 @@
   }
 
   return { id: "CanvasTextLayout", create: create };
-}));
+});

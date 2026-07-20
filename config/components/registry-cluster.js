@@ -7,14 +7,14 @@
 
   const ns = root.DyniPlugin;
   const config = ns.config;
-  const shared = config.shared = config.shared || {};
+  const shared = (config.shared = config.shared || {});
   const BASE = ns.baseUrl;
 
   if (typeof BASE !== "string" || !BASE) {
     throw new Error("dyninstruments: baseUrl missing before config/components/registry-cluster.js load");
   }
 
-  const groups = shared.componentRegistryGroups = shared.componentRegistryGroups || {};
+  const groups = (shared.componentRegistryGroups = shared.componentRegistryGroups || {});
 
   groups.cluster = {
     AisTargetViewModel: {
@@ -104,4 +104,4 @@
       globalKey: "DyniWindMapper"
     }
   };
-}(this));
+})(this);

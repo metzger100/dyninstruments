@@ -265,4 +265,4 @@
       roll: { cap: "ROLL", unit: "\u00b0" }
     }
   };
-}(this));
+})(this);

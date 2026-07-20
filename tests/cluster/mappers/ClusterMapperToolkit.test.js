@@ -71,6 +71,8 @@ describe("ClusterMapperToolkit", function () {
     expect(toolkit.unitNumber("rteDistance", "nm")).toBe(1);
     expect(toolkit.unitNumber("anchorDistance", "m")).toBeUndefined();
     expect(toolkit.unitNumber("anchorDistance", "nm")).toBe(1852);
+    expect(toolkit.positiveUnitNumber("rteDistance", "nm", 5)).toBe(1);
+    expect(toolkit.positiveUnitNumber("anchorDistance", "m", 5)).toBe(5);
     expect(toolkit.formatUnit("rteDistance", "distance")).toBe("nm");
   });
 
@@ -84,7 +86,9 @@ describe("ClusterMapperToolkit", function () {
       unit_sog_kmh: "km/h custom"
     });
     expect(missingTokenToolkit.formatUnit("sog", "speed")).toBe("kmh");
-    expect(missingTokenToolkit.unitText("sog", "speed", missingTokenToolkit.formatUnit("sog", "speed"))).toBe("km/h custom");
+    expect(missingTokenToolkit.unitText("sog", "speed", missingTokenToolkit.formatUnit("sog", "speed"))).toBe(
+      "km/h custom"
+    );
 
     const invalidTokenToolkit = mod.create().createToolkit({
       formatUnit_sog: "bogus",
@@ -95,18 +99,25 @@ describe("ClusterMapperToolkit", function () {
 
   it("uses injected RadialAngleMath helpers when provided", function () {
     const mod = loadFresh("cluster/mappers/ClusterMapperToolkit.js");
-    const toolkit = mod.create({}, createComponentContextMock({
-      modules: {
-        RadialAngleMath: {
-          create() {
-            return {
-              norm360() { return 42; },
-              norm180() { return -7; }
-            };
+    const toolkit = mod.create(
+      {},
+      createComponentContextMock({
+        modules: {
+          RadialAngleMath: {
+            create() {
+              return {
+                norm360() {
+                  return 42;
+                },
+                norm180() {
+                  return -7;
+                }
+              };
+            }
           }
         }
-      }
-    }));
+      })
+    );
 
     const direction = toolkit.makeAngleFormatter(true, true, "NA");
     const relative = toolkit.makeAngleFormatter(false, true, "NA");

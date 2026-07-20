@@ -1,25 +1,22 @@
 const { loadFresh } = require("../../helpers/load-umd");
-const {
-  createComponentContextMock,
-} = require("../../helpers/component-context-mock");
+const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 describe("XteHighwayPrimitives", function () {
   function create() {
-    const geometryScale = loadFresh(
-      "shared/widget-kits/layout/GeometryScale.js",
-    );
+    const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
     const mod = loadFresh("shared/widget-kits/xte/XteHighwayPrimitives.js");
     return mod.create(
       {},
       createComponentContextMock({
         modules: {
-          GeometryScale: geometryScale,
-        },
-      }),
+          GeometryScale: geometryScale
+        }
+      })
     );
   }
 
+  /** @param {any} ctx */
   function extractBoatPoints(ctx) {
     const calls = ctx.calls;
     const beginIdx = [];
@@ -29,34 +26,38 @@ describe("XteHighwayPrimitives", function () {
       }
     }
     const markerStart = beginIdx[1];
-    const markerEnd = calls.findIndex(function (call, idx) {
+    const markerEnd = calls.findIndex(function (/** @type {any} */ call, /** @type {any} */ idx) {
       return idx > markerStart && call.name === "closePath";
     });
     return calls
       .slice(markerStart, markerEnd + 1)
-      .filter(function (call) {
+      .filter(function (/** @type {any} */ call) {
         return call.name === "moveTo" || call.name === "lineTo";
       })
-      .map(function (call) {
+      .map(function (/** @type {any} */ call) {
         return { x: call.args[0], y: call.args[1] };
       });
   }
 
+  /** @param {any} points @param {any} axis */
   function span(points, axis) {
-    const values = points.map(function (point) {
+    const values = points.map(function (/** @type {any} */ point) {
       return point[axis];
     });
     return Math.max.apply(null, values) - Math.min.apply(null, values);
   }
 
+  /** @param {any} points */
   function boatLengthFromPoints(points) {
     return span(points, "y") / 1.18;
   }
 
+  /** @param {any} points */
   function boatBeamFromPoints(points) {
     return span(points, "x") / 1.12;
   }
 
+  /** @param {any} ctx */
   function lineSegments(ctx) {
     const segments = [];
     const calls = ctx.calls;
@@ -64,7 +65,7 @@ describe("XteHighwayPrimitives", function () {
       if (calls[i].name === "moveTo" && calls[i + 1].name === "lineTo") {
         segments.push({
           from: { x: calls[i].args[0], y: calls[i].args[1] },
-          to: { x: calls[i + 1].args[0], y: calls[i + 1].args[1] },
+          to: { x: calls[i + 1].args[0], y: calls[i + 1].args[1] }
         });
       }
     }
@@ -73,7 +74,7 @@ describe("XteHighwayPrimitives", function () {
 
   function createLineWidthTrackerContext() {
     const ctx = createMockContext2D();
-    const widths = [];
+    const widths = /** @type {any[]} */ ([]);
     let value = ctx.lineWidth;
     Object.defineProperty(ctx, "lineWidth", {
       configurable: true,
@@ -83,7 +84,7 @@ describe("XteHighwayPrimitives", function () {
       set(next) {
         value = next;
         widths.push(next);
-      },
+      }
     });
     return { ctx, widths };
   }
@@ -95,10 +96,10 @@ describe("XteHighwayPrimitives", function () {
         x: 0,
         y: 0,
         w: 280,
-        h: 170,
+        h: 170
       },
       "normal",
-      170,
+      170
     );
 
     expect(geom.primaryDim).toBe(170);
@@ -114,17 +115,17 @@ describe("XteHighwayPrimitives", function () {
         cx: 150,
         horizonY: 40,
         baseY: 170,
-        nearHalf: 120,
+        nearHalf: 120
       },
       {
         pointer: "#f00",
-        alarm: "#f00",
+        alarm: "#f00"
       },
       0.2,
       false,
       120,
       1,
-      1,
+      1
     );
 
     const points = extractBoatPoints(ctx);
@@ -144,14 +145,14 @@ describe("XteHighwayPrimitives", function () {
         cx: 100,
         horizonY: 40,
         baseY: 120,
-        nearHalf: 40,
+        nearHalf: 40
       },
       colors,
       1.2,
       true,
       40,
       1,
-      1,
+      1
     );
 
     draw.drawDynamicHighway(
@@ -160,22 +161,22 @@ describe("XteHighwayPrimitives", function () {
         cx: 220,
         horizonY: 40,
         baseY: 230,
-        nearHalf: 140,
+        nearHalf: 140
       },
       colors,
       1.2,
       true,
       140,
       1,
-      1,
+      1
     );
 
     const smallBoat = extractBoatPoints(smallCtx);
     const largeBoat = extractBoatPoints(largeCtx);
-    const smallArc = smallCtx.calls.find(function (call) {
+    const smallArc = smallCtx.calls.find(function (/** @type {any} */ call) {
       return call.name === "arc";
     });
-    const largeArc = largeCtx.calls.find(function (call) {
+    const largeArc = largeCtx.calls.find(function (/** @type {any} */ call) {
       return call.name === "arc";
     });
 
@@ -193,7 +194,7 @@ describe("XteHighwayPrimitives", function () {
       cx: 150,
       horizonY: 40,
       baseY: 170,
-      nearHalf: 120,
+      nearHalf: 120
     };
 
     draw.drawDynamicHighway(baseCtx, geom, colors, 0.2, false, 120, 1, 1);
@@ -217,21 +218,21 @@ describe("XteHighwayPrimitives", function () {
         horizonY: 40,
         baseY: 170,
         nearHalf: 120,
-        farHalf: 30,
+        farHalf: 30
       },
       {
         roadLine: "#fff",
-        stripeLine: "#ccc",
+        stripeLine: "#ccc"
       },
       "normal",
       120,
-      1,
+      1
     );
 
-    const fillCalls = ctx.calls.filter(function (call) {
+    const fillCalls = ctx.calls.filter(function (/** @type {any} */ call) {
       return call.name === "fill";
     });
-    const strokeCalls = ctx.calls.filter(function (call) {
+    const strokeCalls = ctx.calls.filter(function (/** @type {any} */ call) {
       return call.name === "stroke";
     });
 
@@ -248,13 +249,13 @@ describe("XteHighwayPrimitives", function () {
       horizonY: 40,
       baseY: 170,
       nearHalf: 120,
-      farHalf: 30,
+      farHalf: 30
     };
     const colors = {
       pointer: "#f00",
       alarm: "#f00",
       roadLine: "#fff",
-      stripeLine: "#ccc",
+      stripeLine: "#ccc"
     };
 
     const staticBase = createLineWidthTrackerContext();
@@ -264,33 +265,11 @@ describe("XteHighwayPrimitives", function () {
 
     const dynamicBase = createLineWidthTrackerContext();
     const dynamicScaled = createLineWidthTrackerContext();
-    draw.drawDynamicHighway(
-      dynamicBase.ctx,
-      geom,
-      colors,
-      0.1,
-      false,
-      120,
-      1,
-      1,
-    );
-    draw.drawDynamicHighway(
-      dynamicScaled.ctx,
-      geom,
-      colors,
-      0.1,
-      false,
-      120,
-      2,
-      1,
-    );
+    draw.drawDynamicHighway(dynamicBase.ctx, geom, colors, 0.1, false, 120, 1, 1);
+    draw.drawDynamicHighway(dynamicScaled.ctx, geom, colors, 0.1, false, 120, 2, 1);
 
-    expect(Math.max.apply(null, staticScaled.widths)).toBeGreaterThan(
-      Math.max.apply(null, staticBase.widths),
-    );
-    expect(Math.max.apply(null, dynamicScaled.widths)).toBeGreaterThan(
-      Math.max.apply(null, dynamicBase.widths),
-    );
+    expect(Math.max.apply(null, staticScaled.widths)).toBeGreaterThan(Math.max.apply(null, staticBase.widths));
+    expect(Math.max.apply(null, dynamicScaled.widths)).toBeGreaterThan(Math.max.apply(null, dynamicBase.widths));
   });
 
   it("scales the highway and boat marker from the primary dimension and respects the lane-depth clamp", function () {
@@ -299,7 +278,7 @@ describe("XteHighwayPrimitives", function () {
       pointer: "#f00",
       alarm: "#f00",
       roadLine: "#fff",
-      stripeLine: "#ccc",
+      stripeLine: "#ccc"
     };
     const staticTracker = createLineWidthTrackerContext();
 
@@ -310,44 +289,33 @@ describe("XteHighwayPrimitives", function () {
         horizonY: 0,
         baseY: 170,
         nearHalf: 120,
-        farHalf: 40,
+        farHalf: 40
       },
       colors,
       "normal",
       170,
-      1,
+      1
     );
 
     expect(staticTracker.widths[0]).toBe(2);
-    expect(Math.max.apply(null, staticTracker.widths)).toBeGreaterThanOrEqual(
-      2,
-    );
+    expect(Math.max.apply(null, staticTracker.widths)).toBeGreaterThanOrEqual(2);
 
     [
       {
         primaryDim: 170,
         laneDepth: 170,
         geom: { cx: 140, horizonY: 0, baseY: 170, nearHalf: 120, farHalf: 40 },
-        expectedLength: 19,
+        expectedLength: 19
       },
       {
         primaryDim: 40,
         laneDepth: 40,
         geom: { cx: 80, horizonY: 0, baseY: 40, nearHalf: 40, farHalf: 10 },
-        expectedLength: 4,
-      },
+        expectedLength: 4
+      }
     ].forEach(function (testCase) {
       const ctx = createMockContext2D();
-      draw.drawDynamicHighway(
-        ctx,
-        testCase.geom,
-        colors,
-        0.2,
-        false,
-        testCase.primaryDim,
-        1,
-        1,
-      );
+      draw.drawDynamicHighway(ctx, testCase.geom, colors, 0.2, false, testCase.primaryDim, 1, 1);
       const markerLength = boatLengthFromPoints(extractBoatPoints(ctx));
 
       expect(markerLength).toBeCloseTo(testCase.expectedLength, 6);
@@ -361,36 +329,18 @@ describe("XteHighwayPrimitives", function () {
       horizonY: 0,
       baseY: 1700,
       nearHalf: 1200,
-      farHalf: 400,
+      farHalf: 400
     };
     const doubledGeom = {
       cx: 2800,
       horizonY: 0,
       baseY: 3400,
       nearHalf: 2400,
-      farHalf: 800,
+      farHalf: 800
     };
 
-    draw.drawDynamicHighway(
-      baseBoatCtx,
-      baseGeom,
-      colors,
-      0.2,
-      false,
-      1700,
-      1,
-      1,
-    );
-    draw.drawDynamicHighway(
-      doubledBoatCtx,
-      doubledGeom,
-      colors,
-      0.2,
-      false,
-      3400,
-      1,
-      1,
-    );
+    draw.drawDynamicHighway(baseBoatCtx, baseGeom, colors, 0.2, false, 1700, 1, 1);
+    draw.drawDynamicHighway(doubledBoatCtx, doubledGeom, colors, 0.2, false, 3400, 1, 1);
 
     const baseBoatPoints = extractBoatPoints(baseBoatCtx);
     const doubledBoatPoints = extractBoatPoints(doubledBoatCtx);
@@ -411,12 +361,12 @@ describe("XteHighwayPrimitives", function () {
         horizonY: 0,
         baseY: 10,
         nearHalf: 8,
-        farHalf: 3,
+        farHalf: 3
       },
       colors,
       "normal",
       10,
-      1,
+      1
     );
 
     const seamLengths = lineSegments(tinyStatic)

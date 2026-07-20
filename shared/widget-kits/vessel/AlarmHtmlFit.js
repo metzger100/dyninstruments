@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAlarmHtmlFit = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const SECONDARY_SCALE = 0.8;
@@ -28,9 +28,8 @@
    */
   function resolveThemeColors(theme) {
     const colors = theme && theme.colors && typeof theme.colors === "object" ? theme.colors : null;
-    const alarmWidget = colors && colors.alarmWidget && typeof colors.alarmWidget === "object"
-      ? colors.alarmWidget
-      : null;
+    const alarmWidget =
+      colors && colors.alarmWidget && typeof colors.alarmWidget === "object" ? colors.alarmWidget : null;
     return {
       bg: alarmWidget ? alarmWidget.bg : undefined,
       fg: alarmWidget ? alarmWidget.fg : undefined,
@@ -157,9 +156,8 @@
     function compute(args) {
       const cfg = args || {};
       const model = /** @type {DyniAlarmFitModel} */ (toObject(cfg.model));
-      const shellRect = cfg.shellRect && typeof cfg.shellRect === "object"
-        ? /** @type {DyniAlarmShellRect} */ (cfg.shellRect)
-        : null;
+      const shellRect =
+        cfg.shellRect && typeof cfg.shellRect === "object" ? /** @type {DyniAlarmShellRect} */ (cfg.shellRect) : null;
       const targetEl = cfg.targetEl || cfg.rootEl || null;
       if (!model || !shellRect || !targetEl) {
         return null;
@@ -210,18 +208,23 @@
         return /** @type {DyniAlarmHtmlFitResult} */ (fitCache.result);
       }
 
-      const modeFit = computeModeFit({
-        mode: layout.mode,
-        model: model,
-        width: layout.contentRect.width,
-        height: layout.contentRect.height,
-        ctx: measureCtx,
-        family: family,
-        valueWeight: valueWeight,
-        labelWeight: labelWeight
-      }, textLayout, htmlUtils);
+      const modeFit = computeModeFit(
+        {
+          mode: layout.mode,
+          model: model,
+          width: layout.contentRect.width,
+          height: layout.contentRect.height,
+          ctx: measureCtx,
+          family: family,
+          valueWeight: valueWeight,
+          labelWeight: labelWeight
+        },
+        textLayout,
+        htmlUtils
+      );
 
-      const activeBackgroundStyle = model.showActiveBackground === true ? htmlUtils.toStyleText("background-color", tokens.bg) : "";
+      const activeBackgroundStyle =
+        model.showActiveBackground === true ? htmlUtils.toStyleText("background-color", tokens.bg) : "";
       const activeForegroundStyle = model.state === "active" ? htmlUtils.toStyleText("color", tokens.fg) : "";
       const chrome = layout.contentRect.chrome;
       const shellStyle = chromeApi.buildShellStyle(chrome);
@@ -261,4 +264,4 @@
   }
 
   return { id: "AlarmHtmlFit", create: create };
-}));
+});

@@ -12,10 +12,14 @@
     throw new Error("dyninstruments: runtime._createClusterSurfacePolicy missing before runtime/surface/index.js load");
   }
   if (typeof runtime._createCanvasDomSurfaceAdapter !== "function") {
-    throw new Error("dyninstruments: runtime._createCanvasDomSurfaceAdapter missing before runtime/surface/index.js load");
+    throw new Error(
+      "dyninstruments: runtime._createCanvasDomSurfaceAdapter missing before runtime/surface/index.js load"
+    );
   }
   if (typeof runtime._createHtmlSurfaceController !== "function") {
-    throw new Error("dyninstruments: runtime._createHtmlSurfaceController missing before runtime/surface/index.js load");
+    throw new Error(
+      "dyninstruments: runtime._createHtmlSurfaceController missing before runtime/surface/index.js load"
+    );
   }
 
   const policy = /** @type {DyniSurfacePolicy} */ (runtime._createClusterSurfacePolicy());
@@ -66,9 +70,11 @@
     return ns.baseUrl + "shared/html/HtmlShadowCommon.css";
   }
 
-  runtime.surfaces = /** @type {DyniSurfaceRuntimeApi} */ (Object.freeze({
-    createController: createController,
-    materializeSurfacePolicyProps: materializeSurfacePolicyProps,
-    getCommonShadowCssUrl: getCommonShadowCssUrl
-  }));
-}(this));
+  runtime.surfaces = /** @type {DyniSurfaceRuntimeApi} */ (
+    Object.freeze({
+      createController: createController,
+      materializeSurfacePolicyProps: materializeSurfacePolicyProps,
+      getCommonShadowCssUrl: getCommonShadowCssUrl
+    })
+  );
+})(this);

@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniEditRouteLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const PAD_X_RATIO = 0.03;
@@ -27,21 +27,6 @@
   const NAME_BAND_MAX_RATIO_HIGH = 0.28;
   const NAME_BAND_MIN_RATIO_NORMAL = 0.24;
   const NAME_BAND_MAX_RATIO_NORMAL = 0.4;
-
-  const SOURCE_BADGE_RATIO = 0.22;
-  const SOURCE_BADGE_MIN_PX = 26;
-  const SOURCE_BADGE_MAX_RATIO = 0.4;
-
-  const HIGH_ROW_LABEL_RATIO = 0.34;
-  const HIGH_ROW_LABEL_MIN_RATIO = 0.22;
-  const HIGH_ROW_LABEL_MAX_RATIO = 0.46;
-
-  const METRIC_UNIT_SHARE = 0.28;
-  const METRIC_UNIT_MIN_PX = 12;
-  const METRIC_UNIT_MAX_RATIO = 0.46;
-
-  const FLAT_METRIC_MIN_TILE_WIDTH = 74;
-  const FLAT_TWO_ROW_MIN_METRICS_HEIGHT = 56;
 
   const VERTICAL_ASPECT_RATIO = { width: 7, height: 8 };
   const VERTICAL_MIN_HEIGHT = "8em";
@@ -64,8 +49,7 @@
     const sizingHelpers = componentContext.components.require("LayoutSizingHelpers");
     const makeRect = rectApi.makeRect;
     const mathApi = componentContext.components.require("EditRouteLayoutMath");
-    const geometryApi = componentContext.components.require("EditRouteLayoutGeometry");
-    const toPx = componentContext.components.require("HtmlWidgetUtils").toPx;
+    const tilesApi = componentContext.components.require("EditRouteLayoutTiles");
     const toOptionalFiniteNumber = mathApi.toOptionalFiniteNumber;
     const computeMetricTileSpacing = sizingHelpers.createMetricTileSpacingFactory(
       profileApi,
@@ -94,7 +78,10 @@
         1,
         Math.floor((width * VERTICAL_ASPECT_RATIO.height) / VERTICAL_ASPECT_RATIO.width)
       );
-      const effectiveLayoutHeight = Math.max(1, Math.floor(typeof explicitHeight === "number" ? explicitHeight : widthDrivenHeight));
+      const effectiveLayoutHeight = Math.max(
+        1,
+        Math.floor(typeof explicitHeight === "number" ? explicitHeight : widthDrivenHeight)
+      );
 
       return {
         isVerticalCommitted: true,
@@ -106,7 +93,11 @@
       };
     }
 
-    /** @param {unknown} W @param {unknown} H @param {{ isVerticalCommitted?: boolean } | undefined} options @returns {DyniEditRouteInsets} */ function computeInsets(W, H, options) {
+    /** @param {unknown} W @param {unknown} H @param {{ isVerticalCommitted?: boolean } | undefined} options @returns {DyniEditRouteInsets} */ function computeInsets(
+      W,
+      H,
+      options
+    ) {
       const opts = options || {};
       const isVerticalCommitted = opts.isVerticalCommitted === true;
       const safeW = Math.max(1, Math.floor(mathApi.clampNumber(W, 1, Number.MAX_SAFE_INTEGER, 1)));
@@ -124,7 +115,11 @@
       };
     }
 
-    /** @param {unknown} W @param {unknown} H @param {DyniEditRouteInsets | undefined} insets @returns {DyniRect} */ function createContentRect(W, H, insets) {
+    /** @param {unknown} W @param {unknown} H @param {DyniEditRouteInsets | undefined} insets @returns {DyniRect} */ function createContentRect(
+      W,
+      H,
+      insets
+    ) {
       const ins = insets || computeInsets(W, H, {});
       return makeRect(
         ins.padX,
@@ -134,7 +129,9 @@
       );
     }
 
-    /** @param {DyniEditRouteLayoutArgs | undefined} args @returns {DyniEditRouteLayoutMode} */ function resolveMode(args) {
+    /** @param {DyniEditRouteLayoutArgs | undefined} args @returns {DyniEditRouteLayoutMode} */ function resolveMode(
+      args
+    ) {
       const cfg = /** @type {DyniEditRouteLayoutArgs} */ (args || {});
       if (cfg.isVerticalCommitted === true) {
         return "high";
@@ -158,109 +155,9 @@
       return "normal";
     }
 
-    /** @param {DyniRect} nameBarRect @param {boolean} showSourceBadge @param {DyniEditRouteInsets} insets */ function computeNameRects(nameBarRect, showSourceBadge, insets) {
-      return geometryApi.computeNameRects({
-        nameBarRect: nameBarRect,
-        showSourceBadge: showSourceBadge,
-        insets: insets,
-        sourceBadgeRatio: SOURCE_BADGE_RATIO,
-        sourceBadgeMinPx: SOURCE_BADGE_MIN_PX,
-        sourceBadgeMaxRatio: SOURCE_BADGE_MAX_RATIO
-      });
-    }
-
-    /** @param {DyniRect} tileRect @param {DyniEditRouteInsets} insets @param {DyniResponsiveScaleProfile} responsive @param {Record<string, unknown> | undefined} options */ function createMetricTile(tileRect, insets, responsive, options) {
-      const opts = options || {};
-      const unitPlacement = Object.prototype.hasOwnProperty.call(opts, "unitPlacement")
-        ? opts.unitPlacement
-        : "inline";
-      return geometryApi.createMetricTile({
-        tileRect: tileRect,
-        insets: insets,
-        responsive: responsive,
-        profileApi: profileApi,
-        metricTilePadRatio: METRIC_TILE_PAD_RATIO,
-        metricTileCaptionRatio: METRIC_TILE_CAPTION_RATIO,
-        unitPlacement: unitPlacement,
-        unitShare: typeof opts.unitShare === "number" ? opts.unitShare : METRIC_UNIT_SHARE,
-        unitMinPx: typeof opts.unitMinPx === "number" ? opts.unitMinPx : METRIC_UNIT_MIN_PX,
-        unitMaxRatio: typeof opts.unitMaxRatio === "number" ? opts.unitMaxRatio : METRIC_UNIT_MAX_RATIO
-      });
-    }
-
-    /** @param {DyniEditRouteWrapperArgs} args @returns {string} */ function buildFlatWrapperLayoutStyle(args) {
-      const cfg = args;
-      const nameHeight = Math.max(1, Math.floor(mathApi.clampNumber(cfg.nameHeight, 1, Number.MAX_SAFE_INTEGER, 1)));
-      const metricsHeight = Math.max(0, Math.floor(mathApi.clampNumber(cfg.metricsHeight, 0, Number.MAX_SAFE_INTEGER, 0)));
-      const gapPx = Math.max(0, Math.floor(mathApi.clampNumber(cfg.gap, 0, Number.MAX_SAFE_INTEGER, 0)));
-      const insets = cfg.insets;
-      const rowAreas = cfg.hasMetrics === true ? '"name" "metrics"' : '"name"';
-      const rowSpec = cfg.hasMetrics === true
-        ? ("minmax(0," + toPx(nameHeight) + ") minmax(0," + toPx(metricsHeight) + ")")
-        : ("minmax(0," + toPx(nameHeight) + ")");
-      return ""
-        + "grid-template-areas:" + rowAreas + ";"
-        + "grid-template-columns:minmax(0,1fr);"
-        + "grid-template-rows:" + rowSpec + ";"
-        + "gap:" + toPx(gapPx) + ";"
-        + "padding:" + toPx(insets.innerY) + " " + toPx(insets.padX) + ";";
-    }
-
-    /** @param {number} rows @param {number} columns @param {number} gapPx @returns {string} */ function buildFlatMetricsLayoutStyle(rows, columns, gapPx) {
-      return ""
-        + "grid-template-columns:repeat(" + String(columns) + ",minmax(0,1fr));"
-        + "grid-template-rows:repeat(" + String(rows) + ",minmax(0,1fr));"
-        + "gap:" + toPx(gapPx) + ";";
-    }
-
-    /** @param {DyniRect} rowRect @param {DyniEditRouteInsets} insets @param {boolean} hasUnit */ function createHighMetricRow(rowRect, insets, hasUnit) {
-      return geometryApi.createHighMetricRow({
-        rowRect: rowRect,
-        insets: insets,
-        labelRatio: HIGH_ROW_LABEL_RATIO,
-        labelMinRatio: HIGH_ROW_LABEL_MIN_RATIO,
-        labelMaxRatio: HIGH_ROW_LABEL_MAX_RATIO,
-        includeUnit: hasUnit === true,
-        unitShare: METRIC_UNIT_SHARE,
-        unitMinPx: METRIC_UNIT_MIN_PX,
-        unitMaxRatio: METRIC_UNIT_MAX_RATIO
-      });
-    }
-
-    /** @param {DyniRect} metricsRect @param {DyniEditRouteInsets} insets @param {DyniResponsiveScaleProfile} responsive @param {DyniEditRouteLayoutOutput} out @param {{ dst: boolean, rte: boolean }} metricHasUnit */ function computeFlatMetricsLayout(metricsRect, insets, responsive, out, metricHasUnit) {
-      const singleRowTiles = rectApi.splitRow(metricsRect, insets.gap, 4, rectApi.makeRect);
-      const minTileWidth = Math.max(1, FLAT_METRIC_MIN_TILE_WIDTH);
-      const canUseTwoRows = metricsRect.h >= FLAT_TWO_ROW_MIN_METRICS_HEIGHT;
-      const useTwoRows = canUseTwoRows && singleRowTiles[0].w < minTileWidth;
-      let tiles;
-
-      if (useTwoRows) {
-        const rows = rectApi.splitStack(metricsRect, insets.gap, 2, rectApi.makeRect);
-        tiles = rectApi.splitRow(rows[0], insets.gap, 2, rectApi.makeRect)
-          .concat(rectApi.splitRow(rows[1], insets.gap, 2, rectApi.makeRect));
-        out.flatMetricRows = 2;
-        out.flatMetricColumns = 2;
-      } else {
-        tiles = singleRowTiles;
-        out.flatMetricRows = 1;
-        out.flatMetricColumns = 4;
-      }
-
-      out.metricBoxes.pts = createMetricTile(tiles[0], insets, responsive, {
-        unitPlacement: "none"
-      });
-      out.metricBoxes.dst = createMetricTile(tiles[1], insets, responsive, {
-        unitPlacement: metricHasUnit.dst ? "inline" : "none"
-      });
-      out.metricBoxes.rte = createMetricTile(tiles[2], insets, responsive, {
-        unitPlacement: metricHasUnit.rte ? "inline" : "none"
-      });
-      out.metricBoxes.rteEta = createMetricTile(tiles[3], insets, responsive, {
-        unitPlacement: "none"
-      });
-    }
-
-    /** @param {DyniEditRouteLayoutArgs | undefined} args @returns {DyniEditRouteLayoutOutput} */ function computeLayout(args) {
+    /** @param {DyniEditRouteLayoutArgs | undefined} args @returns {DyniEditRouteLayoutOutput} */ function computeLayout(
+      args
+    ) {
       const cfg = /** @type {DyniEditRouteLayoutArgs} */ (args || {});
       const hasRoute = cfg.hasRoute === true;
       const isLocalRoute = cfg.isLocalRoute === true;
@@ -289,9 +186,7 @@
         rte: hasRoute,
         rteEta: hasRoute
       };
-      const metricHasUnitConfig = cfg.metricHasUnit && typeof cfg.metricHasUnit === "object"
-        ? cfg.metricHasUnit
-        : {};
+      const metricHasUnitConfig = cfg.metricHasUnit && typeof cfg.metricHasUnit === "object" ? cfg.metricHasUnit : {};
       const metricHasUnit = {
         pts: metricHasUnitConfig.pts === true,
         dst: Object.prototype.hasOwnProperty.call(metricHasUnitConfig, "dst")
@@ -303,30 +198,32 @@
         rteEta: metricHasUnitConfig.rteEta === true
       };
 
-      const out = /** @type {DyniEditRouteLayoutOutput} */ (/** @type {unknown} */ ({
-        mode: mode,
-        hasRoute: hasRoute,
-        isLocalRoute: isLocalRoute,
-        isVerticalCommitted: verticalShell.isVerticalCommitted,
-        verticalShell: verticalShell,
-        insets: insets,
-        responsive: insets.responsive,
-        contentRect: contentRect,
-        nameBarRect: null,
-        nameTextRect: null,
-        sourceBadgeRect: null,
-        metricVisibility: metricVisibility,
-        metricBoxes: Object.create(null),
-        flatMetricRows: 0,
-        flatMetricColumns: 0,
-        flatWrapperLayoutStyle: "",
-        flatMetricsLayoutStyle: ""
-      }));
+      const out = /** @type {DyniEditRouteLayoutOutput} */ (
+        /** @type {unknown} */ ({
+          mode: mode,
+          hasRoute: hasRoute,
+          isLocalRoute: isLocalRoute,
+          isVerticalCommitted: verticalShell.isVerticalCommitted,
+          verticalShell: verticalShell,
+          insets: insets,
+          responsive: insets.responsive,
+          contentRect: contentRect,
+          nameBarRect: null,
+          nameTextRect: null,
+          sourceBadgeRect: null,
+          metricVisibility: metricVisibility,
+          metricBoxes: Object.create(null),
+          flatMetricRows: 0,
+          flatMetricColumns: 0,
+          flatWrapperLayoutStyle: "",
+          flatMetricsLayoutStyle: ""
+        })
+      );
 
       if (!hasRoute) {
         out.nameBarRect = contentRect;
         if (mode === "flat") {
-          out.flatWrapperLayoutStyle = buildFlatWrapperLayoutStyle({
+          out.flatWrapperLayoutStyle = tilesApi.buildFlatWrapperLayoutStyle({
             nameHeight: contentRect.h,
             metricsHeight: 0,
             gap: 0,
@@ -334,7 +231,7 @@
             hasMetrics: false
           });
         }
-        const emptyNameRects = computeNameRects(contentRect, false, insets);
+        const emptyNameRects = tilesApi.computeNameRects(contentRect, false, insets);
         out.nameTextRect = emptyNameRects.nameTextRect;
         out.sourceBadgeRect = emptyNameRects.sourceBadgeRect;
         return out;
@@ -342,7 +239,12 @@
 
       if (mode === "flat") {
         const nameShare = profileApi.scaleShare(
-          mathApi.clampNumber(NAME_BAND_RATIO_FLAT, NAME_BAND_MIN_RATIO_FLAT, NAME_BAND_MAX_RATIO_FLAT, NAME_BAND_RATIO_FLAT),
+          mathApi.clampNumber(
+            NAME_BAND_RATIO_FLAT,
+            NAME_BAND_MIN_RATIO_FLAT,
+            NAME_BAND_MAX_RATIO_FLAT,
+            NAME_BAND_RATIO_FLAT
+          ),
           insets.responsive.flatNameBandScale,
           NAME_BAND_MIN_RATIO_FLAT,
           NAME_BAND_MAX_RATIO_FLAT
@@ -356,15 +258,19 @@
         );
 
         out.nameBarRect = makeRect(contentRect.x, contentRect.y, contentRect.w, nameHeight);
-        computeFlatMetricsLayout(metricsRect, insets, insets.responsive, out, metricHasUnit);
-        out.flatWrapperLayoutStyle = buildFlatWrapperLayoutStyle({
+        tilesApi.computeFlatMetricsLayout(metricsRect, insets, insets.responsive, out, metricHasUnit);
+        out.flatWrapperLayoutStyle = tilesApi.buildFlatWrapperLayoutStyle({
           nameHeight: out.nameBarRect.h,
           metricsHeight: metricsRect.h,
           gap: insets.gap,
           insets: insets,
           hasMetrics: true
         });
-        out.flatMetricsLayoutStyle = buildFlatMetricsLayoutStyle(out.flatMetricRows, out.flatMetricColumns, insets.gap);
+        out.flatMetricsLayoutStyle = tilesApi.buildFlatMetricsLayoutStyle(
+          out.flatMetricRows,
+          out.flatMetricColumns,
+          insets.gap
+        );
       } else {
         const baseNameShare = mode === "high" ? NAME_BAND_RATIO_HIGH : NAME_BAND_RATIO_NORMAL;
         const scale = mode === "high" ? insets.responsive.highNameBandScale : insets.responsive.normalNameBandScale;
@@ -385,28 +291,28 @@
           const rows = rectApi.splitStack(metricsRect, insets.gap, 2, rectApi.makeRect);
           const firstRow = rectApi.splitRow(rows[0], insets.gap, 2, rectApi.makeRect);
           const secondRow = rectApi.splitRow(rows[1], insets.gap, 2, rectApi.makeRect);
-          out.metricBoxes.pts = createMetricTile(firstRow[0], insets, insets.responsive, {
+          out.metricBoxes.pts = tilesApi.createMetricTile(firstRow[0], insets, insets.responsive, {
             unitPlacement: "none"
           });
-          out.metricBoxes.dst = createMetricTile(firstRow[1], insets, insets.responsive, {
+          out.metricBoxes.dst = tilesApi.createMetricTile(firstRow[1], insets, insets.responsive, {
             unitPlacement: metricHasUnit.dst ? "inline" : "none"
           });
-          out.metricBoxes.rte = createMetricTile(secondRow[0], insets, insets.responsive, {
+          out.metricBoxes.rte = tilesApi.createMetricTile(secondRow[0], insets, insets.responsive, {
             unitPlacement: metricHasUnit.rte ? "inline" : "none"
           });
-          out.metricBoxes.rteEta = createMetricTile(secondRow[1], insets, insets.responsive, {
+          out.metricBoxes.rteEta = tilesApi.createMetricTile(secondRow[1], insets, insets.responsive, {
             unitPlacement: "none"
           });
         } else {
           const rows = rectApi.splitStack(metricsRect, insets.gap, 4, rectApi.makeRect);
-          out.metricBoxes.pts = createHighMetricRow(rows[0], insets, false);
-          out.metricBoxes.dst = createHighMetricRow(rows[1], insets, metricHasUnit.dst);
-          out.metricBoxes.rte = createHighMetricRow(rows[2], insets, metricHasUnit.rte);
-          out.metricBoxes.rteEta = createHighMetricRow(rows[3], insets, false);
+          out.metricBoxes.pts = tilesApi.createHighMetricRow(rows[0], insets, false);
+          out.metricBoxes.dst = tilesApi.createHighMetricRow(rows[1], insets, metricHasUnit.dst);
+          out.metricBoxes.rte = tilesApi.createHighMetricRow(rows[2], insets, metricHasUnit.rte);
+          out.metricBoxes.rteEta = tilesApi.createHighMetricRow(rows[3], insets, false);
         }
       }
 
-      const nameRects = computeNameRects(out.nameBarRect, isLocalRoute, insets);
+      const nameRects = tilesApi.computeNameRects(out.nameBarRect, isLocalRoute, insets);
       out.nameTextRect = nameRects.nameTextRect;
       out.sourceBadgeRect = nameRects.sourceBadgeRect;
       return out;
@@ -428,4 +334,4 @@
   }
 
   return { id: "EditRouteLayout", create: create };
-}));
+});

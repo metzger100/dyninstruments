@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniLinearGaugeTextLayout = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /**
@@ -127,7 +127,18 @@
    * @param {DyniHtmlWidgetUtilsApi} htmlUtils
    * @returns {void}
    */
-  function drawValueUnitRow(state, textApi, valueText, unitText, box, secScale, align, scaleHelpers, setCanvasFont, htmlUtils) {
+  function drawValueUnitRow(
+    state,
+    textApi,
+    valueText,
+    unitText,
+    box,
+    secScale,
+    align,
+    scaleHelpers,
+    setCanvasFont,
+    htmlUtils
+  ) {
     if (!box || box.w <= 0 || box.h <= 0 || !textApi) {
       return;
     }
@@ -188,7 +199,18 @@
    * @param {DyniHtmlWidgetUtilsApi} htmlUtils
    * @returns {void}
    */
-  function drawInlineRow(state, textApi, caption, valueText, unitText, box, secScale, scaleHelpers, setCanvasFont, htmlUtils) {
+  function drawInlineRow(
+    state,
+    textApi,
+    caption,
+    valueText,
+    unitText,
+    box,
+    secScale,
+    scaleHelpers,
+    setCanvasFont,
+    htmlUtils
+  ) {
     if (!box || box.w <= 0 || box.h <= 0 || !textApi) {
       return;
     }
@@ -312,13 +334,35 @@
         drawCaptionRow(state, textApi, caption, box, secScale, align, scaleHelpers, htmlUtils);
       },
       drawValueUnitRow: function (state, textApi, valueText, unitText, box, secScale, align) {
-        drawValueUnitRow(state, textApi, valueText, unitText, box, secScale, align, scaleHelpers, setCanvasFont, htmlUtils);
+        drawValueUnitRow(
+          state,
+          textApi,
+          valueText,
+          unitText,
+          box,
+          secScale,
+          align,
+          scaleHelpers,
+          setCanvasFont,
+          htmlUtils
+        );
       },
       drawInlineRow: function (state, textApi, caption, valueText, unitText, box, secScale) {
-        drawInlineRow(state, textApi, caption, valueText, unitText, box, secScale, scaleHelpers, setCanvasFont, htmlUtils);
+        drawInlineRow(
+          state,
+          textApi,
+          caption,
+          valueText,
+          unitText,
+          box,
+          secScale,
+          scaleHelpers,
+          setCanvasFont,
+          htmlUtils
+        );
       }
     };
   }
 
   return { id: "LinearGaugeTextLayout", create: create };
-}));
+});

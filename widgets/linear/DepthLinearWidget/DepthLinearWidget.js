@@ -8,7 +8,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniDepthLinearWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   /** @typedef {DyniLinearGaugeProps & { warningFrom?: number, alarmFrom?: number, depthLinearWarningFrom?: number, depthLinearAlarmFrom?: number }} DyniDepthLinearProps */
@@ -49,21 +49,28 @@
     /** @param {DyniDepthLinearProps} props @param {number} minV @param {number} maxV @param {DyniLinearRange} axis @param {DyniLinearGaugeTheme} theme @returns {DyniLinearColoredRange[]} */
     function buildSectors(props, minV, maxV, axis, theme) {
       const p = props || {};
-      return buildLowEndSectors({
-        warningFrom: p.depthLinearWarningFrom,
-        alarmFrom: p.depthLinearAlarmFrom
-      }, minV, maxV, {
-        warningColor: theme.colors.warning,
-        alarmColor: theme.colors.alarm
-      }).map(function (sector) {
-        return {
-          from: valueMath.clamp(sector.from, axis.min, axis.max),
-          to: valueMath.clamp(sector.to, axis.min, axis.max),
-          color: sector.color
-        };
-      }).filter(function (entry) {
-        return entry.to > entry.from;
-      });
+      return buildLowEndSectors(
+        {
+          warningFrom: p.depthLinearWarningFrom,
+          alarmFrom: p.depthLinearAlarmFrom
+        },
+        minV,
+        maxV,
+        {
+          warningColor: theme.colors.warning,
+          alarmColor: theme.colors.alarm
+        }
+      )
+        .map(function (sector) {
+          return {
+            from: valueMath.clamp(sector.from, axis.min, axis.max),
+            to: valueMath.clamp(sector.to, axis.min, axis.max),
+            color: sector.color
+          };
+        })
+        .filter(function (entry) {
+          return entry.to > entry.from;
+        });
     }
 
     const renderCanvas = engine.createRenderer({
@@ -104,4 +111,4 @@
   }
 
   return { id: "DepthLinearWidget", create: create };
-}));
+});

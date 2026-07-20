@@ -9,7 +9,7 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniAlarmTextHtmlWidget = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {{ props?: unknown, shellRect?: DyniAlarmShellRect | null, rootEl?: HTMLElement | null, fontMetricsEpoch?: number }} DyniAlarmWidgetPayload */
 
@@ -81,7 +81,9 @@
 
     /** @param {unknown} rendererContext @returns {Record<string, unknown>} */
     function createCommittedRenderer(rendererContext) {
-      const context = /** @type {Record<string, unknown>} */ (rendererContext && typeof rendererContext === "object" ? rendererContext : {});
+      const context = /** @type {Record<string, unknown>} */ (
+        rendererContext && typeof rendererContext === "object" ? rendererContext : {}
+      );
       const hostContext = context.hostContext || {};
       const baselineFit = buildBaselineFit();
 
@@ -130,9 +132,10 @@
           ev.preventDefault();
           ev.stopPropagation();
           const policy = htmlUtils.resolveSurfacePolicy(lastProps);
-          const actions = policy && typeof policy.actions === "object" && policy.actions
-            ? /** @type {{ alarm?: { stopAll?: () => void } }} */ (policy.actions)
-            : null;
+          const actions =
+            policy && typeof policy.actions === "object" && policy.actions
+              ? /** @type {{ alarm?: { stopAll?: () => void } }} */ (policy.actions)
+              : null;
           const alarmActions = actions ? actions.alarm : null;
           if (!alarmActions || typeof alarmActions.stopAll !== "function") {
             return;
@@ -150,21 +153,27 @@
         const props = toObject(payload.props);
         const shellRect = payload.shellRect || null;
         const model = buildModel(props, shellRect);
-        const fit = htmlFit.compute({
-          model: model,
-          hostContext: hostContext,
-          targetEl: payload.rootEl,
-          shellRect: shellRect,
-          fontMetricsEpoch: payload.fontMetricsEpoch || 0
-        }) || lastFit || baselineFit;
+        const fit =
+          htmlFit.compute({
+            model: model,
+            hostContext: hostContext,
+            targetEl: payload.rootEl,
+            shellRect: shellRect,
+            fontMetricsEpoch: payload.fontMetricsEpoch || 0
+          }) ||
+          lastFit ||
+          baselineFit;
 
         htmlUtils.applyMirroredContext(rootEl, props);
         ensureRootClass();
-        htmlUtils.patchInnerHtml(rootEl, markup.render({
-          model: model,
-          fit: fit,
-          htmlUtils: htmlUtils
-        }));
+        htmlUtils.patchInnerHtml(
+          rootEl,
+          markup.render({
+            model: model,
+            fit: fit,
+            htmlUtils: htmlUtils
+          })
+        );
 
         lastProps = props;
         lastFit = fit;
@@ -239,4 +248,4 @@
   }
 
   return { id: "AlarmTextHtmlWidget", create: create };
-}));
+});

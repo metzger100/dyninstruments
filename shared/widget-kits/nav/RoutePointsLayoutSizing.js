@@ -8,13 +8,13 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniRoutePointsLayoutSizing = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
 
   const HEADER_HEIGHT_FLOOR_ROWS_NORMAL = 1.45;
   const HEADER_HEIGHT_FLOOR_ROWS_HIGH = 2.0;
-  const HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_NORMAL = 0.10;
-  const HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_HIGH = 0.20;
+  const HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_NORMAL = 0.1;
+  const HEADER_HEIGHT_NARROW_VERTICAL_BOOST_ROWS_HIGH = 0.2;
   const HEADER_NARROW_VERTICAL_WIDTH_TO_ROW_RATIO = 5.0;
   const MARKER_DIAMETER_RATIO = 0.48;
   const MARKER_DIAMETER_MIN_PX = 3;
@@ -52,44 +52,26 @@
 
   /** @param {unknown} markerHeightPx @returns {number} */
   function computeMarkerDiameter(markerHeightPx) {
-    const markerHeight = Math.max(
-      1,
-      Math.floor(clampNumber(markerHeightPx, 1, Number.MAX_SAFE_INTEGER, 1))
-    );
+    const markerHeight = Math.max(1, Math.floor(clampNumber(markerHeightPx, 1, Number.MAX_SAFE_INTEGER, 1)));
     const scaled = Math.floor(markerHeight * MARKER_DIAMETER_RATIO);
-    const preferred = Math.max(
-      MARKER_DIAMETER_MIN_PX,
-      Math.min(MARKER_DIAMETER_MAX_PX, scaled)
-    );
+    const preferred = Math.max(MARKER_DIAMETER_MIN_PX, Math.min(MARKER_DIAMETER_MAX_PX, scaled));
     return Math.max(1, Math.min(markerHeight, preferred));
   }
 
   /** @param {unknown} markerDiameterPx @returns {number} */
   function computeMarkerCellPaddingX(markerDiameterPx) {
-    const markerDiameter = Math.max(
-      1,
-      Math.floor(clampNumber(markerDiameterPx, 1, Number.MAX_SAFE_INTEGER, 1))
-    );
+    const markerDiameter = Math.max(1, Math.floor(clampNumber(markerDiameterPx, 1, Number.MAX_SAFE_INTEGER, 1)));
     const scaled = Math.round(markerDiameter * MARKER_CELL_PADDING_X_RATIO);
-    return Math.max(
-      MARKER_CELL_PADDING_X_MIN_PX,
-      Math.min(MARKER_CELL_PADDING_X_MAX_PX, scaled)
-    );
+    return Math.max(MARKER_CELL_PADDING_X_MIN_PX, Math.min(MARKER_CELL_PADDING_X_MAX_PX, scaled));
   }
 
   /** @param {DyniRoutePointsMarkerCellWidthArgs | undefined} args @returns {number} */
   function computeMarkerCellWidth(args) {
     const cfg = args || {};
-    const markerDiameter = Math.max(
-      1,
-      Math.floor(clampNumber(cfg.markerDiameter, 1, Number.MAX_SAFE_INTEGER, 1))
-    );
+    const markerDiameter = Math.max(1, Math.floor(clampNumber(cfg.markerDiameter, 1, Number.MAX_SAFE_INTEGER, 1)));
     const markerPaddingX = computeMarkerCellPaddingX(markerDiameter);
     const compactWidth = markerDiameter + markerPaddingX * 2;
-    const maxWidth = Math.max(
-      1,
-      Math.floor(clampNumber(cfg.maxWidth, 1, Number.MAX_SAFE_INTEGER, compactWidth))
-    );
+    const maxWidth = Math.max(1, Math.floor(clampNumber(cfg.maxWidth, 1, Number.MAX_SAFE_INTEGER, compactWidth)));
     return Math.max(1, Math.min(compactWidth, maxWidth));
   }
 
@@ -146,11 +128,13 @@
 
     const rowHeight = Math.max(1, Math.floor(clampNumber(cfg.rowHeight, 1, Number.MAX_SAFE_INTEGER, 1)));
     let floorRows = resolveHeaderFloorRows(mode);
-    if (isNarrowVertical({
-      isVerticalContainer: cfg.isVerticalContainer === true,
-      rowHeight: rowHeight,
-      contentWidth: cfg.contentWidth
-    })) {
+    if (
+      isNarrowVertical({
+        isVerticalContainer: cfg.isVerticalContainer === true,
+        rowHeight: rowHeight,
+        contentWidth: cfg.contentWidth
+      })
+    ) {
       floorRows += resolveNarrowVerticalBoostRows(mode);
     }
     const floorHeight = Math.max(1, Math.floor(rowHeight * floorRows));
@@ -192,4 +176,4 @@
   }
 
   return { id: "RoutePointsLayoutSizing", create: create };
-}));
+});

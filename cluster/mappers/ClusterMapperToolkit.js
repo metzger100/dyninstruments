@@ -9,10 +9,10 @@
   else {
     (root.DyniComponents = root.DyniComponents || {}).DyniClusterMapperToolkit = factory();
   }
-}(this, function () {
+})(this, function () {
   "use strict";
   /** @typedef {(raw: unknown) => string} DyniAngleFormatter */
-  /** @typedef {{ cap: (key: string) => unknown, unit: (key: string) => unknown, formatUnit: (metricKey: string, familyId: string) => string, unitText: (metricKey: string, familyId: string, selectedUnitToken: string) => string, unitNumber: (baseKey: string, selectedUnitToken: string) => number | undefined, out: (value: unknown, caption: unknown, unit: unknown, formatter: unknown, formatterParameters: unknown) => Record<string, unknown>, num: DyniValueMathApi["toOptionalFiniteNumber"], makeAngleFormatter: (isDirection: boolean, leadingZero: boolean, defaultText: string) => DyniAngleFormatter }} DyniClusterMapperToolkitInstance */
+  /** @typedef {{ cap: (key: string) => unknown, unit: (key: string) => unknown, formatUnit: (metricKey: string, familyId: string) => string, unitText: (metricKey: string, familyId: string, selectedUnitToken: string) => string, unitNumber: (baseKey: string, selectedUnitToken: string) => number | undefined, positiveUnitNumber: (baseKey: string, selectedUnitToken: string, defaultValue: number) => number, out: (value: unknown, caption: unknown, unit: unknown, formatter: unknown, formatterParameters: unknown) => Record<string, unknown>, num: DyniValueMathApi["toOptionalFiniteNumber"], makeAngleFormatter: (isDirection: boolean, leadingZero: boolean, defaultText: string) => DyniAngleFormatter }} DyniClusterMapperToolkitInstance */
   /** @typedef {{ out: (value: unknown, caption: unknown, unit: unknown, formatter: unknown, formatterParameters: unknown) => Record<string, unknown>, num: DyniValueMathApi["toOptionalFiniteNumber"], makeAngleFormatter: (isDirection: boolean, leadingZero: boolean, defaultText: string) => DyniAngleFormatter, createToolkit: (props?: DyniMapperProps) => DyniClusterMapperToolkitInstance }} DyniClusterMapperToolkitApi */
 
   /** @type {DyniValueMathApi["toFiniteNumber"]} */
@@ -42,8 +42,7 @@
       let out;
       if (isDirection) {
         out = ((Math.round(a) % 360) + 360) % 360;
-      }
-      else {
+      } else {
         const r = Math.round(Math.abs(a));
         out = a < 0 ? -r : r;
         if (out === 180) out = -180;
@@ -112,7 +111,18 @@
       if (resolved.family.tokens.indexOf(resolved.binding.defaultToken) !== -1) {
         return resolved.binding.defaultToken;
       }
-      throw new Error("dyninstruments: invalid default token '" + resolved.binding.defaultToken + "' for metric '" + metricKey + "'");
+      throw new Error(
+        "dyninstruments: invalid default token '" + resolved.binding.defaultToken + "' for metric '" + metricKey + "'"
+      );
+    }
+
+    /** @param {string} baseKey @param {string} selectedUnitToken @returns {number | undefined} */
+    function unitNumber(baseKey, selectedUnitToken) {
+      const key = baseKey + "_" + selectedUnitToken;
+      if (!Object.prototype.hasOwnProperty.call(p, key)) {
+        return undefined;
+      }
+      return toFiniteNumber(p[key]);
     }
 
     return {
@@ -134,9 +144,8 @@
         if (resolved.binding.family !== familyId) {
           throw new Error("dyninstruments: metric '" + metricKey + "' does not belong to family '" + familyId + "'");
         }
-        const token = resolved.family.tokens.indexOf(selectedUnitToken) !== -1
-          ? selectedUnitToken
-          : resolved.binding.defaultToken;
+        const token =
+          resolved.family.tokens.indexOf(selectedUnitToken) !== -1 ? selectedUnitToken : resolved.binding.defaultToken;
         const key = "unit_" + metricKey + "_" + token;
         if (Object.prototype.hasOwnProperty.call(p, key)) {
           const value = p[key];
@@ -146,13 +155,11 @@
         }
         return resolved.family.labels[token] || token;
       },
-      /** @param {string} baseKey @param {string} selectedUnitToken @returns {number | undefined} */
-      unitNumber: function (baseKey, selectedUnitToken) {
-        const key = baseKey + "_" + selectedUnitToken;
-        if (!Object.prototype.hasOwnProperty.call(p, key)) {
-          return undefined;
-        }
-        return toFiniteNumber(p[key]);
+      unitNumber: unitNumber,
+      /** @param {string} baseKey @param {string} selectedUnitToken @param {number} defaultValue @returns {number} */
+      positiveUnitNumber: function (baseKey, selectedUnitToken, defaultValue) {
+        const value = unitNumber(baseKey, selectedUnitToken);
+        return value !== undefined && value > 0 ? value : defaultValue;
       },
       out: out,
       num: toOptionalFiniteNumber,
@@ -186,4 +193,4 @@
   }
 
   return { id: "ClusterMapperToolkit", create: create };
-}));
+});
