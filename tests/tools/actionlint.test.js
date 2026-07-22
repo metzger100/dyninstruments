@@ -21,11 +21,17 @@ function platformKey() {
   return `${platform}_${arch}`;
 }
 
-/** @param {string} root */
-function cacheBinary(root) {
+/**
+ * @param {string} root
+ * @param {{invocationMarker?: boolean}} [options]
+ */
+function cacheBinary(root, options) {
   const targetDir = path.join(root, "v1.7.12", platformKey());
   fs.mkdirSync(targetDir, { recursive: true });
-  writeExecutable(path.join(targetDir, "actionlint"), "#!/bin/sh\nprintf '%s\\n' \"$*\"\n");
+  const binaryContent = options?.invocationMarker
+    ? "#!/bin/sh\nprintf 'invoked\\n' > \"$ACTIONLINT_INVOCATION_MARKER\"\nexit 37\n"
+    : "#!/bin/sh\nprintf '%s\\n' \"$*\"\n";
+  writeExecutable(path.join(targetDir, "actionlint"), binaryContent);
   fs.writeFileSync(path.join(targetDir, ".verified"), "verified\n");
   return targetDir;
 }
@@ -98,15 +104,19 @@ describe("tools/actionlint.sh", function () {
     }
   });
 
-  it("lets setup mode reuse a verified cache without node_modules writes", function () {
+  it("keeps install mode install-only with a verified cache", function () {
     const root = makeTempRoot();
+    const invocationMarker = path.join(root, "invoked");
     try {
-      const targetDir = cacheBinary(root);
-      const result = runScript(root, ["--install", "-color"]);
+      const targetDir = cacheBinary(root, { invocationMarker: true });
+      const result = runScript(root, ["--install", "-color"], {
+        ACTIONLINT_INVOCATION_MARKER: invocationMarker
+      });
 
       expect(result.status).toBe(0);
       expect(fs.existsSync(path.join(targetDir, ".verified"))).toBe(true);
       expect(fs.existsSync(path.join(root, "node_modules"))).toBe(false);
+      expect(fs.existsSync(invocationMarker)).toBe(false);
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }

@@ -68,7 +68,10 @@ if [[ "$install_mode" == true ]]; then
   if [[ ! -x "$binary" || ! -f "$verified_marker" ]]; then
     provision
   fi
-elif [[ ! -x "$binary" || ! -f "$verified_marker" ]]; then
+  exit 0
+fi
+
+if [[ ! -x "$binary" || ! -f "$verified_marker" ]]; then
   echo "actionlint is not provisioned in the cache. Run 'npm run setup' first." >&2
   exit 1
 fi
