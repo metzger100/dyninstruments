@@ -82,9 +82,11 @@ jobs:
             exit 1
           fi
 
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "zip_path=$zip_path" >> "$GITHUB_OUTPUT"
-          echo "notes_path=$notes_path" >> "$GITHUB_OUTPUT"
+          {
+            echo "version=$version"
+            echo "zip_path=$zip_path"
+            echo "notes_path=$notes_path"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
