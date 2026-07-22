@@ -490,9 +490,6 @@
     "tests/contract/cluster-widget-global-root-contract.test.js": {
       "classification": "strict"
     },
-    "tests/contract/codeowners-contract.test.js": {
-      "classification": "strict"
-    },
     "tests/contract/component-registry-contract-negative.test.js": {
       "classification": "strict"
     },
@@ -518,9 +515,6 @@
       "classification": "strict"
     },
     "tests/contract/placeholder-normalization-contract.test.js": {
-      "classification": "strict"
-    },
-    "tests/contract/quality-workflow-contract.test.js": {
       "classification": "strict"
     },
     "tests/contract/release-workflow-contract.test.js": {
@@ -1765,9 +1759,6 @@
       "classification": "strict"
     },
     "tests/tools/phase0-baseline.test.js": {
-      "classification": "strict"
-    },
-    "tests/tools/pre-commit-config.test.js": {
       "classification": "strict"
     },
     "tests/tools/quality-owners.test.js": {

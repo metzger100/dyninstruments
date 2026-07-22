@@ -120,9 +120,9 @@ typing and keep `noEmit` enabled.
 `package:check` runs `schema:check` and focused Node-only release/package tests for release preparation, release
 creation, and release manifest contents.
 
-The tag-only publisher reruns `npm run setup` and `npm run check:all` in a read-only job. Its write-privileged publish
-job depends on that result and only uploads the committed ZIP and notes. The shared SemVer tool classifies the validated
-tag so prerelease versions publish as GitHub prereleases while stable versions publish as normal releases.
+The tag-only publisher validates the tag and matching committed ZIP/notes, then uploads them. It does not install
+dependencies, rerun quality, build, package, commit, or tag. The shared SemVer tool classifies prereleases while all
+quality, manual AvNav validation, packaging, commits, and tag creation remain local.
 
 `docs:check` runs `markdownlint-cli2`, Linkinator fixture proofs and the repository scan from `linkinator.config.json`,
 then the documentation-specific, format, and reachability contracts (`check:doclinks`, `check:docformat`,
@@ -161,9 +161,7 @@ run. The coverage and test-exception captures are SHA-256 locked: coverage keeps
 while the 229 non-strict test paths may only migrate to strict or disappear. Contract-owned production files and
 negative test fixtures must name their canonical test owners. `check:complexity` regenerates Phase 0 findings from
 `capturedCommit` before checking that active debt is a shrinking subset; active values must exactly match current
-findings so improvements shrink the ledger immediately. `.github/CODEOWNERS` protects the checker implementations,
-policy data, quality tests/support, root toolchain configuration, and canonical quality documentation; its contract test
-enumerates the required surfaces.
+findings so improvements shrink the ledger immediately.
 
 ## Touchpoint Matrix
 
@@ -179,7 +177,7 @@ enumerates the required surfaces.
 | Installation/packaging/release workflow changes (`plugin.json`, release scripts, install steps)                | `documentation/guides/release-workflow.md`, `documentation/conventions/quality-gates.md`, `README.md` (installation/update instructions)                                                                                                                                                                         |
 | User configuration surface changes (editable params, defaults, unit selectors, key selectors, cluster options) | relevant `documentation/avnav-api/*` and widget docs, `README.md` (Configuration section)                                                                                                                                                                                                                        |
 | Requirements/platform support changes                                                                          | `documentation/core-principles.md` or relevant architecture docs, `README.md` (Requirements section)                                                                                                                                                                                                             |
-| Development workflow changes (`package.json`, `vitest.config.js`, `tools/*`, `.pre-commit-config.yaml`)        | `documentation/guides/documentation-maintenance.md`, `README.md` (Development section), `AGENTS.md`; update `CLAUDE.md` only for Claude-specific notes                                                                                                                                                           |
+| Development workflow changes (`package.json`, `vitest.config.js`, `tools/*`, `.githooks/`)                     | `documentation/guides/documentation-maintenance.md`, `README.md` (Development section), `AGENTS.md`; update `CLAUDE.md` only for Claude-specific notes                                                                                                                                                           |
 | New documentation file                                                                                         | `documentation/TABLEOFCONTENTS.md`                                                                                                                                                                                                                                                                               |
 
 ## Validation

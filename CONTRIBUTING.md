@@ -160,15 +160,15 @@ New custom checker code is allowed only for irreducible AvNav contracts with a d
 
 ## 8) Execution and Validation Workflow
 
-Optional local hooks can be installed when `pre-commit` is available:
+Install the tracked local pre-push hook once per clone:
 
 ```bash
-pre-commit install
-pre-commit run --all-files
+npm run hooks:install
+npm run hooks:doctor
 ```
 
-The hooks run fast local checks only. The complete local `check:all` gate is the quality authority; tag pushes rerun it
-before GitHub publishes only the locally prepared, committed release artifacts.
+The hook runs `npm run check:all` before every push and blocks failures. Git does not activate a tracked hook directory
+automatically, so repeat this setup for each clone; `hooks:doctor` provides the repair command when it drifts.
 
 Run from repository root after implementation:
 
@@ -206,10 +206,10 @@ In short: run `npm run release:prepare`, choose a full SemVer version, write not
 `releases/dyninstruments-VERSION.md`, then run `npm run release:create -- --version=VERSION`. Prereleases such as
 `4.0.0-beta.1` use the same flow.
 
-Tag publication uses the committed release artifacts created locally. The tag workflow reruns locked setup and
-`check:all`, validates SemVer, and never rebuilds the ZIP. It publishes SemVer prerelease tags as GitHub prereleases and
-stable tags as normal releases. The documented manual AvNav validation supplements the blocking jsdom and VM contracts
-before release creation.
+Tag publication uses the committed release artifacts created locally. GitHub validates tag/artifact identity and
+publishes the committed ZIP and notes without installing dependencies, rerunning quality, rebuilding, packaging,
+committing, or tagging. It publishes SemVer prerelease tags as GitHub prereleases and stable tags as normal releases.
+The documented manual AvNav validation supplements the blocking jsdom and VM contracts before release creation.
 
 ## 10) Pre-Merge Checklist
 
@@ -218,5 +218,5 @@ before release creation.
 - [ ] Implementation matches requested intent and scope.
 - [ ] Documentation was updated wherever behavior/config/contracts changed.
 - [ ] AI slop review completed.
-- [ ] Optional `pre-commit run --all-files` passed when pre-commit is installed.
+- [ ] `npm run hooks:doctor` confirms the tracked pre-push hook is installed for this clone.
 - [ ] `npm run check:all` passed (required final gate).

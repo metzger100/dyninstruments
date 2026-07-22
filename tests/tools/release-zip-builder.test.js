@@ -16,7 +16,6 @@ function writeFile(rootDir, relPath, content) {
 
 const DEV_TOOLING_FILES = [
   ".markdownlint-cli2.jsonc",
-  ".pre-commit-config.yaml",
   ".prettierignore",
   ".prettierrc.json",
   ".stylelintrc.json",
@@ -73,7 +72,6 @@ describe("release-zip-builder", function () {
     expect(isRuntimePath("tools/retired-quality-tool.mjs")).toBe(false);
     expect(isRuntimePath("tests/tools/release-zip-builder.test.js")).toBe(false);
     expect(isRuntimePath("node_modules/vitest/index.js")).toBe(false);
-    expect(isRuntimePath(".pre-commit-config.yaml")).toBe(false);
     expect(isRuntimePath("tsconfig.checkjs.json")).toBe(false);
   });
 

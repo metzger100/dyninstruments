@@ -4,8 +4,8 @@
 
 ## Overview
 
-Releases are created locally and committed into the repository first. A tag push reruns the complete quality gate before
-GitHub publishes the already-created ZIP and notes.
+Releases are created, validated, packaged, committed, and tagged locally. A tag push only validates release identity and
+publishes the already-committed ZIP and notes.
 
 ## Key Details
 
@@ -68,10 +68,10 @@ git push origin main
 git push origin vVERSION
 ```
 
-The tag workflow installs the locked Node 26/npm 12.0.1 quality toolchain, reruns `npm run check:all`, validates the tag
-with the same SemVer owner used by `release:create`, and then publishes the committed files without rebuilding. Tags
-with a SemVer prerelease segment become GitHub prereleases; plain versions and versions with build metadata only become
-normal GitHub releases.
+The tag workflow validates the tag with the same SemVer owner used by `release:create`, verifies matching committed ZIP
+and notes paths, and publishes those files. It does not install dependencies, rerun quality, build, package, commit, or
+tag. Tags with a SemVer prerelease segment become GitHub prereleases; plain versions and versions with build metadata
+only become normal GitHub releases.
 
 ## SemVer Decision Guide
 
@@ -133,14 +133,14 @@ Practical checklist for each bullet:
 
 ## Troubleshooting
 
-| Symptom                                          | Likely Cause                                                    | Fix                                                                                                  |
-| ------------------------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `release:create` fails on `check:all`            | Complete local gate failure                                     | Run `npm run check:all`, fix all failures, rerun release                                             |
-| `release:create` fails on notes file             | Missing or empty `releases/dyninstruments-VERSION.md` file      | Create/populate the matching markdown file in `releases/` and rerun                                  |
-| Preparation/creation reports dirty release paths | Stale ZIP, unrelated notes, or another uncommitted file exists  | Commit, stash, or remove every path except the current canonical notes file used by `release:create` |
-| `release:create` fails with duplicate tag        | `vVERSION` already exists                                       | Choose next version or delete/retarget tag intentionally                                             |
-| Tag workflow quality job fails                   | The tagged commit does not pass the reproducible aggregate gate | Fix locally, create a new release commit/tag, and push the replacement tag intentionally             |
-| Release zip/notes missing after run              | Release command aborted before artifact stage                   | Fix earlier error and rerun full command                                                             |
+| Symptom                                          | Likely Cause                                                   | Fix                                                                                                     |
+| ------------------------------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `release:create` fails on `check:all`            | Complete local gate failure                                    | Run `npm run check:all`, fix all failures, rerun release                                                |
+| `release:create` fails on notes file             | Missing or empty `releases/dyninstruments-VERSION.md` file     | Create/populate the matching markdown file in `releases/` and rerun                                     |
+| Preparation/creation reports dirty release paths | Stale ZIP, unrelated notes, or another uncommitted file exists | Commit, stash, or remove every path except the current canonical notes file used by `release:create`    |
+| `release:create` fails with duplicate tag        | `vVERSION` already exists                                      | Choose next version or delete/retarget tag intentionally                                                |
+| Tag workflow cannot find ZIP/notes               | The tagged commit lacks matching committed release inputs      | Create the release locally, commit its ZIP/notes, create a new annotated tag, and push it intentionally |
+| Release zip/notes missing after run              | Release command aborted before artifact stage                  | Fix earlier error and rerun full command                                                                |
 
 ## Related
 

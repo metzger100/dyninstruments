@@ -148,9 +148,9 @@ Task: Add new BarometerGauge
       temporary-fragment or negative-fixture classification.
 - [ ] Coverage/complexity policy edits preserve the hash-locked coverage snapshot and regenerated Phase 0 complexity
       capture; only the 12 frozen legacy coverage paths may retain their exact below-default values, and every active
-      complexity value exactly matches its current finding; all quality-policy surfaces remain CODEOWNERS-protected.
-- [ ] For releases, pushed only a locally created annotated tag; the tag workflow reruns `check:all` before publishing
-      committed artifacts with the correct stable/prerelease classification.
+      complexity value exactly matches its current finding.
+- [ ] For releases, pushed only a locally created annotated tag; the tag workflow validates and publishes committed
+      artifacts with the correct stable/prerelease classification without rerunning quality.
 - [ ] Completed the documented manual AvNav validation before release: plugin load, representative radial/linear/HTML
       widgets, day/night switch, and route/AIS interactions.
 

@@ -18,6 +18,17 @@ function createTempRepo() {
   return tempRoot;
 }
 
+/** @param {string} tempRoot @param {number} exitCode */
+function createFakeNpm(tempRoot, exitCode) {
+  const binDirectory = path.join(tempRoot, "test-bin");
+  const invocationPath = path.join(tempRoot, "npm-invocation.txt");
+  fs.mkdirSync(binDirectory);
+  const npmPath = path.join(binDirectory, "npm");
+  fs.writeFileSync(npmPath, `#!/usr/bin/env bash\nprintf "%s\\n" "$@" >> "$DYNI_HOOK_INVOCATION"\nexit ${exitCode}\n`);
+  fs.chmodSync(npmPath, 0o755);
+  return { binDirectory, invocationPath };
+}
+
 /** @param {string} cwd */
 function runDoctor(cwd) {
   return spawnSync(process.execPath, [path.join(root, "tools/hooks-doctor.mjs")], {
@@ -48,28 +59,43 @@ describe(".githooks/pre-push", function () {
     expect(result.stderr).toBe("");
   });
 
-  it("executes exactly npm run check:all and propagates its failure", function () {
+  it("executes exactly one npm run check:all", function () {
     const tempRoot = createTempRepo();
     try {
-      const binDirectory = path.join(tempRoot, "test-bin");
-      const invocationPath = path.join(tempRoot, "npm-invocation.txt");
-      fs.mkdirSync(binDirectory);
-      const npmPath = path.join(binDirectory, "npm");
-      fs.writeFileSync(npmPath, '#!/usr/bin/env bash\nprintf "%s\\n" "$@" > "$DYNI_HOOK_INVOCATION"\nexit 23\n');
-      fs.chmodSync(npmPath, 0o755);
+      const fakeNpm = createFakeNpm(tempRoot, 0);
 
       const result = spawnSync("bash", [path.join(tempRoot, ".githooks", "pre-push")], {
         cwd: tempRoot,
         env: {
           ...childEnv(),
-          PATH: `${binDirectory}:${process.env.PATH}`,
-          DYNI_HOOK_INVOCATION: invocationPath
+          PATH: `${fakeNpm.binDirectory}:${process.env.PATH}`,
+          DYNI_HOOK_INVOCATION: fakeNpm.invocationPath
+        },
+        encoding: "utf8"
+      });
+
+      expect(result.status).toBe(0);
+      expect(fs.readFileSync(fakeNpm.invocationPath, "utf8").trim().split("\n")).toEqual(["run", "check:all"]);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("propagates the quality gate failure", function () {
+    const tempRoot = createTempRepo();
+    try {
+      const fakeNpm = createFakeNpm(tempRoot, 23);
+      const result = spawnSync("bash", [path.join(tempRoot, ".githooks", "pre-push")], {
+        cwd: tempRoot,
+        env: {
+          ...childEnv(),
+          PATH: `${fakeNpm.binDirectory}:${process.env.PATH}`,
+          DYNI_HOOK_INVOCATION: fakeNpm.invocationPath
         },
         encoding: "utf8"
       });
 
       expect(result.status).toBe(23);
-      expect(fs.readFileSync(invocationPath, "utf8").trim().split("\n")).toEqual(["run", "check:all"]);
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
@@ -83,6 +109,19 @@ describe("hooks:doctor", function () {
       const result = runDoctor(tempRoot);
       expect(result.status).not.toBe(0);
       expect(result.stderr).toContain("core.hooksPath");
+      expect(result.stderr).toContain("npm run hooks:install");
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails with a repair instruction when core.hooksPath points elsewhere", function () {
+    const tempRoot = createTempRepo();
+    try {
+      spawnSync("git", ["config", "core.hooksPath", ".other-hooks"], { cwd: tempRoot, env: childEnv() });
+      const result = runDoctor(tempRoot);
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toContain('core.hooksPath is ".other-hooks"');
       expect(result.stderr).toContain("npm run hooks:install");
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });

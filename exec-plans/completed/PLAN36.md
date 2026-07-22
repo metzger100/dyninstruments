@@ -610,66 +610,95 @@ unchanged.
 
 ### Local hook and command authority
 
-- [ ] `npm run check:all` still expands exactly to `check:core` plus `test:coverage:check`.
-- [ ] `.githooks/pre-push` executes exactly one `npm run check:all` and propagates failure.
-- [ ] `hooks:install` configures `core.hooksPath=.githooks` and the executable bit.
-- [ ] `hooks:doctor` fails with the repair command when setup is absent and passes after installation.
-- [ ] Hook tests use temporary repositories and never mutate the real clone's Git config.
-- [ ] `.githooks/README.md` and CONTRIBUTING document the one-time per-clone setup prominently.
-- [ ] `.pre-commit-config.yaml`, its test, its inventory entries, and active documentation references are absent.
+- [x] `npm run check:all` still expands exactly to `check:core` plus `test:coverage:check`.
+- [x] `.githooks/pre-push` executes exactly one `npm run check:all` and propagates failure.
+- [x] `hooks:install` configures `core.hooksPath=.githooks` and the executable bit.
+- [x] `hooks:doctor` fails with the repair command when setup is absent and passes after installation.
+- [x] Hook tests use temporary repositories and never mutate the real clone's Git config.
+- [x] `.githooks/README.md` and CONTRIBUTING document the one-time per-clone setup prominently.
+- [x] `.pre-commit-config.yaml`, its test, its inventory entries, and active documentation references are absent.
 
 ### GitHub topology and release publishing
 
-- [ ] `publish-release.yml` is the only GitHub Actions workflow.
-- [ ] No branch, pull-request, reusable, or renamed quality workflow remains.
-- [ ] `.github/CODEOWNERS`, its contract test, and required-ruleset guidance are absent.
-- [ ] The tag workflow has one publisher job and no quality-job dependency.
-- [ ] The workflow performs no Node/npm/repository setup, quality run, test, coverage, lint, build, rebuild, packaging,
+- [x] `publish-release.yml` is the only GitHub Actions workflow.
+- [x] No branch, pull-request, reusable, or renamed quality workflow remains.
+- [x] `.github/CODEOWNERS`, its contract test, and required-ruleset guidance are absent.
+- [x] The tag workflow has one publisher job and no quality-job dependency.
+- [x] The workflow performs no Node/npm/repository setup, quality run, test, coverage, lint, build, rebuild, packaging,
       commit, tag, or push.
-- [ ] The publisher uses only the checked-out committed ZIP and Markdown for the validated tag version.
-- [ ] Stable tags create normal releases and prerelease tags create GitHub prereleases.
-- [ ] Every action is pinned to a full SHA; permissions, concurrency, tag ref, and timeout remain fail-closed.
-- [ ] Workflow contract tests reject a second workflow and every forbidden publisher operation.
+- [x] The publisher uses only the checked-out committed ZIP and Markdown for the validated tag version.
+- [x] Stable tags create normal releases and prerelease tags create GitHub prereleases.
+- [x] Every action is pinned to a full SHA; permissions, concurrency, tag ref, and timeout remain fail-closed.
+- [x] Workflow contract tests reject a second workflow and every forbidden publisher operation.
 
 ### Local release preservation
 
-- [ ] `release:create` runs `check:all` exactly once before packaging.
-- [ ] Full SemVer, dirty-state, release-note, deterministic ZIP, release commit, and annotated-tag contracts remain
+- [x] `release:create` runs `check:all` exactly once before packaging.
+- [x] Full SemVer, dirty-state, release-note, deterministic ZIP, release commit, and annotated-tag contracts remain
       green.
-- [ ] No release manifest entry, runtime ZIP content, committed artifact, or installer contract changes.
-- [ ] Manual AvNav validation remains a documented local prerequisite for release creation.
+- [x] No release manifest entry, runtime ZIP content, committed artifact, or installer contract changes.
+- [x] Manual AvNav validation remains a documented local prerequisite for release creation.
 
 ### Maintained quality preservation
 
-- [ ] ESLint, Prettier, Stylelint, TypeScript, Vitest/V8, actionlint, jscpd, schema, documentation, focused-test,
+- [x] ESLint, Prettier, Stylelint, TypeScript, Vitest/V8, actionlint, jscpd, schema, documentation, focused-test,
       coverage-inventory, complexity, scaling, and package checks remain active.
-- [ ] No coverage threshold/floor, complexity baseline, test-exception capture, lint severity, or scan root is weakened.
-- [ ] Deleted test files are removed cleanly from strict test inventory and typecheck includes only.
-- [ ] No production/runtime source file changes.
-- [ ] No new dependency, runtime build, browser automation, or remote quality service.
+- [x] No coverage threshold/floor, complexity baseline, test-exception capture, lint severity, or scan root is weakened.
+- [x] Deleted test files are removed cleanly from strict test inventory and typecheck includes only.
+- [x] No production/runtime source file changes.
+- [x] No new dependency, runtime build, browser automation, or remote quality service.
 
 ### Plan and documentation consistency
 
-- [ ] PLAN35 records its canceled external acceptance items as superseded and is archived without rewriting completed
+- [x] PLAN35 records its canceled external acceptance items as superseded and is archived without rewriting completed
       history.
-- [ ] PLAN36 is the sole active plan during implementation and is archived after completion.
-- [ ] README, CONTRIBUTING, AGENTS, CLAUDE, quality-gate, smell, maintenance, release, and hook guidance match live
+- [x] PLAN36 is the sole active plan during implementation and is archived after completion.
+- [x] README, CONTRIBUTING, AGENTS, CLAUDE, quality-gate, smell, maintenance, release, and hook guidance match live
       behavior.
-- [ ] Historical PLAN19, PLAN34, and completed PLAN35 remain available as evidence.
-- [ ] No active stale claim says GitHub reruns quality, checks branches/PRs, or enforces CODEOWNERS/rulesets.
-- [ ] `documentation/TABLEOFCONTENTS.md` remains unchanged unless implementation adds a new documentation file.
+- [x] Historical PLAN19, PLAN34, and completed PLAN35 remain available as evidence.
+- [x] No active stale claim says GitHub reruns quality, checks branches/PRs, or enforces CODEOWNERS/rulesets.
+- [x] `documentation/TABLEOFCONTENTS.md` remains unchanged unless implementation adds a new documentation file.
 
 ### Final validation
 
-- [ ] `npm run hooks:doctor` passes after explicit install.
-- [ ] `npm run test:split` passes.
-- [ ] `npm run actions:lint` passes.
-- [ ] `npm run package:check` passes.
-- [ ] `npm run docs:check` passes.
-- [ ] `npm run check:filesize` passes.
-- [ ] `npm run check:all` passes with final test counts and coverage recorded.
-- [ ] `git diff --check` passes.
-- [ ] Final diff contains no unrelated user change.
+- [x] `npm run hooks:doctor` passes after explicit install.
+- [x] `npm run test:split` passes.
+- [x] `npm run actions:lint` passes.
+- [x] `npm run package:check` passes.
+- [x] `npm run docs:check` passes.
+- [x] `npm run check:filesize` passes.
+- [x] `npm run check:all` passes with final test counts and coverage recorded.
+- [x] `git diff --check` passes.
+- [x] Final diff contains no unrelated user change.
+
+---
+
+## Implementation Record
+
+- **Phase 0 (2026-07-22):** started from `5b4849ecb23cdfcee99027c4c4a80e619e224dfd` with a clean worktree.
+  `npm run hooks:doctor` correctly reported `core.hooksPath` as unset and named `npm run hooks:install` as the repair.
+  PLAN35 now records that its remaining hosted pull-request/ruleset items were superseded, and it was archived without
+  changing its completed evidence.
+- **Phases 1–3:** removed the optional pre-commit layer, branch/PR workflow, CODEOWNERS, and their three retired
+  strict tests/inventory entries. The retained hook contract remains clone-local and fail-closed. The sole workflow is
+  a one-job, tag-only publisher that validates SemVer and committed artifacts without installing dependencies or
+  rerunning quality. Focused hook/package/release and workflow contracts passed; the strict test inventory is now 472
+  files.
+- **Phase 4:** restored `.githooks/README.md`; synchronized contributor, root, agent, quality, smell, maintenance,
+  and release guidance. The repository has no `ai:check` script; the existing AI instruction pointer contract passed
+  as the live synchronization proof. Documentation checks, file-size checks, formatting, and whitespace validation
+  passed.
+- **Phase 5:** `npm run hooks:install` configured `core.hooksPath=.githooks`, and `npm run hooks:doctor` passed.
+  `npm run test:split`, `npm run actions:lint`, `npm run package:check`, and `npm run check:all` passed. Focused
+  package validation reported 3 files / 15 tests; the full contract project reported 28 files / 128 tests. The final
+  split and coverage runs passed 436 test files / 1,892 tests. V8 coverage was 92.26% statements, 79.77% branches,
+  96.83% functions, and 93.24% lines. Final residue checks confirmed one workflow and no
+  CODEOWNERS/pre-commit/test-reference residue; runtime, layouts, release artifacts, coverage floors, complexity
+  baselines, scaling contracts, and release manifest are unchanged.
+- **Post-implementation audit (2026-07-22):** strengthened the publisher contract to reject any second workflow and
+  every executable line outside the reviewed transport allowlist. Hook tests now prove one invocation by append-only
+  capture and cover an incorrect `core.hooksPath`. Corrected the live test-inventory count to 472 and checked every
+  acceptance item after the final green validation.
 
 ---
 
@@ -677,7 +706,7 @@ unchanged.
 
 - [PLAN19 — Release Automation + Cleanup](../completed/PLAN19.md)
 - [PLAN34 — Quality-System Migration Remediation and Finalization](../completed/PLAN34.md)
-- [PLAN35 — AI Coding Quality Enforcement Hardening](PLAN35.md)
+- [PLAN35 — AI Coding Quality Enforcement Hardening](../completed/PLAN35.md)
 - [Quality gates](../../documentation/conventions/quality-gates.md)
 - [Release workflow](../../documentation/guides/release-workflow.md)
 - [Documentation maintenance](../../documentation/guides/documentation-maintenance.md)

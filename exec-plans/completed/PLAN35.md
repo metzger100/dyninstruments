@@ -1305,6 +1305,13 @@ user-visible behavior. If that happens, stop and amend the plan before changing 
 
 ### Phase 9 — in progress (2026-07-20): mechanical validation complete, two external GitHub items remain
 
+### Supersession record — 2026-07-22
+
+PLAN36 restores the owner-approved local-first delivery model. Completed Phases 0–8 and the mechanical portion of
+Phase 9 remain completed evidence. The representative pull-request run and GitHub branch-check/owner-review ruleset
+activation are canceled, not achieved. PLAN36 removes the branch/PR quality workflow, quality-specific CODEOWNERS, and
+the tag-side quality rerun; this plan is archived with that scope correction recorded.
+
 - **9A, clean reproducibility:** ran the exact command sequence from a fresh `npm run setup` (`npm ci` + actionlint
   provisioning) through `format:check`, `lint`, `typecheck`, `test:split` (438 files / 1862 tests), `check:patterns` (0
   findings across 39 rules), `check:scaling` (4 files / 17 tests), `docs:check`, `check:filesize` (0 violations across

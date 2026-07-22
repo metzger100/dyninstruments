@@ -272,11 +272,11 @@ values. Complexity checks regenerate the immutable Phase 0 debt capture from its
 every active entry to exactly match its current over-limit metric. Test files likewise default to the separate strict
 `checkJs`/ESLint boundary. The hash-locked test-exception capture permits only the 229 existing non-strict paths to
 remain exempt; temporary harness/split-spec debt requires an inventory-owned removal path, and negative fixtures must be
-referenced by their canonical owner test. Pull-request CI checks `github.sha`, which is the proposed merge result for
-the `pull_request` event, rather than testing only the branch head.
+referenced by their canonical owner test.
 
-Optional local pre-commit hooks can run the fast formatting, lint, actionlint, and documentation checks before the full
-local gate.
+Install the tracked pre-push gate once per clone with `npm run hooks:install`, then verify it with
+`npm run hooks:doctor`. It runs `check:all` before each push. This is local enforcement: an unconfigured clone or an
+explicit Git bypass can skip it, so manual `check:all` remains the required completion gate.
 
 For test-environment work, `npm run test:split` runs the configured projects: `unit-node` for pure/tool tests without
 jsdom, `contract` for VM-based registry and bootstrap contracts, and `unit-dom` for jsdom/canvas-backed runtime/widget
@@ -284,10 +284,10 @@ tests. Required local and CI checks do not require Playwright, a downloaded brow
 behavior is covered by the DOM and contract projects. Coverage uses Vitest/V8 global and critical-area thresholds, with
 the legacy coverage-summary parser retired after native threshold proof.
 
-The local `check:all` command is the complete quality authority. A tag push reruns locked setup and `check:all` in a
-read-only GitHub job; only after it passes does the publisher upload the committed ZIP and matching notes. SemVer
-prerelease tags publish as GitHub prereleases; stable tags publish as normal releases. GitHub does not rebuild release
-artifacts.
+The local `check:all` command is the complete quality authority; GitHub has no branch/PR quality CI, CODEOWNERS, or
+required quality ruleset. A tag push only validates the tag and matching committed ZIP/notes before publishing them.
+SemVer prerelease tags publish as GitHub prereleases; stable tags publish as normal releases. GitHub does not install
+dependencies, rerun quality, rebuild, package, commit, or tag release artifacts.
 
 Before release creation, perform the manual AvNav smoke checklist in `CONTRIBUTING.md`: load the plugin, inspect
 representative radial/linear/HTML widgets in a bundled layout, switch day/night appearance, and exercise the interactive
