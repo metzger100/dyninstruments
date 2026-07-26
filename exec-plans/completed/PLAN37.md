@@ -1,8 +1,8 @@
 # PLAN37 — Split oversized AI-read files and extend the 400-line gate to cover them
 
-**Status:** 🚧 Active | Prescriptive on scope, gate behavior, and exclusion boundaries; flexible on the exact interface/
-function placement within each split target as long as every produced file stays under the 400-line limit and is grouped
-by responsibility (never `part1`/`part2`/numbered fragments).
+**Status:** ✅ Implemented | All four oversized `.d.ts` files and six oversized `tools/**/*.mjs` modules split by
+responsibility; the file-size gate widened to cover `plugin.mjs`, `tools/`, and `types/`; `npm run check:all` passes
+with the widened gate active.
 
 ## Goal
 

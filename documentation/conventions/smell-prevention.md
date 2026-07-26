@@ -75,7 +75,10 @@ This document defines smell rules and enforcement ownership. Blocking checks mus
 - Full gate: `npm run check:all` (includes `npm run check:smells` via `check:core`)
 - Clone-local push gate: `.githooks/pre-push` runs `npm run check:all` after `npm run hooks:install`; use
   `npm run hooks:doctor` to verify or repair activation
-- `check:filesize` runs fail-closed with `--oneliner=block` (used by `check:core`/`check:all`)
+- `check:filesize` runs fail-closed with `--oneliner=block` (used by `check:core`/`check:all`); it scans JS, `.mjs`,
+  `.d.ts` type declarations, and Markdown across `plugin.js`, `plugin.mjs`, `runtime`, `cluster`, `config`, `shared`,
+  `widgets`, `tests`, `documentation`, `tools` (excluding `tools/lint-fixtures/` and `tools/test-data/`), `types`, and
+  the root docs; one-liner detection applies only to JS/`.mjs`, not `.d.ts`
 - Optional exploratory variant: `npm run check:filesize:warn`
 - Full command graph: [quality-gates.md](quality-gates.md)
 

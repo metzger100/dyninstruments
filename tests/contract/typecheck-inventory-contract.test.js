@@ -26,12 +26,12 @@ describe("TypeScript checkJs inventory", function () {
     expect(listed.size).toBe(229);
   });
 
-  it("keeps the six ambient declaration files in the strict project", function () {
+  it("keeps the ambient declaration files in the strict project", function () {
     expect(
       config.files.filter(function (/** @type {any} */ file) {
         return file.endsWith(".d.ts");
       })
-    ).toHaveLength(6);
+    ).toHaveLength(34);
   });
 });
 

@@ -1,15 +1,24 @@
 import fs from "node:fs";
 import path from "node:path";
+import { maskCommentsAndStrings } from "./shared-source-scan.mjs";
+import { resetSuppressionState, setKnownRuleNames } from "./shared-suppressions.mjs";
+
+export {
+  BOUNDARY_MARKER_RULE_NAME,
+  getInvalidLintSuppressions,
+  isLintSuppressed,
+  setKnownRuleNames
+} from "./shared-suppressions.mjs";
+export {
+  findMatchingBrace,
+  findMatchingParen,
+  findTopLevelComma,
+  isExternalFactorFallbackContext,
+  maskCommentsAndStrings,
+  readLiteralToken
+} from "./shared-source-scan.mjs";
 
 const SKIP_DIRS = new Set([".git", "node_modules", "coverage", "artifacts"]);
-const EXTERNAL_FACTOR_CONTEXT_HINTS = [
-  "root.avnav",
-  "avnav.api",
-  "getComputedStyle",
-  "devicePixelRatio",
-  "ownerDocument",
-  "documentElement"
-];
 
 let ROOT = process.cwd();
 let WARN_MODE = false;
@@ -18,8 +27,6 @@ const scopeCache = new Map();
 let clusterPrefixCache = null;
 let rendererContractCache = null;
 let atomicityContractCache = null;
-let lintDirectiveCache = new Map();
-let knownRuleNames = [];
 
 export const RENDER_PROP_OBJECT_NAMES = new Set(["p", "props"]);
 
@@ -31,8 +38,8 @@ export function resetContext(options = {}) {
   clusterPrefixCache = null;
   rendererContractCache = null;
   atomicityContractCache = null;
-  lintDirectiveCache = new Map();
-  knownRuleNames = [];
+  resetSuppressionState();
+  setKnownRuleNames([]);
 }
 
 export function getWarnMode() {
@@ -59,21 +66,6 @@ export function setAtomicityContractCache(value) {
   atomicityContractCache = value;
 }
 
-export function setKnownRuleNames(names) {
-  knownRuleNames = Array.isArray(names) ? names.slice() : [];
-  lintDirectiveCache = new Map();
-}
-
-export function isLintSuppressed(file, line, ruleName) {
-  const info = getLintDirectiveInfo(file);
-  const suppressedRules = info.suppressionsByLine.get(line);
-  return !!(suppressedRules && suppressedRules.has(ruleName));
-}
-
-export function getInvalidLintSuppressions(file) {
-  return getLintDirectiveInfo(file).invalids.slice();
-}
-
 export function filesForScope(scope) {
   const key = JSON.stringify(scope);
   if (scopeCache.has(key)) return scopeCache.get(key);
@@ -85,7 +77,11 @@ export function filesForScope(scope) {
     walk(path.join(ROOT, root), candidates);
   }
   const files = [...candidates.keys()]
-    .filter((file) => includes.some((re) => re.test(file)) && !excludes.some((re) => re.test(file)))
+    .filter((file) => {
+      const included = includes.some((re) => re.test(file));
+      const excluded = excludes.some((re) => re.test(file));
+      return included && !excluded;
+    })
     .sort((a, b) => a.localeCompare(b));
   scopeCache.set(key, files);
   return files;
@@ -101,151 +97,6 @@ export function getFileData(file) {
   const data = { text, lineStarts, maskedText: maskCommentsAndStrings(text) };
   fileCache.set(file, data);
   return data;
-}
-
-function getLintDirectiveInfo(file) {
-  if (lintDirectiveCache.has(file)) {
-    return lintDirectiveCache.get(file);
-  }
-
-  const data = getFileData(file);
-  const info = parseLintDirectives(data.text, data.lineStarts);
-  lintDirectiveCache.set(file, info);
-  return info;
-}
-
-export const BOUNDARY_MARKER_RULE_NAME = "catch-fallback-without-suppression";
-
-function parseLintDirectives(text, lineStarts) {
-  const suppressionsByLine = new Map();
-  const invalids = [];
-  const knownRules = new Set(knownRuleNames);
-  const commentRe = /\/\/[^\n]*|\/\*[\s\S]*?\*\//g;
-  let match;
-
-  while ((match = commentRe.exec(text))) {
-    const raw = match[0];
-    if (!raw.includes("dyni-lint-disable-") && !raw.includes("dyni-boundary-")) {
-      continue;
-    }
-
-    const line = lineAt(match.index, lineStarts);
-    const body = raw.startsWith("//") ? raw.slice(2).trim() : raw.slice(2, -2).trim();
-
-    if (body.includes("dyni-boundary-")) {
-      parseBoundaryMarker(body, line, suppressionsByLine, invalids);
-      continue;
-    }
-
-    parseLintDisableDirective(body, line, knownRules, suppressionsByLine, invalids);
-  }
-
-  return {
-    suppressionsByLine,
-    invalids
-  };
-}
-
-function parseLintDisableDirective(body, line, knownRules, suppressionsByLine, invalids) {
-  const parsed = /^dyni-lint-disable-(next-line|line)\s+([a-z0-9-]+)\s+--\s+(.+)$/s.exec(body);
-  if (!parsed) {
-    invalids.push({
-      line,
-      detail: `Malformed suppression directive '${body}'. Expected 'dyni-lint-disable-next-line <rule-name> -- <reason>' or 'dyni-lint-disable-line <rule-name> -- <reason>'.`
-    });
-    return;
-  }
-
-  const mode = parsed[1];
-  const ruleName = parsed[2];
-  const reason = parsed[3].trim();
-  if (!reason) {
-    invalids.push({ line, detail: `Suppression for rule '${ruleName}' is missing a reason.` });
-    return;
-  }
-  if (!knownRules.has(ruleName)) {
-    invalids.push({ line, detail: `Suppression references unknown rule '${ruleName}'.` });
-    return;
-  }
-  invalids.push({
-    line,
-    detail: `Generic production suppression '${mode} ${ruleName}' is forbidden. Use a checker-owned canonical exception, or a validated dyni-boundary marker for an external catch fallback.`
-  });
-}
-
-function parseBoundaryMarker(body, line, suppressionsByLine, invalids) {
-  const parsed = /^dyni-boundary-(next-line|line)\(([^)]*)\)\s+--\s+(.+)$/s.exec(body);
-  if (!parsed) {
-    invalids.push({
-      line,
-      detail: `Malformed boundary marker '${body}'. Expected 'dyni-boundary-next-line(category: <slug>, owner: <handle>, date: <YYYY-MM-DD>[, expires: <YYYY-MM-DD>]) -- <reason>' or the '-line' variant.`
-    });
-    return;
-  }
-
-  const mode = parsed[1];
-  const reason = parsed[3].trim();
-  const fields = parseBoundaryMarkerFields(parsed[2]);
-  const error = validateBoundaryMarkerFields(fields, reason);
-  if (error) {
-    invalids.push({ line, detail: `Invalid boundary marker: ${error}` });
-    return;
-  }
-
-  addSuppression(suppressionsByLine, mode === "next-line" ? line + 1 : line, BOUNDARY_MARKER_RULE_NAME);
-}
-
-function parseBoundaryMarkerFields(rawFields) {
-  const fields = {};
-  for (const entry of rawFields.split(",")) {
-    const separatorIndex = entry.indexOf(":");
-    if (separatorIndex < 0) continue;
-    const key = entry.slice(0, separatorIndex).trim();
-    const value = entry.slice(separatorIndex + 1).trim();
-    if (key) fields[key] = value;
-  }
-  return fields;
-}
-
-function validateBoundaryMarkerFields(fields, reason) {
-  if (!fields.category || !/^[a-z][a-z0-9-]*$/.test(fields.category)) {
-    return "'category' is required and must be a lowercase kebab-case slug.";
-  }
-  if (!fields.owner || !/^[A-Za-z0-9][A-Za-z0-9-]*$/.test(fields.owner)) {
-    return "'owner' is required and must be a handle-like identifier.";
-  }
-  if (!fields.date || !isValidIsoDate(fields.date)) {
-    return "'date' is required and must be a valid 'YYYY-MM-DD' calendar date.";
-  }
-  if (fields.expires !== undefined) {
-    if (!isValidIsoDate(fields.expires)) {
-      return "'expires' must be a valid 'YYYY-MM-DD' calendar date.";
-    }
-    if (fields.expires < isoToday()) {
-      return `temporary marker expired on ${fields.expires}.`;
-    }
-  }
-  if (!reason) {
-    return "a reason after '--' is required.";
-  }
-  return null;
-}
-
-function isValidIsoDate(value) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const parsed = new Date(`${value}T00:00:00Z`);
-  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
-}
-
-function isoToday() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function addSuppression(suppressionsByLine, targetLine, ruleName) {
-  if (!suppressionsByLine.has(targetLine)) {
-    suppressionsByLine.set(targetLine, new Set());
-  }
-  suppressionsByLine.get(targetLine).add(ruleName);
 }
 
 export function getClusterPascalPrefixes() {
@@ -355,204 +206,6 @@ export function countIdentifierReferences(text, name) {
 
 function identifierRegExp(name) {
   return new RegExp(`(?<![A-Za-z0-9_$])${escapeRegex(name)}(?![A-Za-z0-9_$])`, "g");
-}
-
-export function maskCommentsAndStrings(text) {
-  let out = "";
-  let i = 0;
-  let mode = "code";
-  let quote = "";
-
-  while (i < text.length) {
-    const ch = text[i];
-    const next = text[i + 1];
-
-    if (mode === "code") {
-      if (ch === "/" && next === "/") {
-        out += "  ";
-        i += 2;
-        mode = "line-comment";
-        continue;
-      }
-      if (ch === "/" && next === "*") {
-        out += "  ";
-        i += 2;
-        mode = "block-comment";
-        continue;
-      }
-      if (ch === "'" || ch === '"' || ch === "`") {
-        out += " ";
-        i += 1;
-        mode = "string";
-        quote = ch;
-        continue;
-      }
-      out += ch;
-      i += 1;
-      continue;
-    }
-
-    if (mode === "line-comment") {
-      if (ch === "\n") {
-        out += "\n";
-        i += 1;
-        mode = "code";
-        continue;
-      }
-      out += " ";
-      i += 1;
-      continue;
-    }
-
-    if (mode === "block-comment") {
-      if (ch === "*" && next === "/") {
-        out += "  ";
-        i += 2;
-        mode = "code";
-        continue;
-      }
-      out += ch === "\n" ? "\n" : " ";
-      i += 1;
-      continue;
-    }
-
-    if (mode === "string") {
-      if (ch === "\\") {
-        out += " ";
-        i += 1;
-        if (i < text.length) {
-          out += text[i] === "\n" ? "\n" : " ";
-          i += 1;
-        }
-        continue;
-      }
-      if (ch === quote) {
-        out += " ";
-        i += 1;
-        mode = "code";
-        quote = "";
-        continue;
-      }
-      out += ch === "\n" ? "\n" : " ";
-      i += 1;
-    }
-  }
-
-  return out;
-}
-
-export function findMatchingBrace(text, openIndex) {
-  let depth = 0;
-  for (let i = openIndex; i < text.length; i += 1) {
-    const ch = text[i];
-    if (ch === "{") {
-      depth += 1;
-      continue;
-    }
-    if (ch === "}") {
-      depth -= 1;
-      if (depth === 0) return i;
-    }
-  }
-  return -1;
-}
-
-export function findMatchingParen(text, openIndex) {
-  let depth = 0;
-  for (let i = openIndex; i < text.length; i += 1) {
-    const ch = text[i];
-    if (ch === "(") {
-      depth += 1;
-      continue;
-    }
-    if (ch === ")") {
-      depth -= 1;
-      if (depth === 0) return i;
-    }
-  }
-  return -1;
-}
-
-export function findTopLevelComma(maskedText, start, end) {
-  let braceDepth = 0;
-  let parenDepth = 0;
-  let bracketDepth = 0;
-  for (let i = start; i < end; i += 1) {
-    const ch = maskedText[i];
-    if (ch === "{") {
-      braceDepth += 1;
-      continue;
-    }
-    if (ch === "}") {
-      braceDepth -= 1;
-      continue;
-    }
-    if (ch === "(") {
-      parenDepth += 1;
-      continue;
-    }
-    if (ch === ")") {
-      parenDepth -= 1;
-      continue;
-    }
-    if (ch === "[") {
-      bracketDepth += 1;
-      continue;
-    }
-    if (ch === "]") {
-      bracketDepth -= 1;
-      continue;
-    }
-    if (ch === "," && braceDepth === 0 && parenDepth === 0 && bracketDepth === 0) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-export function readLiteralToken(text, startIndex) {
-  let i = startIndex;
-  while (i < text.length && /\s/.test(text[i])) {
-    i += 1;
-  }
-  if (i >= text.length) {
-    return null;
-  }
-
-  const quote = text[i];
-  if (quote === '"' || quote === "'" || quote === "`") {
-    let j = i + 1;
-    while (j < text.length) {
-      const ch = text[j];
-      if (ch === "\\") {
-        j += 2;
-        continue;
-      }
-      if (ch === quote) {
-        return { token: text.slice(i, j + 1), end: j + 1 };
-      }
-      j += 1;
-    }
-    return null;
-  }
-
-  const rem = text.slice(i);
-  const keyword = /^(?:true|false|null|undefined)\b/.exec(rem);
-  if (keyword) {
-    return { token: keyword[0], end: i + keyword[0].length };
-  }
-  const numeric = /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:e[+-]?\d+)?/i.exec(rem);
-  if (numeric) {
-    return { token: numeric[0], end: i + numeric[0].length };
-  }
-  return null;
-}
-
-export function isExternalFactorFallbackContext(maskedText, index) {
-  const start = Math.max(0, index - 220);
-  const end = Math.min(maskedText.length, index + 220);
-  const snippet = maskedText.slice(start, end);
-  return EXTERNAL_FACTOR_CONTEXT_HINTS.some((hint) => snippet.includes(hint));
 }
 
 function normalizePath(value) {

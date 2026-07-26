@@ -15,9 +15,10 @@ These rules are mandatory for all contributors and AI agents in this repository.
    [architecture/cluster-widget-system.md](architecture/cluster-widget-system.md)
 4. Rule: Dependency direction is one-way by layer: `widgets -> shared`; `cluster -> cluster/widgets/shared`;
    `shared -> shared`; `config` is pure data; `runtime` must not depend on `widgets/cluster/shared`.
-5. Rule: Hard 400-line limit on all JS files (source and test) and Markdown documentation files. Split before crossing
-   the limit. This rule is absolute and overrides exec-plan assumptions. Exempt: `.css`, `.json`, `exec-plans/`,
-   `.agents/skills/`, `tools/`, package configs. →
+5. Rule: Hard 400-line limit on all JS, `.mjs`, `.d.ts` type declaration, and Markdown documentation files across
+   source, tests, `tools`, `types`, and root docs. Split before crossing the limit. This rule is absolute and overrides
+   exec-plan assumptions. Exempt: `.css`, `.json`, `exec-plans/`, `.agents/skills/`, package configs, and the
+   `tools/lint-fixtures/`/`tools/test-data/` fixture trees. →
    [conventions/coding-standards.md](conventions/coding-standards.md#file-size-limits)
 6. Rule: Documentation must be updated in the same task as code/architecture changes.
 7. Rule: Public or complex runtime contracts need focused documentation or JSDoc; `Documentation:` header targets are

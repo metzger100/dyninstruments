@@ -33,15 +33,20 @@ Validate and default at boundaries, then trust the resulting internal contract.
 
 ## File Size Limits
 
-- **Hard limit: 400 non-empty lines per file.** This applies to all JS files (source and test) and all Markdown
-  documentation files. There are no exceptions, no warning tier, and no workarounds. If a file approaches or reaches 400
-  lines, the agent must stop and split it before continuing — even if the current exec-plan does not mention splitting.
-  Repo rules always override exec-plan assumptions.
-- Exempt file types: `.css`, `.json` layout files, exec-plan files (`exec-plans/`), agent skill files
-  (`.agents/skills/`), tool scripts (`tools/`), and package config files.
+- **Hard limit: 400 non-empty lines per file.** This applies to all JS and `.mjs` files (source and test), all `.d.ts`
+  type declaration files (total lines counted the same as code), and all Markdown documentation files (total lines).
+  Scope covers `plugin.js`, `plugin.mjs`, `runtime`, `cluster`, `config`, `shared`, `widgets`, `tests`, `documentation`,
+  `tools`, `types`, and the root docs. There are no exceptions, no warning tier, and no workarounds. If a file
+  approaches or reaches 400 lines, the agent must stop and split it before continuing — even if the current exec-plan
+  does not mention splitting. Repo rules always override exec-plan assumptions.
+- Exempt file types/paths: `.css`, `.json` layout files, exec-plan files (`exec-plans/`), agent skill files
+  (`.agents/skills/`), package config files (`*.config.*`), and the tool fixture/test-input trees
+  (`tools/lint-fixtures/`, `tools/test-data/`).
 - One-liner compression (collapsing multiline code onto fewer lines to stay under the limit) is a blocking lint
-  violation. The linter detects dense oneliners, long packed lines, chained ternaries, collapsed blocks, and other
-  compression patterns. See `documentation/conventions/smell-prevention.md` §Oneliner line-limit bypass.
+  violation for JS/`.mjs` source. The linter detects dense oneliners, long packed lines, chained ternaries, collapsed
+  blocks, and other compression patterns. `.d.ts` type declarations are line-limited but exempt from one-liner detection
+  — dense ambient type syntax is expected. See `documentation/conventions/smell-prevention.md` §Oneliner line-limit
+  bypass.
 - Shared drawing/layout logic must be split into `shared/widget-kits/radial/` modules:
   - `RadialAngleMath`
   - `RadialTickMath`
