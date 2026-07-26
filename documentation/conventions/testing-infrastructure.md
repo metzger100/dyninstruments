@@ -48,14 +48,11 @@ bar. Floors only ratchet up in later phases; they must never be lowered below th
 
 ## Strict Test-Code Boundary
 
-Every file under `tests/**/*.js` is classified exactly once in `tools/quality-policy/test-inventory.json` (475 entries)
-as one of:
+Every file under `tests/**/*.js` is classified exactly once in `tools/quality-policy/test-inventory.json` as one of:
 
 - `strict` — a real test module or helper, held to the same rigor as production code. New test files default to
   `strict`.
 - `harness-fragment` — a non-spec `.harness.js` file naming its existing parent test, reason, and removal path.
-- `split-spec-fragment` — an executable `*.partN.test.js` file that still consumes sibling harness globals; it names the
-  exact sibling parent plus a reason and migration/removal path.
 - `fixture` — an executable negative fixture naming an existing `ownerTest` and a `reason`; deliberately invalid so its
   owner checker test can prove a rule fails a real violation.
 
@@ -69,7 +66,9 @@ checker also rejects duplicate raw JSON keys and any `@ts-nocheck` directive out
 `tests/tools/test-inventory.test.js` exercises every failure branch against a disposable temp workspace.
 
 `tsconfig.tests.json` (repo root) is a separate strict, no-emit `checkJs` project whose `files` list is exactly the
-`strict`-classified entries — no temporary fragment or fixture file is typechecked there.
+`strict`-classified entries — no harness or fixture file is typechecked there. When a family grows beyond the file-size
+limit, split it by behavior into strict `Base.<topic>.test.js` files and extract shared setup once into a strict helper
+or an existing captured harness; numeric `*.partN.test.js` files are not permitted.
 `tests/contract/typecheck-tests-inventory-contract.test.js` proves the two lists stay in lockstep. Temporary fragments
 carry `// @ts-nocheck` so they stay exempt even when `require()`-reached from a strict file; `fixture` files are never
 reached from a strict file at all. `npm run typecheck` runs both boundaries: `typecheck:source` (production,

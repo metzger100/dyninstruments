@@ -1,0 +1,235 @@
+// @ts-check
+const {
+  createLayout,
+  expectInlineSubRects,
+  expectStackedSubRects,
+  readPxFromStyle
+} = require("./AisTargetLayout-setup");
+
+describe("AisTargetLayout", function () {
+  it("resolves high/normal/flat mode by ratio thresholds", function () {
+    const layout = createLayout();
+
+    expect(
+      layout.resolveMode({
+        W: 180,
+        H: 200,
+        ratioThresholdNormal: 1.2,
+        ratioThresholdFlat: 3.8
+      })
+    ).toBe("high");
+    expect(
+      layout.resolveMode({
+        W: 260,
+        H: 180,
+        ratioThresholdNormal: 1.2,
+        ratioThresholdFlat: 3.8
+      })
+    ).toBe("normal");
+    expect(
+      layout.resolveMode({
+        W: 520,
+        H: 120,
+        ratioThresholdNormal: 1.2,
+        ratioThresholdFlat: 3.8
+      })
+    ).toBe("flat");
+  });
+
+  it("builds flat data layout as fixed 1x4 metrics with stacked sub-rects", function () {
+    const layout = createLayout();
+    const out = layout.computeLayout({
+      mode: "flat",
+      W: 620,
+      H: 120,
+      renderState: "data",
+      showTcpaBranch: false,
+      ratioThresholdNormal: 1.2,
+      ratioThresholdFlat: 3.8
+    });
+
+    expect(out.mode).toBe("flat");
+    expect(out.nameRect).toBeTruthy();
+    expect(out.frontRect).toBeTruthy();
+    expect(Object.prototype.hasOwnProperty.call(out, "frontInitialRect")).toBe(false);
+    expect(out.metricVisibility).toEqual({
+      dst: true,
+      cpa: true,
+      tcpa: true,
+      brg: true
+    });
+    expect(out.metricOrder).toEqual(["dst", "cpa", "tcpa", "brg"]);
+    expect(out.flatMetricRows).toBeUndefined();
+    expect(out.flatMetricColumns).toBeUndefined();
+
+    ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
+      expect(out.metricBoxes[id]).toBeTruthy();
+      expectStackedSubRects(out.metricBoxes[id]);
+      expect(out.metricBoxes[id].y).toBe(out.metricBoxes.dst.y);
+    });
+  });
+
+  it("keeps flat mode 1x4 even on narrow shells (no two-row fallback)", function () {
+    const layout = createLayout();
+    const out = layout.computeLayout({
+      mode: "flat",
+      W: 290,
+      H: 140,
+      renderState: "data",
+      showTcpaBranch: true
+    });
+
+    expect(out.mode).toBe("flat");
+    expect(out.metricBoxes.tcpa.y).toBe(out.metricBoxes.dst.y);
+    expect(out.metricBoxes.brg.y).toBe(out.metricBoxes.cpa.y);
+    expect(out.metricBoxes.tcpa.x).toBeGreaterThan(out.metricBoxes.cpa.x);
+  });
+
+  it("builds normal data layout as a 2x2 grid with inline label/value-group metric boxes", function () {
+    const layout = createLayout();
+    const out = layout.computeLayout({
+      mode: "normal",
+      W: 320,
+      H: 210,
+      renderState: "data",
+      showTcpaBranch: true,
+      ratioThresholdNormal: 1.2,
+      ratioThresholdFlat: 3.8
+    });
+
+    expect(out.mode).toBe("normal");
+    expect(Math.abs(out.nameRect.h - out.frontRect.h)).toBeLessThanOrEqual(1);
+    expect(out.metricOrder).toEqual(["dst", "cpa", "tcpa", "brg"]);
+    expect(out.metricBoxes.dst.y).toBe(out.metricBoxes.cpa.y);
+    expect(out.metricBoxes.tcpa.y).toBeGreaterThan(out.metricBoxes.dst.y);
+    expect(out.metricBoxes.brg.y).toBeGreaterThan(out.metricBoxes.cpa.y);
+    ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
+      expectInlineSubRects(out.metricBoxes[id]);
+    });
+    expect(out.inlineGeometry.wrapperStyle).toContain('grid-template-areas:"identity" "metrics"');
+    expect(out.inlineGeometry.metricStyles.tcpa.valueRowStyle).toContain("grid-template-columns:");
+  });
+
+  it("favors value width for DCPA/TCPA in normal and high inline rows", function () {
+    const layout = createLayout();
+    const normal = layout.computeLayout({
+      mode: "normal",
+      W: 300,
+      H: 190,
+      renderState: "data",
+      showTcpaBranch: true
+    });
+    const high = layout.computeLayout({
+      mode: "high",
+      W: 180,
+      H: 320,
+      renderState: "data",
+      showTcpaBranch: true
+    });
+
+    expect(normal.metricBoxes.cpa.valueTextRect.w).toBeGreaterThan(normal.metricBoxes.cpa.labelRect.w);
+    expect(normal.metricBoxes.tcpa.valueTextRect.w).toBeGreaterThan(normal.metricBoxes.tcpa.labelRect.w);
+    expect(high.metricBoxes.cpa.valueTextRect.w).toBeGreaterThan(high.metricBoxes.cpa.labelRect.w);
+    expect(high.metricBoxes.tcpa.valueTextRect.w).toBeGreaterThan(high.metricBoxes.tcpa.labelRect.w);
+  });
+
+  it("builds high data layout as four stacked rows with inline label/value-group metric boxes", function () {
+    const layout = createLayout();
+    const out = layout.computeLayout({
+      mode: "high",
+      W: 170,
+      H: 320,
+      renderState: "data",
+      showTcpaBranch: false
+    });
+
+    expect(out.mode).toBe("high");
+    expect(Math.abs(out.nameRect.h - out.frontRect.h)).toBeLessThanOrEqual(1);
+    expect(out.metricOrder).toEqual(["dst", "cpa", "tcpa", "brg"]);
+    expect(out.metricBoxes.cpa.y).toBeGreaterThan(out.metricBoxes.dst.y);
+    expect(out.metricBoxes.tcpa.y).toBeGreaterThan(out.metricBoxes.cpa.y);
+    expect(out.metricBoxes.brg.y).toBeGreaterThan(out.metricBoxes.tcpa.y);
+    ["dst", "cpa", "tcpa", "brg"].forEach((id) => {
+      expectInlineSubRects(out.metricBoxes[id]);
+    });
+  });
+
+  it("omits metric boxes for placeholder and hidden states", function () {
+    const layout = createLayout();
+
+    ["placeholder", "hidden"].forEach((state) => {
+      const out = layout.computeLayout({
+        mode: "flat",
+        W: 320,
+        H: 180,
+        renderState: state,
+        showTcpaBranch: true
+      });
+
+      expect(out.metricVisibility).toEqual({
+        dst: false,
+        cpa: false,
+        tcpa: false,
+        brg: false
+      });
+      expect(out.metricOrder).toEqual([]);
+      expect(Object.keys(out.metricBoxes)).toEqual([]);
+      expect(out.placeholderRect).toEqual(out.contentRect);
+    });
+  });
+
+  it("reserves accent strip space in layout geometry when accent is active", function () {
+    const layout = createLayout();
+    const withoutAccent = layout.computeLayout({
+      mode: "normal",
+      W: 320,
+      H: 180,
+      renderState: "data",
+      showTcpaBranch: true,
+      hasAccent: false
+    });
+    const withAccent = layout.computeLayout({
+      mode: "normal",
+      W: 320,
+      H: 180,
+      renderState: "data",
+      showTcpaBranch: true,
+      hasAccent: true
+    });
+
+    expect(withAccent.contentRect.x).toBeGreaterThan(withoutAccent.contentRect.x);
+    expect(withAccent.contentRect.w).toBeLessThan(withoutAccent.contentRect.w);
+    expect(withAccent.accentRect).toBeTruthy();
+    expect(withAccent.accentRect.w).toBeGreaterThanOrEqual(14);
+    expect(withAccent.insets.accentGap).toBeGreaterThanOrEqual(3);
+    expect(withAccent.insets.accentReserve).toBeGreaterThan(withoutAccent.insets.accentReserve);
+  });
+
+  it("scales accent strip chrome from shell width in non-vertical data layouts", function () {
+    const layout = createLayout();
+    const narrow = layout.computeLayout({
+      W: 180,
+      H: 100,
+      renderState: "data",
+      showTcpaBranch: true,
+      hasAccent: true
+    });
+    const wide = layout.computeLayout({
+      W: 320,
+      H: 100,
+      renderState: "data",
+      showTcpaBranch: true,
+      hasAccent: true
+    });
+    const narrowWidth = readPxFromStyle(narrow.inlineGeometry.accentStyle, "width");
+    const wideWidth = readPxFromStyle(wide.inlineGeometry.accentStyle, "width");
+
+    expect(wide.accentRect.w).toBeGreaterThan(narrow.accentRect.w);
+    expect(wide.insets.accentReserve).toBeGreaterThan(narrow.insets.accentReserve);
+    expect(narrowWidth).toBe(narrow.accentRect.w);
+    expect(wideWidth).toBe(wide.accentRect.w);
+    expect(wide.contentRect.x).toBeGreaterThan(narrow.contentRect.x);
+    expect(wide.contentRect.x - wide.insets.padX).toBe(wide.insets.accentReserve);
+    expect(narrow.contentRect.x - narrow.insets.padX).toBe(narrow.insets.accentReserve);
+  });
+});

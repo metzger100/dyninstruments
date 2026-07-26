@@ -1,0 +1,222 @@
+// @ts-check
+const {
+  createMockCanvas,
+  createMockContext2D,
+  createWidget,
+  loadWidget,
+  makeMockApi,
+  makeMockState
+} = require("./ClockRadialWidget-setup");
+
+describe("ClockRadialWidget", function () {
+  it("exports module with id and create function", function () {
+    var mod = loadWidget();
+    expect(mod.id).toBe("ClockRadialWidget");
+    expect(typeof mod.create).toBe("function");
+  });
+
+  it("returns widget spec with correct properties", function () {
+    var result = createWidget();
+    expect(result.spec.id).toBe("ClockRadialWidget");
+    expect(result.spec.wantsHideNativeHead).toBe(true);
+    expect(typeof result.spec.renderCanvas).toBe("function");
+    expect(typeof result.spec.translateFunction).toBe("function");
+  });
+
+  it("configures renderer with clock-specific ratio props, single face layer, no text modes", function () {
+    var result = createWidget();
+    // @ts-ignore -- pre-existing untyped test mock boundary
+    expect(result.captured.spec.ratioProps).toEqual({
+      normal: "clockRadialRatioThresholdNormal",
+      flat: "clockRadialRatioThresholdFlat"
+    });
+    // @ts-ignore -- pre-existing untyped test mock boundary
+    expect(result.captured.spec.cacheLayers).toEqual(["face"]);
+    // @ts-ignore -- pre-existing untyped test mock boundary
+    expect(result.captured.spec).not.toHaveProperty("ratioDefaults");
+    // @ts-ignore -- pre-existing untyped test mock boundary
+    expect(result.captured.spec).not.toHaveProperty("hideTextualMetricsProp");
+    // @ts-ignore -- pre-existing untyped test mock boundary
+    expect(result.captured.spec).not.toHaveProperty("drawMode");
+  });
+
+  it("buildStaticKey returns label geometry and tick signature", function () {
+    var result = createWidget();
+    var state = makeMockState(createMockContext2D());
+    // @ts-ignore -- pre-existing untyped test mock boundary
+    var key = result.captured.buildStaticKey(state);
+    expect(key).toEqual({
+      labelPx: 14,
+      labelRadius: 75,
+      tickSig: "1-12|major30|minor6"
+    });
+  });
+
+  it("rebuildLayer draws ring, ticks with major30/minor6, and hour labels 1-12", function () {
+    var result = createWidget();
+    var ctx = createMockContext2D();
+    var state = makeMockState(ctx);
+    // @ts-ignore -- pre-existing untyped test mock boundary
+    result.captured.rebuildLayer(ctx, "face", state, {}, makeMockApi());
+    var textCalls = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "fillText";
+      }
+    );
+    var labelTexts = textCalls.map(
+      /** @param {any} c */ function (c) {
+        return String(c.args[0]);
+      }
+    );
+    expect(labelTexts).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]);
+    expect(ctx.fillStyle).toBe("#000");
+    expect(ctx.textAlign).toBe("center");
+    expect(ctx.textBaseline).toBe("middle");
+  });
+
+  it("skips non-face layer in rebuildLayer", function () {
+    var result = createWidget();
+    var ctx = createMockContext2D();
+    var state = makeMockState(ctx);
+    // @ts-ignore -- pre-existing untyped test mock boundary
+    result.captured.rebuildLayer(ctx, "other", state, {}, makeMockApi());
+    expect(
+      ctx.calls.filter(
+        /** @param {any} c */ function (c) {
+          return c.name === "fillText";
+        }
+      )
+    ).toHaveLength(0);
+  });
+
+  it("parses ISO 8601 date string and draws hands at correct positions", function () {
+    var ctx = createMockContext2D();
+    var result = createWidget({ overrides: { cx: 100, cy: 100, rOuter: 80 } });
+    var canvas = createMockCanvas({
+      rectWidth: 240,
+      rectHeight: 240,
+      ctx: ctx
+    });
+    result.spec.renderCanvas(canvas, {
+      value: "2026-05-25T12:00:00Z",
+      hideSeconds: false
+    });
+    var moveTos = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "moveTo";
+      }
+    );
+    var lineTos = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "lineTo";
+      }
+    );
+    expect(moveTos.length).toBeGreaterThanOrEqual(3);
+    expect(lineTos.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("computes correct hand angles for 3:00:00 — hour at 90°, minute at 0°, second at 0°", function () {
+    var ctx = createMockContext2D();
+    var result = createWidget({ overrides: { cx: 100, cy: 100, rOuter: 80 } });
+    var canvas = createMockCanvas({
+      rectWidth: 240,
+      rectHeight: 240,
+      ctx: ctx
+    });
+    result.spec.renderCanvas(canvas, {
+      value: "03:00:00",
+      hideSeconds: false
+    });
+    var lineTos = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "lineTo";
+      }
+    );
+    expect(lineTos.length).toBe(3);
+    expect(lineTos[1].args[0]).toBe(100);
+    expect(lineTos[2].args[0]).toBe(100);
+    expect(lineTos[0].args[0]).toBeGreaterThan(100);
+  });
+
+  it("computes correct hand angles for 6:30:00 — minute at 180° down, second at 0° up", function () {
+    var ctx = createMockContext2D();
+    var result = createWidget({ overrides: { cx: 100, cy: 100, rOuter: 80 } });
+    var canvas = createMockCanvas({
+      rectWidth: 240,
+      rectHeight: 240,
+      ctx: ctx
+    });
+    result.spec.renderCanvas(canvas, {
+      value: "06:30:00",
+      hideSeconds: false
+    });
+    var lineTos = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "lineTo";
+      }
+    );
+    expect(lineTos.length).toBe(3);
+    expect(lineTos[1].args[0]).toBe(100);
+    expect(lineTos[1].args[1]).toBe(152);
+    expect(lineTos[2].args[0]).toBe(100);
+    expect(lineTos[2].args[1]).toBe(36);
+  });
+
+  it("computes correct hand angles for 9:15:30 — hour=277.5° left, minute=93° right, second=180° down", function () {
+    var ctx = createMockContext2D();
+    var result = createWidget({ overrides: { cx: 100, cy: 100, rOuter: 80 } });
+    var canvas = createMockCanvas({
+      rectWidth: 240,
+      rectHeight: 240,
+      ctx: ctx
+    });
+    result.spec.renderCanvas(canvas, {
+      value: "09:15:30",
+      hideSeconds: false
+    });
+    var lineTos = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "lineTo";
+      }
+    );
+    expect(lineTos.length).toBe(3);
+    expect(lineTos[0].args[0]).toBeLessThan(100);
+    expect(lineTos[1].args[0]).toBeGreaterThan(100);
+    expect(lineTos[2].args[0]).toBe(100);
+    expect(lineTos[2].args[1]).toBeGreaterThan(100);
+  });
+
+  it("returns null for invalid inputs and draws no hands", function () {
+    var ctx = createMockContext2D();
+    var result = createWidget({ overrides: { cx: 100, cy: 100, rOuter: 80 } });
+    var canvas = createMockCanvas({
+      rectWidth: 240,
+      rectHeight: 240,
+      ctx: ctx
+    });
+    result.spec.renderCanvas(canvas, { value: null, hideSeconds: false });
+    var strokes = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "stroke";
+      }
+    );
+    expect(strokes.length).toBe(0);
+  });
+
+  it("returns null for empty string and draws no hands", function () {
+    var ctx = createMockContext2D();
+    var result = createWidget({ overrides: { cx: 100, cy: 100, rOuter: 80 } });
+    var canvas = createMockCanvas({
+      rectWidth: 240,
+      rectHeight: 240,
+      ctx: ctx
+    });
+    result.spec.renderCanvas(canvas, { value: "", hideSeconds: false });
+    var strokes = ctx.calls.filter(
+      /** @param {any} c */ function (c) {
+        return c.name === "stroke";
+      }
+    );
+    expect(strokes.length).toBe(0);
+  });
+});

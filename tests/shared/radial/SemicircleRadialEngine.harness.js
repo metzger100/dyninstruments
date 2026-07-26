@@ -331,13 +331,10 @@ module.exports = {
   createLayoutModule,
   makeBaseSpec,
   createRenderOrderHarness,
-  createRenderHarness
+  createRenderHarness,
+  loadFresh,
+  geometryScale,
+  createMockCanvas,
+  createMockContext2D,
+  createComponentContextMock
 };
-
-globalThis.loadFresh = loadFresh;
-globalThis.geometryScale = geometryScale;
-globalThis.createMockCanvas = createMockCanvas;
-globalThis.createMockContext2D = createMockContext2D;
-globalThis.createComponentContextMock = createComponentContextMock;
-globalThis.createLayoutModule = createLayoutModule;
-globalThis.createRenderOrderHarness = createRenderOrderHarness;

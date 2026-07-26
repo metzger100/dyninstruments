@@ -1,0 +1,26 @@
+// @ts-check
+const { createRenderOrderHarness, createMockCanvas, createMockContext2D } = require("./SemicircleRadialEngine.harness");
+
+describe("SemicircleRadialEngine", function () {
+  it("skips the semicircle text draw step when hideTextualMetrics is enabled", function () {
+    // @ts-ignore -- pre-existing untyped test mock boundary
+    const harness = createRenderOrderHarness([]);
+    // @ts-ignore -- pre-existing untyped test mock boundary
+    const canvas = createMockCanvas({
+      rectWidth: 480,
+      rectHeight: 110,
+      // @ts-ignore -- pre-existing untyped test mock boundary
+      ctx: createMockContext2D()
+    });
+
+    harness.renderer(canvas, {
+      value: 12.3,
+      caption: "SPD",
+      unit: "kn",
+      speedRadialHideTextualMetrics: true
+    });
+
+    expect(harness.textLayoutCalls).toHaveLength(0);
+    expect(harness.sequence).toEqual(["ring", "ticks", "labels", "pointer"]);
+  });
+});

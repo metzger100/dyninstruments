@@ -109,10 +109,11 @@ editable-configuration families, unit-format catalog, all cluster configuration 
 cluster-route and component-registry configuration families, bootstrap-manifest configuration, runtime
 namespace/canvas/DOM/editable-default/formatter/widget-registration/surface-index/surface-policy/session/asset-preloader/component-loader/theme-model/theme/cluster-shell/route-activation-payload/latest-wins/controller/host-action-discovery/bootstrap/init
 services, host-commit/temporary-bridge services, runtime surface/theme services, and shared UMD ambient declarations.
-Test sources use a separate strict project. Only inventory-owned `.harness.js` and `*.partN.test.js` debt entries may
-remain outside it, and each must name its parent, reason, and removal path; they are still required through the Node,
-jsdom, VM-contract, coverage, lint, and contract suites. Expand `tsconfig.checkjs.json` only with real JSDoc/ambient
-typing and keep `noEmit` enabled.
+Test sources use a separate strict project. Only inventory-owned `.harness.js` debt entries may remain outside it, and
+each must name its parent, reason, and removal path; oversized test families must instead use strict
+`Base.<topic>.test.js` files with setup extracted once. They are still required through the Node, jsdom, VM-contract,
+coverage, lint, and contract suites. Expand `tsconfig.checkjs.json` only with real JSDoc/ambient typing and keep
+`noEmit` enabled.
 
 `schema:check` validates `plugin.json` with `schemas/plugin.schema.json` and `layouts/*.json` with
 `schemas/layout.schema.json`. Extend those schemas when plugin metadata or bundled layout JSON contracts change.

@@ -1,20 +1,11 @@
 {
-  "note": "Test inventory classification. Every file under tests/**/*.js is classified exactly once as 'strict' (real test module/helper, held to the strict tests lint/typecheck boundary), 'harness-fragment' (temporary non-spec harness naming an existing parent, reason, and removal path), 'split-spec-fragment' (temporary executable *.partN.test.js debt naming its sibling parent, reason, and removal path), or 'fixture' (executable negative fixture intentionally invalid, naming an existing owner test and reason). New test files default to 'strict'. Enforced by tools/quality-policy/test-inventory.mjs.",
+  "note": "Test inventory classification. Every file under tests/**/*.js is classified exactly once as 'strict' (real test module/helper, held to the strict tests lint/typecheck boundary), 'harness-fragment' (temporary non-spec harness naming an existing parent, reason, and removal path), or 'fixture' (executable negative fixture intentionally invalid, naming an existing owner test and reason). Numeric split-spec fragments are retired; split any future oversized family by behavior into strict Base.<topic>.test.js files and extract common setup once into a strict helper or an existing captured harness. Enforced by tools/quality-policy/test-inventory.mjs.",
   "entries": {
     "tests/cluster/ClusterWidget.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/cluster/ClusterWidget.test.js",
+      "parent": "tests/cluster/ClusterWidget.invalidatesRouteActivationMemoState.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/cluster/ClusterWidget.test.js when its test family next changes."
-    },
-    "tests/cluster/ClusterWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/ClusterWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/ClusterWidget.part2.test.js into the strict test project."
-    },
-    "tests/cluster/ClusterWidget.test.js": {
-      "classification": "strict"
     },
     "tests/cluster/mappers/AnchorMapper.test.js": {
       "classification": "strict"
@@ -34,67 +25,7 @@
     "tests/cluster/mappers/MapMapper.test.js": {
       "classification": "strict"
     },
-    "tests/cluster/mappers/NavMapper.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/mappers/NavMapper.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/mappers/NavMapper.part2.test.js into the strict test project."
-    },
-    "tests/cluster/mappers/NavMapper.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/mappers/NavMapper.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/mappers/NavMapper.part3.test.js into the strict test project."
-    },
-    "tests/cluster/mappers/NavMapper.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/mappers/NavMapper.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/mappers/NavMapper.part4.test.js into the strict test project."
-    },
-    "tests/cluster/mappers/NavMapper.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/mappers/NavMapper.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/mappers/NavMapper.part5.test.js into the strict test project."
-    },
-    "tests/cluster/mappers/NavMapper.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/mappers/NavMapper.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/mappers/NavMapper.part6.test.js into the strict test project."
-    },
-    "tests/cluster/mappers/NavMapper.part7.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/mappers/NavMapper.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/mappers/NavMapper.part7.test.js into the strict test project."
-    },
-    "tests/cluster/mappers/NavMapper.part8.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/mappers/NavMapper.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/mappers/NavMapper.part8.test.js into the strict test project."
-    },
-    "tests/cluster/mappers/NavMapper.test.js": {
-      "classification": "strict"
-    },
     "tests/cluster/mappers/SpeedMapper.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/mappers/VesselMapper.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/mappers/VesselMapper.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/mappers/VesselMapper.part2.test.js into the strict test project."
-    },
-    "tests/cluster/mappers/VesselMapper.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/mappers/VesselMapper.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/mappers/VesselMapper.part3.test.js into the strict test project."
-    },
-    "tests/cluster/mappers/VesselMapper.test.js": {
       "classification": "strict"
     },
     "tests/cluster/mappers/WindMapper.test.js": {
@@ -112,151 +43,13 @@
     "tests/cluster/rendering/ActiveRouteTextHtmlWidget.test.js": {
       "classification": "strict"
     },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/AisTargetTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/AisTargetTextHtmlWidget.part2.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/AisTargetTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/AisTargetTextHtmlWidget.part3.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/AisTargetTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/AisTargetTextHtmlWidget.part4.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/AisTargetTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/AisTargetTextHtmlWidget.part5.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/AisTargetTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/AisTargetTextHtmlWidget.part6.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.part7.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/AisTargetTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/AisTargetTextHtmlWidget.part7.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.part8.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/AisTargetTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/AisTargetTextHtmlWidget.part8.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.part9.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/AisTargetTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/AisTargetTextHtmlWidget.part9.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.test.js": {
-      "classification": "strict"
-    },
     "tests/cluster/rendering/AlarmTextHtmlWidget.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/cluster/rendering/AlarmTextHtmlWidget.test.js",
+      "parent": "tests/cluster/rendering/AlarmTextHtmlWidget.mountsCommittedAlarmRootDispatches.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/cluster/rendering/AlarmTextHtmlWidget.test.js when its test family next changes."
     },
-    "tests/cluster/rendering/AlarmTextHtmlWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/AlarmTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/AlarmTextHtmlWidget.part2.test.js into the strict test project."
-    },
     "tests/cluster/rendering/AlarmTextHtmlWidget.renderers.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AlarmTextHtmlWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/EditRouteTextHtmlWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/EditRouteTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/EditRouteTextHtmlWidget.part2.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/EditRouteTextHtmlWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/EditRouteTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/EditRouteTextHtmlWidget.part3.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/EditRouteTextHtmlWidget.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/EditRouteTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/EditRouteTextHtmlWidget.part4.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/EditRouteTextHtmlWidget.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/EditRouteTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/EditRouteTextHtmlWidget.part5.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/EditRouteTextHtmlWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/MapZoomTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/MapZoomTextHtmlWidget.part2.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/MapZoomTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/MapZoomTextHtmlWidget.part3.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/MapZoomTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/MapZoomTextHtmlWidget.part4.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/MapZoomTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/MapZoomTextHtmlWidget.part5.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/MapZoomTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/MapZoomTextHtmlWidget.part6.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.part7.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/MapZoomTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/MapZoomTextHtmlWidget.part7.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.part8.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/MapZoomTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/MapZoomTextHtmlWidget.part8.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.part9.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/MapZoomTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/MapZoomTextHtmlWidget.part9.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.test.js": {
       "classification": "strict"
     },
     "tests/cluster/rendering/MapZoomTextHtmlWidgetFallback.test.js": {
@@ -264,149 +57,11 @@
     },
     "tests/cluster/rendering/RegattaTimerTextHtmlWidget.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/cluster/rendering/RegattaTimerTextHtmlWidget.test.js",
+      "parent": "tests/cluster/rendering/RegattaTimerTextHtmlWidget.resolvesRouteMetadataPreloadAssets.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/cluster/rendering/RegattaTimerTextHtmlWidget.test.js when its test family next changes."
     },
-    "tests/cluster/rendering/RegattaTimerTextHtmlWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RegattaTimerTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RegattaTimerTextHtmlWidget.part2.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RegattaTimerTextHtmlWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsDomEffects.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsDomEffects.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsDomEffects.part2.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsDomEffects.test.js": {
-      "classification": "strict"
-    },
     "tests/cluster/rendering/RoutePointsMarkup.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.part10.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsRenderModel.part10.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.part11.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsRenderModel.part11.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsRenderModel.part2.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsRenderModel.part3.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsRenderModel.part4.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsRenderModel.part5.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsRenderModel.part6.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.part7.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsRenderModel.part7.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.part8.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsRenderModel.part8.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.part9.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsRenderModel.part9.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.part10.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsTextHtmlWidget.part10.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsTextHtmlWidget.part2.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsTextHtmlWidget.part3.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsTextHtmlWidget.part4.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsTextHtmlWidget.part5.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsTextHtmlWidget.part6.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.part7.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsTextHtmlWidget.part7.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.part8.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsTextHtmlWidget.part8.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.part9.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/cluster/rendering/RoutePointsTextHtmlWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/cluster/rendering/RoutePointsTextHtmlWidget.part9.test.js into the strict test project."
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.test.js": {
       "classification": "strict"
     },
     "tests/cluster/viewmodels/ActiveRouteViewModel.test.js": {
@@ -441,29 +96,11 @@
     },
     "tests/config/clusters/static-clusters.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/config/clusters/static-clusters.test.js",
+      "parent": "tests/config/clusters/static-clusters.registersCourseSpeedDefaultWind.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/config/clusters/static-clusters.test.js when its test family next changes."
     },
-    "tests/config/clusters/static-clusters.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/config/clusters/static-clusters.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/config/clusters/static-clusters.part2.test.js into the strict test project."
-    },
-    "tests/config/clusters/static-clusters.test.js": {
-      "classification": "strict"
-    },
     "tests/config/clusters/vessel.test.js": {
-      "classification": "strict"
-    },
-    "tests/config/components.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/config/components.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/config/components.part2.test.js into the strict test project."
-    },
-    "tests/config/components.test.js": {
       "classification": "strict"
     },
     "tests/config/shared/common-editables.test.js": {
@@ -574,21 +211,6 @@
     "tests/integration/ActiveRouteStateScreens.test.js": {
       "classification": "strict"
     },
-    "tests/integration/CrossWidgetAcceptance.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/integration/CrossWidgetAcceptance.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/integration/CrossWidgetAcceptance.part2.test.js into the strict test project."
-    },
-    "tests/integration/CrossWidgetAcceptance.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/integration/CrossWidgetAcceptance.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/integration/CrossWidgetAcceptance.part3.test.js into the strict test project."
-    },
-    "tests/integration/CrossWidgetAcceptance.test.js": {
-      "classification": "strict"
-    },
     "tests/layouts/bundled-layouts.test.js": {
       "classification": "strict"
     },
@@ -607,51 +229,6 @@
     "tests/plugin/plugin-module-bootstrap.test.js": {
       "classification": "strict"
     },
-    "tests/runtime/HostCommitController.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/HostCommitController.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/HostCommitController.part2.test.js into the strict test project."
-    },
-    "tests/runtime/HostCommitController.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/HostCommitController.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/HostCommitController.part3.test.js into the strict test project."
-    },
-    "tests/runtime/HostCommitController.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/SurfaceSessionController.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/SurfaceSessionController.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/SurfaceSessionController.part2.test.js into the strict test project."
-    },
-    "tests/runtime/SurfaceSessionController.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/SurfaceSessionController.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/SurfaceSessionController.part3.test.js into the strict test project."
-    },
-    "tests/runtime/SurfaceSessionController.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/TemporaryHostActionBridge.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/TemporaryHostActionBridge.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/TemporaryHostActionBridge.part2.test.js into the strict test project."
-    },
-    "tests/runtime/TemporaryHostActionBridge.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/TemporaryHostActionBridge.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/TemporaryHostActionBridge.part3.test.js into the strict test project."
-    },
-    "tests/runtime/TemporaryHostActionBridge.test.js": {
-      "classification": "strict"
-    },
     "tests/runtime/asset-preloader.test.js": {
       "classification": "strict"
     },
@@ -663,63 +240,15 @@
     },
     "tests/runtime/cluster/RouteActivationController.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/runtime/cluster/RouteActivationController.test.js",
+      "parent": "tests/runtime/cluster/RouteActivationController.doesNotDiscardHtmlRoutes.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/runtime/cluster/RouteActivationController.test.js when its test family next changes."
     },
-    "tests/runtime/cluster/RouteActivationController.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/cluster/RouteActivationController.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/cluster/RouteActivationController.part2.test.js into the strict test project."
-    },
-    "tests/runtime/cluster/RouteActivationController.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/cluster/RouteActivationController.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/cluster/RouteActivationController.part3.test.js into the strict test project."
-    },
-    "tests/runtime/cluster/RouteActivationController.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/cluster/RouteActivationController.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/cluster/RouteActivationController.part4.test.js into the strict test project."
-    },
-    "tests/runtime/cluster/RouteActivationController.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/cluster/RouteActivationController.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/cluster/RouteActivationController.part5.test.js into the strict test project."
-    },
-    "tests/runtime/cluster/RouteActivationController.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/cluster/RouteActivationController.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/cluster/RouteActivationController.part6.test.js into the strict test project."
-    },
-    "tests/runtime/cluster/RouteActivationController.part7.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/cluster/RouteActivationController.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/cluster/RouteActivationController.part7.test.js into the strict test project."
-    },
-    "tests/runtime/cluster/RouteActivationController.test.js": {
-      "classification": "strict"
-    },
     "tests/runtime/component-loader.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/runtime/component-loader.test.js",
+      "parent": "tests/runtime/component-loader.failsBeforeComponentClosureIs.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/runtime/component-loader.test.js when its test family next changes."
-    },
-    "tests/runtime/component-loader.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/component-loader.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/component-loader.part2.test.js into the strict test project."
-    },
-    "tests/runtime/component-loader.test.js": {
-      "classification": "strict"
     },
     "tests/runtime/dom-runtime.test.js": {
       "classification": "strict"
@@ -750,71 +279,14 @@
     },
     "tests/runtime/surface/HtmlSurfaceController.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/runtime/surface/HtmlSurfaceController.test.js",
+      "parent": "tests/runtime/surface/HtmlSurfaceController.implementsCommittedRendererLifecycleIncluding.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/runtime/surface/HtmlSurfaceController.test.js when its test family next changes."
-    },
-    "tests/runtime/surface/HtmlSurfaceController.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/surface/HtmlSurfaceController.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/surface/HtmlSurfaceController.part2.test.js into the strict test project."
-    },
-    "tests/runtime/surface/HtmlSurfaceController.test.js": {
-      "classification": "strict"
     },
     "tests/runtime/surface/index.test.js": {
       "classification": "strict"
     },
-    "tests/runtime/theme-runtime.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/theme-runtime.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/theme-runtime.part2.test.js into the strict test project."
-    },
-    "tests/runtime/theme-runtime.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/theme-runtime.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/theme-runtime.part3.test.js into the strict test project."
-    },
-    "tests/runtime/theme-runtime.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/theme-runtime.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/theme-runtime.part4.test.js into the strict test project."
-    },
-    "tests/runtime/theme-runtime.test.js": {
-      "classification": "strict"
-    },
     "tests/runtime/theme/token-catalog.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/widget-registrar.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/widget-registrar.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/widget-registrar.part2.test.js into the strict test project."
-    },
-    "tests/runtime/widget-registrar.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/widget-registrar.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/widget-registrar.part3.test.js into the strict test project."
-    },
-    "tests/runtime/widget-registrar.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/widget-registrar.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/widget-registrar.part4.test.js into the strict test project."
-    },
-    "tests/runtime/widget-registrar.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/runtime/widget-registrar.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/runtime/widget-registrar.part5.test.js into the strict test project."
-    },
-    "tests/runtime/widget-registrar.test.js": {
       "classification": "strict"
     },
     "tests/setup/vitest.setup.js": {
@@ -870,150 +342,9 @@
     },
     "tests/shared/linear/LinearGaugeEngine.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
+      "parent": "tests/shared/linear/LinearGaugeEngine.usesLayoutComputedLinearGeometry.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/shared/linear/LinearGaugeEngine.test.js when its test family next changes."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part10.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part10.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part11.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part11.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part12.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part12.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part13.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part13.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part14.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part14.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part15.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part15.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part16.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part16.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part17.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part17.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part18.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part18.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part19.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part19.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part2.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part20.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part20.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part21.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part21.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part22.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part22.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part23.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part23.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part24.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part24.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part3.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part4.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part5.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part6.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part7.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part7.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part8.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part8.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.part9.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeEngine.part9.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeEngine.test.js": {
-      "classification": "strict"
     },
     "tests/shared/linear/LinearGaugeEngineFrame.test.js": {
       "classification": "strict"
@@ -1030,193 +361,19 @@
     "tests/shared/linear/LinearGaugeMath.test.js": {
       "classification": "strict"
     },
-    "tests/shared/linear/LinearGaugeTextLayout.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/linear/LinearGaugeTextLayout.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/linear/LinearGaugeTextLayout.part2.test.js into the strict test project."
-    },
-    "tests/shared/linear/LinearGaugeTextLayout.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/ActiveRouteHtmlFit.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/ActiveRouteHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/ActiveRouteHtmlFit.part2.test.js into the strict test project."
-    },
-    "tests/shared/nav/ActiveRouteHtmlFit.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/ActiveRouteHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/ActiveRouteHtmlFit.part3.test.js into the strict test project."
-    },
-    "tests/shared/nav/ActiveRouteHtmlFit.test.js": {
-      "classification": "strict"
-    },
     "tests/shared/nav/ActiveRouteLayout.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetHtmlFit.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetHtmlFit.part2.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetHtmlFit.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetHtmlFit.part3.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetHtmlFit.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetHtmlFit.part4.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetHtmlFit.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetHtmlFit.part5.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetHtmlFit.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetHtmlFit.part6.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetHtmlFit.part7.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetHtmlFit.part7.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetHtmlFit.part8.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetHtmlFit.part8.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetHtmlFit.part9.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetHtmlFit.part9.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetHtmlFit.test.js": {
       "classification": "strict"
     },
     "tests/shared/nav/AisTargetHtmlFitPlain.test.js": {
       "classification": "strict"
     },
-    "tests/shared/nav/AisTargetLayout.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetLayout.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetLayout.part2.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetLayout.test.js": {
-      "classification": "strict"
-    },
     "tests/shared/nav/AisTargetLayoutMath.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetMarkup.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetMarkup.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetMarkup.part2.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetMarkup.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetMarkup.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetMarkup.part3.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetMarkup.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetMarkup.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetMarkup.part4.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetMarkup.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetMarkup.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetMarkup.part5.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetMarkup.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetMarkup.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetMarkup.part6.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetMarkup.part7.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetMarkup.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetMarkup.part7.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetMarkup.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetRenderModel.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetRenderModel.part2.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetRenderModel.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetRenderModel.part3.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetRenderModel.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/AisTargetRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/AisTargetRenderModel.part4.test.js into the strict test project."
-    },
-    "tests/shared/nav/AisTargetRenderModel.test.js": {
       "classification": "strict"
     },
     "tests/shared/nav/CenterDisplayLayout.test.js": {
       "classification": "strict"
     },
     "tests/shared/nav/CenterDisplayMath.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteHtmlFit.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/EditRouteHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/EditRouteHtmlFit.part2.test.js into the strict test project."
-    },
-    "tests/shared/nav/EditRouteHtmlFit.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/EditRouteHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/EditRouteHtmlFit.part3.test.js into the strict test project."
-    },
-    "tests/shared/nav/EditRouteHtmlFit.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/EditRouteHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/EditRouteHtmlFit.part4.test.js into the strict test project."
-    },
-    "tests/shared/nav/EditRouteHtmlFit.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteHtmlFitSupport.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/EditRouteHtmlFitSupport.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/EditRouteHtmlFitSupport.part2.test.js into the strict test project."
-    },
-    "tests/shared/nav/EditRouteHtmlFitSupport.test.js": {
       "classification": "strict"
     },
     "tests/shared/nav/EditRouteLayoutTiles.test.js": {
@@ -1234,70 +391,10 @@
     "tests/shared/nav/EditRouteMarkup.test.js": {
       "classification": "strict"
     },
-    "tests/shared/nav/EditRouteRenderModel.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/EditRouteRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/EditRouteRenderModel.part2.test.js into the strict test project."
-    },
-    "tests/shared/nav/EditRouteRenderModel.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/EditRouteRenderModel.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/EditRouteRenderModel.part3.test.js into the strict test project."
-    },
-    "tests/shared/nav/EditRouteRenderModel.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/MapZoomHtmlFit.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/MapZoomHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/MapZoomHtmlFit.part2.test.js into the strict test project."
-    },
-    "tests/shared/nav/MapZoomHtmlFit.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/MapZoomHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/MapZoomHtmlFit.part3.test.js into the strict test project."
-    },
-    "tests/shared/nav/MapZoomHtmlFit.test.js": {
-      "classification": "strict"
-    },
     "tests/shared/nav/NavInteractionPolicy.test.js": {
       "classification": "strict"
     },
     "tests/shared/nav/NavModeRatio.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/RoutePointsHtmlFit.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/RoutePointsHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/RoutePointsHtmlFit.part2.test.js into the strict test project."
-    },
-    "tests/shared/nav/RoutePointsHtmlFit.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/RoutePointsHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/RoutePointsHtmlFit.part3.test.js into the strict test project."
-    },
-    "tests/shared/nav/RoutePointsHtmlFit.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/RoutePointsHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/RoutePointsHtmlFit.part4.test.js into the strict test project."
-    },
-    "tests/shared/nav/RoutePointsHtmlFit.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/RoutePointsLayout.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/nav/RoutePointsLayout.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/nav/RoutePointsLayout.part2.test.js into the strict test project."
-    },
-    "tests/shared/nav/RoutePointsLayout.test.js": {
       "classification": "strict"
     },
     "tests/shared/nav/RoutePointsRowGeometry.test.js": {
@@ -1309,79 +406,13 @@
     "tests/shared/radial/CanvasLayerCache.test.js": {
       "classification": "strict"
     },
-    "tests/shared/radial/FullCircleRadialEngine.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/FullCircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/FullCircleRadialEngine.part2.test.js into the strict test project."
-    },
-    "tests/shared/radial/FullCircleRadialEngine.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/FullCircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/FullCircleRadialEngine.part3.test.js into the strict test project."
-    },
-    "tests/shared/radial/FullCircleRadialEngine.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/FullCircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/FullCircleRadialEngine.part4.test.js into the strict test project."
-    },
-    "tests/shared/radial/FullCircleRadialEngine.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/FullCircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/FullCircleRadialEngine.part5.test.js into the strict test project."
-    },
     "tests/shared/radial/FullCircleRadialDrawing.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialEngine.test.js": {
       "classification": "strict"
     },
     "tests/shared/radial/FullCircleRadialLayout.test.js": {
       "classification": "strict"
     },
     "tests/shared/radial/FullCircleRadialMeasure.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/FullCircleRadialTextLayout.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/FullCircleRadialTextLayout.part2.test.js into the strict test project."
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/FullCircleRadialTextLayout.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/FullCircleRadialTextLayout.part3.test.js into the strict test project."
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/FullCircleRadialTextLayout.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/FullCircleRadialTextLayout.part4.test.js into the strict test project."
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/FullCircleRadialTextLayout.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/FullCircleRadialTextLayout.part5.test.js into the strict test project."
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/FullCircleRadialTextLayout.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/FullCircleRadialTextLayout.part6.test.js into the strict test project."
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.part7.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/FullCircleRadialTextLayout.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/FullCircleRadialTextLayout.part7.test.js into the strict test project."
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.test.js": {
       "classification": "strict"
     },
     "tests/shared/radial/RadialAngleMath.test.js": {
@@ -1413,116 +444,11 @@
     },
     "tests/shared/radial/SemicircleRadialEngine.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialEngine.test.js",
+      "parent": "tests/shared/radial/SemicircleRadialEngine.rendersValuemathOnRadialtoolkitValue.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/shared/radial/SemicircleRadialEngine.test.js when its test family next changes."
     },
-    "tests/shared/radial/SemicircleRadialEngine.part10.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialEngine.part10.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialEngine.part11.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialEngine.part11.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialEngine.part12.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialEngine.part12.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialEngine.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialEngine.part2.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialEngine.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialEngine.part3.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialEngine.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialEngine.part4.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialEngine.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialEngine.part5.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialEngine.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialEngine.part6.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialEngine.part7.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialEngine.part7.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialEngine.part8.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialEngine.part8.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialEngine.part9.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialEngine.part9.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialEngine.test.js": {
-      "classification": "strict"
-    },
     "tests/shared/radial/SemicircleRadialLayout.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialTextLayout.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialTextLayout.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialTextLayout.part2.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialTextLayout.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialTextLayout.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialTextLayout.part3.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialTextLayout.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialTextLayout.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialTextLayout.part4.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialTextLayout.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/SemicircleRadialTextLayout.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/SemicircleRadialTextLayout.part5.test.js into the strict test project."
-    },
-    "tests/shared/radial/SemicircleRadialTextLayout.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/TextLayoutEngine.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/radial/TextLayoutEngine.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/radial/TextLayoutEngine.part2.test.js into the strict test project."
-    },
-    "tests/shared/radial/TextLayoutEngine.test.js": {
       "classification": "strict"
     },
     "tests/shared/radial/XteHighwayPrimitives.test.js": {
@@ -1571,57 +497,6 @@
       "classification": "strict"
     },
     "tests/shared/value/ValueMath.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/vessel/AlarmHtmlFit.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/vessel/AlarmHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/vessel/AlarmHtmlFit.part2.test.js into the strict test project."
-    },
-    "tests/shared/vessel/AlarmHtmlFit.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/vessel/AlarmHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/vessel/AlarmHtmlFit.part3.test.js into the strict test project."
-    },
-    "tests/shared/vessel/AlarmHtmlFit.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/vessel/AlarmHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/vessel/AlarmHtmlFit.part4.test.js into the strict test project."
-    },
-    "tests/shared/vessel/AlarmHtmlFit.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/vessel/AlarmHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/vessel/AlarmHtmlFit.part5.test.js into the strict test project."
-    },
-    "tests/shared/vessel/AlarmHtmlFit.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/vessel/AlarmHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/vessel/AlarmHtmlFit.part6.test.js into the strict test project."
-    },
-    "tests/shared/vessel/AlarmHtmlFit.part7.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/vessel/AlarmHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/vessel/AlarmHtmlFit.part7.test.js into the strict test project."
-    },
-    "tests/shared/vessel/AlarmHtmlFit.part8.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/vessel/AlarmHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/vessel/AlarmHtmlFit.part8.test.js into the strict test project."
-    },
-    "tests/shared/vessel/AlarmHtmlFit.part9.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/shared/vessel/AlarmHtmlFit.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/shared/vessel/AlarmHtmlFit.part9.test.js into the strict test project."
-    },
-    "tests/shared/vessel/AlarmHtmlFit.test.js": {
       "classification": "strict"
     },
     "tests/shared/vessel/AlarmMarkup.test.js": {
@@ -1686,36 +561,9 @@
     },
     "tests/tools/check-patterns.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/tools/check-patterns.test.js",
+      "parent": "tests/tools/check-patterns.blocksComputedCompoundAttributeBased.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/tools/check-patterns.test.js when its test family next changes."
-    },
-    "tests/tools/check-patterns.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/tools/check-patterns.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/tools/check-patterns.part2.test.js into the strict test project."
-    },
-    "tests/tools/check-patterns.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/tools/check-patterns.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/tools/check-patterns.part3.test.js into the strict test project."
-    },
-    "tests/tools/check-patterns.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/tools/check-patterns.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/tools/check-patterns.part4.test.js into the strict test project."
-    },
-    "tests/tools/check-patterns.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/tools/check-patterns.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/tools/check-patterns.part5.test.js into the strict test project."
-    },
-    "tests/tools/check-patterns.test.js": {
-      "classification": "strict"
     },
     "tests/tools/complexity-budget.test.js": {
       "classification": "strict"
@@ -1776,104 +624,17 @@
     "tests/tools/verified-baseline.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/linear/CompassLinearWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/linear/CompassLinearWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/linear/CompassLinearWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/linear/CompassLinearWidget.test.js": {
-      "classification": "strict"
-    },
     "tests/widgets/linear/DefaultLinearWidget.test.js": {
       "classification": "strict"
     },
     "tests/widgets/linear/DepthLinearWidget.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/linear/SpeedLinearWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/linear/SpeedLinearWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/linear/SpeedLinearWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/linear/SpeedLinearWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/linear/TemperatureLinearWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/linear/TemperatureLinearWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/linear/TemperatureLinearWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/linear/TemperatureLinearWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/linear/TemperatureLinearWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/linear/TemperatureLinearWidget.part3.test.js into the strict test project."
-    },
-    "tests/widgets/linear/TemperatureLinearWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/linear/VoltageLinearWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/linear/VoltageLinearWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/linear/VoltageLinearWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/linear/VoltageLinearWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/linear/VoltageLinearWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/linear/VoltageLinearWidget.part3.test.js into the strict test project."
-    },
-    "tests/widgets/linear/VoltageLinearWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/linear/WindLinearWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/linear/WindLinearWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/linear/WindLinearWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/linear/WindLinearWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/linear/WindLinearWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/linear/WindLinearWidget.part3.test.js into the strict test project."
-    },
-    "tests/widgets/linear/WindLinearWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/radial/ClockRadialWidget/ClockRadialWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/radial/ClockRadialWidget/ClockRadialWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/radial/ClockRadialWidget/ClockRadialWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/radial/ClockRadialWidget/ClockRadialWidget.test.js": {
-      "classification": "strict"
-    },
     "tests/widgets/radial/CompassRadialWidget.caching.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/widgets/radial/CompassRadialWidget.test.js",
+      "parent": "tests/widgets/radial/CompassRadialWidget.passesFullCircleRatioProps.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/widgets/radial/CompassRadialWidget.test.js when its test family next changes."
-    },
-    "tests/widgets/radial/CompassRadialWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/radial/CompassRadialWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/radial/CompassRadialWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/radial/CompassRadialWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/radial/CompassRadialWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/radial/CompassRadialWidget.part3.test.js into the strict test project."
-    },
-    "tests/widgets/radial/CompassRadialWidget.test.js": {
-      "classification": "strict"
     },
     "tests/widgets/radial/DefaultRadialWidget.test.js": {
       "classification": "strict"
@@ -1881,190 +642,19 @@
     "tests/widgets/radial/DepthRadialWidget.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/radial/SpeedRadialWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/radial/SpeedRadialWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/radial/SpeedRadialWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/radial/SpeedRadialWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/radial/TemperatureRadialWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/radial/TemperatureRadialWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/radial/TemperatureRadialWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/radial/TemperatureRadialWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/radial/VoltageRadialWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/radial/VoltageRadialWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/radial/VoltageRadialWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/radial/VoltageRadialWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/radial/VoltageRadialWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/radial/VoltageRadialWidget.part3.test.js into the strict test project."
-    },
-    "tests/widgets/radial/VoltageRadialWidget.test.js": {
-      "classification": "strict"
-    },
     "tests/widgets/radial/WindRadialWidget.caching.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/widgets/radial/WindRadialWidget.test.js",
+      "parent": "tests/widgets/radial/WindRadialWidget.drawsLaylinesBeforeFullCircle.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/widgets/radial/WindRadialWidget.test.js when its test family next changes."
     },
-    "tests/widgets/radial/WindRadialWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/radial/WindRadialWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/radial/WindRadialWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/radial/WindRadialWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/radial/WindRadialWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/radial/WindRadialWidget.part3.test.js into the strict test project."
-    },
-    "tests/widgets/radial/WindRadialWidget.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/radial/WindRadialWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/radial/WindRadialWidget.part4.test.js into the strict test project."
-    },
-    "tests/widgets/radial/WindRadialWidget.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/radial/WindRadialWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/radial/WindRadialWidget.part5.test.js into the strict test project."
-    },
-    "tests/widgets/radial/WindRadialWidget.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/radial/WindRadialWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/radial/WindRadialWidget.part6.test.js into the strict test project."
-    },
-    "tests/widgets/radial/WindRadialWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/text/CenterDisplayTextWidget.part10.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/CenterDisplayTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/CenterDisplayTextWidget.part10.test.js into the strict test project."
-    },
-    "tests/widgets/text/CenterDisplayTextWidget.part11.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/CenterDisplayTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/CenterDisplayTextWidget.part11.test.js into the strict test project."
-    },
-    "tests/widgets/text/CenterDisplayTextWidget.part12.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/CenterDisplayTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/CenterDisplayTextWidget.part12.test.js into the strict test project."
-    },
-    "tests/widgets/text/CenterDisplayTextWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/CenterDisplayTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/CenterDisplayTextWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/text/CenterDisplayTextWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/CenterDisplayTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/CenterDisplayTextWidget.part3.test.js into the strict test project."
-    },
-    "tests/widgets/text/CenterDisplayTextWidget.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/CenterDisplayTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/CenterDisplayTextWidget.part4.test.js into the strict test project."
-    },
-    "tests/widgets/text/CenterDisplayTextWidget.part5.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/CenterDisplayTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/CenterDisplayTextWidget.part5.test.js into the strict test project."
-    },
-    "tests/widgets/text/CenterDisplayTextWidget.part6.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/CenterDisplayTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/CenterDisplayTextWidget.part6.test.js into the strict test project."
-    },
-    "tests/widgets/text/CenterDisplayTextWidget.part7.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/CenterDisplayTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/CenterDisplayTextWidget.part7.test.js into the strict test project."
-    },
-    "tests/widgets/text/CenterDisplayTextWidget.part8.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/CenterDisplayTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/CenterDisplayTextWidget.part8.test.js into the strict test project."
-    },
-    "tests/widgets/text/CenterDisplayTextWidget.part9.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/CenterDisplayTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/CenterDisplayTextWidget.part9.test.js into the strict test project."
-    },
-    "tests/widgets/text/CenterDisplayTextWidget.test.js": {
-      "classification": "strict"
-    },
     "tests/widgets/text/PositionCoordinateWidget.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/widgets/text/PositionCoordinateWidget.test.js",
+      "parent": "tests/widgets/text/PositionCoordinateWidget.increasesCompactTextFillRatios.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/widgets/text/PositionCoordinateWidget.test.js when its test family next changes."
     },
-    "tests/widgets/text/PositionCoordinateWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/PositionCoordinateWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/PositionCoordinateWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/text/PositionCoordinateWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/PositionCoordinateWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/PositionCoordinateWidget.part3.test.js into the strict test project."
-    },
-    "tests/widgets/text/PositionCoordinateWidget.test.js": {
-      "classification": "strict"
-    },
     "tests/widgets/text/PositionCoordinateWidgetPhase4.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/text/ThreeValueTextWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/ThreeValueTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/ThreeValueTextWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/text/ThreeValueTextWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/ThreeValueTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/ThreeValueTextWidget.part3.test.js into the strict test project."
-    },
-    "tests/widgets/text/ThreeValueTextWidget.part4.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/ThreeValueTextWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/ThreeValueTextWidget.part4.test.js into the strict test project."
-    },
-    "tests/widgets/text/ThreeValueTextWidget.test.js": {
       "classification": "strict"
     },
     "tests/widgets/text/XteDisplayLinearWidget.harness.js": {
@@ -2078,26 +668,977 @@
     },
     "tests/widgets/text/XteDisplayWidget.harness.js": {
       "classification": "harness-fragment",
-      "parent": "tests/widgets/text/XteDisplayWidget.test.js",
+      "parent": "tests/widgets/text/XteDisplayWidget.reusesStaticCacheStableInputs.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/widgets/text/XteDisplayWidget.test.js when its test family next changes."
-    },
-    "tests/widgets/text/XteDisplayWidget.part2.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/XteDisplayWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/XteDisplayWidget.part2.test.js into the strict test project."
-    },
-    "tests/widgets/text/XteDisplayWidget.part3.test.js": {
-      "classification": "split-spec-fragment",
-      "parent": "tests/widgets/text/XteDisplayWidget.test.js",
-      "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/widgets/text/XteDisplayWidget.part3.test.js into the strict test project."
     },
     "tests/widgets/text/XteDisplayWidget.test-model.js": {
       "classification": "strict"
     },
-    "tests/widgets/text/XteDisplayWidget.test.js": {
+    "tests/cluster/mappers/NavMapper.disconnectPositions.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.editRoute.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.formatters.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.routePoints.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.routePointsEditRoute.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.vmgActiveRoute.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.xteDisplay.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.xteDisplayLinear.test.js": {
+      "classification": "strict"
+    },
+    "tests/helpers/nav-mapper.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.propagatesHidetextualmetricsSharedLayoutSuppresses.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.matchesCallbackVisibleLayoutState.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.easesCompassAxisWhenSpringtarget.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.takesShortestWrappedArcAcross.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.matchesCallbackVisibleAxisLayout.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.fallsBackEngineOwnedRange.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.fallsBackEngineOwnedRatio.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.keepsSectorBandsAboveScale.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.mapsPointerPositionAccordingAxis.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.reusesStaticCacheIdenticalKey.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.usesExplicitThreeModeText.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.passesLayoutVariantsSplitHigh.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.boostsCompactTextCeilingsWhile.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.honorsCaptionunitscaleDirectlyAcrossAll.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.allocatesHighModeCaptionValue.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.preservesExplicitEmptyUnitFalsy.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.usesPlaceholderTextMissingInput.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.usesLinearLabelsInsetfactorPosition.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.supportsAxisTickFrameMode.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.keepsDefaultPointerMarkerSizing.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.keepsDefaultPointerWidthIndependent.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.keepsSpringStateKeyedBy.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.rendersDisconnectedStateScreenBefore.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.usesLayoutComputedLinearGeometry.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.rendersValuemathOnRadialtoolkitValue.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.usesPlaceholderTextMissingInput.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.skipsSemicircleTextDrawStep.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.drawsSectorsBeforeArcRing.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.stillDrawsRingPointerTicks.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.matchesCallbackVisibleLayoutState.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.matchesCallbackVisibleRangeLayout.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.fallsBackEngineOwnedRange.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.keepsDefaultRadialPointerSizing.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.delegatesTextRenderingThroughSemicircleradialtextlayout.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.rendersDisconnectedStateScreenBefore.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.resolvesThemeOnceAppliesTokenized.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialTextLayout.compactBoost.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialTextLayout.cacheReuse.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialTextLayout.cacheStability.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialTextLayout.flatClamp.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialTextLayout.normalClamp.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialTextLayout-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeTextLayout.textScaling.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeTextLayout.movingAxisLabels.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeTextLayout-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/ClusterWidget.translatesRouteFramesRendersShell.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/ClusterWidget.invalidatesRouteActivationMemoState.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/ClusterWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/VesselMapper.mapsVoltagelinearExplicitLinearKeys.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/VesselMapper.mapsDatetimePositioncoordinatewidgetDirectVariant.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/VesselMapper.requiresToolkitNumNumericConversion.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/VesselMapper-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.exposesCommittedRendererContract.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.updatesEmittedAccentStripWidth.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.staysPassiveInEditMode.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.rendersNoaisStateVerticalContainers.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.appliesAisHiddenDisconnectedPrecedence.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.updatesLayoutSignaturesBranchInteraction.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.exposesEmptyTranslatefunctionMap.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.rebindsDispatchListenerAcrossSuccessive.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.skipsAisDispatchWhenSurfacepolicy.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AlarmTextHtmlWidget.mountsCommittedAlarmRootDispatches.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AlarmTextHtmlWidget.usesCommittedHtmlWidgetCss.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AlarmTextHtmlWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/EditRouteTextHtmlWidget.exposesCommittedRendererContract.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/EditRouteTextHtmlWidget.keepsCompactNormalModeOn.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/EditRouteTextHtmlWidget.keepsHighModeOnRow.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/EditRouteTextHtmlWidget.usesShadowLocalCssSelectors.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/EditRouteTextHtmlWidget.exposesEmptyTranslatefunctionMap.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/EditRouteTextHtmlWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.exposesCommittedRendererContract.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.normalizesPlaceholderFormatterOutputShared.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.alwaysConsultsMapzoomhtmlfitWhenShell.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.resolvesRatioModesRequiredRow.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.usesDefaultCaptionUnitScale.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.escapesContentFailsClosedWithout.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.usesShadowLocalCssSelectors.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.reusesPreparedSemanticModelAcross.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.clearsPreparedSemanticModelState.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RegattaTimerTextHtmlWidget.resolvesRouteMetadataPreloadAssets.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RegattaTimerTextHtmlWidget.updatesModeSelectionFromRatio.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RegattaTimerTextHtmlWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsDomEffects.detectsCommittedVerticalContainerAncestry.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsDomEffects.treatsNonObjectTruthyTargetel.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsDomEffects-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.buildsCourseDistanceRowsPlaceholder.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.failsClosedWhenRoutePayload.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.classifiesDisconnectedBeforeNorouteDisables.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.keepsMissingCoordinateOptionalLeg.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.keepsMissingSelectedindexValuesUnselected.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.prefersStableRawWaypointIdentity.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.formatsLatLonRowsThrough.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.normalizesCourseDistanceFormatterFallback.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.usesVerticalResizeSignatureContract.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.usesCappedNaturalHeightAs.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.keepsVerticalListViewportHeight.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.exposesCommittedRendererContract.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.reBindsDispatchClickListener.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.dispatchesRoutePointActivationValid.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.rendersDisconnectedStateScreenBlocks.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.runsPostPatchRevealEffects.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.requestsRelayoutWhenScrollbarGutter.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.addsTabularClassRoutePoint.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.rendersPlainStabledigitsInfoText.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.derivesLayoutSignatureFromModel.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.usesShadowLocalCssSelectors.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/config/clusters/static-clusters.registersCourseSpeedDefaultWind.test.js": {
+      "classification": "strict"
+    },
+    "tests/config/clusters/static-clusters.registersWindCourseWarningParameter.test.js": {
+      "classification": "strict"
+    },
+    "tests/config/clusters/static-clusters-setup.js": {
+      "classification": "strict"
+    },
+    "tests/config/components.createsComponentRegistryFromBaseurl.test.js": {
+      "classification": "strict"
+    },
+    "tests/config/components.coverage.test.js": {
+      "classification": "strict"
+    },
+    "tests/config/components-setup.js": {
+      "classification": "strict"
+    },
+    "tests/integration/CrossWidgetAcceptance.keepsDisconnectedLabelsConsistentAcross.test.js": {
+      "classification": "strict"
+    },
+    "tests/integration/CrossWidgetAcceptance.keepsPlaceholderNormalizationOnRender.test.js": {
+      "classification": "strict"
+    },
+    "tests/integration/CrossWidgetAcceptance.keepsStableDigitWidthsAligned.test.js": {
+      "classification": "strict"
+    },
+    "tests/integration/CrossWidgetAcceptance-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/HostCommitController.initstateCreatesCompleteStateShape.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/HostCommitController.cleanupCancelsPendingRafObserver.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/HostCommitController.recordsWaitStageClassificationEach.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/HostCommitController-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/SurfaceSessionController.initstateReturnsCleanStateShape.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/SurfaceSessionController.differentSurfaceDetachesDestroysOld.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/SurfaceSessionController.throwsUnsupportedSurfacesInvalidService.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/SurfaceSessionController-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/TemporaryHostActionBridge.returnsSingletonHostactionsFacadeDocumented.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/TemporaryHostActionBridge.rejectsMissingOrBlankRoute.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/TemporaryHostActionBridge.discoversAlarmDispatchOnAny.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/TemporaryHostActionBridge-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController.loadsOnlyActiveRouteRoots.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController.returnsWarmPayloadsSynchronouslyCaches.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController.memoizesMappedActivationOutputDiscards.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController.doesNotDiscardHtmlRoutes.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController.doesNotDiscardWhenMapped.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController.reusesSameColdPromiseRoute.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController.keepsOneCurrentColdActivation.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/component-loader.loadsDepsFirstDeduplicatesScript.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/component-loader.failsBeforeComponentClosureIs.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/component-loader-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/surface/HtmlSurfaceController.implementsCommittedRendererLifecycleIncluding.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/surface/HtmlSurfaceController.throwsStrictRendererContractsInvalid.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/surface/HtmlSurfaceController-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/theme-runtime.configuresRuntimeThemeAppliesOutput.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/theme-runtime.resolvesDefaultPresetAisRole.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/theme-runtime.resolvesDeprecatedCamelcaseRegattaAlias.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/theme-runtime.applytorootMaterializesDyniThemeOpacity.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/theme-runtime-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/widget-registrar.mergesComponentWidgetDefComposes.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/widget-registrar.registersThroughCapturedDynipluginAvnavapi.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/widget-registrar.keepsVesselStabledigitsAbsentAt.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/widget-registrar.appliesStaticHostClassesEven.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/widget-registrar.injectsHostactionsInitHtmlFinalize.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/widget-registrar-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/ActiveRouteHtmlFit.returnsCaptionValueUnitStyle.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/ActiveRouteHtmlFit.throwsWhenPropsDisplayIs.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/ActiveRouteHtmlFit.passesFirstFormatterParameterWhen.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/ActiveRouteHtmlFit-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.returnsNullWhenRequiredCompute.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.fitsFlatModeStylesAll.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.fitsNameStatusIndependentlyIn.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.raisesNormalHighIdentityText.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.fitsNormalHighValuesAgainst.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.keepsRepresentativeNormalHighShells.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.keepsDcpaTcpaLabelValue.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.keepsCaptionUnitUnder0.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.shrinksLongNameLongMetric.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetLayout.resolvesHighNormalFlatMode.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetLayout.matchesAlarmStripWidthFormula.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetLayout-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.rendersDispatchModeWrapperAccent.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.rendersFitSelectedMetricText.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.rendersPassiveModeWithoutCatchall.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.rendersAllFourMetricsIdentity.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.rendersNoaisStateThroughShared.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.escapesModelTextAppliesInline.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.appliesLayoutDrivenGeometryStyles.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetRenderModel.buildsDispatchDataStateAll.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetRenderModel.normalizesFormatterFallbackTokensAcross.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetRenderModel.rendersNoaisStateVerticalContainers.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetRenderModel.updatesResizeSignatureWhenAny.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetRenderModel-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFit.returnsStableStylePayloadsAll.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFit.fitsSourceBadgeTextUsing.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFit.usesCoordinatedMetricTileMeasurement.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFit.computesOnlyNameFitIn.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFit-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFitSupport.usesMetricsIdLabeltextFirst.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFitSupport.returnsFalseWhenLinefitIs.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFitSupport-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteRenderModel.buildsNoRouteStateScreen.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteRenderModel.normalizesFormatterFallbackTokensAcross.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteRenderModel.staysPassiveWhenCapabilityIs.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteRenderModel-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/MapZoomHtmlFit.usesThemeTokenWeightsNormal.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/MapZoomHtmlFit.shrinksFittedTextUnderTighter.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/MapZoomHtmlFit.producesFittedTextUnderTight.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/MapZoomHtmlFit-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsHtmlFit.producesHeaderRowStyleStrings.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsHtmlFit.returnsEmptyRowfitsArrayZero.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsHtmlFit.usesFullAvailableBoxHeight.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsHtmlFit.fallsBackInfoplaintextNarrowStabledigits.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsHtmlFit-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsLayout.usesMinWHHost.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsLayout.keepsMarkerGeometryCompactBounded.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsLayout-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialEngine.appliesThemeDefaultsRingTicks.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialEngine.matchesCallbackVisibleLayoutState.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialEngine.skipsDrawmodeWhenHidetextualmetricsIs.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialEngine.exposesLayoutOwnedResponsiveState.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialEngine.exposesCacheMetadataHelpersWidget.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialEngine-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.packsSingleNormalTextInside.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.packsDualNormalTextTheme.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.boostsCompactTextOccupancyWhile.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.appliesFullCircleNormalLayout.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.appliesFlatModeClampLong.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.appliesNormalModeClampLong.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.registersItselfOnRootDynicomponents.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/TextLayoutEngine.computesModeRoutingCollapseFlags.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/TextLayoutEngine.keepsSharedCompositeFitPaths.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/TextLayoutEngine-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.resolvesRatioModeFromThresholds.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.fitsAgainstInnerContentRect.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.sharesOneChromeContractBetween.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.neverFitsAgainstRawShell.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.cachesIdenticalResultsOnHostcontext.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.matchesAisVisualChromeGeometry.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.keepsAisChromeParityAt.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.invalidatesCacheWhenShellWidth.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.recomputesWhenFontmetricsepochChangesSo.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit-setup.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-patterns.blocksRenamedButIdenticalFunction.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-patterns.blocksTruthyFallbackOnDefault.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-patterns.blocksFallbacktextWrappersThatDuplicate.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-patterns.blocksComputedCompoundAttributeBased.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-patterns.treatsPrematureLegacySupportFindings.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-patterns-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/CompassLinearWidget.configuresFixed360MovingScaleCompass.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/CompassLinearWidget.doesNotRenderMarkerWhen.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/CompassLinearWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/SpeedLinearWidget.passesLineargaugeengineConfigRangeAxis.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/SpeedLinearWidget.returnsPlaceholderOutputNullSpeed.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/SpeedLinearWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/TemperatureLinearWidget.passesLineargaugeengineConfigTemperatureTick.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/TemperatureLinearWidget.normalizesSharedPlaceholderFormatterOutput.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/TemperatureLinearWidget.treatsBlankMissingHighEnd.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/TemperatureLinearWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/VoltageLinearWidget.passesLineargaugeengineConfigVoltageTick.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/VoltageLinearWidget.suppressesDisabledSectorsKeepsWarning.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/VoltageLinearWidget.treatsBlankMissingLowEnd.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/VoltageLinearWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/WindLinearWidget.configuresCentered180DualWindDisplay.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/WindLinearWidget.usesLayoutOwnedDualGaps.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/WindLinearWidget.keepsMissingAngleValuesOn.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/WindLinearWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/ClockRadialWidget/ClockRadialWidget.exportsModuleIdCreateFunction.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/ClockRadialWidget/ClockRadialWidget.returnsNullUnparseableStringsDraws.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/ClockRadialWidget/ClockRadialWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/CompassRadialWidget.passesFullCircleRatioProps.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/CompassRadialWidget.skipsDrawingStaleMarkerWhen.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/CompassRadialWidget.usesThemePointerColorFixed.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/CompassRadialWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/SpeedRadialWidget.passesSemicircleradialengineConfigHighEnd.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/SpeedRadialWidget.exposesNoOpTranslatefunctionSince.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/SpeedRadialWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/TemperatureRadialWidget.doesNotApplyKelvinFallback.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/TemperatureRadialWidget.normalizesSharedPlaceholderFormatterOutput.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/TemperatureRadialWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/VoltageRadialWidget.buildsLowEndSectorsFrom.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/VoltageRadialWidget.suppressesDisabledSectorsByToggle.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/VoltageRadialWidget.returnsPlaceholderOutputNullVoltage.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/VoltageRadialWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/WindRadialWidget.passesFullCircleRatioProps.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/WindRadialWidget.formatsSpeedViaComponentcontextFormat.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/WindRadialWidget.drawsLaylinesBeforeFullCircle.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/WindRadialWidget.keepsSpringStateKeyedBy.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/WindRadialWidget.rendersNormalThreeRowLayout.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/WindRadialWidget.usesCustomDefaultPlaceholderBoth.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/WindRadialWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.exposesCenterDisplayRendererContract.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.increasesCompactTextFillOn.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.usesMonoFamilyTabularCoordinates.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.rendersDisconnectedStateScreenInstead.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.rendersNormalModeCaptionLeft.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.keepsNonTabularCenterCoordinates.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.centersRelationRowsWhileKeeping.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.rendersPlaceholdersMissingCoordinatesRelation.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.normalizesKnownFormatterFallbackTokens.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.keepsCompactNavPageLike.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.keepsCompactFlatHighLayouts.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.keepsCoordinateFontSizesCoupled.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/PositionCoordinateWidget.rendersFlatModeInOne.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/PositionCoordinateWidget.rendersStatusCircleOnTop.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/PositionCoordinateWidget.increasesCompactTextFillRatios.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/PositionCoordinateWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/ThreeValueTextWidget.reusesCachedFittingUnchangedKeys.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/ThreeValueTextWidget.missesCacheWhenDimensionsChange.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/ThreeValueTextWidget.increasesCompactTextFillRatios.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/ThreeValueTextWidget.normalizesFormatterFallbackTokensRendered.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/ThreeValueTextWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/XteDisplayWidget.selectsFlatNormalHighModes.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/XteDisplayWidget.reusesStaticCacheStableInputs.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/XteDisplayWidget.usesProvidedDstUnitDirectly.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/XteDisplayWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-patterns.failFastRuleCases.test.js": {
       "classification": "strict"
     }
   }
