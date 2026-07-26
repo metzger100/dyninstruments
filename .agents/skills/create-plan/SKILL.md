@@ -7,7 +7,7 @@ description: Creates multi-session execution plans for complex features in the d
 
 ## Description
 
-Creates multi-session execution plans for complex features in the dyninstruments repository. Encodes the canonical plan structure derived from five completed plans (PLAN1–PLAN4) and one active plan (PLAN5). Includes automated baseline verification against the live repo to prevent the "rewritten after repository verification" failure mode.
+Creates multi-session execution plans for complex features in the dyninstruments repository. Encodes the canonical plan structure derived from the repository's completed and active execution plans. Includes automated baseline verification against the live repo to prevent the "rewritten after repository verification" failure mode.
 
 ## When to Use
 
@@ -168,6 +168,8 @@ These notes anchor the plan. They are descriptive, not prescriptive.
 - Do not change existing {reference implementation} code or tests.
 - Do not change {lifecycle owner} internals.
 - Do not perform source-code changes in the documentation phase.
+- Do not leave a permanent `PLANn`/`Phase N` citation in shipped code, docs, or tests outside `exec-plans/`; describe
+  results standalone instead (a literal `PLANn.md` file-path reference is still fine).
 
 ---
 ```
@@ -179,21 +181,21 @@ Structure as phased steps with explicit dependencies:
 ```markdown
 ## Implementation Order
 
-### Phase 1 — {Name}
+### Phase A — {Name}
 
 **Intent:** {what this phase achieves}
-**Dependencies:** {none / Phase N}
+**Dependencies:** {none / an earlier phase's name}
 
-#### 1A. {Sub-step title}
+#### A1. {Sub-step title}
 {Detailed instructions: contract, file to create, code template}
 
-#### 1B. {Test sub-step}
+#### A2. {Test sub-step}
 {What to test, coverage requirements}
 
-#### 1C. {Registration sub-step}
+#### A3. {Registration sub-step}
 {Where to register, code snippet}
 
-### Phase 2 — {Name}
+### Phase B — {Name}
 ...
 
 ### Phase N — Documentation
@@ -244,3 +246,5 @@ After the plan is fully implemented and verified, move to `exec-plans/completed/
 - ❌ Putting the Documentation Phase inside a coding phase
 - ❌ Forgetting acceptance criteria
 - ❌ Plans over 1500 lines (split into multiple phases/plans if needed)
+- ❌ Leaving a permanent `PLANn`/`Phase N` citation in shipped code, docs, or tests outside `exec-plans/`; see
+  `exec-plan-authoring.md`'s Exec-Plan Citation Rule (enforced by `check-patterns`'s `exec-plan-reference` rule)

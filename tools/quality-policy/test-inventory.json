@@ -574,19 +574,19 @@
     "tests/integration/ActiveRouteStateScreens.test.js": {
       "classification": "strict"
     },
-    "tests/integration/Phase9Acceptance.part2.test.js": {
+    "tests/integration/CrossWidgetAcceptance.part2.test.js": {
       "classification": "split-spec-fragment",
-      "parent": "tests/integration/Phase9Acceptance.test.js",
+      "parent": "tests/integration/CrossWidgetAcceptance.test.js",
       "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/integration/Phase9Acceptance.part2.test.js into the strict test project."
+      "removalPath": "Move shared declarations into typed helpers, then migrate tests/integration/CrossWidgetAcceptance.part2.test.js into the strict test project."
     },
-    "tests/integration/Phase9Acceptance.part3.test.js": {
+    "tests/integration/CrossWidgetAcceptance.part3.test.js": {
       "classification": "split-spec-fragment",
-      "parent": "tests/integration/Phase9Acceptance.test.js",
+      "parent": "tests/integration/CrossWidgetAcceptance.test.js",
       "reason": "Executable size-split spec that consumes declarations or globals owned by its sibling parent/harness.",
-      "removalPath": "Move shared declarations into typed helpers, then migrate tests/integration/Phase9Acceptance.part3.test.js into the strict test project."
+      "removalPath": "Move shared declarations into typed helpers, then migrate tests/integration/CrossWidgetAcceptance.part3.test.js into the strict test project."
     },
-    "tests/integration/Phase9Acceptance.test.js": {
+    "tests/integration/CrossWidgetAcceptance.test.js": {
       "classification": "strict"
     },
     "tests/layouts/bundled-layouts.test.js": {
@@ -1758,9 +1758,6 @@
     "tests/tools/package-scripts.test.js": {
       "classification": "strict"
     },
-    "tests/tools/phase0-baseline.test.js": {
-      "classification": "strict"
-    },
     "tests/tools/quality-owners.test.js": {
       "classification": "strict"
     },
@@ -1774,6 +1771,9 @@
       "classification": "strict"
     },
     "tests/tools/test-inventory.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/verified-baseline.test.js": {
       "classification": "strict"
     },
     "tests/widgets/linear/CompassLinearWidget.part2.test.js": {

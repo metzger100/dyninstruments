@@ -6,8 +6,8 @@ import { PRODUCTION_ROOTS, STRICT_LIMITS, scanSource } from "./complexity-scan.m
 
 const toolDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(toolDirectory, "../..");
-const baselinePath = path.join(toolDirectory, "phase0-baseline.json");
-const findingsPath = path.join(toolDirectory, "phase0-complexity-findings.json");
+const baselinePath = path.join(toolDirectory, "verified-baseline.json");
+const findingsPath = path.join(toolDirectory, "historical-complexity-findings.json");
 
 export function captureHistoricalComplexity(root, commit) {
   const trackedFiles = git(root, ["ls-tree", "-r", "--name-only", commit])

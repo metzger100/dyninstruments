@@ -146,7 +146,7 @@ Task: Add new BarometerGauge
 - [ ] New production files use a recognized coverage classification and do not lower the immutable per-file floor; new
       tests enter the strict inventory; only paths in the hash-locked test-exception capture may retain a checked
       temporary-fragment or negative-fixture classification.
-- [ ] Coverage/complexity policy edits preserve the hash-locked coverage snapshot and regenerated Phase 0 complexity
+- [ ] Coverage/complexity policy edits preserve the hash-locked coverage snapshot and regenerated historical complexity
       capture; only the 12 frozen legacy coverage paths may retain their exact below-default values, and every active
       complexity value exactly matches its current finding.
 - [ ] For releases, pushed only a locally created annotated tag; the tag workflow validates and publishes committed

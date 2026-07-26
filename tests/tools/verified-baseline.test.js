@@ -2,11 +2,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const root = process.cwd();
-const baseline = require(path.join(root, "tools/quality-policy/phase0-baseline.json"));
+const baseline = require(path.join(root, "tools/quality-policy/verified-baseline.json"));
 const complexityFindings = require(path.join(root, baseline.complexityDiagnostic.stableIdentityFindings));
 const vitestConfig = require(path.join(root, "vitest.config.js"));
 const { verifyHistoricalComplexityCapture } = require(
-  path.join(root, "tools/quality-policy/phase0-complexity-capture.mjs")
+  path.join(root, "tools/quality-policy/historical-complexity-capture.mjs")
 );
 
 const PRODUCTION_ROOTS = ["config", "runtime", "cluster", "shared", "widgets"];

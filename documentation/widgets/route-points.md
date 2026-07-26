@@ -57,7 +57,7 @@ In .widgetContainer.vertical, RoutePoints natural sizing remains unresolved unti
 - layoutSignature excludes non-authoritative vertical shell height churn
 - postPatch may trigger one bounded relayout pass (for example scrollbar-gutter correction)
 
-## Phase 6 Options
+## Numeric Rendering Options
 
 - `coordinatesTabular` (default `true`) is threaded into `RoutePointsMarkup`.
 - When `showLatLon === true` and `coordinatesTabular !== false`, route-point info spans use `.dyni-tabular`.

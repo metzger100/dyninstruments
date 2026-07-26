@@ -24,7 +24,7 @@ mounted route and renderer identities come from `config.clusterRoutes.byRouteId`
 - Committed-revision floor guard: `recordCommittedRevision(revision)` stores the latest committed shell revision floor
   and `reconcileSession(payload)` returns `false` when `payload.revision < committedRevisionFloor`
 - Return value: `reconcileSession(payload)` returns `true` when the session is accepted and processed
-- Called from the Phase 6 live flow (`HostCommitController.onCommit` -> `ClusterWidget` applies `runtime.theme` ->
+- Called from the live commit flow (`HostCommitController.onCommit` -> `ClusterWidget` applies `runtime.theme` ->
   `SurfaceSessionController.recordCommittedRevision(revision)` -> conditional
   `SurfaceSessionController.detachForShellReplacement()` when the shell identity changed or the route became invalid ->
   `RouteActivationController` builds an activated payload -> `SurfaceSessionController.reconcileSession(payload)`)

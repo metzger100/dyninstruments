@@ -251,7 +251,7 @@ const commonThreeElementsEditables = {
 };
 ```
 
-### Phase 6 Numeric Render Editables (dyninstruments-internal)
+### Numeric Render Editables (dyninstruments-internal)
 
 Two per-widget editables control numeric/coordinate stability:
 
@@ -277,7 +277,7 @@ They are scoped per cluster via `condition` lists (no global shared editable):
 - `config/clusters/wind.js`
   - `stableDigits`: `angleTrueRadial`, `angleApparentRadial`, `angleTrueLinear`, `angleApparentLinear`
 
-### Phase 7 Time Display Editables (dyninstruments-internal)
+### Time Display Editables (dyninstruments-internal)
 
 `hideSeconds` is a per-widget BOOLEAN toggle, default `false`, defined only in the clusters where time text is rendered.
 

@@ -220,7 +220,7 @@ Offscreen layer transform contract:
 The boat marker size is dynamic and comes from the shared `pointerDepthWeight` input plus internal marker factors; it is
 not cached as a `theme.xte.*` token.
 
-## Phase 6 Options
+## Numeric Rendering Options
 
 - `stableDigits` (default `false`) enables stable-digit normalization of XTE value text.
 - XTE uses `sideSuffix` (`R`/`L`/empty) with `reserveSideSuffixSlot` so side alignment stays stable at zero crossing.

@@ -91,13 +91,13 @@ return {
 };
 ```
 
-## Phase 6 Options
+## Numeric Rendering Options
 
 - `coordinatesTabular` (default `true`) switches `position` coordinate rendering to `tokens.font.familyMono`.
 - Applies in stacked and flat `position` variants only.
 - `coordinatesTabular: false` keeps `position` coordinate rendering on `tokens.font.family`.
 
-## Phase 7 Options
+## Time Display Options
 
 - `hideSeconds` (default `false`) swaps the time axis in `dateTime` and `timeStatus` from `formatTime` to `formatClock`.
 - The `formatClock` fallback `--:--` still normalizes to `---` through `PlaceholderNormalize`.

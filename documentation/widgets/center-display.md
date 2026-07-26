@@ -190,7 +190,7 @@ Measure row behavior:
   widgets retain the existing text rhythm
 - no icon sprites, no new theme tokens, no CSS defaults beyond normal dyninstruments widget styling
 
-## Phase 6 Options
+## Numeric Rendering Options
 
 - `coordinatesTabular` (default `true`) routes center-position coordinate rows to `tokens.font.familyMono` and
   right-aligns them so digits line up vertically.

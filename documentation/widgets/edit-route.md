@@ -40,13 +40,13 @@ EditRouteTextHtmlWidget is a committed HTML renderer for the nav editRoute kind.
 - Inner widget wrappers (`.dyni-edit-route-html`) must not self-expand beyond the surface box.
 - Vertical-mode CSS no longer uses `height: auto`, `aspect-ratio`, or `min-height` overrides on the inner wrapper.
 
-## Phase 6 Options
+## Numeric Rendering Options
 
 - `stableDigits` (default `false`) enables `StableDigits.normalize(...)` in `EditRouteRenderModel`.
 - Metric value text spans add `.dyni-tabular` when `stableDigitsEnabled` is true.
 - Values keep full and compact variants through existing layout logic; placeholders remain `---`.
 
-## Phase 7 Options
+## Time Display Options
 
 - `hideSeconds` (default `false`) switches the ETA metric from `formatTime` to `formatClock`.
 - The `--:--` fallback still normalizes to `---` through `PlaceholderNormalize`.

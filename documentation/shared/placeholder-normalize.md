@@ -4,9 +4,8 @@
 
 ## Overview
 
-`PlaceholderNormalize` is the shared normalization helper for formatter fallback text. By the end of PLAN11, every
-widget/render-model path uses this helper at the render boundary, with the RoutePoints compound-placeholder carve-out
-preserved explicitly.
+`PlaceholderNormalize` is the shared normalization helper for formatter fallback text. Every widget/render-model path
+uses this helper at the render boundary, with the RoutePoints compound-placeholder carve-out preserved explicitly.
 
 ## Key Details
 

@@ -283,7 +283,7 @@ function readTextContent(root, selector) {
   return node ? node.textContent : "";
 }
 
-describe("Phase 9 acceptance coverage", function () {
+describe("Cross-widget acceptance coverage", function () {
   it("keeps placeholder normalization on render outputs while preserving RoutePoints compound placeholders", function () {
     const activeRoute = createActiveRouteWidget();
     const editRoute = createEditRouteRenderModel();

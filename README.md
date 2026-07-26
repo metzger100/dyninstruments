@@ -267,9 +267,9 @@ rejection through the direct Vitest configuration and every configured project. 
 Scaling measurements fail closed unless every observed operation count is a non-negative finite integer.
 
 Coverage policy is fail-closed: every shipped JS/MJS file is classified, the captured per-file baseline is hash-locked,
-new measured files start at 80% lines / 65% branches, and only 12 frozen Phase 0 paths retain exact below-default
-values. Complexity checks regenerate the immutable Phase 0 debt capture from its recorded Git commit before requiring
-every active entry to exactly match its current over-limit metric. Test files likewise default to the separate strict
+new measured files start at 80% lines / 65% branches, and only 12 frozen legacy paths retain exact below-default values.
+Complexity checks regenerate the immutable historical debt capture from its recorded Git commit before requiring every
+active entry to exactly match its current over-limit metric. Test files likewise default to the separate strict
 `checkJs`/ESLint boundary. The hash-locked test-exception capture permits only the 229 existing non-strict paths to
 remain exempt; temporary harness/split-spec debt requires an inventory-owned removal path, and negative fixtures must be
 referenced by their canonical owner test.

@@ -26,7 +26,7 @@ describe("package command surface", function () {
 
   it("keeps complexity and scaling policy checks wired into check:core", function () {
     expect(scripts["check:complexity"]).toBe(
-      "node tools/quality-policy/phase0-complexity-capture.mjs --check && node tools/quality-policy/complexity-budget.mjs"
+      "node tools/quality-policy/historical-complexity-capture.mjs --check && node tools/quality-policy/complexity-budget.mjs"
     );
     expect(scripts["check:scaling"]).toBe(
       "vitest run tests/tools/operation-count-evaluator.test.js tests/contract/route-points-render-model-scaling-contract.test.js tests/shared/html/HtmlDomPatchUtils.scaling-contract.test.js tests/shared/text/TextLayoutPrimitives.scaling-contract.test.js"

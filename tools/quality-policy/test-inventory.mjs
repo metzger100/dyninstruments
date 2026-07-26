@@ -7,7 +7,7 @@ import { readJsonPolicy } from "./read-json-policy.mjs";
 const root = process.cwd();
 const inventoryPath = path.join(root, "tools/quality-policy/test-inventory.json");
 const exceptionBaselinePath = path.join(root, "tools/quality-policy/test-exception-baseline.json");
-const CAPTURED_EXCEPTION_BASELINE_SHA256 = "ba7bb9a1065511e799eaa93840ce4715fe4b00b23e3f82004f83db5ef998a409";
+const CAPTURED_EXCEPTION_BASELINE_SHA256 = "cfb1ed41cda70c9c6db51146f036a22f2a8deffaff3517385a96c5943ebb7fb4";
 const ALLOWED_CLASSIFICATIONS = new Set(["strict", "harness-fragment", "split-spec-fragment", "fixture"]);
 const NON_STRICT_CLASSIFICATIONS = new Set(["harness-fragment", "split-spec-fragment", "fixture"]);
 const FIXTURE_ROOT = "tests/tools/lint-fixtures/";
@@ -153,7 +153,7 @@ function checkImmutableExceptionBaseline(out) {
   const actualDigest = createHash("sha256").update(fs.readFileSync(exceptionBaselinePath)).digest("hex");
   if (actualDigest !== CAPTURED_EXCEPTION_BASELINE_SHA256) {
     out.push(
-      "Immutable test-exception baseline differs from the captured PLAN35 snapshot. New tests must remain strict; migrate or remove captured exceptions without editing test-exception-baseline.json."
+      "Immutable test-exception baseline differs from the captured baseline snapshot. New tests must remain strict; migrate or remove captured exceptions without editing test-exception-baseline.json."
     );
   }
 }
@@ -163,7 +163,7 @@ function checkExceptionProvenance(data, captured, out) {
     if (entry.classification === "strict") continue;
     if (captured[relativePath] === entry.classification) continue;
     out.push(
-      `Unapproved non-strict test classification '${entry.classification}' for '${relativePath}'. New test files default to 'strict'; only captured PLAN35 exceptions may remain non-strict.`
+      `Unapproved non-strict test classification '${entry.classification}' for '${relativePath}'. New test files default to 'strict'; only captured baseline exceptions may remain non-strict.`
     );
   }
 }

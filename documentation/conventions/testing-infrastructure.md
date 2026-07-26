@@ -34,7 +34,7 @@ test, per `documentation/core-principles.md`).
   `coverage-floor-baseline.json` must retain its captured SHA-256 digest, so a contributor cannot delete an entry,
   reclassify a captured file, or lower the active floor and baseline together;
 - baseline values below 80% lines or 65% branches require `legacyBelowDefault: true` and the exact captured value for
-  one of the frozen 12 Phase 0 paths; new paths cannot create or self-approve below-default debt;
+  one of the frozen 12 legacy paths; new paths cannot create or self-approve below-default debt;
 - every `measured` entry's live V8 lines/branches percentage is at or above its recorded floor (fails on regression
   below the floor, independent of and in addition to the native Vitest/V8 global and critical-area thresholds already
   enforced by `vitest.config.js`);

@@ -123,7 +123,7 @@ Responsive ownership:
 | ---------------------------------------------- | ----------- | --------------- |
 | `ValueMath.formatDirection360(v, leadingZero)` | heading deg | `0..359` string |
 
-## Phase 6 Options
+## Numeric Rendering Options
 
 - `stableDigits` (default `false`) enables `StableDigits.normalize(...)` for heading value text.
 - When enabled, heading value text uses `tokens.font.familyMono`.

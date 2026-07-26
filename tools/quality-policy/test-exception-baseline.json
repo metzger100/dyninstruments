@@ -1,5 +1,5 @@
 {
-  "capturedBy": "PLAN35 review repair (2026-07-20)",
+  "capturedBy": "review repair (2026-07-20)",
   "entries": {
     "tests/cluster/ClusterWidget.harness.js": "harness-fragment",
     "tests/cluster/ClusterWidget.part2.test.js": "split-spec-fragment",
@@ -60,8 +60,8 @@
     "tests/config/clusters/static-clusters.harness.js": "harness-fragment",
     "tests/config/clusters/static-clusters.part2.test.js": "split-spec-fragment",
     "tests/config/components.part2.test.js": "split-spec-fragment",
-    "tests/integration/Phase9Acceptance.part2.test.js": "split-spec-fragment",
-    "tests/integration/Phase9Acceptance.part3.test.js": "split-spec-fragment",
+    "tests/integration/CrossWidgetAcceptance.part2.test.js": "split-spec-fragment",
+    "tests/integration/CrossWidgetAcceptance.part3.test.js": "split-spec-fragment",
     "tests/runtime/HostCommitController.part2.test.js": "split-spec-fragment",
     "tests/runtime/HostCommitController.part3.test.js": "split-spec-fragment",
     "tests/runtime/SurfaceSessionController.part2.test.js": "split-spec-fragment",

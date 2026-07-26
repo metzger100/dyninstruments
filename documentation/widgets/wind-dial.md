@@ -119,7 +119,7 @@ Responsive ownership:
 | `ValueMath.formatAngle180(v, leadingZero)`                                      | angle deg   | `-180..180` string                                                                                |
 | `componentContext.format.applyFormatter(v, { formatter, formatterParameters })` | speed value | formatted speed string; formatter parameters must carry the selected token, not the display label |
 
-## Phase 6 Options
+## Numeric Rendering Options
 
 - `stableDigits` (default `false`) applies `StableDigits.normalize(...)` to angle and speed display strings.
 - When enabled, dial value text uses `tokens.font.familyMono`.

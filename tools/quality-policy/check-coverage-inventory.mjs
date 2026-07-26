@@ -126,7 +126,7 @@ function checkImmutableBaselineCapture(out) {
   const actualDigest = createHash("sha256").update(fs.readFileSync(baselinePath)).digest("hex");
   if (actualDigest !== CAPTURED_BASELINE_SHA256) {
     out.push(
-      "Immutable coverage-floor baseline differs from the captured PLAN35 snapshot. Ratchet active floors upward without editing coverage-floor-baseline.json."
+      "Immutable coverage-floor baseline differs from the captured baseline snapshot. Ratchet active floors upward without editing coverage-floor-baseline.json."
     );
   }
 }

@@ -108,7 +108,7 @@ runtime/init.js:
 - registers widgets
 - does not preload renderer shadowCss during startup; RouteActivationController owns active-route shadowCss preload
 
-RouteActivationController is introduced in Phase 4, and the Phase 6 cutover is now live:
+RouteActivationController owns route activation, and the cutover to it is now live:
 
 - `runtime/cluster/RouteActivationController.js` builds activated route payloads on demand
 - ClusterWidget now owns the live shell/orchestrator cutover path

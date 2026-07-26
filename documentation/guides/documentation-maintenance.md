@@ -57,7 +57,7 @@ For the full command graph and checker ownership map, see
 - `npm run test:contract` (VM-based AVnav/plugin registry, bootstrap, bundled layout, and runtime loading contracts)
 - `npm run test:focus:check` (fail-closed `.only` proof through the configured Vitest projects)
 - `npm run check:smells` (blocking static smell policy)
-- `npm run check:complexity` (regenerated Phase 0 capture verification plus stable-identity no-regression policy)
+- `npm run check:complexity` (regenerated historical capture verification plus stable-identity no-regression policy)
 - `npm run check:scaling` (deterministic operation-count scaling contracts)
 - `npm run docs:check` (markdownlint, offline Linkinator local link/fragment checks, plus project-specific docs
   contracts)
@@ -159,7 +159,7 @@ target, simple assignment, expected RHS shape, and one occurrence.
 Coverage, test-exception, and complexity policy baselines are duplicate-aware and schema-validated before comparisons
 run. The coverage and test-exception captures are SHA-256 locked: coverage keeps exact values for its 12 legacy paths,
 while the 229 non-strict test paths may only migrate to strict or disappear. Contract-owned production files and
-negative test fixtures must name their canonical test owners. `check:complexity` regenerates Phase 0 findings from
+negative test fixtures must name their canonical test owners. `check:complexity` regenerates historical findings from
 `capturedCommit` before checking that active debt is a shrinking subset; active values must exactly match current
 findings so improvements shrink the ledger immediately.
 

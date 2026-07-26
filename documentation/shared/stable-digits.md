@@ -4,7 +4,7 @@
 
 ## Overview
 
-`StableDigits` is the shared formatter-side normalizer used by Phase 6 renderers.
+`StableDigits` is the shared formatter-side normalizer used by numeric-rendering widgets.
 
 - Module: `shared/widget-kits/format/StableDigits.js`
 - Registry id: `StableDigits`

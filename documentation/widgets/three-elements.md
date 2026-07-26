@@ -125,7 +125,7 @@ return {
 };
 ```
 
-## Phase 6 Options
+## Numeric Rendering Options
 
 - `stableDigits` (default `false`) enables `StableDigits.normalize(...)` for the primary value text.
 - When enabled, value rendering switches to `tokens.font.familyMono` and keeps sign-slot alignment where available.

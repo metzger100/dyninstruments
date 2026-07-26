@@ -29,7 +29,7 @@ function createWorkspace() {
 /** @param {string} tempRoot @param {any[]} entries @param {any[]} [historicalEntries] */
 function writePolicies(tempRoot, entries, historicalEntries = entries) {
   writeJson(path.join(tempRoot, "tools/quality-policy/complexity-baseline.json"), { entries });
-  writeJson(path.join(tempRoot, "tools/quality-policy/phase0-complexity-findings.json"), {
+  writeJson(path.join(tempRoot, "tools/quality-policy/historical-complexity-findings.json"), {
     findings: historicalEntries
   });
 }
@@ -360,7 +360,7 @@ describe("tools/quality-policy/complexity-budget.mjs", function () {
 
       expect(result.status).not.toBe(0);
       expect(result.stderr).toContain("Invalid complexity-baseline increase");
-      expect(result.stderr).toContain("exceeds the phase-0 value 42");
+      expect(result.stderr).toContain("exceeds the historical value 42");
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }

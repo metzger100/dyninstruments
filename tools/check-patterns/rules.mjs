@@ -80,7 +80,7 @@ export const RULES = [
     detect:
       /\bThemePresets\b|data-dyni-theme|applyThemePreset|ThemeResolver\.create\s*\(|invalidateTheme\s*\(|namedHandlers\s*\(|\bcatchAll\b|triggerResize\s*\(|onclick="/g,
     message: ({ file, line, match }) =>
-      `[removed-theme-surface-architecture] ${file}:${line}\nRemoved PLAN9 architecture token detected (${match[0]}). Do not reintroduce legacy theme/surface interaction paths.`
+      `[removed-theme-surface-architecture] ${file}:${line}\nRemoved legacy theme/surface architecture token detected (${match[0]}). Do not reintroduce legacy theme/surface interaction paths.`
   },
   {
     name: "legacy-theme-css-input-consumer",
@@ -113,6 +113,42 @@ export const RULES = [
     detect: /(?:\/home\/[A-Za-z0-9_.-]+\/|\/Users\/[A-Za-z0-9_.-]+\/)/g,
     message: ({ file, line, match }) =>
       `[absolute-user-home-path] ${file}:${line}\nAbsolute user-home path detected (${match[0]}). Use project-relative or redacted placeholders instead (for example '/path/to/...', '/home/<user>/...').`
+  },
+  {
+    name: "exec-plan-reference",
+    severity: "block",
+    scope: {
+      include: [
+        "**/*.md",
+        "**/*.js",
+        "**/*.mjs",
+        "**/*.cjs",
+        "**/*.json",
+        "**/*.jsonc",
+        "**/*.yml",
+        "**/*.yaml",
+        "**/*.txt",
+        "**/*.sh",
+        "**/*.css",
+        "**/*.html"
+      ],
+      exclude: [
+        "exec-plans/**",
+        "releases/**",
+        "artifacts/**",
+        ".codex/**",
+        ".kilo/**",
+        ".vscode/**",
+        ".idea/**",
+        "package-lock.json"
+      ]
+    },
+    // A bare "PLANn.md" is a legitimate reference to a real historical exec-plan file; anything
+    // else naming a plan or phase number goes stale once that plan is archived and must describe
+    // the code/config standalone instead.
+    detect: /\bPLAN\d+\b(?!\.md)|\bPhase\s?\d+[A-Za-z]?\b/g,
+    message: ({ file, line, match }) =>
+      `[exec-plan-reference] ${file}:${line}\n'${match[0]}' cites a historical exec-plan/phase outside exec-plans/. Describe the code or config standalone instead.`
   },
   {
     name: "duplicate-functions",

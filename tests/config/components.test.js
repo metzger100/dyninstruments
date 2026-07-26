@@ -196,7 +196,7 @@ describe("config/components.js", function () {
     expect(components.LinearGaugeEngine.deps).not.toContain("ThemeResolver");
   });
 
-  it("keeps the Phase 7 startup closure pinned to ClusterWidget only", function () {
+  it("keeps the startup dependency closure pinned to ClusterWidget only", function () {
     const context = createScriptContext({
       DyniPlugin: {
         baseUrl: "http://host/plugins/dyninstruments/",
@@ -286,7 +286,7 @@ describe("config/components.js", function () {
     expect(collectShadowCssUrls(components, needed)).toEqual([]);
   });
 
-  it("loads bootstrap manifest with Phase 2 runtime services and surface infrastructure", function () {
+  it("loads bootstrap manifest with runtime services and surface infrastructure", function () {
     const context = createScriptContext({
       DyniPlugin: {
         runtime: {},

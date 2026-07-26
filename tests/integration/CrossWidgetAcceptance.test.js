@@ -1,6 +1,5 @@
-// @ts-nocheck
 const { loadFresh } = require("../helpers/load-umd");
-const { createMockCanvas, createMockContext2D } = require("../helpers/mock-canvas");
+const { createMockContext2D } = require("../helpers/mock-canvas");
 const { createComponentContextMock } = require("../helpers/component-context-mock");
 
 function createActiveRouteWidget() {
@@ -15,9 +14,11 @@ function createActiveRouteWidget() {
     };
   });
   const htmlFitStub = {
+    /** @param {Record<string, any>} props */
     ensureDisplayProps(props) {
       return props;
     },
+    /** @param {Record<string, any>} props @param {any} shellRect @param {any} htmlUtils */
     resolveDisplayMode(props, shellRect, htmlUtils) {
       return htmlUtils.resolveRatioModeForRect({
         shellRect: shellRect,
@@ -28,6 +29,7 @@ function createActiveRouteWidget() {
         defaultMode: "normal"
       });
     },
+    /** @param {any} rawValue @param {any} formatter @param {any} formatterParameters @param {any} defaultText @param {any} placeholderNormalize */
     formatActiveRouteMetric(rawValue, formatter, formatterParameters, defaultText, placeholderNormalize) {
       const out = String(
         componentContext.format.applyFormatter(rawValue, {
@@ -38,9 +40,11 @@ function createActiveRouteWidget() {
       );
       return placeholderNormalize.normalize(out, defaultText);
     },
+    /** @param {any} value */
     textLength(value) {
       return value == null ? 0 : String(value).length;
     },
+    /** @param {any} rawText @param {any} stableDigitsEnabled @param {any} stableDigits @param {any} minWidth */
     normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
       if (!stableDigitsEnabled) {
         return { padded: rawText, plain: rawText };
@@ -66,6 +70,7 @@ function createActiveRouteWidget() {
     },
     services: {
       format: {
+        /** @param {any} value @param {Record<string, any>} [formatterOptions] */
         applyFormatter(value, formatterOptions) {
           const cfg = formatterOptions || {};
           return value == null ? cfg.default : String(value);
@@ -88,6 +93,7 @@ function createActiveRouteWidget() {
   return loadFresh("widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js").create({}, componentContext);
 }
 
+/** @param {any} rendererSpec @param {Record<string, any>} props */
 function mountHtml(rendererSpec, props) {
   const hostContext = {};
   const rootEl = document.createElement("div");
@@ -117,6 +123,7 @@ function mountHtml(rendererSpec, props) {
 
 function createRenderModelContext() {
   const moduleCache = Object.create(null);
+  /** @param {string} id */
   function loadModuleById(id) {
     if (!moduleCache[id]) {
       if (id === "EditRouteLayout") {
@@ -153,6 +160,8 @@ function createRenderModelContext() {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
       } else if (id === "AisTargetLayoutGeometry") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometry.js");
+      } else if (id === "AisTargetLayoutGeometryStyles") {
+        moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutGeometryStyles.js");
       } else if (id === "AisTargetLayoutMath") {
         moduleCache[id] = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
       } else if (id === "HtmlWidgetUtils") {
@@ -195,6 +204,7 @@ function createRenderModelContext() {
     "AisTargetLayout",
     "AisTargetLayoutSizing",
     "AisTargetLayoutGeometry",
+    "AisTargetLayoutGeometryStyles",
     "AisTargetLayoutMath",
     "HtmlWidgetUtils",
     "UnitAwareFormatter",
@@ -213,6 +223,7 @@ function createRenderModelContext() {
     modules,
     services: {
       format: {
+        /** @param {any} value @param {Record<string, any>} [formatterOptions] */
         applyFormatter(value, formatterOptions) {
           const cfg = formatterOptions || {};
           if (value == null || Number.isNaN(value)) {
@@ -274,22 +285,14 @@ function createStateOverlay() {
   );
 }
 
-function createSpringMotion() {
-  return loadFresh("shared/widget-kits/anim/SpringEasing.js").create({}, createComponentContextMock({})).createMotion();
-}
-
-function readTextContent(root, selector) {
-  const node = root.querySelector(selector);
-  return node ? node.textContent : "";
-}
-
-describe("Phase 9 acceptance coverage", function () {
-  it("keeps stable-digit widths aligned and spring motion isolated per canvas", function () {
+describe("Cross-widget acceptance coverage", function () {
+  it("keeps disconnected labels consistent across representative widgets and preserves the AIS hidden exception", function () {
     const activeRoute = createActiveRouteWidget();
     const editRoute = createEditRouteRenderModel();
-    const springMotion = createSpringMotion();
-    const canvasA = createMockCanvas();
-    const canvasB = createMockCanvas();
+    const routePoints = createRoutePointsRenderModel();
+    const aisTarget = createAisTargetRenderModel();
+    const overlay = createStateOverlay();
+    const overlayCtx = createMockContext2D();
 
     const activeMount = mountHtml(activeRoute, {
       display: {
@@ -298,11 +301,10 @@ describe("Phase 9 acceptance coverage", function () {
         rteEta: new Date("2026-03-06T11:45:00Z"),
         nextCourse: 93,
         routeName: "Harbor Run",
-        disconnect: false
+        disconnect: true
       },
       captions: { remain: "RTE", rteEta: "ETA", nextCourse: "NEXT" },
       units: { remain: "nm", rteEta: "", nextCourse: "deg" },
-      stableDigits: true,
       default: "---",
       surfacePolicy: {
         interaction: { mode: "dispatch" },
@@ -320,19 +322,8 @@ describe("Phase 9 acceptance coverage", function () {
 
     const editModel = editRoute.buildModel({
       props: {
-        disconnect: false,
-        stableDigits: true,
-        domain: {
-          hasRoute: true,
-          routeName: "Harbor Run",
-          pointCount: 5,
-          totalDistance: 12.3,
-          remainingDistance: 18.4,
-          rteEta: "2026-03-06T11:45:00Z",
-          isActiveRoute: true,
-          isLocalRoute: true,
-          isServerRoute: false
-        },
+        disconnect: true,
+        domain: { hasRoute: true, routeName: "Harbor Run", pointCount: 5 },
         layout: { ratioThresholdNormal: 1.2, ratioThresholdFlat: 3.8 },
         captions: { pts: "PTS", dst: "DST", rte: "RTE", rteEta: "ETA" },
         units: { dst: "nm", rte: "nm" },
@@ -342,25 +333,60 @@ describe("Phase 9 acceptance coverage", function () {
       isVerticalCommitted: false
     });
 
-    const activeRemainText = readTextContent(
-      activeMount,
-      ".dyni-active-route-metric-remain .dyni-active-route-metric-value"
-    );
-    const editDistanceText = editModel.metrics.dst.valueText;
+    const routePointsModel = routePoints.buildModel({
+      props: {
+        disconnect: true,
+        domain: {
+          route: { points: [{ name: "A", lat: 54.1, lon: 10.0 }] },
+          routeName: "Harbor Run"
+        },
+        layout: { showHeader: true },
+        formatting: { courseUnit: "kt", waypointsText: "waypoints" },
+        units: { distance: "nm" },
+        formatUnits: { distance: "nm" },
+        default: "---"
+      },
+      shellRect: { width: 320, height: 180 }
+    });
 
-    expect(activeRemainText.length).toBe(editDistanceText.length);
-    expect(activeRemainText).not.toBe("---");
-    expect(editDistanceText).not.toBe("---");
+    const aisHiddenModel = aisTarget.buildModel({
+      props: {
+        disconnect: true,
+        domain: { hasTargetIdentity: false, mmsiNormalized: "", nameOrMmsi: "" },
+        layout: { ratioThresholdNormal: 1.2, ratioThresholdFlat: 3.8 },
+        captions: { dst: "DST", cpa: "DCPA", tcpa: "TCPA", brg: "BRG" },
+        units: { dst: "nm", cpa: "nm", tcpa: "min", brg: "°" },
+        default: "---",
+        surfacePolicy: {
+          interaction: { mode: "dispatch" },
+          pageId: "navpage"
+        }
+      },
+      shellRect: { width: 320, height: 180 }
+    });
 
-    expect(springMotion.resolve(canvasA, 10, true, 0)).toBe(10);
-    expect(springMotion.resolve(canvasB, 100, true, 0)).toBe(100);
+    overlay.drawStateScreen({
+      ctx: overlayCtx,
+      W: 320,
+      H: 180,
+      family: "sans-serif",
+      color: "#ffffff",
+      labelWeight: 600,
+      kind: "disconnected",
+      label: "GPS Lost"
+    });
 
-    const nextA = springMotion.resolve(canvasA, 20, true, 16);
-    const nextB = springMotion.resolve(canvasB, 100, true, 16);
-
-    expect(nextA).not.toBe(nextB);
-    expect(nextB).toBe(100);
-    expect(springMotion.isActive(canvasA)).toBe(true);
-    expect(springMotion.isActive(canvasB)).toBe(false);
+    expect(activeMount.textContent).toContain("GPS Lost");
+    expect(editModel.kind).toBe("disconnected");
+    expect(editModel.stateLabel).toBe("GPS Lost");
+    expect(routePointsModel.kind).toBe("disconnected");
+    expect(routePointsModel.stateLabel).toBe("GPS Lost");
+    expect(aisHiddenModel.kind).toBe("hidden");
+    expect(aisHiddenModel.stateLabel).toBe("");
+    expect(
+      overlayCtx.calls
+        .filter((/** @type {any} */ entry) => entry.name === "fillText")
+        .map((/** @type {any} */ entry) => entry.args[0])
+    ).toContain("GPS Lost");
   });
 });

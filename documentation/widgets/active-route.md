@@ -69,13 +69,13 @@ ActiveRouteTextHtmlWidget is a committed HTML renderer routed by route metadata 
 - Renderer consults `ActiveRouteHtmlFit.compute(...)` whenever `shellRect` exists; `ActiveRouteHtmlFit` performs
   hostContext-local signature caching to deduplicate identical fit requests.
 
-## Phase 6 Options
+## Numeric Rendering Options
 
 - `stableDigits` (default `false`) enables `StableDigits.normalize(...)` for remain/ETA/next-course metric text.
 - Metric value spans add `.dyni-tabular` when stable digits are enabled.
 - Fit is two-pass in `ActiveRouteHtmlFit`: padded value first, fallback value when the padded metric clips.
 
-## Phase 7 Options
+## Time Display Options
 
 - `hideSeconds` (default `false`) switches the ETA metric from `formatTime` to `formatClock`.
 - The resulting `--:--` fallback still normalizes to `---` through `PlaceholderNormalize`.

@@ -57,7 +57,7 @@ New functions are limited to complexity 10, 40 statements, nesting depth 4, and 
 (`tools/quality-policy/complexity-budget.mjs`, run as `check:complexity` inside `check:core`). Existing tracked
 functions may only stay equal or shrink, and every active value must exactly equal the current over-limit finding;
 improvements therefore require an immediate baseline reduction. Active entries must be identities from the immutable
-Phase 0 capture, so new debt cannot be self-grandfathered by editing the active baseline. A recorded value is never
+historical capture, so new debt cannot be self-grandfathered by editing the active baseline. A recorded value is never
 raised to accommodate new work; if a change genuinely needs to grow a tracked function, extract a helper instead. See
 [quality-gates.md](quality-gates.md) for the full command and baseline-file ownership.
 

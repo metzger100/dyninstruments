@@ -101,7 +101,7 @@
     "note": "The original diagnostic reported 189 aggregate violations. The checked stable-identity capture reproducibly rescans capturedCommit with the current identity-aware scanner and records 188 function/metric findings; the one-count difference is retained explicitly instead of assigning an invented identity.",
     "originalAggregateViolationCount": 189,
     "stableIdentityFindingCount": 188,
-    "stableIdentityFindings": "tools/quality-policy/phase0-complexity-findings.json",
+    "stableIdentityFindings": "tools/quality-policy/historical-complexity-findings.json",
     "worstComplexityObserved": [77, 96]
   }
 }

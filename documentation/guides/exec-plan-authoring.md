@@ -55,6 +55,18 @@ required baseline for consistent first-attempt implementation success.
 - Defining acceptance criteria only after coding starts.
 - Omitting `README.md` updates for user-facing changes in theming, clusters/kinds, layouts, installation, configuration,
   requirements, or development workflow.
+- Having a phase's deliverables leave a permanent plan/phase citation behind (see Exec-Plan Citation Rule below).
+
+## Exec-Plan Citation Rule
+
+- Only plan documents themselves (`exec-plans/**`) may narrate their own plan number or phase numbers.
+- Deliverables a phase produces outside `exec-plans/` — code comments, docstrings, JSON note fields, runtime error
+  messages, test names, and filenames — must never cite a plan number (`PLANn`) or a phase number (`Phase N`) as
+  authority (for example a comment reading "after `PLANn`" or a filename prefixed `phaseN-`). Describe the resulting
+  code or config standalone instead; the citation goes stale the moment the plan is archived.
+- A literal pointer to a real plan file (`PLANn.md`) is still fine as a factual reference.
+- Enforced repo-wide (outside `exec-plans/`) by `check-patterns` (`exec-plan-reference`); run `npm run check:smells`
+  before closing out a phase to confirm no citation leaked into shipped output.
 
 ## Related
 

@@ -152,11 +152,11 @@ Removed from wrappers:
 - Per-frame dynamic draws remain pointer + text/value rendering; pointer now draws after cached static-layer blit (in
   front of ticks/labels).
 
-## Phase 6 Options
+## Numeric Rendering Options
 
 - `stableDigits` (default `false`) is available on speed/environment semicircle/linear gauge kinds.
 - When enabled, main gauge value text is normalized via `StableDigits` and rendered with `tokens.font.familyMono`.
-- `stableDigits: false` preserves pre-phase rendering and typography behavior.
+- `stableDigits: false` preserves the prior rendering and typography behavior.
 
 ## Related
 

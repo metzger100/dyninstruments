@@ -5,7 +5,7 @@ commit-driven surface reconciliation
 
 ## Overview
 
-This document describes the live runtime lifecycle after PLAN9.
+This document describes the live runtime lifecycle.
 
 Authoritative owners:
 

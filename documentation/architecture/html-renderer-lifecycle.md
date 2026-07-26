@@ -17,7 +17,7 @@ ClusterWidget.renderHtml(...):
 - contains only stable route/surface metadata and route-owned shell sizing state
 - does not carry renderer-spec layout hooks
 
-RouteActivationController is the Phase 4 activation service for the live route-activation path:
+RouteActivationController is the activation service for the live route-activation path:
 
 - `runtime/cluster/RouteActivationController.js` builds activated route payloads on demand
 - it preloads and caches per-renderer shadow CSS for the live activation path
