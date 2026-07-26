@@ -35,9 +35,9 @@ Facts checked against the current repository (2026-07-26):
    `describe("NavMapper", …)` block; the distinguishing content is the `it()` titles inside
    ([tests/cluster/mappers/NavMapper.part2.test.js](../../tests/cluster/mappers/NavMapper.part2.test.js) covers VMG +
    activeRoute, `.part3` covers positions + disconnect, `.part4` covers xteDisplay).
-3. Setup duplication is real and forced by the split. Bytes 1–193 of `NavMapper.part2/3/4.test.js` are **byte-identical**
-   (`md5sum` matches) — the `makeToolkit`/config-fixture helper is copy-pasted into every fragment. Other families
-   instead share a factory: `LinearGaugeEngine.partN` call `createHarness()` and duplicate less.
+3. Setup duplication is real and forced by the split. Bytes 1–193 of `NavMapper.part2/3/4.test.js` are
+   **byte-identical** (`md5sum` matches) — the `makeToolkit`/config-fixture helper is copy-pasted into every fragment.
+   Other families instead share a factory: `LinearGaugeEngine.partN` call `createHarness()` and duplicate less.
 4. The 400-line cap is the cause. [tools/check-file-size.mjs](../../tools/check-file-size.mjs) sets
    `MAX_ALLOWED_LINES = 400` and scans `tests`. A test file that grows past 400 lines was historically split into
    `.partN` fragments rather than regrouped by topic.
@@ -45,15 +45,18 @@ Facts checked against the current repository (2026-07-26):
    [tools/quality-policy/test-inventory.json](../../tools/quality-policy/test-inventory.json) classifies **209** entries
    as `"split-spec-fragment"`, each with `parent` (the sibling `*.test.js`), a `reason`, and a `removalPath` reading
    "Move shared declarations into typed helpers, then migrate `<file>` into the strict test project."
-6. The inventory is enforced by [tools/quality-policy/test-inventory.mjs](../../tools/quality-policy/test-inventory.mjs).
-   `checkSplitSpecFragmentEntries` requires each fragment path to match `*.partN.test.js` and to name its sibling parent;
-   `checkInventoryCompleteness` requires every live `tests/**/*.js` to be classified (new files default to `strict`).
+6. The inventory is enforced by
+   [tools/quality-policy/test-inventory.mjs](../../tools/quality-policy/test-inventory.mjs).
+   `checkSplitSpecFragmentEntries` requires each fragment path to match `*.partN.test.js` and to name its sibling
+   parent; `checkInventoryCompleteness` requires every live `tests/**/*.js` to be classified (new files default to
+   `strict`).
 7. `ALLOWED_CLASSIFICATIONS = {strict, harness-fragment, split-spec-fragment, fixture}`. `harness-fragment` is a valid
    destination for extracted shared setup and must be a non-spec `*.harness.js` file naming a `parent`
    (`checkHarnessFragmentEntries`). There are already **16** `harness-fragment` entries in use.
 8. [tools/quality-policy/test-exception-baseline.json](../../tools/quality-policy/test-exception-baseline.json) is
-   **hash-locked**: `test-inventory.mjs` holds `CAPTURED_EXCEPTION_BASELINE_SHA256` and `checkImmutableExceptionBaseline`
-   fails if the file's bytes change. It currently holds 229 entries (209 of them `split-spec-fragment`).
+   **hash-locked**: `test-inventory.mjs` holds `CAPTURED_EXCEPTION_BASELINE_SHA256` and
+   `checkImmutableExceptionBaseline` fails if the file's bytes change. It currently holds 229 entries (209 of them
+   `split-spec-fragment`).
 9. Critical mechanic — migrating to `strict` does **not** require editing the hash-locked baseline.
    `checkExceptionProvenance` only iterates `test-inventory.json` entries and errors on a non-strict classification that
    is absent from the captured baseline; it never requires a baseline entry to have a live file. So the correct
@@ -105,8 +108,8 @@ Deliverables:
   classified `harness-fragment`) that owns the setup currently duplicated across `NavMapper.part2–8` (Baseline fact 3).
 - Topic-named strict files replacing `NavMapper.test.js` + `NavMapper.part2–8.test.js`, e.g.
   `NavMapper.activeRoute.test.js`, `NavMapper.xteDisplay.test.js`, `NavMapper.positions.test.js`,
-  `NavMapper.vmg.test.js`, `NavMapper.disconnect.test.js` — final names chosen from the actual `it()` groupings, each
-  ≤ 400 lines.
+  `NavMapper.vmg.test.js`, `NavMapper.disconnect.test.js` — final names chosen from the actual `it()` groupings, each ≤
+  400 lines.
 - All 8 `NavMapper` `split-spec-fragment` entries removed from `test-inventory.json`; `test-exception-baseline.json`
   untouched.
 - A short subsection appended to this plan (or to
@@ -157,8 +160,8 @@ Deliverables:
 
 - Update the `test-inventory.json` `note` field and any convention doc that describes `split-spec-fragment` as an
   active/expected classification (e.g. testing-conventions docs referenced from
-  [documentation/TABLEOFCONTENTS.md](../../documentation/TABLEOFCONTENTS.md)) to state that numeric fragments are retired
-  and new oversized tests are split by topic into strict files.
+  [documentation/TABLEOFCONTENTS.md](../../documentation/TABLEOFCONTENTS.md)) to state that numeric fragments are
+  retired and new oversized tests are split by topic into strict files.
 - Confirm no remaining doc, comment, or test name instructs authors to create `*.partN.test.js`.
 
 Exit conditions:
@@ -179,8 +182,8 @@ batch's deliverables.
 Structure and naming:
 
 - `find tests -name '*.part[0-9]*.test.js'` → zero results.
-- Every former fragment's tests live in a `Base.<topic>.test.js` file whose name states its topic; each file ≤ 400
-  lines (`npm run check:filesize` passes).
+- Every former fragment's tests live in a `Base.<topic>.test.js` file whose name states its topic; each file ≤ 400 lines
+  (`npm run check:filesize` passes).
 
 Inventory and immutability:
 
@@ -204,8 +207,8 @@ Gates:
 
 - [tools/quality-policy/test-inventory.json](../../tools/quality-policy/test-inventory.json) — the `split-spec-fragment`
   debt ledger this plan retires.
-- [tools/quality-policy/test-inventory.mjs](../../tools/quality-policy/test-inventory.mjs) — enforcement (classification,
-  immutable baseline, fragment/harness rules).
+- [tools/quality-policy/test-inventory.mjs](../../tools/quality-policy/test-inventory.mjs) — enforcement
+  (classification, immutable baseline, fragment/harness rules).
 - [tools/quality-policy/test-exception-baseline.json](../../tools/quality-policy/test-exception-baseline.json) —
   hash-locked; must remain byte-identical.
 - [tools/check-file-size.mjs](../../tools/check-file-size.mjs) — the 400-line cap that forced the original splits.
