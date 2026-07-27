@@ -558,29 +558,22 @@ Repository independence:
 (excluding `exec-plans/`, where this plan's own prose names the paired repository by design) returns no match — no
 required script, hook, test, release command, or documentation checker resolves the sibling repository.
 
-### Paired comparison with Polar Recorder PLAN7 — not yet performable
+### Paired comparison with Polar Recorder PLAN7 — complete
 
-All local Dyninstruments work above is complete and verified. Polar Recorder's paired `PLAN7.md` implementation is **not
-ready**: its working tree (checked read-only) is mid-implementation with uncommitted changes — `package.json`,
-`tests/js/command-graph.test.mjs`, `tests/js/setup.test.mjs`, and `tools/actionlint.sh` are modified;
-`tools/quality-policy/complexity-baseline.json`, `complexity-budget.mjs`, and `complexity-scan.mjs` are deleted but the
-change is uncommitted; and critically `.codex` is still the original zero-byte marker file (Polar Recorder's own Phase
-D, "Replace the empty `.codex` marker", has not landed). Its `check:core` composition still shows the duplicated
-`check:smells` route the plan intends to remove. Because the paired repository was never edited by this session and its
-implementation is incomplete/uncommitted, the following PLAN40 items remain outstanding and are **not** claimed as
-passing:
+Re-ran the one-off, read-only comparison on 2026-07-27 after Polar Recorder archived `PLAN7.md`; both worktrees were
+clean. The shared Node/npm declarations, all 12 common direct development-dependency versions, and the exact
+`check:fast`, `check:all`, and `check:strict` script strings match. Dyninstruments' `check:core` reaches `test:split`
+exactly once; Polar Recorder's complete core graph has the same meaning with its documented Python-specific leaf.
 
-- Byte-identical `.codex/config.toml` between the two repositories (Polar Recorder has no `config.toml` yet).
-- The one-off paired comparison script (Phase F2): identical actionlint checksum table, identical pinned Action SHAs,
-  no-repeated-Polar-smell-leaf / no-incomplete-Dyn-core cross-check, and the full justified-differences record.
+The repositories have byte-identical `.codex/config.toml` files (SHA-256
+`be6ded57d66fa0d9101ef7eb2b9fb1aa3105e2871f8eca93218da1c6dc937f64`), generic AvNav base schemas, and
+`genericBase` schema-corpus payloads. Their actionlint version/checksum tables and pinned publisher Action SHAs also
+match. Required commands in neither repository resolve a sibling path; remaining sibling-name references are
+provenance/documentation only. No unexplained common-contract drift was found.
 
-Per this plan's own closing instruction ("If the paired implementation is not ready, finish all local work, leave the
-plan active, and state precisely what external comparison remains"), **PLAN40 stays in `exec-plans/active/`**. All local
-acceptance criteria under "Command semantics", "Quality integrity", "Portable role-model configuration" (local test only
-— byte-identity to the sibling excepted), "Documentation", and "Completion" (local gates only) are met. The remaining
-work is entirely external: re-run this plan's Phase F2 one-off comparison once Polar Recorder's PLAN7 is committed and
-its `.codex/config.toml` exists, then move this plan to `exec-plans/completed/PLAN40.md` only if that comparison finds
-no unexplained common-contract drift.
+The current Dyninstruments `npm run check:all` gate passed after this comparison. With the prior local evidence and
+Polar Recorder's archived PLAN7 evidence, all PLAN40 acceptance criteria are now met. This plan was moved to
+`exec-plans/completed/PLAN40.md` on 2026-07-27.
 
 ---
 
