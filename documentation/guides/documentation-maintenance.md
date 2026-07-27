@@ -54,7 +54,9 @@ For the full command graph and checker ownership map, see
 - `npm run check:standard` (full-repository Prettier, ESLint, Stylelint, actionlint, jscpd)
 - `npm run typecheck` (strict no-emit source and test scopes in `tsconfig.checkjs.json` and `tsconfig.tests.json`)
 - `npm run package:check` (Ajv schema validation plus release/package contract tests)
-- `npm run test:contract` (VM-based AVnav/plugin registry, bootstrap, bundled layout, and runtime loading contracts)
+- `npm run test:split` (the complete configured Vitest suite: `unit-node`, `contract`, and `unit-dom` projects, run
+  exactly once as ordinary non-coverage execution; `test:coverage:check` separately reruns the same suite under V8
+  instrumentation for coverage evidence, so the duplication is intentional)
 - `npm run test:focus:check` (fail-closed `.only` proof through the configured Vitest projects)
 - `npm run check:smells` (blocking static smell policy)
 - `npm run check:complexity` (regenerated historical capture verification plus stable-identity no-regression policy)
@@ -73,7 +75,8 @@ Optional exploratory variant during cleanup:
 
 - `npm run check:standard`
 - `npm run typecheck`
-- `npm run test:node`
+- `npm run test:unit` (bounded `unit-node` + `unit-dom` selection; excludes `test:split`, `test:contract`,
+  `package:check`, `docs:check`, `check:complexity`, `check:scaling`, and coverage)
 
 `check:standard` includes:
 
@@ -141,8 +144,9 @@ npm run test:coverage
 `test:coverage` enforces the native Vitest global and critical-area thresholds declared in `vitest.config.js`.
 
 `test:split` runs the `vitest.config.js` `test.projects` configuration with separate `unit-node`, `contract`, and
-`unit-dom` projects. Use it when changing test setup, tool tests, VM contract tests, dependency direction, retired
-owner-path absence, DOM setup, or environment boundaries.
+`unit-dom` projects, and is `check:core`'s complete ordinary non-coverage execution leaf. Use it when changing test
+setup, tool tests, VM contract tests, dependency direction, retired owner-path absence, DOM setup, or environment
+boundaries.
 
 `check-patterns` is enforced in full mode inside `check:core`. Every live rule is blocking (there are no warn-only
 rollout rules); a live rule reporting any finding fails the gate. This includes fail-closed cross-file clone detection

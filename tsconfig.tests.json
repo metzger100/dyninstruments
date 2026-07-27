@@ -435,6 +435,7 @@
     "tests/tools/check-patterns.blocksTruthyFallbackOnDefault.test.js",
     "tests/tools/check-patterns.failFastRuleCases.test.js",
     "tests/tools/check-patterns.treatsPrematureLegacySupportFindings.test.js",
+    "tests/tools/codex-config.test.js",
     "tests/tools/complexity-budget.test.js",
     "tests/tools/complexity-capture-integrity.test.js",
     "tests/tools/coverage-inventory-policy.test.js",

@@ -153,6 +153,11 @@ Commands:
 - `npm run test:unit` — `unit-node` plus `unit-dom`
 - `npm run test:split` — all configured Vitest projects
 
+`npm run check:core` runs `test:split` exactly once as its complete ordinary-execution proof, replacing the former
+direct `test:contract` position. `npm run test:coverage:check` separately reruns the same three projects under V8
+instrumentation afterward for coverage evidence; the two owners intentionally duplicate test execution because ordinary
+`check:core` gives direct failures without instrumentation overhead, while `test:coverage:check` owns coverage.
+
 ## Global Setup (`tests/setup/vitest.setup.js`)
 
 jsdom does not implement Canvas 2D APIs, so global setup installs a deterministic `HTMLCanvasElement.getContext("2d")`

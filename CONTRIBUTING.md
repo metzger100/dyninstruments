@@ -190,14 +190,23 @@ npm test
 `check:standard` is the standard-tool layer: full-repository Prettier formatting (every maintained JS/MJS, CSS, and
 Markdown file plus config/workflow files and the lockfile, checked against Prettier's real effective ignore resolution),
 ESLint, Stylelint, pinned actionlint workflow validation, and jscpd. Any clone detected by jscpd fails this layer.
-`check:fast` adds strict type checking and Node-only unit/tool tests without the full coverage gate. `check:core`
-includes it plus `typecheck` (production/config `checkJs`, inventory-owned tests, and every maintained `tools/**/*.mjs`
-script under `tsconfig.tools.json`), `package:check`, `check:complexity` (a portable, Git-free digest proof plus the
-complexity no-regression budget; `npm run complexity:regenerate-audit` is the maintainer-only Git-based regeneration
-audit), `check:scaling` (deterministic operation-count contracts, never timing), and `docs:check` before the remaining
-project-specific Dyni gates. `test:split` separates Node-only tool tests from jsdom runtime/widget tests.
+`check:fast` adds strict type checking and a bounded `test:unit` selection (`unit-node` plus `unit-dom`) without the
+full coverage gate; it is fast local feedback, not the required final gate. `check:core` is the complete non-coverage
+repository gate: it runs everything `check:fast` runs plus `typecheck` (production/config `checkJs`, inventory-owned
+tests, and every maintained `tools/**/*.mjs` script under `tsconfig.tools.json`), `package:check`, the complete
+configured Vitest suite exactly once via `test:split` (`unit-node` + `contract` + `unit-dom`), `check:complexity` (a
+portable, Git-free digest proof plus the complexity no-regression budget; `npm run complexity:regenerate-audit` is the
+maintainer-only Git-based regeneration audit), `check:scaling` (deterministic operation-count contracts, never timing),
+and `docs:check`. `test:coverage:check` separately reruns the same three Vitest projects under V8 instrumentation
+afterward for coverage evidence; the duplication with `check:core`'s ordinary run is intentional.
 `npm run dependencies:audit` runs a networked `npm audit`; run it after dependency updates and during scheduled
 maintenance, never as part of `check:all`.
+
+This repository is a viewer-profile quality role model, not a blank-plugin starter:
+`check:fast`/`check:core`/`check:all` share the same bounded/complete/coverage meaning across sibling AvNav plugin
+repositories, while Vitest, coverage floors, and the historical complexity ratchet remain Dyninstruments-specific legacy
+tracking. An optional `.codex/config.toml` provides portable Codex CLI defaults; it is contributor tooling only, never a
+runtime or contribution requirement.
 
 Do not merge with failing checks.
 

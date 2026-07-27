@@ -238,8 +238,14 @@ those scoped tokens are explicitly overridden.
 dyninstruments is developed with AI-assisted tooling. See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup,
 architecture, coding standards, and release process.
 
+This repository is a viewer-profile quality role model: its shared quality-gate meanings (`check:fast`, `check:core`,
+`check:all`) align with sibling AvNav plugin repositories, while its Vitest/coverage/complexity ratchets stay
+Dyninstruments-specific legacy debt tracking, not a blank-plugin starter template.
+
 Use Node 26 with npm 12.0.1. Run `npm run setup` once; it installs the locked dependencies and provisions the
-checksum-verified actionlint binary outside `node_modules`.
+checksum-verified actionlint binary outside `node_modules`. An optional `.codex/config.toml` provides portable Codex CLI
+defaults (project-doc pickup, sandbox/approval mode, cached web search); it is contributor tooling only and is never
+required to run the quality gates.
 
 The complete local gate is:
 
@@ -253,18 +259,24 @@ For fast local feedback during development:
 npm run check:fast
 ```
 
-`check:fast` runs the standard static layer, strict `checkJs`, and Node-only unit/tool tests without the full coverage
-gate. `check:standard` runs full-repository Prettier formatting checks (every maintained JS/MJS, CSS, and Markdown file
-plus quality/config files, the lockfile, agent skills, and active execution plans, checked against Prettier's real
-effective ignore resolution), ESLint (including required shipped-file `@file` overviews), Stylelint, pinned actionlint
-workflow validation, and jscpd before the project-specific gates in `check:core`; any detected clone makes this standard
-layer fail. `check:core` also runs the strict no-emit TypeScript boundary via `npm run typecheck` (production/config
+`check:fast` is bounded local feedback, not the required final gate: the standard static layer, the full strict no-emit
+typecheck boundary, and a bounded `test:unit` selection (`unit-node` plus `unit-dom`) without the full coverage gate,
+package/release validation, documentation checks, or complexity/scaling policy checks. `check:standard` runs
+full-repository Prettier formatting checks (every maintained JS/MJS, CSS, and Markdown file plus quality/config files,
+the lockfile, agent skills, and active execution plans, checked against Prettier's real effective ignore resolution),
+ESLint (including required shipped-file `@file` overviews), Stylelint, pinned actionlint workflow validation, and jscpd;
+any detected clone makes this standard layer fail. `check:core` is the complete non-coverage repository gate: it runs
+everything `check:fast` runs plus the strict no-emit TypeScript boundary via `npm run typecheck` (production/config
 `checkJs`, inventory-owned tests, and every maintained `tools/**/*.mjs` script), Ajv schema validation via
 `npm run schema:check` (a generic AvNav `plugin.json` base schema composed with the Dyninstruments layouts profile), the
-release/package contract via `npm run package:check`, the complexity no-regression budget via
+release/package contract via `npm run package:check`, the complete configured Vitest suite exactly once via
+`npm run test:split` (`unit-node` + `contract` + `unit-dom`), the complexity no-regression budget via
 `npm run check:complexity`, and the deterministic scaling contracts via `npm run check:scaling` (operation-count checks,
 never timing). It verifies `.only` rejection through the direct Vitest configuration and every configured project.
 Documentation checks run through `npm run docs:check`, including the markdownlint baseline.
+`npm run test:coverage:check` separately reruns the same three Vitest projects under V8 instrumentation afterward; this
+duplication with `check:core` is intentional — the ordinary run gives direct failures, the instrumented run owns
+coverage evidence.
 
 Scaling measurements fail closed unless every observed operation count is a non-negative finite integer.
 

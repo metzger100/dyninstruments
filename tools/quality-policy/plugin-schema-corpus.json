@@ -1,5 +1,5 @@
 {
-  "note": "Generic AvNav plugin.json base cases and Dyninstruments layouts-profile cases used to prove the base/profile schema composition in schemas/avnav-plugin-base.schema.json and schemas/plugin.schema.json. No sibling repository has published its own schema base/profile split yet, so no upstream shared corpus exists to byte-match today; the genericBase section is written to be adopted byte-for-byte once a sibling profile lands, and dynLayoutsProfile stays local to this repository.",
+  "note": "Generic AvNav plugin.json base cases and Dyninstruments layouts-profile cases used to prove the base/profile schema composition in schemas/avnav-plugin-base.schema.json and schemas/plugin.schema.json. Polar Recorder now publishes the same schema base/profile split with a byte-identical genericBase corpus, so the genericBase section here is the shared upstream corpus rather than a placeholder awaiting adoption; dynLayoutsProfile stays local to this repository.",
   "genericBase": {
     "valid": [{}, { "anyKey": "anyValue" }, { "version": "1.2.3" }],
     "invalid": [[], "not-an-object", null, 42, true]

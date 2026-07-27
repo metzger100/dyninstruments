@@ -453,8 +453,134 @@ Therefore widget/layout fixtures and theme-token extreme fixtures do not change.
 
 ## Progress / Completion Evidence
 
-Populate this section during implementation. Record exact commits, commands, counts, coverage summaries, parity results,
-and deviations. Do not mark criteria complete from expectation alone.
+### Phase A — Baseline reconfirmation
+
+- Verified starting HEAD `3285cc787adf9c9626772a4a6052929470f6089a` on `main` (this commit is "Added PLAN40.md" itself,
+  one commit ahead of the plan's cited verification commit `9a62c68b2cde6df4afb9be4248e18de46ef52af9`; no other drift).
+  Worktree was clean; `exec-plans/active/` contained only this plan.
+- Node `v26.4.0`, npm `12.0.1` — matches the declared `engines`/`packageManager` contract.
+- Re-verified every "Verified Baseline" claim (items 1–20) directly against the live worktree before changing anything:
+  `check:fast`/`check:core`/`check:all`/`check:strict` strings, `test:split` composition, `.codex/config.toml`
+  Windows/MCP content, the schema-corpus false no-sibling note, and README/quality-gate/testing-infrastructure line
+  counts all matched exactly as recorded. No baseline drift found; no plan amendment was required.
+- Read Polar Recorder's `exec-plans/active/PLAN7.md` read-only to confirm the shared contract (same `check:fast` string,
+  same `check:core`/`check:all`/`check:strict` aliasing, same Codex/independence/role-model boundaries). No sibling file
+  was edited.
+
+### Phase B — Command graph
+
+- `package.json`: `check:fast` changed to exactly `npm run check:standard && npm run typecheck && npm run test:unit`;
+  `check:core` changed to run `npm run test:split` in place of the former direct `npm run test:contract` position,
+  keeping every other group and its order.
+- `tests/tools/package-scripts.test.js` extended with: exact-string proofs for the new `check:fast`/`check:core`; a
+  `test:split`-reaches-once assertion; a positive proof that `test:split` still fans out to all three configured Vitest
+  projects (`unit-node`, `contract`, `unit-dom`, read directly from `vitest.config.js`); a full reachability/no-cycle
+  graph walk from `check:all` proving every required core group is reachable and `test:contract` is not; and a
+  **negative** mutation-fixture proof (`assertCompleteCheckCoreGraph`) showing the former incomplete composition
+  (`test:split` replaced by `test:contract`) throws under the same assertion.
+- Focused run: `npx vitest run --project unit-node tests/tools/package-scripts.test.js` → 17/17 passed.
+
+### Phase C — Portable Codex configuration
+
+- `.codex/config.toml`: removed the `[mcp_servers.chrome-devtools]` block (Windows `cmd` launcher,
+  `SystemRoot=C:\Windows` env, unpinned `chrome-devtools-mcp@latest`), keeping only `project_doc_fallback_filenames`,
+  `project_doc_max_bytes`, `approval_policy`, `sandbox_mode`, and `web_search`.
+- Added `tests/tools/codex-config.test.js` (dependency-free text-based proof, no TOML parser): asserts every required
+  portable key is present, asserts no MCP server block, and includes two negative fixtures — a reintroduced
+  Windows/`@latest` MCP block fails the violation check, and a fixture missing `sandbox_mode` fails it too.
+- `diff .codex/config.toml ../polarrecorder/.codex` shows Polar Recorder's file is still the pre-existing zero-byte
+  marker (Polar Recorder's PLAN7 Phase D — replacing that marker with its own `config.toml` — has not landed yet; see
+  the paired-comparison note below). Byte-identity therefore cannot be proven this round; the Dyninstruments file
+  matches the exact minimal portable shape both plans specify verbatim.
+- Focused run: `npx vitest run --project unit-node tests/tools/codex-config.test.js` → 4/4 passed.
+
+### Phase D — Schema-corpus provenance
+
+- `tools/quality-policy/plugin-schema-corpus.json`: rewrote only the `note` field. It no longer claims "no sibling
+  repository has published its own schema base/profile split"; it now states Polar Recorder publishes the same
+  base/profile split with a byte-identical `genericBase` corpus. No `genericBase`/`dynLayoutsProfile` case array was
+  changed.
+- Verified byte-identity directly:
+  `diff dyninstruments/schemas/avnav-plugin-base.schema.json polarrecorder/schemas/avnav-plugin-base.schema.json` → no
+  output (identical); Polar Recorder's `tools/quality-policy/plugin-schema-corpus.json`
+  `genericBase.valid`/`genericBase.invalid` arrays are structurally identical to Dyninstruments' (compared by inspection
+  of both files; Polar Recorder's own note explicitly says it is "kept byte-identical to Dyninstruments' equivalent
+  genericBase corpus").
+- `tests/contract/plugin-schema-base-profile-contract.test.js`: added a locking assertion that `corpus.genericBase`
+  deep-equals the exact intended local payload (independent of the sibling), so a future accidental edit to the local
+  generic cases fails closed without needing the sibling checkout.
+- Focused run: `npx vitest run --project contract tests/contract/plugin-schema-base-profile-contract.test.js` → 5/5
+  passed. `npm run schema:check` → "Ajv schema validation passed."
+
+### Phase E — Documentation sync
+
+- Updated `documentation/conventions/quality-gates.md` (exact `check:fast`/`check:core` command-graph table and Key
+  Details, plus the explicit "ordinary `test:split` in `check:core` vs. instrumented `test:coverage:check` rerun is
+  intentional duplication" statement), `documentation/conventions/testing-infrastructure.md` (same duplication note),
+  `documentation/guides/documentation-maintenance.md` (check:core/check:fast bullet lists corrected to `test:split`/
+  `test:unit`), `README.md`, and `CONTRIBUTING.md` (check:fast/check:core prose corrected from the stale "Node-only
+  unit/tool tests" wording to the real `test:unit`/`test:split` composition; added the viewer-profile role-model
+  boundary statement and the optional-Codex-tooling note per the Hard Constraints/User-Facing Documentation Impact
+  sections).
+- `AGENTS.md`/`CLAUDE.md` were checked and left unchanged: neither names `test:contract` or the old `check:fast`
+  composition, so neither became inaccurate.
+- No shipped file cites this plan or a phase as authority (`check-patterns`'s `exec-plan-reference` rule, which is part
+  of `check:smells`, passed with 0 findings across 1008 checked files).
+- `npm run docs:check` passed in full: `docs:lint` (0 issues/80 files), `docs:links:proof`, `docs:links` (99 local
+  links), `check:doclinks` (5/5), `check:docformat` (5/5), `check:reachability` (4/4).
+- Non-empty line counts after edits, all below the 400-line limit: `README.md` 247, `CONTRIBUTING.md` 177,
+  `documentation/conventions/quality-gates.md` 154, `documentation/conventions/testing-infrastructure.md` 176,
+  `documentation/guides/documentation-maintenance.md` 173.
+
+### Phase F — Standalone verification
+
+Commands run from a worktree containing only this plan's intended changes (confirmed via `git status --short`):
+
+| Command                       | Result                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run check:fast`          | Passed. `test:unit` → 413 files / 1794 tests passed.                                                                                                                                                                                                                                                                                                                                                                  |
+| `npm run check:core`          | Passed. `test:split` → 443 files / 1934 tests passed (up from the pre-plan 442/1924 baseline: +1 file/+10 tests from the new `codex-config.test.js` file and the new assertions added to existing files). `check:complexity` → 175 tracked baseline entries, 0 new violations, digest verified. `check:scaling` → 4 files / 25 tests passed. `check:filesize` → 931 files checked, 0 violations, 0 oneliner findings. |
+| `npm run test:coverage:check` | Passed. Coverage: 93.24% lines (12918/13854), 79.77% branches (9311/11671), 92.26% statements, 96.83% functions — identical to the pre-plan baseline (no production code changed). `check:coverage-inventory` → 228 classified production files.                                                                                                                                                                      |
+| `npm run check:all`           | Passed (exit code 0; `check:core` + `test:coverage:check`, same evidence as above).                                                                                                                                                                                                                                                                                                                                   |
+| `npm run hooks:doctor`        | Passed: "Local pre-push hook is correctly installed (core.hooksPath=.githooks, executable)."                                                                                                                                                                                                                                                                                                                          |
+
+Final worktree diff scope (`git status --short`): `.codex/config.toml`, `CONTRIBUTING.md`, `README.md`,
+`documentation/conventions/quality-gates.md`, `documentation/conventions/testing-infrastructure.md`,
+`documentation/guides/documentation-maintenance.md`, `package.json`,
+`tests/contract/plugin-schema-base-profile-contract.test.js`, `tests/tools/package-scripts.test.js`,
+`tools/quality-policy/plugin-schema-corpus.json`, `tools/quality-policy/test-inventory.json`, `tsconfig.tests.json`,
+plus the new file `tests/tools/codex-config.test.js`. No file under `plugin.js`, `plugin.mjs`, `runtime/`, `cluster/`,
+`config/`, `shared/`, `widgets/`, or any layout/CSS was touched. No suppression, skip, coverage exception, or
+debt-baseline entry was added anywhere.
+
+Repository independence:
+`grep -rl "polarrecorder" package.json .githooks tools tests documentation AGENTS.md CLAUDE.md README.md CONTRIBUTING.md`
+(excluding `exec-plans/`, where this plan's own prose names the paired repository by design) returns no match — no
+required script, hook, test, release command, or documentation checker resolves the sibling repository.
+
+### Paired comparison with Polar Recorder PLAN7 — not yet performable
+
+All local Dyninstruments work above is complete and verified. Polar Recorder's paired `PLAN7.md` implementation is **not
+ready**: its working tree (checked read-only) is mid-implementation with uncommitted changes — `package.json`,
+`tests/js/command-graph.test.mjs`, `tests/js/setup.test.mjs`, and `tools/actionlint.sh` are modified;
+`tools/quality-policy/complexity-baseline.json`, `complexity-budget.mjs`, and `complexity-scan.mjs` are deleted but the
+change is uncommitted; and critically `.codex` is still the original zero-byte marker file (Polar Recorder's own Phase
+D, "Replace the empty `.codex` marker", has not landed). Its `check:core` composition still shows the duplicated
+`check:smells` route the plan intends to remove. Because the paired repository was never edited by this session and its
+implementation is incomplete/uncommitted, the following PLAN40 items remain outstanding and are **not** claimed as
+passing:
+
+- Byte-identical `.codex/config.toml` between the two repositories (Polar Recorder has no `config.toml` yet).
+- The one-off paired comparison script (Phase F2): identical actionlint checksum table, identical pinned Action SHAs,
+  no-repeated-Polar-smell-leaf / no-incomplete-Dyn-core cross-check, and the full justified-differences record.
+
+Per this plan's own closing instruction ("If the paired implementation is not ready, finish all local work, leave the
+plan active, and state precisely what external comparison remains"), **PLAN40 stays in `exec-plans/active/`**. All local
+acceptance criteria under "Command semantics", "Quality integrity", "Portable role-model configuration" (local test only
+— byte-identity to the sibling excepted), "Documentation", and "Completion" (local gates only) are met. The remaining
+work is entirely external: re-run this plan's Phase F2 one-off comparison once Polar Recorder's PLAN7 is committed and
+its `.codex/config.toml` exists, then move this plan to `exec-plans/completed/PLAN40.md` only if that comparison finds
+no unexplained common-contract drift.
 
 ---
 

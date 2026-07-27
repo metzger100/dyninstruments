@@ -2,11 +2,48 @@ const packageJson = require("../../package.json");
 const fs = require("node:fs");
 const path = require("node:path");
 
+/** Ordered `npm run` leaves that check:core must reach, in exact composition order. */
+const REQUIRED_CHECK_CORE_GROUPS = [
+  "check:standard",
+  "typecheck",
+  "package:check",
+  "test:split",
+  "test:focus:check",
+  "check:smells",
+  "check:complexity",
+  "check:scaling",
+  "docs:check",
+  "check:filesize"
+];
+
+/** @param {string} scriptBody @returns {string[]} */
+function orderedNpmRunTokens(scriptBody) {
+  return [...scriptBody.matchAll(/npm run ([\w:-]+)/g)].map((match) => match[1]);
+}
+
+/**
+ * Asserts a `check:core` script body reaches the complete non-coverage graph exactly once via
+ * `test:split`, never substituting the incomplete former `test:contract` leaf.
+ * @param {string} checkCoreBody
+ */
+function assertCompleteCheckCoreGraph(checkCoreBody) {
+  const orderedTokens = orderedNpmRunTokens(checkCoreBody);
+  expect(orderedTokens).toEqual(REQUIRED_CHECK_CORE_GROUPS);
+  expect(orderedTokens.filter((token) => token === "test:split")).toHaveLength(1);
+  expect(orderedTokens).not.toContain("test:contract");
+}
+
 describe("package command surface", function () {
   const scripts = /** @type {Record<string, string>} */ (packageJson.scripts);
 
   it("keeps check:fast bounded to fast local gates", function () {
-    expect(scripts["check:fast"]).toBe("npm run check:standard && npm run typecheck && npm run test:node");
+    expect(scripts["check:fast"]).toBe("npm run check:standard && npm run typecheck && npm run test:unit");
+    expect(scripts["check:fast"]).not.toContain("test:split");
+    expect(scripts["check:fast"]).not.toContain("test:contract");
+    expect(scripts["check:fast"]).not.toContain("package:check");
+    expect(scripts["check:fast"]).not.toContain("docs:check");
+    expect(scripts["check:fast"]).not.toContain("check:complexity");
+    expect(scripts["check:fast"]).not.toContain("check:scaling");
     expect(scripts["check:fast"]).not.toContain("test:coverage");
     expect(scripts["check:fast"]).not.toContain("performance");
   });
@@ -32,8 +69,57 @@ describe("package command surface", function () {
       "vitest run tests/tools/operation-count-evaluator.test.js tests/contract/route-points-render-model-scaling-contract.test.js tests/shared/html/HtmlDomPatchUtils.scaling-contract.test.js tests/shared/text/TextLayoutPrimitives.scaling-contract.test.js"
     );
     expect(scripts["check:core"]).toBe(
-      "npm run check:standard && npm run typecheck && npm run package:check && npm run test:contract && npm run test:focus:check && npm run check:smells && npm run check:complexity && npm run check:scaling && npm run docs:check && npm run check:filesize"
+      "npm run check:standard && npm run typecheck && npm run package:check && npm run test:split && npm run test:focus:check && npm run check:smells && npm run check:complexity && npm run check:scaling && npm run docs:check && npm run check:filesize"
     );
+  });
+
+  it("reaches the complete configured Vitest suite through test:split exactly once", function () {
+    assertCompleteCheckCoreGraph(scripts["check:core"]);
+    expect(scripts["test:split"]).toBe("vitest run");
+  });
+
+  it("rejects the former incomplete core composition that substituted test:contract for test:split", function () {
+    const formerIncompleteCore = scripts["check:core"].replace("test:split", "test:contract");
+    expect(function () {
+      assertCompleteCheckCoreGraph(formerIncompleteCore);
+    }).toThrow();
+  });
+
+  it("exposes test:contract as a standalone leaf outside check:core", function () {
+    expect(scripts["test:contract"]).toBe("vitest run --project contract");
+    expect(orderedNpmRunTokens(scripts["check:core"])).not.toContain("test:contract");
+  });
+
+  it("runs all three configured Vitest projects through test:split", function () {
+    const vitestConfig = require("../../vitest.config.js");
+    const projectNames = vitestConfig.test.projects.map(function (project) {
+      return project.test.name;
+    });
+    expect(projectNames).toEqual(["unit-node", "contract", "unit-dom"]);
+  });
+
+  it("keeps every required core group reachable from check:all with no reference cycle", function () {
+    const visiting = new Set();
+    const reachable = new Set();
+
+    /** @param {string} name */
+    function visit(name) {
+      if (reachable.has(name) || !(name in scripts)) return;
+      if (visiting.has(name)) {
+        throw new Error(`cycle detected reaching ${name}`);
+      }
+      visiting.add(name);
+      orderedNpmRunTokens(scripts[name]).forEach(visit);
+      visiting.delete(name);
+      reachable.add(name);
+    }
+    visit("check:all");
+
+    REQUIRED_CHECK_CORE_GROUPS.forEach(function (group) {
+      expect(reachable.has(group), `${group} must be reachable from check:all`).toBe(true);
+    });
+    expect(reachable.has("test:split")).toBe(true);
+    expect(reachable.has("test:contract")).toBe(false);
   });
 
   it("aggregates the production, test, and tool typecheck boundaries", function () {

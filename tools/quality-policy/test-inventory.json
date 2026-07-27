@@ -574,6 +574,9 @@
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/tools/check-patterns.test.js when its test family next changes."
     },
+    "tests/tools/codex-config.test.js": {
+      "classification": "strict"
+    },
     "tests/tools/complexity-budget.test.js": {
       "classification": "strict"
     },

@@ -6,6 +6,13 @@ const root = process.cwd();
 const corpus = require("../../tools/quality-policy/plugin-schema-corpus.json");
 
 describe("AvNav plugin.json base/profile schema composition contract", function () {
+  it("locks the intended local generic case payload explicitly", function () {
+    expect(corpus.genericBase).toEqual({
+      valid: [{}, { anyKey: "anyValue" }, { version: "1.2.3" }],
+      invalid: [[], "not-an-object", null, 42, true]
+    });
+  });
+
   it("validates every generic base case against the base schema alone", function () {
     const ajv = new Ajv({ allErrors: true });
     const validate = ajv.compile(readSchema("avnav-plugin-base.schema.json"));
