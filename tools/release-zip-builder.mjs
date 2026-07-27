@@ -1,30 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { SENTINEL_BASE, loadBootstrapManifest, loadComponentsRegistry } from "./components-registry-loader.mjs";
+import { collectComponentRegistryResources } from "./component-registry-validation.mjs";
+import { loadBootstrapManifest, loadComponentsRegistry } from "./components-registry-loader.mjs";
+import { FIXED_RUNTIME_FILES, isRuntimePath, normalizeRelativePath } from "./release-path-policy.mjs";
 
-const FIXED_RUNTIME_FILES = [
-  "plugin.js",
-  "plugin.mjs",
-  "plugin.css",
-  "plugin.json",
-  "config/bootstrap-manifest.js",
-  "runtime/plugin-bootstrap-core.js"
-];
-
-const RUNTIME_PREFIXES = ["runtime/", "cluster/", "config/", "shared/", "widgets/", "assets/", "layouts/"];
-
-/** @param {string} filePath @returns {boolean} */
-export function isRuntimePath(filePath) {
-  if (typeof filePath !== "string" || filePath.trim() === "") {
-    return false;
-  }
-  const normalized = normalizeRelativePath(filePath);
-  if (FIXED_RUNTIME_FILES.includes(normalized)) {
-    return true;
-  }
-  return RUNTIME_PREFIXES.some((prefix) => normalized.startsWith(prefix));
-}
+export { isRuntimePath };
 
 /** @param {string} rootDir @returns {string[]} */
 export function buildReleaseManifest(rootDir) {
@@ -32,29 +13,14 @@ export function buildReleaseManifest(rootDir) {
   const files = new Set();
   const bootstrapManifest = loadBootstrapManifest(rootDir) || [];
   const registry = loadComponentsRegistry(rootDir) || {};
+  const registryResources = collectComponentRegistryResources(rootDir, registry);
 
   for (const relPath of bootstrapManifest) {
     addIfPresent(files, relPath);
   }
 
-  for (const component of Object.values(registry)) {
-    collectRegistryField(files, component && component.js);
-    collectRegistryField(files, component && component.css);
-
-    const shadowCss = component && component.shadowCss;
-    if (Array.isArray(shadowCss)) {
-      for (const cssPath of shadowCss) {
-        collectRegistryField(files, cssPath);
-      }
-    }
-
-    const assets = component && component.assets;
-    if (Array.isArray(assets)) {
-      for (const asset of assets) {
-        if (!asset || typeof asset.path !== "string") continue;
-        addIfPresent(files, asset.path);
-      }
-    }
+  for (const relPath of registryResources) {
+    files.add(relPath);
   }
 
   for (const relPath of FIXED_RUNTIME_FILES) {
@@ -113,23 +79,33 @@ export function validateManifest(rootDir, files) {
 }
 
 /**
- * @param {Set<string>} files
- * @param {any} rawValue
+ * @param {string} stageRoot
+ * @param {string[]} expectedPaths
  */
-function collectRegistryField(files, rawValue) {
-  if (typeof rawValue !== "string") return;
-  const relPath = stripSentinelBase(rawValue);
-  addIfPresent(files, relPath);
+export function assertStagingTree(stageRoot, expectedPaths) {
+  const expected = Array.from(new Set(expectedPaths)).sort((a, b) => a.localeCompare(b));
+  const actual = collectAssetPaths(stageRoot, stageRoot).sort((a, b) => a.localeCompare(b));
+  const missing = subtractPaths(expected, actual);
+  const unexpected = subtractPaths(actual, expected);
+
+  if (missing.length === 0 && unexpected.length === 0) {
+    return;
+  }
+
+  const details = [];
+  if (missing.length > 0) {
+    details.push(`missing staged files: ${missing.join(", ")}`);
+  }
+  if (unexpected.length > 0) {
+    details.push(`unexpected staged files: ${unexpected.join(", ")}`);
+  }
+  throw new Error(`release staging validation failed:\n- ${details.join("\n- ")}`);
 }
 
-/** @param {string} rawValue @returns {string} */
-function stripSentinelBase(rawValue) {
-  const value = rawValue.trim();
-  if (value === "") return "";
-  if (value.startsWith(SENTINEL_BASE)) {
-    return value.slice(SENTINEL_BASE.length);
-  }
-  return value;
+/** @param {string[]} left @param {string[]} right @returns {string[]} */
+function subtractPaths(left, right) {
+  const rightSet = new Set(right);
+  return left.filter((relPath) => !rightSet.has(relPath));
 }
 
 /**
@@ -142,11 +118,6 @@ function addIfPresent(files, rawPath) {
   if (normalized !== "") {
     files.add(normalized);
   }
-}
-
-/** @param {string} rawPath @returns {string} */
-function normalizeRelativePath(rawPath) {
-  return rawPath.replace(/\\/g, "/").replace(/^\//, "").replace(/^\.\//, "").trim();
 }
 
 /** @param {string} rootDir @returns {string[]} */

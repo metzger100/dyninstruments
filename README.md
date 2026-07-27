@@ -272,11 +272,12 @@ everything `check:fast` runs plus the strict no-emit TypeScript boundary via `np
 release/package contract via `npm run package:check`, the complete configured Vitest suite exactly once via
 `npm run test:split` (`unit-node` + `contract` + `unit-dom`), the complexity no-regression budget via
 `npm run check:complexity`, and the deterministic scaling contracts via `npm run check:scaling` (operation-count checks,
-never timing). It verifies `.only` rejection through the direct Vitest configuration and every configured project.
-Documentation checks run through `npm run docs:check`, including the markdownlint baseline.
-`npm run test:coverage:check` separately reruns the same three Vitest projects under V8 instrumentation afterward; this
-duplication with `check:core` is intentional — the ordinary run gives direct failures, the instrumented run owns
-coverage evidence.
+never timing). It verifies `.only` rejection through the direct Vitest configuration and every configured project. The
+package contract derives component registry fragments from the browser bootstrap manifest and proves complete
+dependency/resource closure plus exact release staging contents. Documentation checks run through `npm run docs:check`,
+including the markdownlint baseline. `npm run test:coverage:check` separately reruns the same three Vitest projects
+under V8 instrumentation afterward; this duplication with `check:core` is intentional — the ordinary run gives direct
+failures, the instrumented run owns coverage evidence.
 
 Scaling measurements fail closed unless every observed operation count is a non-negative finite integer.
 

@@ -3,7 +3,12 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 
-import { buildBootstrapBundleContent, buildReleaseManifest, validateManifest } from "./release-zip-builder.mjs";
+import {
+  assertStagingTree,
+  buildBootstrapBundleContent,
+  buildReleaseManifest,
+  validateManifest
+} from "./release-zip-builder.mjs";
 import { getUnexpectedDirtyPaths } from "./release-git.mjs";
 import { isValidReleaseVersion } from "./release-version.mjs";
 
@@ -217,6 +222,7 @@ function createReleaseZip({ rootDir, manifestFiles, outputZipAbs, runCommand, bu
     const bundleAbs = path.join(stageRoot, "bootstrap-bundle.js");
     fs.mkdirSync(path.dirname(bundleAbs), { recursive: true });
     fs.writeFileSync(bundleAbs, bundleBuilder(rootDir), "utf8");
+    assertStagingTree(stageRoot, manifestFiles.concat("bootstrap-bundle.js"));
 
     const zipResult = runCommand("zip", ["-q", "-r", outputZipAbs, "dyninstruments"], {
       cwd: stageParent

@@ -53,7 +53,8 @@ For the full command graph and checker ownership map, see
 
 - `npm run check:standard` (full-repository Prettier, ESLint, Stylelint, actionlint, jscpd)
 - `npm run typecheck` (strict no-emit source and test scopes in `tsconfig.checkjs.json` and `tsconfig.tests.json`)
-- `npm run package:check` (Ajv schema validation plus release/package contract tests)
+- `npm run package:check` (Ajv schema validation plus bootstrap-derived registry closure, release manifest, and staging
+  contract tests)
 - `npm run test:split` (the complete configured Vitest suite: `unit-node`, `contract`, and `unit-dom` projects, run
   exactly once as ordinary non-coverage execution; `test:coverage:check` separately reruns the same suite under V8
   instrumentation for coverage evidence, so the duplication is intentional)
@@ -124,7 +125,7 @@ profile, and validates `layouts/*.json` with `schemas/layout.schema.json`. Exten
 upstream-verified AvNav fields; extend the layouts profile for Dyninstruments-specific requirements.
 
 `package:check` runs `schema:check` and focused Node-only release/package tests for release preparation, release
-creation, and release manifest contents.
+creation, bootstrap/registry parity, dependency/resource closure, release manifest contents, and exact staging output.
 
 The tag-only publisher validates the tag and matching committed ZIP/notes, then uploads them. It does not install
 dependencies, rerun quality, build, package, commit, or tag. The shared SemVer tool classifies prereleases while all

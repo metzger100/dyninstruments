@@ -167,9 +167,10 @@ Task: Add new BarometerGauge
   plans, checked against Prettier's real effective ignore resolution, plus ESLint, Stylelint, actionlint, and jscpd),
   `typecheck` (production/config `checkJs`, inventory-owned tests, and every maintained `tools/**/*.mjs` script),
   `package:check` (Ajv validation of the generic AvNav `plugin.json` base schema composed with the Dyninstruments
-  layouts profile), `test:focus:check`, `check:complexity` (a portable, Git-free digest proof of the historical capture
-  plus the complexity no-regression budget), `check:scaling` (validated non-negative integer operation-count contracts,
-  never timing), and `docs:check` before the remaining project-specific gates.
+  layouts profile, plus bootstrap-derived registry dependency/resource closure and exact release staging contracts),
+  `test:focus:check`, `check:complexity` (a portable, Git-free digest proof of the historical capture plus the
+  complexity no-regression budget), `check:scaling` (validated non-negative integer operation-count contracts, never
+  timing), and `docs:check` before the remaining project-specific gates.
 - `npm run dependencies:audit` (networked `npm audit`) and `npm run complexity:regenerate-audit` (Git-based historical
   capture regeneration) are maintainer-only commands; neither runs inside `check:all`.
 - `test:coverage:check` runs native Vitest/V8 global and critical-area thresholds.

@@ -22,6 +22,10 @@ publishes the already-committed ZIP and notes.
   tests.
 - `package:check` verifies release manifests exclude tests, tools, docs, schemas, CI files, type declarations, package
   files, and dev-only quality configs.
+- Release packaging derives registry fragments from `config.bootstrapManifest`, verifies fragment/disk parity, validates
+  the complete acyclic dependency/resource graph, and requires every declared component resource.
+- Before invoking `zip`, release creation verifies that the staging tree contains exactly the generated release manifest
+  plus `bootstrap-bundle.js`.
 - Release artifacts written to `releases/`:
   - `releases/dyninstruments-VERSION.zip`
   - `releases/dyninstruments-VERSION.md`
@@ -145,6 +149,8 @@ Practical checklist for each bullet:
 | `release:create` fails on `check:all`            | Complete local gate failure                                    | Run `npm run check:all`, fix all failures, rerun release                                                |
 | `release:create` fails on notes file             | Missing or empty `releases/dyninstruments-VERSION.md` file     | Create/populate the matching markdown file in `releases/` and rerun                                     |
 | Preparation/creation reports dirty release paths | Stale ZIP, unrelated notes, or another uncommitted file exists | Commit, stash, or remove every path except the current canonical notes file used by `release:create`    |
+| Release creation reports registry validation     | Fragment, dependency, or declared resource drift               | Fix the reported registry owner/path; do not add a separate release-only file list                      |
+| Release creation reports staging validation      | Missing or unexpected staged package file                      | Fix manifest/copy generation and rerun the complete release command                                     |
 | `release:create` fails with duplicate tag        | `vVERSION` already exists                                      | Choose next version or delete/retarget tag intentionally                                                |
 | Tag workflow cannot find ZIP/notes               | The tagged commit lacks matching committed release inputs      | Create the release locally, commit its ZIP/notes, create a new annotated tag, and push it intentionally |
 | Release zip/notes missing after run              | Release command aborted before artifact stage                  | Fix earlier error and rerun full command                                                                |

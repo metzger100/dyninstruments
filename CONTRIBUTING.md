@@ -198,9 +198,10 @@ configured Vitest suite exactly once via `test:split` (`unit-node` + `contract` 
 portable, Git-free digest proof plus the complexity no-regression budget; `npm run complexity:regenerate-audit` is the
 maintainer-only Git-based regeneration audit), `check:scaling` (deterministic operation-count contracts, never timing),
 and `docs:check`. `test:coverage:check` separately reruns the same three Vitest projects under V8 instrumentation
-afterward for coverage evidence; the duplication with `check:core`'s ordinary run is intentional.
-`npm run dependencies:audit` runs a networked `npm audit`; run it after dependency updates and during scheduled
-maintenance, never as part of `check:all`.
+afterward for coverage evidence; the duplication with `check:core`'s ordinary run is intentional. `package:check`
+derives registry fragments from the browser bootstrap manifest and proves component dependency/resource closure and
+exact release staging contents. `npm run dependencies:audit` runs a networked `npm audit`; run it after dependency
+updates and during scheduled maintenance, never as part of `check:all`.
 
 This repository is a viewer-profile quality role model, not a blank-plugin starter:
 `check:fast`/`check:core`/`check:all` share the same bounded/complete/coverage meaning across sibling AvNav plugin
@@ -224,7 +225,9 @@ In short: run `npm run release:prepare`, choose a full SemVer version, write not
 Tag publication uses the committed release artifacts created locally. GitHub validates tag/artifact identity and
 publishes the committed ZIP and notes without installing dependencies, rerunning quality, rebuilding, packaging,
 committing, or tagging. It publishes SemVer prerelease tags as GitHub prereleases and stable tags as normal releases.
-The documented manual AvNav validation supplements the blocking jsdom and VM contracts before release creation.
+The documented manual AvNav validation supplements the blocking jsdom and VM contracts before release creation. Registry
+fragments require no release-only inventory update; the package builder discovers them from `config.bootstrapManifest`
+and fails when bootstrap, disk, dependencies, resources, or staging contents drift.
 
 ## 10) Pre-Merge Checklist
 

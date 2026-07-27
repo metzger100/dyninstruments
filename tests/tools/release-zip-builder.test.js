@@ -44,6 +44,14 @@ describe("release-zip-builder", function () {
     expect(manifest).toContain("runtime/plugin-bootstrap-core.js");
     expect(manifest).toContain("runtime/init.js");
     expect(manifest).toContain("runtime/component-loader.js");
+    expect(manifest).toContain("shared/widget-kits/xte/XteDisplayMetrics.js");
+    expect(manifest).toContain("shared/widget-kits/xte/XteDisplayPropsNormalize.js");
+    expect(manifest).toContain("shared/widget-kits/xte/XteDisplayRenderSetup.js");
+    expect(manifest).toContain("shared/widget-kits/xte/XteHighwayLayout.js");
+    expect(manifest).toContain("shared/widget-kits/xte/XteHighwayPrimitives.js");
+    expect(manifest).toContain("shared/widget-kits/xte/XteLinearDynamicMetrics.js");
+    expect(manifest).toContain("shared/widget-kits/xte/XteLinearLayout.js");
+    expect(manifest).toContain("shared/widget-kits/xte/XteLinearPrimitives.js");
     expect(manifest).toContain("layouts/dyni-motorboat.json");
     expect(manifest).toContain("layouts/dyni-sailboat.json");
     expect(manifest.some((/** @type {any} */ filePath) => filePath.startsWith("assets/fonts/"))).toBe(true);
@@ -129,6 +137,97 @@ describe("release-zip-builder", function () {
     });
   });
 
+  it("discovers future registry fragments from the bootstrap manifest without a tooling inventory change", async function () {
+    const { buildReleaseManifest } = await importTool("../../tools/release-zip-builder.mjs");
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-future-registry-"));
+
+    try {
+      writeRegistryFixture(tempRoot, {
+        fragmentPath: "config/components/registry-future.js",
+        componentId: "FutureComponent",
+        componentPath: "widgets/future/FutureComponent.js"
+      });
+
+      const manifest = buildReleaseManifest(tempRoot);
+
+      expect(manifest).toContain("config/components/registry-future.js");
+      expect(manifest).toContain("widgets/future/FutureComponent.js");
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails when a registry fragment exists outside the authoritative bootstrap manifest", async function () {
+    const { buildReleaseManifest } = await importTool("../../tools/release-zip-builder.mjs");
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-orphan-registry-"));
+
+    try {
+      writeRegistryFixture(tempRoot, {
+        fragmentPath: "config/components/registry-main.js",
+        componentId: "MainComponent",
+        componentPath: "widgets/main/MainComponent.js"
+      });
+      writeFile(tempRoot, "config/components/registry-orphan.js", "(function () {})();\n");
+
+      expect(() => buildReleaseManifest(tempRoot)).toThrow(
+        "registry fragments absent from bootstrap manifest: config/components/registry-orphan.js"
+      );
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails on unknown dependencies, dependency cycles, and missing component resources", async function () {
+    const { collectComponentRegistryResources } = await importTool("../../tools/component-registry-validation.mjs");
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-registry-closure-"));
+
+    try {
+      writeFile(tempRoot, "widgets/A.js", "a\n");
+      writeFile(tempRoot, "widgets/B.js", "b\n");
+
+      expect(() =>
+        collectComponentRegistryResources(tempRoot, {
+          A: { js: "widgets/A.js", deps: ["Missing"] }
+        })
+      ).toThrow("A.deps[0]: unknown component 'Missing'");
+
+      expect(() =>
+        collectComponentRegistryResources(tempRoot, {
+          A: { js: "widgets/A.js", deps: ["B"] },
+          B: { js: "widgets/B.js", deps: ["A"] }
+        })
+      ).toThrow("dependency cycle: A -> B -> A");
+
+      expect(() =>
+        collectComponentRegistryResources(tempRoot, {
+          MissingResource: { js: "widgets/MissingResource.js" }
+        })
+      ).toThrow("MissingResource.js");
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("verifies the complete staged release tree", async function () {
+    const { assertStagingTree } = await importTool("../../tools/release-zip-builder.mjs");
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-stage-"));
+
+    try {
+      writeFile(tempRoot, "plugin.js", "plugin\n");
+      writeFile(tempRoot, "unexpected.js", "unexpected\n");
+
+      expect(() => assertStagingTree(tempRoot, ["plugin.js", "bootstrap-bundle.js"])).toThrow(
+        /missing staged files: bootstrap-bundle\.js[\s\S]*unexpected staged files: unexpected\.js/
+      );
+
+      fs.rmSync(path.join(tempRoot, "unexpected.js"));
+      writeFile(tempRoot, "bootstrap-bundle.js", "bundle\n");
+      expect(() => assertStagingTree(tempRoot, ["plugin.js", "bootstrap-bundle.js"])).not.toThrow();
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("reports missing files during manifest validation", async function () {
     const { validateManifest } = await importTool("../../tools/release-zip-builder.mjs");
 
@@ -148,3 +247,44 @@ describe("release-zip-builder", function () {
     }
   });
 });
+
+/**
+ * @param {string} rootDir
+ * @param {{ fragmentPath: string, componentId: string, componentPath: string }} options
+ */
+function writeRegistryFixture(rootDir, options) {
+  writeFile(
+    rootDir,
+    "runtime/namespace.js",
+    "(function (root) {\n" +
+      "  root.DyniPlugin = root.DyniPlugin || {};\n" +
+      "  root.DyniPlugin.config = root.DyniPlugin.config || {};\n" +
+      "})(this);\n"
+  );
+  writeFile(
+    rootDir,
+    "config/bootstrap-manifest.js",
+    "(function (root) {\n" +
+      `  root.DyniPlugin.config.bootstrapManifest = ["runtime/namespace.js", "${options.fragmentPath}", "config/components.js"];\n` +
+      "})(this);\n"
+  );
+  writeFile(
+    rootDir,
+    options.fragmentPath,
+    "(function (root) {\n" +
+      "  var config = root.DyniPlugin.config;\n" +
+      "  var shared = config.shared = config.shared || {};\n" +
+      "  var groups = shared.componentRegistryGroups = shared.componentRegistryGroups || {};\n" +
+      "  var widgets = groups.widgets = groups.widgets || {};\n" +
+      `  widgets.${options.componentId} = { js: root.DyniPlugin.baseUrl + "${options.componentPath}", globalKey: "Dyni${options.componentId}" };\n` +
+      "})(this);\n"
+  );
+  writeFile(
+    rootDir,
+    "config/components.js",
+    "(function (root) {\n" +
+      "  root.DyniPlugin.config.components = root.DyniPlugin.config.shared.componentRegistryGroups.widgets;\n" +
+      "})(this);\n"
+  );
+  writeFile(rootDir, options.componentPath, "future component\n");
+}

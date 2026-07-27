@@ -37,6 +37,10 @@ Assembly fail-closes when:
 
 - required group is missing
 - duplicate component IDs exist
+- a `config/components/registry-*.js` file is absent from or duplicated in `config.bootstrapManifest`
+- `config/components.js` does not follow every registry fragment in bootstrap order
+- a dependency names an unknown component or creates a cycle
+- a declared JS, CSS, shadow CSS, or asset path is invalid or missing
 
 Recent shared-foundation/runtime registrations:
 
@@ -49,6 +53,9 @@ Recent shared-foundation/runtime registrations:
 - `AisTargetLayoutGeometry` depends on `AisTargetLayoutGeometryStyles` from `registry-shared-foundation-layout.js`;
   rectangle construction and CSS-grid serialization remain separate UMD components
 - component entries may include optional `assets` arrays with relative paths and explicit asset types
+
+Node release tooling derives its registry fragment chain from `config.bootstrapManifest`; it has no separate fragment
+inventory. The release manifest therefore packages the same assembled component registry used by browser startup.
 
 ## API Shape Contract
 
