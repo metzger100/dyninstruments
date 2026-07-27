@@ -47,12 +47,34 @@ const ONELINER_KINDS = [
   "collapsed-block"
 ];
 
+/** @typedef {{ abs: string, rel: string }} TargetFile */
+/** @typedef {{ path: string, lines: number, lineType: string }} SizeViolation */
+/** @typedef {{ line: number, length: number, text: string, kind: string }} RawOnelinerFinding */
+/** @typedef {{ path: string, line: number, length: number, text: string, kind: string }} OnelinerFinding */
+/**
+ * @typedef {{
+ *   ok: boolean,
+ *   checkedFiles: number,
+ *   violations: number,
+ *   onelinerMode: string,
+ *   onelinerFindings: number,
+ *   onelinerByKind: Record<string, number>
+ * }} FileSizeSummary
+ */
+/** @typedef {{ root?: string, onelinerMode?: string, print?: boolean }} FileSizeCheckOptions */
+
+/**
+ * @param {FileSizeCheckOptions} [options]
+ * @returns {{ summary: FileSizeSummary, violations: SizeViolation[], onelinerFindings: OnelinerFinding[] }}
+ */
 export function runFileSizeCheck(options = {}) {
   const root = path.resolve(options.root || process.cwd());
   const onelinerMode = normalizeOnelinerMode(options.onelinerMode || "block");
 
   const targetFiles = collectTargetFiles(root);
+  /** @type {SizeViolation[]} */
   const violations = [];
+  /** @type {OnelinerFinding[]} */
   const onelinerFindings = [];
 
   for (const file of targetFiles) {
@@ -107,6 +129,7 @@ export function runFileSizeCheck(options = {}) {
   };
 }
 
+/** @param {string[]} [argv] @returns {void} */
 export function runFileSizeCheckCli(argv = process.argv.slice(2)) {
   const onelinerMode = parseOnelinerModeArg(argv);
   const { summary } = runFileSizeCheck({
@@ -117,7 +140,9 @@ export function runFileSizeCheckCli(argv = process.argv.slice(2)) {
   process.exit(summary.ok ? 0 : 1);
 }
 
+/** @param {string} root @returns {TargetFile[]} */
 function collectTargetFiles(root) {
+  /** @type {Map<string, TargetFile>} */
   const collected = new Map();
 
   for (const scanRoot of SCAN_ROOTS) {
@@ -129,6 +154,7 @@ function collectTargetFiles(root) {
   return Array.from(collected.values()).sort((a, b) => a.rel.localeCompare(b.rel));
 }
 
+/** @param {string} currentPath @param {Map<string, TargetFile>} collected @param {string} root @returns {void} */
 function walk(currentPath, collected, root) {
   const stat = fs.statSync(currentPath);
 
@@ -147,7 +173,9 @@ function walk(currentPath, collected, root) {
   }
 }
 
+/** @param {string} content @returns {RawOnelinerFinding[]} */
 function detectOnelinerFindings(content) {
+  /** @type {RawOnelinerFinding[]} */
   const findings = [];
   const masked = maskCommentsAndStrings(content);
   const rawLines = content.split(/\r?\n/);
@@ -175,7 +203,9 @@ function detectOnelinerFindings(content) {
   return findings;
 }
 
+/** @param {RawOnelinerFinding[]} findings @returns {Record<string, number>} */
 function createOnelinerKindCounts(findings) {
+  /** @type {Record<string, number>} */
   const counts = {};
   for (const kind of ONELINER_KINDS) {
     counts[kind] = 0;
@@ -187,10 +217,12 @@ function createOnelinerKindCounts(findings) {
   return counts;
 }
 
+/** @param {OnelinerFinding[]} findings @param {string} onelinerMode @returns {void} */
 function printOnelinerFindings(findings, onelinerMode) {
   const blocked = onelinerMode === "block";
   const prefix = blocked ? "[file-size-oneliner]" : "[file-size-oneliner-warn]";
   const print = blocked ? console.error : console.log;
+  /** @type {Record<string, string>} */
   const messageByKind = {
     dense: "Dense one-liner detected (>=2 statements on one line). One-liners are not allowed.",
     "long-packed": "Very long packed one-liner detected (use multiline formatting). One-liners are not allowed.",
@@ -208,6 +240,7 @@ function printOnelinerFindings(findings, onelinerMode) {
   }
 }
 
+/** @param {string} content @returns {number} */
 function countNonEmptyLines(content) {
   let count = 0;
   for (const line of content.split(/\r?\n/)) {
@@ -218,6 +251,7 @@ function countNonEmptyLines(content) {
   return count;
 }
 
+/** @param {string} content @returns {number} */
 function countTotalLines(content) {
   if (content.length === 0) return 0;
   const lines = content.split(/\r?\n/);
@@ -227,19 +261,23 @@ function countTotalLines(content) {
   return lines.length;
 }
 
+/** @param {string} relPath @param {string} content @returns {number} */
 function countLinesByFileType(relPath, content) {
   if (relPath.endsWith(".md")) return countTotalLines(content);
   return countNonEmptyLines(content);
 }
 
+/** @param {string} relPath @returns {boolean} */
 function shouldCheckOneliners(relPath) {
   return relPath.endsWith(".js") || relPath.endsWith(".mjs");
 }
 
+/** @param {string} relPath @returns {string} */
 function getLineTypeLabel(relPath) {
   return relPath.endsWith(".md") ? "total lines" : "non-empty lines";
 }
 
+/** @param {string} relPath @returns {boolean} */
 function isExemptPath(relPath) {
   for (const pattern of EXEMPT_PATTERNS) {
     if (pattern.test(relPath)) return true;
@@ -247,6 +285,7 @@ function isExemptPath(relPath) {
   return false;
 }
 
+/** @param {string[]} argv @returns {string} */
 function parseOnelinerModeArg(argv) {
   let mode = "block";
 
@@ -258,6 +297,7 @@ function parseOnelinerModeArg(argv) {
   return normalizeOnelinerMode(mode);
 }
 
+/** @param {string} mode @returns {string} */
 function normalizeOnelinerMode(mode) {
   const normalized = String(mode || "block")
     .trim()
@@ -268,10 +308,12 @@ function normalizeOnelinerMode(mode) {
   return normalized;
 }
 
+/** @param {string} root @param {string} absolutePath @returns {string} */
 function toRelPath(root, absolutePath) {
   return path.relative(root, absolutePath).replace(/\\/g, "/");
 }
 
+/** @returns {boolean} */
 function isCliEntrypoint() {
   if (!process.argv[1]) return false;
   return pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url;
@@ -281,7 +323,8 @@ if (isCliEntrypoint()) {
   try {
     runFileSizeCheckCli();
   } catch (error) {
-    console.error(error && error.message ? error.message : String(error));
+    const err = /** @type {{ message?: string }} */ (error);
+    console.error(err && err.message ? err.message : String(error));
     process.exit(1);
   }
 }

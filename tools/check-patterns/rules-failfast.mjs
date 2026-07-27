@@ -2,6 +2,9 @@ import { findMatchingBrace, findMatchingParen, getFileData, getInvalidLintSuppre
 
 const INTERNAL_SOURCE_EXPR = String.raw`(?:cfg|p|props|state|theme|display|parsed|opts|style|st|fit)\.[A-Za-z_$][A-Za-z0-9_$.]*`;
 
+/** @typedef {import("./shared.mjs").Rule} Rule */
+
+/** @param {Rule} rule @param {string[]} files @returns {any[]} */
 export function runInvalidLintSuppressionRule(rule, files) {
   const out = [];
 
@@ -23,6 +26,7 @@ export function runInvalidLintSuppressionRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {any[]} */
 export function runCatchFallbackWithoutSuppressionRule(rule, files) {
   const out = [];
   const detect = /catch\s*\([^)]*\)\s*\{/g;
@@ -63,6 +67,7 @@ export function runCatchFallbackWithoutSuppressionRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {any[]} */
 export function runInternalHookFallbackRule(rule, files) {
   const out = [];
   const functionDecl = /\bfunction\s+(normalize[A-Za-z_$][A-Za-z0-9_$]*)\s*\(([^)]*)\)/g;
@@ -144,18 +149,19 @@ export function runInternalHookFallbackRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {any[]} */
 export function runRedundantNullTypeGuardRule(rule, files) {
   const out = [];
   const patterns = [
     {
       re: /\bString\s*\(\s*\(?([A-Za-z_$][A-Za-z0-9_$.]*)\s*==\s*null\s*\)?\s*\?\s*[^:]+:\s*\1\s*\)/g,
-      build: function (match) {
+      build: function (/** @type {RegExpExecArray} */ match) {
         return `String(${match[1]} == null ? ... : ${match[1]})`;
       }
     },
     {
       re: /\bArray\.isArray\s*\(\s*([A-Za-z_$][A-Za-z0-9_$.]*)\s*\)\s*\?\s*\1\s*:\s*\[\s*\]/g,
-      build: function (match) {
+      build: function (/** @type {RegExpExecArray} */ match) {
         return `Array.isArray(${match[1]}) ? ${match[1]} : []`;
       }
     },
@@ -164,7 +170,7 @@ export function runRedundantNullTypeGuardRule(rule, files) {
         String.raw`(?:[A-Za-z_$][A-Za-z0-9_$.]*\.)?(?:isFiniteNumber|Number\.isFinite|isFinite)\s*\(\s*(${INTERNAL_SOURCE_EXPR})\s*\)\s*\?`,
         "g"
       ),
-      build: function (match) {
+      build: function (/** @type {RegExpExecArray} */ match) {
         return match[0].trim();
       }
     }
@@ -199,6 +205,7 @@ export function runRedundantNullTypeGuardRule(rule, files) {
   return out;
 }
 
+/** @type {Record<string, Set<string>>} */
 const HARDCODED_RUNTIME_DEFAULT_ALLOWLIST = {
   // runtime/format-runtime.js's applyFormatter is the documented runtime owner of
   // the generic missing-value placeholder (documentation/shared/helpers.md).
@@ -208,18 +215,19 @@ const HARDCODED_RUNTIME_DEFAULT_ALLOWLIST = {
   "shared/widget-kits/format/PlaceholderNormalize.js": new Set(['"---"', '"NO DATA"'])
 };
 
+/** @param {Rule} rule @param {string[]} files @returns {any[]} */
 export function runHardcodedRuntimeDefaultRule(rule, files) {
   const out = [];
   const patterns = [
     {
       re: /["'`](?:---|NO DATA)["'`]/g,
-      build: function (match) {
+      build: function (/** @type {RegExpExecArray} */ match) {
         return match[0];
       }
     },
     {
       re: new RegExp(String.raw`\b(${INTERNAL_SOURCE_EXPR})\s*(\|\||\?\?)\s*(\{|\[|["'\`]|-?(?:\d|\.\d))`, "g"),
-      build: function (match) {
+      build: function (/** @type {RegExpExecArray} */ match) {
         return `${match[1]} ${match[2]} ${match[3]}...`;
       }
     }
@@ -259,6 +267,7 @@ export function runHardcodedRuntimeDefaultRule(rule, files) {
   return out;
 }
 
+/** @type {Record<string, Set<string>>} */
 const CSS_JS_DEFAULT_DUPLICATION_ALLOWLIST = {
   // runtime/theme/token-catalog.js is the documented canonical semantic owner for
   // theme token/preset metadata (documentation/shared/theme-tokens.md); its own
@@ -270,6 +279,7 @@ const CSS_JS_DEFAULT_DUPLICATION_ALLOWLIST = {
   "runtime/theme-runtime.js": new Set(['getPropertyValue("--dyni-theme-preset")'])
 };
 
+/** @param {Rule} rule @param {string[]} files @returns {any[]} */
 export function runCssJsDefaultDuplicationRule(rule, files) {
   const out = [];
   const themeDefault = /\bdefaultValue\s*:/g;

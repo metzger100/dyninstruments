@@ -35,6 +35,11 @@ await expectPass(
 
 console.log("Linkinator fixture proofs passed: files, fragments, duplicate slugs, and external skips.");
 
+/**
+ * @param {Record<string, string>} files
+ * @param {boolean} expected
+ * @param {string} label
+ */
 async function expectPass(files, expected, label) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-linkinator-proof-"));
   for (const [relativePath, content] of Object.entries(files)) {

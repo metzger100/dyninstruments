@@ -9,6 +9,9 @@ import {
   runRedundantNullTypeGuardRule
 } from "./rules-failfast.mjs";
 
+/** @typedef {import("./shared.mjs").Rule} Rule */
+
+/** @type {Rule[]} */
 export const FAILFAST_RULES = [
   {
     name: "invalid-lint-suppression",

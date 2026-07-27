@@ -7,6 +7,36 @@ import { buildBootstrapBundleContent, buildReleaseManifest, validateManifest } f
 import { getUnexpectedDirtyPaths } from "./release-git.mjs";
 import { isValidReleaseVersion } from "./release-version.mjs";
 
+/**
+ * @typedef {object} CommandResult
+ * @property {number | null} status
+ * @property {string} stdout
+ * @property {string} stderr
+ * @property {Error | null} error
+ */
+
+/**
+ * @typedef {(command: string, args: string[], options?: { cwd?: string }) => CommandResult} RunCommand
+ */
+
+/**
+ * @typedef {object} ReleaseOutput
+ * @property {(message: string) => void} log
+ * @property {(message: string) => void} warn
+ */
+
+/**
+ * @typedef {object} CreateReleaseOptions
+ * @property {string} [rootDir]
+ * @property {string} [version]
+ * @property {RunCommand} [runCommand]
+ * @property {(rootDir: string) => string[]} [manifestBuilder]
+ * @property {(rootDir: string, files: string[]) => { valid: boolean, missing: string[] }} [manifestValidator]
+ * @property {(rootDir: string) => string} [bundleBuilder]
+ * @property {ReleaseOutput} [output]
+ */
+
+/** @param {string[]} argv @returns {{ version: string }} */
 export function parseReleaseCreateArgs(argv) {
   const out = { version: "" };
 
@@ -19,6 +49,10 @@ export function parseReleaseCreateArgs(argv) {
   return out;
 }
 
+/**
+ * @param {CreateReleaseOptions} options
+ * @returns {{ version: string, tag: string, zipPath: string, notesFile: string, filesIncluded: number, totalSizeBytes: number }}
+ */
 export function createRelease(options) {
   const rootDir = options.rootDir || process.cwd();
   const version = String(options.version || "").trim();
@@ -27,6 +61,7 @@ export function createRelease(options) {
   const manifestBuilder = options.manifestBuilder || buildReleaseManifest;
   const manifestValidator = options.manifestValidator || validateManifest;
   const bundleBuilder = options.bundleBuilder || buildBootstrapBundleContent;
+  /** @type {ReleaseOutput} */
   const output = options.output || {
     log: (message) => console.log(message),
     warn: (message) => console.warn(message)
@@ -99,11 +134,12 @@ export function main(argv = process.argv.slice(2)) {
     const args = parseReleaseCreateArgs(argv);
     createRelease({ version: args.version });
   } catch (error) {
-    console.error(error.message || String(error));
+    console.error(/** @type {any} */ (error).message || String(error));
     process.exit(1);
   }
 }
 
+/** @param {{ rootDir: string, version: string, runCommand: RunCommand }} params @returns {string} */
 function validateInputs({ rootDir, version, runCommand }) {
   if (!isValidReleaseVersion(version)) {
     throw new Error("release:create aborted: --version must be a valid SemVer string without 'v' prefix");
@@ -132,6 +168,7 @@ function validateInputs({ rootDir, version, runCommand }) {
   return notesAbs;
 }
 
+/** @param {RunCommand} runCommand @param {string} rootDir */
 function ensureZipBinaryAvailable(runCommand, rootDir) {
   const result = runCommand("zip", ["-h"], { cwd: rootDir });
   if (result.status !== 0) {
@@ -141,6 +178,7 @@ function ensureZipBinaryAvailable(runCommand, rootDir) {
   }
 }
 
+/** @param {RunCommand} runCommand @param {string} rootDir @param {string} version */
 export function ensureCleanReleaseCreation(runCommand, rootDir, version) {
   const allowedNotesPath = `releases/dyninstruments-${version}.md`;
   const unexpectedPaths = getUnexpectedDirtyPaths((args) => runGit(runCommand, rootDir, args), [allowedNotesPath]);
@@ -153,6 +191,7 @@ export function ensureCleanReleaseCreation(runCommand, rootDir, version) {
   }
 }
 
+/** @param {RunCommand} runCommand @param {string} rootDir @param {string[]} args @param {string} label */
 function runRequiredCheck(runCommand, rootDir, args, label) {
   const result = runCommand("npm", args, { cwd: rootDir });
   if (result.status !== 0) {
@@ -160,6 +199,9 @@ function runRequiredCheck(runCommand, rootDir, args, label) {
   }
 }
 
+/**
+ * @param {{ rootDir: string, manifestFiles: string[], outputZipAbs: string, runCommand: RunCommand, bundleBuilder: (rootDir: string) => string }} params
+ */
 function createReleaseZip({ rootDir, manifestFiles, outputZipAbs, runCommand, bundleBuilder }) {
   const stageParent = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-"));
   const stageRoot = path.join(stageParent, "dyninstruments");
@@ -188,6 +230,7 @@ function createReleaseZip({ rootDir, manifestFiles, outputZipAbs, runCommand, bu
   }
 }
 
+/** @param {RunCommand} runCommand @param {string} rootDir @param {string[]} args @returns {string} */
 function runGit(runCommand, rootDir, args) {
   const result = runCommand("git", args, { cwd: rootDir });
   if (result.status !== 0) {
@@ -200,10 +243,17 @@ function runGit(runCommand, rootDir, args) {
   return result.stdout || "";
 }
 
+/** @param {string} rootDir @param {string} version @returns {string} */
 function getCanonicalReleaseNotesPath(rootDir, version) {
   return path.join(rootDir, "releases", `dyninstruments-${version}.md`);
 }
 
+/**
+ * @param {string} command
+ * @param {string[]} args
+ * @param {{ cwd?: string }} [options]
+ * @returns {CommandResult}
+ */
 export function defaultRunCommand(command, args, options = {}) {
   const result = spawnSync(command, args, {
     cwd: options.cwd,

@@ -1,5 +1,6 @@
 import { Linter } from "eslint";
 
+/** @param {string} file @param {string} source @returns {any} */
 export function parseAst(file, source) {
   const linter = new Linter();
   const sourceType = file.endsWith(".mjs") ? "module" : "script";
@@ -16,6 +17,14 @@ export function parseAst(file, source) {
   return sourceCode.ast;
 }
 
+/**
+ * @param {any} node
+ * @param {(node: any, parent: any, parentKey: string|null, ancestors: any[]) => void} visitor
+ * @param {any} [parent]
+ * @param {string|null} [parentKey]
+ * @param {any[]} [ancestors]
+ * @returns {void}
+ */
 export function walkAst(node, visitor, parent = null, parentKey = null, ancestors = []) {
   if (!node || typeof node !== "object" || typeof node.type !== "string") return;
   visitor(node, parent, parentKey, ancestors);
@@ -33,7 +42,9 @@ export function walkAst(node, visitor, parent = null, parentKey = null, ancestor
   }
 }
 
+/** @param {any} ast @returns {Map<string, string>} */
 export function collectStaticStringConstants(ast) {
+  /** @type {Map<string, any>} */
   const declarations = new Map();
   const duplicateNames = new Set();
   walkAst(ast, function (node) {
@@ -46,6 +57,7 @@ export function collectStaticStringConstants(ast) {
   });
   for (const name of duplicateNames) declarations.delete(name);
 
+  /** @type {Map<string, string>} */
   const constants = new Map();
   let changed = true;
   while (changed) {
@@ -61,12 +73,14 @@ export function collectStaticStringConstants(ast) {
   return constants;
 }
 
+/** @param {any} member @param {Map<string, string>} [constants] @returns {string|undefined} */
 export function staticMemberName(member, constants) {
   if (!member || member.type !== "MemberExpression") return undefined;
   if (!member.computed && member.property.type === "Identifier") return member.property.name;
   return staticStringValue(member.property, constants);
 }
 
+/** @param {any} node @param {Map<string, string>} [constants] @returns {string|undefined} */
 export function staticStringValue(node, constants) {
   if (!node) return undefined;
   if (node.type === "Literal" && typeof node.value === "string") return node.value;
@@ -76,6 +90,7 @@ export function staticStringValue(node, constants) {
   return undefined;
 }
 
+/** @param {any} node @param {Map<string, string>} [constants] @returns {string|undefined} */
 function staticStringConcat(node, constants) {
   const left = staticStringValue(node.left, constants);
   const right = staticStringValue(node.right, constants);
@@ -83,7 +98,9 @@ function staticStringConcat(node, constants) {
   return left + right;
 }
 
+/** @param {any} node @param {Map<string, string>} [constants] @returns {string|undefined} */
 function staticTemplateValue(node, constants) {
+  /** @type {string} */
   let value = node.quasis[0].value.cooked;
   for (let index = 0; index < node.expressions.length; index += 1) {
     const expression = staticStringValue(node.expressions[index], constants);

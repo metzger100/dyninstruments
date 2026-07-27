@@ -1,17 +1,22 @@
 ---
 name: create-plan
-description: Creates multi-session execution plans for complex features in the dyninstruments repository and encodes the canonical plan structure with repository-verification safeguards.
+description:
+  Creates multi-session execution plans for complex features in the dyninstruments repository and encodes the canonical
+  plan structure with repository-verification safeguards.
 ---
 
 # Skill: create-plan
 
 ## Description
 
-Creates multi-session execution plans for complex features in the dyninstruments repository. Encodes the canonical plan structure derived from the repository's completed and active execution plans. Includes automated baseline verification against the live repo to prevent the "rewritten after repository verification" failure mode.
+Creates multi-session execution plans for complex features in the dyninstruments repository. Encodes the canonical plan
+structure derived from the repository's completed and active execution plans. Includes automated baseline verification
+against the live repo to prevent the "rewritten after repository verification" failure mode.
 
 ## When to Use
 
 When implementing a feature that involves:
+
 - Multi-file changes with mapper/runtime/shared interactions
 - A new cluster kind or new cluster
 - Refactors touching boundaries, dependencies, or checks
@@ -23,9 +28,11 @@ The developer must decide to use planning mode before prompting (per CONTRIBUTIN
 
 ### Step 0: Pre-Plan Interview (Recommended)
 
-Before writing the plan, use the `grill-me-repo` skill to interview the user about every design decision. The interview should produce a structured decision log that feeds into this plan.
+Before writing the plan, use the `grill-me-repo` skill to interview the user about every design decision. The interview
+should produce a structured decision log that feeds into this plan.
 
-If the user declines the interview, proceed directly to Step 1 but flag any assumptions explicitly in the Verified Baseline.
+If the user declines the interview, proceed directly to Step 1 but flag any assumptions explicitly in the Verified
+Baseline.
 
 ### Step 1: Write the Plan Header
 
@@ -36,7 +43,9 @@ If the user declines the interview, proceed directly to Step 1 but flag any assu
 
 Written after repository verification and concept review.
 
-This plan includes [describe what the plan covers]. The coding agent may choose equivalent implementations for [describe flexibility areas] as long as the behavioral, structural, and documentation outcomes below are met. [List any plan-level contracts that must be followed as specified.]
+This plan includes [describe what the plan covers]. The coding agent may choose equivalent implementations for [describe
+flexibility areas] as long as the behavioral, structural, and documentation outcomes below are met. [List any plan-level
+contracts that must be followed as specified.]
 
 ---
 ```
@@ -64,7 +73,8 @@ Expected outcomes after completion:
 
 ### Step 3: Verify the Baseline Against the Live Repo
 
-This is the critical step that prevents plan rewrites. For each assertion, **actually read the repo file** and confirm the fact.
+This is the critical step that prevents plan rewrites. For each assertion, **actually read the repo file** and confirm
+the fact.
 
 ```markdown
 ## Verified Baseline
@@ -86,9 +96,11 @@ The following points were rechecked against the repository before this plan:
 ```
 
 **Verification checklist — read these files:**
+
 - `config/cluster-routes.js` and `config/cluster-routes/*.js` — current route tuples
 - `cluster/mappers/{Cluster}Mapper.js` — current branches
-- `config/components/registry-widgets-nav.js`, `config/components/registry-widgets-vessel.js`, `config/components/registry-widgets-gauge.js` — current widget registrations
+- `config/components/registry-widgets-nav.js`, `config/components/registry-widgets-vessel.js`,
+  `config/components/registry-widgets-gauge.js` — current widget registrations
 - `config/clusters/{cluster}.js` — current store keys and editables
 - `runtime/surface/HtmlSurfaceController.js` — lifecycle contract (for HTML kinds)
 - `shared/widget-kits/` — available shared utilities
@@ -105,15 +117,19 @@ For features with layout, interaction, or data-formatting complexity:
 This section is the authoritative layout/behavioral specification for the {feature}.
 
 ### Exposed Settings
+
 {Each editable parameter: name, type, default, behavior, mode-specific effects}
 
 ### Layout Concept
+
 {Mode resolution rules, geometry anchors, responsive behavior}
 
 ### Data Contracts
+
 {Store keys, normalization rules, formatting rules}
 
 ### Interaction Model
+
 {Click behavior per page, dispatch vs passive, handler names}
 ```
 
@@ -125,12 +141,15 @@ This section is the authoritative layout/behavioral specification for the {featu
 These notes anchor the plan. They are descriptive, not prescriptive.
 
 ### How {reference} serves as the template
+
 {Describe the canonical flow and how this feature differs}
 
 ### {Technical concern 1}
+
 {Description and consequence}
 
 ### {Technical concern 2}
+
 {Description and consequence}
 
 ---
@@ -142,22 +161,26 @@ These notes anchor the plan. They are descriptive, not prescriptive.
 ## Hard Constraints
 
 ### Architecture
+
 - Do not change the AvNav host registration strategy.
 - Do not add ES modules or a build step.
 - Follow the existing UMD component pattern.
 - Do not add a second responsive scale profile; use `ResponsiveScaleProfile`.
-- Do not duplicate shared utilities.
-{Feature-specific architecture constraints}
+- Do not duplicate shared utilities. {Feature-specific architecture constraints}
 
 ### File organization
+
 - {Renderer folder and file list with ownership descriptions}
 - {ViewModel location}
 - {Layout/fit owner locations}
 - Each file must stay within the 400-line budget.
-- The 400-line limit is absolute and overrides all other plan guidance. If any phase would push a file over 400 lines, that phase must include a split step. Plans must not assume agents will use one-liner compression as a workaround.
-- For implementation phases that touch files already in the 300+ line range, include an explicit note: "Check file size before and after; split if approaching 400 lines."
+- The 400-line limit is absolute and overrides all other plan guidance. If any phase would push a file over 400 lines,
+  that phase must include a split step. Plans must not assume agents will use one-liner compression as a workaround.
+- For implementation phases that touch files already in the 300+ line range, include an explicit note: "Check file size
+  before and after; split if approaching 400 lines."
 
 ### Behavioral
+
 - {Specific behavioral contracts that must be followed exactly}
 - {Responsive rules}
 - {Text sizing rules}
@@ -165,6 +188,7 @@ These notes anchor the plan. They are descriptive, not prescriptive.
 - {Interaction rules}
 
 ### Scope
+
 - Do not change existing {reference implementation} code or tests.
 - Do not change {lifecycle owner} internals.
 - Do not perform source-code changes in the documentation phase.
@@ -183,19 +207,22 @@ Structure as phased steps with explicit dependencies:
 
 ### Phase A — {Name}
 
-**Intent:** {what this phase achieves}
-**Dependencies:** {none / an earlier phase's name}
+**Intent:** {what this phase achieves} **Dependencies:** {none / an earlier phase's name}
 
 #### A1. {Sub-step title}
+
 {Detailed instructions: contract, file to create, code template}
 
 #### A2. {Test sub-step}
+
 {What to test, coverage requirements}
 
 #### A3. {Registration sub-step}
+
 {Where to register, code snippet}
 
 ### Phase B — {Name}
+
 ...
 
 ### Phase N — Documentation
@@ -203,12 +230,15 @@ Structure as phased steps with explicit dependencies:
 **Intent:** create/update documentation without source-code changes.
 
 #### NA. Create `documentation/widgets/{doc-name}.md`
+
 {Content requirements following documentation-format.md}
 
 #### NB. Update `documentation/TABLEOFCONTENTS.md`
+
 {Entries to add}
 
 #### NC. Update related guidance
+
 {README.md, AGENTS.md, CLAUDE.md, or other workflow docs if applicable}
 
 ---

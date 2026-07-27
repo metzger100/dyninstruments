@@ -39,6 +39,7 @@ try {
   });
 }
 
+/** @param {{ label: string, relPath: string, args: string[] }} proof */
 function verifyFocusedTestRejection(proof) {
   const result = spawnSync(process.execPath, [path.join(root, "node_modules/vitest/vitest.mjs")].concat(proof.args), {
     cwd: root,

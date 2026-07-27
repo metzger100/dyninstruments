@@ -25,6 +25,9 @@ const ONELINER_SEQUENCE_ASSIGNMENTS_MIN = 2;
 const ONELINER_PACKED_FOR_HEADER_MIN_COMMAS = 3;
 const ONELINER_PACKED_FOR_HEADER_MIN_ASSIGNMENTS = 2;
 
+/** @typedef {{ open: number, close: number }} FunctionBodyRange */
+
+/** @param {string} rawMaskedTrimmedLine @returns {string | null} */
 export function detectOnelinerKind(rawMaskedTrimmedLine) {
   const maskedTrimmedLine = maskRegexLiterals(rawMaskedTrimmedLine);
   if (detectChainedTernary(maskedTrimmedLine)) return "chained-ternary";
@@ -44,6 +47,7 @@ export function detectOnelinerKind(rawMaskedTrimmedLine) {
   return null;
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function isAllowedSingleLineFunctionException(maskedTrimmedLine) {
   if (!isFunctionLikeLine(maskedTrimmedLine)) return false;
   const bodyRange = resolveFunctionBodyRange(maskedTrimmedLine);
@@ -54,6 +58,7 @@ function isAllowedSingleLineFunctionException(maskedTrimmedLine) {
   return isSingleShortReturnBody(maskedTrimmedLine, body);
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function isBraceFreeGuardClauseLine(maskedTrimmedLine) {
   const start = skipWhitespace(maskedTrimmedLine, 0);
   if (!matchesToken(maskedTrimmedLine, start, "if")) return false;
@@ -67,6 +72,7 @@ function isBraceFreeGuardClauseLine(maskedTrimmedLine) {
   const statementStart = skipWhitespace(maskedTrimmedLine, conditionEnd + 1);
   if (maskedTrimmedLine[statementStart] === "{") return false;
 
+  /** @type {number} */
   let keywordEnd;
   if (matchesToken(maskedTrimmedLine, statementStart, "return")) {
     keywordEnd = statementStart + "return".length;
@@ -83,6 +89,7 @@ function isBraceFreeGuardClauseLine(maskedTrimmedLine) {
   return trailing.length === 0;
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function detectDenseOneliner(maskedTrimmedLine) {
   const startsWithForHeader = /^for\s*\(/.test(maskedTrimmedLine);
   if (!startsWithForHeader && countMatches(maskedTrimmedLine, /;/g) >= 2) return true;
@@ -100,6 +107,7 @@ function detectDenseOneliner(maskedTrimmedLine) {
   return false;
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function detectLongPackedOneliner(maskedTrimmedLine) {
   const lineLength = maskedTrimmedLine.length;
   const braceCount = countMatches(maskedTrimmedLine, /[{}]/g);
@@ -121,10 +129,12 @@ function detectLongPackedOneliner(maskedTrimmedLine) {
   return packedByNestedParens;
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function detectChainedTernary(maskedTrimmedLine) {
   let parenDepth = 0;
   let bracketDepth = 0;
   let braceDepth = 0;
+  /** @type {Map<string, number>} */
   const questionCountByDepth = new Map();
 
   for (let i = 0; i < maskedTrimmedLine.length; i += 1) {
@@ -176,6 +186,7 @@ function detectChainedTernary(maskedTrimmedLine) {
   return false;
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function detectSingleLineBody(maskedTrimmedLine) {
   if (!isFunctionLikeLine(maskedTrimmedLine)) return false;
 
@@ -190,6 +201,7 @@ function detectSingleLineBody(maskedTrimmedLine) {
   return true;
 }
 
+/** @param {string} maskedTrimmedLine @returns {FunctionBodyRange | null} */
 function resolveFunctionBodyRange(maskedTrimmedLine) {
   const arrowIndex = maskedTrimmedLine.indexOf("=>");
   if (arrowIndex >= 0) {
@@ -212,6 +224,7 @@ function resolveFunctionBodyRange(maskedTrimmedLine) {
   return { open, close };
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function isStackedDeclaratorLine(maskedTrimmedLine) {
   const declMatch = maskedTrimmedLine.match(/^(?:const|let|var)\s+(.+)$/);
   if (!declMatch) return false;
@@ -221,6 +234,7 @@ function isStackedDeclaratorLine(maskedTrimmedLine) {
   return declaratorCount >= ONELINER_STACKED_DECLARATORS_MIN;
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function isCommaSequenceAssignmentLine(maskedTrimmedLine) {
   if (/^(?:const|let|var)\b/.test(maskedTrimmedLine)) return false;
 
@@ -231,6 +245,7 @@ function isCommaSequenceAssignmentLine(maskedTrimmedLine) {
   return assignmentCount >= ONELINER_SEQUENCE_ASSIGNMENTS_MIN;
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function isPackedForHeaderLine(maskedTrimmedLine) {
   if (!/^for\s*\(/.test(maskedTrimmedLine)) return false;
 
@@ -241,6 +256,7 @@ function isPackedForHeaderLine(maskedTrimmedLine) {
   );
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function hasMultipleStatementLeaders(maskedTrimmedLine) {
   const leaderMatches = maskedTrimmedLine.match(
     /(?:^|[;}]\s*)(?:if|for|while|switch|try|function|class|const|let|var|return|throw|do)\b/g
@@ -248,18 +264,21 @@ function hasMultipleStatementLeaders(maskedTrimmedLine) {
   return (leaderMatches ? leaderMatches.length : 0) >= 2;
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function hasCommaOperatorCallChain(maskedTrimmedLine) {
   const callChainPattern =
     /(?:^|[;{]\s*)(?:[A-Za-z_$][A-Za-z0-9_$]*\s*\([^()]*\)\s*,\s*){2,}[A-Za-z_$][A-Za-z0-9_$]*\s*\([^()]*\)/;
   return callChainPattern.test(maskedTrimmedLine);
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function hasBackToBackBlockStatements(maskedTrimmedLine) {
   return /(?:\)|\})\s*(?:if|for|while|switch|try|function|class|const|let|var|return|throw|do)\b/.test(
     maskedTrimmedLine
   );
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function isFunctionLikeLine(maskedTrimmedLine) {
   if (/^(?:if|for|while|switch|catch|else)\b/.test(maskedTrimmedLine)) return false;
 
@@ -269,6 +288,7 @@ function isFunctionLikeLine(maskedTrimmedLine) {
   return false;
 }
 
+/** @param {string} maskedTrimmedLine @param {string} body @returns {boolean} */
 function isSingleShortReturnBody(maskedTrimmedLine, body) {
   if (maskedTrimmedLine.length >= 100) return false;
 

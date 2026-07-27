@@ -1,3 +1,7 @@
+/**
+ * @param {(args: string[]) => string} runGit
+ * @returns {string[]}
+ */
 export function getReleaseDirtyPaths(runGit) {
   const status = runGit(["status", "--porcelain=v1", "-z", "--untracked-files=all"]);
   const entries = status.split("\0");
@@ -20,6 +24,11 @@ export function getReleaseDirtyPaths(runGit) {
   return paths;
 }
 
+/**
+ * @param {(args: string[]) => string} runGit
+ * @param {string[]} [allowedPaths]
+ * @returns {string[]}
+ */
 export function getUnexpectedDirtyPaths(runGit, allowedPaths = []) {
   const allowed = new Set(
     allowedPaths.map(function (filePath) {
@@ -32,6 +41,7 @@ export function getUnexpectedDirtyPaths(runGit, allowedPaths = []) {
   });
 }
 
+/** @param {string} rawPath @returns {string} */
 export function normalizeRepoRelativePath(rawPath) {
   return String(rawPath ?? "")
     .replace(/\\/g, "/")

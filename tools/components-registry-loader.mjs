@@ -20,6 +20,11 @@ const REGISTRY_SCRIPT_CHAIN = [
 
 const BOOTSTRAP_MANIFEST_SCRIPT_CHAIN = ["runtime/namespace.js", "config/bootstrap-manifest.js"];
 
+/**
+ * @param {string} rootDir
+ * @param {string[]} scriptPaths
+ * @param {any} sandbox
+ */
 function runScriptChain(rootDir, scriptPaths, sandbox) {
   for (const relPath of scriptPaths) {
     const absPath = path.join(rootDir, relPath);
@@ -28,7 +33,12 @@ function runScriptChain(rootDir, scriptPaths, sandbox) {
   }
 }
 
+/**
+ * @param {string} rootDir
+ * @returns {any}
+ */
 export function loadBootstrapManifest(rootDir) {
+  /** @type {{ DyniPlugin: { baseUrl: string, config: any } }} */
   const sandbox = {
     DyniPlugin: {
       baseUrl: SENTINEL_BASE,
@@ -41,7 +51,12 @@ export function loadBootstrapManifest(rootDir) {
   return sandbox.DyniPlugin && sandbox.DyniPlugin.config ? sandbox.DyniPlugin.config.bootstrapManifest : null;
 }
 
+/**
+ * @param {string} rootDir
+ * @returns {any}
+ */
 export function loadComponentsRegistry(rootDir) {
+  /** @type {{ DyniPlugin: { baseUrl: string, config: any } }} */
   const sandbox = {
     DyniPlugin: {
       baseUrl: SENTINEL_BASE,

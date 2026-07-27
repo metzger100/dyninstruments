@@ -56,10 +56,11 @@ python3 ~/avnav-master/server/avnav_server.py \
 - Enter layout edit mode.
 - Confirm `dyninstruments_*` widgets are visible.
 
-For final manual validation, also verify one radial gauge, one linear gauge, and one HTML widget from the bundled
-layouts; switch day/night appearance; and exercise the route/AIS interaction controls. Record the date, AvNav version,
-browser, representative widgets/layouts, and any limitation in the active execution plan before declaring the migration
-complete.
+For final manual validation, complete the full profile-aware checklist in
+[documentation/guides/manual-avnav-validation.md](documentation/guides/manual-avnav-validation.md): representative
+radial/linear/HTML widgets, day/night switching, route/AIS interactions, and package upgrade/rollback. Record the date,
+AvNav version, plugin commit/version, environment, and results before declaring a release validated; `release:prepare`
+prints this checklist's location as a reminder but never completes it automatically.
 
 ## 3) How to Prompt AI Effectively
 
@@ -187,11 +188,16 @@ npm test
 ```
 
 `check:standard` is the standard-tool layer: full-repository Prettier formatting (every maintained JS/MJS, CSS, and
-Markdown file plus config/workflow files), ESLint, Stylelint, pinned actionlint workflow validation, and jscpd. Any
-clone detected by jscpd fails this layer. `check:fast` adds strict type checking and Node-only unit/tool tests without
-the full coverage gate. `check:core` includes it plus `typecheck`, `package:check`, `check:complexity` (complexity
-no-regression budget), `check:scaling` (deterministic operation-count contracts, never timing), and `docs:check` before
-the remaining project-specific Dyni gates. `test:split` separates Node-only tool tests from jsdom runtime/widget tests.
+Markdown file plus config/workflow files and the lockfile, checked against Prettier's real effective ignore resolution),
+ESLint, Stylelint, pinned actionlint workflow validation, and jscpd. Any clone detected by jscpd fails this layer.
+`check:fast` adds strict type checking and Node-only unit/tool tests without the full coverage gate. `check:core`
+includes it plus `typecheck` (production/config `checkJs`, inventory-owned tests, and every maintained `tools/**/*.mjs`
+script under `tsconfig.tools.json`), `package:check`, `check:complexity` (a portable, Git-free digest proof plus the
+complexity no-regression budget; `npm run complexity:regenerate-audit` is the maintainer-only Git-based regeneration
+audit), `check:scaling` (deterministic operation-count contracts, never timing), and `docs:check` before the remaining
+project-specific Dyni gates. `test:split` separates Node-only tool tests from jsdom runtime/widget tests.
+`npm run dependencies:audit` runs a networked `npm audit`; run it after dependency updates and during scheduled
+maintenance, never as part of `check:all`.
 
 Do not merge with failing checks.
 

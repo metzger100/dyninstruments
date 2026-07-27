@@ -6,6 +6,9 @@ import {
   runPrematureLegacySupportRule
 } from "./rules-legacy-support.mjs";
 
+/** @typedef {import("./shared.mjs").Rule} Rule */
+
+/** @type {Rule[]} */
 export const LEGACY_SUPPORT_RULES = [
   {
     name: "premature-legacy-support",

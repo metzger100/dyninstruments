@@ -1,17 +1,23 @@
 ---
 name: preflight
-description: Mandatory session bootstrap for every task in the dyninstruments repository. Reads required docs, routes to task-relevant docs, and produces a structured context summary. Must run before any planning, coding, review, or documentation work.
+description:
+  Mandatory session bootstrap for every task in the dyninstruments repository. Reads required docs, routes to
+  task-relevant docs, and produces a structured context summary. Must run before any planning, coding, review, or
+  documentation work.
 ---
 
 # Skill: preflight
 
 ## Description
 
-Mandatory session bootstrap for every task in the dyninstruments repository. Reads required docs, routes to task-relevant docs, and produces a structured context summary. Must run before any planning, coding, review, or documentation work.
+Mandatory session bootstrap for every task in the dyninstruments repository. Reads required docs, routes to
+task-relevant docs, and produces a structured context summary. Must run before any planning, coding, review, or
+documentation work.
 
 ## When to Use
 
-Every single session. No exceptions. Before you write a single line of code, before you open a plan, before you touch documentation.
+Every single session. No exceptions. Before you write a single line of code, before you open a plan, before you touch
+documentation.
 
 ## Instructions
 
@@ -27,67 +33,77 @@ Read these three files in this order. Do not skip any of them.
 
 Determine which category the task falls into:
 
-| Category | Signal |
-|---|---|
-| New semicircle gauge | "gauge", "speedometer", "radial", semicircle instrument |
-| New linear gauge | "linear", "bar gauge", horizontal instrument |
-| New full-circle dial | "compass", "wind dial", full-circle, 360° |
-| New text renderer | "text widget", "numeric display", "three-value" |
-| New HTML kind | "HTML widget", "native HTML", "interactive", "list", "route points" |
-| New cluster | "new cluster", entirely new instrument group |
-| Refactor / cleanup | "refactor", "cleanup", "extract", "consolidate" |
-| Documentation | "docs", "document", "update docs", "sync docs" |
-| Bug fix | "fix", "broken", "regression", "failing" |
-| Plan creation | "plan", "design", "architecture plan", "exec-plan" |
+| Category             | Signal                                                              |
+| -------------------- | ------------------------------------------------------------------- |
+| New semicircle gauge | "gauge", "speedometer", "radial", semicircle instrument             |
+| New linear gauge     | "linear", "bar gauge", horizontal instrument                        |
+| New full-circle dial | "compass", "wind dial", full-circle, 360°                           |
+| New text renderer    | "text widget", "numeric display", "three-value"                     |
+| New HTML kind        | "HTML widget", "native HTML", "interactive", "list", "route points" |
+| New cluster          | "new cluster", entirely new instrument group                        |
+| Refactor / cleanup   | "refactor", "cleanup", "extract", "consolidate"                     |
+| Documentation        | "docs", "document", "update docs", "sync docs"                      |
+| Bug fix              | "fix", "broken", "regression", "failing"                            |
+| Plan creation        | "plan", "design", "architecture plan", "exec-plan"                  |
 
 ### Step 3: Route to Task-Specific Docs
 
 Based on the category, read ONLY the additional docs listed below. Never read all docs sequentially.
 
 **New semicircle gauge:**
+
 - `documentation/guides/add-new-gauge.md`
 - `documentation/radial/gauge-style-guide.md`
 - Reference: `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js`
 
 **New linear gauge:**
+
 - `documentation/guides/add-new-linear-gauge.md`
 - `documentation/linear/linear-gauge-style-guide.md`
 - Reference: `widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js`
 
 **New full-circle dial:**
+
 - `documentation/guides/add-new-full-circle-dial.md`
 - `documentation/radial/full-circle-dial-style-guide.md`
 - Reference: `widgets/radial/CompassRadialWidget/CompassRadialWidget.js`
 
 **New text renderer:**
+
 - `documentation/guides/add-new-text-renderer.md`
 - `documentation/widgets/three-elements.md`
 - Reference: `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js`
 
 **New HTML kind:**
+
 - `documentation/guides/add-new-html-kind.md`
 - `documentation/shared/html-widget-visual-style-guide.md`
 - `documentation/widgets/active-route.md`
 - Reference: `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`
 
 **New cluster:**
+
 - `documentation/guides/add-new-cluster.md`
 - `documentation/architecture/cluster-widget-system.md`
 - `documentation/architecture/component-system.md`
 
 **Refactor / cleanup:**
+
 - `documentation/conventions/shared-helpers.md`
 - `documentation/guides/documentation-maintenance.md`
 
 **Documentation:**
+
 - `documentation/guides/documentation-maintenance.md`
 - `documentation/conventions/documentation-format.md`
 
 **Bug fix:**
+
 - `documentation/architecture/cluster-widget-system.md` (if cluster-related)
 - The specific widget/module documentation referenced in the bug's file header
 
 **Plan creation:**
+
 - `documentation/core-principles.md`
 - `ARCHITECTURE.md`
 - The relevant guide for the widget archetype
@@ -130,7 +146,8 @@ Before starting implementation, check whether any file you will modify is alread
 wc -l <file>
 ```
 
-If a file is above 300 lines and your task will add significant code to it, plan the split upfront — do not defer it to "later" or assume the exec-plan will handle it. The 400-line limit is absolute and repo rules override exec-plans.
+If a file is above 300 lines and your task will add significant code to it, plan the split upfront — do not defer it to
+"later" or assume the exec-plan will handle it. The 400-line limit is absolute and repo rules override exec-plans.
 
 ### Anti-Patterns
 

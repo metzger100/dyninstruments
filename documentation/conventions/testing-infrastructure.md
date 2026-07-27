@@ -84,6 +84,14 @@ misspelled test global (`tests/tools/lint-fixtures/misspelled-test-global.test.j
 lint boundary, and an incompatible mock (`tests/tools/lint-fixtures/incompatible-mock.js`, missing a required property
 against its own JSDoc type) fails the strict `tsc` typecheck.
 
+`tsconfig.tools.json` (repo root) is a third strict, no-emit `checkJs` project scoped to every maintained
+`tools/**/*.mjs` script, excluding `tools/lint-fixtures/` and `tools/test-data/`.
+`tests/contract/typecheck-tools-inventory-contract.test.js` proves its `files` list matches the live maintained-tool
+tree exactly and contains no `.js` entries and no fixture/test-data path. `npm run typecheck` runs all three boundaries
+in sequence: `typecheck:source`, `typecheck:tests`, then `typecheck:tools` (`tsc -p tsconfig.tools.json`). A new
+unclassified tool file fails the inventory contract closed; an undefined or mistyped tool symbol fails the strict `tsc`
+leaf the same way a production or test type error would.
+
 ## Deterministic Scaling Contracts
 
 `tools/quality-policy/operation-count-evaluator.mjs` exports two pure, deterministic checkers used by test contracts to

@@ -255,24 +255,29 @@ npm run check:fast
 
 `check:fast` runs the standard static layer, strict `checkJs`, and Node-only unit/tool tests without the full coverage
 gate. `check:standard` runs full-repository Prettier formatting checks (every maintained JS/MJS, CSS, and Markdown file
-plus quality/config files, agent skills, and active execution plans), ESLint (including required shipped-file `@file`
-overviews), Stylelint, pinned actionlint workflow validation, and jscpd before the project-specific gates in
-`check:core`; any detected clone makes this standard layer fail. `check:core` also runs the scoped no-emit TypeScript
-`checkJs` baseline via `npm run typecheck`, Ajv schema validation via `npm run schema:check`, the release/package
-contract via `npm run package:check`, the complexity no-regression budget via `npm run check:complexity`, and the
-deterministic scaling contracts via `npm run check:scaling` (operation-count checks, never timing). It verifies `.only`
-rejection through the direct Vitest configuration and every configured project. Documentation checks run through
-`npm run docs:check`, including the markdownlint baseline.
+plus quality/config files, the lockfile, agent skills, and active execution plans, checked against Prettier's real
+effective ignore resolution), ESLint (including required shipped-file `@file` overviews), Stylelint, pinned actionlint
+workflow validation, and jscpd before the project-specific gates in `check:core`; any detected clone makes this standard
+layer fail. `check:core` also runs the strict no-emit TypeScript boundary via `npm run typecheck` (production/config
+`checkJs`, inventory-owned tests, and every maintained `tools/**/*.mjs` script), Ajv schema validation via
+`npm run schema:check` (a generic AvNav `plugin.json` base schema composed with the Dyninstruments layouts profile), the
+release/package contract via `npm run package:check`, the complexity no-regression budget via
+`npm run check:complexity`, and the deterministic scaling contracts via `npm run check:scaling` (operation-count checks,
+never timing). It verifies `.only` rejection through the direct Vitest configuration and every configured project.
+Documentation checks run through `npm run docs:check`, including the markdownlint baseline.
 
 Scaling measurements fail closed unless every observed operation count is a non-negative finite integer.
 
 Coverage policy is fail-closed: every shipped JS/MJS file is classified, the captured per-file baseline is hash-locked,
 new measured files start at 80% lines / 65% branches, and only 12 frozen legacy paths retain exact below-default values.
-Complexity checks regenerate the immutable historical debt capture from its recorded Git commit before requiring every
-active entry to exactly match its current over-limit metric. Test files likewise default to the separate strict
+`check:complexity` proves the committed historical-debt capture against an independently anchored SHA-256 digest (no Git
+history required, so shallow clones and source archives pass); a maintainer-only `npm run complexity:regenerate-audit`
+command still regenerates that capture from its recorded Git commit when auditing for drift. Every active complexity
+entry must exactly match its current over-limit metric. Test files likewise default to the separate strict
 `checkJs`/ESLint boundary. The hash-locked test-exception capture permits only the 229 existing non-strict paths to
 remain exempt; temporary harness/split-spec debt requires an inventory-owned removal path, and negative fixtures must be
-referenced by their canonical owner test.
+referenced by their canonical owner test. An explicitly networked `npm run dependencies:audit` command is available for
+maintainer-run dependency advisory checks; it is never part of `check:all`.
 
 Install the tracked pre-push gate once per clone with `npm run hooks:install`, then verify it with
 `npm run hooks:doctor`. It runs `check:all` before each push. This is local enforcement: an unconfigured clone or an

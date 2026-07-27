@@ -12,6 +12,49 @@ Examples:
   npm run release:prepare
   npm run release:prepare -- --help`;
 
+/**
+ * @typedef {(args: string[]) => string} RunGit
+ */
+
+/**
+ * @typedef {object} ChangeSummary
+ * @property {number} runtimeFilesChanged
+ * @property {number} devOnlyFilesChanged
+ * @property {number} newFiles
+ * @property {number} deletedFiles
+ */
+
+/**
+ * @typedef {object} SemverReview
+ * @property {string} mode
+ * @property {string} range
+ * @property {null} automaticSuggestion
+ * @property {string[]} decisionInputs
+ * @property {string[]} reviewCommands
+ */
+
+/**
+ * @typedef {object} ReleasePreparePayload
+ * @property {string} plugin
+ * @property {{ tag: string, date: string } | null} lastRelease
+ * @property {string[]} commitsSinceLastRelease
+ * @property {ChangeSummary} changeSummary
+ * @property {string[]} runtimeChangedPaths
+ * @property {string[]} changedPaths
+ * @property {SemverReview} semverReview
+ * @property {string} [help]
+ */
+
+/**
+ * @typedef {object} ReleasePrepareOptions
+ * @property {RunGit} [runGit]
+ * @property {string} [pluginName]
+ */
+
+/**
+ * @param {ReleasePrepareOptions} [options]
+ * @returns {ReleasePreparePayload}
+ */
 export function buildReleasePreparePayload(options = {}) {
   const runGit = options.runGit || defaultRunGit;
   const pluginName = options.pluginName || "dyninstruments";
@@ -69,6 +112,10 @@ export function buildReleasePreparePayload(options = {}) {
   };
 }
 
+/**
+ * @param {string[]} [argv]
+ * @returns {{ help: boolean, unknown: string[] }}
+ */
 export function parseReleasePrepareArgs(argv = []) {
   const unknown = argv.filter((arg) => arg !== "--help" && arg !== "-h");
   return {
@@ -77,6 +124,7 @@ export function parseReleasePrepareArgs(argv = []) {
   };
 }
 
+/** @param {RunGit} runGit */
 export function ensureCleanReleasePreparation(runGit) {
   const dirtyPaths = getUnexpectedDirtyPaths(runGit);
   if (dirtyPaths.length > 0) {
@@ -87,6 +135,11 @@ export function ensureCleanReleasePreparation(runGit) {
   }
 }
 
+/**
+ * @param {string[]} [argv]
+ * @param {ReleasePrepareOptions} [options]
+ * @returns {ReleasePreparePayload | { help: string }}
+ */
 export function runReleasePrepare(argv = process.argv.slice(2), options = {}) {
   const args = parseReleasePrepareArgs(argv);
   if (args.help) return { help: HELP };
@@ -99,17 +152,24 @@ export function runReleasePrepare(argv = process.argv.slice(2), options = {}) {
   return buildReleasePreparePayload({ ...options, runGit });
 }
 
+const MANUAL_VALIDATION_CHECKLIST_PATH = "documentation/guides/manual-avnav-validation.md";
+
 export function main(argv = process.argv.slice(2)) {
   try {
     const result = runReleasePrepare(argv);
-    if (result.help) process.stdout.write(result.help + "\n");
-    else process.stdout.write(JSON.stringify(result, null, 2) + "\n");
+    if (result.help) {
+      process.stdout.write(result.help + "\n");
+      return;
+    }
+    process.stdout.write(JSON.stringify(result, null, 2) + "\n");
+    console.error(`Manual AvNav validation checklist (not run automatically): ${MANUAL_VALIDATION_CHECKLIST_PATH}`);
   } catch (error) {
-    console.error(error.message || String(error));
+    console.error(/** @type {any} */ (error).message || String(error));
     process.exit(1);
   }
 }
 
+/** @param {RunGit} runGit @returns {string | null} */
 function readLatestTag(runGit) {
   try {
     const out = runGit(["describe", "--tags", "--abbrev=0", "--match", "v*"]).trim();
@@ -119,10 +179,12 @@ function readLatestTag(runGit) {
   }
 }
 
+/** @param {RunGit} runGit @param {string} tag @returns {string} */
 function readTagDate(runGit, tag) {
   return runGit(["log", "-1", "--format=%cs", tag]).trim();
 }
 
+/** @param {RunGit} runGit @param {string | null} lastTag @returns {string[]} */
 function readCommits(runGit, lastTag) {
   const args = ["log", "--reverse", "--oneline"];
   if (lastTag) {
@@ -135,6 +197,11 @@ function readCommits(runGit, lastTag) {
   return out.split(/\r?\n/).filter(Boolean);
 }
 
+/**
+ * @param {RunGit} runGit
+ * @param {string | null} lastTag
+ * @returns {{ status: string, path: string }[]}
+ */
 function readChangedFiles(runGit, lastTag) {
   const args = ["diff", "--name-status", "--find-renames"];
   if (lastTag) {
@@ -146,9 +213,14 @@ function readChangedFiles(runGit, lastTag) {
   const out = runGit(args).trim();
   if (!out) return [];
 
-  return out.split(/\r?\n/).filter(Boolean).map(parseNameStatusLine).filter(Boolean);
+  return out
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map(parseNameStatusLine)
+    .filter((entry) => entry !== null);
 }
 
+/** @param {string} line @returns {{ status: string, path: string } | null} */
 function parseNameStatusLine(line) {
   const parts = line.split("\t");
   if (parts.length < 2) return null;
@@ -169,6 +241,7 @@ function parseNameStatusLine(line) {
   };
 }
 
+/** @param {string | null} lastTag @returns {SemverReview} */
 function buildSemverReview(lastTag) {
   const range = lastTag ? `${lastTag}..HEAD` : "repository history";
   const reviewCommands = lastTag
@@ -199,6 +272,7 @@ function buildSemverReview(lastTag) {
   };
 }
 
+/** @param {string} filePath @returns {string} */
 function normalizeChangedPath(filePath) {
   return String(filePath || "")
     .replace(/\\/g, "/")
@@ -206,6 +280,7 @@ function normalizeChangedPath(filePath) {
     .trim();
 }
 
+/** @param {string[]} args @returns {string} */
 function defaultRunGit(args) {
   const result = spawnSync("git", args, { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
   if (result.status === 0) {

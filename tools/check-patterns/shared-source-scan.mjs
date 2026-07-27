@@ -9,6 +9,7 @@ const EXTERNAL_FACTOR_CONTEXT_HINTS = [
   "documentElement"
 ];
 
+/** @param {string} text @returns {string} */
 export function maskCommentsAndStrings(text) {
   let out = "";
   let i = 0;
@@ -93,6 +94,7 @@ export function maskCommentsAndStrings(text) {
   return out;
 }
 
+/** @param {string} text @param {number} openIndex @returns {number} */
 export function findMatchingBrace(text, openIndex) {
   let depth = 0;
   for (let i = openIndex; i < text.length; i += 1) {
@@ -109,6 +111,7 @@ export function findMatchingBrace(text, openIndex) {
   return -1;
 }
 
+/** @param {string} text @param {number} openIndex @returns {number} */
 export function findMatchingParen(text, openIndex) {
   let depth = 0;
   for (let i = openIndex; i < text.length; i += 1) {
@@ -125,6 +128,7 @@ export function findMatchingParen(text, openIndex) {
   return -1;
 }
 
+/** @param {string} maskedText @param {number} start @param {number} end @returns {number} */
 export function findTopLevelComma(maskedText, start, end) {
   let braceDepth = 0;
   let parenDepth = 0;
@@ -162,6 +166,7 @@ export function findTopLevelComma(maskedText, start, end) {
   return -1;
 }
 
+/** @param {string} text @param {number} startIndex @returns {{token: string, end: number}|null} */
 export function readLiteralToken(text, startIndex) {
   let i = startIndex;
   while (i < text.length && /\s/.test(text[i])) {
@@ -200,6 +205,7 @@ export function readLiteralToken(text, startIndex) {
   return null;
 }
 
+/** @param {string} maskedText @param {number} index @returns {boolean} */
 export function isExternalFactorFallbackContext(maskedText, index) {
   const start = Math.max(0, index - 220);
   const end = Math.min(maskedText.length, index + 220);

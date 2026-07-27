@@ -1,0 +1,28 @@
+{
+  "note": "Generic AvNav plugin.json base cases and Dyninstruments layouts-profile cases used to prove the base/profile schema composition in schemas/avnav-plugin-base.schema.json and schemas/plugin.schema.json. No sibling repository has published its own schema base/profile split yet, so no upstream shared corpus exists to byte-match today; the genericBase section is written to be adopted byte-for-byte once a sibling profile lands, and dynLayoutsProfile stays local to this repository.",
+  "genericBase": {
+    "valid": [{}, { "anyKey": "anyValue" }, { "version": "1.2.3" }],
+    "invalid": [[], "not-an-object", null, 42, true]
+  },
+  "dynLayoutsProfile": {
+    "valid": [
+      { "layouts": [{ "name": "Dyni Motorboat", "file": "layouts/dyni-motorboat.json" }] },
+      {
+        "layouts": [
+          { "name": "Dyni Motorboat", "file": "layouts/dyni-motorboat.json" },
+          { "name": "Dyni Sailboat", "file": "layouts/dyni-sailboat.json" }
+        ]
+      }
+    ],
+    "invalid": [
+      {},
+      { "layouts": [] },
+      { "layouts": [{ "name": "A" }] },
+      { "layouts": [{ "file": "layouts/a.json" }] },
+      { "layouts": [{ "name": "", "file": "layouts/a.json" }] },
+      { "layouts": [{ "name": "A", "file": "bad-path.json" }] },
+      { "layouts": [{ "name": "A", "file": "layouts/a.json" }], "extra": 1 },
+      { "layouts": [{ "name": "A", "file": "layouts/a.json" }, { "name": "A", "file": "layouts/a.json" }] }
+    ]
+  }
+}

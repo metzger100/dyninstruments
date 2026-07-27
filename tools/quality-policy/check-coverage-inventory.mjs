@@ -34,10 +34,11 @@ try {
   floors = readJsonPolicy(floorsPath);
   baseline = readJsonPolicy(baselinePath);
 } catch (error) {
-  console.error(error.message);
+  console.error(/** @type {Error} */ (error).message);
   process.exit(1);
 }
 const liveFiles = collectLiveProductionFiles();
+/** @type {string[]} */
 const errors = [];
 
 checkTopLevelSchema(floors, "coverage inventory", errors);
@@ -62,6 +63,7 @@ if (errors.length > 0) {
 console.log(`Coverage inventory check passed: ${Object.keys(floors.entries).length} classified production files.`);
 console.log(`SUMMARY_JSON=${JSON.stringify({ ok: true, entryCount: Object.keys(floors.entries).length })}`);
 
+/** @returns {Set<string>} */
 function collectLiveProductionFiles() {
   const files = new Set();
   for (const entrypoint of ["plugin.js", "plugin.mjs"]) {
@@ -75,10 +77,13 @@ function collectLiveProductionFiles() {
   return files;
 }
 
+/** @param {string} absoluteRoot @returns {string[]} */
 function collectJavaScriptFiles(absoluteRoot) {
+  /** @type {string[]} */
   const files = [];
   if (!fs.existsSync(absoluteRoot)) return files;
 
+  /** @param {string} directory */
   function visit(directory) {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
       const absolutePath = path.join(directory, entry.name);
@@ -91,6 +96,7 @@ function collectJavaScriptFiles(absoluteRoot) {
   return files;
 }
 
+/** @param {any} data @param {Set<string>} live @param {string[]} out */
 function checkInventoryCompleteness(data, live, out) {
   const entries = data?.entries || {};
 
@@ -107,6 +113,7 @@ function checkInventoryCompleteness(data, live, out) {
   }
 }
 
+/** @param {any} data @param {string} label @param {string[]} out */
 function checkTopLevelSchema(data, label, out) {
   if (!data || typeof data !== "object" || Array.isArray(data)) {
     out.push(`Invalid ${label}: expected an object.`);
@@ -117,6 +124,7 @@ function checkTopLevelSchema(data, label, out) {
   }
 }
 
+/** @param {string[]} out */
 function checkImmutableBaselineCapture(out) {
   const packagePath = path.join(root, "package.json");
   if (!fs.existsSync(packagePath)) return;
@@ -131,6 +139,7 @@ function checkImmutableBaselineCapture(out) {
   }
 }
 
+/** @param {any} data @param {string[]} out */
 function checkEntrySchema(data, out) {
   for (const [relativePath, entry] of Object.entries(data?.entries || {})) {
     if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
@@ -152,6 +161,7 @@ function checkEntrySchema(data, out) {
   }
 }
 
+/** @param {any} data @param {any} floorsData @param {string[]} out */
 function checkBaselineSchema(data, floorsData, out) {
   const floorEntries = floorsData?.entries || {};
   const baselineEntries = data?.entries || {};
@@ -178,7 +188,9 @@ function checkBaselineSchema(data, floorsData, out) {
     } else if (!isBelowDefault && hasLegacyMarker) {
       out.push(`Coverage-floor baseline entry '${relativePath}' has a stale 'legacyBelowDefault' marker.`);
     } else if (hasLegacyMarker) {
-      const captured = LEGACY_BELOW_DEFAULT_FLOORS.get(relativePath);
+      const captured = /** @type {{ lines: number, branches: number }} */ (
+        LEGACY_BELOW_DEFAULT_FLOORS.get(relativePath)
+      );
       if (entry.lines !== captured.lines || entry.branches !== captured.branches) {
         out.push(`Coverage-floor baseline entry '${relativePath}' differs from its captured legacy floor.`);
       }
@@ -196,6 +208,7 @@ function checkBaselineSchema(data, floorsData, out) {
   }
 }
 
+/** @param {any} data @param {any} baselineData @param {string[]} out */
 function checkFloorPolicy(data, baselineData, out) {
   const baselineEntries = baselineData?.entries || {};
   for (const [relativePath, entry] of Object.entries(data?.entries || {})) {
@@ -217,6 +230,7 @@ function checkFloorPolicy(data, baselineData, out) {
   }
 }
 
+/** @param {any} data @param {string[]} out */
 function checkMeasuredFloors(data, out) {
   const measured = Object.entries(data.entries).filter(([, entry]) => entry.classification === "measured");
   if (measured.length === 0) return;
@@ -256,6 +270,7 @@ function checkMeasuredFloors(data, out) {
   }
 }
 
+/** @param {any} data @param {string[]} out */
 function checkContractOwnedEntries(data, out) {
   const contractOwned = Object.entries(data.entries).filter(([, entry]) => entry.classification === "contract-owned");
 

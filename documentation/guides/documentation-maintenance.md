@@ -115,8 +115,10 @@ each must name its parent, reason, and removal path; oversized test families mus
 coverage, lint, and contract suites. Expand `tsconfig.checkjs.json` only with real JSDoc/ambient typing and keep
 `noEmit` enabled.
 
-`schema:check` validates `plugin.json` with `schemas/plugin.schema.json` and `layouts/*.json` with
-`schemas/layout.schema.json`. Extend those schemas when plugin metadata or bundled layout JSON contracts change.
+`schema:check` validates `plugin.json` against `schemas/plugin.schema.json`, which composes the generic
+`schemas/avnav-plugin-base.schema.json` (upstream-verified AvNav metadata shape only) with the Dyninstruments layouts
+profile, and validates `layouts/*.json` with `schemas/layout.schema.json`. Extend the base schema only for
+upstream-verified AvNav fields; extend the layouts profile for Dyninstruments-specific requirements.
 
 `package:check` runs `schema:check` and focused Node-only release/package tests for release preparation, release
 creation, and release manifest contents.

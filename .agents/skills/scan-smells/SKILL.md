@@ -1,13 +1,17 @@
 ---
 name: scan-smells
-description: Scans proposed code changes against the dyninstruments smell catalog before committing and catches the defensive, verbose patterns that AI agents typically introduce.
+description:
+  Scans proposed code changes against the dyninstruments smell catalog before committing and catches the defensive,
+  verbose patterns that AI agents typically introduce.
 ---
 
 # Skill: scan-smells
 
 ## Description
 
-Scans proposed code changes against the dyninstruments smell catalog before committing. Catches the defensive, verbose, "play it safe" patterns that AI agents typically introduce. Understands the boundary model: where defaults/validation belong vs. where interior code should trust its inputs.
+Scans proposed code changes against the dyninstruments smell catalog before committing. Catches the defensive, verbose,
+"play it safe" patterns that AI agents typically introduce. Understands the boundary model: where defaults/validation
+belong vs. where interior code should trust its inputs.
 
 ## When to Use
 
@@ -17,9 +21,13 @@ Before committing any code change. Run this mental checklist against every file 
 
 ### The Core Principle
 
-**Fail-fast / keep-it-simple:** Defaults and validation belong at boundaries. Internal code trusts normalized contracts. If you're adding a guard, fallback, or normalization inside a renderer, shared module, or widget — you're almost certainly in the wrong place.
+**Fail-fast / keep-it-simple:** Defaults and validation belong at boundaries. Internal code trusts normalized contracts.
+If you're adding a guard, fallback, or normalization inside a renderer, shared module, or widget — you're almost
+certainly in the wrong place.
 
-Boundaries are: mappers, config files, runtime service boundaries, `componentContext.format.applyFormatter`, `runtime.theme` internals, `componentContext.theme.tokens.resolveForRoot(rootEl)`, editable-parameter defaults, `plugin.css`.
+Boundaries are: mappers, config files, runtime service boundaries, `componentContext.format.applyFormatter`,
+`runtime.theme` internals, `componentContext.theme.tokens.resolveForRoot(rootEl)`, editable-parameter defaults,
+`plugin.css`.
 
 Interior code is: renderers, shared engines, widget-kits, layout modules, fit modules, canvas draw functions.
 
@@ -35,19 +43,20 @@ validated external-boundary marker described below.
 
 ```javascript
 // ❌ SMELL: Props are already normalized by mapper
-String(x == null ? "" : x)
-Array.isArray(x) ? x : []
-isFiniteNumber(x) ? x : 0
-typeof value === "number" ? value : parseFloat(value)
+String(x == null ? "" : x);
+Array.isArray(x) ? x : [];
+isFiniteNumber(x) ? x : 0;
+typeof value === "number" ? value : parseFloat(value);
 
 // ✅ FIX: Trust the mapper/boundary contract
-x       // it's already a string
-x       // it's already an array
-x       // it's already a finite number or undefined
-value   // it's already a number
+x; // it's already a string
+x; // it's already an array
+x; // it's already a finite number or undefined
+value; // it's already a number
 ```
 
-**`renderer-numeric-coercion-without-boundary-contract`** — Renderer does `Number(props.x)` on mapper-owned normalized props.
+**`renderer-numeric-coercion-without-boundary-contract`** — Renderer does `Number(props.x)` on mapper-owned normalized
+props.
 
 ```javascript
 // ❌ SMELL
@@ -85,11 +94,12 @@ const unit = props.unit || "kn";
 const caption = props.caption || "Speed";
 
 // ✅ FIX: Trust the editable-default boundary
-const unit = props.unit;     // config owns the default
+const unit = props.unit; // config owns the default
 const caption = props.caption; // config owns the default
 ```
 
-**`widget-renderer-default-duplication`** — Widget `createRenderer(...)` spec repeats editable-parameter defaults in `ratioDefaults` / `rangeDefaults`.
+**`widget-renderer-default-duplication`** — Widget `createRenderer(...)` spec repeats editable-parameter defaults in
+`ratioDefaults` / `rangeDefaults`.
 
 ```javascript
 // ❌ SMELL
@@ -118,12 +128,13 @@ const threshold = typeof p.ratioThreshold !== "undefined" ? p.ratioThreshold : 1
 const threshold = p.ratioThreshold;
 ```
 
-**`engine-layout-default-drift`** — Layout module re-declares semantic ratio defaults already owned by the engine family.
+**`engine-layout-default-drift`** — Layout module re-declares semantic ratio defaults already owned by the engine
+family.
 
 ```javascript
 // ❌ SMELL: Layout copies engine defaults
-const NORMAL_THRESHOLD = 1.0;  // already in engine
-const FLAT_THRESHOLD = 3.5;    // already in engine
+const NORMAL_THRESHOLD = 1.0; // already in engine
+const FLAT_THRESHOLD = 3.5; // already in engine
 
 // ✅ FIX: Layout keeps only structural safety bounds (0, 1, 2)
 ```
@@ -163,7 +174,8 @@ if (typeof componentContext.format.applyFormatter === "function") {
 return componentContext.format.applyFormatter(value, opts);
 ```
 
-**`try-finally-canvas-drawing`** — Internal draw path wraps save/restore in try/finally without an external throwing boundary.
+**`try-finally-canvas-drawing`** — Internal draw path wraps save/restore in try/finally without an external throwing
+boundary.
 
 ```javascript
 // ❌ SMELL
@@ -291,12 +303,17 @@ const result = componentContext.format.applyFormatter(v, opts);
 
 ```javascript
 // ❌ SMELL
-try { result = compute(); } catch (e) { result = fallback; }
+try {
+  result = compute();
+} catch (e) {
+  result = fallback;
+}
 
 // ✅ FIX: Re-throw, or mark a genuine external boundary with audited metadata
-try { result = compute(); }
-// dyni-boundary-next-line(category: avnav-host-uncertainty, owner: Metzger100, date: 2026-07-20) -- AvNav host may not expose this API
-catch (e) {
+try {
+  result = compute();
+} catch (e) {
+  // dyni-boundary-next-line(category: avnav-host-uncertainty, owner: Metzger100, date: 2026-07-20) -- AvNav host may not expose this API
   result = fallback;
 }
 ```

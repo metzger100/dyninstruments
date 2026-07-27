@@ -2,7 +2,12 @@ import path from "node:path";
 import { parseAst, staticMemberName, walkAst } from "./ast-utils.mjs";
 import { getClusterPascalPrefixes, getFileData, lineAt } from "./shared.mjs";
 
+/** @typedef {import("./shared.mjs").Finding} Finding */
+/** @typedef {import("./shared.mjs").Rule} Rule */
+
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runMapperLogicLeakageRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const namedFunctionDecl = /^\s*function\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(/gm;
   const helperFunctionBinding =
@@ -52,7 +57,9 @@ export function runMapperLogicLeakageRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runAbsentNumericSentinelRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
 
   for (const file of files) {
@@ -79,6 +86,14 @@ export function runAbsentNumericSentinelRule(rule, files) {
   return out;
 }
 
+/**
+ * @param {any} node
+ * @param {any} parent
+ * @param {string|null} parentKey
+ * @param {any[]} ancestors
+ * @param {Set<string>} sentinelVariables
+ * @returns {string|undefined}
+ */
 function absentNumericSentinel(node, parent, parentKey, ancestors, sentinelVariables) {
   if (node.type === "Identifier" && (node.name === "NaN" || node.name === "Infinity")) return node.name;
   const returnedProperty = returnedPropertyName(parent, parentKey, ancestors);
@@ -103,6 +118,7 @@ function absentNumericSentinel(node, parent, parentKey, ancestors, sentinelVaria
   return propertyName ? `numeric literal for optional '${propertyName}'` : "numeric magic literal";
 }
 
+/** @param {any} ast @returns {Set<string>} */
 function collectSentinelVariables(ast) {
   const initializedWithSentinel = new Set();
   const optionallyNormalized = new Set();
@@ -126,6 +142,7 @@ function collectSentinelVariables(ast) {
   );
 }
 
+/** @param {any} parent @param {string|null} parentKey @param {any[]} ancestors @returns {string|undefined} */
 function returnedPropertyName(parent, parentKey, ancestors) {
   if (parent?.type !== "Property" || parentKey !== "value") return undefined;
   const objectExpression = ancestors[ancestors.length - 2];
@@ -134,6 +151,7 @@ function returnedPropertyName(parent, parentKey, ancestors) {
   return propertyKeyName(parent.key);
 }
 
+/** @param {any} node @returns {boolean} */
 function isOptionalNumericNormalization(node) {
   if (!node || node.type !== "CallExpression") return false;
   if (node.callee.type === "Identifier") {
@@ -142,23 +160,27 @@ function isOptionalNumericNormalization(node) {
   return /^(?:num|toOptionalFiniteNumber|toFiniteNumber|unitNumber)$/.test(staticMemberName(node.callee) || "");
 }
 
+/** @param {any} node @returns {boolean} */
 function isNumericLiteral(node) {
   if (!node) return false;
   if (node.type === "Literal") return typeof node.value === "number";
   return node.type === "UnaryExpression" && /^[+-]$/.test(node.operator) && isNumericLiteral(node.argument);
 }
 
+/** @param {any} node @returns {boolean} */
 function isMagicNumericLiteral(node) {
   if (!isNumericLiteral(node)) return false;
   return numericLiteralValue(node) !== 0;
 }
 
+/** @param {any} node @returns {number} */
 function numericLiteralValue(node) {
   if (node.type === "Literal") return node.value;
   if (node.operator === "-") return -node.argument.value;
   return node.argument.value;
 }
 
+/** @param {any} node @returns {string|undefined} */
 function propertyKeyName(node) {
   if (!node) return undefined;
   if (node.type === "Identifier") return node.name;
@@ -166,7 +188,9 @@ function propertyKeyName(node) {
   return undefined;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runMapperPropRenormalizationRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   for (const file of files) {
     const data = getFileData(file);
@@ -190,7 +214,11 @@ export function runMapperPropRenormalizationRule(rule, files) {
   return out;
 }
 
+/** @typedef {{declarations: any[], aliases: Map<string, string>}} MapperPropContext */
+
+/** @param {any} ast @returns {Map<any, MapperPropContext>} */
 function collectMapperPropContexts(ast) {
+  /** @type {Map<any, MapperPropContext>} */
   const contexts = new Map();
   contexts.set(ast, { declarations: [], aliases: new Map() });
   walkAst(ast, function (node, parent, parentKey, ancestors) {
@@ -200,7 +228,8 @@ function collectMapperPropContexts(ast) {
     }
     if (node.type !== "VariableDeclarator" || !node.init) return;
     const owner = nearestFunctionNode(ancestors) || ast;
-    contexts.get(owner).declarations.push(node);
+    const context = /** @type {MapperPropContext} */ (contexts.get(owner));
+    context.declarations.push(node);
   });
 
   for (const context of contexts.values()) {
@@ -219,6 +248,7 @@ function collectMapperPropContexts(ast) {
   return contexts;
 }
 
+/** @param {any} pattern @param {string} rootPath @param {Map<string, string>} aliases @returns {boolean} */
 function addMapperPropAliases(pattern, rootPath, aliases) {
   if (pattern.type === "Identifier") {
     if (aliases.has(pattern.name)) return false;
@@ -237,6 +267,7 @@ function addMapperPropAliases(pattern, rootPath, aliases) {
   return changed;
 }
 
+/** @param {any} node @param {Map<string, string>|undefined} aliases @returns {{helperName: string, propName: string}|undefined} */
 function mapperPropNormalizationFinding(node, aliases) {
   if (!aliases) return undefined;
   const helperName = node.callee.type === "Identifier" ? node.callee.name : staticMemberName(node.callee);
@@ -256,6 +287,7 @@ function mapperPropNormalizationFinding(node, aliases) {
   return undefined;
 }
 
+/** @param {any} node @param {Map<string, string>} aliases @returns {string|undefined} */
 function mapperPropRootPath(node, aliases) {
   if (!node) return undefined;
   if (node.type === "Identifier") return aliases.get(node.name);
@@ -274,11 +306,13 @@ function mapperPropRootPath(node, aliases) {
   return undefined;
 }
 
+/** @param {string} rootPath @returns {string} */
 function mapperPropName(rootPath) {
   const parts = rootPath.split(".");
   return parts.length > 1 ? parts.slice(1).join(".") : "*";
 }
 
+/** @param {any[]} ancestors @returns {any} */
 function nearestFunctionNode(ancestors) {
   for (let index = ancestors.length - 1; index >= 0; index -= 1) {
     if (isFunctionNode(ancestors[index])) return ancestors[index];
@@ -286,13 +320,16 @@ function nearestFunctionNode(ancestors) {
   return undefined;
 }
 
+/** @param {any} node @returns {boolean} */
 function isFunctionNode(node) {
   return (
     node.type === "FunctionDeclaration" || node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression"
   );
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runClusterRendererClusterPrefixRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const prefixes = getClusterPascalPrefixes();
   if (!prefixes.length) return out;

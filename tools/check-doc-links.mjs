@@ -22,6 +22,7 @@ if (!result.passed) {
 
 console.log(`Documentation links passed: ${result.links.length} local and skipped external links checked.`);
 
+/** @param {string} repositoryRoot @returns {string[]} */
 function collectMarkdownPaths(repositoryRoot) {
   const paths = ["AGENTS.md", "CLAUDE.md", "ARCHITECTURE.md", "README.md", "CONTRIBUTING.md"];
   paths.push(...walkMarkdown(path.join(repositoryRoot, "documentation")));
@@ -29,6 +30,7 @@ function collectMarkdownPaths(repositoryRoot) {
   return paths.filter((relativePath) => fs.existsSync(path.join(repositoryRoot, relativePath)));
 }
 
+/** @param {string} absoluteRoot @returns {string[]} */
 function walkMarkdown(absoluteRoot) {
   if (!fs.existsSync(absoluteRoot)) return [];
   const result = [];

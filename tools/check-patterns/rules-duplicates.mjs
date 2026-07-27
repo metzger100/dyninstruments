@@ -19,9 +19,15 @@ const DUPLICATE_BLOCK_WINDOW = 35;
 const DUPLICATE_BLOCK_MIN_TOKENS = 120;
 const DUPLICATE_BLOCK_MIN_STATEMENTS = 6;
 
+/** @typedef {import("./shared.mjs").Rule} Rule */
+
+/** @param {Rule} rule @param {string[]} files @returns {any[]} */
 export function runDuplicateFunctions(rule, files) {
+  /** @type {Map<string, any>} */
   const groupsExact = new Map();
+  /** @type {Map<string, any>} */
   const groupsExactSmall = new Map();
+  /** @type {Map<string, any>} */
   const groupsShape = new Map();
   const functions = extractFunctionsForDuplication(files, new Set(rule.allowlist || []));
 
@@ -68,10 +74,10 @@ export function runDuplicateFunctions(rule, files) {
   const exactMarkedSignatures = new Set();
   const exactGroups = [...groupsExact.values()].sort(compareDuplicateGroups);
   for (const group of exactGroups) {
-    const uniqueFiles = new Set(group.records.map((rec) => rec.file));
+    const uniqueFiles = new Set(group.records.map((/** @type {any} */ rec) => rec.file));
     if (uniqueFiles.size < 2) continue;
     const locations = dedupeLocations(
-      group.records.map(function (rec) {
+      group.records.map(function (/** @type {any} */ rec) {
         return { file: rec.file, line: rec.line };
       })
     ).sort(compareFindings);
@@ -90,13 +96,13 @@ export function runDuplicateFunctions(rule, files) {
 
   const smallGroups = [...groupsExactSmall.values()].sort(compareDuplicateGroups);
   for (const group of smallGroups) {
-    const uniqueFiles = new Set(group.records.map((rec) => rec.file));
+    const uniqueFiles = new Set(group.records.map((/** @type {any} */ rec) => rec.file));
     if (uniqueFiles.size < 2) continue;
-    const exactSignatures = new Set(group.records.map((rec) => rec.signatureExact));
+    const exactSignatures = new Set(group.records.map((/** @type {any} */ rec) => rec.signatureExact));
     if (exactSignatures.size === 1 && exactMarkedSignatures.has([...exactSignatures][0])) continue;
 
     const locations = dedupeLocations(
-      group.records.map(function (rec) {
+      group.records.map(function (/** @type {any} */ rec) {
         return { file: rec.file, line: rec.line };
       })
     ).sort(compareFindings);
@@ -114,14 +120,14 @@ export function runDuplicateFunctions(rule, files) {
 
   const shapeGroups = [...groupsShape.values()].sort(compareDuplicateGroups);
   for (const group of shapeGroups) {
-    const uniqueFiles = new Set(group.records.map((rec) => rec.file));
+    const uniqueFiles = new Set(group.records.map((/** @type {any} */ rec) => rec.file));
     if (uniqueFiles.size < 2) continue;
 
-    const exactSignatures = new Set(group.records.map((rec) => rec.signatureExact));
+    const exactSignatures = new Set(group.records.map((/** @type {any} */ rec) => rec.signatureExact));
     if (exactSignatures.size === 1 && exactMarkedSignatures.has([...exactSignatures][0])) continue;
 
     const locations = dedupeLocations(
-      group.records.map(function (rec) {
+      group.records.map(function (/** @type {any} */ rec) {
         return { file: rec.file, line: rec.line };
       })
     ).sort(compareFindings);
@@ -140,6 +146,7 @@ export function runDuplicateFunctions(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {any[]} */
 export function runDuplicateBlockClones(rule, files) {
   const out = [];
   const functions = extractFunctionsForDuplication(files, new Set(rule.allowlist || []));
@@ -234,6 +241,7 @@ export function runDuplicateBlockClones(rule, files) {
   return out;
 }
 
+/** @param {string[]} files @param {Set<string>} allowlist @returns {any[]} */
 function extractFunctionsForDuplication(files, allowlist) {
   const out = [];
   const patterns = [

@@ -27,9 +27,16 @@ publishes the already-committed ZIP and notes.
   - `releases/dyninstruments-VERSION.md`
 - Public installer contract: `install.sh` expects the GitHub Release asset name `dyninstruments-VERSION.zip`; pinned
   prereleases use the same naming rule.
-- `tools/release-version.mjs` validates tag SemVer and classifies tags with a prerelease segment for GitHub publication.
-  Build metadata alone does not mark a release as a prerelease.
+- `tools/release-version.mjs` validates tag SemVer and classifies tags with a prerelease segment for GitHub publication;
+  its acceptance/prerelease-classification behavior is proven against the shared
+  `tools/quality-policy/semver-corpus.json` valid/invalid corpus.
 - If release asset naming changes, update `install.sh` and the README installation command in the same release.
+- `.github/workflows/publish-release.yml` pins `actions/checkout` and `softprops/action-gh-release` to reviewed exact
+  commit SHAs; update both the workflow and `tests/contract/release-workflow-contract.test.js` together when the pinned
+  versions change.
+- `release:prepare` prints the location of the manual AvNav validation checklist
+  ([documentation/guides/manual-avnav-validation.md](manual-avnav-validation.md)) as a reminder; completing that
+  checklist is separate, human evidence and is never inferred from a passing `check:all`.
 
 ## Prerequisites
 

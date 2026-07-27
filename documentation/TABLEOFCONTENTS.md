@@ -152,6 +152,8 @@
 - **How do I write an effective execution plan?** → [guides/exec-plan-authoring.md](guides/exec-plan-authoring.md)
 - **Local release workflow (`release:prepare` + `release:create`)** →
   [guides/release-workflow.md](guides/release-workflow.md)
+- **Manual AvNav validation checklist (live-host release evidence)** →
+  [guides/manual-avnav-validation.md](guides/manual-avnav-validation.md)
 
 ## Feature-Specific Lookups
 

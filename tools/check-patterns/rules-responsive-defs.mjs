@@ -2,6 +2,9 @@
 
 import { runResponsiveLayoutHardFloorRule, runResponsiveProfileOwnershipRule } from "./rules-responsive.mjs";
 
+/** @typedef {import("./shared.mjs").Rule} Rule */
+
+/** @type {Rule[]} */
 export const RESPONSIVE_RULES = [
   {
     name: "responsive-layout-hard-floor",
@@ -29,6 +32,7 @@ export const RESPONSIVE_RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runResponsiveLayoutHardFloorRule,
+    /** @param {{file: string, line: number, expression: string}} finding */
     message: ({ file, line, expression }) =>
       `[responsive-layout-hard-floor] ${file}:${line}\nResponsive layout/text floor detected (${expression}). Use ResponsiveScaleProfile-derived sizing or add a rule-specific suppression for a technical safety guard.`
   },
@@ -60,6 +64,7 @@ export const RESPONSIVE_RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runResponsiveProfileOwnershipRule,
+    /** @param {{file: string, line: number, detail: string}} finding */
     message: ({ file, line, detail }) => `[responsive-profile-ownership] ${file}:${line}\n${detail}`
   }
 ];

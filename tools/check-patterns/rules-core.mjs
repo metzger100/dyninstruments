@@ -7,11 +7,17 @@ import {
   lineAt
 } from "./shared.mjs";
 
+/** @typedef {import("./shared.mjs").Rule} Rule */
+/** @typedef {import("./shared.mjs").Finding} Finding */
+
+/** @type {Record<string, Set<string>>} */
 const RENDERER_NUMERIC_COERCION_ALLOWLIST = {
   // "widgets/example.js": new Set(["thresholdProp"])
 };
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runRegexRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   for (const file of files) {
     const seenLines = new Set();
@@ -33,8 +39,10 @@ export function runRegexRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runTodoWithoutOwner(rule, files) {
   const valid = /(?:TODO|FIXME|HACK|XXX)\s*\(\s*\w+.*\d{4}/;
+  /** @type {Finding[]} */
   const out = [];
   for (const file of files) {
     const lines = getFileData(file).text.split(/\r?\n/);
@@ -47,7 +55,9 @@ export function runTodoWithoutOwner(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runUnusedFallbackRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const detect = /\b(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\b/g;
 
@@ -78,7 +88,9 @@ export function runUnusedFallbackRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runDeadCodeRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
 
   for (const file of files) {
@@ -152,7 +164,9 @@ export function runDeadCodeRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runDefaultTruthyFallbackRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const detect = /\b([A-Za-z_$][A-Za-z0-9_$.]*\.default)\s*\|\|/g;
 
@@ -181,7 +195,9 @@ export function runDefaultTruthyFallbackRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runFormatterAvailabilityHeuristicRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const detect = /\b[A-Za-z_$][A-Za-z0-9_$]*\.trim\(\)\s*===\s*String\(\s*[A-Za-z_$][A-Za-z0-9_$]*\s*\)/g;
 
@@ -206,7 +222,9 @@ export function runFormatterAvailabilityHeuristicRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runRendererNumericCoercionRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const detect = /\bNumber\s*\(\s*props\.([A-Za-z_$][A-Za-z0-9_$]*)\s*(?:\?\?[^)]*)?\)/g;
 
@@ -234,10 +252,10 @@ export function runRendererNumericCoercionRule(rule, files) {
   return out;
 }
 
-export function runLegacyComponentLoaderApiRule(rule, files) {
+/** @param {RegExp} detect @param {string[]} files @param {Rule} rule @returns {Finding[]} */
+function runMaskedExpressionRule(detect, files, rule) {
+  /** @type {Finding[]} */
   const out = [];
-  const detect =
-    /\b(?:runtime\.createHelpers|runtime\.createComponentContext|Helpers\.getModule|componentContext\.components\.get)\b/g;
 
   for (const file of files) {
     const data = getFileData(file);
@@ -266,34 +284,16 @@ export function runLegacyComponentLoaderApiRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
+export function runLegacyComponentLoaderApiRule(rule, files) {
+  const detect =
+    /\b(?:runtime\.createHelpers|runtime\.createComponentContext|Helpers\.getModule|componentContext\.components\.get)\b/g;
+  return runMaskedExpressionRule(detect, files, rule);
+}
+
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runRuntimeReachThroughRule(rule, files) {
-  const out = [];
   const detect =
     /\bruntime\.(?:theme|format|canvas|dom|perf|hostActions|surfaces|componentLoader|clusterShellRenderer|routeActivation)\b/g;
-
-  for (const file of files) {
-    const data = getFileData(file);
-    const seen = new Set();
-    let match;
-
-    while ((match = detect.exec(data.maskedText))) {
-      const line = lineAt(match.index, data.lineStarts);
-      const key = `${file}:${line}:${match[0]}`;
-      if (seen.has(key)) {
-        continue;
-      }
-      seen.add(key);
-      out.push({
-        file,
-        line,
-        message: rule.message({
-          file,
-          line,
-          expression: match[0]
-        })
-      });
-    }
-  }
-
-  return out;
+  return runMaskedExpressionRule(detect, files, rule);
 }

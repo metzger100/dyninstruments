@@ -4,6 +4,9 @@ import { runDuplicateBlockClones, runDuplicateFunctions } from "./rules-duplicat
 
 const ALLOWLISTED_ORCHESTRATION_FUNCTIONS = new Set(["create", "translateFunction", "translate", "renderCanvas"]);
 
+/** @typedef {import("./shared.mjs").Rule} Rule */
+
+/** @type {Rule[]} */
 export const DUPLICATES_RULES = [
   {
     name: "duplicate-functions",
@@ -14,7 +17,7 @@ export const DUPLICATES_RULES = [
     allowlist: [...ALLOWLISTED_ORCHESTRATION_FUNCTIONS],
     run: runDuplicateFunctions,
     message: ({ mode, tokenCount, fileCount, locations }) => {
-      const lines = locations.map((loc) => `  - ${loc.file}:${loc.line}`).join("\n");
+      const lines = locations.map((/** @type {any} */ loc) => `  - ${loc.file}:${loc.line}`).join("\n");
       return `[duplicate-fn-body] ${mode} function clone across ${fileCount} files (${tokenCount} tokens):\n${lines}\nExtract shared logic to shared/widget-kits/ to prevent copy-paste drift.`;
     }
   },
@@ -27,7 +30,7 @@ export const DUPLICATES_RULES = [
     allowlist: [...ALLOWLISTED_ORCHESTRATION_FUNCTIONS],
     run: runDuplicateBlockClones,
     message: ({ tokenCount, statementCount, locations }) => {
-      const lines = locations.map((loc) => `  - ${loc.file}:${loc.line}`).join("\n");
+      const lines = locations.map((/** @type {any} */ loc) => `  - ${loc.file}:${loc.line}`).join("\n");
       return `[duplicate-block] Cross-file cloned function block (${tokenCount} tokens, ${statementCount} statements):\n${lines}\nExtract shared logic to shared/widget-kits/ to keep behavior in one place.`;
     }
   }

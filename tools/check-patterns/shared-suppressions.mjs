@@ -2,34 +2,45 @@
 
 import { getFileData, lineAt } from "./shared.mjs";
 
+/** @typedef {{line: number, detail: string}} InvalidSuppression */
+/** @typedef {{suppressionsByLine: Map<number, Set<string>>, invalids: InvalidSuppression[]}} LintDirectiveInfo */
+
+/** @type {Map<string, LintDirectiveInfo>} */
 let lintDirectiveCache = new Map();
+/** @type {string[]} */
 let knownRuleNames = [];
 
 export const BOUNDARY_MARKER_RULE_NAME = "catch-fallback-without-suppression";
 
+/** @returns {void} */
 export function resetSuppressionState() {
   lintDirectiveCache = new Map();
   knownRuleNames = [];
 }
 
+/** @param {string[]} names @returns {void} */
 export function setKnownRuleNames(names) {
   knownRuleNames = Array.isArray(names) ? names.slice() : [];
   lintDirectiveCache = new Map();
 }
 
+/** @param {string} file @param {number} line @param {string} ruleName @returns {boolean} */
 export function isLintSuppressed(file, line, ruleName) {
   const info = getLintDirectiveInfo(file);
   const suppressedRules = info.suppressionsByLine.get(line);
   return !!(suppressedRules && suppressedRules.has(ruleName));
 }
 
+/** @param {string} file @returns {InvalidSuppression[]} */
 export function getInvalidLintSuppressions(file) {
   return getLintDirectiveInfo(file).invalids.slice();
 }
 
+/** @param {string} file @returns {LintDirectiveInfo} */
 function getLintDirectiveInfo(file) {
-  if (lintDirectiveCache.has(file)) {
-    return lintDirectiveCache.get(file);
+  const cached = lintDirectiveCache.get(file);
+  if (cached) {
+    return cached;
   }
 
   const data = getFileData(file);
@@ -38,8 +49,11 @@ function getLintDirectiveInfo(file) {
   return info;
 }
 
+/** @param {string} text @param {number[]} lineStarts @returns {LintDirectiveInfo} */
 function parseLintDirectives(text, lineStarts) {
+  /** @type {Map<number, Set<string>>} */
   const suppressionsByLine = new Map();
+  /** @type {InvalidSuppression[]} */
   const invalids = [];
   const knownRules = new Set(knownRuleNames);
   const commentRe = /\/\/[^\n]*|\/\*[\s\S]*?\*\//g;
@@ -68,6 +82,14 @@ function parseLintDirectives(text, lineStarts) {
   };
 }
 
+/**
+ * @param {string} body
+ * @param {number} line
+ * @param {Set<string>} knownRules
+ * @param {Map<number, Set<string>>} suppressionsByLine
+ * @param {InvalidSuppression[]} invalids
+ * @returns {void}
+ */
 function parseLintDisableDirective(body, line, knownRules, suppressionsByLine, invalids) {
   const parsed = /^dyni-lint-disable-(next-line|line)\s+([a-z0-9-]+)\s+--\s+(.+)$/s.exec(body);
   if (!parsed) {
@@ -95,6 +117,13 @@ function parseLintDisableDirective(body, line, knownRules, suppressionsByLine, i
   });
 }
 
+/**
+ * @param {string} body
+ * @param {number} line
+ * @param {Map<number, Set<string>>} suppressionsByLine
+ * @param {InvalidSuppression[]} invalids
+ * @returns {void}
+ */
 function parseBoundaryMarker(body, line, suppressionsByLine, invalids) {
   const parsed = /^dyni-boundary-(next-line|line)\(([^)]*)\)\s+--\s+(.+)$/s.exec(body);
   if (!parsed) {
@@ -117,7 +146,9 @@ function parseBoundaryMarker(body, line, suppressionsByLine, invalids) {
   addSuppression(suppressionsByLine, mode === "next-line" ? line + 1 : line, BOUNDARY_MARKER_RULE_NAME);
 }
 
+/** @param {string} rawFields @returns {Record<string, string>} */
 function parseBoundaryMarkerFields(rawFields) {
+  /** @type {Record<string, string>} */
   const fields = {};
   for (const entry of rawFields.split(",")) {
     const separatorIndex = entry.indexOf(":");
@@ -129,6 +160,7 @@ function parseBoundaryMarkerFields(rawFields) {
   return fields;
 }
 
+/** @param {Record<string, string>} fields @param {string} reason @returns {string|null} */
 function validateBoundaryMarkerFields(fields, reason) {
   if (!fields.category || !/^[a-z][a-z0-9-]*$/.test(fields.category)) {
     return "'category' is required and must be a lowercase kebab-case slug.";
@@ -153,19 +185,24 @@ function validateBoundaryMarkerFields(fields, reason) {
   return null;
 }
 
+/** @param {string} value @returns {boolean} */
 function isValidIsoDate(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const parsed = new Date(`${value}T00:00:00Z`);
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
 }
 
+/** @returns {string} */
 function isoToday() {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** @param {Map<number, Set<string>>} suppressionsByLine @param {number} targetLine @param {string} ruleName @returns {void} */
 function addSuppression(suppressionsByLine, targetLine, ruleName) {
-  if (!suppressionsByLine.has(targetLine)) {
-    suppressionsByLine.set(targetLine, new Set());
+  let ruleSet = suppressionsByLine.get(targetLine);
+  if (!ruleSet) {
+    ruleSet = new Set();
+    suppressionsByLine.set(targetLine, ruleSet);
   }
-  suppressionsByLine.get(targetLine).add(ruleName);
+  ruleSet.add(ruleName);
 }

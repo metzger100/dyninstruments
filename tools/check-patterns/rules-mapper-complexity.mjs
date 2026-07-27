@@ -3,7 +3,14 @@
 
 import { findMatchingBrace, getFileData, lineAt } from "./shared.mjs";
 
+/** @typedef {import("./shared.mjs").FileData} FileData */
+/** @typedef {import("./shared.mjs").Finding} Finding */
+/** @typedef {import("./shared.mjs").Rule} Rule */
+/** @typedef {{start: number, end: number, kinds: string[]}} KindRange */
+
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runMapperOutputComplexityRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const translateDecl = /\bfunction\s+translate\s*\([^)]*\)\s*\{/g;
   const returnObject = /\breturn\s*\{/g;
@@ -50,7 +57,9 @@ export function runMapperOutputComplexityRule(rule, files) {
   return out;
 }
 
+/** @param {FileData} data @param {number} bodyStart @param {number} bodyEnd @param {RegExp} kindMatch @returns {KindRange[]} */
 function collectKindRanges(data, bodyStart, bodyEnd, kindMatch) {
+  /** @type {KindRange[]} */
   const out = [];
   const bodyText = data.maskedText.slice(bodyStart, bodyEnd);
   const ifPattern = /\bif\s*\(([^)]*)\)\s*\{/g;
@@ -63,6 +72,7 @@ function collectKindRanges(data, bodyStart, bodyEnd, kindMatch) {
     const close = findMatchingBrace(data.maskedText, open);
     if (close < 0 || close > bodyEnd) continue;
 
+    /** @type {string[]} */
     const kinds = [];
     const conditionStart = absoluteIf + match[0].indexOf("(") + 1;
     const conditionEnd = conditionStart + match[1].length;
@@ -84,6 +94,7 @@ function collectKindRanges(data, bodyStart, bodyEnd, kindMatch) {
   return out;
 }
 
+/** @param {KindRange[]} kindRanges @param {number} returnIndex @returns {string} */
 function inferKindForReturn(kindRanges, returnIndex) {
   const candidates = kindRanges.filter((entry) => returnIndex >= entry.start && returnIndex <= entry.end);
   if (!candidates.length) return "unknown";
@@ -98,6 +109,7 @@ function inferKindForReturn(kindRanges, returnIndex) {
   return candidates[0].kinds.join("|");
 }
 
+/** @param {string} maskedText @param {number} objectOpen @param {number} objectClose @returns {number} */
 function countObjectLiteralProperties(maskedText, objectOpen, objectClose) {
   let braceDepth = 0;
   let parenDepth = 0;

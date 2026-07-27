@@ -19,11 +19,12 @@ try {
   inventory = readJsonPolicy(inventoryPath);
   exceptionBaseline = readJsonPolicy(exceptionBaselinePath);
 } catch (error) {
-  console.error(error.message);
+  console.error(/** @type {Error} */ (error).message);
   process.exit(1);
 }
 const entries = inventory.entries || {};
 const liveFiles = collectLiveTestFiles();
+/** @type {string[]} */
 const errors = [];
 
 checkExceptionBaselineSchema(exceptionBaseline, errors);
@@ -39,6 +40,7 @@ if (errors.length === 0) {
   checkTypecheckSuppressions(entries, errors);
 }
 
+/** @param {any} data @param {Set<string>} live @param {string[]} out */
 function checkSplitSpecFragmentEntries(data, live, out) {
   const fragments = Object.entries(data).filter(([, entry]) => entry.classification === "split-spec-fragment");
 
@@ -67,6 +69,7 @@ if (errors.length > 0) {
 console.log(`Test inventory check passed: ${Object.keys(entries).length} classified test files.`);
 console.log(`SUMMARY_JSON=${JSON.stringify({ ok: true, entryCount: Object.keys(entries).length })}`);
 
+/** @returns {Set<string>} */
 function collectLiveTestFiles() {
   const files = new Set();
   collectJavaScriptFiles(path.join(root, "tests")).forEach(function (file) {
@@ -75,10 +78,13 @@ function collectLiveTestFiles() {
   return files;
 }
 
+/** @param {string} absoluteRoot @returns {string[]} */
 function collectJavaScriptFiles(absoluteRoot) {
+  /** @type {string[]} */
   const files = [];
   if (!fs.existsSync(absoluteRoot)) return files;
 
+  /** @param {string} directory */
   function visit(directory) {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
       const absolutePath = path.join(directory, entry.name);
@@ -91,6 +97,7 @@ function collectJavaScriptFiles(absoluteRoot) {
   return files;
 }
 
+/** @param {any} data @param {string[]} out */
 function checkNoGlobCatchAllKeys(data, out) {
   for (const relativePath of Object.keys(data)) {
     if (relativePath.includes("*")) {
@@ -99,6 +106,7 @@ function checkNoGlobCatchAllKeys(data, out) {
   }
 }
 
+/** @param {any} data @param {Set<string>} live @param {string[]} out */
 function checkInventoryCompleteness(data, live, out) {
   for (const relativePath of Object.keys(data)) {
     if (!live.has(relativePath)) {
@@ -113,6 +121,7 @@ function checkInventoryCompleteness(data, live, out) {
   }
 }
 
+/** @param {any} data @param {string[]} out */
 function checkClassifications(data, out) {
   for (const [relativePath, entry] of Object.entries(data)) {
     if (!ALLOWED_CLASSIFICATIONS.has(entry.classification)) {
@@ -121,6 +130,7 @@ function checkClassifications(data, out) {
   }
 }
 
+/** @param {any} data @param {string[]} out */
 function checkExceptionBaselineSchema(data, out) {
   if (!data || typeof data !== "object" || Array.isArray(data)) {
     out.push("Invalid test-exception baseline: expected an object.");
@@ -144,6 +154,7 @@ function checkExceptionBaselineSchema(data, out) {
   }
 }
 
+/** @param {string[]} out */
 function checkImmutableExceptionBaseline(out) {
   const packagePath = path.join(root, "package.json");
   if (!fs.existsSync(packagePath)) return;
@@ -158,6 +169,7 @@ function checkImmutableExceptionBaseline(out) {
   }
 }
 
+/** @param {any} data @param {any} captured @param {string[]} out */
 function checkExceptionProvenance(data, captured, out) {
   for (const [relativePath, entry] of Object.entries(data)) {
     if (entry.classification === "strict") continue;
@@ -168,6 +180,7 @@ function checkExceptionProvenance(data, captured, out) {
   }
 }
 
+/** @param {any} data @param {Set<string>} live @param {string[]} out */
 function checkHarnessFragmentEntries(data, live, out) {
   const fragments = Object.entries(data).filter(([, entry]) => entry.classification === "harness-fragment");
 
@@ -190,6 +203,7 @@ function checkHarnessFragmentEntries(data, live, out) {
   }
 }
 
+/** @param {string} relativePath @param {any} entry @param {string[]} out */
 function checkTemporaryDebtMetadata(relativePath, entry, out) {
   if (!entry.reason || typeof entry.reason !== "string" || !entry.reason.trim()) {
     out.push(`Temporary test exception '${relativePath}' is missing a 'reason'.`);
@@ -199,6 +213,7 @@ function checkTemporaryDebtMetadata(relativePath, entry, out) {
   }
 }
 
+/** @param {any} data @param {string[]} out */
 function checkTypecheckSuppressions(data, out) {
   for (const [relativePath, entry] of Object.entries(data)) {
     const source = fs.readFileSync(path.join(root, relativePath), "utf8");
@@ -209,6 +224,7 @@ function checkTypecheckSuppressions(data, out) {
   }
 }
 
+/** @param {any} data @param {Set<string>} live @param {string[]} out */
 function checkFixtureEntries(data, live, out) {
   const fixtures = Object.entries(data).filter(([, entry]) => entry.classification === "fixture");
 

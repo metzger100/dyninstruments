@@ -1,23 +1,29 @@
 ---
 name: mapper-review
-description: Reviews mapper file changes against the dyninstruments mapper boundary rules and catches presentation logic leakage, output complexity violations, and naming drift.
+description:
+  Reviews mapper file changes against the dyninstruments mapper boundary rules and catches presentation logic leakage,
+  output complexity violations, and naming drift.
 ---
 
 # Skill: mapper-review
 
 ## Description
 
-Reviews mapper file changes against the dyninstruments mapper boundary rules. Mappers are one of the project's most sensitive boundaries — they must remain declarative routing/normalization only. This skill catches presentation logic leakage, output complexity violations, and naming drift.
+Reviews mapper file changes against the dyninstruments mapper boundary rules. Mappers are one of the project's most
+sensitive boundaries — they must remain declarative routing/normalization only. This skill catches presentation logic
+leakage, output complexity violations, and naming drift.
 
 ## When to Use
 
-Whenever a file in `cluster/mappers/` is created or modified. Also useful as a pre-commit check for any cluster-level changes.
+Whenever a file in `cluster/mappers/` is created or modified. Also useful as a pre-commit check for any cluster-level
+changes.
 
 ## Instructions
 
 ### The Mapper Contract
 
-Mappers have exactly two functions: `create()` and `translate()`. No other function declarations are allowed in a mapper file.
+Mappers have exactly two functions: `create()` and `translate()`. No other function declarations are allowed in a mapper
+file.
 
 - `create()` — use this when the mapper does not need `componentContext`
 - `create(def, componentContext)` — use this only when the mapper needs `componentContext`
@@ -41,6 +47,7 @@ function translate(props, routeContext) { ... }
 ```
 
 If you find extra functions, move them to:
+
 - `widgets/` — for widget-specific logic
 - `shared/widget-kits/` — for reusable logic
 - `cluster/mappers/ClusterMapperToolkit.js` — for mapper-shared utilities
@@ -48,6 +55,7 @@ If you find extra functions, move them to:
 ### Check 2: Declarative Output Only
 
 Each `translate()` return object must contain only:
+
 - Mapped values — direct prop reads or simple normalization (`Number()`, `String()`, `toolkit.cap()`, `toolkit.unit()`)
 - ViewModel outputs — results from `viewModel.build(p, toolkit)`
 - Pass-through keys — formatter names, unit strings, boolean flags
@@ -55,17 +63,17 @@ Each `translate()` return object must contain only:
 ```javascript
 // ❌ SMELL: Presentation logic in mapper
 return {
-  displayText: value > 100 ? "HIGH" : "OK",  // presentation logic
-  color: isAlarm ? "#ff0000" : "#00ff00",     // rendering decision
-  formattedValue: formatSpeed(raw, unit),      // formatter call
+  displayText: value > 100 ? "HIGH" : "OK", // presentation logic
+  color: isAlarm ? "#ff0000" : "#00ff00", // rendering decision
+  formattedValue: formatSpeed(raw, unit), // formatter call
   layoutMode: ratio < 1.0 ? "high" : "normal" // layout logic
 };
 
 // ✅ OK: Declarative output
 return {
-  value: num(p.rawValue),      // numeric normalization
-  caption: cap("kindName"),    // per-kind text param
-  unit: unit("kindName"),      // per-kind text param
+  value: num(p.rawValue), // numeric normalization
+  caption: cap("kindName"), // per-kind text param
+  unit: unit("kindName"), // per-kind text param
   warningFrom: num(p.warningFrom),
   alarmFrom: num(p.alarmFrom)
 };
@@ -75,10 +83,10 @@ return {
 
 Count top-level properties in each `translate()` return object.
 
-| Count | Severity | Action |
-|---|---|---|
-| ≤8 | OK | No action needed |
-| >8 | BLOCK | Refactor immediately — group into sub-objects or move to dedicated renderer adapter |
+| Count | Severity | Action                                                                              |
+| ----- | -------- | ----------------------------------------------------------------------------------- |
+| ≤8    | OK       | No action needed                                                                    |
+| >8    | BLOCK    | Refactor immediately — group into sub-objects or move to dedicated renderer adapter |
 
 Grouping pattern for complex outputs:
 
@@ -154,15 +162,16 @@ return {
 
 ### Check 7: Renderer Naming
 
-Renderer components must use role-based IDs, not cluster-prefixed IDs. Keep route identity in `config/cluster-routes/` and renderer registration in `config/components/`.
+Renderer components must use role-based IDs, not cluster-prefixed IDs. Keep route identity in `config/cluster-routes/`
+and renderer registration in `config/components/`.
 
 ```javascript
 // ❌ SMELL: Cluster-prefixed renderer
-rendererId: "VesselPropsWidget"    // cluster-prefixed
-rendererId: "NavTextWidget"        // cluster-prefixed
+rendererId: "VesselPropsWidget"; // cluster-prefixed
+rendererId: "NavTextWidget"; // cluster-prefixed
 
 // ✅ OK: Role-based renderer
-rendererId: "ActiveRouteTextHtmlWidget"  // feature-based
+rendererId: "ActiveRouteTextHtmlWidget"; // feature-based
 ```
 
 ### Output

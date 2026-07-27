@@ -65,6 +65,18 @@ describe("tag-only release publisher workflow", function () {
     expect(releaseStep.with.prerelease).toBe("${{ steps.release_version.outputs.prerelease }}");
   });
 
+  it("pins the aligned checkout and release actions to their reviewed exact versions", function () {
+    const checkout = workflow.jobs["publish-release"].steps.find(function (/** @type {any} */ step) {
+      return step.uses && step.uses.startsWith("actions/checkout@");
+    });
+    const release = workflow.jobs["publish-release"].steps.find(function (/** @type {any} */ step) {
+      return step.uses && step.uses.startsWith("softprops/action-gh-release@");
+    });
+
+    expect(checkout.uses).toBe("actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd");
+    expect(release.uses).toBe("softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65");
+  });
+
   it("uses immutable actions and allows only the reviewed transport commands", function () {
     const uses = Object.values(workflow.jobs).flatMap(function (job) {
       return job.steps

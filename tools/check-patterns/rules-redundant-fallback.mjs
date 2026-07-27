@@ -14,7 +14,14 @@ import {
   setRendererContractCache
 } from "./shared.mjs";
 
+/** @typedef {import("./shared.mjs").FileData} FileData */
+/** @typedef {import("./shared.mjs").Finding} Finding */
+/** @typedef {import("./shared.mjs").Rule} Rule */
+/** @typedef {Record<string, string>} RendererFallbackContract */
+
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runRedundantInternalFallbackRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const contractsByRenderer = getRendererFallbackContracts();
 
@@ -135,7 +142,9 @@ export function runRedundantInternalFallbackRule(rule, files) {
   return out;
 }
 
+/** @param {FileData} data @returns {{line: number, expression: string}[]} */
 function collectApplyFormatterDefaultFindings(data) {
+  /** @type {{line: number, expression: string}[]} */
   const out = [];
   const detect = /\bfallbackText\s*\(\s*componentContext\.format\.applyFormatter\s*\(/g;
   let match;
@@ -176,6 +185,7 @@ function collectApplyFormatterDefaultFindings(data) {
   return out;
 }
 
+/** @param {string} applyFormatterExpr @returns {string|null} */
 function extractApplyFormatterDefaultExpression(applyFormatterExpr) {
   const masked = maskCommentsAndStrings(applyFormatterExpr);
   const openParen = masked.indexOf("(");
@@ -202,12 +212,14 @@ function extractApplyFormatterDefaultExpression(applyFormatterExpr) {
   return defaultMatch[1].trim();
 }
 
+/** @param {string} expression @returns {string} */
 function normalizeExpressionForCompare(expression) {
   return String(expression || "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
+/** @returns {Record<string, RendererFallbackContract>} */
 function getRendererFallbackContracts() {
   const cached = getRendererContractCache();
   if (cached) {
@@ -224,6 +236,7 @@ function getRendererFallbackContracts() {
     ]
   };
   const mapperFiles = filesForScope(mapperScope);
+  /** @type {Record<string, RendererFallbackContract>} */
   const contracts = {};
   const detectReturnObject = /\breturn\s*\{/g;
 
@@ -263,7 +276,9 @@ function getRendererFallbackContracts() {
   return contracts;
 }
 
+/** @param {string} prefixText @returns {Record<string, string>} */
 function collectMapperAliasKinds(prefixText) {
+  /** @type {Record<string, string>} */
   const out = {};
   const declaration = /\b(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*([^;]+);/g;
   let changed = true;
@@ -290,6 +305,7 @@ function collectMapperAliasKinds(prefixText) {
   return out;
 }
 
+/** @param {string} expression @param {Record<string, string>} knownAliases @returns {string|null} */
 function classifyMapperContractExpression(expression, knownAliases) {
   const expr = String(expression || "").trim();
   if (!expr) {
@@ -307,8 +323,11 @@ function classifyMapperContractExpression(expression, knownAliases) {
   return null;
 }
 
+/** @param {string} returnBody @param {Record<string, string>} aliasKinds @returns {Record<string, string>} */
 function collectRendererContractProps(returnBody, aliasKinds) {
+  /** @type {Record<string, string>} */
   const out = {};
+  /** @param {string} propName @param {string} sourceType @returns {void} */
   const setProp = function (propName, sourceType) {
     if (propName === "renderer") {
       return;

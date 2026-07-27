@@ -1,11 +1,17 @@
 // Brace/paren/comma scanning helpers shared by the one-liner detectors.
 
+/**
+ * @typedef {{ open: number, close: number }} ParenRange
+ */
+
+/** @param {string} text @returns {string} */
 export function stripTrailingSemicolon(text) {
   return String(text || "")
     .replace(/;\s*$/, "")
     .trim();
 }
 
+/** @param {string} text @returns {number} */
 export function countTopLevelCommas(text) {
   let parenDepth = 0;
   let bracketDepth = 0;
@@ -48,6 +54,7 @@ export function countTopLevelCommas(text) {
   return count;
 }
 
+/** @param {string} text @returns {number} */
 export function countStandaloneAssignments(text) {
   let count = 0;
 
@@ -65,11 +72,13 @@ export function countStandaloneAssignments(text) {
   return count;
 }
 
+/** @param {string} text @param {RegExp} pattern @returns {number} */
 export function countMatches(text, pattern) {
   const match = text.match(pattern);
   return match ? match.length : 0;
 }
 
+/** @param {string} text @param {number} openIndex @param {string} openChar @param {string} closeChar @returns {number} */
 export function findMatchingCloseIndex(text, openIndex, openChar, closeChar) {
   if (openIndex < 0 || openIndex >= text.length) return -1;
 
@@ -89,8 +98,11 @@ export function findMatchingCloseIndex(text, openIndex, openChar, closeChar) {
   return -1;
 }
 
+/** @param {string} text @param {number} openIndex @param {number} closeIndex @returns {ParenRange | null} */
 export function findEnclosingParenRange(text, openIndex, closeIndex) {
+  /** @type {number[]} */
   const stack = [];
+  /** @type {ParenRange | null} */
   let best = null;
 
   for (let i = 0; i < text.length; i += 1) {
@@ -113,6 +125,7 @@ export function findEnclosingParenRange(text, openIndex, closeIndex) {
   return best;
 }
 
+/** @param {string} text @param {number} index @param {string} token @returns {boolean} */
 export function matchesToken(text, index, token) {
   if (!text.startsWith(token, index)) return false;
   const before = text[index - 1] || "";
@@ -120,22 +133,26 @@ export function matchesToken(text, index, token) {
   return !isIdentifierChar(before) && !isIdentifierChar(after);
 }
 
+/** @param {string} text @param {number} startIndex @returns {number} */
 export function skipWhitespace(text, startIndex) {
   let i = startIndex;
   while (i < text.length && /\s/.test(text[i])) i += 1;
   return i;
 }
 
+/** @param {string} text @param {number} startIndex @returns {number} */
 export function skipWhitespaceBackward(text, startIndex) {
   let i = startIndex;
   while (i >= 0 && /\s/.test(text[i])) i -= 1;
   return i;
 }
 
+/** @param {string} ch @returns {boolean} */
 export function isIdentifierChar(ch) {
   return /[A-Za-z0-9_$]/.test(ch || "");
 }
 
+/** @param {string} line @returns {string} */
 export function maskRegexLiterals(line) {
   let out = "";
   let i = 0;
@@ -172,6 +189,7 @@ const REGEX_ALLOWED_KEYWORDS = new Set([
   "of"
 ]);
 
+/** @param {string} precedingText @returns {boolean} */
 function canPrecedeRegexLiteral(precedingText) {
   const trimEnd = skipWhitespaceBackward(precedingText, precedingText.length - 1);
   if (trimEnd < 0) return true;
@@ -184,6 +202,7 @@ function canPrecedeRegexLiteral(precedingText) {
   return REGEX_ALLOWED_KEYWORDS.has(word);
 }
 
+/** @param {string} line @param {number} openIndex @returns {number} */
 function findRegexLiteralEnd(line, openIndex) {
   let inCharClass = false;
 

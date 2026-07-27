@@ -10,6 +10,9 @@ import {
   skipWhitespaceBackward
 } from "./scan-helpers.mjs";
 
+/** @typedef {{ open: number, close: number }} ParenRange */
+
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 export function detectCollapsedLiteral(maskedTrimmedLine) {
   if (maskedTrimmedLine.length <= 80) return false;
   if (/^(?:import|export)\b/.test(maskedTrimmedLine)) return false;
@@ -25,6 +28,7 @@ export function detectCollapsedLiteral(maskedTrimmedLine) {
   return containsCollapsedLiteral(maskedTrimmedLine, "{", "}");
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 export function detectCollapsedBlock(maskedTrimmedLine) {
   for (let i = 0; i < maskedTrimmedLine.length; i += 1) {
     if (matchesToken(maskedTrimmedLine, i, "if")) {
@@ -61,11 +65,13 @@ export function detectCollapsedBlock(maskedTrimmedLine) {
   return false;
 }
 
+/** @param {string} maskedTrimmedLine @returns {boolean} */
 function isDestructuringAssignmentLine(maskedTrimmedLine) {
   if (/^(?:const|let|var)\s*[{[]/.test(maskedTrimmedLine)) return true;
   return /^[{[][^=]*=\s*/.test(maskedTrimmedLine);
 }
 
+/** @param {string} maskedTrimmedLine @param {string} openChar @param {string} closeChar @returns {boolean} */
 function containsCollapsedLiteral(maskedTrimmedLine, openChar, closeChar) {
   const openPattern = openChar === "{" ? /\{/g : /\[/g;
   const closePattern = openChar === "{" ? /\}/g : /\]/g;
@@ -105,6 +111,7 @@ function containsCollapsedLiteral(maskedTrimmedLine, openChar, closeChar) {
   return false;
 }
 
+/** @param {string} prefix @returns {boolean} */
 function isLiteralPrefix(prefix) {
   if (!prefix) return false;
   if (/[=(:,[\-+*!?]\s*$/.test(prefix)) return true;
@@ -112,6 +119,7 @@ function isLiteralPrefix(prefix) {
   return false;
 }
 
+/** @param {string} maskedTrimmedLine @param {number} openIndex @param {number} closeIndex @returns {boolean} */
 function isFunctionParameterDestructuringLiteral(maskedTrimmedLine, openIndex, closeIndex) {
   const parenRange = findEnclosingParenRange(maskedTrimmedLine, openIndex, closeIndex);
   if (!parenRange) return false;
@@ -126,6 +134,7 @@ function isFunctionParameterDestructuringLiteral(maskedTrimmedLine, openIndex, c
   return false;
 }
 
+/** @param {string} text @param {number} openIndex @param {number} closeIndex @param {ParenRange} parenRange @returns {boolean} */
 function isTopLevelParameterPattern(text, openIndex, closeIndex, parenRange) {
   const prev = skipWhitespaceBackward(text, openIndex - 1);
   if (prev < parenRange.open) return false;

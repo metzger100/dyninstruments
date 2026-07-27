@@ -26,7 +26,7 @@ describe("package command surface", function () {
 
   it("keeps complexity and scaling policy checks wired into check:core", function () {
     expect(scripts["check:complexity"]).toBe(
-      "node tools/quality-policy/historical-complexity-capture.mjs --check && node tools/quality-policy/complexity-budget.mjs"
+      "node tools/quality-policy/complexity-capture-integrity.mjs && node tools/quality-policy/complexity-budget.mjs"
     );
     expect(scripts["check:scaling"]).toBe(
       "vitest run tests/tools/operation-count-evaluator.test.js tests/contract/route-points-render-model-scaling-contract.test.js tests/shared/html/HtmlDomPatchUtils.scaling-contract.test.js tests/shared/text/TextLayoutPrimitives.scaling-contract.test.js"
@@ -36,12 +36,13 @@ describe("package command surface", function () {
     );
   });
 
-  it("aggregates the production and test typecheck boundaries", function () {
+  it("aggregates the production, test, and tool typecheck boundaries", function () {
     expect(scripts["typecheck:source"]).toBe("tsc -p tsconfig.checkjs.json");
     expect(scripts["typecheck:tests"]).toBe(
       "node tools/quality-policy/test-inventory.mjs && tsc -p tsconfig.tests.json"
     );
-    expect(scripts["typecheck"]).toBe("npm run typecheck:source && npm run typecheck:tests");
+    expect(scripts["typecheck:tools"]).toBe("tsc -p tsconfig.tools.json");
+    expect(scripts["typecheck"]).toBe("npm run typecheck:source && npm run typecheck:tests && npm run typecheck:tools");
   });
 
   it("keeps setup on the locked npm install path", function () {
@@ -66,5 +67,31 @@ describe("package command surface", function () {
     Object.entries(packageJson.devDependencies).forEach(function ([name, version]) {
       expect(version, name).toMatch(/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/);
     });
+  });
+
+  it("keeps the Git-anchored complexity regeneration audit outside the required gate", function () {
+    expect(scripts["complexity:regenerate-audit"]).toBe(
+      "node tools/quality-policy/historical-complexity-capture.mjs --check"
+    );
+    expect(scripts["check:all"]).not.toContain("complexity:regenerate-audit");
+    expect(scripts["check:core"]).not.toContain("complexity:regenerate-audit");
+    expect(scripts["check:complexity"]).not.toContain("historical-complexity-capture.mjs");
+  });
+
+  it("keeps the dependency advisory command networked and outside check:all", function () {
+    expect(scripts["dependencies:audit"]).toBe("npm audit");
+    expect(scripts["check:all"]).not.toContain("dependencies:audit");
+    expect(scripts["check:core"]).not.toContain("dependencies:audit");
+  });
+
+  it("forces the vulnerable transitive js-yaml and fast-uri resolutions to tested fixed versions", function () {
+    expect(packageJson.overrides).toEqual({ "js-yaml": "5.2.2", "fast-uri": "3.1.4" });
+
+    const root = process.cwd();
+    const installedJsYaml = require(path.join(root, "node_modules/js-yaml/package.json"));
+    const installedFastUri = require(path.join(root, "node_modules/fast-uri/package.json"));
+
+    expect(installedJsYaml.version).toBe(packageJson.overrides["js-yaml"]);
+    expect(installedFastUri.version).toBe(packageJson.overrides["fast-uri"]);
   });
 });

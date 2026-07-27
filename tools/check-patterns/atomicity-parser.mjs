@@ -1,5 +1,11 @@
 import { escapeRegex, findMatchingBrace, getFileData, lineAt, readLiteralToken } from "./shared.mjs";
 
+/** @typedef {import("./shared.mjs").FileData} FileData */
+/** @typedef {{key: string, keyIndex: number, line: number, valueStart: number, valueEnd: number, rawValue: string}} ObjectLiteralProperty */
+/** @typedef {{token: string, type: "string"|"literal", value: string}} ExactLiteral */
+/** @typedef {{line: number, rawValue: string, values: Record<string, {value?: string, token: string}>}} ObjectGroupResult */
+
+/** @param {FileData} data @param {string} propertyName @returns {{openBrace: number, closeBrace: number}[]} */
 export function findNamedObjectLiterals(data, propertyName) {
   const out = [];
   const detect = new RegExp(`\\b${escapeRegex(propertyName)}\\s*:`, "g");
@@ -27,7 +33,9 @@ export function findNamedObjectLiterals(data, propertyName) {
   return out;
 }
 
+/** @param {FileData} data @param {number} openBrace @param {number} closeBrace @returns {ObjectLiteralProperty[]} */
 export function parseObjectLiteral(data, openBrace, closeBrace) {
+  /** @type {ObjectLiteralProperty[]} */
   const properties = [];
   let cursor = openBrace + 1;
 
@@ -70,6 +78,7 @@ export function parseObjectLiteral(data, openBrace, closeBrace) {
   return properties;
 }
 
+/** @param {FileData} data @param {ObjectLiteralProperty|null} parentProp @param {string} keyName @returns {ObjectLiteralProperty|null} */
 export function readNestedObjectProperty(data, parentProp, keyName) {
   if (!parentProp || !parentProp.rawValue.startsWith("{")) {
     return null;
@@ -86,14 +95,17 @@ export function readNestedObjectProperty(data, parentProp, keyName) {
   );
 }
 
+/** @param {FileData} data @param {ObjectLiteralProperty[]} props @param {string} groupName @returns {ObjectGroupResult|null} */
 export function readStringObjectGroup(data, props, groupName) {
   return readObjectGroup(data, props, groupName, "string");
 }
 
+/** @param {FileData} data @param {ObjectLiteralProperty[]} props @param {string} groupName @returns {ObjectGroupResult|null} */
 export function readLiteralObjectGroup(data, props, groupName) {
   return readObjectGroup(data, props, groupName, "literal");
 }
 
+/** @param {string} rawValue @returns {ExactLiteral|null} */
 export function parseExactLiteral(rawValue) {
   const trimmed = String(rawValue || "").trim();
   if (!trimmed) {
@@ -124,6 +136,7 @@ export function parseExactLiteral(rawValue) {
   };
 }
 
+/** @param {string} file @returns {{normal: {token: string, line: number}, flat: {token: string, line: number}}|null} */
 export function readDefaultRatioMap(file) {
   let data;
   try {
@@ -172,6 +185,7 @@ export function readDefaultRatioMap(file) {
   };
 }
 
+/** @param {string} file @param {string} constantName @returns {{token: string, line: number}|null} */
 export function readConstLiteral(file, constantName) {
   let data;
   try {
@@ -200,6 +214,7 @@ export function readConstLiteral(file, constantName) {
   };
 }
 
+/** @param {string} maskedText @returns {Set<string>} */
 export function collectFrameworkAliases(maskedText) {
   const out = new Set();
   const detect =
@@ -213,12 +228,14 @@ export function collectFrameworkAliases(maskedText) {
   return out;
 }
 
+/** @param {string} token @returns {string} */
 export function normalizeToken(token) {
   return String(token || "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
+/** @param {FileData} data @param {ObjectLiteralProperty[]} props @param {string} groupName @param {"string"|"literal"} kind @returns {ObjectGroupResult|null} */
 function readObjectGroup(data, props, groupName, kind) {
   const prop = props.find(function (entry) {
     return entry.key === groupName;
@@ -232,6 +249,7 @@ function readObjectGroup(data, props, groupName, kind) {
     return null;
   }
   const nestedProps = parseObjectLiteral(data, prop.valueStart, nestedClose);
+  /** @type {Record<string, {value?: string, token: string}>} */
   const values = Object.create(null);
 
   for (const entry of nestedProps) {
@@ -252,6 +270,7 @@ function readObjectGroup(data, props, groupName, kind) {
   };
 }
 
+/** @param {string} text @param {string} maskedText @param {number} start @returns {{key: string, index: number, end: number}|null} */
 function readPropertyKey(text, maskedText, start) {
   const ch = text[start];
   if (ch === '"' || ch === "'" || ch === "`") {
@@ -278,6 +297,7 @@ function readPropertyKey(text, maskedText, start) {
   };
 }
 
+/** @param {string} text @param {number} start @param {string} quote @returns {number} */
 function findStringEnd(text, start, quote) {
   for (let i = start + 1; i < text.length; i += 1) {
     if (text[i] === "\\") {
@@ -291,6 +311,7 @@ function findStringEnd(text, start, quote) {
   return -1;
 }
 
+/** @param {string} text @param {number} start @param {number} end @returns {number} */
 function skipWhitespace(text, start, end) {
   let cursor = start;
   while (cursor < end && /\s/.test(text[cursor])) {
@@ -299,6 +320,7 @@ function skipWhitespace(text, start, end) {
   return cursor;
 }
 
+/** @param {string} text @param {number} start @param {number} end @returns {number} */
 function skipSourceWhitespace(text, start, end) {
   let cursor = start;
   while (cursor < end && /\s/.test(text[cursor])) {
@@ -307,6 +329,7 @@ function skipSourceWhitespace(text, start, end) {
   return cursor;
 }
 
+/** @param {string} text @param {number} start @param {number} end @returns {number} */
 function skipSeparators(text, start, end) {
   let cursor = start;
   while (cursor < end && /[\s,]/.test(text[cursor])) {
@@ -315,6 +338,7 @@ function skipSeparators(text, start, end) {
   return cursor;
 }
 
+/** @param {string} maskedText @param {number} start @param {number} limit @returns {number} */
 function findExpressionEnd(maskedText, start, limit) {
   let braceDepth = 0;
   let parenDepth = 0;

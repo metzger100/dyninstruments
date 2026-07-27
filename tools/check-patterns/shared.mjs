@@ -20,16 +20,26 @@ export {
 
 const SKIP_DIRS = new Set([".git", "node_modules", "coverage", "artifacts"]);
 
+/** @typedef {{text: string, lineStarts: number[], maskedText: string}} FileData */
+/** @typedef {{file: string, line: number, [key: string]: any}} Finding */
+/** @typedef {{name: string, severity?: string, scope: {include: string[], exclude?: string[]}, run?: (rule: any, files: string[]) => any[], message: (finding: any) => string, [key: string]: any}} Rule */
+
 let ROOT = process.cwd();
 let WARN_MODE = false;
+/** @type {Map<string, FileData>} */
 const fileCache = new Map();
+/** @type {Map<string, string[]>} */
 const scopeCache = new Map();
+/** @type {string[]|null} */
 let clusterPrefixCache = null;
+/** @type {any} */
 let rendererContractCache = null;
+/** @type {any} */
 let atomicityContractCache = null;
 
 export const RENDER_PROP_OBJECT_NAMES = new Set(["p", "props"]);
 
+/** @param {{root?: string, warnMode?: boolean}} [options] @returns {void} */
 export function resetContext(options = {}) {
   ROOT = path.resolve(options.root || process.cwd());
   WARN_MODE = !!options.warnMode;
@@ -50,28 +60,35 @@ export function getRoot() {
   return ROOT;
 }
 
+/** @returns {any} */
 export function getRendererContractCache() {
   return rendererContractCache;
 }
 
+/** @param {any} value @returns {void} */
 export function setRendererContractCache(value) {
   rendererContractCache = value;
 }
 
+/** @returns {any} */
 export function getAtomicityContractCache() {
   return atomicityContractCache;
 }
 
+/** @param {any} value @returns {void} */
 export function setAtomicityContractCache(value) {
   atomicityContractCache = value;
 }
 
+/** @param {{include: string[], exclude?: string[]}} scope @returns {string[]} */
 export function filesForScope(scope) {
   const key = JSON.stringify(scope);
-  if (scopeCache.has(key)) return scopeCache.get(key);
+  const cached = scopeCache.get(key);
+  if (cached) return cached;
   const includes = scope.include.map(globToRegExp);
   const excludes = (scope.exclude || []).map(globToRegExp);
   const roots = [...new Set(scope.include.map(scopeRoot))];
+  /** @type {Map<string, boolean>} */
   const candidates = new Map();
   for (const root of roots) {
     walk(path.join(ROOT, root), candidates);
@@ -87,8 +104,9 @@ export function filesForScope(scope) {
   return files;
 }
 
+/** @param {string} file @returns {FileData} */
 export function getFileData(file) {
-  if (fileCache.has(file)) return fileCache.get(file);
+  if (fileCache.has(file)) return /** @type {FileData} */ (fileCache.get(file));
   const text = fs.readFileSync(path.join(ROOT, file), "utf8");
   const lineStarts = [0];
   for (let i = 0; i < text.length; i += 1) {
@@ -99,6 +117,7 @@ export function getFileData(file) {
   return data;
 }
 
+/** @returns {string[]} */
 export function getClusterPascalPrefixes() {
   if (clusterPrefixCache) return clusterPrefixCache;
 
@@ -129,6 +148,7 @@ export function getClusterPascalPrefixes() {
   return clusterPrefixCache;
 }
 
+/** @param {string} absPath @param {Map<string, boolean>} out @returns {void} */
 function walk(absPath, out) {
   if (!fs.existsSync(absPath)) return;
   const stat = fs.statSync(absPath);
@@ -142,6 +162,7 @@ function walk(absPath, out) {
   }
 }
 
+/** @param {string} pattern @returns {string} */
 function scopeRoot(pattern) {
   const segments = normalizePath(pattern).split("/");
   const root = [];
@@ -152,6 +173,7 @@ function scopeRoot(pattern) {
   return root.length ? root.join("/") : ".";
 }
 
+/** @param {string} pattern @returns {RegExp} */
 function globToRegExp(pattern) {
   const segments = normalizePath(pattern).split("/").filter(Boolean);
   let regex = "^";
@@ -167,6 +189,7 @@ function globToRegExp(pattern) {
   return new RegExp(regex + "$");
 }
 
+/** @param {number} index @param {number[]} starts @returns {number} */
 export function lineAt(index, starts) {
   let lo = 0;
   let hi = starts.length - 1;
@@ -178,16 +201,20 @@ export function lineAt(index, starts) {
   return hi + 1;
 }
 
+/** @param {RegExp} re @returns {RegExp} */
 export function asGlobal(re) {
   if (re.flags.includes("g")) return new RegExp(re.source, re.flags);
   return new RegExp(re.source, re.flags + "g");
 }
 
+/** @param {Finding} a @param {Finding} b @returns {number} */
 export function compareFindings(a, b) {
   return a.file.localeCompare(b.file) || a.line - b.line;
 }
 
+/** @param {string} maskedText @returns {{name: string, value: string}[]} */
 export function collectFileScopeConstantBooleans(maskedText) {
+  /** @type {{name: string, value: string}[]} */
   const out = [];
   const re = /^\s*const\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*(true|false)\s*;/gm;
   let match;
@@ -197,6 +224,7 @@ export function collectFileScopeConstantBooleans(maskedText) {
   return out;
 }
 
+/** @param {string} text @param {string} name @returns {number} */
 export function countIdentifierReferences(text, name) {
   const re = identifierRegExp(name);
   let count = 0;
@@ -204,18 +232,22 @@ export function countIdentifierReferences(text, name) {
   return count;
 }
 
+/** @param {string} name @returns {RegExp} */
 function identifierRegExp(name) {
   return new RegExp(`(?<![A-Za-z0-9_$])${escapeRegex(name)}(?![A-Za-z0-9_$])`, "g");
 }
 
+/** @param {string} value @returns {string} */
 function normalizePath(value) {
   return String(value).replace(/\\/g, "/").replace(/^\.\//, "");
 }
 
+/** @param {string} absPath @returns {string} */
 function toRel(absPath) {
   return normalizePath(path.relative(ROOT, absPath));
 }
 
+/** @param {string} text @returns {string} */
 export function escapeRegex(text) {
   return text.replace(/[|\\{}()[\]^$+?.]/g, "\\$&");
 }

@@ -2,6 +2,9 @@
 
 import { runRedundantInternalFallbackRule } from "./rules-redundant-fallback.mjs";
 
+/** @typedef {import("./shared.mjs").Rule} Rule */
+
+/** @type {Rule[]} */
 export const REDUNDANT_FALLBACK_RULES = [
   {
     name: "redundant-internal-fallback",
@@ -17,6 +20,7 @@ export const REDUNDANT_FALLBACK_RULES = [
       exclude: ["tests/**", "tools/**"]
     },
     run: runRedundantInternalFallbackRule,
+    /** @param {{file: string, line: number, expression: string, propName?: string, rendererId?: string, sourceType?: string}} finding */
     message: ({ file, line, expression, propName, rendererId, sourceType }) => {
       if (sourceType === "applyFormatter-default") {
         return `[redundant-internal-fallback] ${file}:${line}\nRedundant fallback (${expression}). componentContext.format.applyFormatter() already applies the same default; remove the outer fallback wrapper.`;

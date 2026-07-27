@@ -7,6 +7,9 @@ import {
   runMapperPropRenormalizationRule
 } from "./rules-mapper.mjs";
 
+/** @typedef {import("./shared.mjs").Rule} Rule */
+
+/** @type {Rule[]} */
 export const MAPPER_RULES = [
   {
     name: "absent-numeric-sentinel",

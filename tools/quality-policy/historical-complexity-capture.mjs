@@ -4,11 +4,18 @@ import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { PRODUCTION_ROOTS, STRICT_LIMITS, scanSource } from "./complexity-scan.mjs";
 
+/** @typedef {import("./complexity-scan.mjs").ComplexityFinding} ComplexityFinding */
+
 const toolDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(toolDirectory, "../..");
 const baselinePath = path.join(toolDirectory, "verified-baseline.json");
 const findingsPath = path.join(toolDirectory, "historical-complexity-findings.json");
 
+/**
+ * @param {string} root
+ * @param {string} commit
+ * @returns {{ capturedCommit: string, strictLimits: typeof STRICT_LIMITS, findingCount: number, byMetric: Record<string, number>, findings: ComplexityFinding[] }}
+ */
 export function captureHistoricalComplexity(root, commit) {
   const trackedFiles = git(root, ["ls-tree", "-r", "--name-only", commit])
     .trim()
@@ -28,6 +35,7 @@ export function captureHistoricalComplexity(root, commit) {
   };
 }
 
+/** @param {any} expected @param {any} actual */
 export function verifyHistoricalComplexityCapture(expected, actual) {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     throw new Error(
@@ -36,10 +44,12 @@ export function verifyHistoricalComplexityCapture(expected, actual) {
   }
 }
 
+/** @param {string} root @param {string[]} args @returns {string} */
 function git(root, args) {
   return execFileSync("git", args, { cwd: root, encoding: "utf8", maxBuffer: 20 * 1024 * 1024 });
 }
 
+/** @param {string} file @returns {boolean} */
 function isProductionJavaScript(file) {
   if (file === "plugin.js" || file === "plugin.mjs") return true;
   return PRODUCTION_ROOTS.some(function (root) {
@@ -47,6 +57,7 @@ function isProductionJavaScript(file) {
   });
 }
 
+/** @param {ComplexityFinding} left @param {ComplexityFinding} right @returns {number} */
 function compareFindings(left, right) {
   return (
     left.file.localeCompare(right.file) ||
@@ -55,11 +66,12 @@ function compareFindings(left, right) {
   );
 }
 
+/** @param {ComplexityFinding[]} findings @returns {Record<string, number>} */
 function countByMetric(findings) {
   return findings.reduce(function (counts, finding) {
     counts[finding.metric] = (counts[finding.metric] || 0) + 1;
     return counts;
-  }, {});
+  }, /** @type {Record<string, number>} */ ({}));
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

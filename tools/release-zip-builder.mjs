@@ -14,6 +14,7 @@ const FIXED_RUNTIME_FILES = [
 
 const RUNTIME_PREFIXES = ["runtime/", "cluster/", "config/", "shared/", "widgets/", "assets/", "layouts/"];
 
+/** @param {string} filePath @returns {boolean} */
 export function isRuntimePath(filePath) {
   if (typeof filePath !== "string" || filePath.trim() === "") {
     return false;
@@ -25,7 +26,9 @@ export function isRuntimePath(filePath) {
   return RUNTIME_PREFIXES.some((prefix) => normalized.startsWith(prefix));
 }
 
+/** @param {string} rootDir @returns {string[]} */
 export function buildReleaseManifest(rootDir) {
+  /** @type {Set<string>} */
   const files = new Set();
   const bootstrapManifest = loadBootstrapManifest(rootDir) || [];
   const registry = loadComponentsRegistry(rootDir) || {};
@@ -68,6 +71,7 @@ export function buildReleaseManifest(rootDir) {
   return Array.from(files).sort((a, b) => a.localeCompare(b));
 }
 
+/** @param {string} rootDir @returns {string} */
 export function buildBootstrapBundleContent(rootDir) {
   const bootstrapManifest = loadBootstrapManifest(rootDir);
 
@@ -87,6 +91,11 @@ export function buildBootstrapBundleContent(rootDir) {
   return "// bootstrap-bundle.js — generated at release time, do not edit\n" + scripts.join("\n");
 }
 
+/**
+ * @param {string} rootDir
+ * @param {string[]} files
+ * @returns {{ valid: boolean, missing: string[] }}
+ */
 export function validateManifest(rootDir, files) {
   const missing = [];
 
@@ -103,12 +112,17 @@ export function validateManifest(rootDir, files) {
   };
 }
 
+/**
+ * @param {Set<string>} files
+ * @param {any} rawValue
+ */
 function collectRegistryField(files, rawValue) {
   if (typeof rawValue !== "string") return;
   const relPath = stripSentinelBase(rawValue);
   addIfPresent(files, relPath);
 }
 
+/** @param {string} rawValue @returns {string} */
 function stripSentinelBase(rawValue) {
   const value = rawValue.trim();
   if (value === "") return "";
@@ -118,6 +132,10 @@ function stripSentinelBase(rawValue) {
   return value;
 }
 
+/**
+ * @param {Set<string>} files
+ * @param {any} rawPath
+ */
 function addIfPresent(files, rawPath) {
   if (typeof rawPath !== "string") return;
   const normalized = normalizeRelativePath(rawPath);
@@ -126,25 +144,34 @@ function addIfPresent(files, rawPath) {
   }
 }
 
+/** @param {string} rawPath @returns {string} */
 function normalizeRelativePath(rawPath) {
   return rawPath.replace(/\\/g, "/").replace(/^\//, "").replace(/^\.\//, "").trim();
 }
 
+/** @param {string} rootDir @returns {string[]} */
 function collectFontAssetPaths(rootDir) {
   const fontsDir = path.join(rootDir, "assets", "fonts");
   return collectAssetPaths(rootDir, fontsDir);
 }
 
+/** @param {string} rootDir @returns {string[]} */
 function collectLayoutAssetPaths(rootDir) {
   const layoutsDir = path.join(rootDir, "layouts");
   return collectAssetPaths(rootDir, layoutsDir);
 }
 
+/**
+ * @param {string} rootDir
+ * @param {string} absDirPath
+ * @returns {string[]}
+ */
 function collectAssetPaths(rootDir, absDirPath) {
   if (!fs.existsSync(absDirPath)) {
     return [];
   }
 
+  /** @type {string[]} */
   const out = [];
   walkFiles(absDirPath, (absFile) => {
     const relPath = path.relative(rootDir, absFile).replace(/\\/g, "/");
@@ -153,6 +180,10 @@ function collectAssetPaths(rootDir, absDirPath) {
   return out;
 }
 
+/**
+ * @param {string} currentPath
+ * @param {(absFile: string) => void} visitor
+ */
 function walkFiles(currentPath, visitor) {
   const stat = fs.statSync(currentPath);
   if (stat.isFile()) {

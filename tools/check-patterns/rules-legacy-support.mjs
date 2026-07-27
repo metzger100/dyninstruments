@@ -8,6 +8,10 @@ const PREMATURE_MEMBER_OR_FUNCTION_RE =
 const PREMATURE_MEMBER_OR_MEMBER_RE =
   /([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*\|\|\s*\1\.([A-Za-z_$][A-Za-z0-9_$]*)/g;
 
+/** @typedef {import("./shared.mjs").Rule} Rule */
+/** @typedef {import("./shared.mjs").FileData} FileData */
+
+/** @type {Record<string, string>} */
 const CANONICAL_HELPERS = {
   // ValueMath
   toObject: "ValueMath",
@@ -72,6 +76,7 @@ const CANONICAL_HELPERS = {
   valueToAngleFlat: "RadialAngleMath"
 };
 
+/** @type {Record<string, string>} */
 const OWNER_MODULE_PATHS = {
   ValueMath: "shared/widget-kits/value/ValueMath.js",
   HtmlMeasureUtils: "shared/widget-kits/html/HtmlMeasureUtils.js",
@@ -85,6 +90,7 @@ const OWNER_MODULE_PATHS = {
   RadialAngleMath: "shared/widget-kits/radial/RadialAngleMath.js"
 };
 
+/** @type {Record<string, Set<string>>} */
 const CANONICAL_HELPER_OWNER_EXCEPTIONS = {
   resolveFitCache: new Set(["shared/widget-kits/text/TextLayoutEngine.js"]),
   resolveTextFillScale: new Set(["shared/widget-kits/text/TextLayoutScaleHelpers.js"]),
@@ -104,6 +110,7 @@ const CANONICAL_HELPER_DECL_RE = new RegExp(
   "gm"
 );
 
+/** @type {Record<string, Set<string>>} */
 const PREMATURE_LEGACY_SUPPORT_ALLOWLIST = {
   // runtime/theme/token-catalog.js and runtime/theme/resolver.js implement the
   // documented, permanent deprecated-CSS-alias contract (Regatta camelCase input
@@ -113,6 +120,7 @@ const PREMATURE_LEGACY_SUPPORT_ALLOWLIST = {
   "runtime/theme/resolver.js": new Set(["deprecatedAliasInputVar"])
 };
 
+/** @param {Rule} rule @param {string[]} files @returns {any[]} */
 export function runPrematureLegacySupportRule(rule, files) {
   const out = [];
   const functionDecl = /\bfunction\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(([^)]*)\)/g;
@@ -255,6 +263,7 @@ export function runPrematureLegacySupportRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {any[]} */
 export function runCanonicalHelperRedefinitionRule(rule, files) {
   const out = [];
   for (const file of files) {
@@ -299,6 +308,7 @@ export function runCanonicalHelperRedefinitionRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {any[]} */
 export function runEditableThresholdInternalRule(rule, files) {
   const out = [];
   const propertyDecl = /^[ \t]*([A-Za-z_$][A-Za-z0-9_$]*)\s*:\s*\{/gm;
@@ -349,16 +359,19 @@ export function runEditableThresholdInternalRule(rule, files) {
   return out;
 }
 
+/** @param {string} value @returns {string} */
 function normalizePath(value) {
   return String(value || "").replace(/\\/g, "/");
 }
 
+/** @param {FileData} data @param {number} line @returns {string} */
 function readLineText(data, line) {
   const start = data.lineStarts[Math.max(0, line - 1)] || 0;
   const end = line < data.lineStarts.length ? data.lineStarts[line] - 1 : data.text.length;
   return data.text.slice(start, end);
 }
 
+/** @param {string} name @returns {boolean} */
 function isLikelyFunctionMemberName(name) {
   return /^(to|is|has|resolve|build|measure|set|fit|format|append|read|write|create|make|clamp|scale|split|valueTo|angleTo|normalize)[A-Z_]/.test(
     String(name || "")

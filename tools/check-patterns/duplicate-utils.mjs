@@ -1,5 +1,7 @@
 import { compareFindings } from "./shared.mjs";
 
+/** @typedef {{value: string, type: "string"|"number"|"identifier"|"keyword"|"operator"|"punct", line: number}} DupToken */
+
 const CONTROL_FLOW_TOKENS = new Set(["if", "for", "while", "switch", "catch"]);
 const KEYWORD_TOKENS = new Set([
   "break",
@@ -38,7 +40,9 @@ const KEYWORD_TOKENS = new Set([
   "yield"
 ]);
 
+/** @param {string} text @param {number} startLine @returns {DupToken[]} */
 export function tokenizeDuplicationBody(text, startLine) {
+  /** @type {DupToken[]} */
   const tokens = [];
   let i = 0;
   let line = startLine;
@@ -179,6 +183,7 @@ export function tokenizeDuplicationBody(text, startLine) {
   return tokens;
 }
 
+/** @param {DupToken} token @returns {string} */
 export function toShapeToken(token) {
   if (token.type === "identifier") return "ID";
   if (token.type === "number") return "NUM";
@@ -186,6 +191,7 @@ export function toShapeToken(token) {
   return token.value;
 }
 
+/** @param {string[]} tokens @returns {number} */
 export function countControlTokens(tokens) {
   let count = 0;
   for (const token of tokens) {
@@ -194,6 +200,7 @@ export function countControlTokens(tokens) {
   return count;
 }
 
+/** @param {string[]} tokens @returns {number} */
 export function countStatementMarkers(tokens) {
   let count = 0;
   for (const token of tokens) {
@@ -202,6 +209,7 @@ export function countStatementMarkers(tokens) {
   return count;
 }
 
+/** @param {any} a @param {any} b @returns {number} */
 export function compareDuplicateGroups(a, b) {
   if (a.records.length !== b.records.length) return b.records.length - a.records.length;
   if (a.tokenCount !== b.tokenCount) return b.tokenCount - a.tokenCount;
@@ -210,6 +218,7 @@ export function compareDuplicateGroups(a, b) {
   return compareFindings(firstA, firstB);
 }
 
+/** @param {any[]} locations @returns {any[]} */
 export function dedupeLocations(locations) {
   const seen = new Set();
   const out = [];
@@ -222,6 +231,7 @@ export function dedupeLocations(locations) {
   return out;
 }
 
+/** @param {any[]} segments @returns {any[]} */
 export function mergeCloneSegments(segments) {
   if (!segments.length) return [];
   const sorted = [...segments].sort(function (a, b) {
@@ -243,6 +253,7 @@ export function mergeCloneSegments(segments) {
   return out;
 }
 
+/** @param {any} entry @param {number} tokenIndex @returns {number} */
 export function tokenLineAt(entry, tokenIndex) {
   if (!entry.tokens.length) return entry.line;
   const idx = Math.max(0, Math.min(entry.tokens.length - 1, tokenIndex));

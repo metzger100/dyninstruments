@@ -2,6 +2,9 @@
 
 import { runMapperOutputComplexityRule } from "./rules-mapper-complexity.mjs";
 
+/** @typedef {import("./shared.mjs").Rule} Rule */
+
+/** @type {Rule[]} */
 export const MAPPER_COMPLEXITY_RULES = [
   {
     name: "mapper-output-complexity",

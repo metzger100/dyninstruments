@@ -146,13 +146,15 @@ Task: Add new BarometerGauge
 - [ ] New production files use a recognized coverage classification and do not lower the immutable per-file floor; new
       tests enter the strict inventory; only paths in the hash-locked test-exception capture may retain a checked
       temporary-fragment or negative-fixture classification.
-- [ ] Coverage/complexity policy edits preserve the hash-locked coverage snapshot and regenerated historical complexity
-      capture; only the 12 frozen legacy coverage paths may retain their exact below-default values, and every active
-      complexity value exactly matches its current finding.
+- [ ] Coverage/complexity policy edits preserve the hash-locked coverage snapshot and the digest-anchored historical
+      complexity capture (portable, Git-free proof; `npm run complexity:regenerate-audit` is the maintainer-only
+      Git-based regeneration audit); only the 12 frozen legacy coverage paths may retain their exact below-default
+      values, and every active complexity value exactly matches its current finding.
 - [ ] For releases, pushed only a locally created annotated tag; the tag workflow validates and publishes committed
       artifacts with the correct stable/prerelease classification without rerunning quality.
-- [ ] Completed the documented manual AvNav validation before release: plugin load, representative radial/linear/HTML
-      widgets, day/night switch, and route/AIS interactions.
+- [ ] Completed the profile-aware manual AvNav validation checklist before release:
+      [documentation/guides/manual-avnav-validation.md](documentation/guides/manual-avnav-validation.md) (install/load,
+      representative radial/linear/HTML widgets, day/night switch, route/AIS interactions, package upgrade/rollback).
 
 ---
 
@@ -161,10 +163,15 @@ Task: Add new BarometerGauge
 - Mandatory on every task: follow `documentation/conventions/coding-standards.md` and
   `documentation/conventions/smell-prevention.md` as binding rules.
 - Required completion gate: `npm run check:all` (`check:core` + `test:coverage:check`).
-- `check:core` includes `check:standard` (Prettier over maintained code/docs, agent skills, and active plans, plus
-  ESLint, Stylelint, actionlint, and jscpd), `typecheck`, `package:check`, `test:focus:check`, `check:complexity`
-  (complexity no-regression budget), `check:scaling` (validated non-negative integer operation-count contracts, never
-  timing), and `docs:check` before the remaining project-specific gates.
+- `check:core` includes `check:standard` (Prettier over maintained code/docs, agent skills, the lockfile, and active
+  plans, checked against Prettier's real effective ignore resolution, plus ESLint, Stylelint, actionlint, and jscpd),
+  `typecheck` (production/config `checkJs`, inventory-owned tests, and every maintained `tools/**/*.mjs` script),
+  `package:check` (Ajv validation of the generic AvNav `plugin.json` base schema composed with the Dyninstruments
+  layouts profile), `test:focus:check`, `check:complexity` (a portable, Git-free digest proof of the historical capture
+  plus the complexity no-regression budget), `check:scaling` (validated non-negative integer operation-count contracts,
+  never timing), and `docs:check` before the remaining project-specific gates.
+- `npm run dependencies:audit` (networked `npm audit`) and `npm run complexity:regenerate-audit` (Git-based historical
+  capture regeneration) are maintainer-only commands; neither runs inside `check:all`.
 - `test:coverage:check` runs native Vitest/V8 global and critical-area thresholds.
 - `test:split` runs the Vitest configured split: `unit-node`, `contract`, and `unit-dom` projects.
 - Full smell catalog, enforcement matrix, and suppression syntax:

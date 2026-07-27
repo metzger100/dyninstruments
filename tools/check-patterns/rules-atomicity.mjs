@@ -2,6 +2,12 @@ import { escapeRegex, findMatchingBrace, getFileData, lineAt, readLiteralToken }
 import { getAtomicityContracts, getUniqueConfigDefault } from "./atomicity-contracts.mjs";
 import { collectFrameworkAliases, normalizeToken, readConstLiteral, readDefaultRatioMap } from "./atomicity-parser.mjs";
 
+/** @typedef {import("./shared.mjs").Rule} Rule */
+/** @typedef {import("./shared.mjs").Finding} Finding */
+/** @typedef {import("./atomicity-contracts.mjs").ConfigDefaultsByKey} ConfigDefaultsByKey */
+/** @typedef {import("./atomicity-contracts.mjs").WidgetSpec} WidgetSpec */
+/** @typedef {{family: string, engineFile: string, layoutFile: string}} EngineLayoutFamily */
+
 const CANVAS_METHODS = new Set([
   "arc",
   "beginPath",
@@ -41,7 +47,9 @@ const ENGINE_LAYOUT_FAMILIES = [
   }
 ];
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runWidgetRendererDefaultDuplicationRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const contracts = getAtomicityContracts();
   const fileSet = new Set(files);
@@ -71,7 +79,9 @@ export function runWidgetRendererDefaultDuplicationRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runEngineLayoutDefaultDriftRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const fileSet = new Set(files);
 
@@ -98,7 +108,9 @@ export function runEngineLayoutDefaultDriftRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runCanvasApiTypeofGuardRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const detect = /typeof\s+ctx\.([A-Za-z_$][A-Za-z0-9_$]*)\s*===\s*["']function["']/g;
 
@@ -135,7 +147,9 @@ export function runCanvasApiTypeofGuardRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runTryFinallyCanvasDrawingRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const detect = /\btry\s*\{/g;
 
@@ -209,7 +223,9 @@ export function runTryFinallyCanvasDrawingRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runFrameworkMethodTypeofGuardRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const helperDetect = /typeof\s+Helpers\.([A-Za-z_$][A-Za-z0-9_$]*)\s*===\s*["']function["']/g;
   const aliasDetect = /typeof\s+([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*===\s*["']function["']/g;
@@ -269,7 +285,9 @@ export function runFrameworkMethodTypeofGuardRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runInlineConfigDefaultDuplicationRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
   const contracts = getAtomicityContracts();
   const detect =
@@ -316,6 +334,14 @@ export function runInlineConfigDefaultDuplicationRule(rule, files) {
   return out;
 }
 
+/**
+ * @param {Finding[]} out
+ * @param {Rule} rule
+ * @param {WidgetSpec} spec
+ * @param {ConfigDefaultsByKey} configDefaultsByKey
+ * @param {string} defaultsKey
+ * @param {string} propsKey
+ */
 function pushRendererDefaultDuplicationFinding(out, rule, spec, configDefaultsByKey, defaultsKey, propsKey) {
   const defaultsGroup = spec[defaultsKey];
   const propsGroup = spec[propsKey];
@@ -364,6 +390,13 @@ function pushRendererDefaultDuplicationFinding(out, rule, spec, configDefaultsBy
   });
 }
 
+/**
+ * @param {Rule} rule
+ * @param {EngineLayoutFamily} familySpec
+ * @param {{token: string, line: number}} constantInfo
+ * @param {string} constantName
+ * @returns {Finding}
+ */
 function buildEngineLayoutFinding(rule, familySpec, constantInfo, constantName) {
   return {
     file: familySpec.layoutFile,

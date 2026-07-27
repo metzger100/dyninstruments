@@ -1,5 +1,9 @@
 import { escapeRegex, findMatchingParen, findTopLevelComma, getFileData, lineAt } from "./shared.mjs";
 
+/** @typedef {import("./shared.mjs").FileData} FileData */
+/** @typedef {import("./shared.mjs").Finding} Finding */
+/** @typedef {import("./shared.mjs").Rule} Rule */
+
 const RESPONSIVE_OWNER_SPECS = [
   {
     file: "shared/widget-kits/text/TextLayoutEngine.js",
@@ -58,6 +62,7 @@ const RESPONSIVE_CONSUMER_FILES = new Set([
   "widgets/text/XteDisplayWidget/XteDisplayWidget.js"
 ]);
 
+/** @type {Record<string, Set<string>>} */
 const RESPONSIVE_HARD_FLOOR_ALLOWLIST = {
   // documentation/shared/text-layout-engine.md documents computeInsets(...) as an
   // intentionally retained low-level non-responsive helper; computeResponsiveInsets(...)
@@ -74,16 +79,19 @@ const FLOOR_LITERAL_RE = /^(?:[3-9]|[1-9]\d+)(?:\.0+)?$/;
 const LAYOUT_CONTEXT_RE =
   /(?:Math\.(?:floor|ceil|round)|\.(?:h|w)\b|\b(?:rect|box|layout|contentRect|content|track|slot|band|label|caption|value|unit|font|gap|pad|width|height|radius|minDim|safeVp|px|Px|availableWidth|availableHeight|line|fit)\b)/;
 
+/** @param {string} value @returns {string} */
 function normalizeExpression(value) {
   return String(value || "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
+/** @param {string} alias @param {string} method @returns {RegExp} */
 function buildAliasRegex(alias, method) {
   return new RegExp(`\\b${escapeRegex(alias)}\\.${method}\\s*\\(`);
 }
 
+/** @param {string} text @returns {{alias: string, index: number}|null} */
 function findResponsiveAlias(text) {
   const match =
     /\bconst\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*componentContext\.components\.require\(\s*["'`]ResponsiveScaleProfile["'`]\s*\)/.exec(
@@ -92,6 +100,7 @@ function findResponsiveAlias(text) {
   return match ? { alias: match[1], index: match.index } : null;
 }
 
+/** @param {string} raw @returns {number|null} */
 function parseFloorLiteral(raw) {
   const token = normalizeExpression(raw);
   if (!FLOOR_LITERAL_RE.test(token)) {
@@ -101,11 +110,14 @@ function parseFloorLiteral(raw) {
   return Number.isFinite(value) ? value : null;
 }
 
+/** @param {string} expression @returns {boolean} */
 function looksLikeLayoutContext(expression) {
   return LAYOUT_CONTEXT_RE.test(expression);
 }
 
+/** @param {FileData} data @returns {{index: number, expression: string}[]} */
 function collectMathMaxFindings(data) {
+  /** @type {{index: number, expression: string}[]} */
   const out = [];
   const detect = /\bMath\.max\s*\(/g;
   let match;
@@ -125,7 +137,7 @@ function collectMathMaxFindings(data) {
     }
 
     const floorValue = parseFloorLiteral(data.text.slice(openParen + 1, comma));
-    if (!(floorValue >= 3)) {
+    if (floorValue === null || floorValue < 3) {
       continue;
     }
 
@@ -143,7 +155,9 @@ function collectMathMaxFindings(data) {
   return out;
 }
 
+/** @param {FileData} data @returns {{index: number, expression: string}[]} */
 function collectClampFindings(data) {
+  /** @type {{index: number, expression: string}[]} */
   const out = [];
   const detect = /(?<!\.)\b(?:clamp|clampNumber)\s*\(/g;
   let match;
@@ -168,7 +182,7 @@ function collectClampFindings(data) {
 
     const expr = data.text.slice(openParen + 1, firstComma);
     const floorValue = parseFloorLiteral(data.text.slice(firstComma + 1, secondComma));
-    if (!(floorValue >= 3)) {
+    if (floorValue === null || floorValue < 3) {
       continue;
     }
     if (!looksLikeLayoutContext(expr)) {
@@ -184,7 +198,9 @@ function collectClampFindings(data) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runResponsiveLayoutHardFloorRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
 
   for (const file of files) {
@@ -218,7 +234,9 @@ export function runResponsiveLayoutHardFloorRule(rule, files) {
   return out;
 }
 
+/** @param {Rule} rule @param {string[]} files @returns {Finding[]} */
 export function runResponsiveProfileOwnershipRule(rule, files) {
+  /** @type {Finding[]} */
   const out = [];
 
   for (const file of files) {

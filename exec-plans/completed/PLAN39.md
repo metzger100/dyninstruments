@@ -417,47 +417,237 @@ triggered.
 
 ### Gate integrity
 
-- [ ] Prettier effective ownership matches the documented/package-script scope.
-- [ ] `package-lock.json` and all active agent skills are actually formatted.
-- [ ] Negative formatter fixtures are excluded only by exact path and are owner-tested.
-- [ ] Maintained tracked source contains zero literal NUL bytes.
-- [ ] Every custom checker changed by the plan has clean and failing self-tests.
+- [x] Prettier effective ownership matches the documented/package-script scope.
+- [x] `package-lock.json` and all active agent skills are actually formatted.
+- [x] Negative formatter fixtures are excluded only by exact path and are owner-tested (the approved exclusion set is
+      currently empty; every prior directory-glob exclusion was replaced by real formatting or removed).
+- [x] Maintained tracked source contains zero literal NUL bytes.
+- [x] Every custom checker changed by the plan has clean and failing self-tests.
 
 ### Static ownership and policy portability
 
-- [ ] All maintained JavaScript tools pass ESLint recommended rules and strict no-emit typechecking.
-- [ ] New tool files fail closed until they enter the tool type boundary.
-- [ ] `check:complexity` passes without the captured Git object and still rejects capture/ledger tampering.
-- [ ] The active complexity and coverage debt sets are not enlarged or weakened.
+- [x] All maintained JavaScript tools pass ESLint recommended rules and strict no-emit typechecking.
+- [x] New tool files fail closed until they enter the tool type boundary.
+- [x] `check:complexity` passes without the captured Git object and still rejects capture/ledger tampering.
+- [x] The active complexity and coverage debt sets are not enlarged or weakened.
 
 ### Cross-repository alignment
 
-- [ ] Common exact dev dependencies and the `js-yaml` override match Polar Recorder.
-- [ ] Node/npm, actionlint version/checksums, publisher Action SHAs, and public `check:all` semantics match.
-- [ ] The common schema corpus and SemVer corpus are byte-identical and pass both real implementations.
-- [ ] Differences in test runners, language gates, coverage families, and project-specific contracts are documented as
+- [x] Common exact dev dependencies and the `js-yaml` override match Polar Recorder's target snapshot.
+- [x] Node/npm, actionlint version/checksums, publisher Action SHAs, and public `check:all` semantics match.
+- [x] The SemVer corpus is byte-identical to Polar Recorder's and passes the real `release-version.mjs` implementation.
+- [~] The generic AvNav schema corpus is **not yet** byte-identical to a Polar Recorder corpus — Polar Recorder's own
+  PLAN6 has not executed its schema base/profile phase, so no upstream corpus exists to match (verified read-only
+  2026-07-27). Dyninstruments' corpus is written so its `genericBase` section can be adopted byte-for-byte once Polar
+  Recorder lands a matching profile. See Completion Evidence for detail.
+- [x] Differences in test runners, language gates, coverage families, and project-specific contracts are documented as
       profile extensions rather than unexplained drift.
 
 ### Schema, release, and onboarding
 
-- [ ] Generic AvNav metadata and Dyn layout validation are separate composed schema owners.
-- [ ] Existing bundled layouts and release ZIP contents are unchanged.
-- [ ] Advisory checks remain maintainer-only/networked; required gates remain offline after setup.
-- [ ] Native setup and the optional pinned development-container path both pass without dirtying the worktree.
-- [ ] The manual AvNav checklist records real human evidence and is referenced by release preparation.
-- [ ] Local-first hook/publisher authority is preserved and described honestly.
+- [x] Generic AvNav metadata and Dyn layout validation are separate composed schema owners.
+- [x] Existing bundled layouts and release ZIP contents are unchanged.
+- [x] Advisory checks remain maintainer-only/networked; required gates remain offline after setup.
+- [x] Native setup passes without dirtying the worktree.
+- [~] The optional pinned development-container path is **deferred** (not added) — Polar Recorder has no such path to
+  mirror yet, and this execution environment has no Docker/Podman available to prove one. Shipping an unverified
+  container config would violate the no-unverified-success rule. See Completion Evidence.
+- [~] The manual AvNav checklist exists, is referenced by `release:prepare`, and defines the exact fields/coverage areas
+  to record, but **no live AvNav host was available in this session** to produce real human validation evidence. See
+  Completion Evidence for the explicit request.
+- [x] Local-first hook/publisher authority is preserved and described honestly.
 
 ### Completion
 
-- [ ] All touched non-exempt files remain within 400 lines; 300+ line checker files were measured before/after.
-- [ ] `npm run setup` succeeds from the supported environment and does not install hooks implicitly.
-- [ ] `npm run hooks:doctor` passes after explicit installation.
-- [ ] `npm run check:all` passes.
-- [ ] Documentation and package/release checks pass.
-- [ ] Both worktrees are clean after final proof.
-- [ ] Completion evidence is recorded and the implemented plan is moved to `exec-plans/completed/PLAN39.md`.
+- [x] All touched non-exempt files remain within 400 lines; 300+ line checker files were measured before/after (see
+      Completion Evidence).
+- [x] `npm run setup` succeeds from the supported environment and does not install hooks implicitly.
+- [x] `npm run hooks:doctor` passes after explicit installation.
+- [x] `npm run check:all` passes.
+- [x] Documentation and package/release checks pass.
+- [x] This repository's worktree is clean of unintended changes after final proof; Polar Recorder was verified read-only
+      and remains at its pre-session state (only its own pre-existing uncommitted
+      `tools/quality-policy/format-scope.json` change and untracked `PLAN6.md`, unchanged by this session).
+- [x] Completion evidence is recorded below; the plan is moved to `exec-plans/completed/PLAN39.md` after this edit.
 
 ---
+
+## Completion Evidence
+
+Implemented and verified on 2026-07-27, starting from `fa36fb6f` (clean tree, no drift beyond this plan's own file).
+
+### Baseline reverification (Phase A)
+
+- HEAD `fa36fb6f`, `git status` clean before starting.
+- Node v26.4.0, npm 12.0.1.
+- `npm run setup`, `npm run hooks:doctor`, `npm run check:all` all passed on the untouched baseline: 437 test files,
+  1,899 tests, coverage 93.24% lines / 79.77% branches / 92.26% statements / 96.83% functions, complexity 175 tracked
+  baseline entries. `npm audit --json` reported 8 findings (1 moderate, 7 high) in dev-only tooling.
+- Polar Recorder's paired `PLAN6.md` was read in full, read-only, at its own HEAD
+  `addd6656a5293988a9457934af87515ef3c082b8`. **Key finding: PLAN6 had not been executed** — Polar Recorder was still in
+  its own pre-migration baseline state (no `@eslint/js`, version drift on `eslint`/`globals`/`@types/node`, checkout
+  pinned to v4.4.0 not v6.0.2, no schema base/profile split, still Git-blob-anchored complexity provenance, no live-host
+  checklist). This changed the cross-repo alignment strategy: items with an explicit shared target already stated
+  identically in both plans' Hard-Constraints text (common tool versions, `js-yaml` override, actionlint
+  version/checksums, Action SHA target, and the existing shared `tools/quality-policy/semver-corpus.json` file) could
+  still be matched exactly; items with no upstream artifact yet (the generic schema corpus, a development-container
+  path) could not be byte-matched and are recorded as explicit, evidence-backed deviations below instead of silently
+  claimed.
+
+### Phase B — Prettier ownership and NUL bytes
+
+- Removed the `package-lock.json` and `.agents/` exclusions from `.prettierignore`; removed the four lint-fixture
+  directory-glob exclusions (`tests/css/lint-fixtures/`, `tests/tools/lint-fixtures/`, `widgets/lint-fixtures/`,
+  `tools/lint-fixtures/`) after confirming every fixture file inside them is genuinely Prettier-parseable (only
+  `tools/lint-fixtures/isfinite.js` needed a trivial reformat; its consumer test only asserts ESLint output,
+  unaffected). The negative-fixture exclusion list is currently empty. All 7 `.agents/skills/*/SKILL.md` files and
+  `package-lock.json` are now actually formatted (`package-lock.json` was already compliant).
+- Rewrote `tests/contract/formatting-scope-contract.test.js` to call Prettier's real `getFileInfo`/ignore resolution
+  (async) for every maintained file, keeping the glob-based scope-completeness checks, and added a seeded-ignore proof
+  showing the check fails closed when a maintained file becomes newly ignored.
+- Replaced the 3 literal NUL-byte tuple separators in `complexity-scan.mjs` and the 1 in `complexity-budget.mjs` with
+  the source-level `\0` escape sequence (2 ASCII characters), matching the pattern already used in
+  `tests/tools/verified-baseline.test.js`. `file`/Git now classify both as text; behavior is unchanged
+  (`check:complexity` output identical before/after).
+- Added `tests/contract/source-text-integrity-contract.test.js`: scans maintained source/config/docs for literal NUL
+  bytes (0 found) and proves detection against a new negative fixture, `tools/test-data/source-nul-byte-fixture.dat` (an
+  out-of-scan-extension file so it never pollutes the real gates).
+
+### Phase C — Common tool versions, action pins, advisory workflow
+
+- Upgraded to the common snapshot stated identically in both plans: `@eslint/js` 10.0.1, `eslint` 10.8.0, `globals`
+  17.8.0, `linkinator` 8.0.2, `markdownlint-cli2` 0.23.1, `prettier` 3.9.6, `stylelint` 17.14.1 (all verified to exist
+  on the registry at implementation time). `jscpd`, `@types/node`, `stylelint-config-standard`, and `typescript` were
+  already at the target versions.
+- Added `"overrides": { "js-yaml": "5.2.2", "fast-uri": "3.1.4" }`. `js-yaml` matches the shared target exactly;
+  `fast-uri` is a Dyninstruments-only fix (transitive via `ajv`, which Polar Recorder does not have yet) discovered by a
+  fresh `npm audit` after the version bumps. `npm audit` now reports 0 vulnerabilities (down from 8).
+- Re-pinned `.github/workflows/publish-release.yml`'s `softprops/action-gh-release` from v2.2.2 to v2.6.2
+  (`3bb12739c298aeb8a4eeaf626c5b8d85266b0e65`), matching the Hard Constraints target exactly; `actions/checkout` was
+  already at v6.0.2. `tools/actionlint.sh`'s version/checksums were already byte-identical to Polar Recorder's. Extended
+  `tests/contract/release-workflow-contract.test.js` with an exact-SHA assertion for both pinned actions.
+  `npm run actions:lint` passes. Verified with the sibling repo: Polar Recorder's own workflow is still pinned to
+  checkout v4.4.0 (unexecuted PLAN6); the Dyninstruments target now matches the value both plans specify, and the
+  difference is Polar's own remaining work, not something this session can or should change there. **Real regression
+  caught and fixed**: Linkinator 8.0.2 changed its internal static-server host from `localhost` to `127.0.0.1`; the
+  existing `linkinator.config.json` `linksToSkip` pattern (`^(https?://(?!localhost))`) started matching the local
+  server's own URLs and silently skipped every real link check (the fixture proof caught this: it expected a broken-link
+  case to fail and it didn't). Fixed by extending the pattern to also exempt `127.0.0.1` and `[::1]`;
+  `npm run docs:links` again reports the same 98-link count as before the version bump. Added
+  `"dependencies:audit": "npm audit"` (networked, maintainer-only, excluded from `check:all`/`check:core`) and a
+  package-script contract test for it.
+
+### Phase D — Strict `tools/**/*.mjs` type boundary
+
+- Added `tsconfig.tools.json` (strict, `noEmit`, ES2022/ES2023, `module: "es2022"`) listing all 54 maintained
+  `tools/**/*.mjs` files (53 pre-existing plus the new `complexity-capture-integrity.mjs`), excluding
+  `tools/lint-fixtures/` and `tools/test-data/`. Added `typecheck:tools` and wired it into `typecheck`. Added
+  `tests/contract/typecheck-tools-inventory-contract.test.js` proving the `files` list matches the live tree exactly.
+- Fixed all ~880 initial strict-mode errors via JSDoc-only annotations (no runtime behavior changes), split across 4
+  parallel isolated-worktree passes by file family (`check-file-size/*`, `quality-policy/*`, `release-*`/misc,
+  `check-patterns/*`); each pass was merged back file-by-file and independently re-verified (typecheck, the family's own
+  runtime output/summary counts, and its Vitest suite) before the next merge. `npx tsc -p tsconfig.tools.json` now
+  reports 0 errors.
+- **Regression found and fixed during final verification**: the parallel JSDoc annotation of two already-similar
+  rule-runner functions in `rules-core.mjs` (`runLegacyComponentLoaderApiRule`, `runRuntimeReachThroughRule`) made their
+  now-identical annotated bodies cross jscpd's clone-detection threshold (a 31-line clone that did not exist in the
+  original file, confirmed by running `jscpd` against the pre-session version). Fixed by extracting the shared
+  scan/dedupe loop into one local `runMaskedExpressionRule` helper; `npm run duplication:check` now reports 0 clones
+  again, with identical runtime output. Making `tests/tools/release-version-semver-corpus.test.js` `require()`
+  `tools/release-version.mjs` (an ES module with an `import.meta` CLI-entry guard) surfaced a real `tsconfig.tests.json`
+  incompatibility (`module: "commonjs"` does not permit `import.meta`). Changed `tsconfig.tests.json`'s `module` to
+  `"es2022"` (verified safe: `moduleDetection` stays `"legacy"`, so CommonJS `require`/`module.exports` test files are
+  unaffected; `npx tsc -p tsconfig.tests.json` and the full Vitest run both stayed green).
+
+### Phase E — Generic AvNav schema base/profile and shared SemVer corpus
+
+- Added `schemas/avnav-plugin-base.schema.json` (a minimal `{"type": "object"}` base — AvNav's host loader does not
+  itself require any specific `plugin.json` field, confirmed against this repository's own loader/schema behavior and
+  documentation; no unverified upstream field was invented).
+- Refactored `schemas/plugin.schema.json` into an `allOf` composition of the base schema plus the existing Dyn
+  layouts-profile constraints (`required: ["layouts"]`, `additionalProperties: false`, item shape unchanged). Wired
+  `tools/validate-schemas.mjs` to `ajv.addSchema()` the base before compiling the profile. Verified Ajv's `allOf`
+  composition does not leak `additionalProperties` false-positives between subschemas (manual probe plus the new
+  contract test).
+- Added `tools/quality-policy/plugin-schema-corpus.json` (generic base + Dyn-profile valid/invalid cases) and
+  `tests/contract/plugin-schema-base-profile-contract.test.js` proving every case against the real schemas, plus the
+  real `plugin.json`. Documented in the corpus's own `note` field (and above) that the generic section cannot yet be
+  byte-matched against a Polar Recorder corpus because none exists.
+- Copied `tools/quality-policy/semver-corpus.json` from Polar Recorder byte-identical for the `valid`/`invalid` arrays
+  (20 valid / 42 invalid, diffed byte-for-byte against the sibling file) with a Dyninstruments-appropriate `note`. Added
+  `tests/tools/release-version-semver-corpus.test.js` running the real `tools/release-version.mjs` against every row.
+
+### Phase F — Portable complexity provenance
+
+- Added `tools/quality-policy/complexity-capture-integrity.mjs`: a Git-free SHA-256 digest proof of
+  `historical-complexity-findings.json` against a hardcoded `CAPTURED_FINDINGS_SHA256` constant, following the exact
+  pattern already used for `coverage-floor-baseline.json`/`test-exception-baseline.json`. Rewired `check:complexity` to
+  run it instead of `historical-complexity-capture.mjs --check`. Added `complexity:regenerate-audit` as an explicit
+  maintainer-only command that still performs the full Git-based regeneration/comparison, excluded from
+  `check:all`/`check:core`.
+- Added `tests/tools/complexity-capture-integrity.test.js`: proves the script contains no `execFileSync`/`child_process`
+  call at all, passes from a real temp copy of the capture with no `.git` directory present, and fails closed when the
+  capture is tampered with. All 175 active complexity entries, their historical provenance checks, and the existing
+  self-grandfathering/stale-entry/duplicate fixtures in `complexity-budget.mjs`/its tests are unchanged.
+
+### Phase G — Documentation and onboarding
+
+- Added `documentation/guides/manual-avnav-validation.md`: a consolidated, profile-aware checklist (date, AvNav version,
+  plugin commit/version, environment, pass/fail per area) covering install/activate/load, representative
+  radial/linear/HTML widgets, day/night switching, route/AIS interactions, and package upgrade/rollback. Linked from
+  `documentation/TABLEOFCONTENTS.md` and `CONTRIBUTING.md`.
+- Made `tools/release-prepare.mjs` print the checklist's path to stderr after a successful run, explicitly labeled "not
+  run automatically" — it never claims completion.
+- Updated `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `documentation/conventions/quality-gates.md`,
+  `documentation/conventions/testing-infrastructure.md`, `documentation/guides/documentation-maintenance.md`, and
+  `documentation/guides/release-workflow.md` for: the real Prettier ignore-resolution behavior, the three-way
+  `typecheck` split, the portable `check:complexity`/maintainer-only regeneration audit, the schema base/profile split,
+  the pinned Action SHAs, and the `dependencies:audit`/manual-checklist pointers.
+- **Deliberate deviation — development container**: not added. Polar Recorder (the paired exemplar this item says to
+  mirror) has no development-container path of its own yet, so there is nothing to copy, and this execution environment
+  has no Docker or Podman available to build and prove one. Shipping an unverified container configuration would violate
+  the plan's own "never claim unverified success" rule, so this deliverable is deferred rather than faked. Native
+  `npm run setup` remains the only supported, proven path.
+
+### Final verification
+
+- `npm run setup` → 0 vulnerabilities, no unintended generated changes (`git status` identical before/after).
+- `npm run hooks:install` + `npm run hooks:doctor` → hook correctly installed (`core.hooksPath=.githooks`, executable).
+- `npm run check:all` → **passes**. `check:core` (standard/lint/actionlint/duplication, all three typecheck scopes,
+  package/schema/contract tests, focused-test proof, smells, complexity, scaling, docs, file-size) and
+  `test:coverage:check` both green.
+- Full suite: **442 test files, 1,924 tests, all passing** (1,899 baseline + 25 new, across the new/extended contract
+  and tool test files listed above).
+- Coverage: 93.24% lines / 79.77% branches / 92.26% statements / 96.83% functions — **identical** to the pre-session
+  baseline (only `tools/`, `tests/`, `documentation/`, and config/schema files changed; no production runtime path
+  touched). 228 classified production files, unchanged.
+- Complexity: 175 tracked baseline entries, 0 new violations, digest-verified with no Git object read.
+- Test inventory: 533 classified test files (was 528; +5 new strict files, 0 non-strict).
+- `npm audit` → 0 vulnerabilities (was 8).
+- `npm ls` → no invalid/unmet dependency resolution.
+- Targeted negative-proof re-run (14 files, 105 tests): complexity budget/capture-integrity tamper and
+  self-grandfathering fixtures, coverage/test-inventory policy fixtures, formatting-scope seeded-ignore proof,
+  source-text-integrity NUL fixture, schema base/profile corpus, tools-inventory contract, SemVer corpus,
+  `quality-owners` negative fixtures (misspelled global, focused test, missing overview, incompatible mock, bare
+  `isFinite`), release-workflow pinned-action assertions, and package-script exact-string assertions — all pass.
+- Every touched file stays within 400 non-empty lines. The four originally 300+-line checker files measured after
+  typing: `rules-atomicity.mjs` 337→369, `atomicity-parser.mjs` 320→343, `rules-redundant-fallback.mjs` 309→327,
+  `rules-failfast.mjs` 298→307; also `rules-legacy-support.mjs` 339→351, `rules-mapper.mjs` 280→315,
+  `rules-duplicates.mjs` 272→279, `rules-core.mjs` 261→262 (after the de-duplication fix),
+  `check-coverage-inventory.mjs` 258→273 — none reached 400 and none needed splitting.
+- Polar Recorder verified unchanged: only its own pre-existing uncommitted `tools/quality-policy/format-scope.json` and
+  untracked `PLAN6.md`, identical to the state observed at the start of this session.
+- No commit, push, tag, or release was created in either repository.
+
+### Remaining external/manual evidence (not automatable in this session)
+
+1. **Live AvNav manual validation** — no live AvNav host/browser environment is available in this execution environment.
+   `documentation/guides/manual-avnav-validation.md` is ready and referenced by `release:prepare`, but no human has yet
+   completed it for this change set. **Requesting**: a maintainer with an AvNav environment complete the checklist
+   (install/activate/load, one radial/linear/HTML widget, day/night switch, route/AIS interactions, package
+   upgrade/rollback) before the next release that ships this migration.
+2. **Development-container proof** — deferred, not implemented (see Phase G above); no action needed unless a maintainer
+   wants to pursue it once Docker/Podman is available and/or Polar Recorder publishes one to mirror.
 
 ## Related
 

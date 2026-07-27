@@ -2,7 +2,9 @@
 
 ## Description
 
-Scaffolds a new widget in the dyninstruments repository. Determines the correct archetype, generates all required files with proper UMD wrappers, naming conventions, and wiring, and produces the complete checklist of registration points. Prevents the "forgot to wire X" class of bugs.
+Scaffolds a new widget in the dyninstruments repository. Determines the correct archetype, generates all required files
+with proper UMD wrappers, naming conventions, and wiring, and produces the complete checklist of registration points.
+Prevents the "forgot to wire X" class of bugs.
 
 ## When to Use
 
@@ -14,16 +16,17 @@ When creating any new widget, renderer, kind, or gauge in the dyninstruments pro
 
 Ask the user or infer from context which archetype this widget matches:
 
-| Archetype | Shared Engine | Reference Implementation | Guide |
-|---|---|---|---|
-| Semicircle gauge | `SemicircleRadialEngine` | `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js` | `documentation/guides/add-new-gauge.md` |
-| Linear gauge | `LinearGaugeEngine` | `widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js` | `documentation/guides/add-new-linear-gauge.md` |
-| Full-circle dial | `FullCircleRadialEngine` | `widgets/radial/CompassRadialWidget/CompassRadialWidget.js` | `documentation/guides/add-new-full-circle-dial.md` |
-| Text renderer | `TextLayoutEngine` | `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js` | `documentation/guides/add-new-text-renderer.md` |
-| Text renderer variant | `TextLayoutEngine` | `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js` | `documentation/guides/add-new-text-renderer.md` |
-| Native HTML kind | `HtmlSurfaceController` lifecycle | `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js` | `documentation/guides/add-new-html-kind.md` |
+| Archetype             | Shared Engine                     | Reference Implementation                                              | Guide                                              |
+| --------------------- | --------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------- |
+| Semicircle gauge      | `SemicircleRadialEngine`          | `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js`               | `documentation/guides/add-new-gauge.md`            |
+| Linear gauge          | `LinearGaugeEngine`               | `widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js`               | `documentation/guides/add-new-linear-gauge.md`     |
+| Full-circle dial      | `FullCircleRadialEngine`          | `widgets/radial/CompassRadialWidget/CompassRadialWidget.js`           | `documentation/guides/add-new-full-circle-dial.md` |
+| Text renderer         | `TextLayoutEngine`                | `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js`           | `documentation/guides/add-new-text-renderer.md`    |
+| Text renderer variant | `TextLayoutEngine`                | `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js`   | `documentation/guides/add-new-text-renderer.md`    |
+| Native HTML kind      | `HtmlSurfaceController` lifecycle | `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js` | `documentation/guides/add-new-html-kind.md`        |
 
-**Rule:** If the widget does not match any archetype, STOP and discuss with the user before creating a new engine. Read the reference implementation for the chosen archetype before proceeding.
+**Rule:** If the widget does not match any archetype, STOP and discuss with the user before creating a new engine. Read
+the reference implementation for the chosen archetype before proceeding.
 
 ### Step 2: Derive Names
 
@@ -40,6 +43,7 @@ Kind name: {kindName} (e.g., "barometerRadial")
 ```
 
 For cluster kinds, also derive:
+
 ```
 Ratio threshold props: {kind}RatioThresholdNormal, {kind}RatioThresholdFlat
 Sector props (if gauge): {kind}WarningFrom, {kind}AlarmFrom
@@ -51,8 +55,8 @@ Editable condition: { kind: "{kindName}" }
 
 ### Step 3: Generate the Widget Module
 
-Create the widget file with the mandatory UMD wrapper and leading `@file`
-overview. Add a `Documentation:` target for its public or complex contract:
+Create the widget file with the mandatory UMD wrapper and leading `@file` overview. Add a `Documentation:` target for
+its public or complex contract:
 
 ```javascript
 /**
@@ -88,11 +92,13 @@ overview. Add a `Documentation:` target for its public or complex contract:
 ```
 
 **Critical rules for the module body:**
+
 - Do NOT add `rangeDefaults` or `ratioDefaults` to `createRenderer` spec — trust editable config.
 - Do NOT import `ResponsiveScaleProfile` — the shared engine/layout already owns it.
 - Do NOT add `Math.max(N, ...)` responsive floors — use shared profile.
 - Do NOT add `typeof ctx.method === "function"` guards — trust Canvas 2D.
-- Do NOT add internal `typeof ... === "function"` guards for runtime service methods — trust module loader and service contracts once inside the component boundary.
+- Do NOT add internal `typeof ... === "function"` guards for runtime service methods — trust module loader and service
+  contracts once inside the component boundary.
 - Keep the file under 400 lines. Gauge-specific code only.
 
 ### Step 4: Register the Component
@@ -109,6 +115,7 @@ Add entry to the appropriate `config/components/registry-widgets-*.js` fragment:
 ```
 
 If cluster-routed, also:
+
 - Add `"{ComponentId}"` to the relevant component registry fragment in `config/components/registry-widgets-*.js`
 - Add the route metadata tuple in `config/cluster-routes/<cluster>.js` with `rendererId: "{ComponentId}"`
 - Keep the mapper branch declarative and free of renderer identity
@@ -149,6 +156,7 @@ if (req === "{kindName}") {
 ```
 
 **Mapper rules:**
+
 - Keep declarative: map values, normalize numbers, pass-through formatter keys
 - No formatter logic, no status-symbol conversion, no rendering fallbacks
 - Keep under 9 top-level props per return (group into `domain`/`layout`/`formatting` if needed)
@@ -169,6 +177,7 @@ Create test file at `tests/widgets/{type}/{ComponentId}.test.js` (or `tests/clus
 Minimum coverage depends on archetype:
 
 **Canvas gauges (semicircle/linear/full-circle):**
+
 - Renderer creates without error
 - Flat/normal/high mode transitions
 - Pointer tracks displayed numeric value
@@ -177,12 +186,14 @@ Minimum coverage depends on archetype:
 - Disconnect handling
 
 **Text renderers:**
+
 - Layout mode transitions
 - Text fit behavior
 - Caption/unit/value rendering
 - Disconnect overlay
 
 **HTML kinds:**
+
 - Surface lifecycle: attach/update/detach/destroy
 - Click ownership: dispatch vs passive/editing mode
 - Resize contract: signature changes only on layout-relevant inputs
@@ -213,17 +224,17 @@ Create `documentation/widgets/{doc-name}.md`:
 
 ## Props
 
-| Prop | Type | Source | Description |
-|---|---|---|---|
+| Prop   | Type   | Source                  | Description   |
+| ------ | ------ | ----------------------- | ------------- |
 | {prop} | {type} | {mapper/editable/store} | {description} |
 
 ## Layout Modes
 
-| Mode | Condition | Behavior |
-|---|---|---|
-| high | ratio < {normal} | {description} |
+| Mode   | Condition                 | Behavior      |
+| ------ | ------------------------- | ------------- |
+| high   | ratio < {normal}          | {description} |
 | normal | {normal} ≤ ratio ≤ {flat} | {description} |
-| flat | ratio > {flat} | {description} |
+| flat   | ratio > {flat}            | {description} |
 
 ## Related
 
@@ -241,8 +252,8 @@ Run the completion gate:
 npm run check:all
 ```
 
-This runs `check:core` (standard tools, typecheck, package contracts,
-component contracts, file size, patterns, docs) + `test:coverage:check`.
+This runs `check:core` (standard tools, typecheck, package contracts, component contracts, file size, patterns, docs) +
+`test:coverage:check`.
 
 ### Output Checklist
 

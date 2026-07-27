@@ -3,5 +3,5 @@
   "checkFragments": true,
   "directoryListing": true,
   "redirects": "error",
-  "linksToSkip": ["^(https?://(?!localhost))"]
+  "linksToSkip": ["^(https?://(?!localhost|127\\.0\\.0\\.1|\\[::1\\]))"]
 }

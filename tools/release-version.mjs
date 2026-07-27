@@ -10,10 +10,12 @@ export const VERSION_PATTERN_SOURCE =
 
 export const VERSION_REGEX = new RegExp(VERSION_PATTERN_SOURCE);
 
+/** @param {string} version @returns {boolean} */
 export function isValidReleaseVersion(version) {
   return VERSION_REGEX.test(version);
 }
 
+/** @param {string} tag @returns {string} */
 export function parseReleaseTag(tag) {
   if (typeof tag !== "string" || tag.charAt(0) !== "v") {
     throw new Error("release tag must use the vX.Y.Z form");
@@ -26,6 +28,7 @@ export function parseReleaseTag(tag) {
   return version;
 }
 
+/** @param {string} tag @returns {{ version: string, prerelease: boolean }} */
 export function classifyReleaseTag(tag) {
   const version = parseReleaseTag(tag);
   const buildSeparator = version.indexOf("+");
@@ -37,6 +40,7 @@ export function classifyReleaseTag(tag) {
   };
 }
 
+/** @param {string} tag @returns {string} */
 export function formatGithubOutput(tag) {
   const release = classifyReleaseTag(tag);
   return `version=${release.version}\nprerelease=${release.prerelease}\n`;
@@ -58,7 +62,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   try {
     main();
   } catch (error) {
-    console.error(error.message || String(error));
+    console.error(/** @type {any} */ (error).message || String(error));
     process.exit(1);
   }
 }

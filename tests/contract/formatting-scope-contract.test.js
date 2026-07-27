@@ -1,7 +1,9 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const prettier = require("prettier");
 
 const root = process.cwd();
+const ignorePath = path.join(root, ".prettierignore");
 
 // New maintained JS/MJS, CSS, and Markdown files must not be
 // able to land outside Prettier ownership. If a file genuinely needs to be
@@ -52,6 +54,39 @@ describe("formatting scope contract", function () {
       expect(fs.existsSync(path.join(root, relPath)), relPath + " must exist on disk").toBe(true);
     });
   });
+
+  it("keeps every approved negative fixture scoped to a fixture/test-data path", function () {
+    NEGATIVE_FIXTURE_EXCLUSIONS.forEach(function (relPath) {
+      const segments = relPath.split("/");
+      expect(segments.includes("lint-fixtures") || segments.includes("test-data")).toBe(true);
+    });
+  });
+
+  it("finds every maintained JS/MJS file not effectively ignored by Prettier's real resolution", async function () {
+    await expectNoneEffectivelyIgnored(collectMaintainedJsFiles());
+  });
+
+  it("finds every maintained CSS file not effectively ignored by Prettier's real resolution", async function () {
+    await expectNoneEffectivelyIgnored(collectMaintainedCssFiles());
+  });
+
+  it("finds every maintained Markdown file not effectively ignored by Prettier's real resolution", async function () {
+    await expectNoneEffectivelyIgnored(collectMaintainedMarkdownFiles());
+  });
+
+  it("proves a maintained file newly added to .prettierignore is detected as ignored", async function () {
+    const seededIgnorePath = path.join(root, `.prettierignore.contract-proof-${process.pid}`);
+    const targetFile = "shared/widget-kits/value/ValueMath.js";
+    try {
+      fs.writeFileSync(seededIgnorePath, `${fs.readFileSync(ignorePath, "utf8")}\n${targetFile}\n`);
+
+      const info = await prettier.getFileInfo(path.join(root, targetFile), { ignorePath: seededIgnorePath });
+
+      expect(info.ignored).toBe(true);
+    } finally {
+      fs.rmSync(seededIgnorePath, { force: true });
+    }
+  });
 });
 
 /** @param {string[]} maintained @param {Set<string>} covered @param {string} label */
@@ -62,6 +97,18 @@ function expectAllCovered(maintained, covered, label) {
   });
 
   expect(missing, "missing " + label + " files from Prettier scope").toEqual([]);
+}
+
+/** @param {string[]} maintained */
+async function expectNoneEffectivelyIgnored(maintained) {
+  const excluded = new Set(NEGATIVE_FIXTURE_EXCLUSIONS);
+  const ignored = [];
+  for (const relPath of maintained) {
+    if (excluded.has(relPath)) continue;
+    const info = await prettier.getFileInfo(path.join(root, relPath), { ignorePath });
+    if (info.ignored) ignored.push(relPath);
+  }
+  expect(ignored, "maintained files effectively ignored by Prettier").toEqual([]);
 }
 
 /** @param {"format" | "format:check"} scriptName @returns {Set<string>} */

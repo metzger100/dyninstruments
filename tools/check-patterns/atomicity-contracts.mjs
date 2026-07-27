@@ -26,6 +26,11 @@ const WIDGET_SCOPE = {
   exclude: ["tests/**", "tools/**"]
 };
 
+/** @typedef {{key: string, file: string, line: number, defaultLine: number, defaultToken: string}} ConfigDefaultEntry */
+/** @typedef {Record<string, ConfigDefaultEntry[]>} ConfigDefaultsByKey */
+/** @typedef {any} WidgetSpec */
+
+/** @returns {{configDefaultsByKey: ConfigDefaultsByKey, widgetSpecs: WidgetSpec[]}} */
 export function getAtomicityContracts() {
   const cached = getAtomicityContractCache();
   if (cached) {
@@ -40,12 +45,15 @@ export function getAtomicityContracts() {
   return contracts;
 }
 
+/** @param {ConfigDefaultsByKey} configDefaultsByKey @param {string} keyName @returns {ConfigDefaultEntry|null} */
 export function getUniqueConfigDefault(configDefaultsByKey, keyName) {
   const entries = configDefaultsByKey[keyName];
   return Array.isArray(entries) && entries.length === 1 ? entries[0] : null;
 }
 
+/** @returns {ConfigDefaultsByKey} */
 function collectConfigDefaultsByKey() {
+  /** @type {ConfigDefaultsByKey} */
   const out = Object.create(null);
   const configFiles = filesForScope(CONFIG_SCOPE);
 
@@ -85,7 +93,9 @@ function collectConfigDefaultsByKey() {
   return out;
 }
 
+/** @returns {WidgetSpec[]} */
 function collectWidgetSpecs() {
+  /** @type {WidgetSpec[]} */
   const out = [];
   const widgetFiles = filesForScope(WIDGET_SCOPE);
   const detect = /\.createRenderer\s*\(/g;
@@ -129,6 +139,7 @@ function collectWidgetSpecs() {
   return out;
 }
 
+/** @param {string} text @param {number} start @param {number} end @returns {number} */
 function skipWhitespace(text, start, end) {
   let cursor = start;
   while (cursor < end && /\s/.test(text[cursor])) {

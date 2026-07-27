@@ -151,6 +151,12 @@
     "tests/contract/placeholder-literal-contract.test.js": {
       "classification": "strict"
     },
+    "tests/contract/source-text-integrity-contract.test.js": {
+      "classification": "strict"
+    },
+    "tests/contract/plugin-schema-base-profile-contract.test.js": {
+      "classification": "strict"
+    },
     "tests/contract/placeholder-normalization-contract.test.js": {
       "classification": "strict"
     },
@@ -170,6 +176,9 @@
       "classification": "strict"
     },
     "tests/contract/typecheck-tests-inventory-contract.test.js": {
+      "classification": "strict"
+    },
+    "tests/contract/typecheck-tools-inventory-contract.test.js": {
       "classification": "strict"
     },
     "tests/helpers/async.js": {
@@ -568,6 +577,9 @@
     "tests/tools/complexity-budget.test.js": {
       "classification": "strict"
     },
+    "tests/tools/complexity-capture-integrity.test.js": {
+      "classification": "strict"
+    },
     "tests/tools/coverage-inventory-policy.test.js": {
       "classification": "strict"
     },
@@ -613,6 +625,9 @@
       "classification": "strict"
     },
     "tests/tools/release-prepare.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/release-version-semver-corpus.test.js": {
       "classification": "strict"
     },
     "tests/tools/release-zip-builder.test.js": {
