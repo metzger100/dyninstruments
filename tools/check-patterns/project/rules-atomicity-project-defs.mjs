@@ -1,18 +1,16 @@
-// Rule definitions for the atomicity-contract family in rules-atomicity.mjs.
+// Project-set rule definitions for the atomicity-contract family: each of these guards a
+// Dyninstruments-specific default-ownership boundary (widget/config, engine/layout family).
 
 import {
-  runCanvasApiTypeofGuardRule,
   runEngineLayoutDefaultDriftRule,
-  runFrameworkMethodTypeofGuardRule,
   runInlineConfigDefaultDuplicationRule,
-  runTryFinallyCanvasDrawingRule,
   runWidgetRendererDefaultDuplicationRule
-} from "./rules-atomicity.mjs";
+} from "../rules-atomicity.mjs";
 
-/** @typedef {import("./shared.mjs").Rule} Rule */
+/** @typedef {import("../shared.mjs").Rule} Rule */
 
 /** @type {Rule[]} */
-export const ATOMICITY_RULES = [
+export const ATOMICITY_PROJECT_RULES = [
   {
     name: "widget-renderer-default-duplication",
     severity: "block",
@@ -36,42 +34,6 @@ export const ATOMICITY_RULES = [
     /** @param {{file: string, line: number, constantName: string, expression: string, otherFile: string}} finding */
     message: ({ file, line, constantName, expression, otherFile }) =>
       `[engine-layout-default-drift] ${file}:${line}\nLayout constant ${constantName} = ${expression} duplicates the engine-owned ratio default in ${otherFile}. Keep semantic ratio defaults in one owner only.`
-  },
-  {
-    name: "canvas-api-typeof-guard",
-    severity: "block",
-    scope: {
-      include: ["shared/**/*.js", "widgets/**/*.js"],
-      exclude: ["tests/**", "tools/**"]
-    },
-    run: runCanvasApiTypeofGuardRule,
-    /** @param {{file: string, line: number, methodName: string}} finding */
-    message: ({ file, line, methodName }) =>
-      `[canvas-api-typeof-guard] ${file}:${line}\nRedundant typeof guard for Canvas 2D method ctx.${methodName}. The rendering context is already a trusted CanvasRenderingContext2D at the setup boundary.`
-  },
-  {
-    name: "try-finally-canvas-drawing",
-    severity: "block",
-    scope: {
-      include: ["shared/**/*.js"],
-      exclude: ["tests/**", "tools/**"]
-    },
-    run: runTryFinallyCanvasDrawingRule,
-    /** @param {{file: string, line: number, expression: string}} finding */
-    message: ({ file, line, expression }) =>
-      `[try-finally-canvas-drawing] ${file}:${line}\nCanvas save/restore wrapped in ${expression}. Keep the direct save/restore pair and reserve try/finally for real throwing boundaries.`
-  },
-  {
-    name: "framework-method-typeof-guard",
-    severity: "block",
-    scope: {
-      include: ["shared/**/*.js", "widgets/**/*.js"],
-      exclude: ["tests/**", "tools/**"]
-    },
-    run: runFrameworkMethodTypeofGuardRule,
-    /** @param {{file: string, line: number, target: string}} finding */
-    message: ({ file, line, target }) =>
-      `[framework-method-typeof-guard] ${file}:${line}\nRedundant typeof guard on trusted framework method ${target}. Internal module-loader contracts should be used directly once resolved.`
   },
   {
     name: "inline-config-default-duplication",

@@ -1,8 +1,8 @@
 // Rule definitions for the responsive-layout family in rules-responsive.mjs.
 
-import { runResponsiveLayoutHardFloorRule, runResponsiveProfileOwnershipRule } from "./rules-responsive.mjs";
+import { runResponsiveLayoutHardFloorRule, runResponsiveProfileOwnershipRule } from "../rules-responsive.mjs";
 
-/** @typedef {import("./shared.mjs").Rule} Rule */
+/** @typedef {import("../shared.mjs").Rule} Rule */
 
 /** @type {Rule[]} */
 export const RESPONSIVE_RULES = [

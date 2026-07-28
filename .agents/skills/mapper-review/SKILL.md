@@ -178,7 +178,7 @@ rendererId: "ActiveRouteTextHtmlWidget"; // feature-based
 
 After reviewing, produce a summary:
 
-```
+```text
 MAPPER: {filename}
 FUNCTIONS: {list of declared functions — should be only create, translate}
 BRANCHES: {list of kind branches in translate()}

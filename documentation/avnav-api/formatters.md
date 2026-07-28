@@ -8,6 +8,34 @@ Formatters convert raw store values to display strings. AvNav provides built-in 
 registration via `avnav.api.registerFormatter()`. Authoritative core formatter signatures and parameter-order details
 are maintained only in [core-formatter-catalog.md](core-formatter-catalog.md).
 
+## Key Details
+
+- Custom formatters are registered via `avnav.api.registerFormatter(name, fn)`; the function's first parameter is the
+  raw value, must return a string, and throws if a formatter with the same name already exists.
+- Return strings should be constant-length (space-padded) to prevent layout jumps; additional formatter args come from
+  `formatterParameters` configured in the Layout Editor.
+- A formatter function may carry a `.parameters` property (same spec syntax as
+  [editable-parameters.md](editable-parameters.md)) describing its Layout Editor parameters.
+- `avnav.api.registerFeatureFormatter(name, fn)` (AvNav API, since build 20210114) registers formatters for
+  overlay/feature data instead of store values.
+- `formatTime`, `formatDate`, `formatDateTime` must receive the raw store value; do not pre-coerce with `Number(...)` at
+  mapper/widget boundaries.
+- Migrated dyninstruments metrics split formatter token from display label: `formatUnit_<metricKey>` (conversion token,
+  e.g. `ms`, `celsius`, `hpa`) vs. `unit_<metricKey>_<token>` (display label, e.g. `m/s`, `°C`, `hPa`); tokens go to the
+  formatter, labels go to rendered text.
+- Formatters currently used by dyninstruments: `formatSpeed` (speed/wind/VMG), `formatDistance` (nav/anchor distance,
+  depth), `formatDirection360` (course/bearing), `formatDirection` with `[true, true, false]` (roll/pitch, radian input,
+  signed ±180), `formatTemperature`, `formatDecimal` (voltage), `formatTime` (ETA/clock),
+  `formatLonLats`/`formatLonLatsDecimal` (position), `formatPressure` (environment pressure).
+- Canonical pressure formatter name is `formatPressure` with lowercase tokens (`pa`, `hpa`, `bar`); `skPressure` is a
+  legacy AvNav-core alias kept only for compatibility.
+- `componentContext.format.applyFormatter(...)` is the dyninstruments-internal dispatch path: reads
+  `props.formatterParameters`, returns `props.default` or `"---"` for null/NaN raw values, normalizes parameters
+  (array/string/comma-split/empty), dispatches to a function or `avnav.api.formatter[name]`, and falls back to
+  `String(raw)` on missing/failing formatters.
+- Gauge helpers built on `applyFormatter`: `displaySpeedFromRaw`, `displayDepthFromRaw` (local `toFixed`, not a
+  registered formatter), `displayTemperatureFromRaw`, `displayVoltageFromRaw` — each returns `{ num, text }`.
+
 ## Registering Custom Formatters (AvNav API)
 
 ```javascript

@@ -19,6 +19,22 @@ const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);
 const fg = tokens.surface.fg;
 ```
 
+## Key Details
+
+- `componentContext.theme.tokens.resolveForRoot(rootEl)` returns an immutable snapshot that is reused whenever the
+  committed-root inputs are identical.
+- Resolution precedence per token path: root CSS override (checking a deprecated alias first if the canonical var is
+  unset) → active preset mode override → active preset base override → token mode default (`defaultByMode[mode]`) →
+  token base default (`default`) → parent cascade via `defaultFrom` (scoped tokens only).
+- Supported preset families: `default`, `slim`, `bold`, `darkmode`, `highcontrast`; mode axis is `day`/`night`. `night`
+  is not a legal preset family and is normalized to `default`.
+- Deprecated regatta aliases still resolve with a warning: `--dyni-regatta-barWarning`, `--dyni-regatta-barCritical`,
+  `--dyni-regatta-barDefault` map to their kebab-case canonical names.
+- `componentContext.dom.requirePluginRoot(rootEl)` throws on invalid input; `configure(...)` clears resolver metadata
+  and all per-root snapshot caches.
+- `GeometryScale` converts family geometry factors (e.g. `radial.ring.widthFactor`, `linear.track.widthFactor`) into
+  pixels from each family's primary dimension; `compactGeometryScale` affects only text/layout spacing.
+
 ## Token Hierarchy
 
 Theme tokens follow a two-level hierarchy:

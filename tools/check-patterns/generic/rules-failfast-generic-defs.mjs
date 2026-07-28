@@ -1,18 +1,18 @@
-// Rule definitions for the fallback/guard family in rules-failfast.mjs.
+// Generic-set rule definitions for the fallback/guard family: no Dyninstruments-specific
+// concept (mapper, cluster, widget, theme, layout, responsive profile, or component loader)
+// appears in these rules' detection or message text, so they are liftable verbatim.
 
 import {
   runCatchFallbackWithoutSuppressionRule,
-  runCssJsDefaultDuplicationRule,
-  runHardcodedRuntimeDefaultRule,
   runInternalHookFallbackRule,
   runInvalidLintSuppressionRule,
   runRedundantNullTypeGuardRule
-} from "./rules-failfast.mjs";
+} from "../rules-failfast.mjs";
 
-/** @typedef {import("./shared.mjs").Rule} Rule */
+/** @typedef {import("../shared.mjs").Rule} Rule */
 
 /** @type {Rule[]} */
-export const FAILFAST_RULES = [
+export const FAILFAST_GENERIC_RULES = [
   {
     name: "invalid-lint-suppression",
     scope: {
@@ -64,26 +64,5 @@ export const FAILFAST_RULES = [
     run: runRedundantNullTypeGuardRule,
     message: ({ file, line, expression }) =>
       `[redundant-null-type-guard] ${file}:${line}\nRedundant internal null/type guard (${expression}). Trust validated internal contracts instead of silently sanitizing again.`
-  },
-  {
-    name: "hardcoded-runtime-default",
-    severity: "block",
-    scope: {
-      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
-      exclude: ["tests/**", "tools/**"]
-    },
-    run: runHardcodedRuntimeDefaultRule,
-    message: ({ file, line, expression }) =>
-      `[hardcoded-runtime-default] ${file}:${line}\nHardcoded runtime fallback/default detected (${expression}). Prefer declarative config or boundary-owned defaults over inline literals.`
-  },
-  {
-    name: "css-js-default-duplication",
-    scope: {
-      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
-      exclude: ["tests/**", "tools/**"]
-    },
-    run: runCssJsDefaultDuplicationRule,
-    message: ({ file, line, expression }) =>
-      `[css-js-default-duplication] ${file}:${line}\nJS duplicates CSS/theme defaults (${expression}). Keep theme/token defaults in the CSS or theme boundary layer only.`
   }
 ];

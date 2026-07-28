@@ -41,6 +41,24 @@ Layout ownership:
 - `shared/widget-kits/layout/GeometryScale.js` scales the highway graphics from the primary dimension
   `min(highway.w, highway.h)`
 
+## Key Details
+
+- Renderer file: `widgets/text/XteDisplayWidget/XteDisplayWidget.js`; export/`globalKey`: `"DyniXteDisplayWidget"`;
+  renders a 2.5D highway view rather than the linear bar used by `XteDisplayLinearWidget`.
+- Metrics shown: `XTE` (with `L/R` side suffix), `COG`, `DST`, `BRG`, plus optional waypoint name (hidden first under
+  space constraints).
+- Layout owner: `shared/widget-kits/xte/XteHighwayLayout.js`; drawing/marker-visibility owner:
+  `shared/widget-kits/xte/XteHighwayPrimitives.js`.
+- `xteScale` comes from the mapper-selected `xteDisplayScale_<token>` field (fallback `1`); marker position is clamped
+  and shown with an overflow alarm cue when `abs(xte) > xteScale`.
+- Layout thresholds: `layout.xteRatioThresholdNormal` default `0.85` (below -> `high`), `layout.xteRatioThresholdFlat`
+  default `2.3` (above -> `flat`).
+- `layout.hideTextualMetrics` (default `false`) switches to a graphics-only layout branch (no metric tiles, no
+  waypoint-name rect); state-screen selection is unaffected.
+- Only the `back` static highway layer is cached via `CanvasLayerCache`; the XTE marker, centerline overlay, overflow
+  cue, and live metric text are always redrawn.
+- `stableDigits` (default `false`) enables stable-digit normalization with a reserved side-suffix slot for `XTE`.
+
 ## Module Registration
 
 ```javascript

@@ -7,6 +7,26 @@
 Use this workflow whenever code changes touch architecture, module wiring, or widget behavior. User-facing changes must
 also keep `README.md` current in the same task.
 
+## Key Details
+
+- Touched-area triggers doc sync: `config/`, `runtime/`, `widgets/`, `plugin.js`, `plugin.mjs`.
+- Fail-closed README sync applies when a task changes theming, clusters/kinds, layouts, installation, configuration,
+  requirements, or development workflow.
+- Fail-closed fixture sync: theme-token/input-var/default-theming changes require updating
+  `tests/css/theme-token-extremes.user.css` (plus related `tests/css` fixtures); a new or changed kind with user-visible
+  visual/layout behavior requires updating `tests/layouts/gpspage-all-widgets.json` and
+  `tests/layouts/gpspage-all-widgets.test.js`.
+- Every new documentation file must be linked from at least one other doc reachable from `AGENTS.md`; the easiest path
+  is adding an entry to `TABLEOFCONTENTS.md`.
+- Default completion gate is `npm run check:all`; use `npm run check:fast`, `npm run check:core`, or `npm test` for
+  faster iteration feedback, but fix all failures and review all warnings before finishing.
+- The Touchpoint Matrix below maps each change type (component registry, cluster/kind, gauge renderer, lifecycle,
+  helpers/formatter contract, CSS/theming, layouts, install/release, config surface, requirements, dev workflow, new doc
+  file) to the minimum docs that must be updated.
+- `tests/contract/documentation-format-contract.test.js` enforces required doc sections (`# Title`, `**Status:**`, and
+  key headings including `## Key Details`); `tests/contract/documentation-reachability-contract.test.js` enforces that
+  every in-scope doc is reachable from `AGENTS.md`/`CLAUDE.md` and that `.md` link targets exist.
+
 ## Workflow
 
 1. Identify touched code areas (`config/`, `runtime/`, `widgets/`, `plugin.js`, `plugin.mjs`)
@@ -24,13 +44,12 @@ also keep `README.md` current in the same task.
    easiest way: add an entry to TABLEOFCONTENTS.md.
 7. Run default validation gate:
 
-```bash
-npm run check:all
-```
+   ```bash
+   npm run check:all
+   ```
 
 8. During iteration, optionally run targeted checks (`npm run check:fast`, `npm run check:core`, `npm test`) for faster
    feedback.
-
 9. Fix all failures and review all warnings before finishing
 
 ## Quality and Regression Commands
@@ -154,8 +173,8 @@ rollout rules); a live rule reporting any finding fails the gate. This includes 
 (`duplicate-functions`, `duplicate-block-clones`), block-mode atomicity/fail-fast rules (`internal-hook-fallback`,
 `redundant-null-type-guard`, `hardcoded-runtime-default`, `widget-renderer-default-duplication`,
 `engine-layout-default-drift`, `canvas-api-typeof-guard`, `try-finally-canvas-drawing`, `framework-method-typeof-guard`,
-`inline-config-default-duplication`), fail-closed repository hygiene rules (`absolute-user-home-path`), the blocking
-mapper complexity check (`mapper-output-complexity`: block above 8 properties), the promoted former rollout rules
+`inline-config-default-duplication`), fail-closed repository hygiene rules (`absolute-home-path`), the blocking mapper
+complexity check (`mapper-output-complexity`: block above 8 properties), the promoted former rollout rules
 (`catch-fallback-without-suppression`, `css-js-default-duplication`, `editable-threshold-missing-internal`), plus
 blocking suppression validation (`invalid-lint-suppression`). Responsive ownership checks are part of the same gate:
 `responsive-profile-ownership` and `responsive-layout-hard-floor` both block new drift.

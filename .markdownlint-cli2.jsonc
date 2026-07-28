@@ -1,23 +1,13 @@
 {
-  "globs": ["*.md", "documentation/**/*.md"],
-  "ignores": ["artifacts/**", "coverage/**", "exec-plans/**", "node_modules/**", "releases/**"],
+  "globs": ["**/*.md"],
+  "ignores": ["**/node_modules/**", "artifacts/**", "coverage/**", "exec-plans/completed/**", "releases/**"],
   "config": {
     "default": true,
-    "MD012": false,
+    // Long lines are Prettier's proseWrap responsibility, not markdownlint's.
     "MD013": false,
-    "MD022": false,
-    "MD024": {
-      "siblings_only": true
-    },
-    "MD029": false,
-    "MD031": false,
-    "MD032": false,
+    // Inline HTML (e.g. status badges, raw <br>) is intentionally allowed in maintained docs.
     "MD033": false,
-    "MD036": false,
-    "MD038": false,
-    "MD040": false,
-    "MD041": false,
-    "MD056": false,
-    "MD060": false
+    // Not every maintained doc needs a top-level H1 immediately (e.g. skill/README fragments).
+    "MD041": false
   }
 }

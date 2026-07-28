@@ -10,6 +10,23 @@ canvas wrappers run through internal `surface: "canvas-dom"` routes. Route selec
 `config.clusterRoutes.byRouteId`; it owns `mapperId`, `rendererId`, `surface`, optional `viewModelId`, and
 `shellSizing`.
 
+## Key Details
+
+- New wrapper file: `widgets/radial/NewDialWidget/NewDialWidget.js`, UMD wrapper with `create(def, componentContext)`.
+- Required shared modules resolved via `componentContext.components.require(...)`: `FullCircleRadialEngine` and
+  `FullCircleRadialTextLayout`.
+- Registration entry goes in `config/components/registry-widgets-gauge.js` with
+  `deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]`.
+- Route update in `config/cluster-routes/<cluster>.js` needs `mapperId`, `rendererId: "NewDialWidget"`,
+  `surface: "canvas-dom"`, and `shellSizing`.
+- `renderCanvas` is built with `engine.createRenderer({...})` using scoped callbacks: `buildStaticKey(state, props)`,
+  `rebuildLayer(layerCtx, layerName, state, props, api)`, `drawFrame(state, props, api)`, and
+  `drawMode.{flat,normal,high}`.
+- Responsive geometry/text ownership stays entirely in `FullCircleRadialLayout` + `GeometryScale`; wrappers must not
+  import `ResponsiveScaleProfile` directly or add widget-local user-visible `Math.max(...)`/`clamp(...)` floors.
+- Config-backed plugin wrappers omit `ratioDefaults` and trust the editable/default config boundary for threshold props.
+- `disconnect === true` must show the shared state-screen (`GPS Lost`) on a cleared canvas.
+
 ## Prerequisites
 
 Read first:

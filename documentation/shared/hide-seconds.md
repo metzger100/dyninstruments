@@ -7,6 +7,16 @@
 `hideSeconds` is a per-widget option that swaps `formatTime` for `formatClock` at the mapper or render-model boundary.
 It is defined per cluster in the relevant `config/clusters/*.js` file and does not use a post-processor.
 
+## Key Details
+
+- `hideSeconds` is configured per cluster in `config/clusters/*.js`, not through a post-processor.
+- `hideSeconds: false` keeps `formatTime` (`HH:MM:SS`); `hideSeconds: true` swaps to `formatClock` (`HH:MM`).
+- `formatDateTime` is unused by this plugin, so no compound post-processing path exists for it.
+- Fallback/placeholder text still normalizes through `PlaceholderNormalize` regardless of the swap.
+- Supported paths: `NavMapper` (`wpEta`, `rteEta`), `VesselMapper` (`clock`), `ActiveRouteTextHtmlWidget` (ETA metric),
+  `EditRouteRenderModel` (ETA metric), and `PositionCoordinateWidget` (`dateTime`/`timeStatus` on the lon-axis
+  formatter).
+
 ## Contract
 
 - `hideSeconds: false` keeps the existing `HH:MM:SS` path.

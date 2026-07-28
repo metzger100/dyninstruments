@@ -30,6 +30,28 @@ Responsive ownership:
 - Do not add wrapper-local user-visible responsive `Math.max(...)` / `clamp(...)` floors or import
   `ResponsiveScaleProfile` directly in linear wrappers.
 
+## Key Details
+
+- New wrapper file: `widgets/linear/NewLinearWidget/NewLinearWidget.js`, UMD + `create(def, componentContext)`,
+  delegating to `LinearGaugeEngine`; reference `SpeedLinearWidget` for the base pattern, `CompassLinearWidget` and
+  `WindLinearWidget` for advanced pointer/sector behavior.
+- Profile selection is driven by `axisMode`: `"range"` (editable min/max, e.g. `sogLinear`, `depthLinear`,
+  `tempLinear`), `"centered180"` (fixed `-180..180`, e.g. wind-angle kinds), `"fixed360"` (fixed `0..360`, e.g.
+  `hdtLinear`/`hdmLinear`).
+- Registration entry goes in `config/components/registry-widgets-gauge.js`.
+- Route update in `config/cluster-routes/<cluster>.js` needs `mapperId`, `rendererId`, `surface: "canvas-dom"`, optional
+  `viewModelId`, and `shellSizing`.
+- Gauge-prefixed editable key naming: `{gauge}LinearRatioThresholdNormal`/`Flat`, `{gauge}LinearTickMajor`/`Minor`/
+  `ShowEndLabels`, `{gauge}LinearMinValue`/`MaxValue` (range profile only), `{gauge}LinearWarningEnabled`/
+  `AlarmEnabled`/`WarningFrom`/`AlarmFrom`, and `{gauge}LinearLayEnabled`/`Min`/`Max` for wind mirrored sectors.
+- `centered180` and `fixed360` kinds omit `*MinValue`/`*MaxValue` from mapper output.
+- Config-backed wrappers pass only `rangeProps`/`ratioProps` (not `rangeDefaults`/`ratioDefaults`) and trust the
+  editable/default pipeline.
+- Required tests: `tests/widgets/linear/*LinearWidget.test.js`, `tests/cluster/mappers/*Mapper.test.js`,
+  `tests/config/clusters/*.test.js`; full gate is `npm run check:all`.
+- `disconnect === true` must show the shared state-screen (`GPS Lost`) on a cleared canvas with no gauge visible behind
+  it.
+
 ## Step 0: Choose Profile
 
 | Profile                 | `axisMode`    | Typical kinds                            | Domain             | Sector style                 |

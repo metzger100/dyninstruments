@@ -1,0 +1,7 @@
+{
+  "note": "Local per-file growth ceilings for known hotspot files, tighter than the repository-wide 400-line hard limit. A budget value may only shrink or stay equal, never increase. See documentation/conventions/quality-gates.md and tests/contract/hotspot-budget-contract.test.js.",
+  "entries": [
+    { "rel": "shared/widget-kits/radial/RadialTextLayout.js", "maxNonEmpty": 290 },
+    { "rel": "widgets/radial/WindRadialWidget/WindRadialWidget.js", "maxNonEmpty": 370 }
+  ]
+}

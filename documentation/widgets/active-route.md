@@ -14,6 +14,18 @@ ActiveRouteTextHtmlWidget is a committed HTML renderer routed by route metadata 
 - Mapper payloads split formatter tokens from display labels: `formatUnits.remain` feeds the remain formatter and
   `units.remain` stays display-only.
 
+## Key Details
+
+- Renderer class: `ActiveRouteTextHtmlWidget`, routed for cluster kind `nav/activeRoute` via `ClusterWidget`.
+- Layout geometry owner: `shared/widget-kits/nav/ActiveRouteLayout.js`; text-fit owner:
+  `shared/widget-kits/nav/ActiveRouteHtmlFit.js`.
+- Mount host selector: `.dyni-surface-html-mount`; inner wrapper class: `.dyni-active-route-html`.
+- Route metadata `shellSizing`: ratio sizing, `aspectRatio: 2` in vertical mode.
+- Numeric option `stableDigits` (default `false`) adds `.dyni-tabular` to metric value spans and normalizes remain/ETA/
+  next-course text via `StableDigits.normalize(...)`.
+- Time option `hideSeconds` (default `false`) swaps the ETA metric formatter from `formatTime` to `formatClock`.
+- Interaction action target: `surfacePolicy.actions.routeEditor.openActiveRoute()`.
+
 ## State Screens
 
 - Resolver order: `disconnected` (`p.disconnect === true`) -> `noRoute` (`p.wpServer === false`) -> `noRoute`

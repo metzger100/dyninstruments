@@ -16,6 +16,23 @@ Linear instruments use a shared engine pipeline:
 New linear widgets should delegate rendering to `LinearGaugeEngine.createRenderer(spec)`. `GeometryScale` turns the
 linear primary dimension (`min(trackBox.w, trackBox.h)`) into graphical pixels.
 
+## Key Details
+
+- Factory: `LinearGaugeEngine.create(def, componentContext)`; main API:
+  `createRenderer(spec) -> renderCanvas(canvas, props)`.
+- `spec.axisMode` is one of `"range" | "centered180" | "fixed360"`; `rangeProps`/`rangeDefaults` are only honored for
+  `"range"` and are ignored by the axis resolver for `"centered180"`/`"fixed360"`.
+- Core `spec` fields: `rawValueKey`, `unitDefault`, `tickProps: { major, minor, showEndLabels }`,
+  `ratioProps: { normal, flat }`, `hideTextualMetricsProp`, `labelEdgePolicy: "inset" | "sliding"`,
+  `springTarget: "pointer" | "axis"`, `springWrap` (numeric wrap span for `SpringEasing.createMotion()`).
+- Public UI label for `hideTextualMetricsProp` is `Hide textual metrics`, default `false`; shipped on Speed, Depth,
+  Temperature, Voltage, Compass, Wind, and Default linear gauges.
+- Static background is cached in two layers, `back` and `front`, composited via `CanvasLayerCache.blitLayer()`; z-order
+  is `back` → live pointer/marker (`drawFrame`) → `front` → text.
+- `LinearGaugeLayout` reserves symmetric pointer edge clearance (`POINTER_EDGE_CLEARANCE_FACTOR`) between
+  `scaleX0`/`scaleX1` and the content edges.
+- Testing gate for new wrappers: `npm run check:all`.
+
 ## Components
 
 ### LinearCanvasPrimitives

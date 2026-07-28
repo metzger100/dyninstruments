@@ -3,7 +3,7 @@ const path = require("node:path");
 
 const DOC_ROOT = "documentation";
 const EXCLUDED = new Set(["documentation/TABLEOFCONTENTS.md"]);
-const REQUIRED_SECTIONS = ["Overview", "Related"];
+const REQUIRED_SECTIONS = ["Overview", "Key Details", "Related"];
 
 describe("documentation format contract", function () {
   it("keeps maintained documentation in the compact canonical shape", function () {
@@ -32,6 +32,15 @@ describe("documentation format contract", function () {
     );
 
     expect(findings).toContain("documentation/fixture.md missing '## Related' section.");
+  });
+
+  it("rejects documents without a Key Details section", function () {
+    const findings = validateDoc(
+      "documentation/fixture.md",
+      ["# Fixture", "", "**Status:** test", "", "## Overview", "", "## Related", ""].join("\n")
+    );
+
+    expect(findings).toContain("documentation/fixture.md missing '## Key Details' section.");
   });
 
   it("allows the navigation table of contents exception", function () {

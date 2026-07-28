@@ -13,6 +13,18 @@ RoutePointsTextHtmlWidget is the committed HTML renderer for nav route points.
 - Mapper payloads split formatter tokens from display labels: `formatUnits.distance` feeds the distance formatter and
   `units.distance` remains display-only while `courseUnit` stays in `formatting`.
 
+## Key Details
+
+- Renderer class: `RoutePointsTextHtmlWidget`, committed HTML renderer for cluster kind `nav/routePoints`.
+- Interaction action target: `surfacePolicy.actions.routePoints.activate({ index, pointSnapshot })`, dispatched through
+  the `TemporaryHostActionBridge` runtime boundary.
+- Route metadata `shellSizing.kind === "natural"`: the only widget in the family with width-derived natural height (no
+  inline height/aspect-ratio, no cold-load height reservation).
+- Vertical-mode viewport cap: `60vh`, applied only when `data-dyni-orientation="vertical"`.
+- Numeric option `coordinatesTabular` (default `true`) adds `.dyni-tabular` to route-point info spans when
+  `showLatLon === true`.
+- Missing-leg compound placeholders (for example `"--°/--nm"`) are an explicit carve-out from plain `---` placeholders.
+
 ## State Screens
 
 - Resolver order: `disconnected` (`p.disconnect === true`) -> `noRoute` (`domain.route` missing) -> `data`

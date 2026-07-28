@@ -1,35 +1,35 @@
 ---
 name: create-plan
 description:
-  Creates multi-session execution plans for complex features in the dyninstruments repository and encodes the canonical
-  plan structure with repository-verification safeguards.
+  Creates multi-session execution plans for complex features in this repository and encodes the canonical plan structure
+  with repository-verification safeguards.
 ---
 
 # Skill: create-plan
 
 ## Description
 
-Creates multi-session execution plans for complex features in the dyninstruments repository. Encodes the canonical plan
-structure derived from the repository's completed and active execution plans. Includes automated baseline verification
-against the live repo to prevent the "rewritten after repository verification" failure mode.
+Creates multi-session execution plans for complex features in this repository. Encodes the canonical plan structure
+derived from the repository's completed and active execution plans. Includes automated baseline verification against the
+live repo to prevent the "rewritten after repository verification" failure mode.
 
 ## When to Use
 
 When implementing a feature that involves:
 
-- Multi-file changes with mapper/runtime/shared interactions
-- A new cluster kind or new cluster
+- Multi-file changes spanning core logic, runtime, and shared-utility layers
+- A new component kind or new component
 - Refactors touching boundaries, dependencies, or checks
 - Any unclear requirement or high ambiguity
 
-The developer must decide to use planning mode before prompting (per CONTRIBUTING.md §4).
+The developer must decide to use planning mode before prompting (per your project's contribution guidelines).
 
 ## Instructions
 
 ### Step 0: Pre-Plan Interview (Recommended)
 
-Before writing the plan, use the `grill-me-repo` skill to interview the user about every design decision. The interview
-should produce a structured decision log that feeds into this plan.
+Before writing the plan, use an interview-style skill (if one is available in this repository) to interview the user
+about every design decision. The interview should produce a structured decision log that feeds into this plan.
 
 If the user declines the interview, proceed directly to Step 1 but flag any assumptions explicitly in the Verified
 Baseline.
@@ -50,7 +50,7 @@ contracts that must be followed as specified.]
 ---
 ```
 
-Title should be: `{Feature Name} ({kind/cluster context})`
+Title should be: `{Feature Name} ({component/context})`
 
 ### Step 2: Write the Goal Section
 
@@ -61,11 +61,12 @@ Title should be: `{Feature Name} ({kind/cluster context})`
 
 Expected outcomes after completion:
 
-- {Outcome 1: What the widget/feature does}
-- {Outcome 2: Layout modes and responsive behavior}
+- {Outcome 1: What the feature does}
+- {Outcome 2: Layout/behavior modes and responsive behavior, if applicable}
 - {Outcome 3: Data contracts and formatting}
 - {Outcome 4: Interaction model}
-- {Outcome 5: Architectural compliance (UMD, shared layout/fit, lifecycle, fail-closed, smell-prevention, file-size)}
+- {Outcome 5: Architectural compliance (module pattern, shared layout/fit conventions, lifecycle, fail-closed,
+  smell-prevention, file-size)}
 - {Outcome 6: Documentation and tests cover the new feature end-to-end}
 
 ---
@@ -83,12 +84,12 @@ The following points were rechecked against the repository before this plan:
 
 1. {Reference implementation}: {What it does and how it's structured}
 2. {Lifecycle owner}: {What it owns and its contract}
-3. {Route metadata}: {Current state, where new tuples must go}
-4. {Route metadata}: {Current inventory, where new renderers must go}
-5. {Mapper}: {Current branches, how new kinds are added}
+3. {Routing/registration metadata}: {Current state, where new entries must go}
+4. {Routing/registration metadata}: {Current inventory, where new renderers must go}
+5. {Dispatch/branching logic}: {Current branches, how new kinds are added}
 6. {Shared utilities}: {Available helpers relevant to this feature}
 7. {Config}: {Current store keys, editables, kind list}
-8. {Theme/CSS}: {Relevant token contracts}
+8. {Theme/styling}: {Relevant token contracts}
 9. {Bridge/host actions}: {If interactive, what capabilities exist}
 10. {Confirmed absence}: {No existing code for this feature exists}
 
@@ -97,14 +98,13 @@ The following points were rechecked against the repository before this plan:
 
 **Verification checklist — read these files:**
 
-- `config/cluster-routes.js` and `config/cluster-routes/*.js` — current route tuples
-- `cluster/mappers/{Cluster}Mapper.js` — current branches
-- `config/components/registry-widgets-nav.js`, `config/components/registry-widgets-vessel.js`,
-  `config/components/registry-widgets-gauge.js` — current widget registrations
-- `config/clusters/{cluster}.js` — current store keys and editables
-- `runtime/surface/HtmlSurfaceController.js` — lifecycle contract (for HTML kinds)
-- `shared/widget-kits/` — available shared utilities
-- `runtime/TemporaryHostActionBridge.js` — if interactive, available host actions
+- The file(s) that hold current route/registration tuples for this kind of feature
+- The file(s) that hold the current dispatch or branching logic that a new kind must extend
+- The file(s) that register components/widgets of this kind, to see current registrations
+- The config file that defines store keys and editable settings for the relevant grouping
+- The controller or module that owns lifecycle for this kind of feature (creation, teardown, update)
+- Your project's shared-utility directory — check for reusable helpers before writing new ones
+- The module that exposes host/bridge actions, if the feature is interactive
 - The reference implementation file for the chosen archetype
 
 ### Step 4: Write the Concept Specification (If Applicable)
@@ -130,7 +130,7 @@ This section is the authoritative layout/behavioral specification for the {featu
 
 ### Interaction Model
 
-{Click behavior per page, dispatch vs passive, handler names}
+{Click behavior per context, dispatch vs passive, handler names}
 ```
 
 ### Step 5: Write Architecture Notes
@@ -162,10 +162,9 @@ These notes anchor the plan. They are descriptive, not prescriptive.
 
 ### Architecture
 
-- Do not change the AvNav host registration strategy.
-- Do not add ES modules or a build step.
-- Follow the existing UMD component pattern.
-- Do not add a second responsive scale profile; use `ResponsiveScaleProfile`.
+- Do not change the host integration/registration strategy.
+- Do not introduce a new module system or build step; follow the project's existing module pattern.
+- Do not add a second responsive-scaling mechanism; reuse the project's existing one.
 - Do not duplicate shared utilities. {Feature-specific architecture constraints}
 
 ### File organization
@@ -173,11 +172,11 @@ These notes anchor the plan. They are descriptive, not prescriptive.
 - {Renderer folder and file list with ownership descriptions}
 - {ViewModel location}
 - {Layout/fit owner locations}
-- Each file must stay within the 400-line budget.
-- The 400-line limit is absolute and overrides all other plan guidance. If any phase would push a file over 400 lines,
+- Each file must stay within the project's line-count budget (check your project's conventions for the exact number).
+- The line-count limit is absolute and overrides all other plan guidance. If any phase would push a file over the limit,
   that phase must include a split step. Plans must not assume agents will use one-liner compression as a workaround.
-- For implementation phases that touch files already in the 300+ line range, include an explicit note: "Check file size
-  before and after; split if approaching 400 lines."
+- For implementation phases that touch files already close to the limit, include an explicit note: "Check file size
+  before and after; split if approaching the limit."
 
 ### Behavioral
 
@@ -192,8 +191,8 @@ These notes anchor the plan. They are descriptive, not prescriptive.
 - Do not change existing {reference implementation} code or tests.
 - Do not change {lifecycle owner} internals.
 - Do not perform source-code changes in the documentation phase.
-- Do not leave a permanent `PLANn`/`Phase N` citation in shipped code, docs, or tests outside `exec-plans/`; describe
-  results standalone instead (a literal `PLANn.md` file-path reference is still fine).
+- Do not leave a permanent plan/phase citation in shipped code, docs, or tests outside the plans directory; describe
+  results standalone instead (a literal plan-file-path reference is still fine).
 
 ---
 ```
@@ -229,17 +228,17 @@ Structure as phased steps with explicit dependencies:
 
 **Intent:** create/update documentation without source-code changes.
 
-#### NA. Create `documentation/widgets/{doc-name}.md`
+#### NA. Create the feature's documentation page
 
-{Content requirements following documentation-format.md}
+{Content requirements following your project's documentation-format conventions}
 
-#### NB. Update `documentation/TABLEOFCONTENTS.md`
+#### NB. Update the documentation index/table of contents
 
 {Entries to add}
 
 #### NC. Update related guidance
 
-{README.md, AGENTS.md, CLAUDE.md, or other workflow docs if applicable}
+{README, contributor guide, agent instructions, or other workflow docs if applicable}
 
 ---
 ```
@@ -250,22 +249,23 @@ Structure as phased steps with explicit dependencies:
 ## Acceptance Criteria
 
 - [ ] {Feature works: specific testable behavior}
-- [ ] {Layout modes: flat/normal/high transitions correct}
-- [ ] {Interaction: dispatch/passive behavior per page}
+- [ ] {Layout modes: transitions correct, if applicable}
+- [ ] {Interaction: dispatch/passive behavior per context}
 - [ ] {Edge cases: empty data, disconnect, missing props}
-- [ ] {Responsive: text sizing, compaction profile}
-- [ ] {Day/night: theme token usage}
-- [ ] All new files under 400 lines
+- [ ] {Responsive: text sizing, compaction behavior}
+- [ ] {Theming: token usage across light/dark or day/night modes}
+- [ ] All new files within the project's line-count budget
 - [ ] No smell-prevention violations
-- [ ] Documentation complete and linked from TABLEOFCONTENTS.md
-- [ ] `npm run check:all` passes (`check:core` + native coverage thresholds)
+- [ ] Documentation complete and linked from the documentation index
+- [ ] The project's full check/test suite passes
 ```
 
 ### Step 9: Save the Plan
 
-Save to `exec-plans/active/PLAN{N}.md`.
+Save to the repository's active-plans directory, e.g. `exec-plans/active/PLAN{N}.md`.
 
-After the plan is fully implemented and verified, move to `exec-plans/completed/PLAN{N}.md`.
+After the plan is fully implemented and verified, move it to the corresponding completed-plans directory, e.g.
+`exec-plans/completed/PLAN{N}.md`.
 
 ### Anti-Patterns
 
@@ -276,5 +276,8 @@ After the plan is fully implemented and verified, move to `exec-plans/completed/
 - ❌ Putting the Documentation Phase inside a coding phase
 - ❌ Forgetting acceptance criteria
 - ❌ Plans over 1500 lines (split into multiple phases/plans if needed)
-- ❌ Leaving a permanent `PLANn`/`Phase N` citation in shipped code, docs, or tests outside `exec-plans/`; see
-  `exec-plan-authoring.md`'s Exec-Plan Citation Rule (enforced by `check-patterns`'s `exec-plan-reference` rule)
+- ❌ Leaving a permanent plan/phase citation in shipped code, docs, or tests outside the plans directory; see your
+project's exec-plan authoring guidance for the exact citation rule and how it is enforced
+</content>
+
+</invoke>

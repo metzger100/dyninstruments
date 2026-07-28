@@ -20,6 +20,23 @@ Current context surfaces include:
 Legacy helper theme fallbacks (resolveTextColor, resolveFontFamily, resolveWidgetRoot) are not part of the production
 contract.
 
+## Key Details
+
+- `componentContext.canvas.setupCanvas()` returns `{ ctx, W, H }` for a HiDPI-safe canvas.
+- `componentContext.dom.requirePluginRoot(target)` walks the composed tree across ShadowRoot host boundaries, memoizes
+  the resolved root per target node in a `WeakMap`, and throws if no committed `.widget.dyniplugin` root exists.
+- `componentContext.dom.getNightModeState(rootEl)` returns `!!rootEl.closest('.nightMode')` with no fallback to
+  `documentElement`/`body`.
+- `componentContext.format.applyFormatter(...)` treats empty/whitespace-only strings as missing, catches formatter
+  exceptions at this boundary, and falls back to `String(raw)` when dispatch is unavailable or fails.
+- `componentContext.hostActions()` is the same function reference as `runtime.hostActions`; it re-reads the current
+  runtime-owned facade on every call and exposes `getCapabilities()`, `routePoints.activate({ index, pointSnapshot })`,
+  `routeEditor.openActiveRoute()`, `routeEditor.openEditRoute()`, `map.checkAutoZoom()`, `ais.showInfo(mmsi)`.
+- `componentContext.components.require(name)` returns the already-created dependency instance loaded by
+  `runtime.componentLoader` from the matching `config.components` ID.
+- Legacy helper theme fallbacks (`resolveTextColor`, `resolveFontFamily`, `resolveWidgetRoot`) are not part of the
+  production contract.
+
 ## API Reference
 
 ### componentContext.canvas.setupCanvas

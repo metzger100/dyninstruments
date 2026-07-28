@@ -18,6 +18,26 @@ Ownership split:
 - runtime/cluster/RouteActivationController.js builds activated route payloads on demand
 - runtime/init.js requests required components and registers widgets
 
+## Key Details
+
+- `config.components` is assembled from 10 registry fragments (`registry-shared-foundation-format.js`, `-geometry.js`,
+  `-layout.js`, `-state.js`, `-xte.js`, `registry-shared-engines.js`, `registry-widgets-nav.js`, `-vessel.js`,
+  `-gauge.js`, `registry-cluster.js`), each of which must also appear in `config.bootstrapManifest`.
+- Loader supports exactly two API shapes: `factory` (requires `create()`) and `module` (requires a direct module object
+  API).
+- `componentContext.theme.tokens.resolveForRoot(rootEl)` resolves immutable theme snapshots for component factories;
+  `componentContext.hostActions` is the same function reference as `runtime.hostActions`.
+- `runtime.getAsset(key)` returns the preloaded asset value or `null` for a known-but-failed asset;
+  `runtime.assetUrl(relativePath)` resolves a plugin-relative path to a full URL.
+- Loader flow: resolve dependencies recursively -> load CSS (`runtime.loadCssOnce`) -> load JS
+  (`runtime.loadScriptOnce`) -> preload declared assets -> validate API shape -> cache resolved component promise.
+- Global `plugin.css` is linked in document head; committed-HTML `shadowCss` bundles are preloaded as text and injected
+  only into the active renderer's shadow root by `HtmlSurfaceController`, never linked globally.
+- `ClusterWidget.deps` is intentionally `[]`; route roots are loaded lazily by `RouteActivationController`, not at
+  startup.
+- `runtime/init.js` does not preload renderer `shadowCss` during startup; `RouteActivationController` owns active-route
+  `shadowCss` preload.
+
 ## Registry Assembly
 
 config.components is assembled from:

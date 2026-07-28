@@ -10,6 +10,15 @@ MapZoomTextHtmlWidget renders map zoom state as a committed HTML surface.
 - shell: inert pre-commit
 - semantic content: committed shadow-root renderer
 
+## Key Details
+
+- Renderer class: `MapZoomTextHtmlWidget`, committed HTML renderer for cluster kind `map/zoom`.
+- Markup owner: `shared/widget-kits/nav/MapZoomMarkup.js`; text-fit owner: `shared/widget-kits/nav/MapZoomHtmlFit.js`.
+- DOM patching goes through the shared `HtmlDomPatchUtils.patchInnerHtml()` helper (no per-widget patch logic).
+- Inner wrapper class: `.dyni-map-zoom-html`.
+- Route metadata `shellSizing`: ratio sizing, `aspectRatio: 2` in vertical mode.
+- Interaction action target: `surfacePolicy.actions.map.checkAutoZoom()`.
+
 ## State Screens
 
 - Resolver order: `disconnected` (`p.disconnect === true`) -> `data`

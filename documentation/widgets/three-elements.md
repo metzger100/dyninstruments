@@ -15,6 +15,20 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
   floor
 - formatted value output is normalized through `PlaceholderNormalize`; missing values render as `---`
 
+## Key Details
+
+- Renderer file: `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js`; export id `"ThreeValueTextWidget"`; used
+  as `ClusterWidget`'s default renderer.
+- Layout thresholds: `ratioThresholdNormal` default `1.0` (below -> `high`), `ratioThresholdFlat` default `3.0` (above
+  -> `flat`); `captionUnitScale` default `0.8`.
+- Collapsing rules: no caption forces `flat`; no unit in `high` collapses to `normal`; no caption and no unit forces
+  `flat`.
+- `disconnect` prop (default `false`) renders the shared `disconnected` state-screen (`GPS Lost`) via
+  `StateScreenPrecedence.pickFirst(...)` and `StateScreenCanvasOverlay.drawStateScreen(...)`.
+- Missing/invalid values fall back to `default` (`"---"`), normalized through `PlaceholderNormalize`.
+- `stableDigits` (default `false`) enables `StableDigits.normalize(...)` on the primary value text and switches to
+  `tokens.font.familyMono`.
+
 ## Module Registration
 
 ```javascript

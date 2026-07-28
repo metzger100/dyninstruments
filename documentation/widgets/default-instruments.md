@@ -18,6 +18,21 @@ thin and pushes visual behavior into the existing renderers:
 - `linearGauge` -> `DefaultLinearWidget`
 - `radialGauge` -> `DefaultRadialWidget`
 
+## Key Details
+
+- Cluster config file: `config/clusters/default.js`; cluster identifier: `dyni_Default_Instruments`.
+- Three kinds map to renderers: `text` -> `ThreeValueTextWidget`, `linearGauge` -> `DefaultLinearWidget`, `radialGauge`
+  -> `DefaultRadialWidget`.
+- `value` is a `KEY` editable that trims the selected store path into `storeKeys.value` (for example `nav.gps.speed`,
+  `env.water.temperature`, `electrical.battery.house`); empty input removes `storeKeys.value`.
+- Shared defaults: `captionUnitScale = 0.8`, `stableDigits = false`.
+- Gauge kinds default `min = 0`, `max = 100`, major tick `10`, minor tick `2`, `showEndLabels = false`, `easing = true`.
+- Sector model (both gauge kinds): four sectors — low alarm, low warning, high warning, high alarm — each with an enable
+  toggle, a threshold, and an editable color; all four start disabled. Default thresholds: low alarm `10`, low warning
+  `25`, high warning `75`, high alarm `90`; default colors: warning `#e0a92e`, alarm `#d9534a`.
+- `caption`/`unit` are hidden as built-in AvNav editables (per-kind caption/unit editables remain visible); `formatter`,
+  `formatterParameters`, and `className` stay enabled. Only `canvas-dom` routes are used.
+
 ## Value Contract
 
 The cluster exposes one dynamic key selector:

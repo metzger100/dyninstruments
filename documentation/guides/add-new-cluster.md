@@ -32,6 +32,27 @@ Mapper contract:
   - [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md)
   - [../avnav-api/core-key-catalog.md](../avnav-api/core-key-catalog.md)
 
+## Key Details
+
+- Files touched per new cluster: `config/shared/kind-defaults.js` (kind maps), `config/clusters/<cluster>.js` (cluster
+  def, pushed via `config.clusters.push({...})`), `cluster/mappers/<Cluster>Mapper.js` (translate logic),
+  `config/components/registry-cluster.js` (mapper registration), `config/cluster-routes/<cluster>.js` (route entry).
+- Mapper module stays declarative: exports `{ id, create }` where `create()` returns `{ cluster, translate }`;
+  `translate(props, toolkit)` only normalizes values and picks a payload, never renderer identity or drawing logic.
+- Use CamelCase-suffix keys for multi-value radial fields (`value1RadialMain`, `xteDisplayBrg`, ...) so generated
+  editable keys stay predictable (`caption_<mapKey>`, `unit_<mapKey>`).
+- Internal-only responsive knobs (`ratioThresholdNormal`, `ratioThresholdFlat`, widget-specific `*RatioThreshold*`) must
+  be marked `internal: true` on the editable spec so defaults apply without host-editor exposure.
+- Renderer decision rule: create a dedicated renderer if the mapper needs more than 6 renderer-specific props, if props
+  change renderer behavior mode, or if visual output differs from the existing renderer's purpose; otherwise extend the
+  existing renderer with a renderer-owned variant contract (e.g. `PositionCoordinateWidget` `displayVariant`).
+- Every formatter-bearing kind needs a documented `kind -> key -> raw unit/type -> formatter -> formatterParameters`
+  tuple in [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md),
+  [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md), and
+  [../avnav-api/core-key-catalog.md](../avnav-api/core-key-catalog.md).
+- User-visible visual/layout changes require updating `tests/layouts/gpspage-all-widgets.json` and
+  `tests/layouts/gpspage-all-widgets.test.js`.
+
 ## Step 1: Add Kind Defaults
 
 Add entries in `config/shared/kind-defaults.js`:

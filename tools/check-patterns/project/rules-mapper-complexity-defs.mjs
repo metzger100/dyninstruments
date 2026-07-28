@@ -1,8 +1,8 @@
 // Rule definition for the mapper-output-complexity rule in rules-mapper-complexity.mjs.
 
-import { runMapperOutputComplexityRule } from "./rules-mapper-complexity.mjs";
+import { runMapperOutputComplexityRule } from "../rules-mapper-complexity.mjs";
 
-/** @typedef {import("./shared.mjs").Rule} Rule */
+/** @typedef {import("../shared.mjs").Rule} Rule */
 
 /** @type {Rule[]} */
 export const MAPPER_COMPLEXITY_RULES = [

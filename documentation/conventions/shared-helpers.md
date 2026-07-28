@@ -9,6 +9,26 @@ owned by widget-local helpers.
 
 Use these modules before adding local helper functions.
 
+## Key Details
+
+- Canonical modules live under `shared/widget-kits/{value,html,text,layout,radial,format,gauge}/`; `ValueMath` is the
+  base numeric/text helper module that other modules (`RadialValueMath`, `GaugeToolkit`) compose rather than duplicate.
+- The Complete Canonical Helper List table is the reference backing the `check-patterns` rule
+  `canonical-helper-redefinition`; redefining any listed helper name outside its owner module fails that rule.
+- Radial wrappers (`RadialValueMath`, `RadialTextFitting`, `RadialTextLayout`, `RadialToolkit`) are compatibility shims
+  only; do not add new generic behavior to them.
+- `ClusterMapperToolkit.positiveUnitNumber(...)` is the canonical helper when a unit-aware numeric config value must be
+  positive and required downstream.
+- At the `applyFormatter` boundary, empty strings are treated as `no data` and must return the default placeholder;
+  `PlaceholderNormalize` catches JS sentinel strings (`NaN`, `undefined`, `null`, `Infinity`, `-Infinity`) as a safety
+  net.
+- Use `undefined` (never `NaN`) as the sentinel for an absent optional numeric value; use
+  `ValueMath.toOptionalFiniteNumber(raw)` at live data/action boundaries and keep `ValueMath.toFiniteNumber(raw)` only
+  for intentional coercive config/default normalization where `null -> 0` is documented.
+- Runtime bootstrap scripts consume the pre-component-load global `window.DyniComponents.DyniValueMath`; keep
+  `shared/widget-kits/value/ValueMath.js` loaded before those scripts in `config/bootstrap-manifest.js` and test/perf
+  harness bootstrap lists.
+
 ## Canonical Modules
 
 | Module                | File                                             | Owns                                                                                                                                                                                                                                                                                          |

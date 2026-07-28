@@ -1,18 +1,16 @@
 ---
 name: preflight
 description:
-  Mandatory session bootstrap for every task in the dyninstruments repository. Reads required docs, routes to
-  task-relevant docs, and produces a structured context summary. Must run before any planning, coding, review, or
-  documentation work.
+  Mandatory session bootstrap for every task in this repository. Reads required docs, routes to task-relevant docs, and
+  produces a structured context summary. Must run before any planning, coding, review, or documentation work.
 ---
 
 # Skill: preflight
 
 ## Description
 
-Mandatory session bootstrap for every task in the dyninstruments repository. Reads required docs, routes to
-task-relevant docs, and produces a structured context summary. Must run before any planning, coding, review, or
-documentation work.
+Mandatory session bootstrap for every task in this repository. Reads required docs, routes to task-relevant docs, and
+produces a structured context summary. Must run before any planning, coding, review, or documentation work.
 
 ## When to Use
 
@@ -21,76 +19,58 @@ documentation.
 
 ## Instructions
 
-### Step 1: Read the Three Mandatory Files
+### Step 1: Read the Mandatory Files
 
-Read these three files in this order. Do not skip any of them.
+Read these files in this order. Do not skip any of them.
 
-1. `documentation/TABLEOFCONTENTS.md`
+1. `documentation/TABLEOFCONTENTS.md` (or the repository's equivalent top-level documentation index)
 2. `documentation/conventions/coding-standards.md`
 3. `documentation/conventions/smell-prevention.md`
 
+If any of these paths do not exist in the repository, look for the nearest equivalent (a documentation index, a
+coding-standards document, and an anti-pattern/code-smell document) before proceeding. If no such documents exist at
+all, note that explicitly in the context summary in Step 4 rather than silently skipping this step.
+
 ### Step 2: Classify the Task
 
-Determine which category the task falls into:
+Determine which category the task falls into. Use the repository's own vocabulary for feature types where it differs
+from the generic labels below:
 
-| Category             | Signal                                                              |
-| -------------------- | ------------------------------------------------------------------- |
-| New semicircle gauge | "gauge", "speedometer", "radial", semicircle instrument             |
-| New linear gauge     | "linear", "bar gauge", horizontal instrument                        |
-| New full-circle dial | "compass", "wind dial", full-circle, 360°                           |
-| New text renderer    | "text widget", "numeric display", "three-value"                     |
-| New HTML kind        | "HTML widget", "native HTML", "interactive", "list", "route points" |
-| New cluster          | "new cluster", entirely new instrument group                        |
-| Refactor / cleanup   | "refactor", "cleanup", "extract", "consolidate"                     |
-| Documentation        | "docs", "document", "update docs", "sync docs"                      |
-| Bug fix              | "fix", "broken", "regression", "failing"                            |
-| Plan creation        | "plan", "design", "architecture plan", "exec-plan"                  |
+| Category                 | Signal                                                                             |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| New component/module     | "add", "new component", "new module", request to build a new unit                  |
+| New variant of a pattern | Request matches an existing family of components/modules with a shared style guide |
+| New integration/adapter  | "integration", "adapter", "connector", "new kind of interface"                     |
+| Refactor / cleanup       | "refactor", "cleanup", "extract", "consolidate"                                    |
+| Documentation            | "docs", "document", "update docs", "sync docs"                                     |
+| Bug fix                  | "fix", "broken", "regression", "failing"                                           |
+| Plan creation            | "plan", "design", "architecture plan", "exec-plan"                                 |
 
 ### Step 3: Route to Task-Specific Docs
 
-Based on the category, read ONLY the additional docs listed below. Never read all docs sequentially.
+Based on the category, read ONLY the additional docs listed below (adjust paths to match this repository's actual
+layout). Never read all docs sequentially.
 
-**New semicircle gauge:**
+**New component/module:**
 
-- `documentation/guides/add-new-gauge.md`
-- `documentation/radial/gauge-style-guide.md`
-- Reference: `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js`
+- The repository's "how to add a new X" guide, if one exists (commonly under `documentation/guides/`)
+- The relevant style guide for that category of component
+- Reference: an existing, representative implementation of the same kind
 
-**New linear gauge:**
+**New variant of an existing pattern:**
 
-- `documentation/guides/add-new-linear-gauge.md`
-- `documentation/linear/linear-gauge-style-guide.md`
-- Reference: `widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js`
+- The style guide for that pattern family
+- Reference: the most recently added sibling implementation, to confirm the pattern is still current
 
-**New full-circle dial:**
+**New integration/adapter:**
 
-- `documentation/guides/add-new-full-circle-dial.md`
-- `documentation/radial/full-circle-dial-style-guide.md`
-- Reference: `widgets/radial/CompassRadialWidget/CompassRadialWidget.js`
-
-**New text renderer:**
-
-- `documentation/guides/add-new-text-renderer.md`
-- `documentation/widgets/three-elements.md`
-- Reference: `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js`
-
-**New HTML kind:**
-
-- `documentation/guides/add-new-html-kind.md`
-- `documentation/shared/html-widget-visual-style-guide.md`
-- `documentation/widgets/active-route.md`
-- Reference: `widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js`
-
-**New cluster:**
-
-- `documentation/guides/add-new-cluster.md`
-- `documentation/architecture/cluster-widget-system.md`
-- `documentation/architecture/component-system.md`
+- The architecture document describing how integrations/adapters are wired into the system
+- The component/module registry or contract document, if the repository has one
 
 **Refactor / cleanup:**
 
-- `documentation/conventions/shared-helpers.md`
-- `documentation/guides/documentation-maintenance.md`
+- `documentation/conventions/shared-helpers.md` (or equivalent)
+- `documentation/guides/documentation-maintenance.md` (or equivalent)
 
 **Documentation:**
 
@@ -99,34 +79,33 @@ Based on the category, read ONLY the additional docs listed below. Never read al
 
 **Bug fix:**
 
-- `documentation/architecture/cluster-widget-system.md` (if cluster-related)
-- The specific widget/module documentation referenced in the bug's file header
+- The architecture document for the subsystem the bug lives in, if the bug is subsystem-related
+- The specific module documentation referenced in the bug's file header or nearest doc comment
 
 **Plan creation:**
 
 - `documentation/core-principles.md`
-- `ARCHITECTURE.md`
-- The relevant guide for the widget archetype
-- Existing plans in `exec-plans/completed/` (read structure only, not full content)
+- The top-level architecture document (commonly `ARCHITECTURE.md`)
+- The relevant guide for the pattern/category involved
+- Existing completed plans (read structure only, not full content)
 
 ### Step 4: Produce Context Summary
 
 After reading, produce a short structured summary for yourself (do not output this to the user unless asked):
 
-```
+```text
 TASK: [one-line description]
 CATEGORY: [from Step 2]
-ARCHETYPE: [widget archetype if applicable, else "N/A"]
-SHARED ENGINE: [engine name if applicable, else "N/A"]
+PATTERN/ARCHETYPE: [pattern or component family if applicable, else "N/A"]
+SHARED ENGINE/UTILITY: [name if applicable, else "N/A"]
 REFERENCE IMPL: [file path if applicable, else "N/A"]
 KEY CONSTRAINTS:
-- No bundler, no ES modules, UMD/IIFE only
-- Host path is renderHtml-only
-- ABSOLUTE 400-line limit on all JS and MD files (repo rules override exec-plans; split before crossing; no one-liner compression)
+- [runtime/build constraints from the repository's own conventions]
+- [any hard limits on file size, module structure, or dependency use — repo rules override any plan document]
 - [task-specific constraints from docs read]
-RELEVANT SHARED UTILITIES: [list from coding-standards.md §Shared Utilities]
-ACTIVE SMELL RULES: [list rules most likely to trigger for this task type]
-COMPLETION GATE: npm run check:all
+RELEVANT SHARED UTILITIES: [list from coding-standards.md, if such a section exists]
+ACTIVE ANTI-PATTERN RULES: [list rules most likely to trigger for this task type]
+COMPLETION GATE: [the repository's standard check/test command, e.g. `npm run check:all` or equivalent]
 ```
 
 ### Step 5: Verify Precedence
@@ -140,19 +119,21 @@ If any guidance conflicts during the task, apply this precedence:
 
 ### Step 5.5: File-Size Awareness Check
 
-Before starting implementation, check whether any file you will modify is already in the 300+ line range:
+Before starting implementation, check whether any file you will modify is already close to the repository's documented
+size limit (if one exists):
 
 ```bash
 wc -l <file>
 ```
 
-If a file is above 300 lines and your task will add significant code to it, plan the split upfront — do not defer it to
-"later" or assume the exec-plan will handle it. The 400-line limit is absolute and repo rules override exec-plans.
+If a file is already large and your task will add significant code to it, plan the split upfront — do not defer it to
+"later" or assume a plan document will handle it. Hard size limits documented in the repository's conventions are
+absolute and take precedence over any plan document.
 
 ### Anti-Patterns
 
-- ❌ Reading all documentation files sequentially
-- ❌ Re-reading the same docs repeatedly within a session
-- ❌ Starting implementation before completing preflight
-- ❌ Skipping smell-prevention.md because "it's just a cleanup task"
-- ❌ Reading verbose examples when not implementing a matching pattern
+- Reading all documentation files sequentially
+- Re-reading the same docs repeatedly within a session
+- Starting implementation before completing preflight
+- Skipping the smell-prevention/anti-pattern document because "it's just a cleanup task"
+- Reading verbose examples when not implementing a matching pattern

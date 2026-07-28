@@ -49,6 +49,30 @@ These rules are mandatory for all contributors and AI agents in this repository.
     fallbacks only — the validated `dyni-boundary-*(category, owner, date[, expires])` marker. →
     [conventions/smell-prevention.md](conventions/smell-prevention.md#suppression-syntax)
 
+## Key Details
+
+- 400-line hard limit applies to JS, `.mjs`, `.d.ts` declarations, and Markdown across source, tests, `tools`, `types`,
+  and root docs; exempt paths are `.css`, `.json`, `exec-plans/`, `.agents/skills/`, package configs, and the
+  `tools/lint-fixtures/`/`tools/test-data/` fixture trees.
+- Dependency direction is strictly one-way: `widgets -> shared`; `cluster -> cluster/widgets/shared`; `shared -> shared`
+  only; `config` stays pure data; `runtime` must not depend on `widgets`, `cluster`, or `shared`.
+- Every component registers via the UMD/IIFE wrapper on `window.DyniComponents.{globalKey}`; no bundler, no runtime
+  build step.
+- No direct `window.avnav` access from widget/shared/config code; go through `componentContext.format.applyFormatter()`
+  and `componentContext.dom.requirePluginRoot()`.
+- Explicit falsy defaults (`""`, `0`, `false`) must survive using property-presence/nullish checks; truthy-fallback
+  (`x || default`) is never allowed for configured defaults.
+- Cache-owning modules must expose explicit invalidation APIs, and mutation paths must call them when cached values go
+  stale.
+- No speculative legacy, compatibility, or fallback code paths unless an active external boundary contract requires
+  them.
+- No duplication of CSS, theme-token, or declarative config defaults inside runtime/widget logic.
+- Generic `dyni-lint-disable-*` suppressions are forbidden in production source; the only allowed exceptions are a
+  narrow canonical-owner allowlist entry owned by the rule itself, or the validated
+  `dyni-boundary-*(category, owner, date[, expires])` marker for genuine external-boundary catch fallbacks.
+- Rules that matter must be mechanically enforced (lint/check), not left as prose only; never fake green tests by
+  weakening assertions to hide a failure.
+
 ## Related
 
 - [TABLEOFCONTENTS.md](TABLEOFCONTENTS.md)

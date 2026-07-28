@@ -8,6 +8,35 @@ editableParameters define the widget configuration UI in AvNav's Layout Editor. 
 `avnav.api.registerWidget(def, editableParameters)`. Parameter values are available in renderHtml/renderCanvas props
 (exception: KEY type provides the store-read value, not the path).
 
+## Key Details
+
+- Parameter types (AvNav API): `STRING`, `NUMBER`, `FLOAT`, `BOOLEAN`, `SELECT`, `KEY`, `ARRAY`, `COLOR` — see the type
+  table below for editor UI, value type, and notes.
+- `KEY` type is special: render/update functions receive the store value read from the path, not the path string itself.
+  The selected path is stored in `storeKeys.<parameterName>`.
+- Pre-defined AvNav parameters needing only `true`/`false` (no type def): `caption`, `unit`, `formatter`,
+  `formatterParameters`, `value`, `className`.
+- `formatterParameters` is an `ARRAY` type; values are positional and formatter-specific (see
+  [formatters.md](formatters.md#built-in-formatters-canonical-list)).
+- `condition` (dyninstruments-only, undocumented in official AvNav API) controls editor visibility: a single object is
+  an AND of its keys, an array of objects is OR across entries, and an empty array/omitted `condition` means always
+  visible.
+- `internal: true` (dyninstruments-only) marks a spec as runtime-owned but editor-hidden: `runtime/editable-defaults.js`
+  still extracts its `default`, while `runtime/widget-registrar.js` strips it before calling
+  `avnav.api.registerWidget(...)`.
+- `makePerKindTextParams(KIND_MAP)` generates `caption_<kind>`/`unit_<kind>` STRING parameters from a kind map; entries
+  support `cap`, `unit`, optional `kind` (array allowed for OR conditions), `captionName`, `unitName`.
+- Migrated metrics use `formatUnit_<metricKey>` (SELECT, formatter token) plus `unit_<metricKey>_<token>` (STRING,
+  display label) instead of a single `unit_<kind>` field; blank display labels are intentional.
+- Shared `commonThreeElementsEditables` defines `ratioThresholdNormal` (FLOAT, 0.5-2.0, default 1.0, internal),
+  `ratioThresholdFlat` (FLOAT, 1.5-6.0, default 3.0, internal), and `captionUnitScale` (FLOAT, 0.5-1.5, default 0.8).
+- `stableDigits` (BOOLEAN, default `false`) and `coordinatesTabular` (BOOLEAN, default `true`) are scoped per-widget via
+  `condition` lists in `config/clusters/*.js`, not via a shared editable.
+- `hideSeconds` (BOOLEAN, default `false`) swaps `formatTime` for `formatClock`; defined only where time text is
+  rendered (`nav.js`: `wpEta`, `rteEta`, `activeRoute`, `editRoute`; `vessel.js`: `clock`, `dateTime`, `timeStatus`).
+- Depth/temperature `KEY` aliases (`depthKey`, `tempKey`) must be copied onto the mapper-owned prop (`depth`, `temp`) in
+  `updateFunction`; default `depthKey` is `nav.gps.depthBelowKeel`.
+
 ## Parameter Definition
 
 editableParameters is an object of parameter specs.

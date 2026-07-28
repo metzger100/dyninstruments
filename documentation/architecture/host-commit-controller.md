@@ -53,15 +53,15 @@ controller.getState();
 
 ### `options` (all optional)
 
-| Key                     | Type       | Purpose                                                   |
-| ----------------------- | ---------- | --------------------------------------------------------- |
-| `instancePrefix`        | `string`   | Prefix for generated `instanceId` values                  |
-| `document`              | `Document` | DOM query target (`querySelector`, `body`)                |
-| `requestAnimationFrame` | `function` | Inject scheduler for deterministic tests/runtime adapters |
-| `cancelAnimationFrame`  | `function` | Inject rAF cancellation                                   |
-| `setTimeout`            | `function` | Inject timeout scheduler                                  |
-| `clearTimeout`          | `function` | Inject timeout cancellation                               |
-| `MutationObserver`      | `function  | null`                                                     | Inject observer constructor or disable observer fallback |
+| Key                     | Type               | Purpose                                                   |
+| ----------------------- | ------------------ | --------------------------------------------------------- |
+| `instancePrefix`        | `string`           | Prefix for generated `instanceId` values                  |
+| `document`              | `Document`         | DOM query target (`querySelector`, `body`)                |
+| `requestAnimationFrame` | `function`         | Inject scheduler for deterministic tests/runtime adapters |
+| `cancelAnimationFrame`  | `function`         | Inject rAF cancellation                                   |
+| `setTimeout`            | `function`         | Inject timeout scheduler                                  |
+| `clearTimeout`          | `function`         | Inject timeout cancellation                               |
+| `MutationObserver`      | `function \| null` | Inject observer constructor or disable observer fallback  |
 
 ### State Shape (`getState`)
 

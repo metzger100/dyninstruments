@@ -7,6 +7,27 @@ commit-driven surface reconciliation
 
 This document describes the live runtime lifecycle.
 
+## Key Details
+
+- `window.DyniPlugin.startupGeneration` records `entrypoint`, `baseUrl`, `hostApi`, and a unique id per startup
+  invocation; `window.DyniPlugin.runtime.runInit()` is called exactly once per startup.
+- `--dyni-theme-preset` is read once from `document.documentElement` during startup and normalized through
+  `runtime.theme`.
+- Commit order per host commit: resolve committed root/shell -> `runtime.theme.applyToRoot(rootEl)` -> record committed
+  revision floor on `SurfaceSessionController` -> `runtime.routeActivation.createWidgetController(def)` /
+  `activateCommittedRoute(...)` resolves route metadata from `config.clusterRoutes.byRouteId` ->
+  `RouteActivationPayloadBuilder` merges `rendererProps` and strips renderer identity fields ->
+  `SurfaceSessionController.reconcileSession(...)` attaches/updates html/canvas-dom surfaces.
+- There is no theme-change gate; `runtime.theme.applyToRoot(rootEl)` outputs are applied on every commit.
+- A new host/API generation clears `initStarted`, `initPromise`, the host-action bridge, `runtime.hostActions`, and
+  `runtime.componentLoader` state before registering widgets; `runtime/init.js` reuses an init promise only within the
+  same generation.
+- Startup does not scan plugin roots, does not apply per-root theme state, and does not preload renderer shadow CSS;
+  route activation owns active-route shadow CSS preload.
+- Surface policy per routed update includes `pageId`, `containerOrientation` (from `props.mode`), `interaction.mode`,
+  `surfacePolicy.actions`, host facts (for example viewport height), and route metadata fields (`routeId`, `mapperId`,
+  `rendererId`, `surface`, optional `viewModelId`, `shellSizing`).
+
 Authoritative owners:
 
 - runtime/plugin-bootstrap-core.js: shared automatic startup owner (bundle-first, manifest fallback, `runInit()`)

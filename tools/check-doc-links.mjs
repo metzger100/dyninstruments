@@ -7,6 +7,15 @@ const root = process.cwd();
 const config = JSON.parse(fs.readFileSync(path.join(root, "linkinator.config.json"), "utf8"));
 const paths = collectMarkdownPaths(root);
 
+/** @param {string} repositoryRoot @returns {string[]} */
+function collectMarkdownPaths(repositoryRoot) {
+  const scopePath = path.join(repositoryRoot, "tools/quality-policy/format-scope.json");
+  const scope = JSON.parse(fs.readFileSync(scopePath, "utf8"));
+  return scope.rows
+    .filter((/** @type {any} */ row) => row.owner === "prettier" && row.path.endsWith(".md"))
+    .map((/** @type {any} */ row) => row.path);
+}
+
 const result = await check({
   ...config,
   path: paths,
@@ -21,23 +30,3 @@ if (!result.passed) {
 }
 
 console.log(`Documentation links passed: ${result.links.length} local and skipped external links checked.`);
-
-/** @param {string} repositoryRoot @returns {string[]} */
-function collectMarkdownPaths(repositoryRoot) {
-  const paths = ["AGENTS.md", "CLAUDE.md", "ARCHITECTURE.md", "README.md", "CONTRIBUTING.md"];
-  paths.push(...walkMarkdown(path.join(repositoryRoot, "documentation")));
-  paths.push(...walkMarkdown(path.join(repositoryRoot, "exec-plans/active")));
-  return paths.filter((relativePath) => fs.existsSync(path.join(repositoryRoot, relativePath)));
-}
-
-/** @param {string} absoluteRoot @returns {string[]} */
-function walkMarkdown(absoluteRoot) {
-  if (!fs.existsSync(absoluteRoot)) return [];
-  const result = [];
-  for (const entry of fs.readdirSync(absoluteRoot, { withFileTypes: true })) {
-    const absolutePath = path.join(absoluteRoot, entry.name);
-    if (entry.isDirectory()) result.push(...walkMarkdown(absolutePath));
-    else if (entry.isFile() && entry.name.endsWith(".md")) result.push(path.relative(root, absolutePath));
-  }
-  return result;
-}

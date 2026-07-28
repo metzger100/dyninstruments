@@ -8,6 +8,27 @@ dyninstruments HTML kinds are commit-driven. Pre-commit shell output is inert; s
 commit inside HtmlSurfaceController. Route metadata owns the pre-activation shell contract, and committed renderers own
 post-activation shadow CSS sizing and layout.
 
+## Key Details
+
+- Stable mount host class: `.dyni-surface-html-mount`; `shellRect` is measured from it and passed to renderers as
+  `payload.shellRect`.
+- `HtmlSurfaceController.createSurfaceController(...)` owns committed lifecycle: `attach(payload)`, `update(payload)`,
+  `detach(reason)`, `destroy()`.
+- Committed renderer instance API: `mount(mountEl, payload)`, `update(payload)`, `postPatch(payload)`, `detach(reason)`,
+  `destroy()`, optional `layoutSignature(payload)`; there is no renderer-spec vertical-sizing hook.
+- Base shadow stylesheet marker: `style[data-dyni-shadow-base="html-surface-box-contract"]`, targeting `:host` and
+  `.dyni-html-root` with `display:block`, `width:100%`, `height:100%`, `min-width:0`, `min-height:0`,
+  `box-sizing:border-box`.
+- `shared/widget-kits/html/PreparedPayloadModelCache.js` caches by payload `revision`, `props` identity, and
+  `shellRect.width`/`shellRect.height`; renderers must clear it on `detach` and `destroy`.
+- `HtmlWidgetUtils.patchInnerHtml(rootEl, markup)` is the shared DOM patch boundary; it stores the last patched markup
+  in non-enumerable `__dyniLastPatchedMarkup` and is a no-op for identical markup.
+- Session-persistence patterns for remounts: `hostContext[SESSION_KEY]` snapshot (same surface session), or a
+  module-level `Object.create(null)` registry keyed by `routeId + pageId + cluster + kind` (cross-session). Snapshots
+  must be plain serializable data (timestamps/phase/config), never DOM nodes or closures.
+- Reference implementation: `shared/widget-kits/vessel/RegattaTimerSessionStore.js` and
+  `widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.js`.
+
 ## Authoritative Contract
 
 ClusterWidget.renderHtml(...):

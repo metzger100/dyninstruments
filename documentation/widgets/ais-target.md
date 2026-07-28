@@ -13,6 +13,17 @@ AisTargetTextHtmlWidget renders AIS target summary state on the committed HTML s
 - Mapper payloads split formatter tokens from display labels: `formatUnits.dst` / `formatUnits.cpa` carry the distance
   tokens while `units.dst` / `units.cpa` stay display-only.
 
+## Key Details
+
+- Renderer class: `AisTargetTextHtmlWidget`, routed for cluster kind `map/aisTarget`.
+- Geometry owners: `AisTargetLayoutSizing.resolveVisualChrome(...)` (accent/shell chrome), `AisTargetLayoutGeometry`
+  (metric sub-rectangles), `AisTargetLayoutGeometryStyles` (CSS-grid style serialization).
+- Inner wrapper class: `.dyni-ais-target-html`.
+- Route metadata `shellSizing`: ratio sizing, `aspectRatio: 7/8` in vertical mode.
+- `hidden` state keeps the widget invisible outside `gpspage` when there is no target identity and it is not being
+  edited — this is an AIS-specific addition to the normal state resolver order.
+- Interaction action target: `surfacePolicy.actions.ais.showInfo(mmsi)`.
+
 ## State Screens
 
 - Resolver order (AIS exception): `hidden` -> `disconnected` -> `noAis` -> `data`

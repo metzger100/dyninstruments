@@ -28,14 +28,14 @@ describe("smell catalog coverage contract", function () {
       "",
       "| Smell Class | Anti-Pattern | Required Pattern | Enforcement | Severity |",
       "|---|---|---|---|---|",
-      "| Example | Example | Example | `check-patterns` (`absolute-user-home-path`) | block |",
+      "| Example | Example | Example | `check-patterns` (`absolute-home-path`) | block |",
       "",
       "## Executable Rule Index",
       "",
       "`missing-rule`"
     ].join("\n");
 
-    expect(missingRuleNames(markdown, ["absolute-user-home-path", "missing-rule"])).toEqual(["missing-rule"]);
+    expect(missingRuleNames(markdown, ["absolute-home-path", "missing-rule"])).toEqual(["missing-rule"]);
   });
 
   it("rejects documents without a smell catalog section", function () {

@@ -13,6 +13,22 @@ The four semicircle gauges share one renderer implementation:
   `GaugeToolkit`, `RadialAngleMath`, `RadialTickMath`, draw utils)
 - Gauge wrappers keep only formatting, tick-profile selection, and sector strategy
 
+## Key Details
+
+- Shared renderer entry point: `SemicircleRadialEngine.createRenderer(spec)`; per-gauge wrapper files:
+  `widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js`, `.../DepthRadialWidget/DepthRadialWidget.js`,
+  `.../TemperatureRadialWidget/TemperatureRadialWidget.js`, `.../VoltageRadialWidget/VoltageRadialWidget.js`.
+- Sector placement and default range per gauge: Speed (high-end, `0..30`, unit `kn`), Depth (low-end, `0..30`, unit `m`,
+  store key default `nav.gps.depthBelowKeel`), Temperature (high-end, `0..35`, unit `°C`), Voltage (low-end, `7..15`,
+  unit `V`, default thresholds `warningFrom=12.2`/`alarmFrom=11.6`).
+- Formatters: Speed uses `formatSpeed`, Depth uses `formatDistance` with a mapper-resolved token, Temperature uses
+  `formatTemperature`, Voltage uses `formatDecimal` with parameters `[3, 1, true]`.
+- `stableDigits` (default `false`) is available on speed/environment semicircle and linear gauge kinds; enables
+  `tokens.font.familyMono` rendering when set.
+- Static gauge art (sectors, ring, ticks, major labels) is cached via `CanvasLayerCache`; the shared cache key covers
+  `W`/`H`, active mode, caption/unit/value-width class, `secScale`, font family/weights, and layout geometry — no
+  per-gauge cache logic.
+
 ## File Locations
 
 | Role                                            | File                                                                |

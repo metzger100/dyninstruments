@@ -27,7 +27,52 @@ If guidance conflicts, precedence is:
 
 ---
 
-## 1. Project Constraints (AvNav Plugin Environment)
+## 1. Documentation Navigation Rule
+
+1. **Read `documentation/TABLEOFCONTENTS.md` FIRST**
+2. **Read `documentation/conventions/coding-standards.md` and `documentation/conventions/smell-prevention.md` for every
+   task**
+3. Identify 1-3 additional relevant files for your task
+4. Read ONLY those additional files
+5. **Never read all files sequentially** (wastes tokens)
+
+---
+
+## 2. Plan and Phase Citation Rule
+
+A comment, docstring, config note, or documentation paragraph outside `exec-plans/` must not cite a historical exec-plan
+number (`PLANn`) or phase identifier (`Phase N`) as authority. Describe the code or config standalone instead; a literal
+pointer to a real `PLANn.md` file (for example in a "related plans" list) is still fine. Plan prose belongs only inside
+`exec-plans/`.
+
+---
+
+## 3. README Sync Principle
+
+`README.md` is mandatory documentation when user-facing behavior changes. Do not treat it as optional. Update
+`README.md` in the same task whenever a change affects theming/configuration, user-selectable options, installation or
+packaging, bundled assets, requirements/platform support, or contributor-visible workflow. For execution plans, include
+explicit README deliverables and exit conditions for these categories.
+
+---
+
+## 4. Quality Checklist Skeleton
+
+- [ ] Completed the mandatory preflight reads.
+- [ ] Read only necessary additional documentation beyond mandatory preflight.
+- [ ] Implementation complete.
+- [ ] Updated relevant documentation, including the navigation index if a doc was added, moved, or removed.
+- [ ] Updated `README.md` when the change is user-facing (see the README sync principle above).
+- [ ] Ran the project's full quality gate — no failures.
+- [ ] New/changed tests and coverage/complexity policy stay within this project's checked floors, budgets, and
+      classifications; no suppression, skip, or lowered threshold was added to reach green.
+- [ ] For releases, followed this project's release workflow exactly, without rerunning quality inside the publish step.
+
+<!-- END SHARED_INSTRUCTIONS -->
+
+---
+
+## 5. Project Constraints (AvNav Plugin Environment)
 
 - **No bundler, no runtime build step** - Raw JS loaded via `<script>` tags at runtime
 - **Dev-only npm tooling is allowed** - used for tests and quality checks; not part of plugin runtime loading
@@ -49,11 +94,9 @@ If guidance conflicts, precedence is:
 
 ---
 
-## 2. Token-Efficient Documentation System
+## 6. Documentation Structure Reference
 
-### Documentation Structure
-
-```
+```text
 documentation/
 ├── TABLEOFCONTENTS.md              # Navigation index (read THIS FIRST)
 ├── core-principles.md              # Non-negotiable project rules
@@ -82,27 +125,18 @@ documentation/
     └── documentation-maintenance.md # Docs sync + validation workflow
 ```
 
-### RULE: Always Start with TABLEOFCONTENTS.md
-
-1. **Read `documentation/TABLEOFCONTENTS.md` FIRST**
-2. **Read `documentation/conventions/coding-standards.md` and `documentation/conventions/smell-prevention.md` for every
-   task**
-3. Identify 1-3 additional relevant files for your task
-4. Read ONLY those additional files
-5. **Never read all files sequentially** (wastes tokens)
-
 ### Example Workflow
 
 **Bad (Token wasteful):**
 
-```
+```text
 Task: Add new BarometerGauge
 ❌ Read all documentation files and large source areas sequentially.
 ```
 
 **Good (Token efficient):**
 
-```
+```text
 Task: Add new BarometerGauge
 ✅ Read TABLEOFCONTENTS.md
 ✅ Read conventions/coding-standards.md and conventions/smell-prevention.md
@@ -113,7 +147,7 @@ Task: Add new BarometerGauge
 
 ---
 
-## 4. File Map
+## 7. File Map
 
 - Feature and API lookups: [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md)
 - Non-negotiable project rules: [documentation/core-principles.md](documentation/core-principles.md)
@@ -129,7 +163,7 @@ Task: Add new BarometerGauge
 
 ---
 
-## 5. Quality Checklist
+## 8. Quality Checklist (Project Detail)
 
 - [ ] Completed mandatory preflight reads: TABLEOFCONTENTS.md + coding-standards.md + smell-prevention.md.
 - [ ] Read only necessary additional documentation beyond mandatory preflight.
@@ -158,7 +192,7 @@ Task: Add new BarometerGauge
 
 ---
 
-## 6. Smell Prevention & Fail-Closed Rules
+## 9. Smell Prevention & Fail-Closed Rules
 
 - Mandatory on every task: follow `documentation/conventions/coding-standards.md` and
   `documentation/conventions/smell-prevention.md` as binding rules.
@@ -182,7 +216,7 @@ Task: Add new BarometerGauge
 
 ---
 
-## 7. Code Hygiene Rules for AI Agents
+## 10. Code Hygiene Rules for AI Agents
 
 ### Before creating any helper function
 
@@ -210,9 +244,7 @@ Task: Add new BarometerGauge
 
 ---
 
-## 8. User-Facing README Sync Rule (Fail-Closed)
-
-`README.md` is mandatory documentation when user-facing behavior changes. Do not treat it as optional.
+## 11. User-Facing README Sync Categories (Project Detail)
 
 Update `README.md` in the same task whenever changes affect any of:
 
@@ -224,9 +256,9 @@ Update `README.md` in the same task whenever changes affect any of:
 6. Requirements/platform support statements
 7. Development setup or contributor workflow visible to users/contributors
 
-For execution plans, include explicit README deliverables and exit conditions for these categories.
+---
 
-## 9. Fail-Closed Fixture/Test Sync Rules
+## 12. Fail-Closed Fixture/Test Sync Rules
 
 When changing user-facing theming or user-visible kind visuals, update the related fixtures/tests in the same task:
 
@@ -235,5 +267,3 @@ When changing user-facing theming or user-visible kind visuals, update the relat
 2. New or visually changed kind (for example a new renderer variant such as `xteDisplayLinear`): update
    `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js` so showcase coverage
    includes the new visual behavior.
-
-<!-- END SHARED_INSTRUCTIONS -->

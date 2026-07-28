@@ -52,9 +52,9 @@ publishes the already-committed ZIP and notes.
 
 1. Prepare release context.
 
-```bash
-npm run release:prepare
-```
+   ```bash
+   npm run release:prepare
+   ```
 
 2. Review the JSON evidence and decide the next SemVer version from actual impact.
 3. Write the release notes markdown directly in the canonical release notes file: `releases/dyninstruments-VERSION.md`.
@@ -64,20 +64,20 @@ npm run release:prepare
    - Name the affected widget, flow, or behavior when that helps the reader understand the change.
 4. Create the release artifacts, commit, and annotated tag.
 
-```bash
-npm run release:create -- --version=X.Y.Z
-```
+   ```bash
+   npm run release:create -- --version=X.Y.Z
+   ```
 
-`release:create` runs one blocking `check:all` gate, builds the ZIP, reads `releases/dyninstruments-VERSION.md`
-directly, commits both artifacts, and creates an annotated `vVERSION` tag. A prerelease uses the same command, for
-example `npm run release:create -- --version=4.0.0-beta.1`.
+   `release:create` runs one blocking `check:all` gate, builds the ZIP, reads `releases/dyninstruments-VERSION.md`
+   directly, commits both artifacts, and creates an annotated `vVERSION` tag. A prerelease uses the same command, for
+   example `npm run release:create -- --version=4.0.0-beta.1`.
 
 5. Push the release commit and annotated tag.
 
-```bash
-git push origin main
-git push origin vVERSION
-```
+   ```bash
+   git push origin main
+   git push origin vVERSION
+   ```
 
 The tag workflow validates the tag with the same SemVer owner used by `release:create`, verifies matching committed ZIP
 and notes paths, and publishes those files. It does not install dependencies, rerun quality, build, package, commit, or

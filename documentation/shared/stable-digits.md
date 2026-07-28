@@ -15,6 +15,17 @@ It produces a two-output pair for a formatted numeric text:
 - `padded`: alignment-friendly value (optional sign slot, zero-padded integer, optional reserved side slot)
 - `plain`: accuracy-preserving unpadded value
 
+## Key Details
+
+- Module: `shared/widget-kits/format/StableDigits.js`; registry id `StableDigits`; depends on `PlaceholderNormalize`.
+- Entry point: `normalize(rawFormattedText, options) -> { padded, plain }`.
+- Options: `integerWidth` (number), `reserveSignSlot` (boolean), `sideSuffix` (`"R"` | `"L"` | `""`),
+  `reserveSideSuffixSlot` (boolean), `suffix` (string override).
+- Integer and fractional digits are never truncated, even when they exceed `integerWidth`.
+- If `PlaceholderNormalize.isPlaceholder(rawFormattedText)` is true, both `padded` and `plain` return the input
+  unchanged; placeholders are never padded.
+- Two-pass fit convention: callers try `padded` first, and rerun the fit with `plain` only if `padded` clips.
+
 ## Contract
 
 `normalize(rawFormattedText, options)` accepts formatter output text and returns:

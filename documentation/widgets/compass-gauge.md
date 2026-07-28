@@ -12,6 +12,22 @@ shortest arc. Pointer color is resolved once per render via `FullCircleRadialEng
 shared `CanvasLayerCache` managed by `FullCircleRadialEngine`. Responsive ring, label, marker, and pointer geometry come
 from `FullCircleRadialLayout` through the shared engine state.
 
+## Key Details
+
+- Renderer file: `widgets/radial/CompassRadialWidget/CompassRadialWidget.js`; export id `"CompassRadialWidget"`;
+  `globalKey: "DyniCompassRadialWidget"`.
+- Dial rotation: `rotationDeg = -heading`; the lubber pointer stays fixed at 0° (North-up card rotation model).
+- Optional target marker (`markerCourse`) eases independently from `heading` and is rendered at
+  `easedMarker - easedHeading` so wrapped changes take the shortest arc.
+- Layout thresholds: `compassRadialRatioThresholdNormal` default `0.8` (below -> `high`),
+  `compassRadialRatioThresholdFlat` default `2.2` (above -> `flat`).
+- `disconnect` prop (default `false`) shows the shared `disconnected` state-screen (`GPS Lost`) and skips dial
+  rendering.
+- Heading formatting: `ValueMath.formatDirection360(v, leadingZero)`, with `leadingZero` default `true`.
+- `stableDigits` (default `false`) switches heading value text to `tokens.font.familyMono`.
+- `heading` is explicitly excluded from the static cache key; only geometry/style/label-set inputs invalidate the cached
+  face+label sprites.
+
 ## Module Registration
 
 ```javascript

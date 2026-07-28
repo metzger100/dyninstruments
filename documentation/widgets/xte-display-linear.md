@@ -10,6 +10,21 @@ same four nav metrics (`COG`, `XTE`, `DST`, `BRG`) plus optional waypoint name r
 State-screen ownership and metric formatting match the existing XTE family: disconnected/no-target overlays are rendered
 first, then gauge + metrics in `data` state.
 
+## Key Details
+
+- Renderer file: `widgets/text/XteDisplayLinearWidget/XteDisplayLinearWidget.js`; export/`globalKey`:
+  `"DyniXteDisplayLinearWidget"`; horizontal linear-gauge counterpart to `XteDisplayWidget`'s highway view.
+- Metrics shown: `COG`, `XTE`, `DST`, `BRG`, plus optional waypoint name via `layout.showWpName` (default `false`).
+- Gauge range is symmetric: `-xteScale..+xteScale` (`xteScale` default `1`); overflow clamps the pointer to the edge and
+  switches it to `theme.colors.alarm`.
+- Layout thresholds: `layout.ratioThresholdNormal` default `0.85` (below -> `high`), `layout.ratioThresholdFlat` default
+  `2.3` (above -> `flat`); tick steps default major `1.0`, minor `0.25`.
+- `layout.hideTextualMetrics` (default `false`) renders gauge-only, hiding metric text and waypoint name.
+- `layout.easing` (default `true`) spring-eases pointer motion via `SpringEasing`.
+- `stableDigits` (default `false`) enables two-pass padded/plain XTE text with `L/R` suffix slot reservation.
+- Static layers `back` (track) and `front` (ticks + end labels) are cached via `CanvasLayerCache`; pointer position/
+  color, live metrics, and waypoint name are never cached.
+
 ## Module Registration
 
 ```javascript

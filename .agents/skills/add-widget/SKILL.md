@@ -32,7 +32,7 @@ the reference implementation for the chosen archetype before proceeding.
 
 From the widget name, derive all required identifiers:
 
-```
+```text
 Widget name: [UserInput] (e.g., "Barometer")
 Component ID: {Name}Widget (e.g., "BarometerRadialWidget")
 Global key: Dyni{ComponentId} (e.g., "DyniBarometerRadialWidget")
@@ -44,7 +44,7 @@ Kind name: {kindName} (e.g., "barometerRadial")
 
 For cluster kinds, also derive:
 
-```
+```text
 Ratio threshold props: {kind}RatioThresholdNormal, {kind}RatioThresholdFlat
 Sector props (if gauge): {kind}WarningFrom, {kind}AlarmFrom
 Range props (if gauge): {kind}MinValue, {kind}MaxValue

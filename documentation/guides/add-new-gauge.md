@@ -20,23 +20,38 @@ through the internal `canvas-dom` surface. Route selection lives in `config.clus
 
 For linear instruments, use [add-new-linear-gauge.md](add-new-linear-gauge.md) and `LinearGaugeEngine`.
 
+## Key Details
+
+- New module file: `widgets/radial/NewGaugeWidget/NewGaugeWidget.js`, UMD wrapper with `create(def, componentContext)`.
+- Required shared module: `SemicircleRadialEngine`, resolved via `componentContext.components.require(...)`.
+- Registration entry in `config/components/registry-widgets-gauge.js` with `deps: ["SemicircleRadialEngine"]`.
+- Gauge-specific functions to provide: `formatDisplay(raw, props, unit, componentContext) -> { num, text }`,
+  `tickSteps(range) -> { major, minor }`, and `buildSectors(props, minV, maxV, arc, valueUtils, theme) -> Sector[]`
+  (pass `warningColor`/`alarmColor` from `theme.colors.warning`/`theme.colors.alarm`).
+- Route update in `config/cluster-routes/<cluster>.js` needs `mapperId`, `rendererId: "NewGaugeWidget"`,
+  `surface: "canvas-dom"`, optional `viewModelId`, and `shellSizing`.
+- Responsive geometry/text ownership stays in `SemicircleRadialLayout`; wrappers must not import
+  `ResponsiveScaleProfile` directly or add user-visible responsive `Math.max(...)`/`clamp(...)` floors.
+- Config-backed plugin wrappers must not pass `rangeDefaults` or `ratioDefaults`; the engine owns the last-resort
+  fallback, and normal runtime should get min/max and threshold props from the editable/default config boundary.
+
 ## Step 1: Create Gauge Module
 
 Create `widgets/radial/NewGaugeWidget/NewGaugeWidget.js`:
 
 1. UMD wrapper + `create(def, componentContext)`
-2. Resolve shared renderer: `componentContext.components.require("SemicircleRadialEngine")`
-3. Respect responsive ownership:
+1. Resolve shared renderer: `componentContext.components.require("SemicircleRadialEngine")`
+1. Respect responsive ownership:
    - `SemicircleRadialLayout` already consumes `ResponsiveScaleProfile` and owns compact geometry/text boxes for the
      family.
    - Keep wrapper code thin; do not import `ResponsiveScaleProfile` and do not add user-visible responsive
      `Math.max(...)` / `clamp(...)` floors in wrapper code.
-4. Provide gauge-specific functions only:
+1. Provide gauge-specific functions only:
    - `formatDisplay(raw, props, unit, componentContext) -> { num, text }`
    - `tickSteps(range) -> { major, minor }`
    - `buildSectors(props, minV, maxV, arc, valueUtils, theme) -> Sector[]` Pass `warningColor`/`alarmColor` scalars into
      shared sector builders (typically from `theme.colors.warning`/`theme.colors.alarm`).
-5. Build `renderCanvas` with `createRenderer(spec)`
+1. Build `renderCanvas` with `createRenderer(spec)`
 
 ```javascript
 const renderer = componentContext.components.require("SemicircleRadialEngine");
@@ -58,7 +73,7 @@ For config-backed plugin wrappers, do not add `rangeDefaults` or `ratioDefaults`
 the last-resort fallback, and normal plugin runtime should receive min/max and threshold props from the editable/default
 config boundary.
 
-6. Export module spec:
+1. Export module spec:
 
 ```javascript
 return {

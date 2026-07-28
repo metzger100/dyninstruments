@@ -19,6 +19,28 @@ Primary owners:
 - runtime/surface/HtmlSurfaceController.js: committed HTML lifecycle owner
 - runtime/surface/CanvasDomSurfaceAdapter.js: committed canvas lifecycle owner
 
+## Key Details
+
+- `config.clusterRoutes.byRouteId[routeId]` fields: `routeId`, `mapperId`, `rendererId`, `surface`, optional
+  `viewModelId`, `shellSizing`.
+- `ClusterMapperToolkit.positiveUnitNumber(baseKey, token, defaultValue)` owns positive unit-aware config defaults for
+  mappers.
+- Route activation memoization compares payload `__mappedSignature` plus `nightMode` and `editing`, and additionally
+  requires unchanged committed `rootEl`/`shellEl` attachment targets before returning `DISCARDED_ACTIVATION`.
+- `ClusterWidget` calls `activationController.invalidateMemoState()` when it detaches an active surface for an
+  invalid/diagnostic route commit that skips activation.
+- Commit order is strict: `runtime.theme.applyToRoot(rootEl)` -> `SurfaceSessionController.recordCommittedRevision(...)`
+  -> conditional shell-replacement detachment -> surface session reconcile.
+- `ClusterSurfacePolicy` resolves one normalized policy object per routed update with fields: `pageId`,
+  `containerOrientation` (from `props.mode`), `interaction.mode` (`dispatch` or `passive`), normalized callbacks under
+  `surfacePolicy.actions`, and host facts such as viewport height.
+- `routeState.props` identity is preserved (no per-update clone); `surfacePolicy` and `viewportHeight` are attached as
+  non-enumerable runtime-only fields.
+- Normalized action/capability caches are keyed per `hostContext` and refresh only when `hostContext.hostActions` (the
+  snapshot set by `runtime/widget-registrar.js`) or raw capability object identity changes.
+- Vertical mode: host owns width; `ClusterShellRenderer` materializes ratio `shellSizing` pre-activation; renderer
+  shadow CSS owns post-activation natural sizing. RoutePoints is the only width-derived natural-height exception.
+
 ## Route Metadata Contract
 
 `config.clusterRoutes.byRouteId[routeId]` is the source of route identity and route policy.

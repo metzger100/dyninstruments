@@ -13,6 +13,20 @@ Bundled layout integration:
 - `layouts/dyni-sailboat.json` includes a dedicated `regattapage` with a `dyni_Vessel_Instruments` entry using
   `kind: "regattaTimer"` plus race-start companion instruments.
 
+## Key Details
+
+- Renderer class: `RegattaTimerTextHtmlWidget`, for cluster kind `regattaTimer` in the `vessel` cluster; render model:
+  `shared/widget-kits/vessel/RegattaTimerModel.js`; audio engine: `shared/widget-kits/vessel/ RegattaTimerAudio.js`.
+- States: `idle` (shows configured duration `MM:00`, action `START`), `countdown` (remaining `MM:SS`, actions
+  `SYNC`/`RESET`), `elapsed` (elapsed `MM:SS`, action `RESET`).
+- Editables: `regattaSoundEnabled` (default `true`), `regattaProgressBar` (default `true`), `regattaDuration`
+  (`3`/`5`/`6` minutes, default `5`), `stableDigits` (default `false`), `regattaTimerRatioThresholdNormal` (default
+  `1.0`), `regattaTimerRatioThresholdFlat` (default `3.0`).
+- Audio signals: whole-minute boundaries during countdown play a `440 Hz`/`300 ms` beep; the final `0:10`-`0:01` plays
+  an `880 Hz`/`150 ms` beep each second; reaching `0:00` plays an `880 Hz`/`800 ms` tone.
+- Bundled layout: `layouts/dyni-sailboat.json` includes a `regattapage` with a `dyni_Vessel_Instruments` entry using
+  `kind: "regattaTimer"`.
+
 ## Visual Contract
 
 - Root and wrapper classes:

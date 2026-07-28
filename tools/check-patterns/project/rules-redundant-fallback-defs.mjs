@@ -1,8 +1,8 @@
 // Rule definition for the redundant-internal-fallback rule in rules-redundant-fallback.mjs.
 
-import { runRedundantInternalFallbackRule } from "./rules-redundant-fallback.mjs";
+import { runRedundantInternalFallbackRule } from "../rules-redundant-fallback.mjs";
 
-/** @typedef {import("./shared.mjs").Rule} Rule */
+/** @typedef {import("../shared.mjs").Rule} Rule */
 
 /** @type {Rule[]} */
 export const REDUNDANT_FALLBACK_RULES = [

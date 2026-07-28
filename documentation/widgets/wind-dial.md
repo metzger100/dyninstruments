@@ -10,6 +10,22 @@ via `FullCircleRadialEngine`. Dial background rendering uses shared `CanvasLayer
 (`back` + `front` layers). Responsive ring, label, and pointer geometry come from `FullCircleRadialLayout` through the
 shared engine state.
 
+## Key Details
+
+- Renderer file: `widgets/radial/WindRadialWidget/WindRadialWidget.js`; export id `"WindRadialWidget"`;
+  `globalKey: "DyniWindRadialWidget"`.
+- Dual-value display: `angle` (AWA/TWA, ±180° range) on one side, `speed` (AWS/TWS) on the other; angle formatting via
+  `ValueMath.formatAngle180(v, leadingZero)`, `leadingZero` default `false`.
+- Layline sectors gated by `layEnabled` (default `true`), bounded by `windRadialLayMin`/`windRadialLayMax` (both default
+  `0`, range `0..180`); starboard uses `tokens.colors.laylineStb` (default `#2e9e6b`), port uses
+  `tokens.colors.laylinePort` (default `#d9534a`).
+- Layout thresholds: `windRadialRatioThresholdNormal` default `0.7` (below -> `high`), `windRadialRatioThresholdFlat`
+  default `2.0` (above -> `flat`).
+- Speed formatter defaults to `"formatSpeed"` with a mapper-resolved token (`kn`, `ms`, `kmh`) passed via
+  `formatterParameters`; `speedUnit` display label defaults to `"kn"`.
+- `stableDigits` (default `false`) switches angle/speed value text to `tokens.font.familyMono`.
+- Live values (`angle`, `speed`) never invalidate the cached static base/tick/label layers.
+
 ## Module Registration
 
 ```javascript

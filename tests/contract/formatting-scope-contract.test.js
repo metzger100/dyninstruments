@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const prettier = require("prettier");
+const { parse: parseJsonc } = require("jsonc-parser");
 
 const root = process.cwd();
 const ignorePath = path.join(root, ".prettierignore");
@@ -17,33 +18,33 @@ const MAINTAINED_JS_FILES = ["plugin.js", "plugin.mjs"];
 
 const MAINTAINED_CSS_GLOBS = [{ file: "plugin.css" }, { dir: "shared" }, { dir: "widgets" }, { dir: "tests/css" }];
 
-const MAINTAINED_MARKDOWN_ROOTS = ["documentation", ".agents/skills", "exec-plans/active"];
+const MAINTAINED_MARKDOWN_ROOTS = ["documentation", ".agents/skills", "exec-plans/active", ".githooks"];
 
 describe("formatting scope contract", function () {
   it("covers every maintained JavaScript/MJS file with format and format:check", function () {
     const maintained = collectMaintainedJsFiles();
-    const covered = collectPrettierScope("format:check");
+    const covered = collectPrettierScope();
 
     expectAllCovered(maintained, covered, ".js/.mjs");
   });
 
   it("covers every maintained CSS file with format and format:check", function () {
     const maintained = collectMaintainedCssFiles();
-    const covered = collectPrettierScope("format:check");
+    const covered = collectPrettierScope();
 
     expectAllCovered(maintained, covered, ".css");
   });
 
   it("covers every maintained Markdown file with format and format:check", function () {
     const maintained = collectMaintainedMarkdownFiles();
-    const covered = collectPrettierScope("format:check");
+    const covered = collectPrettierScope();
 
     expectAllCovered(maintained, covered, ".md");
   });
 
   it("keeps format and format:check targeting the exact same file set", function () {
-    const writeScope = collectPrettierScope("format");
-    const checkScope = collectPrettierScope("format:check");
+    const writeScope = collectPrettierScope();
+    const checkScope = collectPrettierScope();
 
     expect(Array.from(writeScope).sort()).toEqual(Array.from(checkScope).sort());
   });
@@ -72,6 +73,23 @@ describe("formatting scope contract", function () {
 
   it("finds every maintained Markdown file not effectively ignored by Prettier's real resolution", async function () {
     await expectNoneEffectivelyIgnored(collectMaintainedMarkdownFiles());
+  });
+
+  it("keeps every maintained Markdown file inside markdownlint's scope, never formatted-but-unlinted", function () {
+    const maintained = collectMaintainedMarkdownFiles();
+    const ignored = collectMarkdownlintIgnores();
+
+    const unlinted = maintained.filter((relPath) => ignored.some((pattern) => pattern.test(relPath)));
+
+    expect(unlinted, "maintained Markdown files excluded from markdownlint scope").toEqual([]);
+  });
+
+  it("proves a file matching a markdownlint ignore pattern is detected as excluded", function () {
+    const ignored = collectMarkdownlintIgnores();
+
+    expect(ignored.some((pattern) => pattern.test("coverage/report.md"))).toBe(true);
+    expect(ignored.some((pattern) => pattern.test("nested/.kilo/node_modules/pkg/README.md"))).toBe(true);
+    expect(ignored.some((pattern) => pattern.test("documentation/core-principles.md"))).toBe(false);
   });
 
   it("proves a maintained file newly added to .prettierignore is detected as ignored", async function () {
@@ -111,34 +129,16 @@ async function expectNoneEffectivelyIgnored(maintained) {
   expect(ignored, "maintained files effectively ignored by Prettier").toEqual([]);
 }
 
-/** @param {"format" | "format:check"} scriptName @returns {Set<string>} */
-function collectPrettierScope(scriptName) {
-  const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
-  const command = pkg.scripts[scriptName];
-  const args = tokenizeCommand(command).filter(function (token) {
-    return token !== "prettier" && token !== "--write" && token !== "--check";
-  });
-
+// `format` and `format:check` both run `tools/quality-policy/run-format.mjs` against the exact
+// same generated `format-scope.json`, so there is exactly one Prettier-scope source to read.
+/** @returns {Set<string>} */
+function collectPrettierScope() {
+  const scope = JSON.parse(fs.readFileSync(path.join(root, "tools/quality-policy/format-scope.json"), "utf8"));
   const covered = new Set();
-  args.forEach(function (pattern) {
-    const matches = fs.globSync(pattern, { cwd: root });
-    matches.forEach(function (match) {
-      covered.add(match.replace(/\\/g, "/"));
-    });
+  scope.rows.forEach(function (/** @type {any} */ row) {
+    if (row.owner === "prettier") covered.add(row.path);
   });
   return covered;
-}
-
-/** @param {string} command @returns {string[]} */
-function tokenizeCommand(command) {
-  const tokens = /** @type {string[]} */ ([]);
-  const pattern = /"([^"]*)"|(\S+)/g;
-  let match = pattern.exec(command);
-  while (match) {
-    tokens.push(match[1] !== undefined ? match[1] : match[2]);
-    match = pattern.exec(command);
-  }
-  return tokens;
 }
 
 /** @returns {string[]} */
@@ -164,6 +164,22 @@ function collectMaintainedCssFiles() {
     files.push(...walk(path.join(root, /** @type {string} */ (entry.dir)), [".css"]));
   });
   return files;
+}
+
+/** @returns {RegExp[]} */
+function collectMarkdownlintIgnores() {
+  const configPath = path.join(root, ".markdownlint-cli2.jsonc");
+  const config = parseJsonc(fs.readFileSync(configPath, "utf8"));
+  return /** @type {string[]} */ (config.ignores || []).map(globToRegExp);
+}
+
+/** @param {string} glob @returns {RegExp} */
+function globToRegExp(glob) {
+  const escaped = glob
+    .split("**")
+    .map((segment) => segment.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^/]*"))
+    .join(".*");
+  return new RegExp("^" + escaped + "$");
 }
 
 /** @returns {string[]} */

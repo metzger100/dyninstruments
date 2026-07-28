@@ -9,6 +9,23 @@ is cached as a static layer (ring, ticks, numeral labels). Hands are drawn per-f
 easing. Digital time display uses the shared `FullCircleRadialTextLayout.drawSingleModeText` contract, gated by
 `clockRadialHideTextualMetrics`.
 
+## Key Details
+
+- Renderer file: `widgets/radial/ClockRadialWidget/ClockRadialWidget.js`; export id `"ClockRadialWidget"`;
+  `globalKey: "DyniClockRadialWidget"`.
+- Route wiring: `kind: "clockRadial"`, `mapperId: "VesselMapper"`, `rendererId: "ClockRadialWidget"`,
+  `surface: "canvas-dom"`, `shellSizing: { kind: "ratio", aspectRatio: 1 }` in `config/cluster-routes/vessel.js`.
+- Default formatter is `"formatTime"` (HH:MM:SS); swaps to `"formatClock"` (HH:MM) when `hideSeconds === true`.
+- Layout thresholds: `clockRadialRatioThresholdNormal` default `0.7` (below -> `high`), `clockRadialRatioThresholdFlat`
+  default `2.0` (above -> `flat`).
+- `clockRadialHideTextualMetrics` (default `false`) suppresses all digital time display while the analog dial keeps
+  rendering.
+- Hand angle formulas: `hourAngle = (hours % 12) * 30 + minutes * 0.5`, `minuteAngle = minutes * 6 + seconds * 0.1`,
+  `secondAngle = seconds * 6`.
+- Static face layer (ring, ticks, hour labels) is cached per `buildStaticKey`; `value`, `hideSeconds`, and
+  `clockRadialHideTextualMetrics` never invalidate the cache.
+- `stableDigits` is intentionally not supported on this widget.
+
 ## Module Registration
 
 ```javascript
@@ -68,7 +85,7 @@ caching or upright rotation, since the clock face is static.
 | Hour hand   | Line from center, length `rOuter * 0.45`, width via `GeometryScale.scaleStroke(rOuter, 0.04, weight, 2)`, color `state.color`                                                      |
 | Minute hand | Line from center, length `rOuter * 0.65`, width via `GeometryScale.scaleStroke(rOuter, 0.025, weight, 1)`, color `state.color`                                                     |
 | Second hand | Line from center, length `rOuter * 0.80`, width via `GeometryScale.scaleStroke(rOuter, 0.015, weight, 1)`, color `state.theme.colors.pointer` (hidden when `hideSeconds === true`) |
-| Center cap  | Filled circle at center, radius `max(1, floor(rOuter * 0.03)                                                                                                                       |     | 1)`, color `state.color` |
+| Center cap  | Filled circle at center, radius `max(1, floor(rOuter * 0.03) \| 1)`, color `state.color`                                                                                           |
 
 Hands are drawn using `drawHand(state, angleDeg, length, width, style)` which applies `ctx.lineCap = "round"`, converts
 the angle via `state.angle.degToCanvasRad(angleDeg)`, and draws from center to tip.
@@ -114,7 +131,7 @@ Hand angles (0° at 12 o'clock, clockwise):
 
 ## Layout Modes
 
-```
+```text
 ratio = W / H
 ratio < clockRadialRatioThresholdNormal -> high
 ratio > clockRadialRatioThresholdFlat -> flat

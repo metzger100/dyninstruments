@@ -1,10 +1,16 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const HOTSPOT_LIMITS = [
-  { rel: "shared/widget-kits/radial/RadialTextLayout.js", maxNonEmpty: 290 },
-  { rel: "widgets/radial/WindRadialWidget/WindRadialWidget.js", maxNonEmpty: 370 }
-];
+const POLICY_PATH = path.join(process.cwd(), "tools/quality-policy/hotspot-budgets.json");
+
+// A frozen ceiling per hotspot entry: raising a hotspot-budgets.json value above its frozen
+// counterpart here requires a deliberate, reviewed co-edit of both files in the same change,
+// so a budget can never silently creep upward.
+/** @type {Record<string, number>} */
+const FROZEN_MAX_BUDGETS = {
+  "shared/widget-kits/radial/RadialTextLayout.js": 290,
+  "widgets/radial/WindRadialWidget/WindRadialWidget.js": 370
+};
 
 describe("hotspot budget contract", function () {
   it("keeps known hotspot files below their local growth budgets", function () {
@@ -26,10 +32,31 @@ describe("hotspot budget contract", function () {
       "fixture.js:1 Hotspot file has 291 non-empty lines (> 290). Split before further growth."
     ]);
   });
+
+  it("never allows a policy budget to exceed its frozen ceiling", function () {
+    const entries = readHotspotPolicy();
+
+    const increased = entries.filter(function (item) {
+      return item.maxNonEmpty > FROZEN_MAX_BUDGETS[item.rel];
+    });
+
+    expect(increased).toEqual([]);
+  });
+
+  it("flags a seeded budget increase above the frozen ceiling", function () {
+    const seeded = { rel: "shared/widget-kits/radial/RadialTextLayout.js", maxNonEmpty: 291 };
+
+    expect(seeded.maxNonEmpty > FROZEN_MAX_BUDGETS[seeded.rel]).toBe(true);
+  });
 });
 
+/** @returns {{rel: string, maxNonEmpty: number}[]} */
+function readHotspotPolicy() {
+  return JSON.parse(fs.readFileSync(POLICY_PATH, "utf8")).entries;
+}
+
 function scanRepository() {
-  return HOTSPOT_LIMITS.flatMap(function (item) {
+  return readHotspotPolicy().flatMap(function (item) {
     const abs = path.join(process.cwd(), item.rel);
     if (!fs.existsSync(abs)) return validateMissingFile(item.rel);
     return validateHotspotText(item.rel, fs.readFileSync(abs, "utf8"), item.maxNonEmpty);

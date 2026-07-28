@@ -15,6 +15,23 @@ Ownership:
 - `runtime.theme`: canonical semantic token/preset owner and strict root-only resolution boundary
 - `runtime.theme.applyToRoot(...)`: commit-time output writer on committed `.widget.dyniplugin` roots
 
+## Key Details
+
+- Two-layer flow: raw `--dyni-*` input variables read from the committed plugin root, and `--dyni-theme-*` output
+  variables overwritten on every commit and consumed by migrated CSS.
+- Mandatory output variables: `--dyni-theme-surface-fg`, `--dyni-theme-surface-bg`, `--dyni-theme-surface-border`,
+  `--dyni-theme-font-family`, `--dyni-theme-font-family-mono`, `--dyni-theme-font-weight`,
+  `--dyni-theme-font-label-weight`.
+- `--dyni-border` is optional; when unset, `runtime.theme` derives `--dyni-theme-surface-border` from the resolved
+  `surface.fg` token instead.
+- `.dyni-tabular` is the canonical class for stable numeric columns: `font-variant-numeric: tabular-nums` plus
+  `font-family: var(--dyni-theme-font-family-mono), var(--dyni-theme-font-family)`.
+- Scoped inputs cascade from global semantic tokens when unset (e.g. `--dyni-pointer` from `--dyni-info`,
+  `--dyni-layline-stb` from `--dyni-ok`, `--dyni-regatta-button-stroke-weight` from `--dyni-stroke-weight`); explicit
+  scoped values still win.
+- `runtime/init.js` reads `--dyni-theme-preset` once from `document.documentElement` as the runtime fallback; a
+  committed root may still override `--dyni-theme-preset` itself.
+
 ## Input Variables
 
 Canonical shared inputs for migrated surface/typography tokens:

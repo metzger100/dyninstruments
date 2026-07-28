@@ -5,9 +5,9 @@ import {
   runClusterRendererClusterPrefixRule,
   runMapperLogicLeakageRule,
   runMapperPropRenormalizationRule
-} from "./rules-mapper.mjs";
+} from "../rules-mapper.mjs";
 
-/** @typedef {import("./shared.mjs").Rule} Rule */
+/** @typedef {import("../shared.mjs").Rule} Rule */
 
 /** @type {Rule[]} */
 export const MAPPER_RULES = [

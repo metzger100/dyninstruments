@@ -1,26 +1,13 @@
-// Rule definitions for the legacy-support family in rules-legacy-support.mjs.
+// Project-set rule definitions for the legacy-support family: canonical-helper-redefinition
+// reads a hardcoded Dyninstruments module-ownership registry, and
+// editable-threshold-missing-internal targets the AvNav editable-parameter contract.
 
-import {
-  runCanonicalHelperRedefinitionRule,
-  runEditableThresholdInternalRule,
-  runPrematureLegacySupportRule
-} from "./rules-legacy-support.mjs";
+import { runCanonicalHelperRedefinitionRule, runEditableThresholdInternalRule } from "../rules-legacy-support.mjs";
 
-/** @typedef {import("./shared.mjs").Rule} Rule */
+/** @typedef {import("../shared.mjs").Rule} Rule */
 
 /** @type {Rule[]} */
-export const LEGACY_SUPPORT_RULES = [
-  {
-    name: "premature-legacy-support",
-    severity: "block",
-    scope: {
-      include: ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
-      exclude: ["tests/**", "tools/**"]
-    },
-    run: runPrematureLegacySupportRule,
-    message: ({ file, line, expression }) =>
-      `[premature-legacy-support] ${file}:${line}\nPremature legacy/compatibility support detected (${expression}). Remove speculative fallback/compat paths unless an active boundary contract requires them.`
-  },
+export const LEGACY_SUPPORT_PROJECT_RULES = [
   {
     name: "canonical-helper-redefinition",
     severity: "block",

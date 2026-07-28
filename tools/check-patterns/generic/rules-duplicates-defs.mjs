@@ -1,10 +1,10 @@
 // Rule definitions for the cross-file clone detectors in rules-duplicates.mjs.
 
-import { runDuplicateBlockClones, runDuplicateFunctions } from "./rules-duplicates.mjs";
+import { runDuplicateBlockClones, runDuplicateFunctions } from "../rules-duplicates.mjs";
 
 const ALLOWLISTED_ORCHESTRATION_FUNCTIONS = new Set(["create", "translateFunction", "translate", "renderCanvas"]);
 
-/** @typedef {import("./shared.mjs").Rule} Rule */
+/** @typedef {import("../shared.mjs").Rule} Rule */
 
 /** @type {Rule[]} */
 export const DUPLICATES_RULES = [

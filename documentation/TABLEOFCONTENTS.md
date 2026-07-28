@@ -2,7 +2,26 @@
 
 **Status:** ✅ Reference | Navigation index for AI-focused docs
 
-**Purpose:** Quick routing to canonical docs without reading the full tree.
+## Overview
+
+**Purpose:** Quick routing to canonical docs without reading the full tree. This file is the mandatory first preflight
+read for any agent task in this repository (see `AGENTS.md` §0) and stays a pure navigation index — it links out to the
+canonical doc that owns each concern rather than duplicating content.
+
+## Key Details
+
+- This is the only maintained document exempt from the `## Key Details` requirement enforced by
+  `tests/contract/documentation-format-contract.test.js`, because its role is routing, not reference content; this
+  section exists for parity with the sibling repository's stricter documentation-format checker, not because the
+  contract requires it here.
+- The index is organized into 12 top-level categories: Repository Overview, AvNav Plugin API, Architecture, Conventions,
+  Creating New Widgets, Module Reference, Gauges & Dials Style Guides, Styling & Theming, Documentation Maintenance,
+  Feature-Specific Lookups.
+- Every entry links to one canonical file; when a concern has both a narrative doc and a style guide (for example
+  full-circle dials), the entry links to the specific anchor (`#section-name`) rather than the whole file.
+- `documentation/core-principles.md` is the highest-precedence document referenced from this index; per `AGENTS.md` §0
+  the precedence order is `core-principles.md`, then `conventions/coding-standards.md`, then
+  `conventions/smell-prevention.md`, then task-specific documentation.
 
 ## Repository Overview
 
@@ -119,6 +138,8 @@
 - **Semicircle gauge proportions, layout modes, pointer config, sector logic** →
   [radial/gauge-style-guide.md](radial/gauge-style-guide.md)
 - **Shared semicircle toolkit contracts** → [radial/gauge-shared-api.md](radial/gauge-shared-api.md)
+- **Per-module shared gauge API reference (Angle/Tick/text/ValueMath/spec fields)** →
+  [radial/gauge-shared-api-reference.md](radial/gauge-shared-api-reference.md)
 - **Full-circle dial engine architecture** → [radial/full-circle-dial-engine.md](radial/full-circle-dial-engine.md)
 - **Full-circle proportions + pointer variants** →
   [radial/full-circle-dial-style-guide.md#proportions-function-of-r](radial/full-circle-dial-style-guide.md#proportions-function-of-r),
@@ -191,3 +212,10 @@
 - **State-screen precedence and shared labels** → [shared/state-screens.md](shared/state-screens.md)
 - **Missing-value placeholder normalization and RoutePoints carve-out** →
   [shared/placeholder-normalize.md](shared/placeholder-normalize.md), [widgets/route-points.md](widgets/route-points.md)
+
+## Related
+
+- [../AGENTS.md](../AGENTS.md)
+- [core-principles.md](core-principles.md)
+- [conventions/coding-standards.md](conventions/coding-standards.md)
+- [conventions/smell-prevention.md](conventions/smell-prevention.md)

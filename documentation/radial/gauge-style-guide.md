@@ -12,6 +12,22 @@ still differs per gauge. Shared geometry weights come from `tokens.strokeWeight`
 
 - Theme tokens are resolved once per render via `const tokens = componentContext.theme.tokens.resolveForRoot(rootEl);`.
 
+## Key Details
+
+- Default arc: `startDeg = 270`, `endDeg = 450`; angle convention is 0° at North, clockwise positive.
+- Key proportions: `R = min(floor(availW/2), floor(availH))` (min 14),
+  `ringW = GeometryScale.scale(R, theme.radial.ring.widthFactor)`,
+  `pointerDepth = GeometryScale.scalePointer(R, theme.radial.pointer.depthFactor, pointerDepthWeight)`.
+- Compact math: `textFillScale = lerp(1.18, 1, t)` and `compactGeometryScale = max(0.5, 1 - max(0, textFillScale - 1))`;
+  `compactGeometryScale` affects only label/text spacing, never ring/tick/pointer geometry.
+- Default color tokens: warning `#e0a92e`, alarm `#d9534a`, pointer inherits `colors.info` (`#3366cc`).
+- Default layout thresholds (`thresholdNormal`/`thresholdFlat`): Speed/Depth/Temperature `1.1`/`3.5`, Voltage
+  `1.1`/`3.5`, Compass `0.8`/`2.2`, Wind `0.7`/`2.0`.
+- `SemicircleRadialLayout` reserves bottom pointer clearance via `POINTER_BOTTOM_CLEARANCE_FACTOR`.
+- Public UI label `Hide textual metrics` (default `false`) is hide-only for this family: it suppresses live
+  caption/value/unit text without reclaiming layout space, on `SpeedRadialWidget`, `DepthRadialWidget`,
+  `TemperatureRadialWidget`, `VoltageRadialWidget`, and `DefaultRadialWidget`.
+
 ## Arc Configuration
 
 - Shape: N-shaped semicircle (opening downward)
@@ -169,7 +185,7 @@ Aspect ratio `ratio = W / H` determines text layout:
 
 ### Text Layout Per Mode
 
-**normal**
+#### normal mode
 
 ```text
 Row 1: Caption
@@ -177,14 +193,14 @@ Row 2: Value
 Row 3: Unit
 ```
 
-**flat**
+#### flat mode
 
 ```text
 [Gauge] | Top: Caption
         | Bottom: Value + Unit
 ```
 
-**high**
+#### high mode
 
 ```text
 [Gauge at top]

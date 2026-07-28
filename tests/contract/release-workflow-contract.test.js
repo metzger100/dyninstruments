@@ -14,7 +14,7 @@ describe("tag-only release publisher workflow", function () {
   const workflow = YAML.parse(source);
 
   it("keeps an exclusive tag trigger, least privilege, and bounded serialization", function () {
-    expect(workflowFiles).toEqual(["publish-release.yml"]);
+    expect(workflowFiles).toEqual(["publish-release.yml", "quality.yml"]);
     expect(Object.keys(workflow.on)).toEqual(["push"]);
     expect(workflow.on.push).toEqual({ tags: ["v*"] });
     expect(workflow.permissions).toEqual({ contents: "read" });

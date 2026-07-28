@@ -1,13 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Linter } from "eslint";
+import { STRICT_COMPLEXITY_RULES, STRICT_LIMITS } from "./eslint-complexity-config.mjs";
 
-export const STRICT_LIMITS = Object.freeze({
-  complexity: 10,
-  "max-statements": 40,
-  "max-depth": 4,
-  "max-params": 6
-});
+export { STRICT_LIMITS };
 
 /** @typedef {keyof typeof STRICT_LIMITS} ComplexityMetricKey */
 /**
@@ -194,15 +190,11 @@ export function scanFile(absoluteFile, root) {
  */
 export function scanSource(code, relativeFile) {
   const linter = new Linter();
-  /** @type {import("eslint").Linter.RulesRecord} */
-  const rules = {
-    complexity: ["warn", STRICT_LIMITS.complexity],
-    "max-statements": ["warn", STRICT_LIMITS["max-statements"]],
-    "max-depth": ["warn", STRICT_LIMITS["max-depth"]],
-    "max-params": ["warn", STRICT_LIMITS["max-params"]]
-  };
   const sourceType = relativeFile.endsWith(".mjs") ? "module" : "script";
-  const messages = linter.verify(code, { rules: rules, languageOptions: { ecmaVersion: 2022, sourceType } });
+  const messages = linter.verify(code, {
+    rules: STRICT_COMPLEXITY_RULES,
+    languageOptions: { ecmaVersion: 2022, sourceType }
+  });
   if (messages.length === 0) return [];
 
   const sourceCode = linter.getSourceCode();

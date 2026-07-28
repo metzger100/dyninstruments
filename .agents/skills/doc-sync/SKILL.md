@@ -25,23 +25,25 @@ List all files you have created or modified in this session.
 
 ### Step 2: Apply the Touchpoint Matrix
 
-For each changed file, determine the minimum documentation updates required:
+For each changed file, determine the minimum documentation updates required. The categories below are examples — adapt
+them to this repository's actual module/documentation layout, then keep the matrix itself up to date as new categories
+emerge.
 
-| Change Type                                                                               | Minimum Docs to Update                                                                                                 |
-| ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| New/changed module in `config/components/registry-*.js` or `config/components.js`         | `documentation/architecture/component-system.md`, affected module doc in `documentation/widgets/`                      |
-| New cluster or new cluster kind                                                           | `documentation/guides/add-new-cluster.md`, `documentation/architecture/cluster-widget-system.md`, relevant module docs |
-| New gauge renderer                                                                        | `documentation/guides/add-new-gauge.md`, `documentation/widgets/semicircle-gauges.md` or dedicated module doc          |
-| Changes in registration/lifecycle flow (`runtime/init.js`, `runtime/widget-registrar.js`) | `documentation/avnav-api/plugin-lifecycle.md`, `documentation/architecture/component-system.md`                        |
-| Changes in helper services or `componentContext.format.applyFormatter` contract           | `documentation/shared/helpers.md`                                                                                      |
-| CSS/theming changes (`plugin.css`)                                                        | `documentation/shared/css-theming.md`                                                                                  |
-| Test setup or quality rule changes (tools, config, hooks)                                 | `documentation/guides/documentation-maintenance.md`, `README.md`, `AGENTS.md`, `CLAUDE.md`                             |
-| New documentation file                                                                    | `documentation/TABLEOFCONTENTS.md`                                                                                     |
-| New/changed mapper                                                                        | Relevant cluster-widget-system.md section                                                                              |
-| New/changed shared utility                                                                | `documentation/conventions/coding-standards.md` §Shared Utilities                                                      |
-| New/changed theme tokens                                                                  | `documentation/shared/theme-tokens.md`                                                                                 |
-| New/changed editable parameters                                                           | `documentation/avnav-api/editable-parameters.md`                                                                       |
-| New/changed cluster config                                                                | Relevant cluster doc under `documentation/`                                                                            |
+| Change Type                                                                                   | Minimum Docs to Update                                                                        |
+| --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| New/changed core module or its registration entry point                                       | The relevant architecture doc, plus the affected module's own doc                             |
+| New instance of a repeated/pluggable pattern (e.g. a new plugin, driver, or renderer variant) | The "how to add a new X" guide, the architecture doc for that subsystem, relevant module docs |
+| New rendering/formatting strategy for an existing subsystem                                   | The "how to add a new X" guide, the module doc, or a dedicated new module doc                 |
+| Changes in startup/registration/lifecycle flow                                                | The platform integration doc, the architecture doc for the component system                   |
+| Changes in shared helper/formatter contracts                                                  | The shared helpers doc                                                                        |
+| Styling/theming changes                                                                       | The CSS/theming doc                                                                           |
+| Test setup or quality rule changes (tools, config, hooks)                                     | The documentation-maintenance guide, `README.md`, `AGENTS.md`, `CLAUDE.md`                    |
+| New documentation file                                                                        | The table of contents doc                                                                     |
+| New/changed transformation or mapping logic between data representations                      | Relevant subsystem architecture doc section                                                   |
+| New/changed shared utility                                                                    | The coding-standards doc, "Shared Utilities" section                                          |
+| New/changed theme tokens                                                                      | The theme-tokens doc                                                                          |
+| New/changed user-editable parameters                                                          | The editable-parameters doc                                                                   |
+| New/changed configuration entry for a pluggable component                                     | Relevant doc under the documentation root                                                     |
 
 ### Step 3: Update Each Affected Doc
 
@@ -99,16 +101,16 @@ Every documentation file MUST follow this structure:
 - Color values, proportions, constants (where relevant)
 - Critical implementation details
 
-### Step 5: Update TABLEOFCONTENTS.md
+### Step 5: Update the Table of Contents
 
 If you created a new documentation file:
 
-1. Open `documentation/TABLEOFCONTENTS.md`
+1. Open the repository's table-of-contents doc
 2. Add a question→link entry in the appropriate section
 3. Follow the existing format: `**"How do I ...?"** → [doc-name.md](path/doc-name.md)`
 
 **Reachability rule:** Every new doc must be linked from at least one other doc that is itself reachable from
-`AGENTS.md`. The easiest way is adding an entry to `TABLEOFCONTENTS.md`.
+`AGENTS.md`. The easiest way is adding an entry to the table-of-contents doc.
 
 ### Step 6: Update Root Agent Instructions (When Applicable)
 
@@ -116,14 +118,14 @@ If you created a new documentation file:
 
 - Architecture guidance changes
 - New file map entries are needed
-- Keep `AGENTS.md` canonical. Keep `CLAUDE.md` as a short pointer unless genuinely Claude-specific notes are required.
+- Keep `AGENTS.md` canonical. Keep `CLAUDE.md` as a short pointer unless genuinely tool-specific notes are required.
 
 ### Step 7: Validate
 
 Run the documentation validation checks:
 
 ```bash
-npm run check:doclinks     # Link, anchor, and JS Documentation: target validation
+npm run check:doclinks     # Link, anchor, and doc-comment target validation
 npm run check:docformat    # Required doc section/format enforcement
 npm run check:reachability # Reachability from AGENTS.md or CLAUDE.md
 ```
@@ -139,7 +141,7 @@ Non-zero exit means docs are not consistent. Fix all failures before proceeding.
 ### Anti-Patterns
 
 - ❌ Changing code without updating linked docs
-- ❌ Creating a new doc without adding it to TABLEOFCONTENTS.md
+- ❌ Creating a new doc without adding it to the table of contents
 - ❌ Writing verbose "Why?" sections or "Future Enhancements"
 - ❌ Using more than 1-2 examples per concept
 - ❌ Leaving empty sections in docs

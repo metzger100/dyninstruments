@@ -14,6 +14,16 @@ EditRouteTextHtmlWidget is a committed HTML renderer for the nav editRoute kind.
 - Mapper payloads split formatter tokens from display labels: `formatUnits.dst` / `formatUnits.rte` carry the distance
   tokens while `units.dst` / `units.rte` stay display-only.
 
+## Key Details
+
+- Renderer class: `EditRouteTextHtmlWidget`, committed HTML renderer for cluster kind `nav/editRoute`.
+- Inner wrapper class: `.dyni-edit-route-html`; render model: `EditRouteRenderModel`.
+- Route metadata `shellSizing`: ratio sizing, `aspectRatio: 7/8` in vertical mode.
+- Numeric option `stableDigits` (default `false`) enables `StableDigits.normalize(...)` and adds `.dyni-tabular` to
+  metric value spans.
+- Time option `hideSeconds` (default `false`) swaps the ETA metric formatter from `formatTime` to `formatClock`.
+- Interaction action target: `surfacePolicy.actions.routeEditor.openEditRoute()`.
+
 ## State Screens
 
 - Resolver order: `disconnected` (`p.disconnect === true`) -> `noRoute` (`domain.hasRoute !== true`) -> `data`
