@@ -691,6 +691,10 @@
       "alternateValidation": "none needed"
     },
     {
+      "path": "exec-plans/active/PLAN42.md",
+      "owner": "prettier"
+    },
+    {
       "path": "install.sh",
       "owner": "unsupported",
       "reason": "no maintained shell formatter in this inventory",
@@ -4160,7 +4164,7 @@
     }
   ],
   "countByOwner": {
-    "prettier": 990,
+    "prettier": 991,
     "unsupported": 33
   }
 }
