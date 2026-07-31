@@ -24,7 +24,7 @@ const TEXT_EXTENSIONS = new Set([".js", ".mjs", ".json", ".md", ".yml", ".yaml",
 
 /**
  * @param {GenericSurfaceCheckOptions} [options]
- * @returns {{ summary: GenericSurfaceSummary, findings: GenericSurfaceFinding[] }}
+ * @returns {{ summary: GenericSurfaceSummary, findings: GenericSurfaceFinding[], ok: boolean }}
  */
 export function runGenericSurfaceCheck(options = {}) {
   const root = path.resolve(options.root || process.cwd());
@@ -51,7 +51,7 @@ export function runGenericSurfaceCheck(options = {}) {
 
   if (options.print !== false) printFindings(findings, summary, warn);
 
-  return { summary, findings };
+  return { summary, findings, ok: summary.ok };
 }
 
 /** @param {string} haystack @param {string} token @returns {boolean} */
@@ -76,11 +76,15 @@ function printFindings(findings, summary, warn) {
 /** @param {string} root @returns {string[]} */
 function loadTokens(root) {
   const data = readVersionedProfile(path.join(root, "tools/quality-policy/generic-tokens.json"), [
+    "profileType",
     "note",
     "projectTokens",
     "domainTokens",
     "hostTokens"
   ]);
+  if (data.profileType !== undefined && data.profileType !== "genericness-token-profile") {
+    throw new Error("Genericness token profile has an unknown profileType.");
+  }
   return [...data.projectTokens, ...data.domainTokens, ...data.hostTokens];
 }
 
@@ -122,8 +126,31 @@ function collectTargets(root, patternEngineOnly) {
 /** @param {string} root @returns {string[]} */
 function loadManifestPaths(root) {
   const contractPath = path.join(root, CONTRACT_PATH);
-  if (fs.existsSync(contractPath)) return readPortableCoreContract(root).mandatoryPaths;
+  if (fs.existsSync(contractPath)) {
+    return [...new Set([...readPortableCoreContract(root).mandatoryPaths, ...discoverGenericRulePaths(root)])].sort();
+  }
   return discoverFallbackPatternPaths(root);
+}
+
+/** @param {string} root @returns {string[]} */
+function discoverGenericRulePaths(root) {
+  const genericRoot = path.join(root, GENERIC_RULE_DEFINITIONS_DIR);
+  if (!fs.existsSync(genericRoot)) throw new Error(`Missing generic rule directory: ${GENERIC_RULE_DEFINITIONS_DIR}`);
+  /** @type {string[]} */
+  const discovered = [];
+  /** @param {string} directory */
+  function visit(directory) {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const absolutePath = path.join(directory, entry.name);
+      if (entry.isDirectory()) visit(absolutePath);
+      else if (entry.isFile() && TEXT_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
+        discovered.push(path.relative(root, absolutePath).split(path.sep).join("/"));
+      }
+    }
+  }
+  visit(genericRoot);
+  if (discovered.length === 0) throw new Error(`Generic rule directory is empty: ${GENERIC_RULE_DEFINITIONS_DIR}`);
+  return discovered.sort();
 }
 
 /** @param {string} root @returns {string[]} */
@@ -138,19 +165,19 @@ function discoverFallbackPatternPaths(root) {
       const absolutePath = path.join(directory, entry.name);
       if (entry.isDirectory()) visit(absolutePath);
       else if (entry.isFile() && TEXT_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
-        discovered.push(path.relative(root, absolutePath).replaceAll(path.sep, "/"));
+        discovered.push(path.relative(root, absolutePath).split(path.sep).join("/"));
       }
     }
   }
   visit(patternRoot);
   const runnerPath = path.join(root, "tools", "check-patterns.mjs");
-  if (fs.existsSync(runnerPath)) discovered.push(path.relative(root, runnerPath).replaceAll(path.sep, "/"));
+  if (fs.existsSync(runnerPath)) discovered.push(path.relative(root, runnerPath).split(path.sep).join("/"));
   const skillsRoot = path.join(root, ".agents", "skills");
   if (fs.existsSync(skillsRoot)) {
     for (const entry of fs.readdirSync(skillsRoot, { withFileTypes: true })) {
       const skillPath = path.join(skillsRoot, entry.name, "SKILL.md");
       if (entry.isDirectory() && fs.existsSync(skillPath)) {
-        discovered.push(path.relative(root, skillPath).replaceAll(path.sep, "/"));
+        discovered.push(path.relative(root, skillPath).split(path.sep).join("/"));
       }
     }
   }

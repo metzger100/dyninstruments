@@ -27,7 +27,7 @@ export function resolveContainedPath(root, relativePath) {
     throw new Error("Portable-core paths must be non-empty strings.");
   }
 
-  const normalized = relativePath.replaceAll("\\", "/");
+  const normalized = relativePath.replace(/\\/g, "/");
   if (
     normalized !== relativePath ||
     path.posix.isAbsolute(normalized) ||
@@ -146,12 +146,43 @@ function assertPortableRelativePath(value, label) {
   }
 }
 
-/** @param {string} root @param {Record<string, string>} entries @returns {{coreVersion: string, manifestSha256: string, entries: Record<string, string>}} */
+/** @param {string} root @param {Record<string, string>} entries @returns {{coreVersion: string, manifestSha256: string, genericRulesSha256: string, entries: Record<string, string>}} */
 export function buildAttestation(root, entries) {
   const contract = readPortableCoreContract(root);
   const manifestPath = resolveContainedPath(root, MANIFEST_PATH);
   const manifestSha256 = createHash("sha256").update(fs.readFileSync(manifestPath)).digest("hex");
-  return { coreVersion: contract.coreVersion, manifestSha256, entries };
+  return {
+    coreVersion: contract.coreVersion,
+    manifestSha256,
+    genericRulesSha256: hashGenericRules(root),
+    entries
+  };
+}
+
+/** @param {string} root @returns {string} */
+function hashGenericRules(root) {
+  const genericRoot = resolveContainedPath(root, "tools/check-patterns/generic");
+  if (!fs.statSync(genericRoot).isDirectory()) throw new Error("Generic rule path must be a directory.");
+  /** @type {string[]} */
+  const files = [];
+  /** @param {string} directory */
+  function visit(directory) {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const absolutePath = path.join(directory, entry.name);
+      if (entry.isDirectory()) visit(absolutePath);
+      else if (entry.isFile()) files.push(absolutePath);
+    }
+  }
+  visit(genericRoot);
+  if (files.length === 0) throw new Error("Generic rule directory must not be empty.");
+  const hash = createHash("sha256");
+  for (const absolutePath of files.sort()) {
+    hash.update(path.relative(genericRoot, absolutePath).split(path.sep).join("/"));
+    hash.update("\0");
+    hash.update(fs.readFileSync(absolutePath));
+    hash.update("\0");
+  }
+  return hash.digest("hex");
 }
 
 /** @param {string} absolutePath @returns {string} */

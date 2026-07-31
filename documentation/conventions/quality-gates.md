@@ -74,7 +74,8 @@ authoritative; GitHub publishes only committed release inputs.
 | `npm run check:shared-core`        | Contract, exact manifest signature, containment, role/export completeness, and entry digests                                                                                                                                                              | Signed Tier 1 inventory gate                                                                                  |
 | `npm run check:generic-surface`    | Contract-derived Tier 1 text scan with local token profile                                                                                                                                                                                                | Blocking genericness gate                                                                                     |
 | `npm run check:suppressions`       | Independent source-comment scan over maintained code/config surfaces                                                                                                                                                                                      | Zero-inline-suppression gate                                                                                  |
-| `npm run portable-core:attest`     | Deterministic contract version, manifest digest, and sorted entry digests                                                                                                                                                                                 | Anonymous local identity record                                                                               |
+| `npm run portable-core:attest`     | Deterministic contract version, manifest digest, generic-rule-tree digest, and sorted entry digests                                                                                                                                                       | Anonymous local identity record                                                                               |
+| `npm run starter:create -- ...`    | Dependency-free empty-plugin learning environment with its own `check:all`                                                                                                                                                                                | Product-neutral onboarding path                                                                               |
 | `npm run docs:check`               | `docs:lint` + `docs:links` + project-specific docs contracts                                                                                                                                                                                              | Documentation-only shortcut                                                                                   |
 | `npm run docs:links`               | Linkinator with `linkinator.config.json` over root/docs/active-plan Markdown                                                                                                                                                                              | Offline local link and fragment validation                                                                    |
 | `npm run check:docformat`          | Documentation-format Vitest contract                                                                                                                                                                                                                      | Required docs shape gate                                                                                      |
@@ -163,9 +164,9 @@ owner runs, and the negative proof that demonstrates it actually fails a violati
 - `.githooks/pre-push` runs `npm run check:all`. `npm run hooks:install` sets `core.hooksPath=.githooks` and marks the
   hook executable; `npm run hooks:doctor` verifies both and prints the exact repair command when either drifts. Each
   clone must opt in explicitly, and Git's bypass mechanisms remain an accepted local-authority tradeoff.
-- GitHub has no branch/PR quality workflow, quality-specific CODEOWNERS file, or required quality ruleset. The sole tag
-  publisher has top-level read permission, job-scoped release-write permission, pinned actions, bounded execution, and
-  concurrency control. It validates SemVer and matching committed artifacts, then publishes them without altering
+- `.github/workflows/quality.yml` runs the same `npm run check:all` authority on pull requests and pushes to `main` with
+  read-only contents permission. There is no quality-specific CODEOWNERS file or required quality ruleset. The separate
+  tag publisher has job-scoped release-write permission and validates matching committed artifacts without altering
   repository state.
 
 ## Rule Groups
@@ -176,9 +177,10 @@ owner runs, and the negative proof that demonstrates it actually fails a violati
 `tools/quality-policy/shared-core-manifest.json` anchors exact local bytes, and `npm run check:shared-core` verifies the
 contract, signature, containment, completeness, exports, and entry digests. Tier 2 path, token, schema, formatter,
 coverage, complexity, test-inventory, and release profiles are versioned and validated by the Tier 1 interfaces but are
-not part of the signed byte inventory. `npm run portable-core:attest` emits only the contract version, manifest digest,
-and sorted entry digests; it does not read Git metadata or record a repository location. Required local gates are
-expected to pass from a fresh isolated copy containing only this repository.
+not part of the signed byte inventory. The three interpreter entrypoints, contract loader, profile loader, and contract
+schema are signed entries. `npm run portable-core:attest` emits only the contract version, manifest digest,
+generic-rule-tree digest, and sorted entry digests; it does not read Git metadata or record a repository location.
+Required local gates are expected to pass from a fresh isolated copy containing only this repository.
 
 | Gate                 | Rule Reference                                                    |
 | -------------------- | ----------------------------------------------------------------- |

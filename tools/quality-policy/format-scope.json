@@ -3201,6 +3201,10 @@
       "owner": "prettier"
     },
     {
+      "path": "tests/tools/create-avnav-plugin-starter.test.js",
+      "owner": "prettier"
+    },
+    {
       "path": "tests/tools/eslint-config.test.mjs",
       "owner": "prettier"
     },
@@ -3839,6 +3843,10 @@
       "owner": "prettier"
     },
     {
+      "path": "tools/create-avnav-plugin-starter.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tools/hooks-doctor.mjs",
       "owner": "prettier"
     },
@@ -4450,7 +4458,7 @@
     }
   ],
   "countByOwner": {
-    "prettier": 1040,
+    "prettier": 1042,
     "unsupported": 48
   }
 }

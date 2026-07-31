@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "coreVersion": "2.0.0",
+  "coreVersion": "3.0.0",
   "mandatoryRoles": {
     "portable-role-1": ["tools/portable-core/complexity-engine.mjs"],
     "portable-role-2": ["tools/portable-core/coverage-engine.mjs"],
@@ -17,7 +17,17 @@
     "portable-role-13": ["tools/portable-core/suppression-engine.mjs"],
     "portable-role-14": ["tools/portable-core/test-inventory-engine.mjs"],
     "portable-role-15": [".agents/skills/create-plan/SKILL.md"],
-    "portable-role-16": [".agents/skills/doc-sync/SKILL.md", "tests/portable-core/portable-policy-engines.test.mjs"]
+    "portable-role-16": [".agents/skills/doc-sync/SKILL.md", "tests/portable-core/portable-policy-engines.test.mjs"],
+    "portable-role-17": [
+      "schemas/portable-core-contract.schema.json",
+      "tools/check-generic-surface.mjs",
+      "tools/check-shared-core.mjs",
+      "tools/portable-core-attest.mjs",
+      "tools/quality-policy/portable-core-contract.json",
+      "tools/quality-policy/portable-core-contract.mjs",
+      "tools/quality-policy/profile-schema.mjs",
+      "tools/quality-policy/read-json-policy.mjs"
+    ]
   },
   "mandatoryPaths": [
     ".agents/skills/create-plan/SKILL.md",
@@ -25,7 +35,11 @@
     ".agents/skills/grill-me-repo/SKILL.md",
     ".agents/skills/preflight/SKILL.md",
     ".agents/skills/scan-smells/SKILL.md",
+    "schemas/portable-core-contract.schema.json",
     "tests/portable-core/portable-policy-engines.test.mjs",
+    "tools/check-generic-surface.mjs",
+    "tools/check-shared-core.mjs",
+    "tools/portable-core-attest.mjs",
     "tools/portable-core/complexity-engine.mjs",
     "tools/portable-core/coverage-engine.mjs",
     "tools/portable-core/doc-link-engine.mjs",
@@ -39,7 +53,11 @@
     "tools/portable-core/release-engine.mjs",
     "tools/portable-core/schema-engine.mjs",
     "tools/portable-core/suppression-engine.mjs",
-    "tools/portable-core/test-inventory-engine.mjs"
+    "tools/portable-core/test-inventory-engine.mjs",
+    "tools/quality-policy/portable-core-contract.json",
+    "tools/quality-policy/portable-core-contract.mjs",
+    "tools/quality-policy/profile-schema.mjs",
+    "tools/quality-policy/read-json-policy.mjs"
   ],
   "metadataPaths": [
     "tools/quality-policy/portable-core-contract.json",
@@ -84,7 +102,7 @@
     "tools/portable-core/test-inventory-engine.mjs": ["runTestInventoryPolicy"]
   },
   "requiredSelfTestRoles": {
-    "engines": "tests/portable-core/portable-core-contract.test.js",
-    "attestation": "tests/portable-core/portable-core-contract.test.js"
+    "engines": "tests/portable-core/portable-policy-engines.test.mjs",
+    "attestation": "tests/portable-core/portable-policy-engines.test.mjs"
   }
 }

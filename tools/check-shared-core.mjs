@@ -188,10 +188,41 @@ function checkRoleCompleteness(root, contract, findings) {
     const source = fs.readFileSync(absolutePath, "utf8");
     for (const exportName of exports) {
       if (!new RegExp(`export (?:async )?function ${exportName}\\b|export \\{[^}]*\\b${exportName}\\b`).test(source)) {
-        findings.push({ path: relativePath, kind: "export", detail: `missing ${exportName}` });
+        findings.push({
+          path: relativePath,
+          kind: "export",
+          detail: `required checker exports no run*() function: ${exportName} is missing`
+        });
       }
     }
   }
+  for (const relativePath of Object.values(contract.requiredSelfTestRoles)) {
+    let absolutePath;
+    try {
+      absolutePath = resolveContainedPath(root, relativePath);
+    } catch (error) {
+      findings.push({ path: relativePath, kind: "escaping", detail: errorMessage(error) });
+      continue;
+    }
+    if (!fs.existsSync(absolutePath)) {
+      findings.push({ path: relativePath, kind: "self-test", detail: "no referencing self-test found" });
+    }
+  }
+}
+
+/**
+ * Run only checker-export and self-test preconditions from the local contract.
+ * @param {SharedCoreCheckOptions} [options]
+ * @returns {{ok: boolean, findings: Array<SharedCoreFinding & {reason: string}>, checkedEntries: number}}
+ */
+export function runManifestPreconditionCheck(options = {}) {
+  const result = runSharedCoreCheck({ ...options, print: false });
+  const findings = result.findings
+    .filter((finding) => finding.kind === "export" || finding.kind === "self-test")
+    .map((finding) => ({ ...finding, reason: finding.detail || finding.kind }));
+  const output = { ok: findings.length === 0, findings, checkedEntries: result.summary.checkedEntries };
+  if (options.print !== false) console.log(`Manifest precondition check ${output.ok ? "passed" : "failed"}.`);
+  return output;
 }
 
 /** @param {string} root @param {SharedCoreFinding[]} findings @returns {void} */

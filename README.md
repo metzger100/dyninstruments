@@ -240,7 +240,9 @@ architecture, coding standards, and release process.
 
 This repository is a viewer-profile quality role model: its shared quality-gate meanings (`check:fast`, `check:core`,
 `check:all`) are defined by the local command graph, while its Vitest/coverage/complexity ratchets remain
-Dyninstruments-specific legacy debt tracking, not a blank-plugin starter template.
+Dyninstruments-specific. To create a deliberately small learning project without copying product code, run
+`npm run starter:create -- --output=/absolute/path --id=my-plugin --name="My Plugin"`; the generated dependency-free
+project has its own blocking `npm run check:all` command and a host-boundary test.
 
 Use Node 26 with npm 12.0.1. Run `npm run setup` once; it installs the locked dependencies and provisions the
 checksum-verified actionlint binary outside `node_modules`. An optional `.codex/config.toml` provides portable Codex CLI
@@ -249,9 +251,10 @@ required to run the quality gates.
 
 The standalone quality-core contract is checked with `npm run check:shared-core`; the blocking genericness check is
 `npm run check:generic-surface`, and `npm run check:suppressions` owns the zero-inline-suppression source scan.
-`npm run portable-core:attest` emits only anonymous contract and content digests for local review. A completed change
-must also pass `npm run check:all` from an isolated copy containing only this repository. The standalone-boundary check
-scans all maintained text, including archived execution plans, for references that would identify another checkout.
+`npm run portable-core:attest` emits only anonymous contract, content, and generic-rule-tree digests for local review. A
+completed change must also pass `npm run check:all` from an isolated copy containing only this repository. The
+standalone-boundary check scans all maintained text, including archived execution plans, for references that would
+identify another checkout.
 
 The complete local gate is:
 
@@ -308,10 +311,11 @@ tests. Required local and CI checks do not require Playwright, a downloaded brow
 behavior is covered by the DOM and contract projects. Coverage uses Vitest/V8 global and critical-area thresholds, with
 the legacy coverage-summary parser retired after native threshold proof.
 
-The local `check:all` command is the complete quality authority; GitHub has no branch/PR quality CI, CODEOWNERS, or
-required quality ruleset. A tag push only validates the tag and matching committed ZIP/notes before publishing them.
-SemVer prerelease tags publish as GitHub prereleases; stable tags publish as normal releases. GitHub does not install
-dependencies, rerun quality, rebuild, package, commit, or tag release artifacts.
+The local `check:all` command is the complete quality authority, and `.github/workflows/quality.yml` runs that same gate
+on pull requests and pushes to `main`; there is no quality-specific CODEOWNERS file or repository ruleset. A tag push
+only validates the tag and matching committed ZIP/notes before publishing them. SemVer prerelease tags publish as GitHub
+prereleases; stable tags publish as normal releases. GitHub does not install dependencies, rerun quality, rebuild,
+package, commit, or tag release artifacts.
 
 Before release creation, perform the manual AvNav smoke checklist in `CONTRIBUTING.md`: load the plugin, inspect
 representative radial/linear/HTML widgets in a bundled layout, switch day/night appearance, and exercise the interactive

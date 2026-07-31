@@ -63,7 +63,7 @@ describe("portable quality-core boundary", function () {
     );
     expect(JSON.stringify(first)).toBe(JSON.stringify(second));
     expect(first).toEqual(golden);
-    expect(Object.keys(first)).toEqual(["coreVersion", "manifestSha256", "entries"]);
+    expect(Object.keys(first)).toEqual(["coreVersion", "manifestSha256", "genericRulesSha256", "entries"]);
     expect(first).not.toHaveProperty("root");
     expect(first).not.toHaveProperty("repository");
     expect(first).not.toHaveProperty("timestamp");
@@ -154,7 +154,7 @@ function createWorkspace(options = {}) {
 function createMinimalContract() {
   /** @type {Record<string, string[]>} */
   const roles = {};
-  for (let index = 0; index < 16; index += 1) roles[`role-${index}`] = ["payload.txt"];
+  for (let index = 0; index < 17; index += 1) roles[`role-${index}`] = ["payload.txt"];
   return {
     schemaVersion: 1,
     coreVersion: "1.0.0",

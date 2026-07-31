@@ -66,6 +66,7 @@
     "tools/check-patterns/shared-source-scan.mjs",
     "tools/check-patterns/shared-suppressions.mjs",
     "tools/check-test-focus.mjs",
+    "tools/create-avnav-plugin-starter.mjs",
     "tools/component-registry-validation.mjs",
     "tools/components-registry-loader.mjs",
     "tools/hooks-doctor.mjs",

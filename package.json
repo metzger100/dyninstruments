@@ -23,6 +23,7 @@
     "check:standalone-boundary": "node tools/check-standalone-boundary.mjs",
     "check:suppressions": "node tools/check-suppressions.mjs",
     "portable-core:attest": "node tools/portable-core-attest.mjs",
+    "starter:create": "node tools/create-avnav-plugin-starter.mjs",
     "check:complexity": "node tools/quality-policy/complexity-capture-integrity.mjs && node tools/quality-policy/complexity-budget.mjs",
     "complexity:regenerate-audit": "node tools/quality-policy/historical-complexity-capture.mjs --check",
     "check:scaling": "vitest run tests/tools/operation-count-evaluator.test.js tests/contract/route-points-render-model-scaling-contract.test.js tests/shared/html/HtmlDomPatchUtils.scaling-contract.test.js tests/shared/text/TextLayoutPrimitives.scaling-contract.test.js",

@@ -120,6 +120,36 @@ describe("tools/check-generic-surface.mjs core behavior", function () {
     expect(findings).toEqual([]);
   });
 
+  it("scans generic rule files even when a contract inventory is present", function () {
+    const root = createWorkspace({
+      "tools/check-patterns/generic/sample-generic-defs.mjs": "export const acmeSpecificRule = true;"
+    });
+    /** @type {Record<string, string[]>} */
+    const roles = {};
+    for (let index = 0; index < 17; index += 1) roles[`role-${index}`] = ["tools/check-patterns/shared.mjs"];
+    fs.writeFileSync(
+      path.join(root, "tools/quality-policy/portable-core-contract.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        coreVersion: "3.0.0",
+        mandatoryRoles: roles,
+        mandatoryPaths: ["tools/check-patterns/shared.mjs"],
+        metadataPaths: ["contract.json", "manifest.json", "manifest.sha256"],
+        profileSchemas: ["tools/quality-policy/generic-tokens.json"],
+        canonicalRuleIds: Array.from({ length: 21 }, (_unused, index) => `rule-${index}`),
+        requiredCheckerExports: {},
+        requiredSelfTestRoles: { engines: "tools/check-patterns/shared.mjs" }
+      })
+    );
+
+    const { summary, findings } = runGenericSurfaceCheck({ root, print: false });
+    expect(summary.ok).toBe(false);
+    expect(findings).toContainEqual({
+      target: "tools/check-patterns/generic/sample-generic-defs.mjs",
+      token: "acme"
+    });
+  });
+
   it("throws when AGENTS.md is missing the SHARED_INSTRUCTIONS marker pair", function () {
     const root = createWorkspace({ "AGENTS.md": "No markers here." });
 
