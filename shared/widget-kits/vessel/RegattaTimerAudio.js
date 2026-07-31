@@ -67,7 +67,6 @@
         try {
           audioContext = new AudioContextCtor();
           return true;
-          // plugin-boundary-next-line(category: web-audio-boundary, owner: Metzger100, date: 2026-07-17) -- Web Audio availability is an external boundary and must fail closed.
         } catch (error) {
           audioContext = null;
           audioUnavailable = true;
@@ -108,7 +107,6 @@
           gainNode.connect(audioContext.destination);
           oscillator.start(now);
           oscillator.stop(toneEnd);
-          // plugin-boundary-next-line(category: web-audio-boundary, owner: Metzger100, date: 2026-07-17) -- Tone playback is best-effort and must not break the widget render flow.
         } catch (error) {
           // Silent by contract: audio failures must never throw into renderer flow.
         }
@@ -129,7 +127,6 @@
               }
             );
           }
-          // plugin-boundary-next-line(category: web-audio-boundary, owner: Metzger100, date: 2026-07-17) -- Teardown failures are intentionally non-fatal at this boundary.
         } catch (error) {
           // Silent by contract: tear-down failures are ignored.
         }

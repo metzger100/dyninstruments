@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { collectComponentRegistryResources } from "./component-registry-validation.mjs";
 import { loadBootstrapManifest, loadComponentsRegistry } from "./components-registry-loader.mjs";
-import { FIXED_RUNTIME_FILES, isRuntimePath, normalizeRelativePath } from "./release-path-policy.mjs";
+import { FIXED_RUNTIME_FILES, isRuntimePath, resolveContainedRelativePath } from "./release-path-policy.mjs";
 
 export { isRuntimePath };
 
@@ -16,11 +16,11 @@ export function buildReleaseManifest(rootDir) {
   const registryResources = collectComponentRegistryResources(rootDir, registry);
 
   for (const relPath of bootstrapManifest) {
-    addIfPresent(files, relPath);
+    addIfPresent(files, rootDir, relPath);
   }
 
   for (const relPath of registryResources) {
-    files.add(relPath);
+    files.add(resolveContainedRelativePath(rootDir, relPath));
   }
 
   for (const relPath of FIXED_RUNTIME_FILES) {
@@ -46,9 +46,8 @@ export function buildBootstrapBundleContent(rootDir) {
   }
 
   const scripts = bootstrapManifest.map((relPath) => {
-    const absPath = path.join(rootDir, relPath);
     try {
-      return fs.readFileSync(absPath, "utf8");
+      return fs.readFileSync(path.join(rootDir, resolveContainedRelativePath(rootDir, relPath)), "utf8");
     } catch {
       throw new Error(`bootstrap bundle generation aborted: failed to read ${relPath}`);
     }
@@ -66,8 +65,14 @@ export function validateManifest(rootDir, files) {
   const missing = [];
 
   for (const relPath of files) {
-    const absPath = path.join(rootDir, relPath);
-    if (!fs.existsSync(absPath)) {
+    let safePath;
+    try {
+      safePath = resolveContainedRelativePath(rootDir, relPath);
+    } catch {
+      missing.push(relPath);
+      continue;
+    }
+    if (!fs.existsSync(path.join(rootDir, safePath))) {
       missing.push(relPath);
     }
   }
@@ -83,7 +88,9 @@ export function validateManifest(rootDir, files) {
  * @param {string[]} expectedPaths
  */
 export function assertStagingTree(stageRoot, expectedPaths) {
-  const expected = Array.from(new Set(expectedPaths)).sort((a, b) => a.localeCompare(b));
+  const expected = Array.from(
+    new Set(expectedPaths.map((relPath) => resolveContainedRelativePath(stageRoot, relPath)))
+  ).sort((a, b) => a.localeCompare(b));
   const actual = collectAssetPaths(stageRoot, stageRoot).sort((a, b) => a.localeCompare(b));
   const missing = subtractPaths(expected, actual);
   const unexpected = subtractPaths(actual, expected);
@@ -110,11 +117,12 @@ function subtractPaths(left, right) {
 
 /**
  * @param {Set<string>} files
+ * @param {string} rootDir
  * @param {any} rawPath
  */
-function addIfPresent(files, rawPath) {
+function addIfPresent(files, rootDir, rawPath) {
   if (typeof rawPath !== "string") return;
-  const normalized = normalizeRelativePath(rawPath);
+  const normalized = resolveContainedRelativePath(rootDir, rawPath);
   if (normalized !== "") {
     files.add(normalized);
   }

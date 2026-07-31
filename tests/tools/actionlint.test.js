@@ -40,10 +40,11 @@ function cacheBinary(root, options) {
  * @param {string} cacheRoot
  * @param {string[]} [args]
  * @param {Record<string, string>} [extraEnv]
+ * @param {string} [cwd]
  */
-function runScript(cacheRoot, args, extraEnv) {
+function runScript(cacheRoot, args, extraEnv, cwd = process.cwd()) {
   return spawnSync("bash", [SCRIPT, ...(args || [])], {
-    cwd: process.cwd(),
+    cwd,
     env: {
       ...process.env,
       ACTIONLINT_CACHE_DIR: cacheRoot,
@@ -63,6 +64,22 @@ describe("tools/actionlint.sh", function () {
       expect(result.status).toBe(0);
       expect(result.stdout).toContain("-color");
       expect(targetDir).not.toContain(path.join("node_modules", ".cache"));
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("passes explicit workflow paths without requiring git metadata", function () {
+    const root = makeTempRoot();
+    try {
+      cacheBinary(root);
+      fs.mkdirSync(path.join(root, ".github", "workflows"), { recursive: true });
+      fs.writeFileSync(path.join(root, ".github", "workflows", "check.yml"), "name: check\n");
+
+      const result = runScript(root, [], undefined, root);
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain(".github/workflows/check.yml");
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }

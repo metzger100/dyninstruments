@@ -1,11 +1,20 @@
 {
   "note": "Test inventory classification. Every file under tests/**/*.js is classified exactly once as 'strict' (real test module/helper, held to the strict tests lint/typecheck boundary), 'harness-fragment' (temporary non-spec harness naming an existing parent, reason, and removal path), or 'fixture' (executable negative fixture intentionally invalid, naming an existing owner test and reason). Numeric split-spec fragments are retired; split any future oversized family by behavior into strict Base.<topic>.test.js files and extract common setup once into a strict helper or an existing captured harness. Enforced by tools/quality-policy/test-inventory.mjs.",
   "entries": {
+    "tests/cluster/ClusterWidget-setup.js": {
+      "classification": "strict"
+    },
     "tests/cluster/ClusterWidget.harness.js": {
       "classification": "harness-fragment",
       "parent": "tests/cluster/ClusterWidget.invalidatesRouteActivationMemoState.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/cluster/ClusterWidget.test.js when its test family next changes."
+    },
+    "tests/cluster/ClusterWidget.invalidatesRouteActivationMemoState.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/ClusterWidget.translatesRouteFramesRendersShell.test.js": {
+      "classification": "strict"
     },
     "tests/cluster/mappers/AnchorMapper.test.js": {
       "classification": "strict"
@@ -25,13 +34,49 @@
     "tests/cluster/mappers/MapMapper.test.js": {
       "classification": "strict"
     },
+    "tests/cluster/mappers/mapper-output-finiteness.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.disconnectPositions.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.editRoute.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.formatters.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.routePoints.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.routePointsEditRoute.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.vmgActiveRoute.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.xteDisplay.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/NavMapper.xteDisplayLinear.test.js": {
+      "classification": "strict"
+    },
     "tests/cluster/mappers/SpeedMapper.test.js": {
       "classification": "strict"
     },
-    "tests/cluster/mappers/WindMapper.test.js": {
+    "tests/cluster/mappers/VesselMapper-setup.js": {
       "classification": "strict"
     },
-    "tests/cluster/mappers/mapper-output-finiteness.test.js": {
+    "tests/cluster/mappers/VesselMapper.mapsDatetimePositioncoordinatewidgetDirectVariant.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/VesselMapper.mapsVoltagelinearExplicitLinearKeys.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/VesselMapper.requiresToolkitNumNumericConversion.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/mappers/WindMapper.test.js": {
       "classification": "strict"
     },
     "tests/cluster/rendering/ActiveRouteTextHtmlWidget.harness.js": {
@@ -43,16 +88,106 @@
     "tests/cluster/rendering/ActiveRouteTextHtmlWidget.test.js": {
       "classification": "strict"
     },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.appliesAisHiddenDisconnectedPrecedence.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.exposesCommittedRendererContract.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.exposesEmptyTranslatefunctionMap.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.rebindsDispatchListenerAcrossSuccessive.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.rendersNoaisStateVerticalContainers.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.skipsAisDispatchWhenSurfacepolicy.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.staysPassiveInEditMode.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.updatesEmittedAccentStripWidth.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AisTargetTextHtmlWidget.updatesLayoutSignaturesBranchInteraction.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/AlarmTextHtmlWidget-setup.js": {
+      "classification": "strict"
+    },
     "tests/cluster/rendering/AlarmTextHtmlWidget.harness.js": {
       "classification": "harness-fragment",
       "parent": "tests/cluster/rendering/AlarmTextHtmlWidget.mountsCommittedAlarmRootDispatches.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/cluster/rendering/AlarmTextHtmlWidget.test.js when its test family next changes."
     },
+    "tests/cluster/rendering/AlarmTextHtmlWidget.mountsCommittedAlarmRootDispatches.test.js": {
+      "classification": "strict"
+    },
     "tests/cluster/rendering/AlarmTextHtmlWidget.renderers.js": {
       "classification": "strict"
     },
+    "tests/cluster/rendering/AlarmTextHtmlWidget.usesCommittedHtmlWidgetCss.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/EditRouteTextHtmlWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/EditRouteTextHtmlWidget.exposesCommittedRendererContract.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/EditRouteTextHtmlWidget.exposesEmptyTranslatefunctionMap.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/EditRouteTextHtmlWidget.keepsCompactNormalModeOn.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/EditRouteTextHtmlWidget.keepsHighModeOnRow.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/EditRouteTextHtmlWidget.usesShadowLocalCssSelectors.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.alwaysConsultsMapzoomhtmlfitWhenShell.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.clearsPreparedSemanticModelState.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.escapesContentFailsClosedWithout.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.exposesCommittedRendererContract.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.normalizesPlaceholderFormatterOutputShared.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.resolvesRatioModesRequiredRow.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.reusesPreparedSemanticModelAcross.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.usesDefaultCaptionUnitScale.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/MapZoomTextHtmlWidget.usesShadowLocalCssSelectors.test.js": {
+      "classification": "strict"
+    },
     "tests/cluster/rendering/MapZoomTextHtmlWidgetFallback.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RegattaTimerTextHtmlWidget-setup.js": {
       "classification": "strict"
     },
     "tests/cluster/rendering/RegattaTimerTextHtmlWidget.harness.js": {
@@ -61,7 +196,91 @@
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/cluster/rendering/RegattaTimerTextHtmlWidget.test.js when its test family next changes."
     },
+    "tests/cluster/rendering/RegattaTimerTextHtmlWidget.resolvesRouteMetadataPreloadAssets.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RegattaTimerTextHtmlWidget.updatesModeSelectionFromRatio.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsDomEffects-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsDomEffects.detectsCommittedVerticalContainerAncestry.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsDomEffects.treatsNonObjectTruthyTargetel.test.js": {
+      "classification": "strict"
+    },
     "tests/cluster/rendering/RoutePointsMarkup.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.buildsCourseDistanceRowsPlaceholder.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.classifiesDisconnectedBeforeNorouteDisables.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.failsClosedWhenRoutePayload.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.formatsLatLonRowsThrough.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.keepsMissingCoordinateOptionalLeg.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.keepsMissingSelectedindexValuesUnselected.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.keepsVerticalListViewportHeight.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.normalizesCourseDistanceFormatterFallback.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.prefersStableRawWaypointIdentity.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.usesCappedNaturalHeightAs.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsRenderModel.usesVerticalResizeSignatureContract.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.addsTabularClassRoutePoint.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.derivesLayoutSignatureFromModel.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.dispatchesRoutePointActivationValid.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.exposesCommittedRendererContract.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.reBindsDispatchClickListener.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.rendersDisconnectedStateScreenBlocks.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.rendersPlainStabledigitsInfoText.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.requestsRelayoutWhenScrollbarGutter.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.runsPostPatchRevealEffects.test.js": {
+      "classification": "strict"
+    },
+    "tests/cluster/rendering/RoutePointsTextHtmlWidget.usesShadowLocalCssSelectors.test.js": {
       "classification": "strict"
     },
     "tests/cluster/viewmodels/ActiveRouteViewModel.test.js": {
@@ -94,13 +313,31 @@
     "tests/config/clusters/nav.test.js": {
       "classification": "strict"
     },
+    "tests/config/clusters/static-clusters-setup.js": {
+      "classification": "strict"
+    },
     "tests/config/clusters/static-clusters.harness.js": {
       "classification": "harness-fragment",
       "parent": "tests/config/clusters/static-clusters.registersCourseSpeedDefaultWind.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/config/clusters/static-clusters.test.js when its test family next changes."
     },
+    "tests/config/clusters/static-clusters.registersCourseSpeedDefaultWind.test.js": {
+      "classification": "strict"
+    },
+    "tests/config/clusters/static-clusters.registersWindCourseWarningParameter.test.js": {
+      "classification": "strict"
+    },
     "tests/config/clusters/vessel.test.js": {
+      "classification": "strict"
+    },
+    "tests/config/components-setup.js": {
+      "classification": "strict"
+    },
+    "tests/config/components.coverage.test.js": {
+      "classification": "strict"
+    },
+    "tests/config/components.createsComponentRegistryFromBaseurl.test.js": {
       "classification": "strict"
     },
     "tests/config/shared/common-editables.test.js": {
@@ -127,6 +364,9 @@
     "tests/contract/cluster-widget-global-root-contract.test.js": {
       "classification": "strict"
     },
+    "tests/contract/complexity-limit-single-owner-contract.test.js": {
+      "classification": "strict"
+    },
     "tests/contract/component-registry-contract-negative.test.js": {
       "classification": "strict"
     },
@@ -142,13 +382,10 @@
     "tests/contract/documentation-reachability-contract.test.js": {
       "classification": "strict"
     },
-    "tests/contract/formatting-scope-contract.test.js": {
-      "classification": "strict"
-    },
-    "tests/contract/complexity-limit-single-owner-contract.test.js": {
-      "classification": "strict"
-    },
     "tests/contract/format-scope-contract.test.js": {
+      "classification": "strict"
+    },
+    "tests/contract/formatting-scope-contract.test.js": {
       "classification": "strict"
     },
     "tests/contract/generic-tokens-single-owner-contract.test.js": {
@@ -160,28 +397,16 @@
     "tests/contract/hotspot-budget-contract.test.js": {
       "classification": "strict"
     },
-    "tests/contract/shared-core-manifest-contract.test.js": {
-      "classification": "strict"
-    },
     "tests/contract/pattern-rule-generic-scope-contract.test.js": {
       "classification": "strict"
     },
     "tests/contract/placeholder-literal-contract.test.js": {
       "classification": "strict"
     },
-    "tests/contract/shared-instructions-block-contract.test.js": {
-      "classification": "strict"
-    },
-    "tests/contract/skill-layer-contract.test.js": {
-      "classification": "strict"
-    },
-    "tests/contract/source-text-integrity-contract.test.js": {
+    "tests/contract/placeholder-normalization-contract.test.js": {
       "classification": "strict"
     },
     "tests/contract/plugin-schema-base-profile-contract.test.js": {
-      "classification": "strict"
-    },
-    "tests/contract/placeholder-normalization-contract.test.js": {
       "classification": "strict"
     },
     "tests/contract/quality-workflow-contract.test.js": {
@@ -193,7 +418,19 @@
     "tests/contract/route-points-render-model-scaling-contract.test.js": {
       "classification": "strict"
     },
+    "tests/contract/shared-core-manifest-contract.test.js": {
+      "classification": "strict"
+    },
+    "tests/contract/shared-instructions-block-contract.test.js": {
+      "classification": "strict"
+    },
+    "tests/contract/skill-layer-contract.test.js": {
+      "classification": "strict"
+    },
     "tests/contract/smell-catalog-coverage-contract.test.js": {
+      "classification": "strict"
+    },
+    "tests/contract/source-text-integrity-contract.test.js": {
       "classification": "strict"
     },
     "tests/contract/state-screen-precedence-contract.test.js": {
@@ -238,6 +475,9 @@
     "tests/helpers/mock-dom.js": {
       "classification": "strict"
     },
+    "tests/helpers/nav-mapper.js": {
+      "classification": "strict"
+    },
     "tests/helpers/retired-component-owners.js": {
       "classification": "strict"
     },
@@ -245,6 +485,18 @@
       "classification": "strict"
     },
     "tests/integration/ActiveRouteStateScreens.test.js": {
+      "classification": "strict"
+    },
+    "tests/integration/CrossWidgetAcceptance-setup.js": {
+      "classification": "strict"
+    },
+    "tests/integration/CrossWidgetAcceptance.keepsDisconnectedLabelsConsistentAcross.test.js": {
+      "classification": "strict"
+    },
+    "tests/integration/CrossWidgetAcceptance.keepsPlaceholderNormalizationOnRender.test.js": {
+      "classification": "strict"
+    },
+    "tests/integration/CrossWidgetAcceptance.keepsStableDigitWidthsAligned.test.js": {
       "classification": "strict"
     },
     "tests/layouts/bundled-layouts.test.js": {
@@ -265,6 +517,9 @@
     "tests/plugin/plugin-module-bootstrap.test.js": {
       "classification": "strict"
     },
+    "tests/portable-core/portable-core-contract.test.js": {
+      "classification": "strict"
+    },
     "tests/runtime/asset-preloader.test.js": {
       "classification": "strict"
     },
@@ -274,17 +529,50 @@
     "tests/runtime/cluster/ClusterShellRenderer.test.js": {
       "classification": "strict"
     },
+    "tests/runtime/cluster/RouteActivationController-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController.doesNotDiscardHtmlRoutes.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController.doesNotDiscardWhenMapped.test.js": {
+      "classification": "strict"
+    },
     "tests/runtime/cluster/RouteActivationController.harness.js": {
       "classification": "harness-fragment",
       "parent": "tests/runtime/cluster/RouteActivationController.doesNotDiscardHtmlRoutes.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/runtime/cluster/RouteActivationController.test.js when its test family next changes."
     },
+    "tests/runtime/cluster/RouteActivationController.keepsOneCurrentColdActivation.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController.loadsOnlyActiveRouteRoots.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController.memoizesMappedActivationOutputDiscards.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController.returnsWarmPayloadsSynchronouslyCaches.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/cluster/RouteActivationController.reusesSameColdPromiseRoute.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/component-loader-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/component-loader.failsBeforeComponentClosureIs.test.js": {
+      "classification": "strict"
+    },
     "tests/runtime/component-loader.harness.js": {
       "classification": "harness-fragment",
       "parent": "tests/runtime/component-loader.failsBeforeComponentClosureIs.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/runtime/component-loader.test.js when its test family next changes."
+    },
+    "tests/runtime/component-loader.loadsDepsFirstDeduplicatesScript.test.js": {
+      "classification": "strict"
     },
     "tests/runtime/dom-runtime.test.js": {
       "classification": "strict"
@@ -296,6 +584,18 @@
       "classification": "strict"
     },
     "tests/runtime/format-runtime.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/HostCommitController-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/HostCommitController.cleanupCancelsPendingRafObserver.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/HostCommitController.initstateCreatesCompleteStateShape.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/HostCommitController.recordsWaitStageClassificationEach.test.js": {
       "classification": "strict"
     },
     "tests/runtime/init.test.js": {
@@ -313,16 +613,82 @@
     "tests/runtime/surface/ClusterSurfacePolicy.test.js": {
       "classification": "strict"
     },
+    "tests/runtime/surface/HtmlSurfaceController-setup.js": {
+      "classification": "strict"
+    },
     "tests/runtime/surface/HtmlSurfaceController.harness.js": {
       "classification": "harness-fragment",
       "parent": "tests/runtime/surface/HtmlSurfaceController.implementsCommittedRendererLifecycleIncluding.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/runtime/surface/HtmlSurfaceController.test.js when its test family next changes."
     },
+    "tests/runtime/surface/HtmlSurfaceController.implementsCommittedRendererLifecycleIncluding.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/surface/HtmlSurfaceController.throwsStrictRendererContractsInvalid.test.js": {
+      "classification": "strict"
+    },
     "tests/runtime/surface/index.test.js": {
       "classification": "strict"
     },
+    "tests/runtime/SurfaceSessionController-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/SurfaceSessionController.differentSurfaceDetachesDestroysOld.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/SurfaceSessionController.initstateReturnsCleanStateShape.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/SurfaceSessionController.throwsUnsupportedSurfacesInvalidService.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/TemporaryHostActionBridge-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/TemporaryHostActionBridge.discoversAlarmDispatchOnAny.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/TemporaryHostActionBridge.rejectsMissingOrBlankRoute.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/TemporaryHostActionBridge.returnsSingletonHostactionsFacadeDocumented.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/theme-runtime-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/theme-runtime.applytorootMaterializesDyniThemeOpacity.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/theme-runtime.configuresRuntimeThemeAppliesOutput.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/theme-runtime.resolvesDefaultPresetAisRole.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/theme-runtime.resolvesDeprecatedCamelcaseRegattaAlias.test.js": {
+      "classification": "strict"
+    },
     "tests/runtime/theme/token-catalog.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/widget-registrar-setup.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/widget-registrar.appliesStaticHostClassesEven.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/widget-registrar.injectsHostactionsInitHtmlFinalize.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/widget-registrar.keepsVesselStabledigitsAbsentAt.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/widget-registrar.mergesComponentWidgetDefComposes.test.js": {
+      "classification": "strict"
+    },
+    "tests/runtime/widget-registrar.registersThroughCapturedDynipluginAvnavapi.test.js": {
       "classification": "strict"
     },
     "tests/setup/vitest.setup.js": {
@@ -376,11 +742,83 @@
     "tests/shared/linear/LinearCanvasPrimitives.test.js": {
       "classification": "strict"
     },
+    "tests/shared/linear/LinearGaugeEngine.allocatesHighModeCaptionValue.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.boostsCompactTextCeilingsWhile.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.easesCompassAxisWhenSpringtarget.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.fallsBackEngineOwnedRange.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.fallsBackEngineOwnedRatio.test.js": {
+      "classification": "strict"
+    },
     "tests/shared/linear/LinearGaugeEngine.harness.js": {
       "classification": "harness-fragment",
       "parent": "tests/shared/linear/LinearGaugeEngine.usesLayoutComputedLinearGeometry.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/shared/linear/LinearGaugeEngine.test.js when its test family next changes."
+    },
+    "tests/shared/linear/LinearGaugeEngine.honorsCaptionunitscaleDirectlyAcrossAll.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.keepsDefaultPointerMarkerSizing.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.keepsDefaultPointerWidthIndependent.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.keepsSectorBandsAboveScale.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.keepsSpringStateKeyedBy.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.mapsPointerPositionAccordingAxis.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.matchesCallbackVisibleAxisLayout.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.matchesCallbackVisibleLayoutState.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.passesLayoutVariantsSplitHigh.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.preservesExplicitEmptyUnitFalsy.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.propagatesHidetextualmetricsSharedLayoutSuppresses.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.rendersDisconnectedStateScreenBefore.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.reusesStaticCacheIdenticalKey.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.supportsAxisTickFrameMode.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.takesShortestWrappedArcAcross.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.usesExplicitThreeModeText.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.usesLayoutComputedLinearGeometry.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.usesLinearLabelsInsetfactorPosition.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeEngine.usesPlaceholderTextMissingInput.test.js": {
+      "classification": "strict"
     },
     "tests/shared/linear/LinearGaugeEngineFrame.test.js": {
       "classification": "strict"
@@ -397,13 +835,112 @@
     "tests/shared/linear/LinearGaugeMath.test.js": {
       "classification": "strict"
     },
+    "tests/shared/linear/LinearGaugeTextLayout-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeTextLayout.movingAxisLabels.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/linear/LinearGaugeTextLayout.textScaling.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/ActiveRouteHtmlFit-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/ActiveRouteHtmlFit.passesFirstFormatterParameterWhen.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/ActiveRouteHtmlFit.returnsCaptionValueUnitStyle.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/ActiveRouteHtmlFit.throwsWhenPropsDisplayIs.test.js": {
+      "classification": "strict"
+    },
     "tests/shared/nav/ActiveRouteLayout.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.fitsFlatModeStylesAll.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.fitsNameStatusIndependentlyIn.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.fitsNormalHighValuesAgainst.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.keepsCaptionUnitUnder0.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.keepsDcpaTcpaLabelValue.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.keepsRepresentativeNormalHighShells.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.raisesNormalHighIdentityText.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.returnsNullWhenRequiredCompute.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetHtmlFit.shrinksLongNameLongMetric.test.js": {
       "classification": "strict"
     },
     "tests/shared/nav/AisTargetHtmlFitPlain.test.js": {
       "classification": "strict"
     },
+    "tests/shared/nav/AisTargetLayout-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetLayout.matchesAlarmStripWidthFormula.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetLayout.resolvesHighNormalFlatMode.test.js": {
+      "classification": "strict"
+    },
     "tests/shared/nav/AisTargetLayoutMath.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.appliesLayoutDrivenGeometryStyles.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.escapesModelTextAppliesInline.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.rendersAllFourMetricsIdentity.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.rendersDispatchModeWrapperAccent.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.rendersFitSelectedMetricText.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.rendersNoaisStateThroughShared.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetMarkup.rendersPassiveModeWithoutCatchall.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetRenderModel-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetRenderModel.buildsDispatchDataStateAll.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetRenderModel.normalizesFormatterFallbackTokensAcross.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetRenderModel.rendersNoaisStateVerticalContainers.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/AisTargetRenderModel.updatesResizeSignatureWhenAny.test.js": {
       "classification": "strict"
     },
     "tests/shared/nav/CenterDisplayLayout.test.js": {
@@ -412,7 +949,28 @@
     "tests/shared/nav/CenterDisplayMath.test.js": {
       "classification": "strict"
     },
-    "tests/shared/nav/EditRouteLayoutTiles.test.js": {
+    "tests/shared/nav/EditRouteHtmlFit-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFit.computesOnlyNameFitIn.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFit.fitsSourceBadgeTextUsing.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFit.returnsStableStylePayloadsAll.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFit.usesCoordinatedMetricTileMeasurement.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFitSupport-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFitSupport.returnsFalseWhenLinefitIs.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteHtmlFitSupport.usesMetricsIdLabeltextFirst.test.js": {
       "classification": "strict"
     },
     "tests/shared/nav/EditRouteLayout.test.js": {
@@ -424,13 +982,64 @@
     "tests/shared/nav/EditRouteLayoutMath.test.js": {
       "classification": "strict"
     },
+    "tests/shared/nav/EditRouteLayoutTiles.test.js": {
+      "classification": "strict"
+    },
     "tests/shared/nav/EditRouteMarkup.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteRenderModel-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteRenderModel.buildsNoRouteStateScreen.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteRenderModel.normalizesFormatterFallbackTokensAcross.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/EditRouteRenderModel.staysPassiveWhenCapabilityIs.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/MapZoomHtmlFit-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/MapZoomHtmlFit.producesFittedTextUnderTight.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/MapZoomHtmlFit.shrinksFittedTextUnderTighter.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/MapZoomHtmlFit.usesThemeTokenWeightsNormal.test.js": {
       "classification": "strict"
     },
     "tests/shared/nav/NavInteractionPolicy.test.js": {
       "classification": "strict"
     },
     "tests/shared/nav/NavModeRatio.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsHtmlFit-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsHtmlFit.fallsBackInfoplaintextNarrowStabledigits.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsHtmlFit.producesHeaderRowStyleStrings.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsHtmlFit.returnsEmptyRowfitsArrayZero.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsHtmlFit.usesFullAvailableBoxHeight.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsLayout-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsLayout.keepsMarkerGeometryCompactBounded.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/nav/RoutePointsLayout.usesMinWHHost.test.js": {
       "classification": "strict"
     },
     "tests/shared/nav/RoutePointsRowGeometry.test.js": {
@@ -445,10 +1054,52 @@
     "tests/shared/radial/FullCircleRadialDrawing.test.js": {
       "classification": "strict"
     },
+    "tests/shared/radial/FullCircleRadialEngine-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialEngine.appliesThemeDefaultsRingTicks.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialEngine.exposesCacheMetadataHelpersWidget.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialEngine.exposesLayoutOwnedResponsiveState.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialEngine.matchesCallbackVisibleLayoutState.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialEngine.skipsDrawmodeWhenHidetextualmetricsIs.test.js": {
+      "classification": "strict"
+    },
     "tests/shared/radial/FullCircleRadialLayout.test.js": {
       "classification": "strict"
     },
     "tests/shared/radial/FullCircleRadialMeasure.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.appliesFlatModeClampLong.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.appliesFullCircleNormalLayout.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.appliesNormalModeClampLong.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.boostsCompactTextOccupancyWhile.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.packsDualNormalTextTheme.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.packsSingleNormalTextInside.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/FullCircleRadialTextLayout.registersItselfOnRootDynicomponents.test.js": {
       "classification": "strict"
     },
     "tests/shared/radial/RadialAngleMath.test.js": {
@@ -478,16 +1129,79 @@
     "tests/shared/radial/RadialValueMath.test.js": {
       "classification": "strict"
     },
+    "tests/shared/radial/SemicircleRadialEngine.delegatesTextRenderingThroughSemicircleradialtextlayout.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.drawsSectorsBeforeArcRing.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.fallsBackEngineOwnedRange.test.js": {
+      "classification": "strict"
+    },
     "tests/shared/radial/SemicircleRadialEngine.harness.js": {
       "classification": "harness-fragment",
       "parent": "tests/shared/radial/SemicircleRadialEngine.rendersValuemathOnRadialtoolkitValue.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/shared/radial/SemicircleRadialEngine.test.js when its test family next changes."
     },
+    "tests/shared/radial/SemicircleRadialEngine.keepsDefaultRadialPointerSizing.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.matchesCallbackVisibleLayoutState.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.matchesCallbackVisibleRangeLayout.test.js": {
+      "classification": "strict"
+    },
     "tests/shared/radial/SemicircleRadialEngine.render-order-harness.js": {
       "classification": "strict"
     },
+    "tests/shared/radial/SemicircleRadialEngine.rendersDisconnectedStateScreenBefore.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.rendersValuemathOnRadialtoolkitValue.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.resolvesThemeOnceAppliesTokenized.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.skipsSemicircleTextDrawStep.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.stillDrawsRingPointerTicks.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialEngine.usesPlaceholderTextMissingInput.test.js": {
+      "classification": "strict"
+    },
     "tests/shared/radial/SemicircleRadialLayout.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialTextLayout-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialTextLayout.cacheReuse.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialTextLayout.cacheStability.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialTextLayout.compactBoost.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialTextLayout.flatClamp.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/SemicircleRadialTextLayout.normalClamp.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/TextLayoutEngine-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/TextLayoutEngine.computesModeRoutingCollapseFlags.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/radial/TextLayoutEngine.keepsSharedCompositeFitPaths.test.js": {
       "classification": "strict"
     },
     "tests/shared/radial/XteHighwayPrimitives.test.js": {
@@ -538,6 +1252,36 @@
     "tests/shared/value/ValueMath.test.js": {
       "classification": "strict"
     },
+    "tests/shared/vessel/AlarmHtmlFit-setup.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.cachesIdenticalResultsOnHostcontext.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.fitsAgainstInnerContentRect.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.invalidatesCacheWhenShellWidth.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.keepsAisChromeParityAt.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.matchesAisVisualChromeGeometry.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.neverFitsAgainstRawShell.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.recomputesWhenFontmetricsepochChangesSo.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.resolvesRatioModeFromThresholds.test.js": {
+      "classification": "strict"
+    },
+    "tests/shared/vessel/AlarmHtmlFit.sharesOneChromeContractBetween.test.js": {
+      "classification": "strict"
+    },
     "tests/shared/vessel/AlarmMarkup.test.js": {
       "classification": "strict"
     },
@@ -583,6 +1327,12 @@
     "tests/tools/actionlint.test.js": {
       "classification": "strict"
     },
+    "tests/tools/check-doc-links-proof.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/check-doc-links.test.mjs": {
+      "classification": "strict"
+    },
     "tests/tools/check-file-size-oneliner.test.js": {
       "classification": "strict"
     },
@@ -595,42 +1345,6 @@
     "tests/tools/check-generic-surface.test.js": {
       "classification": "strict"
     },
-    "tests/tools/check-schema.test.mjs": {
-      "classification": "strict"
-    },
-    "tests/tools/check-doc-links.test.mjs": {
-      "classification": "strict"
-    },
-    "tests/tools/check-doc-links-proof.test.mjs": {
-      "classification": "strict"
-    },
-    "tests/tools/hooks-install.test.mjs": {
-      "classification": "strict"
-    },
-    "tests/tools/hooks-doctor.test.mjs": {
-      "classification": "strict"
-    },
-    "tests/tools/check-test-focus.test.mjs": {
-      "classification": "strict"
-    },
-    "tests/tools/complexity-scan.test.mjs": {
-      "classification": "strict"
-    },
-    "tests/tools/eslint-config.test.mjs": {
-      "classification": "strict"
-    },
-    "tests/tools/prettier-config.test.mjs": {
-      "classification": "strict"
-    },
-    "tests/tools/run-format.test.mjs": {
-      "classification": "strict"
-    },
-    "tests/tools/vitest-projects.test.mjs": {
-      "classification": "strict"
-    },
-    "tests/tools/vitest-allow-only.proof.test.js": {
-      "classification": "strict"
-    },
     "tests/tools/check-patterns-atomicity.test.js": {
       "classification": "strict"
     },
@@ -640,11 +1354,38 @@
     "tests/tools/check-patterns-responsive.test.js": {
       "classification": "strict"
     },
+    "tests/tools/check-patterns-setup.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-patterns.blocksComputedCompoundAttributeBased.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-patterns.blocksFallbacktextWrappersThatDuplicate.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-patterns.blocksRenamedButIdenticalFunction.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-patterns.blocksTruthyFallbackOnDefault.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-patterns.failFastRuleCases.test.js": {
+      "classification": "strict"
+    },
     "tests/tools/check-patterns.harness.js": {
       "classification": "harness-fragment",
       "parent": "tests/tools/check-patterns.blocksComputedCompoundAttributeBased.test.js",
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/tools/check-patterns.test.js when its test family next changes."
+    },
+    "tests/tools/check-patterns.treatsPrematureLegacySupportFindings.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-schema.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/check-test-focus.test.mjs": {
+      "classification": "strict"
     },
     "tests/tools/codex-config.test.js": {
       "classification": "strict"
@@ -655,10 +1396,22 @@
     "tests/tools/complexity-capture-integrity.test.js": {
       "classification": "strict"
     },
+    "tests/tools/complexity-scan.test.mjs": {
+      "classification": "strict"
+    },
     "tests/tools/coverage-inventory-policy.test.js": {
       "classification": "strict"
     },
     "tests/tools/coverage-inventory.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/eslint-config.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/hooks-doctor.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/hooks-install.test.mjs": {
       "classification": "strict"
     },
     "tests/tools/hooks.test.js": {
@@ -677,20 +1430,23 @@
       "ownerTest": "tests/tools/quality-owners.test.js",
       "reason": "Deliberately type-incompatible mock (missing a required property) exercised by its owner checker test to prove the strict test typecheck boundary rejects invalid mocks; must not be linted/typechecked as real test code."
     },
-    "tests/tools/lint-fixtures/misspelled-test-global.test.js": {
-      "classification": "fixture",
-      "ownerTest": "tests/tools/quality-owners.test.js",
-      "reason": "Deliberately misspelled global reference exercised by its owner checker test to prove the strict test lint boundary rejects undeclared globals; must not be linted/typechecked as real test code."
-    },
     "tests/tools/lint-fixtures/missing-file-overview.js": {
       "classification": "fixture",
       "ownerTest": "tests/tools/quality-owners.test.js",
       "reason": "Deliberately invalid fixture (missing @file overview) exercised by its owner checker test; must not be linted/typechecked as real test code."
     },
+    "tests/tools/lint-fixtures/misspelled-test-global.test.js": {
+      "classification": "fixture",
+      "ownerTest": "tests/tools/quality-owners.test.js",
+      "reason": "Deliberately misspelled global reference exercised by its owner checker test to prove the strict test lint boundary rejects undeclared globals; must not be linted/typechecked as real test code."
+    },
     "tests/tools/operation-count-evaluator.test.js": {
       "classification": "strict"
     },
     "tests/tools/package-scripts.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/prettier-config.test.mjs": {
       "classification": "strict"
     },
     "tests/tools/quality-owners.test.js": {
@@ -708,820 +1464,22 @@
     "tests/tools/release-zip-builder.test.js": {
       "classification": "strict"
     },
+    "tests/tools/run-format.test.mjs": {
+      "classification": "strict"
+    },
     "tests/tools/test-inventory.test.js": {
       "classification": "strict"
     },
     "tests/tools/verified-baseline.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/linear/DefaultLinearWidget.test.js": {
+    "tests/tools/vitest-allow-only.proof.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/linear/DepthLinearWidget.test.js": {
+    "tests/tools/vitest-projects.test.mjs": {
       "classification": "strict"
     },
-    "tests/widgets/radial/CompassRadialWidget.caching.harness.js": {
-      "classification": "harness-fragment",
-      "parent": "tests/widgets/radial/CompassRadialWidget.passesFullCircleRatioProps.test.js",
-      "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
-      "removalPath": "Inline this harness into tests/widgets/radial/CompassRadialWidget.test.js when its test family next changes."
-    },
-    "tests/widgets/radial/DefaultRadialWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/radial/DepthRadialWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/radial/WindRadialWidget.caching.harness.js": {
-      "classification": "harness-fragment",
-      "parent": "tests/widgets/radial/WindRadialWidget.drawsLaylinesBeforeFullCircle.test.js",
-      "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
-      "removalPath": "Inline this harness into tests/widgets/radial/WindRadialWidget.test.js when its test family next changes."
-    },
-    "tests/widgets/text/PositionCoordinateWidget.harness.js": {
-      "classification": "harness-fragment",
-      "parent": "tests/widgets/text/PositionCoordinateWidget.increasesCompactTextFillRatios.test.js",
-      "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
-      "removalPath": "Inline this harness into tests/widgets/text/PositionCoordinateWidget.test.js when its test family next changes."
-    },
-    "tests/widgets/text/PositionCoordinateWidgetPhase4.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/text/XteDisplayLinearWidget.harness.js": {
-      "classification": "harness-fragment",
-      "parent": "tests/widgets/text/XteDisplayLinearWidget.test.js",
-      "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
-      "removalPath": "Inline this harness into tests/widgets/text/XteDisplayLinearWidget.test.js when its test family next changes."
-    },
-    "tests/widgets/text/XteDisplayLinearWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/text/XteDisplayWidget.harness.js": {
-      "classification": "harness-fragment",
-      "parent": "tests/widgets/text/XteDisplayWidget.reusesStaticCacheStableInputs.test.js",
-      "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
-      "removalPath": "Inline this harness into tests/widgets/text/XteDisplayWidget.test.js when its test family next changes."
-    },
-    "tests/widgets/text/XteDisplayWidget.test-model.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/mappers/NavMapper.disconnectPositions.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/mappers/NavMapper.editRoute.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/mappers/NavMapper.formatters.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/mappers/NavMapper.routePoints.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/mappers/NavMapper.routePointsEditRoute.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/mappers/NavMapper.vmgActiveRoute.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/mappers/NavMapper.xteDisplay.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/mappers/NavMapper.xteDisplayLinear.test.js": {
-      "classification": "strict"
-    },
-    "tests/helpers/nav-mapper.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.propagatesHidetextualmetricsSharedLayoutSuppresses.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.matchesCallbackVisibleLayoutState.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.easesCompassAxisWhenSpringtarget.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.takesShortestWrappedArcAcross.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.matchesCallbackVisibleAxisLayout.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.fallsBackEngineOwnedRange.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.fallsBackEngineOwnedRatio.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.keepsSectorBandsAboveScale.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.mapsPointerPositionAccordingAxis.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.reusesStaticCacheIdenticalKey.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.usesExplicitThreeModeText.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.passesLayoutVariantsSplitHigh.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.boostsCompactTextCeilingsWhile.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.honorsCaptionunitscaleDirectlyAcrossAll.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.allocatesHighModeCaptionValue.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.preservesExplicitEmptyUnitFalsy.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.usesPlaceholderTextMissingInput.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.usesLinearLabelsInsetfactorPosition.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.supportsAxisTickFrameMode.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.keepsDefaultPointerMarkerSizing.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.keepsDefaultPointerWidthIndependent.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.keepsSpringStateKeyedBy.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.rendersDisconnectedStateScreenBefore.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeEngine.usesLayoutComputedLinearGeometry.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialEngine.rendersValuemathOnRadialtoolkitValue.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialEngine.usesPlaceholderTextMissingInput.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialEngine.skipsSemicircleTextDrawStep.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialEngine.drawsSectorsBeforeArcRing.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialEngine.stillDrawsRingPointerTicks.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialEngine.matchesCallbackVisibleLayoutState.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialEngine.matchesCallbackVisibleRangeLayout.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialEngine.fallsBackEngineOwnedRange.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialEngine.keepsDefaultRadialPointerSizing.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialEngine.delegatesTextRenderingThroughSemicircleradialtextlayout.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialEngine.rendersDisconnectedStateScreenBefore.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialEngine.resolvesThemeOnceAppliesTokenized.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialTextLayout.compactBoost.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialTextLayout.cacheReuse.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialTextLayout.cacheStability.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialTextLayout.flatClamp.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialTextLayout.normalClamp.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/SemicircleRadialTextLayout-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeTextLayout.textScaling.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeTextLayout.movingAxisLabels.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/linear/LinearGaugeTextLayout-setup.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/ClusterWidget.translatesRouteFramesRendersShell.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/ClusterWidget.invalidatesRouteActivationMemoState.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/ClusterWidget-setup.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/mappers/VesselMapper.mapsVoltagelinearExplicitLinearKeys.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/mappers/VesselMapper.mapsDatetimePositioncoordinatewidgetDirectVariant.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/mappers/VesselMapper.requiresToolkitNumNumericConversion.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/mappers/VesselMapper-setup.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.exposesCommittedRendererContract.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.updatesEmittedAccentStripWidth.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.staysPassiveInEditMode.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.rendersNoaisStateVerticalContainers.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.appliesAisHiddenDisconnectedPrecedence.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.updatesLayoutSignaturesBranchInteraction.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.exposesEmptyTranslatefunctionMap.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.rebindsDispatchListenerAcrossSuccessive.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget.skipsAisDispatchWhenSurfacepolicy.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AisTargetTextHtmlWidget-setup.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AlarmTextHtmlWidget.mountsCommittedAlarmRootDispatches.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AlarmTextHtmlWidget.usesCommittedHtmlWidgetCss.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/AlarmTextHtmlWidget-setup.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/EditRouteTextHtmlWidget.exposesCommittedRendererContract.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/EditRouteTextHtmlWidget.keepsCompactNormalModeOn.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/EditRouteTextHtmlWidget.keepsHighModeOnRow.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/EditRouteTextHtmlWidget.usesShadowLocalCssSelectors.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/EditRouteTextHtmlWidget.exposesEmptyTranslatefunctionMap.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/EditRouteTextHtmlWidget-setup.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.exposesCommittedRendererContract.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.normalizesPlaceholderFormatterOutputShared.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.alwaysConsultsMapzoomhtmlfitWhenShell.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.resolvesRatioModesRequiredRow.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.usesDefaultCaptionUnitScale.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.escapesContentFailsClosedWithout.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.usesShadowLocalCssSelectors.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.reusesPreparedSemanticModelAcross.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget.clearsPreparedSemanticModelState.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/MapZoomTextHtmlWidget-setup.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RegattaTimerTextHtmlWidget.resolvesRouteMetadataPreloadAssets.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RegattaTimerTextHtmlWidget.updatesModeSelectionFromRatio.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RegattaTimerTextHtmlWidget-setup.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsDomEffects.detectsCommittedVerticalContainerAncestry.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsDomEffects.treatsNonObjectTruthyTargetel.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsDomEffects-setup.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.buildsCourseDistanceRowsPlaceholder.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.failsClosedWhenRoutePayload.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.classifiesDisconnectedBeforeNorouteDisables.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.keepsMissingCoordinateOptionalLeg.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.keepsMissingSelectedindexValuesUnselected.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.prefersStableRawWaypointIdentity.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.formatsLatLonRowsThrough.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.normalizesCourseDistanceFormatterFallback.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.usesVerticalResizeSignatureContract.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.usesCappedNaturalHeightAs.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel.keepsVerticalListViewportHeight.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsRenderModel-setup.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.exposesCommittedRendererContract.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.reBindsDispatchClickListener.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.dispatchesRoutePointActivationValid.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.rendersDisconnectedStateScreenBlocks.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.runsPostPatchRevealEffects.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.requestsRelayoutWhenScrollbarGutter.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.addsTabularClassRoutePoint.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.rendersPlainStabledigitsInfoText.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.derivesLayoutSignatureFromModel.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget.usesShadowLocalCssSelectors.test.js": {
-      "classification": "strict"
-    },
-    "tests/cluster/rendering/RoutePointsTextHtmlWidget-setup.js": {
-      "classification": "strict"
-    },
-    "tests/config/clusters/static-clusters.registersCourseSpeedDefaultWind.test.js": {
-      "classification": "strict"
-    },
-    "tests/config/clusters/static-clusters.registersWindCourseWarningParameter.test.js": {
-      "classification": "strict"
-    },
-    "tests/config/clusters/static-clusters-setup.js": {
-      "classification": "strict"
-    },
-    "tests/config/components.createsComponentRegistryFromBaseurl.test.js": {
-      "classification": "strict"
-    },
-    "tests/config/components.coverage.test.js": {
-      "classification": "strict"
-    },
-    "tests/config/components-setup.js": {
-      "classification": "strict"
-    },
-    "tests/integration/CrossWidgetAcceptance.keepsDisconnectedLabelsConsistentAcross.test.js": {
-      "classification": "strict"
-    },
-    "tests/integration/CrossWidgetAcceptance.keepsPlaceholderNormalizationOnRender.test.js": {
-      "classification": "strict"
-    },
-    "tests/integration/CrossWidgetAcceptance.keepsStableDigitWidthsAligned.test.js": {
-      "classification": "strict"
-    },
-    "tests/integration/CrossWidgetAcceptance-setup.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/HostCommitController.initstateCreatesCompleteStateShape.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/HostCommitController.cleanupCancelsPendingRafObserver.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/HostCommitController.recordsWaitStageClassificationEach.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/HostCommitController-setup.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/SurfaceSessionController.initstateReturnsCleanStateShape.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/SurfaceSessionController.differentSurfaceDetachesDestroysOld.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/SurfaceSessionController.throwsUnsupportedSurfacesInvalidService.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/SurfaceSessionController-setup.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/TemporaryHostActionBridge.returnsSingletonHostactionsFacadeDocumented.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/TemporaryHostActionBridge.rejectsMissingOrBlankRoute.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/TemporaryHostActionBridge.discoversAlarmDispatchOnAny.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/TemporaryHostActionBridge-setup.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/cluster/RouteActivationController.loadsOnlyActiveRouteRoots.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/cluster/RouteActivationController.returnsWarmPayloadsSynchronouslyCaches.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/cluster/RouteActivationController.memoizesMappedActivationOutputDiscards.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/cluster/RouteActivationController.doesNotDiscardHtmlRoutes.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/cluster/RouteActivationController.doesNotDiscardWhenMapped.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/cluster/RouteActivationController.reusesSameColdPromiseRoute.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/cluster/RouteActivationController.keepsOneCurrentColdActivation.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/cluster/RouteActivationController-setup.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/component-loader.loadsDepsFirstDeduplicatesScript.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/component-loader.failsBeforeComponentClosureIs.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/component-loader-setup.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/surface/HtmlSurfaceController.implementsCommittedRendererLifecycleIncluding.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/surface/HtmlSurfaceController.throwsStrictRendererContractsInvalid.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/surface/HtmlSurfaceController-setup.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/theme-runtime.configuresRuntimeThemeAppliesOutput.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/theme-runtime.resolvesDefaultPresetAisRole.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/theme-runtime.resolvesDeprecatedCamelcaseRegattaAlias.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/theme-runtime.applytorootMaterializesDyniThemeOpacity.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/theme-runtime-setup.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/widget-registrar.mergesComponentWidgetDefComposes.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/widget-registrar.registersThroughCapturedDynipluginAvnavapi.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/widget-registrar.keepsVesselStabledigitsAbsentAt.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/widget-registrar.appliesStaticHostClassesEven.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/widget-registrar.injectsHostactionsInitHtmlFinalize.test.js": {
-      "classification": "strict"
-    },
-    "tests/runtime/widget-registrar-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/ActiveRouteHtmlFit.returnsCaptionValueUnitStyle.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/ActiveRouteHtmlFit.throwsWhenPropsDisplayIs.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/ActiveRouteHtmlFit.passesFirstFormatterParameterWhen.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/ActiveRouteHtmlFit-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetHtmlFit.returnsNullWhenRequiredCompute.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetHtmlFit.fitsFlatModeStylesAll.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetHtmlFit.fitsNameStatusIndependentlyIn.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetHtmlFit.raisesNormalHighIdentityText.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetHtmlFit.fitsNormalHighValuesAgainst.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetHtmlFit.keepsRepresentativeNormalHighShells.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetHtmlFit.keepsDcpaTcpaLabelValue.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetHtmlFit.keepsCaptionUnitUnder0.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetHtmlFit.shrinksLongNameLongMetric.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetHtmlFit-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetLayout.resolvesHighNormalFlatMode.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetLayout.matchesAlarmStripWidthFormula.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetLayout-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetMarkup.rendersDispatchModeWrapperAccent.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetMarkup.rendersFitSelectedMetricText.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetMarkup.rendersPassiveModeWithoutCatchall.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetMarkup.rendersAllFourMetricsIdentity.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetMarkup.rendersNoaisStateThroughShared.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetMarkup.escapesModelTextAppliesInline.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetMarkup.appliesLayoutDrivenGeometryStyles.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetMarkup-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetRenderModel.buildsDispatchDataStateAll.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetRenderModel.normalizesFormatterFallbackTokensAcross.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetRenderModel.rendersNoaisStateVerticalContainers.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetRenderModel.updatesResizeSignatureWhenAny.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/AisTargetRenderModel-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteHtmlFit.returnsStableStylePayloadsAll.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteHtmlFit.fitsSourceBadgeTextUsing.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteHtmlFit.usesCoordinatedMetricTileMeasurement.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteHtmlFit.computesOnlyNameFitIn.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteHtmlFit-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteHtmlFitSupport.usesMetricsIdLabeltextFirst.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteHtmlFitSupport.returnsFalseWhenLinefitIs.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteHtmlFitSupport-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteRenderModel.buildsNoRouteStateScreen.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteRenderModel.normalizesFormatterFallbackTokensAcross.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteRenderModel.staysPassiveWhenCapabilityIs.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/EditRouteRenderModel-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/MapZoomHtmlFit.usesThemeTokenWeightsNormal.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/MapZoomHtmlFit.shrinksFittedTextUnderTighter.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/MapZoomHtmlFit.producesFittedTextUnderTight.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/MapZoomHtmlFit-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/RoutePointsHtmlFit.producesHeaderRowStyleStrings.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/RoutePointsHtmlFit.returnsEmptyRowfitsArrayZero.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/RoutePointsHtmlFit.usesFullAvailableBoxHeight.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/RoutePointsHtmlFit.fallsBackInfoplaintextNarrowStabledigits.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/RoutePointsHtmlFit-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/RoutePointsLayout.usesMinWHHost.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/RoutePointsLayout.keepsMarkerGeometryCompactBounded.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/nav/RoutePointsLayout-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialEngine.appliesThemeDefaultsRingTicks.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialEngine.matchesCallbackVisibleLayoutState.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialEngine.skipsDrawmodeWhenHidetextualmetricsIs.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialEngine.exposesLayoutOwnedResponsiveState.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialEngine.exposesCacheMetadataHelpersWidget.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialEngine-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.packsSingleNormalTextInside.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.packsDualNormalTextTheme.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.boostsCompactTextOccupancyWhile.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.appliesFullCircleNormalLayout.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.appliesFlatModeClampLong.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.appliesNormalModeClampLong.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout.registersItselfOnRootDynicomponents.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/FullCircleRadialTextLayout-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/TextLayoutEngine.computesModeRoutingCollapseFlags.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/TextLayoutEngine.keepsSharedCompositeFitPaths.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/radial/TextLayoutEngine-setup.js": {
-      "classification": "strict"
-    },
-    "tests/shared/vessel/AlarmHtmlFit.resolvesRatioModeFromThresholds.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/vessel/AlarmHtmlFit.fitsAgainstInnerContentRect.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/vessel/AlarmHtmlFit.sharesOneChromeContractBetween.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/vessel/AlarmHtmlFit.neverFitsAgainstRawShell.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/vessel/AlarmHtmlFit.cachesIdenticalResultsOnHostcontext.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/vessel/AlarmHtmlFit.matchesAisVisualChromeGeometry.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/vessel/AlarmHtmlFit.keepsAisChromeParityAt.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/vessel/AlarmHtmlFit.invalidatesCacheWhenShellWidth.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/vessel/AlarmHtmlFit.recomputesWhenFontmetricsepochChangesSo.test.js": {
-      "classification": "strict"
-    },
-    "tests/shared/vessel/AlarmHtmlFit-setup.js": {
-      "classification": "strict"
-    },
-    "tests/tools/check-patterns.blocksRenamedButIdenticalFunction.test.js": {
-      "classification": "strict"
-    },
-    "tests/tools/check-patterns.blocksTruthyFallbackOnDefault.test.js": {
-      "classification": "strict"
-    },
-    "tests/tools/check-patterns.blocksFallbacktextWrappersThatDuplicate.test.js": {
-      "classification": "strict"
-    },
-    "tests/tools/check-patterns.blocksComputedCompoundAttributeBased.test.js": {
-      "classification": "strict"
-    },
-    "tests/tools/check-patterns.treatsPrematureLegacySupportFindings.test.js": {
-      "classification": "strict"
-    },
-    "tests/tools/check-patterns-setup.js": {
+    "tests/widgets/linear/CompassLinearWidget-setup.js": {
       "classification": "strict"
     },
     "tests/widgets/linear/CompassLinearWidget.configuresFixed360MovingScaleCompass.test.js": {
@@ -1530,7 +1488,13 @@
     "tests/widgets/linear/CompassLinearWidget.doesNotRenderMarkerWhen.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/linear/CompassLinearWidget-setup.js": {
+    "tests/widgets/linear/DefaultLinearWidget.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/DepthLinearWidget.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/linear/SpeedLinearWidget-setup.js": {
       "classification": "strict"
     },
     "tests/widgets/linear/SpeedLinearWidget.passesLineargaugeengineConfigRangeAxis.test.js": {
@@ -1539,19 +1503,19 @@
     "tests/widgets/linear/SpeedLinearWidget.returnsPlaceholderOutputNullSpeed.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/linear/SpeedLinearWidget-setup.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/linear/TemperatureLinearWidget.passesLineargaugeengineConfigTemperatureTick.test.js": {
+    "tests/widgets/linear/TemperatureLinearWidget-setup.js": {
       "classification": "strict"
     },
     "tests/widgets/linear/TemperatureLinearWidget.normalizesSharedPlaceholderFormatterOutput.test.js": {
       "classification": "strict"
     },
+    "tests/widgets/linear/TemperatureLinearWidget.passesLineargaugeengineConfigTemperatureTick.test.js": {
+      "classification": "strict"
+    },
     "tests/widgets/linear/TemperatureLinearWidget.treatsBlankMissingHighEnd.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/linear/TemperatureLinearWidget-setup.js": {
+    "tests/widgets/linear/VoltageLinearWidget-setup.js": {
       "classification": "strict"
     },
     "tests/widgets/linear/VoltageLinearWidget.passesLineargaugeengineConfigVoltageTick.test.js": {
@@ -1563,19 +1527,19 @@
     "tests/widgets/linear/VoltageLinearWidget.treatsBlankMissingLowEnd.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/linear/VoltageLinearWidget-setup.js": {
+    "tests/widgets/linear/WindLinearWidget-setup.js": {
       "classification": "strict"
     },
     "tests/widgets/linear/WindLinearWidget.configuresCentered180DualWindDisplay.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/linear/WindLinearWidget.usesLayoutOwnedDualGaps.test.js": {
-      "classification": "strict"
-    },
     "tests/widgets/linear/WindLinearWidget.keepsMissingAngleValuesOn.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/linear/WindLinearWidget-setup.js": {
+    "tests/widgets/linear/WindLinearWidget.usesLayoutOwnedDualGaps.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/ClockRadialWidget/ClockRadialWidget-setup.js": {
       "classification": "strict"
     },
     "tests/widgets/radial/ClockRadialWidget/ClockRadialWidget.exportsModuleIdCreateFunction.test.js": {
@@ -1584,8 +1548,14 @@
     "tests/widgets/radial/ClockRadialWidget/ClockRadialWidget.returnsNullUnparseableStringsDraws.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/radial/ClockRadialWidget/ClockRadialWidget-setup.js": {
+    "tests/widgets/radial/CompassRadialWidget-setup.js": {
       "classification": "strict"
+    },
+    "tests/widgets/radial/CompassRadialWidget.caching.harness.js": {
+      "classification": "harness-fragment",
+      "parent": "tests/widgets/radial/CompassRadialWidget.passesFullCircleRatioProps.test.js",
+      "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
+      "removalPath": "Inline this harness into tests/widgets/radial/CompassRadialWidget.test.js when its test family next changes."
     },
     "tests/widgets/radial/CompassRadialWidget.passesFullCircleRatioProps.test.js": {
       "classification": "strict"
@@ -1596,16 +1566,22 @@
     "tests/widgets/radial/CompassRadialWidget.usesThemePointerColorFixed.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/radial/CompassRadialWidget-setup.js": {
+    "tests/widgets/radial/DefaultRadialWidget.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/radial/SpeedRadialWidget.passesSemicircleradialengineConfigHighEnd.test.js": {
+    "tests/widgets/radial/DepthRadialWidget.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/SpeedRadialWidget-setup.js": {
       "classification": "strict"
     },
     "tests/widgets/radial/SpeedRadialWidget.exposesNoOpTranslatefunctionSince.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/radial/SpeedRadialWidget-setup.js": {
+    "tests/widgets/radial/SpeedRadialWidget.passesSemicircleradialengineConfigHighEnd.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/TemperatureRadialWidget-setup.js": {
       "classification": "strict"
     },
     "tests/widgets/radial/TemperatureRadialWidget.doesNotApplyKelvinFallback.test.js": {
@@ -1614,31 +1590,37 @@
     "tests/widgets/radial/TemperatureRadialWidget.normalizesSharedPlaceholderFormatterOutput.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/radial/TemperatureRadialWidget-setup.js": {
+    "tests/widgets/radial/VoltageRadialWidget-setup.js": {
       "classification": "strict"
     },
     "tests/widgets/radial/VoltageRadialWidget.buildsLowEndSectorsFrom.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/radial/VoltageRadialWidget.suppressesDisabledSectorsByToggle.test.js": {
-      "classification": "strict"
-    },
     "tests/widgets/radial/VoltageRadialWidget.returnsPlaceholderOutputNullVoltage.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/radial/VoltageRadialWidget-setup.js": {
+    "tests/widgets/radial/VoltageRadialWidget.suppressesDisabledSectorsByToggle.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/radial/WindRadialWidget.passesFullCircleRatioProps.test.js": {
+    "tests/widgets/radial/WindRadialWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/radial/WindRadialWidget.caching.harness.js": {
+      "classification": "harness-fragment",
+      "parent": "tests/widgets/radial/WindRadialWidget.drawsLaylinesBeforeFullCircle.test.js",
+      "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
+      "removalPath": "Inline this harness into tests/widgets/radial/WindRadialWidget.test.js when its test family next changes."
+    },
+    "tests/widgets/radial/WindRadialWidget.drawsLaylinesBeforeFullCircle.test.js": {
       "classification": "strict"
     },
     "tests/widgets/radial/WindRadialWidget.formatsSpeedViaComponentcontextFormat.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/radial/WindRadialWidget.drawsLaylinesBeforeFullCircle.test.js": {
+    "tests/widgets/radial/WindRadialWidget.keepsSpringStateKeyedBy.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/radial/WindRadialWidget.keepsSpringStateKeyedBy.test.js": {
+    "tests/widgets/radial/WindRadialWidget.passesFullCircleRatioProps.test.js": {
       "classification": "strict"
     },
     "tests/widgets/radial/WindRadialWidget.rendersNormalThreeRowLayout.test.js": {
@@ -1647,7 +1629,10 @@
     "tests/widgets/radial/WindRadialWidget.usesCustomDefaultPlaceholderBoth.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/radial/WindRadialWidget-setup.js": {
+    "tests/widgets/text/CenterDisplayTextWidget-setup.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.centersRelationRowsWhileKeeping.test.js": {
       "classification": "strict"
     },
     "tests/widgets/text/CenterDisplayTextWidget.exposesCenterDisplayRendererContract.test.js": {
@@ -1656,7 +1641,19 @@
     "tests/widgets/text/CenterDisplayTextWidget.increasesCompactTextFillOn.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/text/CenterDisplayTextWidget.usesMonoFamilyTabularCoordinates.test.js": {
+    "tests/widgets/text/CenterDisplayTextWidget.keepsCompactFlatHighLayouts.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.keepsCompactNavPageLike.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.keepsCoordinateFontSizesCoupled.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.keepsNonTabularCenterCoordinates.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/CenterDisplayTextWidget.normalizesKnownFormatterFallbackTokens.test.js": {
       "classification": "strict"
     },
     "tests/widgets/text/CenterDisplayTextWidget.rendersDisconnectedStateScreenInstead.test.js": {
@@ -1665,28 +1662,22 @@
     "tests/widgets/text/CenterDisplayTextWidget.rendersNormalModeCaptionLeft.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/text/CenterDisplayTextWidget.keepsNonTabularCenterCoordinates.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/text/CenterDisplayTextWidget.centersRelationRowsWhileKeeping.test.js": {
-      "classification": "strict"
-    },
     "tests/widgets/text/CenterDisplayTextWidget.rendersPlaceholdersMissingCoordinatesRelation.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/text/CenterDisplayTextWidget.normalizesKnownFormatterFallbackTokens.test.js": {
+    "tests/widgets/text/CenterDisplayTextWidget.usesMonoFamilyTabularCoordinates.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/text/CenterDisplayTextWidget.keepsCompactNavPageLike.test.js": {
+    "tests/widgets/text/PositionCoordinateWidget-setup.js": {
       "classification": "strict"
     },
-    "tests/widgets/text/CenterDisplayTextWidget.keepsCompactFlatHighLayouts.test.js": {
-      "classification": "strict"
+    "tests/widgets/text/PositionCoordinateWidget.harness.js": {
+      "classification": "harness-fragment",
+      "parent": "tests/widgets/text/PositionCoordinateWidget.increasesCompactTextFillRatios.test.js",
+      "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
+      "removalPath": "Inline this harness into tests/widgets/text/PositionCoordinateWidget.test.js when its test family next changes."
     },
-    "tests/widgets/text/CenterDisplayTextWidget.keepsCoordinateFontSizesCoupled.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/text/CenterDisplayTextWidget-setup.js": {
+    "tests/widgets/text/PositionCoordinateWidget.increasesCompactTextFillRatios.test.js": {
       "classification": "strict"
     },
     "tests/widgets/text/PositionCoordinateWidget.rendersFlatModeInOne.test.js": {
@@ -1695,40 +1686,52 @@
     "tests/widgets/text/PositionCoordinateWidget.rendersStatusCircleOnTop.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/text/PositionCoordinateWidget.increasesCompactTextFillRatios.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/text/PositionCoordinateWidget-setup.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/text/ThreeValueTextWidget.reusesCachedFittingUnchangedKeys.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/text/ThreeValueTextWidget.missesCacheWhenDimensionsChange.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/text/ThreeValueTextWidget.increasesCompactTextFillRatios.test.js": {
-      "classification": "strict"
-    },
-    "tests/widgets/text/ThreeValueTextWidget.normalizesFormatterFallbackTokensRendered.test.js": {
+    "tests/widgets/text/PositionCoordinateWidgetPhase4.test.js": {
       "classification": "strict"
     },
     "tests/widgets/text/ThreeValueTextWidget-setup.js": {
       "classification": "strict"
     },
-    "tests/widgets/text/XteDisplayWidget.selectsFlatNormalHighModes.test.js": {
+    "tests/widgets/text/ThreeValueTextWidget.increasesCompactTextFillRatios.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/text/XteDisplayWidget.reusesStaticCacheStableInputs.test.js": {
+    "tests/widgets/text/ThreeValueTextWidget.missesCacheWhenDimensionsChange.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/text/XteDisplayWidget.usesProvidedDstUnitDirectly.test.js": {
+    "tests/widgets/text/ThreeValueTextWidget.normalizesFormatterFallbackTokensRendered.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/ThreeValueTextWidget.reusesCachedFittingUnchangedKeys.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/XteDisplayLinearWidget.harness.js": {
+      "classification": "harness-fragment",
+      "parent": "tests/widgets/text/XteDisplayLinearWidget.test.js",
+      "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
+      "removalPath": "Inline this harness into tests/widgets/text/XteDisplayLinearWidget.test.js when its test family next changes."
+    },
+    "tests/widgets/text/XteDisplayLinearWidget.test.js": {
       "classification": "strict"
     },
     "tests/widgets/text/XteDisplayWidget-setup.js": {
       "classification": "strict"
     },
-    "tests/tools/check-patterns.failFastRuleCases.test.js": {
+    "tests/widgets/text/XteDisplayWidget.harness.js": {
+      "classification": "harness-fragment",
+      "parent": "tests/widgets/text/XteDisplayWidget.reusesStaticCacheStableInputs.test.js",
+      "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
+      "removalPath": "Inline this harness into tests/widgets/text/XteDisplayWidget.test.js when its test family next changes."
+    },
+    "tests/widgets/text/XteDisplayWidget.reusesStaticCacheStableInputs.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/XteDisplayWidget.selectsFlatNormalHighModes.test.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/XteDisplayWidget.test-model.js": {
+      "classification": "strict"
+    },
+    "tests/widgets/text/XteDisplayWidget.usesProvidedDstUnitDirectly.test.js": {
       "classification": "strict"
     }
   }

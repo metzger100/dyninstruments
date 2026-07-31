@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "baseSchema": "schemas/avnav-plugin-base.schema.json",
+  "pluginSchema": "schemas/plugin.schema.json",
+  "layoutSchema": "schemas/layout.schema.json"
+}

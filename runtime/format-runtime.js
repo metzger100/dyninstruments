@@ -56,7 +56,6 @@
           return formatter.apply(avnavApi.formatter, formatterArgs);
         }
       }
-      // plugin-boundary-next-line(category: avnav-host-boundary, owner: Metzger100, date: 2026-07-17) -- Formatter dispatch is an external AvNav/custom boundary; documented fallback behavior must remain centralized here.
     } catch (e) {
       /* intentional: formatter failures fall back to default/raw formatting */
     }

@@ -246,6 +246,18 @@ describe("release-zip-builder", function () {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
   });
+
+  it("rejects release manifest paths that escape the repository root", async function () {
+    const { validateManifest } = await importTool("../../tools/release-zip-builder.mjs");
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-validate-escape-"));
+    try {
+      const result = validateManifest(tempRoot, ["../outside.js", "/absolute.js"]);
+      expect(result.valid).toBe(false);
+      expect(result.missing).toEqual(["../outside.js", "/absolute.js"]);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
 });
 
 /**

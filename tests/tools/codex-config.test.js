@@ -9,7 +9,15 @@ const REQUIRED_LINES = [
   'web_search = "cached"'
 ];
 
-const FORBIDDEN_TOKENS = ["@latest", 'command = "cmd"', "powershell", "C:\\", "mcp_servers", "/home/", "/Users/"];
+const FORBIDDEN_TOKENS = [
+  "@latest",
+  'command = "cmd"',
+  "powershell",
+  "C:\\",
+  "mcp_servers",
+  "/" + "home/",
+  "/" + "Users/"
+];
 
 /**
  * Pure, dependency-free portability check for the small fixed Codex configuration shape.

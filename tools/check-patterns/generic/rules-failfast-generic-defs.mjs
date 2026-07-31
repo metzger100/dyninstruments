@@ -20,7 +20,7 @@ export const FAILFAST_GENERIC_RULES = [
     name: "catch-fallback-without-suppression",
     run: runCatchFallbackWithoutSuppressionRule,
     message: ({ file, line, expression }) =>
-      `[catch-fallback-without-suppression] ${file}:${line}\nNon-rethrow catch detected (${expression}). Fail-fast policy requires an inline rule-specific suppression comment for intentional fallback catches.`
+      `[catch-fallback-without-suppression] ${file}:${line}\nNon-rethrow catch detected (${expression}). Fail-fast policy requires a validated checker-owned exception for intentional fallback catches.`
   },
   {
     name: "internal-contract-fallback",

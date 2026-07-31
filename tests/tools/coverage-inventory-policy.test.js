@@ -17,6 +17,12 @@ function createWorkspace() {
   fs.mkdirSync(path.join(tempRoot, "config"), { recursive: true });
   fs.writeFileSync(path.join(tempRoot, "plugin.js"), "// plugin\n");
   fs.writeFileSync(path.join(tempRoot, "config/example.js"), "// example\n");
+  writeJson(path.join(tempRoot, "tools/quality-policy/project-coverage-inventory-policy.json"), {
+    schemaVersion: 1,
+    productionRoots: ["config"],
+    entrypoints: ["plugin.js"],
+    legacyBelowDefaultFloors: {}
+  });
   return tempRoot;
 }
 
@@ -79,6 +85,7 @@ describe("coverage inventory policy hardening", function () {
     try {
       writeJson(path.join(tempRoot, "package.json"), { name: "dyninstruments" });
       writeJson(path.join(tempRoot, "tools/quality-policy/project-coverage-inventory-policy.json"), {
+        schemaVersion: 1,
         baselinePackageName: "dyninstruments",
         baselineSha256: "0".repeat(64),
         legacyBelowDefaultFloors: { "plugin.js": { lines: 1, branches: 1 } }
@@ -112,6 +119,7 @@ describe("coverage inventory policy hardening", function () {
       fs.writeFileSync(path.join(tempRoot, "tests/contract/plugin.test.js"), "// owner\n");
       writeJson(path.join(tempRoot, "package.json"), { name: "dyninstruments" });
       writeJson(path.join(tempRoot, "tools/quality-policy/project-coverage-inventory-policy.json"), {
+        schemaVersion: 1,
         baselinePackageName: "dyninstruments",
         baselineSha256: "0".repeat(64)
       });

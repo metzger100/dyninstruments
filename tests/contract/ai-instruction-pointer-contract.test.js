@@ -61,7 +61,7 @@ describe("AI instruction pointer contract", function () {
 });
 
 /**
- * Converged pointer-contract logic shared with the sibling repository's `check-agents-pointer.mjs`: link
+ * Converged pointer-contract logic for this repository: link
  * presence, marker absence, the non-empty-line cap, all three preflight names, and preflight existence.
  * @param {string} content @param {string} root
  */

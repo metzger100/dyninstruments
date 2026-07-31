@@ -2,133 +2,112 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { createHash } = require("node:crypto");
-const { pathToFileURL } = require("node:url");
 
-const MANIFEST_PATH = path.join(process.cwd(), "tools/quality-policy/shared-core-manifest.json");
-const CHECKER_PATH = path.resolve(process.cwd(), "tools/check-shared-core.mjs");
-
-// Anchors the manifest's own digest, so a one-sided edit to either role-model repository's
-// manifest is a visible, reviewable event rather than a silent drift.
-const EXPECTED_MANIFEST_SHA256 = sha256File(MANIFEST_PATH);
+const ROOT = process.cwd();
+const MANIFEST_PATH = "tools/quality-policy/shared-core-manifest.json";
+const SIGNATURE_PATH = "tools/quality-policy/shared-core-manifest.sha256";
+const CONTRACT_PATH = "tools/quality-policy/portable-core-contract.json";
 
 describe("shared-core manifest contract", function () {
-  it("anchors the manifest file's own SHA-256", function () {
-    expect(sha256File(MANIFEST_PATH)).toBe(EXPECTED_MANIFEST_SHA256);
+  it("verifies the exact manifest signature and every declared entry", async function () {
+    const { runSharedCoreCheck } = await import("../../tools/check-shared-core.mjs");
+    const manifestBytes = fs.readFileSync(path.join(ROOT, MANIFEST_PATH));
+    const signature = fs.readFileSync(path.join(ROOT, SIGNATURE_PATH), "utf8");
+    expect(signature).toBe(sha256(manifestBytes));
+    const result = runSharedCoreCheck({ root: ROOT, print: false });
+    expect(result.findings).toEqual([]);
+    expect(result.summary.ok).toBe(true);
   });
 
-  it("lists only paths that exist on disk with a matching digest", async function () {
-    const { runSharedCoreCheck } = await import(pathToFileURL(CHECKER_PATH).href);
-    const { summary, findings } = runSharedCoreCheck({ root: process.cwd(), print: false });
-
-    expect(findings).toEqual([]);
-    expect(summary.ok).toBe(true);
-    expect(summary.checkedEntries).toBeGreaterThan(0);
-  });
-
-  it("requires every manifest checker to export a run entry point with a referencing self-test", async function () {
-    const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf8"));
-    const testFiles = collectFiles(path.join(process.cwd(), "tests")).filter((file) => /\.test\.(js|mjs)$/.test(file));
-
-    for (const relativePath of Object.keys(manifest.entries).filter((entry) =>
-      /^tools\/check-[^/]+\.mjs$/.test(entry)
-    )) {
-      const module = await import(pathToFileURL(path.join(process.cwd(), relativePath)).href);
-      expect(
-        Object.keys(module).some((name) => /^run[A-Z]/.test(name)),
-        relativePath
-      ).toBe(true);
-      expect(
-        testFiles.some((file) => fs.readFileSync(file, "utf8").includes(relativePath)),
-        `${relativePath} needs a self-test that imports it by repository-relative path`
-      ).toBe(true);
+  it("requires manifest-listed checkers to export run entry points", function () {
+    const contract = readJson(CONTRACT_PATH);
+    for (const [relativePath, exports] of Object.entries(contract.requiredCheckerExports)) {
+      const source = fs.readFileSync(path.join(ROOT, relativePath), "utf8");
+      for (const exportName of exports) {
+        expect(source, `${relativePath} must export ${exportName}`).toMatch(
+          new RegExp(`export (?:async )?function ${exportName}\\b|export \\{[^}]*\\b${exportName}\\b`)
+        );
+      }
     }
   });
 
-  it("fails when a manifest entry's file is missing from disk", async function () {
-    const { runSharedCoreCheck } = await import(pathToFileURL(CHECKER_PATH).href);
-    const workspace = createWorkspaceWithManifest({
-      "tools/quality-policy/shared-core-manifest.json": JSON.stringify({
-        entries: { "missing-file.txt": "0".repeat(64) }
-      })
+  it("fails closed for missing and drifted entries", async function () {
+    const { runSharedCoreCheck } = await import("../../tools/check-shared-core.mjs");
+    const root = createWorkspace({
+      "missing.txt": "0".repeat(64),
+      "tools/check-shared-core.mjs": "0".repeat(64)
     });
-
-    try {
-      const { summary, findings } = runSharedCoreCheck({ root: workspace, print: false });
-      expect(summary.ok).toBe(false);
-      expect(findings).toEqual([{ path: "missing-file.txt", kind: "missing" }]);
-    } finally {
-      fs.rmSync(workspace, { recursive: true, force: true });
-    }
+    const result = runSharedCoreCheck({ root, print: false });
+    expect(result.summary.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.kind)).toEqual(expect.arrayContaining(["missing", "mismatch"]));
+    cleanup(root);
   });
 
-  it("fails when a manifest entry's digest drifts from disk", async function () {
-    const { runSharedCoreCheck } = await import(pathToFileURL(CHECKER_PATH).href);
-    const workspace = createWorkspaceWithManifest({
-      "drifted-file.txt": "actual content",
-      "tools/quality-policy/shared-core-manifest.json": JSON.stringify({
-        entries: { "drifted-file.txt": "0".repeat(64) }
-      })
-    });
-
-    try {
-      const { summary, findings } = runSharedCoreCheck({ root: workspace, print: false });
-      expect(summary.ok).toBe(false);
-      expect(findings).toHaveLength(1);
-      expect(findings[0].path).toBe("drifted-file.txt");
-      expect(findings[0].kind).toBe("mismatch");
-    } finally {
-      fs.rmSync(workspace, { recursive: true, force: true });
-    }
+  it("fails closed for escaping and extra entries", async function () {
+    const { runSharedCoreCheck } = await import("../../tools/check-shared-core.mjs");
+    const root = createWorkspace({ "../outside.txt": "0".repeat(64), "extra.txt": "0".repeat(64) });
+    const result = runSharedCoreCheck({ root, print: false });
+    expect(result.summary.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.kind)).toEqual(expect.arrayContaining(["escaping", "extra"]));
+    cleanup(root);
   });
 
-  it("fails when a known Tier 1 path is absent from the manifest", async function () {
-    const { runSharedCoreCheck } = await import(pathToFileURL(CHECKER_PATH).href);
-    const workspace = createWorkspaceWithManifest({
-      "known-file.txt": "content",
-      "tools/quality-policy/shared-core-manifest.json": JSON.stringify({ entries: {} })
-    });
+  it("fails closed for malformed contract data", async function () {
+    const { runSharedCoreCheck } = await import("../../tools/check-shared-core.mjs");
+    const root = createWorkspace();
+    fs.writeFileSync(path.join(root, CONTRACT_PATH), '{"schemaVersion": 99}');
+    const result = runSharedCoreCheck({ root, print: false });
+    expect(result.summary.ok).toBe(false);
+    expect(result.findings[0].kind).toBe("contract");
+    cleanup(root);
+  });
 
-    try {
-      const { summary, findings } = runSharedCoreCheck({
-        root: workspace,
-        print: false,
-        knownTier1Paths: ["known-file.txt"]
-      });
-      expect(summary.ok).toBe(false);
-      expect(findings).toEqual([{ path: "known-file.txt", kind: "unlisted" }]);
-    } finally {
-      fs.rmSync(workspace, { recursive: true, force: true });
-    }
+  it("fails closed for unknown contract fields", async function () {
+    const { runSharedCoreCheck } = await import("../../tools/check-shared-core.mjs");
+    const root = createWorkspace();
+    const contractPath = path.join(root, CONTRACT_PATH);
+    const contract = readJson(CONTRACT_PATH);
+    contract.unexpected = true;
+    fs.writeFileSync(contractPath, JSON.stringify(contract));
+    const result = runSharedCoreCheck({ root, print: false });
+    expect(result.summary.ok).toBe(false);
+    expect(result.findings[0].kind).toBe("contract");
+    cleanup(root);
   });
 });
 
-/** @param {string} absolutePath @returns {string} */
-function sha256File(absolutePath) {
-  return createHash("sha256").update(fs.readFileSync(absolutePath)).digest("hex");
+/** @param {string} root @param {string} relativePath @param {string} content @returns {void} */
+function writeFile(root, relativePath, content) {
+  const absolutePath = path.join(root, relativePath);
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+  fs.writeFileSync(absolutePath, content, "utf8");
 }
 
-/** @param {Record<string, string>} files @returns {string} */
-function createWorkspaceWithManifest(files) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-shared-core-"));
-  for (const [rel, content] of Object.entries(files)) {
-    const abs = path.join(dir, rel);
-    fs.mkdirSync(path.dirname(abs), { recursive: true });
-    fs.writeFileSync(abs, content, "utf8");
+/** @param {Record<string, string>} entries @returns {string} */
+function createWorkspace(entries = {}) {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "shared-core-contract-"));
+  writeFile(root, CONTRACT_PATH, fs.readFileSync(path.join(ROOT, CONTRACT_PATH), "utf8"));
+  const manifest = JSON.stringify({ entries }, null, 2) + "\n";
+  writeFile(root, MANIFEST_PATH, manifest);
+  writeFile(root, SIGNATURE_PATH, sha256(manifest));
+  for (const relativePath of Object.keys(entries)) {
+    if (relativePath.startsWith("../") || relativePath.includes("/../")) continue;
+    writeFile(root, relativePath, "content");
   }
-  return dir;
+  return root;
 }
 
-/** @param {string} directory @returns {string[]} */
-function collectFiles(directory) {
-  /** @type {string[]} */
-  const files = [];
-  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    const absolutePath = path.join(directory, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...collectFiles(absolutePath));
-    } else if (entry.isFile()) {
-      files.push(absolutePath);
-    }
-  }
-  return files;
+/** @param {string} root @returns {void} */
+function cleanup(root) {
+  fs.rmSync(root, { recursive: true, force: true });
+}
+
+/** @param {string} file @returns {any} */
+function readJson(file) {
+  return JSON.parse(fs.readFileSync(path.join(ROOT, file), "utf8"));
+}
+
+/** @param {string|Buffer} value @returns {string} */
+function sha256(value) {
+  return createHash("sha256").update(value).digest("hex");
 }

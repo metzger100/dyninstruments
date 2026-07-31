@@ -8,25 +8,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { readJsonPolicy } from "./quality-policy/read-json-policy.mjs";
+import { CONTRACT_PATH, readPortableCoreContract } from "./quality-policy/portable-core-contract.mjs";
+import { readVersionedProfile } from "./quality-policy/profile-schema.mjs";
 
 const AGENTS_PATH = "AGENTS.md";
 const BEGIN_MARKER = "<!-- BEGIN SHARED_INSTRUCTIONS -->";
 const END_MARKER = "<!-- END SHARED_INSTRUCTIONS -->";
-const GENERIC_SKILLS = ["preflight", "create-plan", "doc-sync", "scan-smells", "grill-me-repo"];
 const GENERIC_RULE_DEFINITIONS_DIR = "tools/check-patterns/generic";
-
-const TIER1_TOOL_MODULES = [
-  "tools/check-patterns.mjs",
-  "tools/check-patterns/shared.mjs",
-  "tools/check-patterns/shared-source-scan.mjs",
-  "tools/check-patterns/shared-suppressions.mjs",
-  "tools/check-patterns/ast-utils.mjs",
-  "tools/check-patterns/duplicate-utils.mjs",
-  "tools/check-patterns/atomicity-parser.mjs",
-  "tools/check-patterns/rules.mjs",
-  "tools/check-patterns/rule-policy.mjs"
-];
+const TEXT_EXTENSIONS = new Set([".js", ".mjs", ".json", ".md", ".yml", ".yaml", ".toml"]);
 
 /** @typedef {{ target: string, token: string }} GenericSurfaceFinding */
 /** @typedef {{ ok: boolean, checkedTargets: number, findings: number, warn: boolean }} GenericSurfaceSummary */
@@ -48,7 +37,7 @@ export function runGenericSurfaceCheck(options = {}) {
   for (const target of targets) {
     const haystack = scanContent(target).toLowerCase();
     for (const token of tokens) {
-      if (haystack.includes(token.toLowerCase())) findings.push({ target: target.name, token });
+      if (containsToken(haystack, token)) findings.push({ target: target.name, token });
     }
   }
 
@@ -65,6 +54,14 @@ export function runGenericSurfaceCheck(options = {}) {
   return { summary, findings };
 }
 
+/** @param {string} haystack @param {string} token @returns {boolean} */
+function containsToken(haystack, token) {
+  const loweredToken = token.toLowerCase();
+  if (!/\.(?:js|mjs|json|py)$/.test(loweredToken)) return haystack.includes(loweredToken);
+  const escaped = loweredToken.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(?:^|[^a-z0-9])${escaped}(?![a-z0-9])`, "i").test(haystack);
+}
+
 /** @param {GenericSurfaceFinding[]} findings @param {GenericSurfaceSummary} summary @param {boolean} warn @returns {void} */
 function printFindings(findings, summary, warn) {
   const prefix = warn ? "[generic-surface-warn]" : "[generic-surface]";
@@ -78,7 +75,12 @@ function printFindings(findings, summary, warn) {
 
 /** @param {string} root @returns {string[]} */
 function loadTokens(root) {
-  const data = readJsonPolicy(path.join(root, "tools/quality-policy/generic-tokens.json"));
+  const data = readVersionedProfile(path.join(root, "tools/quality-policy/generic-tokens.json"), [
+    "note",
+    "projectTokens",
+    "domainTokens",
+    "hostTokens"
+  ]);
   return [...data.projectTokens, ...data.domainTokens, ...data.hostTokens];
 }
 
@@ -87,30 +89,72 @@ function collectTargets(root, patternEngineOnly) {
   /** @type {ScanTarget[]} */
   const targets = [];
 
+  const manifestPaths = loadManifestPaths(root);
+  const selected = manifestPaths.filter((relativePath) => {
+    if (!TEXT_EXTENSIONS.has(path.extname(relativePath).toLowerCase())) return false;
+    return (
+      !patternEngineOnly ||
+      relativePath === "tools/check-patterns.mjs" ||
+      relativePath.startsWith("tools/check-patterns/")
+    );
+  });
+  for (const relativePath of selected) {
+    const absolutePath = path.join(root, relativePath);
+    const content = fs.readFileSync(absolutePath, "utf8");
+    targets.push({
+      name: relativePath,
+      content,
+      genericDefinitions: relativePath.startsWith(`${GENERIC_RULE_DEFINITIONS_DIR}/`)
+    });
+  }
+
   if (!patternEngineOnly) {
+    const agentsPath = path.join(root, AGENTS_PATH);
     targets.push({
       name: "AGENTS.md#SHARED_INSTRUCTIONS",
-      content: extractSharedInstructionsBlock(fs.readFileSync(path.join(root, AGENTS_PATH), "utf8"))
+      content: extractSharedInstructionsBlock(fs.readFileSync(agentsPath, "utf8"))
     });
-
-    for (const skill of GENERIC_SKILLS) {
-      const rel = `.agents/skills/${skill}/SKILL.md`;
-      targets.push({ name: rel, content: fs.readFileSync(path.join(root, rel), "utf8") });
-    }
-  }
-
-  for (const rel of TIER1_TOOL_MODULES) {
-    targets.push({ name: rel, content: fs.readFileSync(path.join(root, rel), "utf8") });
-  }
-
-  const genericRulesDir = path.join(root, GENERIC_RULE_DEFINITIONS_DIR);
-  for (const entry of fs.readdirSync(genericRulesDir, { withFileTypes: true })) {
-    if (!entry.isFile() || !entry.name.endsWith(".mjs")) continue;
-    const rel = `${GENERIC_RULE_DEFINITIONS_DIR}/${entry.name}`;
-    targets.push({ name: rel, content: fs.readFileSync(path.join(root, rel), "utf8"), genericDefinitions: true });
   }
 
   return targets;
+}
+
+/** @param {string} root @returns {string[]} */
+function loadManifestPaths(root) {
+  const contractPath = path.join(root, CONTRACT_PATH);
+  if (fs.existsSync(contractPath)) return readPortableCoreContract(root).mandatoryPaths;
+  return discoverFallbackPatternPaths(root);
+}
+
+/** @param {string} root @returns {string[]} */
+function discoverFallbackPatternPaths(root) {
+  const patternRoot = path.join(root, "tools", "check-patterns");
+  if (!fs.existsSync(patternRoot)) return [];
+  /** @type {string[]} */
+  const discovered = [];
+  /** @param {string} directory */
+  function visit(directory) {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const absolutePath = path.join(directory, entry.name);
+      if (entry.isDirectory()) visit(absolutePath);
+      else if (entry.isFile() && TEXT_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
+        discovered.push(path.relative(root, absolutePath).replaceAll(path.sep, "/"));
+      }
+    }
+  }
+  visit(patternRoot);
+  const runnerPath = path.join(root, "tools", "check-patterns.mjs");
+  if (fs.existsSync(runnerPath)) discovered.push(path.relative(root, runnerPath).replaceAll(path.sep, "/"));
+  const skillsRoot = path.join(root, ".agents", "skills");
+  if (fs.existsSync(skillsRoot)) {
+    for (const entry of fs.readdirSync(skillsRoot, { withFileTypes: true })) {
+      const skillPath = path.join(skillsRoot, entry.name, "SKILL.md");
+      if (entry.isDirectory() && fs.existsSync(skillPath)) {
+        discovered.push(path.relative(root, skillPath).replaceAll(path.sep, "/"));
+      }
+    }
+  }
+  return [...new Set(discovered)].sort();
 }
 
 /** @param {ScanTarget} target @returns {string} */
@@ -134,7 +178,7 @@ export function runGenericSurfaceCheckCli(argv = process.argv.slice(2)) {
   const warn = argv.includes("--warn");
   const patternEngineOnly = argv.includes("--pattern-engine-only");
   const { summary } = runGenericSurfaceCheck({ root: process.cwd(), warn, patternEngineOnly, print: true });
-  process.exit(summary.ok ? 0 : 1);
+  process.exitCode = summary.ok ? 0 : 1;
 }
 
 /** @returns {boolean} */

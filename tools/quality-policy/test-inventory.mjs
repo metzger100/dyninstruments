@@ -4,45 +4,38 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { readJsonPolicy } from "./read-json-policy.mjs";
+import { readVersionedProfile } from "./profile-schema.mjs";
 
 const root = process.cwd();
-const inventoryPath = path.join(root, "tools/quality-policy/test-inventory.json");
-const exceptionBaselinePath = path.join(root, "tools/quality-policy/test-exception-baseline.json");
 const CAPTURED_EXCEPTION_BASELINE_SHA256 = "1d4965b3294f15ac402063c2bbb706647059aa2c0922e48352bb81e86ab049d8";
 const ALLOWED_CLASSIFICATIONS = new Set(["strict", "harness-fragment", "split-spec-fragment", "fixture"]);
 const NON_STRICT_CLASSIFICATIONS = new Set(["harness-fragment", "split-spec-fragment", "fixture"]);
 const FIXTURE_ROOT = "tests/tools/lint-fixtures/";
 const FIXTURE_OWNER = "tests/tools/quality-owners.test.js";
-// tests/tools/vitest-allow-only.proof.test.js momentarily materializes one seeded `.only` file
-// per configured project to prove Vitest's allowOnly:false config rejects it, then deletes it.
-// Excluding these exact paths avoids a real race against a concurrently running scan of this
-// same set (this checker's own "real repo" self-test included).
-const TRANSIENT_ALLOW_ONLY_PROOF_FILES = new Set([
-  "tests/tools/dyni-focused-direct.proof.test.js",
-  "tests/tools/dyni-focused-node.proof.test.js",
-  "tests/contract/dyni-focused-contract.proof.test.js",
-  "tests/runtime/dyni-focused-dom.proof.test.js"
-]);
 
-/** @returns {void} */
-function runTestInventoryCheckCli() {
+/** @param {{root?: string}} [options] @returns {{ok: boolean, errors: string[], entryCount: number}} */
+export function runTestInventoryCheck(options = {}) {
+  const projectRoot = options.root || root;
+  const projectPolicy = readVersionedProfile(
+    path.join(projectRoot, "tools/quality-policy/project-test-inventory-policy.json"),
+    ["baselinePackageName", "transientAllowOnlyProofFiles"]
+  );
   let inventory;
   let exceptionBaseline;
   try {
-    inventory = readJsonPolicy(inventoryPath);
-    exceptionBaseline = readJsonPolicy(exceptionBaselinePath);
+    inventory = readJsonPolicy(path.join(projectRoot, "tools/quality-policy/test-inventory.json"));
+    exceptionBaseline = readJsonPolicy(path.join(projectRoot, "tools/quality-policy/test-exception-baseline.json"));
   } catch (error) {
-    console.error(/** @type {Error} */ (error).message);
-    process.exit(1);
+    return { ok: false, errors: [/** @type {Error} */ (error).message], entryCount: 0 };
   }
   const entries = inventory.entries || {};
-  const liveFiles = collectLiveTestFiles();
+  const liveFiles = collectLiveTestFiles(projectRoot);
   /** @type {string[]} */
   const errors = [];
 
   checkExceptionBaselineSchema(exceptionBaseline, errors);
   checkExceptionBaselineLiveness(exceptionBaseline.entries, liveFiles, errors);
-  checkImmutableExceptionBaseline(errors);
+  checkImmutableExceptionBaseline(projectRoot, projectPolicy, errors);
   checkNoGlobCatchAllKeys(entries, errors);
   checkInventoryCompleteness(entries, liveFiles, errors);
   if (errors.length === 0) {
@@ -50,18 +43,24 @@ function runTestInventoryCheckCli() {
     checkExceptionProvenance(entries, exceptionBaseline.entries, errors);
     checkHarnessFragmentEntries(entries, liveFiles, errors);
     checkSplitSpecFragmentEntries(entries, liveFiles, errors);
-    checkFixtureEntries(entries, liveFiles, errors);
-    checkTypecheckSuppressions(entries, errors);
+    checkFixtureEntries(entries, liveFiles, projectRoot, errors);
+    checkTypecheckSuppressions(entries, projectRoot, errors);
   }
 
-  if (errors.length > 0) {
-    for (const message of errors) console.error(message);
-    console.error(`\ntest inventory check failed: ${errors.length} problem(s).`);
-    process.exit(1);
-  }
+  return { ok: errors.length === 0, errors, entryCount: Object.keys(entries).length };
+}
 
-  console.log(`Test inventory check passed: ${Object.keys(entries).length} classified test files.`);
-  console.log(`SUMMARY_JSON=${JSON.stringify({ ok: true, entryCount: Object.keys(entries).length })}`);
+/** @returns {void} */
+function runTestInventoryCheckCli() {
+  const result = runTestInventoryCheck();
+  if (!result.ok) {
+    for (const message of result.errors) console.error(message);
+    console.error(`\ntest inventory check failed: ${result.errors.length} problem(s).`);
+    process.exitCode = 1;
+    return;
+  }
+  console.log(`Test inventory check passed: ${result.entryCount} classified test files.`);
+  console.log(`SUMMARY_JSON=${JSON.stringify(result)}`);
 }
 
 /** @param {any} entries @param {Set<string>} live @param {string[]} out */
@@ -103,17 +102,21 @@ function checkSplitSpecFragmentEntries(data, live, out) {
  * @returns {string[]}
  */
 export function discoverExecutableTestHelpers(projectRoot = process.cwd()) {
+  const profilePath = path.join(projectRoot, "tools/quality-policy/project-test-inventory-policy.json");
+  const profile = fs.existsSync(profilePath) ? readJsonPolicy(profilePath) : {};
+  const transient = new Set(profile.transientAllowOnlyProofFiles || []);
   return collectJavaScriptFiles(path.join(projectRoot, "tests"))
     .map((file) => path.relative(projectRoot, file).replaceAll(path.sep, "/"))
-    .filter((rel) => !rel.startsWith(FIXTURE_ROOT) && !TRANSIENT_ALLOW_ONLY_PROOF_FILES.has(rel))
+    .filter((rel) => !rel.startsWith(FIXTURE_ROOT) && !transient.has(rel))
     .sort();
 }
 
 /** @returns {Set<string>} */
-function collectLiveTestFiles() {
+/** @param {string} projectRoot @returns {Set<string>} */
+function collectLiveTestFiles(projectRoot) {
   const files = new Set();
-  collectJavaScriptFiles(path.join(root, "tests")).forEach(function (file) {
-    files.add(path.relative(root, file).replaceAll(path.sep, "/"));
+  collectJavaScriptFiles(path.join(projectRoot, "tests")).forEach(function (file) {
+    files.add(path.relative(projectRoot, file).replaceAll(path.sep, "/"));
   });
   return files;
 }
@@ -194,13 +197,14 @@ function checkExceptionBaselineSchema(data, out) {
   }
 }
 
-/** @param {string[]} out */
-function checkImmutableExceptionBaseline(out) {
-  const packagePath = path.join(root, "package.json");
+/** @param {string} projectRoot @param {any} projectPolicy @param {string[]} out */
+function checkImmutableExceptionBaseline(projectRoot, projectPolicy, out) {
+  const packagePath = path.join(projectRoot, "package.json");
   if (!fs.existsSync(packagePath)) return;
   const packageJson = readJsonPolicy(packagePath);
-  if (packageJson.name !== "dyninstruments") return;
+  if (packageJson.name !== projectPolicy.baselinePackageName) return;
 
+  const exceptionBaselinePath = path.join(projectRoot, "tools/quality-policy/test-exception-baseline.json");
   const actualDigest = createHash("sha256").update(fs.readFileSync(exceptionBaselinePath)).digest("hex");
   if (actualDigest !== CAPTURED_EXCEPTION_BASELINE_SHA256) {
     out.push(
@@ -253,10 +257,10 @@ function checkTemporaryDebtMetadata(relativePath, entry, out) {
   }
 }
 
-/** @param {any} data @param {string[]} out */
-function checkTypecheckSuppressions(data, out) {
+/** @param {any} data @param {string} projectRoot @param {string[]} out */
+function checkTypecheckSuppressions(data, projectRoot, out) {
   for (const [relativePath, entry] of Object.entries(data)) {
-    const source = fs.readFileSync(path.join(root, relativePath), "utf8");
+    const source = fs.readFileSync(path.join(projectRoot, relativePath), "utf8");
     if (!/^\s*\/\/\s*@ts-nocheck\b/m.test(source)) continue;
     if (entry.classification !== "harness-fragment" && entry.classification !== "split-spec-fragment") {
       out.push(`Typecheck suppression '@ts-nocheck' is not allowed for '${relativePath}' (${entry.classification}).`);
@@ -264,8 +268,8 @@ function checkTypecheckSuppressions(data, out) {
   }
 }
 
-/** @param {any} data @param {Set<string>} live @param {string[]} out */
-function checkFixtureEntries(data, live, out) {
+/** @param {any} data @param {Set<string>} live @param {string} projectRoot @param {string[]} out */
+function checkFixtureEntries(data, live, projectRoot, out) {
   const fixtures = Object.entries(data).filter(([, entry]) => entry.classification === "fixture");
 
   for (const [relativePath, entry] of fixtures) {
@@ -282,7 +286,7 @@ function checkFixtureEntries(data, live, out) {
     if (!live.has(entry.ownerTest)) {
       out.push(`Fixture entry '${relativePath}' names a nonexistent owner test '${entry.ownerTest}'.`);
     } else {
-      const ownerSource = fs.readFileSync(path.join(root, entry.ownerTest), "utf8");
+      const ownerSource = fs.readFileSync(path.join(projectRoot, entry.ownerTest), "utf8");
       if (!ownerSource.includes(relativePath)) {
         out.push(`Fixture entry '${relativePath}' is not referenced by owner test '${entry.ownerTest}'.`);
       }

@@ -76,4 +76,12 @@ if [[ ! -x "$binary" || ! -f "$verified_marker" ]]; then
   exit 1
 fi
 
+workflow_dir=".github/workflows"
+if [[ -d "$workflow_dir" ]]; then
+  mapfile -t workflow_files < <(find "$workflow_dir" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) -print | sort)
+  if (( ${#workflow_files[@]} > 0 )); then
+    exec "$binary" "${actionlint_args[@]}" "${workflow_files[@]}"
+  fi
+fi
+
 exec "$binary" "${actionlint_args[@]}"

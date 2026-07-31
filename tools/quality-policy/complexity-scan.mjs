@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Linter } from "eslint";
 import { STRICT_COMPLEXITY_RULES, STRICT_LIMITS } from "./eslint-complexity-config.mjs";
-import { readJsonPolicy } from "./read-json-policy.mjs";
+import { readVersionedProfile } from "./profile-schema.mjs";
 
 export { STRICT_LIMITS };
 
@@ -16,11 +16,6 @@ export { STRICT_LIMITS };
  * @property {number} limit
  */
 /** @typedef {(child: any, hint: string | null, childParentPath: string) => void} FunctionVisitor */
-
-const DEFAULT_SCOPE = {
-  productionRoots: ["config", "runtime", "cluster", "shared", "widgets"],
-  entrypoints: ["plugin.js", "plugin.mjs"]
-};
 
 const FUNCTION_TYPES = new Set(["FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression"]);
 
@@ -47,8 +42,8 @@ export function collectProductionFiles(root) {
 /** @param {string} root @returns {{ productionRoots: string[], entrypoints: string[] }} */
 export function readProjectComplexityScope(root) {
   const scopePath = path.join(root, "tools/quality-policy/project-complexity-scope.json");
-  if (!fs.existsSync(scopePath)) return DEFAULT_SCOPE;
-  const scope = readJsonPolicy(scopePath);
+  if (!fs.existsSync(scopePath)) throw new Error("Missing project complexity scope profile.");
+  const scope = readVersionedProfile(scopePath, ["productionRoots", "entrypoints"]);
   if (!Array.isArray(scope.productionRoots) || !Array.isArray(scope.entrypoints)) {
     throw new Error("Invalid project complexity scope: expected productionRoots and entrypoints arrays.");
   }
@@ -251,4 +246,18 @@ export function scanRepository(root) {
     findings.push(...scanFile(file, root));
   }
   return findings;
+}
+
+/** @param {{root?: string, print?: boolean}} [options] @returns {{summary: {ok: boolean, checkedFiles: number, findings: number}, findings: ComplexityFinding[]}} */
+export function runComplexityScan(options = {}) {
+  const scanRoot = path.resolve(options.root || process.cwd());
+  const files = collectProductionFiles(scanRoot);
+  const findings = scanRepository(scanRoot);
+  const summary = { ok: findings.length === 0, checkedFiles: files.length, findings: findings.length };
+  if (options.print !== false) {
+    for (const finding of findings)
+      console.error(`${finding.file}:${finding.identity} ${finding.metric}=${finding.value}`);
+    console.log("SUMMARY_JSON=" + JSON.stringify(summary));
+  }
+  return { summary, findings };
 }

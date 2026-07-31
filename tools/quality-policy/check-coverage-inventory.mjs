@@ -1,65 +1,85 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { createHash } from "node:crypto";
 import { readJsonPolicy } from "./read-json-policy.mjs";
+import { readVersionedProfile } from "./profile-schema.mjs";
 import { readCoverageSummary } from "./coverage-summary-adapter.mjs";
 
-const root = process.cwd();
-const floorsPath = path.join(root, "tools/quality-policy/coverage-floors.json");
-const baselinePath = path.join(root, "tools/quality-policy/coverage-floor-baseline.json");
-const summaryPath = path.join(root, "coverage/coverage-summary.json");
+let root = process.cwd();
+let floorsPath = path.join(root, "tools/quality-policy/coverage-floors.json");
+let baselinePath = path.join(root, "tools/quality-policy/coverage-floor-baseline.json");
+let summaryPath = path.join(root, "coverage/coverage-summary.json");
 const DEFAULT_LINES = 80;
 const DEFAULT_BRANCHES = 65;
-const policyPath = path.join(root, "tools/quality-policy/project-coverage-inventory-policy.json");
-const DEFAULT_PROJECT_POLICY = {
-  productionRoots: ["config", "runtime", "cluster", "shared", "widgets"],
-  legacyBelowDefaultFloors: {}
-};
 
+/** @type {any} */
 let floors;
+/** @type {any} */
 let baseline;
 /** @type {any} */
 let policy;
-try {
-  floors = readJsonPolicy(floorsPath);
-  baseline = readJsonPolicy(baselinePath);
-  policy = fs.existsSync(policyPath) ? readJsonPolicy(policyPath) : DEFAULT_PROJECT_POLICY;
-} catch (error) {
-  console.error(/** @type {Error} */ (error).message);
-  process.exit(1);
-}
-const liveFiles = collectLiveProductionFiles();
-const projectCoveragePolicy = policy;
+/** @type {any} */
+let projectCoveragePolicy;
 /** @type {string[]} */
-const errors = [];
+let errors;
 
-checkTopLevelSchema(floors, "coverage inventory", errors);
-checkTopLevelSchema(baseline, "coverage floor baseline", errors);
-checkInventoryCompleteness(floors, liveFiles, errors);
-checkEntrySchema(floors, errors);
-checkImmutableBaselineCapture(policy, errors);
-checkBaselineSchema(baseline, floors, errors);
-checkFloorPolicy(floors, baseline, errors);
-
-if (errors.length === 0) {
-  checkMeasuredFloors(floors, errors);
-  checkContractOwnedEntries(floors, errors);
+/** @param {{root?: string, print?: boolean}} [options] @returns {{summary: {ok: boolean, entryCount: number}, errors: string[]}} */
+export function runCoverageInventoryCheck(options = {}) {
+  root = path.resolve(options.root || process.cwd());
+  floorsPath = path.join(root, "tools/quality-policy/coverage-floors.json");
+  baselinePath = path.join(root, "tools/quality-policy/coverage-floor-baseline.json");
+  summaryPath = path.join(root, "coverage/coverage-summary.json");
+  const policyPath = path.join(root, "tools/quality-policy/project-coverage-inventory-policy.json");
+  errors = [];
+  try {
+    floors = readJsonPolicy(floorsPath);
+    baseline = readJsonPolicy(baselinePath);
+    policy = readVersionedProfile(policyPath, [
+      "baselinePackageName",
+      "baselineSha256",
+      "productionRoots",
+      "entrypoints",
+      "legacyBelowDefaultFloors"
+    ]);
+  } catch (error) {
+    errors.push(/** @type {Error} */ (error).message);
+    return reportResult(options.print !== false);
+  }
+  projectCoveragePolicy = policy;
+  const liveFiles = collectLiveProductionFiles();
+  checkTopLevelSchema(floors, "coverage inventory", errors);
+  checkTopLevelSchema(baseline, "coverage floor baseline", errors);
+  checkInventoryCompleteness(floors, liveFiles, errors);
+  checkEntrySchema(floors, errors);
+  checkImmutableBaselineCapture(policy, errors);
+  checkBaselineSchema(baseline, floors, errors);
+  checkFloorPolicy(floors, baseline, errors);
+  if (errors.length === 0) {
+    checkMeasuredFloors(floors, errors);
+    checkContractOwnedEntries(floors, errors);
+  }
+  return reportResult(options.print !== false);
 }
 
-if (errors.length > 0) {
-  for (const message of errors) console.error(message);
-  console.error(`\ncoverage inventory check failed: ${errors.length} problem(s).`);
-  process.exit(1);
+/** @param {boolean} print @returns {{summary: {ok: boolean, entryCount: number}, errors: string[]}} */
+function reportResult(print) {
+  const entryCount = Object.keys(floors?.entries || {}).length;
+  const summary = { ok: errors.length === 0, entryCount };
+  if (print) {
+    for (const message of errors) console.error(message);
+    if (summary.ok) console.log(`Coverage inventory check passed: ${entryCount} classified production files.`);
+    else console.error(`\ncoverage inventory check failed: ${errors.length} problem(s).`);
+    console.log("SUMMARY_JSON=" + JSON.stringify(summary));
+  }
+  return { summary, errors };
 }
-
-console.log(`Coverage inventory check passed: ${Object.keys(floors.entries).length} classified production files.`);
-console.log(`SUMMARY_JSON=${JSON.stringify({ ok: true, entryCount: Object.keys(floors.entries).length })}`);
 
 /** @returns {Set<string>} */
 function collectLiveProductionFiles() {
   const files = new Set();
-  for (const entrypoint of ["plugin.js", "plugin.mjs"]) {
+  for (const entrypoint of policy.entrypoints || []) {
     if (fs.existsSync(path.join(root, entrypoint))) files.add(entrypoint);
   }
   for (const relativeRoot of policy.productionRoots || []) {
@@ -284,4 +304,8 @@ function checkContractOwnedEntries(data, out) {
       out.push(`Contract-owned entry '${relativePath}' is missing a 'reason'.`);
     }
   }
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+  process.exitCode = runCoverageInventoryCheck().summary.ok ? 0 : 1;
 }

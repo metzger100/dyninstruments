@@ -1,5 +1,5 @@
 {
-  "note": "Generic AvNav plugin.json base cases and Dyninstruments layouts-profile cases used to prove the base/profile schema composition in schemas/avnav-plugin-base.schema.json and schemas/plugin.schema.json. Polar Recorder now publishes the same schema base/profile split with a byte-identical genericBase corpus, so the genericBase section here is the shared upstream corpus rather than a placeholder awaiting adoption; dynLayoutsProfile stays local to this repository.",
+  "note": "Generic AvNav plugin.json base cases and local layouts-profile cases prove the base/profile schema composition in schemas/avnav-plugin-base.schema.json and schemas/plugin.schema.json. The genericBase section is the reusable base corpus; dynLayoutsProfile stays local to this repository.",
   "genericBase": {
     "valid": [{}, { "anyKey": "anyValue" }, { "version": "1.2.3" }],
     "invalid": [[], "not-an-object", null, 42, true]
@@ -22,7 +22,12 @@
       { "layouts": [{ "name": "", "file": "layouts/a.json" }] },
       { "layouts": [{ "name": "A", "file": "bad-path.json" }] },
       { "layouts": [{ "name": "A", "file": "layouts/a.json" }], "extra": 1 },
-      { "layouts": [{ "name": "A", "file": "layouts/a.json" }, { "name": "A", "file": "layouts/a.json" }] }
+      {
+        "layouts": [
+          { "name": "A", "file": "layouts/a.json" },
+          { "name": "A", "file": "layouts/a.json" }
+        ]
+      }
     ]
   }
 }

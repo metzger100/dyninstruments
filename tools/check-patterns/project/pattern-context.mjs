@@ -1,12 +1,17 @@
 import path from "node:path";
 import { getRoot } from "../shared.mjs";
-import { readJsonPolicy } from "../../quality-policy/read-json-policy.mjs";
+import { readVersionedProfile } from "../../quality-policy/profile-schema.mjs";
 
-/** @typedef {{clusterPascalPrefixes: string[], renderPropObjectNames: string[], externalFallbackContextHints: string[]}} ProjectPatternContext */
+/** @typedef {{clusterPascalPrefixes: string[], renderPropObjectNames: string[], externalFallbackContextHints: string[], catchFallbackExceptions: Array<{file: string, line: number, rule: string, owner: string, reason: string}>}} ProjectPatternContext */
 
-/** @returns {ProjectPatternContext} */
-export function getProjectPatternContext() {
-  return readJsonPolicy(path.join(getRoot(), "tools/quality-policy/project-pattern-context.json"));
+/** @param {string} [root] @returns {ProjectPatternContext} */
+export function getProjectPatternContext(root = getRoot()) {
+  return readVersionedProfile(path.join(root, "tools/quality-policy/project-pattern-context.json"), [
+    "clusterPascalPrefixes",
+    "renderPropObjectNames",
+    "externalFallbackContextHints",
+    "catchFallbackExceptions"
+  ]);
 }
 
 /** @param {string} maskedText @param {number} index @returns {boolean} */

@@ -1,13 +1,15 @@
 import path from "node:path";
 import { getRoot } from "./shared.mjs";
-import { readJsonPolicy } from "../quality-policy/read-json-policy.mjs";
+import { readVersionedProfile } from "../quality-policy/profile-schema.mjs";
 
 /** @typedef {import("./shared.mjs").Rule} Rule */
 /** @typedef {import("./shared.mjs").RuleDefinition} RuleDefinition */
 
 /** @returns {Record<string, {scope: {include: string[], exclude?: string[]}, remedy: string}>} */
 function getPolicies() {
-  const data = readJsonPolicy(path.join(getRoot(), "tools/quality-policy/project-pattern-scopes.json"));
+  const data = readVersionedProfile(path.join(getRoot(), "tools/quality-policy/project-pattern-scopes.json"), [
+    "rules"
+  ]);
   return data.rules;
 }
 

@@ -20,6 +20,9 @@ also keep `README.md` current in the same task.
   is adding an entry to `TABLEOFCONTENTS.md`.
 - Default completion gate is `npm run check:all`; use `npm run check:fast`, `npm run check:core`, or `npm test` for
   faster iteration feedback, but fix all failures and review all warnings before finishing.
+- Contributor-visible quality workflow changes must document `check:shared-core`, blocking genericness, the zero-
+  suppression scan, deterministic anonymous attestation, and the isolated-copy expectation in the README and quality
+  gate convention.
 - The Touchpoint Matrix below maps each change type (component registry, cluster/kind, gauge renderer, lifecycle,
   helpers/formatter contract, CSS/theming, layouts, install/release, config surface, requirements, dev workflow, new doc
   file) to the minimum docs that must be updated.
@@ -71,6 +74,8 @@ For the full command graph and checker ownership map, see
 `check:core` includes:
 
 - `npm run check:standard` (full-repository Prettier, ESLint, Stylelint, actionlint, jscpd)
+- `npm run check:shared-core`, `npm run check:standalone-boundary`, and `npm run check:suppressions` (signed portable
+  inventory, repository-local path/reference proof, and independent zero-suppression scan)
 - `npm run typecheck` (strict no-emit source and test scopes in `tsconfig.checkjs.json` and `tsconfig.tests.json`)
 - `npm run package:check` (Ajv schema validation plus bootstrap-derived registry closure, release manifest, and staging
   contract tests)
@@ -178,6 +183,12 @@ complexity check (`mapper-output-complexity`: block above 8 properties), the pro
 (`catch-fallback-without-suppression`, `css-js-default-duplication`, `editable-threshold-missing-internal`), plus
 blocking suppression validation (`invalid-lint-suppression`). Responsive ownership checks are part of the same gate:
 `responsive-profile-ownership` and `responsive-layout-hard-floor` both block new drift.
+
+The portable-core contract and exact-byte manifest are checked before the remaining core work. Tier 2 profiles use a
+versioned schema envelope and are rejected when their version or fields are unknown. `npm run check:generic-surface`
+scans the contract-derived Tier 1 text surface using the local token profile; `npm run portable-core:attest` emits only
+the contract version, manifest digest, and sorted entry digests. These checks must remain runnable from an isolated copy
+containing only the repository.
 
 The unsafe DOM-sink rule blocks all statically named `on*` property/attribute assignments, including names resolved
 through constant aliases, concatenations, or template expressions. Allowances require the canonical enclosing function,

@@ -27,6 +27,10 @@ function createWorkspace() {
   writeFile(path.join(tempRoot, "tests/example.test.js"), "// example\n");
   writeFile(path.join(tempRoot, "tests/helper.js"), "// helper\n");
   writeJson(path.join(tempRoot, "tools/quality-policy/test-exception-baseline.json"), { entries: {} });
+  fs.copyFileSync(
+    path.join(root, "tools/quality-policy/project-test-inventory-policy.json"),
+    path.join(tempRoot, "tools/quality-policy/project-test-inventory-policy.json")
+  );
   return tempRoot;
 }
 

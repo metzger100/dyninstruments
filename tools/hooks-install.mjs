@@ -45,5 +45,5 @@ export function runHooksInstall(options = {}) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const result = runHooksInstall();
-  process.exit(result.ok ? 0 : 1);
+  process.exitCode = result.ok ? 0 : 1;
 }

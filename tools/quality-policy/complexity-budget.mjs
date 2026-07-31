@@ -17,7 +17,7 @@ try {
   historical = readJsonPolicy(historicalPath);
 } catch (error) {
   console.error(/** @type {Error} */ (error).message);
-  process.exit(1);
+  process.exitCode = 1;
 }
 if (!baseline || typeof baseline !== "object" || Array.isArray(baseline)) {
   errors.push("Invalid complexity baseline: expected an object.");
@@ -73,11 +73,11 @@ for (const [key, entry] of baselineByKey) {
 if (errors.length > 0) {
   for (const message of errors) console.error(message);
   console.error(`\ncomplexity budget check failed: ${errors.length} problem(s).`);
-  process.exit(1);
+  process.exitCode = 1;
+} else {
+  console.log(`Complexity budget check passed: ${baselineByKey.size} tracked baseline entries, 0 new violations.`);
+  console.log(`SUMMARY_JSON=${JSON.stringify({ ok: true, baselineEntryCount: baselineByKey.size })}`);
 }
-
-console.log(`Complexity budget check passed: ${baselineByKey.size} tracked baseline entries, 0 new violations.`);
-console.log(`SUMMARY_JSON=${JSON.stringify({ ok: true, baselineEntryCount: baselineByKey.size })}`);
 
 /** @param {any} entry @returns {string} */
 function entryKey(entry) {

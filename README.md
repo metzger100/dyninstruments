@@ -239,13 +239,18 @@ dyninstruments is developed with AI-assisted tooling. See [CONTRIBUTING.md](CONT
 architecture, coding standards, and release process.
 
 This repository is a viewer-profile quality role model: its shared quality-gate meanings (`check:fast`, `check:core`,
-`check:all`) align with sibling AvNav plugin repositories, while its Vitest/coverage/complexity ratchets stay
+`check:all`) are defined by the local command graph, while its Vitest/coverage/complexity ratchets remain
 Dyninstruments-specific legacy debt tracking, not a blank-plugin starter template.
 
 Use Node 26 with npm 12.0.1. Run `npm run setup` once; it installs the locked dependencies and provisions the
 checksum-verified actionlint binary outside `node_modules`. An optional `.codex/config.toml` provides portable Codex CLI
 defaults (project-doc pickup, sandbox/approval mode, cached web search); it is contributor tooling only and is never
 required to run the quality gates.
+
+The standalone quality-core contract is checked with `npm run check:shared-core`; the blocking genericness check is
+`npm run check:generic-surface`, and `npm run check:suppressions` owns the zero-inline-suppression source scan.
+`npm run portable-core:attest` emits only anonymous contract and content digests for local review. A completed change
+must also pass `npm run check:all` from an isolated copy containing only this repository.
 
 The complete local gate is:
 

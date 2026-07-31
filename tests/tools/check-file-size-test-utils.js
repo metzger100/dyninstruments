@@ -19,6 +19,10 @@ function createWorkspaceManager() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-check-file-size-"));
     tempDirs.push(dir);
 
+    const scopePath = path.join(dir, "tools/quality-policy/project-file-size-scope.json");
+    fs.mkdirSync(path.dirname(scopePath), { recursive: true });
+    fs.copyFileSync(path.resolve(__dirname, "../..", "tools/quality-policy/project-file-size-scope.json"), scopePath);
+
     for (const [rel, content] of Object.entries(files)) {
       const abs = path.join(dir, rel);
       fs.mkdirSync(path.dirname(abs), { recursive: true });

@@ -23,7 +23,13 @@ function writeFile(filePath, content) {
 }
 
 function createWorkspace() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), "dyni-complexity-budget-"));
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-complexity-budget-"));
+  fs.mkdirSync(path.join(tempRoot, "tools/quality-policy"), { recursive: true });
+  fs.copyFileSync(
+    path.join(root, "tools/quality-policy/project-complexity-scope.json"),
+    path.join(tempRoot, "tools/quality-policy/project-complexity-scope.json")
+  );
+  return tempRoot;
 }
 
 /** @param {string} tempRoot @param {any[]} entries @param {any[]} [historicalEntries] */

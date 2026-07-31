@@ -1,15 +1,7 @@
 {
-  "note": "Genericness token owner for the shared-core surface. Byte-identical in both role-model repositories. Matching is case-insensitive against the SHARED_INSTRUCTIONS block, every generic skill file, every Tier 1 tool module's full content, and every generic rule definition's content and rendered semantics.",
-  "projectTokens": [
-    "dyni",
-    "dyninstruments",
-    "dynicomponents",
-    "dyniplugin",
-    "polarrecorder",
-    "polar recorder",
-    "polar.json",
-    "windy"
-  ],
+  "schemaVersion": 1,
+  "note": "Genericness token owner for the portable-core surface. Matching is case-insensitive against the shared instructions block, every generic skill file, every Tier 1 tool module's full content, and every generic rule definition's content and rendered semantics.",
+  "projectTokens": ["dyni", "dyninstruments", "dynicomponents", "dyniplugin", "polar.json", "windy"],
   "domainTokens": [
     "widget",
     "cluster",

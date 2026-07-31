@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 1,
   "clusterPascalPrefixes": [
     "CourseHeading",
     "Environment",
@@ -18,5 +19,105 @@
     "devicePixelRatio",
     "ownerDocument",
     "documentElement"
+  ],
+  "catchFallbackExceptions": [
+    {
+      "file": "cluster/ClusterWidget.js",
+      "line": 206,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "cluster-boundary",
+      "reason": "Host activation errors are reported while the committed shell remains usable."
+    },
+    {
+      "file": "cluster/ClusterWidget.js",
+      "line": 223,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "cluster-boundary",
+      "reason": "Host activation rejections are reported while the committed shell remains usable."
+    },
+    {
+      "file": "cluster/viewmodels/EditRouteViewModel.js",
+      "line": 80,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "route-boundary",
+      "reason": "Host route calculations fail closed to the leg-sum calculation."
+    },
+    {
+      "file": "cluster/viewmodels/EditRouteViewModel.js",
+      "line": 87,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "route-boundary",
+      "reason": "Malformed route points fail closed to the empty summary."
+    },
+    {
+      "file": "plugin.js",
+      "line": 109,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "bootstrap-boundary",
+      "reason": "Bootstrap failures are logged without creating an unhandled browser rejection."
+    },
+    {
+      "file": "runtime/TemporaryHostActionBridgeDiscovery.js",
+      "line": 29,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "dom-boundary",
+      "reason": "Host property enumeration failures are treated as a non-match."
+    },
+    {
+      "file": "runtime/TemporaryHostActionBridgeDiscovery.js",
+      "line": 165,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "dom-boundary",
+      "reason": "Host selector failures are treated as unsupported."
+    },
+    {
+      "file": "runtime/asset-preloader.js",
+      "line": 197,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "asset-boundary",
+      "reason": "Known asset failures are cached as null for widget fallback behavior."
+    },
+    {
+      "file": "runtime/cluster/RouteActivationLatestWins.js",
+      "line": 146,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "route-boundary",
+      "reason": "Activation load failures reject the active request and preserve teardown semantics."
+    },
+    {
+      "file": "runtime/format-runtime.js",
+      "line": 59,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "formatter-boundary",
+      "reason": "Formatter failures use the centralized raw-value fallback."
+    },
+    {
+      "file": "runtime/plugin-bootstrap-core.js",
+      "line": 276,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "bootstrap-boundary",
+      "reason": "Bootstrap failures are logged without creating an unhandled browser rejection."
+    },
+    {
+      "file": "shared/widget-kits/vessel/RegattaTimerAudio.js",
+      "line": 70,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "audio-boundary",
+      "reason": "Unavailable audio construction fails closed without affecting rendering."
+    },
+    {
+      "file": "shared/widget-kits/vessel/RegattaTimerAudio.js",
+      "line": 110,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "audio-boundary",
+      "reason": "Best-effort audio playback cannot interrupt rendering."
+    },
+    {
+      "file": "shared/widget-kits/vessel/RegattaTimerAudio.js",
+      "line": 130,
+      "rule": "catch-fallback-without-suppression",
+      "owner": "audio-boundary",
+      "reason": "Audio teardown failures are intentionally non-fatal."
+    }
   ]
 }

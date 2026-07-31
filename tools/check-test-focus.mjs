@@ -202,5 +202,5 @@ function reportTestFocus(failures, summary) {
 
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
   const result = runTestFocusCheck();
-  process.exit(result.ok ? 0 : 1);
+  process.exitCode = result.ok ? 0 : 1;
 }

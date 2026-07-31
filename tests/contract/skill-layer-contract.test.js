@@ -91,7 +91,7 @@ describe("agent skill layer contract", function () {
       expect(entry.source.length, name + ".source").toBeGreaterThan(0);
       expect(typeof entry.sourceType, name + ".sourceType").toBe("string");
       expect(["vendored-generic", "project-local"], name + ".sourceType").toContain(entry.sourceType);
-      expect(entry.sourceType, name + ".sourceType").not.toBe("sibling-repository");
+      expect(entry.sourceType, name + ".sourceType").not.toBe("remote-source");
       expect(entry.computedHash, name + ".computedHash").toMatch(/^[0-9a-f]+$/);
       expect(entry.computedHash.length, name + ".computedHash length").toBe(SHA256_HEX_LENGTH);
       const skillPath = path.join(root, entry.source, "SKILL.md");

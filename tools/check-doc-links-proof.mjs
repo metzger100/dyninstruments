@@ -15,7 +15,7 @@ import { runDocLinksCheck } from "./check-doc-links.mjs";
  * @returns {string}
  */
 function makeFixtureRoot({ broken }) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-doc-links-proof-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "doc-links-proof-"));
   fs.mkdirSync(path.join(root, "documentation"), { recursive: true });
   fs.mkdirSync(path.join(root, "tools", "quality-policy"), { recursive: true });
   const fileTarget = broken ? "missing-target.md" : "documentation/other.md";

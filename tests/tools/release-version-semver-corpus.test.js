@@ -1,6 +1,8 @@
 const { isValidReleaseVersion, classifyReleaseTag } = require("../../tools/release-version.mjs");
 const corpus = require("../../tools/quality-policy/semver-corpus.json");
 
+expect(corpus.schemaVersion).toBe(1);
+
 describe("tools/release-version.mjs against the shared SemVer corpus", function () {
   it("accepts every valid corpus entry and classifies its prerelease flag correctly", function () {
     corpus.valid.forEach(function (entry) {

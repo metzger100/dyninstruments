@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "historicalExclusionPatterns": ["^releases/", "^exec-plans/completed/"],
+  "gitkeepPaths": ["exec-plans/active/.gitkeep", "releases/.gitkeep"],
+  "rules": [
+    { "pattern": "^package.json$", "owner": "prettier" },
+    { "pattern": "^package-lock.json$", "owner": "prettier" },
+    { "pattern": "^\\.prettierrc.json$", "owner": "prettier" },
+    { "pattern": "^\\.stylelintrc.json$", "owner": "prettier" },
+    { "pattern": "^\\.markdownlint-cli2.jsonc$", "owner": "prettier" },
+    { "pattern": "^jscpd.config.json$", "owner": "prettier" },
+    { "pattern": "^eslint.config.mjs$", "owner": "prettier" },
+    { "pattern": "^tsconfig.checkjs.json$", "owner": "prettier" },
+    { "pattern": "^tsconfig.tests.json$", "owner": "prettier" },
+    { "pattern": "^tsconfig.tools.json$", "owner": "prettier" },
+    { "pattern": "^vitest.config.js$", "owner": "prettier" },
+    { "pattern": "^plugin\\.js$", "owner": "prettier" },
+    { "pattern": "^plugin\\.mjs$", "owner": "prettier" },
+    { "pattern": "^plugin\\.css$", "owner": "prettier" },
+    { "pattern": "^\\.github/workflows/.*\\.yml$", "owner": "prettier" },
+    { "pattern": "^types/.*\\.d\\.ts$", "owner": "prettier" },
+    { "pattern": "^schemas/[^/]+\\.json$", "owner": "prettier" },
+    { "pattern": "^(runtime|cluster|config|shared|widgets|tests|tools)/.*\\.js$", "owner": "prettier" },
+    { "pattern": "^(tools|tests)/.*\\.mjs$", "owner": "prettier" },
+    { "pattern": "^(shared|widgets)/.*\\.css$", "owner": "prettier" },
+    { "pattern": "^tests/css/.*\\.css$", "owner": "prettier" },
+    { "pattern": "^[^/]+\\.md$", "owner": "prettier" },
+    { "pattern": "^documentation/.*\\.md$", "owner": "prettier" },
+    { "pattern": "^\\.agents/skills/.*\\.md$", "owner": "prettier" },
+    { "pattern": "^exec-plans/active/.*\\.md$", "owner": "prettier" },
+    { "pattern": "^\\.githooks/.*\\.md$", "owner": "prettier" },
+    {
+      "pattern": "^plugin\\.json$",
+      "owner": "unsupported",
+      "reason": "Declarative manifest validated by the schema gate",
+      "alternateValidation": "npm run schema:check"
+    },
+    {
+      "pattern": "^layouts/.*\\.json$",
+      "owner": "unsupported",
+      "reason": "User-facing layout data validated by the layout schema",
+      "alternateValidation": "npm run schema:check"
+    },
+    {
+      "pattern": "^tests/layouts/.*\\.json$",
+      "owner": "unsupported",
+      "reason": "Showcase layout fixture asserted by its owning tests",
+      "alternateValidation": "the owning layout test"
+    },
+    {
+      "pattern": "^skills-lock\\.json$",
+      "owner": "unsupported",
+      "reason": "Pinned skill digest manifest; whitespace is a reviewed policy decision",
+      "alternateValidation": "the skill-lock shape/hash contract test"
+    },
+    {
+      "pattern": "^linkinator\\.config\\.json$",
+      "owner": "unsupported",
+      "reason": "Consumed directly by documentation-link tooling",
+      "alternateValidation": "npm run docs:links"
+    },
+    {
+      "pattern": "^tools/quality-policy/.*\\.json$",
+      "owner": "unsupported",
+      "reason": "Policy data read by its owning quality checker",
+      "alternateValidation": "npm run check:core"
+    },
+    {
+      "pattern": "^tools/quality-policy/shared-instructions\\.md$",
+      "owner": "unsupported",
+      "reason": "Extracted byte-for-byte verification artifact; whitespace is part of the checked content",
+      "alternateValidation": "shared-instructions-block contract test"
+    },
+    {
+      "pattern": "^\\.codex/config\\.toml$",
+      "owner": "unsupported",
+      "reason": "TOML configuration without a maintained formatter",
+      "alternateValidation": "reviewed on change"
+    },
+    {
+      "pattern": ".*\\.(zip|woff2|dat)$",
+      "owner": "unsupported",
+      "reason": "Binary asset; not formattable",
+      "alternateValidation": "reviewed on change"
+    },
+    {
+      "pattern": "(^|/)\\.git(ignore|attributes)$|^\\.prettierignore$|^\\.stylelintignore$|^\\.nvmrc$",
+      "owner": "unsupported",
+      "reason": "Plain configuration file without a maintained formatter target",
+      "alternateValidation": "reviewed on change"
+    },
+    {
+      "pattern": "(^|/)\\.githooks/pre-push$|\\.sh$",
+      "owner": "unsupported",
+      "reason": "Shell file without a maintained formatter in this inventory",
+      "alternateValidation": "bash -n syntax check"
+    },
+    {
+      "pattern": "\\.txt$",
+      "owner": "unsupported",
+      "reason": "Vendored license text; not a maintained formatter input",
+      "alternateValidation": "reviewed on change"
+    },
+    {
+      "pattern": "\\.jsonc?$",
+      "owner": "unsupported",
+      "reason": "Configuration data read directly by its owning checker",
+      "alternateValidation": "npm run check:core"
+    }
+  ]
+}

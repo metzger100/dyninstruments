@@ -1,5 +1,6 @@
 {
-  "note": "Shared valid/invalid SemVer corpus, kept data-identical to Polar Recorder's tools/quality-policy/semver-corpus.json so the two independent release-version implementations can never silently diverge on version acceptance or prerelease classification. tests/tools/verified-baseline.test.js runs the real tools/release-version.mjs against every row.",
+  "schemaVersion": 1,
+  "note": "Shared valid/invalid SemVer corpus used to prove version acceptance and prerelease classification.",
   "valid": [
     { "version": "0.0.0", "prerelease": false },
     { "version": "1.0.0", "prerelease": false },

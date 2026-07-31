@@ -6,6 +6,7 @@ const { pathToFileURL } = require("node:url");
 const TOOL_PATH = path.resolve(process.cwd(), "tools/check-generic-surface.mjs");
 
 const GENERIC_TOKENS_FIXTURE = JSON.stringify({
+  schemaVersion: 1,
   projectTokens: ["acme"],
   domainTokens: ["widget"],
   hostTokens: ["hostapi"]

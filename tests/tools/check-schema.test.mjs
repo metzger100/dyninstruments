@@ -18,9 +18,23 @@ function makeFakeRoot() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-schema-check-"));
   fs.mkdirSync(path.join(root, "schemas"), { recursive: true });
   fs.mkdirSync(path.join(root, "layouts"), { recursive: true });
-  for (const name of ["avnav-plugin-base.schema.json", "plugin.schema.json", "layout.schema.json"]) {
+  for (const name of [
+    "avnav-plugin-base.schema.json",
+    "plugin.schema.json",
+    "layout.schema.json",
+    "portable-core-contract.schema.json"
+  ]) {
     fs.copyFileSync(path.join(ROOT, "schemas", name), path.join(root, "schemas", name));
   }
+  fs.mkdirSync(path.join(root, "tools/quality-policy"), { recursive: true });
+  fs.copyFileSync(
+    path.join(ROOT, "tools/quality-policy/project-schema-profile.json"),
+    path.join(root, "tools/quality-policy/project-schema-profile.json")
+  );
+  fs.copyFileSync(
+    path.join(ROOT, "tools/quality-policy/portable-core-contract.json"),
+    path.join(root, "tools/quality-policy/portable-core-contract.json")
+  );
   fs.copyFileSync(path.join(ROOT, "plugin.json"), path.join(root, "plugin.json"));
   return root;
 }

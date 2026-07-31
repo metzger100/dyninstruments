@@ -12,8 +12,8 @@ canonical doc that owns each concern rather than duplicating content.
 
 - This is the only maintained document exempt from the `## Key Details` requirement enforced by
   `tests/contract/documentation-format-contract.test.js`, because its role is routing, not reference content; this
-  section exists for parity with the sibling repository's stricter documentation-format checker, not because the
-  contract requires it here.
+  section exists for compatibility with the repository's stricter documentation-format checker, not because the contract
+  requires it here.
 - The index is organized into 12 top-level categories: Repository Overview, AvNav Plugin API, Architecture, Conventions,
   Creating New Widgets, Module Reference, Gauges & Dials Style Guides, Styling & Theming, Documentation Maintenance,
   Feature-Specific Lookups.

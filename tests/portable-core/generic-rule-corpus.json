@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "rules": [
+    { "id": "absolute-home-path", "clean": "relative/path", "failing": "/home/<user>/path" },
+    { "id": "exec-plan-reference", "clean": "current behavior", "failing": "historical authority label" },
+    { "id": "no-nul-byte", "clean": "plain text", "failing": "encoded NUL fixture" },
+    { "id": "unsafe-html-dom-sink", "clean": "textContent", "failing": "innerHTML assignment" },
+    { "id": "dead-code", "clean": "reachable function", "failing": "unreachable function" },
+    { "id": "console-in-runtime", "clean": "owned logger", "failing": "console.log call" },
+    { "id": "default-truthy-fallback", "clean": "explicit boundary", "failing": "value || fallback" },
+    { "id": "redundant-null-type-guard", "clean": "normalized value", "failing": "redundant null guard" },
+    { "id": "empty-catch", "clean": "reported error", "failing": "empty catch block" },
+    { "id": "premature-legacy-support", "clean": "active contract", "failing": "legacy compatibility branch" },
+    { "id": "unused-fallback", "clean": "used fallback", "failing": "unused fallback" },
+    { "id": "responsive-layout-hard-floor", "clean": "bounded sizing", "failing": "hardcoded floor" },
+    { "id": "canvas-api-typeof-guard", "clean": "trusted canvas", "failing": "typeof canvas method" },
+    { "id": "try-finally-canvas-drawing", "clean": "direct drawing", "failing": "try finally drawing" },
+    { "id": "todo-without-owner", "clean": "TODO(owner, date)", "failing": "TODO without owner" },
+    { "id": "duplicate-functions", "clean": "single implementation", "failing": "duplicate function" },
+    { "id": "duplicate-block-clones", "clean": "single block", "failing": "duplicate block" },
+    { "id": "catch-fallback-without-suppression", "clean": "documented boundary", "failing": "catch fallback" },
+    { "id": "internal-contract-fallback", "clean": "strict internal call", "failing": "internal fallback" },
+    { "id": "framework-method-typeof-guard", "clean": "direct method", "failing": "typeof framework method" },
+    { "id": "invalid-lint-suppression", "clean": "no directive", "failing": "invalid suppression" }
+  ]
+}

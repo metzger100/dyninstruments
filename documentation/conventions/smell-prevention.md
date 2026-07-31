@@ -12,19 +12,14 @@ This document defines smell rules and enforcement ownership. Blocking checks mus
 - Severity model: `block` findings must pass locally before push; `warn` is allowed only for exploratory/rollout rules
   not yet promoted, and each warn-only rule promotes to `block` once its repo warning count reaches zero (verified by
   checker output).
-- Generic inline suppression syntax: `// plugin-lint-disable-next-line <rule-name> -- <reason>` or the block form
-  `/* plugin-lint-disable-line <rule-name> -- <reason> */`; it must name exactly one rule and always include a reason
-  after `--`.
-- Generic `plugin-lint-disable-*` directives are forbidden in production source (`plugin.js`, `config/`, `runtime/`,
-  `cluster/`, `shared/`, `widgets/`); the only allowed production exceptions are a canonical-owner allowlist entry in
-  the rule's own implementation, the validated boundary marker (below, `catch-fallback-without-suppression` only), or
-  root-cause removal.
-- Validated boundary marker syntax:
-  `// plugin-boundary-next-line(category: <slug>, owner: <handle>, date: <YYYY-MM-DD>[, expires: <YYYY-MM-DD>]) -- <reason>`;
-  `category`, `owner`, `date`, and a reason are always required, `expires` is optional, and the marker fails once
-  `expires` is in the past.
-- Malformed directives, unknown rule names, missing marker fields, and expired markers all fail via
-  `invalid-lint-suppression`.
+- Inline suppression directives are test-fixture input only. Maintained production and tool source contains none;
+  `check:suppressions` scans real source comments independently of the pattern engine, while the standard linter's
+  warning-comment rules provide the second owner.
+- Intentional `catch-fallback-without-suppression` findings are recorded as exact checker-owned entries in
+  `tools/quality-policy/project-pattern-context.json` with a relative file, line, rule, owner, and reason. The runner
+  validates those fields and rejects unknown versions or malformed records.
+- Negative suppression fixtures are created in temporary files by owner tests, so examples cannot become maintained
+  source exceptions.
 - Tooling ownership: static checks run through `tools/check-patterns.mjs`, semantic/naming checks through
   `npm run test:contract`, and file-size/oneliner policy through `check:filesize` (`--oneliner=block` in
   `check:core`/`check:all`); remediation steps per smell class are in [smell-fix-playbooks.md](smell-fix-playbooks.md).
@@ -124,42 +119,12 @@ This document defines smell rules and enforcement ownership. Blocking checks mus
 `check-file-size` smell-adjacent rule IDs: `file-size`, `file-size-oneliner`, `oneliner=dense`, `oneliner=long-packed`,
 `oneliner=chained-ternary`, `oneliner=collapsed-block`, `oneliner=collapsed-literal`, `oneliner=single-line-body`.
 
-## Suppression Syntax
+## Suppression Policy
 
-Generic inline suppression:
-
-```javascript
-// plugin-lint-disable-next-line <rule-name> -- <reason>
-/* plugin-lint-disable-line <rule-name> -- <reason> */
-```
-
-- Suppress only one named rule.
-- Always include a short reason after `--`.
-- Malformed directives or unknown rule names fail via `invalid-lint-suppression`.
-- **Generic `plugin-lint-disable-*` directives are forbidden in production source** (`plugin.js`, `config/`, `runtime/`,
-  `cluster/`, `shared/`, `widgets/`). Negative fixtures may keep them to prove the checker. Every production exception
-  must instead be one of:
-  1. A **canonical-owner exception** recognized directly by the rule's own implementation (a narrow, file-scoped
-     allowlist in the checker, e.g. `CSS_JS_DEFAULT_DUPLICATION_ALLOWLIST` in `tools/check-patterns/rules-failfast.mjs`)
-     — used when the flagged file is the documented single owner of the value/pattern the rule protects.
-  2. The **validated boundary marker**, for genuine external-boundary degradation only, and only for the
-     `catch-fallback-without-suppression` rule (see below).
-  3. Root-cause removal, when the suppressed finding turns out to be stale debt.
-
-Validated boundary marker (the only suppression mechanism allowed for `catch-fallback-without-suppression` in production
-source):
-
-```javascript
-// plugin-boundary-next-line(category: <slug>, owner: <handle>, date: <YYYY-MM-DD>[, expires: <YYYY-MM-DD>]) -- <reason>
-/* plugin-boundary-line(category: <slug>, owner: <handle>, date: <YYYY-MM-DD>[, expires: <YYYY-MM-DD>]) -- <reason> */
-```
-
-- `category`, `owner`, `date`, and a reason after `--` are always required; `expires` is optional.
-- The marker can suppress only `catch-fallback-without-suppression`; it cannot name or affect any other rule.
-- `expires` marks a temporary exception; the marker fails once `expires` is in the past. Omit `expires` for a permanent,
-  reviewed external-boundary exception (e.g. DOM/AvNav/Web Audio host uncertainty that will never go away).
-- Malformed markers, missing fields, and expired markers fail via `invalid-lint-suppression`, exactly like a malformed
-  `plugin-lint-disable-*` directive.
+The supported directive bodies are parsed only inside negative fixtures: a named rule and a reason after `--` are
+required, and malformed or unknown directives fail through `invalid-lint-suppression`. Production source has no inline
+directive form. A genuine fallback is represented by a validated local profile record instead, keeping the source and
+the reusable runner independent of local ownership prose.
 
 ## Severity Model
 

@@ -204,10 +204,10 @@ exact release staging contents. `npm run dependencies:audit` runs a networked `n
 updates and during scheduled maintenance, never as part of `check:all`.
 
 This repository is a viewer-profile quality role model, not a blank-plugin starter:
-`check:fast`/`check:core`/`check:all` share the same bounded/complete/coverage meaning across sibling AvNav plugin
-repositories, while Vitest, coverage floors, and the historical complexity ratchet remain Dyninstruments-specific legacy
-tracking. An optional `.codex/config.toml` provides portable Codex CLI defaults; it is contributor tooling only, never a
-runtime or contribution requirement.
+`check:fast`/`check:core`/`check:all` have the bounded/complete/coverage meanings defined by the local command graph,
+while Vitest, coverage floors, and the historical complexity ratchet remain Dyninstruments-specific legacy tracking. An
+optional `.codex/config.toml` provides portable Codex CLI defaults; it is contributor tooling only, never a runtime or
+contribution requirement.
 
 Do not merge with failing checks.
 

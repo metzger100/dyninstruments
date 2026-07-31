@@ -185,26 +185,23 @@
         value: null
       });
 
-      return (
-        loadAsset(asset)
-          .then(function (value) {
-            cache.set(asset.key, {
-              status: "loaded",
-              type: asset.type,
-              value: value
-            });
-            return value;
-          })
-          // plugin-boundary-next-line(category: browser-asset-loading, owner: Metzger100, date: 2026-07-17) -- Known asset preload failures degrade to null after logging so widgets can fall back gracefully.
-          .catch(function (error) {
-            cache.set(asset.key, {
-              status: "failed",
-              type: asset.type,
-              value: null
-            });
-            return null;
-          })
-      );
+      return loadAsset(asset)
+        .then(function (value) {
+          cache.set(asset.key, {
+            status: "loaded",
+            type: asset.type,
+            value: value
+          });
+          return value;
+        })
+        .catch(function (error) {
+          cache.set(asset.key, {
+            status: "failed",
+            type: asset.type,
+            value: null
+          });
+          return null;
+        });
     }
 
     /** @param {unknown} assetDeclarations @returns {Promise<unknown[]>} */

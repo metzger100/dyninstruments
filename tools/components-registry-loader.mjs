@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
+import { resolveContainedRelativePath } from "./quality-policy/release-path-core.mjs";
 
 export const SENTINEL_BASE = "__CHECK_BASE__/";
 
@@ -16,7 +17,8 @@ const BOOTSTRAP_MANIFEST_SCRIPT_CHAIN = ["runtime/namespace.js", "config/bootstr
  */
 function runScriptChain(rootDir, scriptPaths, sandbox) {
   for (const relPath of scriptPaths) {
-    const absPath = path.join(rootDir, relPath);
+    const safePath = resolveContainedRelativePath(rootDir, relPath);
+    const absPath = path.join(rootDir, safePath);
     const source = fs.readFileSync(absPath, "utf8");
     vm.runInNewContext(source, sandbox, { filename: relPath });
   }
@@ -74,7 +76,7 @@ export function resolveRegistryScriptChain(rootDir, rawManifest) {
     throw new Error("component registry discovery failed: bootstrap manifest is missing or empty");
   }
 
-  const manifest = rawManifest.map((value) => String(value));
+  const manifest = rawManifest.map((value) => resolveContainedRelativePath(rootDir, String(value)));
   const fragments = manifest.filter(isRegistryFragmentPath);
   const uniqueFragments = Array.from(new Set(fragments));
   const duplicateFragments = fragments.filter((relPath, index) => fragments.indexOf(relPath) !== index);

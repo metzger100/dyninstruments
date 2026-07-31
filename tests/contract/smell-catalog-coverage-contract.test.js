@@ -7,7 +7,7 @@ describe("smell catalog coverage contract", function () {
   let ruleNames;
 
   beforeAll(async function () {
-    const rulesPath = path.resolve(process.cwd(), "tools/check-patterns/rules.mjs");
+    const rulesPath = path.resolve(process.cwd(), "tools/check-patterns.mjs");
     const mod = await import(pathToFileURL(rulesPath).href);
     ruleNames = mod.RULES.map(function (/** @type {any} */ rule) {
       return rule.name;

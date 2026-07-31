@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 1,
   "productionRoots": ["config", "runtime", "cluster", "shared", "widgets"],
   "entrypoints": ["plugin.js", "plugin.mjs"]
 }

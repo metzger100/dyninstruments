@@ -1,5 +1,5 @@
 /**
- * @file eslint-shared-rules - Strict lint rules shared by role-model repositories
+ * @file eslint-shared-rules - Strict reusable lint rules for the portable quality core
  */
 
 export const SHARED_STRICT_RULES = {

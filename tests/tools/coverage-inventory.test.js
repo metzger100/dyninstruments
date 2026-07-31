@@ -22,7 +22,9 @@ function createWorkspace() {
   fs.writeFileSync(path.join(tempRoot, "plugin.js"), "// plugin\n");
   fs.writeFileSync(path.join(tempRoot, "config/example.js"), "// example\n");
   writeJson(path.join(tempRoot, "tools/quality-policy/project-coverage-inventory-policy.json"), {
+    schemaVersion: 1,
     productionRoots: ["config"],
+    entrypoints: ["plugin.js"],
     legacyBelowDefaultFloors: { "plugin.js": { lines: 71.73, branches: 65 } }
   });
   return tempRoot;

@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 1,
   "rules": {
     "canvas-api-typeof-guard": {
       "scope": { "include": ["shared/**/*.js", "widgets/**/*.js"], "exclude": ["tests/**", "tools/**"] },

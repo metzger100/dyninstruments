@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
 /**
- * @file check-schema - Ajv validation of plugin.json and every layouts/*.json against their schemas
+ * @file check-schema - Ajv validation over the local schema profile and portable-core contract
  * Documentation: documentation/conventions/quality-gates.md
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import Ajv from "ajv";
+import { readVersionedProfile } from "./quality-policy/profile-schema.mjs";
 
 /**
  * @param {string} root
@@ -53,9 +54,15 @@ export function runSchemaCheck(options = {}) {
   const print = options.print !== false;
 
   const ajv = new Ajv({ allErrors: true });
-  ajv.addSchema(readJson(root, "schemas/avnav-plugin-base.schema.json"));
-  const pluginSchema = readJson(root, "schemas/plugin.schema.json");
-  const layoutSchema = readJson(root, "schemas/layout.schema.json");
+  const profile = readVersionedProfile(path.join(root, "tools/quality-policy/project-schema-profile.json"), [
+    "baseSchema",
+    "pluginSchema",
+    "layoutSchema"
+  ]);
+  ajv.addSchema(readJson(root, profile.baseSchema));
+  const pluginSchema = readJson(root, profile.pluginSchema);
+  const layoutSchema = readJson(root, profile.layoutSchema);
+  const portableCoreSchema = readJson(root, "schemas/portable-core-contract.schema.json");
 
   /** @type {string[]} */
   const failures = [];
@@ -65,6 +72,13 @@ export function runSchemaCheck(options = {}) {
     const failure = validateFile(ajv, layoutSchema, root, relPath);
     if (failure) failures.push(failure);
   }
+  const portableCoreFailure = validateFile(
+    ajv,
+    portableCoreSchema,
+    root,
+    "tools/quality-policy/portable-core-contract.json"
+  );
+  if (portableCoreFailure) failures.push(portableCoreFailure);
 
   if (print) {
     if (failures.length > 0) {
@@ -78,5 +92,5 @@ export function runSchemaCheck(options = {}) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const result = runSchemaCheck();
-  process.exit(result.ok ? 0 : 1);
+  process.exitCode = result.ok ? 0 : 1;
 }

@@ -1,7 +1,9 @@
 {
+  "schemaVersion": 1,
   "baselinePackageName": "dyninstruments",
   "baselineSha256": "eb3369055d9a2b8f346d56fcbb4d85238e6c8dd4099a5f53a6043c739607fe77",
   "productionRoots": ["config", "runtime", "cluster", "shared", "widgets"],
+  "entrypoints": ["plugin.js", "plugin.mjs"],
   "legacyBelowDefaultFloors": {
     "cluster/mappers/AnchorMapper.js": { "lines": 80, "branches": 61.11 },
     "cluster/viewmodels/ActiveRouteViewModel.js": { "lines": 80, "branches": 58.82 },

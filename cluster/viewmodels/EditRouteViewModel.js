@@ -77,7 +77,6 @@
         if (typeof computed === "number") {
           return computed;
         }
-        // plugin-boundary-next-line(category: avnav-host-boundary, owner: Metzger100, date: 2026-07-17) -- Host-provided route objects may throw from computeLength; fail closed to leg-sum math.
       } catch (err) {
         // Ignore computeLength failures and fail closed via leg-sum fallback.
       }
@@ -85,7 +84,6 @@
 
     try {
       return computeLegSumDistance(points, useRhumbLine, centerMath);
-      // plugin-boundary-next-line(category: avnav-host-boundary, owner: Metzger100, date: 2026-07-17) -- Malformed point payloads must fail closed and keep summary rendering alive.
     } catch (err) {
       return 0;
     }

@@ -81,6 +81,10 @@ contract. Keep documentation concise, concrete, and linked from the navigation i
 
 ## 5. Project Constraints (AvNav Plugin Environment)
 
+- The signed portable quality core is local and standalone: `npm run check:shared-core` verifies the contract-derived
+  manifest, `npm run check:generic-surface` is blocking, `npm run check:suppressions` owns the independent zero-comment
+  scan, and `npm run portable-core:attest` emits only anonymous content digests. Required completion checks must also
+  pass from an isolated copy containing only this repository.
 - **No bundler, no runtime build step** - Raw JS loaded via `<script>` tags at runtime
 - **Dev-only npm tooling is allowed** - used for tests and quality checks; not part of plugin runtime loading
 - **UMD component pattern** - All components register on `window.DyniComponents.{globalKey}`

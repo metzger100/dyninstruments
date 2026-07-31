@@ -16,6 +16,11 @@ tests.
 - Split environments: `unit-node` and `contract` run without jsdom; `unit-dom` uses jsdom and the canvas setup.
 - Test locations: `tests/**/*.test.js`.
 - Structure: `tests/` mirrors runtime/source modules and feature areas.
+- Portable-core contract tests cover exact manifest bytes, versioned profile rejection, deterministic attestation,
+  repository containment, release-path containment, and the clean/failing suppression scanner fixture.
+- `npm run check:suppressions` scans maintained source comments independently of `check-patterns`; the standard ESLint
+  warning-comment rules are the second zero-suppression owner. Intentional catch fallbacks use validated local profile
+  records rather than source comments.
 
 ## Coverage Inventory Classification
 

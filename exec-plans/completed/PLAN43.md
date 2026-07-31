@@ -2,7 +2,7 @@
 
 ## Status
 
-Active. This plan finalizes the repository's quality system as a standalone adopter of a canonical portable core.
+Completed. This plan finalizes the repository's quality system as a standalone adopter of a canonical portable core.
 
 This plan is intentionally repository-neutral and self-contained. It applies only to the checkout containing it. No
 committed tool, test, configuration, documentation page, comment, plan evidence, or generated artifact may name, locate,
@@ -83,9 +83,130 @@ Verified against the current worktree on 2026-07-31.
 14. Active execution plans are formatter-owned and archival completed plans are not; this plan must remain active until
     every completion criterion is evidenced.
 
+### Phase A baseline evidence (2026-07-31)
+
+The following values were generated from the current repository root before implementation. They are regression inputs;
+the required quality gate passed with exit code 0.
+
+| Measure                                                      |                                                                                       Count or result |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------: |
+| Maintained files discovered by the local inventory command   |                                                                                                 1,199 |
+| Portable-core candidate paths selected by the role scan      |                                                                                                   260 |
+| Production JavaScript/`mjs` files                            |                                                                                                   136 |
+| Canonical generic rule identifiers                           |                                                                                                    21 |
+| Product rule identifiers                                     |                                                                                                    23 |
+| Existing complexity baseline entries                         |                                                                                                   175 |
+| Coverage inventory entries/classification                    |                                                                                    228 / 228 measured |
+| Test inventory entries                                       |                                                                                                   558 |
+| Test inventory classifications                               |                                                          538 strict, 16 harness fragments, 4 fixtures |
+| Test-exception baseline entries                              |                                                                                                    20 |
+| Checker modules exporting `run*()`                           |                                                                                                    23 |
+| Tool self-test owners found by the local test-reference scan |                                                                                                    41 |
+| Inline suppression directives in maintained comments         |                                                          0 standard, 38 checker/boundary-text matches |
+| Standalone-reference audit seed counts                       | 8 absolute-home-like, 3 user-home-like, 17 checkout-vocabulary, 149 historical identity-token matches |
+| Release manifest paths / missing paths                       |                                                                                               245 / 0 |
+| Existing release archive entries                             |                                                                                                   292 |
+| Baseline `check:all`                                         |                                                                                                passed |
+
+The checkout-vocabulary and identity-token values are anonymous cleanup counts only; no identity, filesystem location,
+or coordination source is copied into a shipped artifact or completion claim.
+
+### Temporary review ledger
+
+The role split is recorded before mechanism changes. Mandatory quality mechanisms remain Tier 1 even when their current
+bytes contain local paths or remedy text; local data is split into Tier 2 profiles/adapters.
+
+| Candidate role                                             | Tier 1 mechanism target                                                                                                                                                                                                   | Tier 2 boundary                                                                      |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Manifest, contract, signature, attestation                 | `tools/quality-policy/portable-core-contract.json`, `tools/quality-policy/shared-core-manifest.json`, `tools/quality-policy/shared-core-manifest.sha256`, `tools/check-shared-core.mjs`, `tools/portable-core-attest.mjs` | Contract-selected repository root                                                    |
+| Genericness, instructions, skills                          | `tools/check-generic-surface.mjs`, `tools/quality-policy/shared-instructions.md`, five generic skills                                                                                                                     | Local token policy and skill lock                                                    |
+| Pattern engine and generic rules                           | `tools/check-patterns*.mjs`, `tools/check-patterns/generic/`, generic fixtures                                                                                                                                            | `tools/check-patterns/project/` and project pattern profiles                         |
+| File-size, focus, schema, documentation, hooks, formatting | Existing checker modules and their shared helpers                                                                                                                                                                         | Project scopes, schema composition, documentation roots, hook and formatter profiles |
+| Complexity, coverage, test inventory                       | Existing policy engines and new adapter interfaces                                                                                                                                                                        | Captured baselines, coverage reports, classifications, and exception data            |
+| Release orchestration                                      | Existing release modules plus path-safe shared interfaces                                                                                                                                                                 | Local payload, archive names, version policy, and environment                        |
+| Self-tests and negative fixtures                           | `tests/portable-core/` and manifest-listed generic fixtures                                                                                                                                                               | Project-owned regression suites                                                      |
+
+Phase A is complete: every mandatory role has a current or planned path, counts came from commands, and no candidate was
+downgraded because its current implementation is not yet canonical.
+
 Phase A must append exact local counts for suppression comments, portable-core candidate paths, baseline entries,
 coverage classifications, test classifications, checker exports, and self-tests before implementation begins. Those
 counts become regression inputs; they may shrink where this plan requires cleanup and may not be hidden by exclusions.
+
+### Phase B completion evidence (2026-07-31)
+
+- Contract schema version: `1`; core version: `1.0.0`; signed manifest SHA-256:
+  `ba1ce543b905393d764fb3fe16a19c70155c25ada3dfab5e6dca3cf1c264d58f`.
+- The contract declares 57 mandatory paths across 20 roles, three metadata paths, ten local profile paths, 21 canonical
+  rule IDs, 17 required checker-export bindings, and four self-test role bindings.
+- `check-shared-core` passed exact signature, path containment, completeness, digest, role, and export checks;
+  malformed, missing, extra, escaping, ordering, signature, and digest cases are covered by contract tests.
+- The anonymous attestation emits only `coreVersion`, `manifestSha256`, and sorted `entries`; the golden comparison is
+  deterministic.
+- The standalone boundary check passed 1,024 maintained text files with zero findings, including a seeded failing
+  checkout-vocabulary fixture.
+- The complete split passed 466 test files and 2,058 tests in a single-worker clean-room run; the final required
+  `npm run check:all` result is recorded below after all phases.
+
+### Phase C completion evidence (2026-07-31)
+
+- Genericness uses the contract-derived mandatory path inventory plus the marked shared-instructions block; no second
+  Tier 1 module list is used by the required scanner.
+- The blocking scanner reports 58 targets and zero findings; `--warn` remains available only as the exploratory command.
+- Shared instructions are exact-byte equal to the marked block, and the five generic skills have literal local SHA-256
+  entries validated by the skill-layer contract.
+- Local token data and path/schema/test/format/coverage/complexity profiles remain Tier 2 and are not in the signed
+  manifest.
+
+### Phase D completion evidence (2026-07-31)
+
+- The portable runner, filesystem/source helpers, suppression parser, generic registry, and local adapter compose
+  without product concepts in Tier 1. The canonical registry contains exactly 21 generic IDs followed by 23 product
+  rules.
+- The generic corpus contains one clean and one failing seed for every canonical ID; the targeted pattern, atomicity,
+  responsive, namespace, and local-equivalence suites pass.
+- The blocking pattern gate checked 1,118 files with zero generic or product findings. The 14 prior boundary markers
+  were removed from runtime source and replaced by 14 exact checker-owned profile records.
+- `npm run check:all` was rerun after the phase implementation; its final successful result is recorded in Phase I after
+  the release and isolated-copy checks.
+
+### Phase E completion evidence (2026-07-31)
+
+- File-size, focused-test, schema, documentation-link/proof, hook, formatting, and format-scope mechanisms use versioned
+  local profiles and exported `run*()` entry points where applicable. Unknown profile versions and fields fail closed in
+  the portable self-tests.
+- The current format scope contains 1,074 rows; the clean/failing checker suites and the full typecheck targets pass.
+- No maintained runtime or package payload file was added to the manifest by the developer-workflow migration.
+
+### Phase F completion evidence (2026-07-31)
+
+- Complexity remains at 175 captured baseline entries with zero active new findings. Coverage remains 228 measured
+  entries with unchanged local floors. Test inventory contains 559 entries: 539 strict, 16 harness fragments, and four
+  fixtures; its immutable exception capture remains at 20 entries.
+- Coverage, complexity, test-inventory, malformed-data, stale-entry, duplicate-entry, and regression suites pass.
+- Empty temporary profiles fail closed instead of disabling the corresponding mechanism.
+
+### Phase G completion evidence (2026-07-31)
+
+- The independent source scanner checked 889 source files and reported zero findings. Supported ESLint, TypeScript,
+  Prettier, Stylelint, coverage, and checker suppression families are all zero in maintained comments.
+- Generated negative fixtures for the suppression scanner and standard lint path fail independently when materialized in
+  a temporary source file; encoded fixture data remains excluded by the documented fixture boundary.
+
+### Phase H completion evidence (2026-07-31)
+
+- Release-focused tests pass: 20 package/release tests plus the semantic-version corpus suite. Release path resolution
+  rejects absolute paths, traversal, and symlink escapes before staging.
+- The release manifest remains 245 paths with no missing entries; release archive entry count and local payload modes
+  remain unchanged. A normalized pre/post payload comparison over current repository history found exact path, mode, and
+  content parity after removing only the retired boundary-marker comments.
+
+### Phase I completion evidence (2026-07-31)
+
+- Documentation, standalone-boundary, blocking genericness, signed-core, suppression, and documentation-link checks all
+  pass. Maintained text contains no external-checkout identity or location references.
+- Final normal and isolated-copy `npm run check:all` results, final coverage percentages, deterministic attestation
+  proof, and release parity proof are recorded in the completion evidence below.
 
 ---
 
@@ -615,6 +736,28 @@ Record the following before archiving the plan:
 
 Do not record repository names, remotes, branches, user paths, external checkout paths, or comparison commands in the
 completion evidence.
+
+### Final completion evidence (2026-07-31)
+
+1. Contract schema version `1`; core version `1.0.0`; manifest SHA-256
+   `ba1ce543b905393d764fb3fe16a19c70155c25ada3dfab5e6dca3cf1c264d58f`.
+2. Tier 1 inventory: 57 manifest entries across 20 roles; 57 mandatory paths; 10 validated Tier 2 profile schemas.
+3. Canonical checker/export inventory: 17 checker-export bindings and four self-test role bindings; all required
+   self-test owners have clean and failing coverage.
+4. Rule counts: 21 canonical generic rules and 23 local product rules.
+5. Suppression counts: zero ESLint, TypeScript, Prettier, Istanbul, Stylelint, plugin-lint, plugin-boundary, generic
+   checker, and coverage suppression comments in maintained source.
+6. Complexity/coverage: 175 complexity baseline entries with zero active findings; 228 measured coverage entries; final
+   aggregate coverage is 92.28% statements, 79.87% branches, 96.83% functions, and 93.26% lines.
+7. Test inventory: 559 entries (539 strict, 16 harness fragments, four fixtures), with 20 immutable test-exception
+   baseline entries; the complete split is 466 files and 2,058 tests.
+8. Documentation/reference scans: 1,024 standalone-boundary files with zero findings; 58 genericness targets with zero
+   findings; 889 suppression-scanned source files with zero findings.
+9. Normal and isolated `npm run check:all`: passed with exit code 0 in each copy.
+10. Two consecutive `npm run portable-core:attest` invocations produced identical bytes and only the approved
+    `coreVersion`, `manifestSha256`, and sorted `entries` fields.
+11. Local release parity: 245 release payload paths, zero missing paths, unchanged modes, and exact normalized content
+    digests after removing only retired boundary-marker comments; release archive validation passed.
 
 ---
 

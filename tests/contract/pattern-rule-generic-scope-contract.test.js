@@ -97,43 +97,46 @@ describe("pattern-rule generic/project scope contract", function () {
 
   it("keeps at least one rule classified in each of the generic and project rule sets", async function () {
     const rulesModule = await import(path.join(root, "tools/check-patterns/rules.mjs"));
+    const projectModule = await import(path.join(root, "tools/check-patterns/project/rules.mjs"));
 
     expect(rulesModule.GENERIC_RULES.length).toBeGreaterThan(0);
-    expect(rulesModule.PROJECT_RULES.length).toBeGreaterThan(0);
-    expect(rulesModule.RULES.length).toBe(rulesModule.GENERIC_RULES.length + rulesModule.PROJECT_RULES.length);
+    expect(projectModule.PROJECT_RULES.length).toBeGreaterThan(0);
+    expect(rulesModule.GENERIC_RULES.length + projectModule.PROJECT_RULES.length).toBeGreaterThan(0);
   });
 
   it("keeps the complete Tier 2 registry classification and concatenation contract", async function () {
     const rulesModule = await import(path.join(root, "tools/check-patterns/rules.mjs"));
+    const projectModule = await import(path.join(root, "tools/check-patterns/project/rules.mjs"));
+    const adapterModule = await import(path.join(root, "tools/check-patterns.mjs"));
     const genericNames = rulesModule.GENERIC_RULES.map(function (/** @type {any} */ rule) {
       return rule.name;
     });
-    const projectNames = rulesModule.PROJECT_RULES.map(function (/** @type {any} */ rule) {
+    const projectNames = projectModule.PROJECT_RULES.map(function (/** @type {any} */ rule) {
       return rule.name;
     });
 
     expect(genericNames).toEqual([
-      "invalid-lint-suppression",
-      "catch-fallback-without-suppression",
-      "internal-contract-fallback",
-      "redundant-null-type-guard",
       "absolute-home-path",
       "exec-plan-reference",
-      "empty-catch",
-      "console-in-runtime",
       "no-nul-byte",
-      "duplicate-functions",
-      "duplicate-block-clones",
-      "todo-without-owner",
-      "unused-fallback",
+      "unsafe-html-dom-sink",
       "dead-code",
+      "console-in-runtime",
       "default-truthy-fallback",
+      "redundant-null-type-guard",
+      "empty-catch",
+      "premature-legacy-support",
+      "unused-fallback",
+      "responsive-layout-hard-floor",
       "canvas-api-typeof-guard",
       "try-finally-canvas-drawing",
+      "todo-without-owner",
+      "duplicate-functions",
+      "duplicate-block-clones",
+      "catch-fallback-without-suppression",
+      "internal-contract-fallback",
       "framework-method-typeof-guard",
-      "premature-legacy-support",
-      "responsive-layout-hard-floor",
-      "unsafe-html-dom-sink"
+      "invalid-lint-suppression"
     ]);
     expect(projectNames).toEqual([
       "hardcoded-runtime-default",
@@ -162,13 +165,15 @@ describe("pattern-rule generic/project scope contract", function () {
     expect([...genericNames, ...projectNames]).not.toEqual(
       expect.arrayContaining(["internal-hook-fallback", "console-in-widgets"])
     );
-    expect(rulesModule.RULES).toEqual([...rulesModule.GENERIC_RULES, ...rulesModule.PROJECT_RULES]);
+    expect(adapterModule.RULES).toEqual([...rulesModule.GENERIC_RULES, ...projectModule.PROJECT_RULES]);
   });
 
   it("keeps renamed rules finding-equivalent on the current tree and fixture inputs", async function () {
     const rulesModule = await import(path.join(root, "tools/check-patterns/rules.mjs"));
+    const projectModule = await import(path.join(root, "tools/check-patterns/project/rules.mjs"));
     const sharedModule = await import(path.join(root, "tools/check-patterns/shared.mjs"));
     const { runRegexRule } = rulesModule;
+    const allRules = [...rulesModule.GENERIC_RULES, ...projectModule.PROJECT_RULES];
     const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-rule-rename-"));
 
     try {
@@ -179,7 +184,7 @@ describe("pattern-rule generic/project scope contract", function () {
       ];
 
       renames.forEach(function ([oldName, newName]) {
-        const newRule = rulesModule.RULES.find(function (/** @type {any} */ rule) {
+        const newRule = allRules.find(function (/** @type {any} */ rule) {
           return rule.name === newName;
         });
         expect(newRule, "missing renamed rule '" + newName + "'").toBeDefined();

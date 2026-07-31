@@ -1,8 +1,7 @@
 /**
- * Contract test pinning .prettierrc.json to the shared, paired-repository shape so a future
- * local edit that breaks shared-file identity fails a gate instead of drifting silently.
- * `.prettierrc.json` is a `shared-core-manifest.json` seed entry (byte-identical in both
- * role-model repositories).
+ * Contract test pinning .prettierrc.json to the portable shape so a future local edit that
+ * breaks the shared-file identity fails a gate instead of drifting silently.
+ * `.prettierrc.json` is a manifest seed entry.
  */
 
 import assert from "node:assert/strict";

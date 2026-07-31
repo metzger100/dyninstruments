@@ -1,3 +1,5 @@
+import { resolveContainedRelativePath } from "./quality-policy/release-path-core.mjs";
+
 export const FIXED_RUNTIME_FILES = [
   "plugin.js",
   "plugin.mjs",
@@ -25,3 +27,5 @@ export function isRuntimePath(filePath) {
 export function normalizeRelativePath(rawPath) {
   return rawPath.replace(/\\/g, "/").replace(/^\//, "").replace(/^\.\//, "").trim();
 }
+
+export { resolveContainedRelativePath };

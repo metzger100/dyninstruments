@@ -5,7 +5,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { maskCommentsAndStrings } from "./check-patterns/shared.mjs";
 import { detectOnelinerKind } from "./check-file-size/oneliner-rules.mjs";
-import { readJsonPolicy } from "./quality-policy/read-json-policy.mjs";
+import { readVersionedProfile } from "./quality-policy/profile-schema.mjs";
 
 const MAX_ALLOWED_LINES = 400;
 const PROJECT_SCOPE_PATH = "tools/quality-policy/project-file-size-scope.json";
@@ -37,9 +37,15 @@ const ONELINER_KINDS = [
 /** @typedef {{ root?: string, onelinerMode?: string, print?: boolean }} FileSizeCheckOptions */
 /** @typedef {{ scanRoots: string[], scanExtensions: string[], exemptPatterns: string[], remedyMessage: string }} ProjectFileSizeScope */
 
-/** @returns {ProjectFileSizeScope} */
-function loadProjectScope() {
-  return readJsonPolicy(path.join(process.cwd(), PROJECT_SCOPE_PATH));
+/** @param {string} root @returns {ProjectFileSizeScope} */
+function loadProjectScope(root) {
+  return readVersionedProfile(path.join(root, PROJECT_SCOPE_PATH), [
+    "note",
+    "scanRoots",
+    "scanExtensions",
+    "exemptPatterns",
+    "remedyMessage"
+  ]);
 }
 
 /**
@@ -49,7 +55,7 @@ function loadProjectScope() {
 export function runFileSizeCheck(options = {}) {
   const root = path.resolve(options.root || process.cwd());
   const onelinerMode = normalizeOnelinerMode(options.onelinerMode || "block");
-  const scope = loadProjectScope();
+  const scope = loadProjectScope(root);
 
   const targetFiles = collectTargetFiles(root, scope);
   /** @type {SizeViolation[]} */
@@ -117,7 +123,7 @@ export function runFileSizeCheckCli(argv = process.argv.slice(2)) {
     onelinerMode,
     print: true
   });
-  process.exit(summary.ok ? 0 : 1);
+  process.exitCode = summary.ok ? 0 : 1;
 }
 
 /** @param {string} root @param {ProjectFileSizeScope} scope @returns {TargetFile[]} */
@@ -314,6 +320,6 @@ if (isCliEntrypoint()) {
   } catch (error) {
     const err = /** @type {{ message?: string }} */ (error);
     console.error(err && err.message ? err.message : String(error));
-    process.exit(1);
+    process.exitCode = 1;
   }
 }

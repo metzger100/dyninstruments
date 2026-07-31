@@ -161,10 +161,11 @@ Example:
 - Renderer-side helpers may format with mapper-resolved formatter tokens, but they must not repeat mapper fallback or
   token-validation logic.
 - Do not pass display labels such as `m/s`, `°C`, or `hPa` into formatter parameters.
-- Generic `plugin-lint-disable-*` directives are forbidden in production source. Fix the root cause or add a narrow
-  checker-owned canonical-owner exception.
-- Only a genuine external catch boundary may use the validated `plugin-boundary-*` marker documented in
-  [smell-prevention.md](smell-prevention.md#suppression-syntax).
+- Generic `plugin-lint-disable-*` directives and boundary markers are forbidden in maintained production source. Fix the
+  root cause or record an exact file/line/rule/owner/reason exception in the versioned local pattern profile; the
+  blocking checker owns that exception and source remains comment-free.
+- Run `npm run check:suppressions` with the standard linter layer. Both owners must remain at zero findings; negative
+  fixtures are generated into temporary paths by their owner tests.
 
 ## Temporary Workaround Marker
 

@@ -47,7 +47,7 @@ These rules are mandatory for all contributors and AI agents in this repository.
 19. Rule: Generic `plugin-lint-disable-*` suppressions are forbidden in production source. Intentional exceptions are
     either a narrow canonical-owner allowlist entry owned by the rule itself, or — for genuine external-boundary catch
     fallbacks only — the validated `plugin-boundary-*(category, owner, date[, expires])` marker. →
-    [conventions/smell-prevention.md](conventions/smell-prevention.md#suppression-syntax)
+    [conventions/smell-prevention.md](conventions/smell-prevention.md#suppression-policy)
 
 ## Key Details
 

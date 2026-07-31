@@ -1,7 +1,6 @@
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const { execFileSync } = require("node:child_process");
 
 const root = process.cwd();
 const SCOPE_PATH = path.join(root, "tools/quality-policy/format-scope.json");
@@ -83,9 +82,12 @@ describe("format-scope contract", function () {
     const deletedPath = path.join(fixtureRoot, "deleted.md");
     fs.writeFileSync(livePath, "# Live\n");
     fs.writeFileSync(deletedPath, "# Deleted\n");
-    execFileSync("git", ["init", "--quiet"], { cwd: fixtureRoot });
-    execFileSync("git", ["add", "live.md", "deleted.md"], { cwd: fixtureRoot });
     fs.rmSync(deletedPath);
+    fs.mkdirSync(path.join(fixtureRoot, "tools/quality-policy"), { recursive: true });
+    fs.copyFileSync(
+      path.join(root, "tools/quality-policy/project-format-scope.json"),
+      path.join(fixtureRoot, "tools/quality-policy/project-format-scope.json")
+    );
 
     try {
       const { buildFormatScope } = await import(path.join(root, "tools/quality-policy/generate-format-scope.mjs"));

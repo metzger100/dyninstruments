@@ -140,6 +140,7 @@
     "tests/contract/placeholder-literal-contract.test.js",
     "tests/contract/placeholder-normalization-contract.test.js",
     "tests/contract/plugin-schema-base-profile-contract.test.js",
+    "tests/portable-core/portable-core-contract.test.js",
     "tests/contract/quality-workflow-contract.test.js",
     "tests/contract/release-workflow-contract.test.js",
     "tests/contract/shared-instructions-block-contract.test.js",

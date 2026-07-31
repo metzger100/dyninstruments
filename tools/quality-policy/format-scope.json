@@ -31,19 +31,19 @@
     {
       "path": ".codex/config.toml",
       "owner": "unsupported",
-      "reason": "Prettier has no built-in TOML support and no TOML plugin is in this inventory",
-      "alternateValidation": "reviewed on change; byte-identical across the paired repository"
+      "reason": "TOML configuration without a maintained formatter",
+      "alternateValidation": "reviewed on change"
     },
     {
       "path": ".gitattributes",
       "owner": "unsupported",
-      "reason": "plain dotfile with no maintained formatter target",
+      "reason": "Plain configuration file without a maintained formatter target",
       "alternateValidation": "reviewed on change"
     },
     {
       "path": ".githooks/pre-push",
       "owner": "unsupported",
-      "reason": "no maintained shell formatter in this inventory",
+      "reason": "Shell file without a maintained formatter in this inventory",
       "alternateValidation": "bash -n syntax check"
     },
     {
@@ -61,7 +61,7 @@
     {
       "path": ".gitignore",
       "owner": "unsupported",
-      "reason": "plain dotfile with no maintained formatter target",
+      "reason": "Plain configuration file without a maintained formatter target",
       "alternateValidation": "reviewed on change"
     },
     {
@@ -71,13 +71,13 @@
     {
       "path": ".nvmrc",
       "owner": "unsupported",
-      "reason": "plain dotfile with no maintained formatter target",
+      "reason": "Plain configuration file without a maintained formatter target",
       "alternateValidation": "reviewed on change"
     },
     {
       "path": ".prettierignore",
       "owner": "unsupported",
-      "reason": "plain dotfile with no maintained formatter target",
+      "reason": "Plain configuration file without a maintained formatter target",
       "alternateValidation": "reviewed on change"
     },
     {
@@ -87,7 +87,7 @@
     {
       "path": ".stylelintignore",
       "owner": "unsupported",
-      "reason": "plain dotfile with no maintained formatter target",
+      "reason": "Plain configuration file without a maintained formatter target",
       "alternateValidation": "reviewed on change"
     },
     {
@@ -105,31 +105,31 @@
     {
       "path": "assets/fonts/LICENSE.txt",
       "owner": "unsupported",
-      "reason": "vendored third-party asset license text; not a maintained input",
+      "reason": "Vendored license text; not a maintained formatter input",
       "alternateValidation": "reviewed on change"
     },
     {
       "path": "assets/fonts/Roboto-Bold.woff2",
       "owner": "unsupported",
-      "reason": "binary asset; not formattable",
+      "reason": "Binary asset; not formattable",
       "alternateValidation": "reviewed on change"
     },
     {
       "path": "assets/fonts/Roboto-Regular.woff2",
       "owner": "unsupported",
-      "reason": "binary asset; not formattable",
+      "reason": "Binary asset; not formattable",
       "alternateValidation": "reviewed on change"
     },
     {
       "path": "assets/fonts/RobotoMono-Bold.woff2",
       "owner": "unsupported",
-      "reason": "binary asset; not formattable",
+      "reason": "Binary asset; not formattable",
       "alternateValidation": "reviewed on change"
     },
     {
       "path": "assets/fonts/RobotoMono-Regular.woff2",
       "owner": "unsupported",
-      "reason": "binary asset; not formattable",
+      "reason": "Binary asset; not formattable",
       "alternateValidation": "reviewed on change"
     },
     {
@@ -687,17 +687,13 @@
     {
       "path": "exec-plans/active/.gitkeep",
       "owner": "unsupported",
-      "reason": "empty placeholder file",
+      "reason": "Empty placeholder file",
       "alternateValidation": "none needed"
-    },
-    {
-      "path": "exec-plans/active/PLAN43.md",
-      "owner": "prettier"
     },
     {
       "path": "install.sh",
       "owner": "unsupported",
-      "reason": "no maintained shell formatter in this inventory",
+      "reason": "Shell file without a maintained formatter in this inventory",
       "alternateValidation": "bash -n syntax check"
     },
     {
@@ -707,19 +703,19 @@
     {
       "path": "layouts/dyni-motorboat.json",
       "owner": "unsupported",
-      "reason": "user-facing layout data validated by Ajv against layout.schema.json",
+      "reason": "User-facing layout data validated by the layout schema",
       "alternateValidation": "npm run schema:check"
     },
     {
       "path": "layouts/dyni-sailboat.json",
       "owner": "unsupported",
-      "reason": "user-facing layout data validated by Ajv against layout.schema.json",
+      "reason": "User-facing layout data validated by the layout schema",
       "alternateValidation": "npm run schema:check"
     },
     {
       "path": "linkinator.config.json",
       "owner": "unsupported",
-      "reason": "consumed directly by the docs:links tooling; not yet brought under Prettier",
+      "reason": "Consumed directly by documentation-link tooling",
       "alternateValidation": "npm run docs:links"
     },
     {
@@ -741,7 +737,7 @@
     {
       "path": "plugin.json",
       "owner": "unsupported",
-      "reason": "AvNav plugin manifest validated by Ajv against the base plugin schema",
+      "reason": "Declarative manifest validated by the schema gate",
       "alternateValidation": "npm run schema:check"
     },
     {
@@ -870,6 +866,10 @@
     },
     {
       "path": "schemas/plugin.schema.json",
+      "owner": "prettier"
+    },
+    {
+      "path": "schemas/portable-core-contract.schema.json",
       "owner": "prettier"
     },
     {
@@ -1331,7 +1331,7 @@
     {
       "path": "skills-lock.json",
       "owner": "unsupported",
-      "reason": "vendored skill-lock manifest with a pinned SHA-256 per entry; reformatting is a reviewed decision",
+      "reason": "Pinned skill digest manifest; whitespace is a reviewed policy decision",
       "alternateValidation": "the skill-lock shape/hash contract test"
     },
     {
@@ -2001,8 +2001,8 @@
     {
       "path": "tests/layouts/gpspage-all-widgets.json",
       "owner": "unsupported",
-      "reason": "showcase-layout test fixture; content is asserted directly by its owning test",
-      "alternateValidation": "tests/layouts/gpspage-all-widgets.test.js"
+      "reason": "Showcase layout fixture asserted by its owning tests",
+      "alternateValidation": "the owning layout test"
     },
     {
       "path": "tests/layouts/gpspage-all-widgets.test.js",
@@ -2022,6 +2022,22 @@
     },
     {
       "path": "tests/plugin/plugin-module-bootstrap.test.js",
+      "owner": "prettier"
+    },
+    {
+      "path": "tests/portable-core/generic-rule-corpus.json",
+      "owner": "unsupported",
+      "reason": "Configuration data read directly by its owning checker",
+      "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tests/portable-core/portable-core-attest.golden.json",
+      "owner": "unsupported",
+      "reason": "Configuration data read directly by its owning checker",
+      "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tests/portable-core/portable-core-contract.test.js",
       "owner": "prettier"
     },
     {
@@ -3591,7 +3607,7 @@
     {
       "path": "tools/actionlint.sh",
       "owner": "unsupported",
-      "reason": "no maintained shell formatter in this inventory",
+      "reason": "Shell file without a maintained formatter in this inventory",
       "alternateValidation": "bash -n syntax check"
     },
     {
@@ -3775,6 +3791,10 @@
       "owner": "prettier"
     },
     {
+      "path": "tools/check-patterns/runner.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tools/check-patterns/shared-source-scan.mjs",
       "owner": "prettier"
     },
@@ -3792,6 +3812,14 @@
     },
     {
       "path": "tools/check-shared-core.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/check-standalone-boundary.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/check-suppressions.mjs",
       "owner": "prettier"
     },
     {
@@ -3819,13 +3847,17 @@
       "owner": "prettier"
     },
     {
+      "path": "tools/portable-core-attest.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tools/quality-policy/check-coverage-inventory.mjs",
       "owner": "prettier"
     },
     {
       "path": "tools/quality-policy/complexity-baseline.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
@@ -3843,13 +3875,13 @@
     {
       "path": "tools/quality-policy/coverage-floor-baseline.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
       "path": "tools/quality-policy/coverage-floors.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
@@ -3867,7 +3899,7 @@
     {
       "path": "tools/quality-policy/format-scope.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
@@ -3877,7 +3909,7 @@
     {
       "path": "tools/quality-policy/generic-tokens.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
@@ -3887,13 +3919,13 @@
     {
       "path": "tools/quality-policy/historical-complexity-findings.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
       "path": "tools/quality-policy/hotspot-budgets.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
@@ -3903,41 +3935,77 @@
     {
       "path": "tools/quality-policy/plugin-schema-corpus.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tools/quality-policy/portable-core-contract.json",
+      "owner": "unsupported",
+      "reason": "Policy data read by its owning quality checker",
+      "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tools/quality-policy/portable-core-contract.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/quality-policy/profile-schema.mjs",
+      "owner": "prettier"
     },
     {
       "path": "tools/quality-policy/project-complexity-scope.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
       "path": "tools/quality-policy/project-coverage-inventory-policy.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
       "path": "tools/quality-policy/project-file-size-scope.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
+      "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tools/quality-policy/project-format-scope.json",
+      "owner": "unsupported",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
       "path": "tools/quality-policy/project-pattern-context.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
       "path": "tools/quality-policy/project-pattern-scopes.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
+      "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tools/quality-policy/project-schema-profile.json",
+      "owner": "unsupported",
+      "reason": "Policy data read by its owning quality checker",
+      "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tools/quality-policy/project-test-inventory-policy.json",
+      "owner": "unsupported",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
       "path": "tools/quality-policy/read-json-policy.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/quality-policy/release-path-core.mjs",
       "owner": "prettier"
     },
     {
@@ -3947,31 +4015,37 @@
     {
       "path": "tools/quality-policy/semver-corpus.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
       "path": "tools/quality-policy/shared-core-manifest.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tools/quality-policy/shared-core-manifest.sha256",
+      "owner": "unsupported",
+      "reason": "Unclassified file requires an explicit disposition",
+      "alternateValidation": "reviewed on change"
     },
     {
       "path": "tools/quality-policy/shared-instructions.md",
       "owner": "unsupported",
-      "reason": "extracted byte-for-byte verification artifact; whitespace is part of the checked content",
+      "reason": "Extracted byte-for-byte verification artifact; whitespace is part of the checked content",
       "alternateValidation": "shared-instructions-block contract test"
     },
     {
       "path": "tools/quality-policy/test-exception-baseline.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
       "path": "tools/quality-policy/test-inventory.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
@@ -3981,7 +4055,7 @@
     {
       "path": "tools/quality-policy/verified-baseline.json",
       "owner": "unsupported",
-      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "reason": "Policy data read by its owning quality checker",
       "alternateValidation": "npm run check:core"
     },
     {
@@ -4015,7 +4089,7 @@
     {
       "path": "tools/test-data/source-nul-byte-fixture.dat",
       "owner": "unsupported",
-      "reason": "binary asset; not formattable",
+      "reason": "Binary asset; not formattable",
       "alternateValidation": "reviewed on change"
     },
     {
@@ -4316,7 +4390,7 @@
     }
   ],
   "countByOwner": {
-    "prettier": 1017,
-    "unsupported": 41
+    "prettier": 1025,
+    "unsupported": 48
   }
 }
