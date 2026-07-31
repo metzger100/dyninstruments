@@ -18,28 +18,24 @@ describe("CompassRadialWidget", function () {
 
     harness.spec.renderCanvas(canvas, makeCompassProps());
     const layout = harness.computeLayout(480, 110);
+    const calls =
+      /** @type {{ pointer: Array<{ depth: number, fillStyle: string, halfWidth: number }>, ring: Array<{ lineWidth: number }>, rimMarker: Array<{ angle: unknown, opts: { len: number, strokeStyle: string, width: number } }>, ticks: Array<{ major: { len: number, width: number }, minor: { len: number, width: number } }> }} */
+      (/** @type {unknown} */ (harness.calls));
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.pointer[0].depth).toBe(layout.geom.fixedPointerDepth);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.pointer[0].halfWidth).toBe(Math.max(1, Math.floor(layout.geom.pointerSide / 2)));
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.rimMarker[0].opts).toEqual({
+    expect(calls.pointer[0].fillStyle).toBe(harness.theme.colors.pointer);
+    expect(calls.pointer[0].depth).toBe(layout.geom.fixedPointerDepth);
+    expect(calls.pointer[0].halfWidth).toBe(Math.max(1, Math.floor(layout.geom.pointerSide / 2)));
+    expect(calls.rimMarker[0].opts).toEqual({
       len: layout.geom.markerLen,
       width: layout.geom.markerWidth,
       strokeStyle: harness.theme.colors.pointer
     });
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.ring[0].lineWidth).toBe(layout.geom.arcLineWidth);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.ticks[0].major).toEqual({
+    expect(calls.ring[0].lineWidth).toBe(layout.geom.arcLineWidth);
+    expect(calls.ticks[0].major).toEqual({
       len: layout.geom.majorTickLen,
       width: layout.geom.majorTickWidth
     });
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.ticks[0].minor).toEqual({
+    expect(calls.ticks[0].minor).toEqual({
       len: layout.geom.minorTickLen,
       width: layout.geom.minorTickWidth
     });

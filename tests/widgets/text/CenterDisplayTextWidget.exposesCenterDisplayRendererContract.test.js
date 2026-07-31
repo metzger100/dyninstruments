@@ -40,6 +40,9 @@ describe("CenterDisplayTextWidget", function () {
     expect(meas).toBeTruthy();
     expect(wp).toBeTruthy();
     expect(boat).toBeTruthy();
+    if (!center || !lat || !lon || !meas || !wp || !boat) {
+      throw new Error("Expected every relation-row text to be captured.");
+    }
     expect(center.y).toBeLessThan(lat.y);
     expect(lat.y).toBeLessThan(lon.y);
     expect(lon.y).toBeLessThan(meas.y);

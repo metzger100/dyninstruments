@@ -1,10 +1,15 @@
 // @ts-check
 const { loadClusters } = require("./static-clusters-setup");
 
+/**
+ * @typedef {{ condition?: unknown, internal?: boolean, default?: unknown, name?: string, list?: { value: unknown }[] }} EditableParamEntry
+ * @typedef {{ cluster: string, editableParameters: Record<string, EditableParamEntry>, updateFunction: (props: Record<string, unknown>) => { storeKeys?: Record<string, unknown> } }} ClusterDef
+ */
+
 describe("static cluster configs", function () {
   it("registers wind/course/warning parameter conditions", function () {
+    /** @type {ClusterDef[]} */
     const defs = loadClusters();
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const byCluster = Object.fromEntries(defs.map((d) => [d.cluster, d]));
     expect(byCluster.wind.editableParameters.angleCaption_TWA).toBeUndefined();
     expect(byCluster.wind.editableParameters.speedCaption_TWS).toBeUndefined();
@@ -69,10 +74,11 @@ describe("static cluster configs", function () {
     expect(byCluster.courseHeading.editableParameters.compassLinearRatioThresholdNormal.internal).toBe(true);
     expect(byCluster.courseHeading.editableParameters.compassLinearRange.default).toBe(360);
     expect(byCluster.courseHeading.editableParameters.compassLinearRange.name).toBe("Visible range");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(byCluster.courseHeading.editableParameters.compassLinearRange.list.map((entry) => entry.value)).toEqual([
-      360, 180
-    ]);
+    const compassLinearRangeList = byCluster.courseHeading.editableParameters.compassLinearRange.list;
+    if (!compassLinearRangeList) {
+      throw new Error("Expected the compassLinearRange editable list.");
+    }
+    expect(compassLinearRangeList.map((entry) => entry.value)).toEqual([360, 180]);
     expect(byCluster.courseHeading.editableParameters.compassLinearRange.condition).toEqual([
       { kind: "hdtLinear" },
       { kind: "hdmLinear" }
@@ -295,14 +301,20 @@ describe("static cluster configs", function () {
   });
 
   it("updates default cluster storeKeys.value from the KEY editable", function () {
+    /** @type {ClusterDef[]} */
     const defs = loadClusters();
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const def = defs.find((item) => item.cluster === "default");
+    if (!def) {
+      throw new Error("Expected the default cluster def.");
+    }
 
     const updated = def.updateFunction({
       kind: "text",
       value: " nav.gps.speed "
     });
+    if (!updated.storeKeys) {
+      throw new Error("Expected storeKeys on the updated props.");
+    }
     expect(updated.storeKeys.value).toBe("nav.gps.speed");
 
     const cleared = def.updateFunction({
@@ -310,6 +322,9 @@ describe("static cluster configs", function () {
       value: "   ",
       storeKeys: { value: "old.path" }
     });
+    if (!cleared.storeKeys) {
+      throw new Error("Expected storeKeys on the cleared props.");
+    }
     expect(cleared.storeKeys.value).toBeUndefined();
     expect(Object.prototype.hasOwnProperty.call(cleared.storeKeys, "value")).toBe(false);
   });

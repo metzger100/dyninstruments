@@ -1,6 +1,6 @@
 # Guide: Create a New Cluster Widget
 
-**Status:** ✅ Reference Guide | Modular ClusterWidget workflow
+**Status:** Current.
 
 ## Prerequisites
 

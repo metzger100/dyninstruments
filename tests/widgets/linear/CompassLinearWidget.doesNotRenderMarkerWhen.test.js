@@ -3,6 +3,10 @@ const { createComponentContextMock, loadFresh } = require("./CompassLinearWidget
 
 describe("CompassLinearWidget", function () {
   it("does not render a marker when markerCourse is null", function () {
+    /** @typedef {{ drawDefaultPointer: () => void, drawMarkerAtValue: (value: number, options: { strokeStyle: string }) => void }} FrameApi */
+    /** @typedef {{ canvas: Record<string, unknown>, nowMs: number, theme: { colors: { pointer: string } } }} DrawState */
+    /** @typedef {{ drawFrame: (state: DrawState, props: { markerCourse: unknown }, display: { num: number, easedNum: number }, api: FrameApi) => { wantsFollowUpFrame: boolean } | undefined }} DrawConfig */
+    /** @type {DrawConfig | undefined} */
     let captured;
     const markerMotion = {
       resolve: vi.fn(),
@@ -16,23 +20,23 @@ describe("CompassLinearWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} value @returns {boolean} */
                 isFiniteNumber(value) {
                   return typeof value === "number" && Number.isFinite(value);
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} value @returns {number | undefined} */
                 toFiniteNumber(value) {
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} value @returns {number | undefined} */
                 toOptionalFiniteNumber(value) {
-                  if (value == null) return undefined;
+                  if (value === null || value === undefined) return undefined;
                   if (typeof value === "string" && value.trim() === "") return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} value @param {boolean} leadingZero @returns {string} */
                 formatDirection360(value, leadingZero) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
@@ -55,7 +59,7 @@ describe("CompassLinearWidget", function () {
           LinearGaugeEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {DrawConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -79,7 +83,9 @@ describe("CompassLinearWidget", function () {
       }
     };
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!captured) {
+      throw new Error("Expected the compass-linear draw-frame configuration.");
+    }
     const result = captured.drawFrame(state, { markerCourse: null }, { num: 350, easedNum: 350 }, api);
     expect(markerMotion.resolve).not.toHaveBeenCalled();
     expect(markerMotion.isActive).not.toHaveBeenCalled();
@@ -88,6 +94,9 @@ describe("CompassLinearWidget", function () {
   });
 
   it("returns fallback text for invalid heading values", function () {
+    /** @typedef {{ min: number, max: number }} AxisRange */
+    /** @typedef {{ formatDisplay: (value: unknown, props: { default?: unknown }) => { num: number, text: unknown }, resolveAxis: (props: { heading?: unknown }, range: unknown, defaultAxis: AxisRange) => AxisRange }} CompassConfig */
+    /** @type {CompassConfig | undefined} */
     let captured;
     loadFresh("widgets/linear/CompassLinearWidget/CompassLinearWidget.js").create(
       {},
@@ -96,18 +105,18 @@ describe("CompassLinearWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} value @returns {boolean} */
                 isFiniteNumber(value) {
                   return typeof value === "number" && Number.isFinite(value);
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} value @returns {number | undefined} */
                 toFiniteNumber(value) {
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} value @returns {number | undefined} */
                 toOptionalFiniteNumber(value) {
-                  if (value == null) return undefined;
+                  if (value === null || value === undefined) return undefined;
                   if (typeof value === "string" && value.trim() === "") return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
@@ -123,7 +132,7 @@ describe("CompassLinearWidget", function () {
               return {
                 createMotion() {
                   return {
-                    // @ts-ignore -- pre-existing untyped test mock boundary
+                    /** @param {unknown} canvas @param {unknown} target */
                     resolve(canvas, target) {
                       void canvas;
                       return target;
@@ -139,7 +148,7 @@ describe("CompassLinearWidget", function () {
           LinearGaugeEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {CompassConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -151,28 +160,26 @@ describe("CompassLinearWidget", function () {
       })
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(captured.formatDisplay(undefined, { default: "N/A" })).toEqual({
+    if (!captured) {
+      throw new Error("Expected the compass-linear display configuration.");
+    }
+    const compassConfig = captured;
+
+    expect(compassConfig.formatDisplay(undefined, { default: "N/A" })).toEqual({
       num: NaN,
       text: "N/A"
     });
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(captured.formatDisplay("", { default: "N/A" })).toEqual({
+    expect(compassConfig.formatDisplay("", { default: "N/A" })).toEqual({
       num: NaN,
       text: "N/A"
     });
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(captured.formatDisplay("   ", { default: "N/A" })).toEqual({
+    expect(compassConfig.formatDisplay("   ", { default: "N/A" })).toEqual({
       num: NaN,
       text: "N/A"
     });
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(captured.resolveAxis({ heading: undefined }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(captured.resolveAxis({ heading: null }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(captured.resolveAxis({ heading: "" }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(captured.resolveAxis({ heading: "   " }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });
+    expect(compassConfig.resolveAxis({ heading: undefined }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });
+    expect(compassConfig.resolveAxis({ heading: null }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });
+    expect(compassConfig.resolveAxis({ heading: "" }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });
+    expect(compassConfig.resolveAxis({ heading: "   " }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });
   });
 });

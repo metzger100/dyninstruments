@@ -1,7 +1,6 @@
 # Gauge Style Guide
 
-**Status:** ✅ Implemented | SpeedRadialWidget, DepthRadialWidget, TemperatureRadialWidget, VoltageRadialWidget,
-DefaultRadialWidget
+**Status:** Current. DefaultRadialWidget
 
 ## Overview
 

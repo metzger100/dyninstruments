@@ -1,6 +1,6 @@
 # Smell Fix Playbooks
 
-**Status:** ✅ Reference | Step-by-step remediation for smell catalog entries
+**Status:** Current.
 
 ## Overview
 

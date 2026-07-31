@@ -11,7 +11,9 @@ describe("UnitAwareFormatter", function () {
       },
       services: {
         format: {
-          applyFormatter: applyFormatterImpl || vi.fn((value) => (value == null ? null : String(value) + " m"))
+          applyFormatter:
+            applyFormatterImpl ||
+            vi.fn((value) => (value === null || value === undefined ? null : String(value) + " m"))
         }
       }
     });

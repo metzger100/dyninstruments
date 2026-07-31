@@ -41,7 +41,7 @@ function createComponentContextMock(options) {
   const format = services.format || {
     /** @param {any} value @param {any} [cfg] @returns {any} */
     applyFormatter(value, cfg) {
-      if (value == null || Number.isNaN(value)) {
+      if (value === null || value === undefined || Number.isNaN(value)) {
         if (cfg && Object.prototype.hasOwnProperty.call(cfg, "default")) {
           return cfg.default;
         }

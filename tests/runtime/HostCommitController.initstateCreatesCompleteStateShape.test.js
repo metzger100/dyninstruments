@@ -41,8 +41,9 @@ describe("runtime/HostCommitController.js", function () {
     harness.runNextRaf();
 
     expect(harness.document.querySelector).toHaveBeenCalled();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.document.querySelector.mock.calls[0][0]).toContain('.widgetData.dyni-shell[data-dyni-instance="');
+    /** @type {import("vitest").Mock<(selector: string) => unknown>} */
+    const querySelectorMock = harness.document.querySelector;
+    expect(querySelectorMock.mock.calls[0][0]).toContain('.widgetData.dyni-shell[data-dyni-instance="');
     expect(onCommit).toHaveBeenCalledTimes(1);
     const payload = onCommit.mock.calls[0][0];
     expect(payload.revision).toBe(1);

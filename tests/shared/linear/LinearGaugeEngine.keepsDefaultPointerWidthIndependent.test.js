@@ -80,9 +80,7 @@ describe("LinearGaugeEngine", function () {
       props
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(shortHarness.calls.pointer[0].opts.depth).not.toBe(longHarness.calls.pointer[0].opts.depth);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(shortHarness.calls.pointer[0].opts.side).toBe(longHarness.calls.pointer[0].opts.side);
   });
 });

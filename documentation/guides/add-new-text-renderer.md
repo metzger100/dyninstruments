@@ -1,7 +1,6 @@
 # Add New Text Renderer
 
-**Status:** ✅ Reference | Canvas text renderer workflow on TextLayoutEngine +
-`componentContext.theme.tokens.resolveForRoot(rootEl)`
+**Status:** Current. `componentContext.theme.tokens.resolveForRoot(rootEl)`
 
 ## Overview
 

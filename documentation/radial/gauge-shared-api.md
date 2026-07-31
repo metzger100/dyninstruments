@@ -1,6 +1,6 @@
 # Gauge Shared API
 
-**Status:** ✅ Implemented | split gauge utility modules + `RadialToolkit` facade
+**Status:** Current.
 
 ## Overview
 

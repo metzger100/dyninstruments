@@ -1,6 +1,6 @@
 # Layout File Conventions
 
-**Status:** ✅ Implemented | Canonical layout JSON structure and page naming rules
+**Status:** Current.
 
 ## Overview
 

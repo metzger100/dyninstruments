@@ -19,6 +19,8 @@
   let toObject;
   /** @type {DyniValueMathApi["toText"]} */
   let toText;
+  /** @type {DyniValueMathApi["isNullish"]} */
+  let isNullish;
 
   /**
    * @param {DyniComponentContext} componentContext
@@ -46,7 +48,7 @@
   function selectMetricValueFit(args, htmlUtils, tileLayout, htmlMeasureUtils) {
     const cfg = /** @type {DyniAisTargetMetricValueFitArgs} */ (args || {});
     const valueText = toText(cfg.valueText);
-    const plainText = cfg.plainText == null ? valueText : toText(cfg.plainText);
+    const plainText = isNullish(cfg.plainText) ? valueText : toText(cfg.plainText);
     const valueFit = htmlMeasureUtils.measurePx(
       {
         rect: cfg.rect,
@@ -163,6 +165,7 @@
     const modeRatio = componentContext.components.require("NavModeRatio");
     toObject = valueMath.toObject;
     toText = valueMath.toText;
+    isNullish = valueMath.isNullish;
     /**
      * @param {DyniAisTargetHtmlFitArgs | undefined} args
      * @returns {DyniAisTargetMarkupFit | null}

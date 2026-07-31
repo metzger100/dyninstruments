@@ -4,13 +4,21 @@ const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-ca
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @typedef {{ applyFormatter?: (raw: unknown, props?: Record<string, unknown>) => unknown }} ContextOptions
+ * @typedef {{ args: unknown[], name: string }} CanvasCall
+ * @typedef {{ __ctx: DyniTestCanvasContext, getBoundingClientRect: () => DOMRect, getContext: (kind: string) => DyniTestCanvasContext | null }} TestCanvas
+ * @typedef {{ renderCanvas: (canvas: TestCanvas, props: unknown) => void }} CanvasRenderer
+ * @typedef {{ font: string, text: string, x: unknown, y: unknown }} TextCall
+ */
+
+/** @param {ContextOptions} [options] */
 function makeComponentContext(options) {
   const opts = options || {};
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {unknown} raw @param {Record<string, unknown>} [props] */
   const defaultApplyFormatter = (raw, props) => {
     const fallback = props && Object.prototype.hasOwnProperty.call(props, "default") ? props.default : "---";
-    if (raw == null || Number.isNaN(raw)) return fallback;
+    if (raw === null || raw === undefined || Number.isNaN(raw)) return fallback;
     return String(raw);
   };
   const applyFormatter = vi.fn(typeof opts.applyFormatter === "function" ? opts.applyFormatter : defaultApplyFormatter);
@@ -35,14 +43,14 @@ function makeComponentContext(options) {
     CanvasTextLayout: {
       create() {
         return {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {string} family @param {{ monoFamily?: string, useMono?: boolean }} [options] */
           resolveFamily(family, options) {
             if (options && options.useMono === true) {
               return options.monoFamily || family;
             }
             return family;
           },
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {DyniTestCanvasContext} ctx @param {number} px @param {number} weight @param {string} family */
           setFont(ctx, px, weight, family) {
             const size = Math.max(1, Math.floor(Number(px) || 0));
             const fontWeight = Math.floor(Number(weight));
@@ -55,17 +63,17 @@ function makeComponentContext(options) {
     ValueMath: {
       create() {
         return {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {unknown} value */
           isFiniteNumber(value) {
             return typeof value === "number" && isFinite(value);
           },
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {number} value @param {number} lo @param {number} hi */
           clamp(value, lo, hi) {
             const n = Number(value);
             if (!isFinite(n)) return Number(lo);
             return Math.max(Number(lo), Math.min(Number(hi), n));
           },
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {number} value @param {number} lo @param {number} hi @param {number} fallbackValue */
           clampNumber(value, lo, hi, fallbackValue) {
             const n = Number(value);
             if (!Number.isFinite(n)) {
@@ -73,15 +81,15 @@ function makeComponentContext(options) {
             }
             return Math.max(Number(lo), Math.min(Number(hi), n));
           },
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {number} from @param {number} to @param {number} t */
           lerp(from, to, t) {
             return from + (to - from) * t;
           },
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {unknown} value */
           toText(value) {
-            return value == null ? "" : String(value).trim();
+            return value === null || value === undefined ? "" : String(value).trim();
           },
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {number} ratio @param {number} thresholdNormal @param {number} thresholdFlat */
           computeMode(ratio, thresholdNormal, thresholdFlat) {
             if (ratio < thresholdNormal) return "high";
             if (ratio > thresholdFlat) return "flat";
@@ -101,7 +109,7 @@ function makeComponentContext(options) {
     services: {
       format: { applyFormatter },
       canvas: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {TestCanvas} canvas */
         setupCanvas(canvas) {
           const ctx = canvas.getContext("2d");
           const rect = canvas.getBoundingClientRect();
@@ -113,7 +121,7 @@ function makeComponentContext(options) {
         }
       },
       dom: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {Element} target */
         requirePluginRoot(target) {
           return target;
         }
@@ -122,13 +130,12 @@ function makeComponentContext(options) {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {CanvasCall[]} calls @param {string} name */
 function countByName(calls, name) {
-  // @ts-ignore -- pre-existing untyped test mock boundary
   return calls.filter((entry) => entry.name === name).length;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {CanvasRenderer} spec @param {TestCanvas} canvas @param {unknown} props */
 function renderFrame(spec, canvas, props) {
   const ctx = canvas.__ctx;
   const beforeCallCount = ctx.calls.length;
@@ -138,9 +145,7 @@ function renderFrame(spec, canvas, props) {
     measureDelta: countByName(frameCalls, "measureText"),
     fillDelta: countByName(frameCalls, "fillText"),
     fillEntries: frameCalls
-      // @ts-ignore -- pre-existing untyped test mock boundary
       .filter((entry) => entry.name === "fillText")
-      // @ts-ignore -- pre-existing untyped test mock boundary
       .map((entry) => ({
         text: String(entry.args[0]),
         x: entry.args[1],
@@ -149,31 +154,30 @@ function renderFrame(spec, canvas, props) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {DyniTestCanvasContext} ctx @returns {TextCall[]} */
 function captureTextCalls(ctx) {
-  // @ts-ignore -- pre-existing untyped test mock boundary
-  const captured = [];
+  const captured = /** @type {TextCall[]} */ ([]);
   const originalFillText = ctx.fillText;
-  ctx.fillText = function () {
+  /** @this {DyniTestCanvasContext} @param {...unknown} args */
+  ctx.fillText = function (...args) {
     captured.push({
-      text: String(arguments[0]),
-      x: arguments[1],
-      y: arguments[2],
+      text: String(args[0]),
+      x: args[1],
+      y: args[2],
       font: ctx.font
     });
-    return originalFillText.apply(this, arguments);
+    return originalFillText.call(this, String(args[0]), Number(args[1]), Number(args[2]));
   };
-  // @ts-ignore -- pre-existing untyped test mock boundary
   return captured;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {string} font */
 function parseFontPx(font) {
   const match = /(\d+)px/.exec(String(font || ""));
   return match ? Number(match[1]) : 0;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {CanvasRenderer} spec @param {number} width @param {number} height @param {unknown} props */
 function renderCaptured(spec, width, height, props) {
   const ctx = createMockContext2D();
   const canvas = createMockCanvas({
@@ -186,9 +190,8 @@ function renderCaptured(spec, width, height, props) {
   return captured;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {TextCall[]} calls @param {string} text */
 function findTextCall(calls, text) {
-  // @ts-ignore -- pre-existing untyped test mock boundary
   return calls.find((entry) => entry.text === text);
 }
 

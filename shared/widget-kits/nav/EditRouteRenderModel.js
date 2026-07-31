@@ -47,7 +47,7 @@
 
   /** @param {unknown} value @returns {string} */
   function toSignatureToken(value) {
-    if (value == null) {
+    if (value === null || value === undefined) {
       return "";
     }
     return encodeURIComponent(String(value));

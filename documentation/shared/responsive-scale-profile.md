@@ -1,6 +1,6 @@
 # ResponsiveScaleProfile
 
-**Status:** ✅ Implemented | Shared runtime owner for repo-wide responsive compaction
+**Status:** Current.
 
 ## Overview
 

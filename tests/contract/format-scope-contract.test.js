@@ -1,5 +1,7 @@
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
+const { execFileSync } = require("node:child_process");
 
 const root = process.cwd();
 const SCOPE_PATH = path.join(root, "tools/quality-policy/format-scope.json");
@@ -73,6 +75,28 @@ describe("format-scope contract", function () {
     });
 
     expect(trulyUnclassified).toEqual([]);
+  });
+
+  it("excludes tracked paths deleted before their move is staged", async function () {
+    const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "format-scope-deleted-"));
+    const livePath = path.join(fixtureRoot, "live.md");
+    const deletedPath = path.join(fixtureRoot, "deleted.md");
+    fs.writeFileSync(livePath, "# Live\n");
+    fs.writeFileSync(deletedPath, "# Deleted\n");
+    execFileSync("git", ["init", "--quiet"], { cwd: fixtureRoot });
+    execFileSync("git", ["add", "live.md", "deleted.md"], { cwd: fixtureRoot });
+    fs.rmSync(deletedPath);
+
+    try {
+      const { buildFormatScope } = await import(path.join(root, "tools/quality-policy/generate-format-scope.mjs"));
+      const paths = buildFormatScope(fixtureRoot).map(function (/** @type {{ path: string }} */ row) {
+        return row.path;
+      });
+      expect(paths).toContain("live.md");
+      expect(paths).not.toContain("deleted.md");
+    } finally {
+      fs.rmSync(fixtureRoot, { recursive: true, force: true });
+    }
   });
 });
 

@@ -1,6 +1,11 @@
 // @ts-check
 const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
+/**
+ * @typedef {{ opts: { lineWidth: number } }} TrackCallWithOpts
+ * @typedef {{ thickness: number, y: number }} BandCall
+ */
+
 describe("LinearGaugeEngine", function () {
   it("keeps sector bands above the scale track", function () {
     const harness = createHarness();
@@ -32,12 +37,11 @@ describe("LinearGaugeEngine", function () {
       showEndLabels: true
     });
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const trackY = harness.calls.track[0].y;
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const band = harness.calls.bands[0];
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const trackClearance = Math.max(1, Math.ceil(harness.calls.track[0].opts.lineWidth / 2));
+    const bandsCalls = /** @type {typeof harness.calls & { bands: BandCall[] }} */ (harness.calls).bands;
+    const band = bandsCalls[0];
+    const trackCallWithOpts = /** @type {typeof harness.calls.track[0] & TrackCallWithOpts} */ (harness.calls.track[0]);
+    const trackClearance = Math.max(1, Math.ceil(trackCallWithOpts.opts.lineWidth / 2));
 
     expect(band).toBeDefined();
     expect(band.y + band.thickness / 2).toBeLessThanOrEqual(trackY - trackClearance);

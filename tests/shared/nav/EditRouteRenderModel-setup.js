@@ -2,16 +2,22 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @typedef {{ default?: unknown, formatter?: string, formatterParameters?: unknown[] }} FormatterOptions
+ * @typedef {{ applyFormatter?: (value: unknown, options?: FormatterOptions) => unknown }} RenderModelOptions
+ * @typedef {Record<string, unknown> & { captions?: Record<string, string>, domain?: Record<string, unknown>, formatUnits?: Record<string, string>, layout?: Record<string, number>, units?: Record<string, string> }} EditRouteProps
+ */
+
+/** @param {RenderModelOptions} [options] */
 function createRenderModel(options) {
   const opts = options || {};
   const applyFormatter =
     opts.applyFormatter ||
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {unknown} value @param {FormatterOptions} [formatterOptions] */
     function (value, formatterOptions) {
       const cfg = formatterOptions || {};
       const defaultText = Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
-      if (value == null || Number.isNaN(value)) {
+      if (value === null || value === undefined || Number.isNaN(value)) {
         return defaultText;
       }
 
@@ -59,7 +65,7 @@ function createRenderModel(options) {
   return loadFresh("shared/widget-kits/nav/EditRouteRenderModel.js").create({}, componentContext);
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {EditRouteProps} props @param {{ mode?: string, orientation?: string }} [options] */
 function withSurfacePolicy(props, options) {
   const opts = options || {};
   return Object.assign({}, props || {}, {
@@ -72,7 +78,7 @@ function withSurfacePolicy(props, options) {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {EditRouteProps} [overrides] */
 function makeProps(overrides) {
   return Object.assign(
     {

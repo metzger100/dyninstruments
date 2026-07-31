@@ -30,6 +30,7 @@ interface DyniComponentContext {
 
 interface DyniValueMathApi {
   isObject(value: unknown): value is Record<string, unknown>;
+  isNullish(value: unknown): value is null | undefined;
   toObject(value: unknown): Record<string, unknown>;
   trimText(value: unknown): string;
   clampPositive(value: unknown, defaultValue: number): number;

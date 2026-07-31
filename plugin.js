@@ -2,7 +2,6 @@
  * @file plugin.js - Legacy Dyni bootstrap adapter
  * Documentation: documentation/architecture/runtime-lifecycle.md
  */
-/* global avnav */
 (function () {
   "use strict";
 
@@ -86,9 +85,9 @@
 
   var hostApi = resolveHostApi();
   if (!hasRequiredHostApi(hostApi)) {
-    console.error("dyninstruments: avnav.api missing required registerWidget/log methods");
     return;
   }
+  const requiredHostApi = hostApi;
 
   var baseUrl = resolveBaseUrl();
 
@@ -97,14 +96,18 @@
       return core.start({
         root: window,
         document: document,
-        logger: console,
+        logger: {
+          error: function () {
+            requiredHostApi.log(Array.prototype.join.call(arguments, " "));
+          }
+        },
         baseUrl: baseUrl,
         hostApi: hostApi,
         entrypoint: "legacy"
       });
     })
-    // dyni-boundary-next-line(category: browser-runtime-boundary, owner: Metzger100, date: 2026-07-17) -- Top-level bootstrap should log startup failures without turning them into unhandled browser promise rejections.
+    // plugin-boundary-next-line(category: browser-runtime-boundary, owner: Metzger100, date: 2026-07-17) -- Top-level bootstrap should log startup failures without turning them into unhandled browser promise rejections.
     .catch(function (error) {
-      console.error("dyninstruments bootstrap failed:", error);
+      requiredHostApi.log("dyninstruments bootstrap failed: " + String(error));
     });
 })();

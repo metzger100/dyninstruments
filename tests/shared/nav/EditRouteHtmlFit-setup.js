@@ -2,10 +2,15 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
+/**
+ * @typedef {{ labelText: string, plainValueText?: string, unitText?: string, valueText: string }} Metric
+ * @typedef {{ hasRoute: boolean, isLocalRoute: boolean, metrics: Record<string, Metric>, mode: string, nameText: string, ratioThresholdFlat: number, ratioThresholdNormal: number, sourceBadgeText: string, stableDigitsEnabled: boolean }} EditRouteModel
+ */
+
 function createMeasureContext() {
   return {
     font: "700 12px sans-serif",
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {string} text */
     measureText(text) {
       const source = String(this.font || "");
       const match = source.match(/(\d+(?:\.\d+)?)px/);
@@ -37,7 +42,7 @@ function createRadialTextApi() {
       return { vPx: 0.5, uPx: unit ? 0.5 : 0, gap: 0, total: 0 };
     }
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {number} vPx @param {number} uPx @param {number} gap */
     function totalWidth(vPx, uPx, gap) {
       api.setFont(ctx, vPx, valueWeight, valueFamily);
       let total = api.measureTextWidth(ctx, String(value || ""));
@@ -85,10 +90,10 @@ function createRadialTextApi() {
   return api;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {Partial<EditRouteModel>} [overrides] */
 function buildModel(overrides) {
   const patch = overrides || {};
-  const base = {
+  const base = /** @type {EditRouteModel} */ ({
     mode: "normal",
     hasRoute: true,
     isLocalRoute: true,
@@ -123,13 +128,12 @@ function buildModel(overrides) {
         unitText: ""
       }
     }
-  };
+  });
 
-  const out = Object.assign({}, base, patch);
-  const patchedMetrics = patch.metrics && typeof patch.metrics === "object" ? patch.metrics : {};
+  const out = /** @type {EditRouteModel} */ (Object.assign({}, base, patch));
+  const patchedMetrics = patch.metrics || {};
   out.metrics = Object.create(null);
   Object.keys(base.metrics).forEach((id) => {
-    // @ts-ignore -- pre-existing untyped test mock boundary
     out.metrics[id] = Object.assign({}, base.metrics[id], patchedMetrics[id] || {});
   });
   return out;
@@ -185,7 +189,7 @@ function createHarness() {
         resolveForRoot: themeApi.resolveForRoot
       },
       dom: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {Element | null} target */
         requirePluginRoot(target) {
           return target || null;
         },
@@ -199,14 +203,14 @@ function createHarness() {
   return { fit, targetEl, hostContext, themeApi, textTileLayoutSpy };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} style */
 function extractPx(style) {
   const source = String(style || "");
   const match = source.match(new RegExp("^font-size:(\\d+)px\\x3b$"));
   return match ? Number(match[1]) : 0;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} style */
 function expectStyleFormat(style) {
   expect(typeof style).toBe("string");
   if (style === "") {

@@ -1,6 +1,6 @@
 # Surface Session Controller
 
-**Status:** ✅ Implemented | Runtime state machine for `html` / `canvas-dom` session ownership
+**Status:** Current.
 
 ## Overview
 

@@ -3,7 +3,8 @@ const { createComponentContextMock, loadFresh } = require("./TemperatureLinearWi
 
 describe("TemperatureLinearWidget", function () {
   it("treats blank and missing high-end thresholds as unset", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @typedef {{ buildSectors: (props: Record<string, unknown>, min: number, max: number, axis: { min: number, max: number }, valueApi: Record<string, unknown>, theme: { colors: { warning: string, alarm: string } }) => unknown[] }} SectorConfig */
+    /** @type {SectorConfig | undefined} */
     let captured;
 
     loadFresh("widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js").create(
@@ -13,10 +14,10 @@ describe("TemperatureLinearWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   return String(text);
                 }
@@ -26,12 +27,12 @@ describe("TemperatureLinearWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} raw */
                 formatGaugeDisplay(raw) {
                   const n = Number(raw);
                   return Number.isFinite(n) ? { num: n, text: String(n) } : { num: NaN, text: "---" };
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} v @param {number} lo @param {number} hi */
                 clamp(v, lo, hi) {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
@@ -44,7 +45,7 @@ describe("TemperatureLinearWidget", function () {
           LinearGaugeEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {SectorConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -55,7 +56,7 @@ describe("TemperatureLinearWidget", function () {
         },
         services: {
           format: {
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {unknown} value */
             applyFormatter(value) {
               return String(value);
             }
@@ -64,13 +65,17 @@ describe("TemperatureLinearWidget", function () {
       })
     );
 
+    if (!captured) {
+      throw new Error("Expected the temperature-linear sectors configuration.");
+    }
+    const sectorConfig = captured;
+
     const theme = { colors: { warning: "#123456", alarm: "#654321" } };
     const axis = { min: 0, max: 35 };
 
     [null, undefined, "", "   "].forEach(function (rawThreshold) {
       expect(
-        // @ts-ignore -- pre-existing untyped test mock boundary
-        captured.buildSectors(
+        sectorConfig.buildSectors(
           {
             tempLinearWarningFrom: rawThreshold,
             tempLinearAlarmFrom: rawThreshold
@@ -85,8 +90,7 @@ describe("TemperatureLinearWidget", function () {
     });
 
     expect(
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      captured.buildSectors(
+      sectorConfig.buildSectors(
         {
           tempLinearWarningFrom: 28,
           tempLinearAlarmFrom: 32

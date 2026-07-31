@@ -3,13 +3,10 @@ const { createRenderOrderHarness, createMockCanvas, createMockContext2D } = requ
 
 describe("SemicircleRadialEngine", function () {
   it("skips the semicircle text draw step when hideTextualMetrics is enabled", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const harness = createRenderOrderHarness([]);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       ctx: createMockContext2D()
     });
 

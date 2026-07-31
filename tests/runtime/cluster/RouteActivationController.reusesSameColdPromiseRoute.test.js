@@ -6,6 +6,14 @@ const {
   loadController
 } = require("./RouteActivationController-setup");
 
+/** @param {{ resolve?: () => void }} deferred */
+function resolveDeferred(deferred) {
+  if (!deferred.resolve) {
+    throw new Error("deferred.resolve is not defined");
+  }
+  deferred.resolve();
+}
+
 describe("runtime/cluster/RouteActivationController.js", function () {
   it("reuses the same cold promise for a route and resolves with the latest snapshot, then discards cleanly on destroy", async function () {
     const mapperTranslate = vi.fn(function (props, routeContext) {
@@ -149,14 +157,10 @@ describe("runtime/cluster/RouteActivationController.js", function () {
 
     expect(first).toBe(second);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    deferredLoads.NavMapper.resolve();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    deferredLoads.ActiveRouteViewModel.resolve();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    deferredLoads.ActiveRouteTextHtmlWidget.resolve();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    deferredLoads.ClusterMapperToolkit.resolve();
+    resolveDeferred(deferredLoads.NavMapper);
+    resolveDeferred(deferredLoads.ActiveRouteViewModel);
+    resolveDeferred(deferredLoads.ActiveRouteTextHtmlWidget);
+    resolveDeferred(deferredLoads.ClusterMapperToolkit);
 
     const payload = await first;
     expect(

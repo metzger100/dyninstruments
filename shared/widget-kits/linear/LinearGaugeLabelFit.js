@@ -11,6 +11,9 @@
 })(this, function () {
   "use strict";
 
+  /** @type {DyniValueMathApi["isNullish"]} */
+  let isNullish;
+
   /**
    * @param {DyniLinearGaugeDrawingState} state
    * @returns {DyniLinearScaleBounds}
@@ -181,7 +184,7 @@
       }
       const labelRaw =
         typeof labelFormatter === "function" ? labelFormatter(tickV, state) : math.formatTickLabel(tickV);
-      if (labelRaw == null) {
+      if (isNullish(labelRaw)) {
         continue;
       }
       const label = String(labelRaw);
@@ -300,6 +303,7 @@
   function create(def, componentContext) {
     const fitting = componentContext.components.require("CanvasTextFitting");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    isNullish = componentContext.components.require("ValueMath").isNullish;
     const setCanvasFont = fitting.setFont;
     const resolveLabelEdgePolicy = htmlUtils.resolveLabelEdgePolicy;
 

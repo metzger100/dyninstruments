@@ -1,7 +1,26 @@
-// @ts-nocheck
 const { loadFresh } = require("../helpers/load-umd");
-const { flushPromises } = require("../helpers/async");
 const { createComponentContextMock } = require("../helpers/component-context-mock");
+
+/**
+ * @typedef {{
+ *   activeController: { id: string } | null,
+ *   shellEl: unknown
+ * }} DyniSurfaceSessionState
+ * @typedef {{
+ *   routeMeta?: unknown,
+ *   routeId?: string,
+ *   clusterRoutes?: { byRouteId: Record<string, unknown> },
+ *   hostCommitController?: ReturnType<typeof createHostCommitControllerMock>,
+ *   surfaceSessionController?: ReturnType<typeof createSurfaceSessionControllerMock>,
+ *   activationController?: {
+ *     activateCommittedRoute: import("vitest").Mock<(payload?: unknown) => unknown>,
+ *     invalidateMemoState?: () => void,
+ *     destroy: () => void
+ *   },
+ *   activationResultFactory?: (payload?: unknown) => unknown,
+ *   shellHtml?: string
+ * }} DyniRuntimeHarnessOptions
+ */
 
 function createDeferred() {
   let resolve = null;
@@ -14,6 +33,7 @@ function createDeferred() {
   };
 }
 
+/** @param {string} instanceId */
 function createHostCommitControllerMock(instanceId) {
   let renderRevision = 0;
   let lastProps = null;
@@ -55,6 +75,7 @@ function createHostCommitControllerMock(instanceId) {
 }
 
 function createSurfaceSessionControllerMock() {
+  /** @type {DyniSurfaceSessionState} */
   const state = {
     activeController: null,
     shellEl: null
@@ -83,6 +104,7 @@ function createSurfaceSessionControllerMock() {
   };
 }
 
+/** @param {((payload?: unknown) => unknown) | undefined} [resultFactory] */
 function createActivationControllerMock(resultFactory) {
   return {
     activateCommittedRoute: vi.fn(
@@ -96,6 +118,7 @@ function createActivationControllerMock(resultFactory) {
   };
 }
 
+/** @param {DyniRuntimeHarnessOptions} [options] */
 function createRuntimeHarness(options) {
   const opts = options || {};
   const routeMeta = opts.routeMeta || null;
@@ -163,6 +186,7 @@ function createRuntimeHarness(options) {
   };
 }
 
+/** @param {unknown} def */
 function createClusterWidget(def) {
   return loadFresh("cluster/ClusterWidget.js").create(def, createComponentContextMock());
 }
@@ -186,11 +210,3 @@ module.exports = {
   createRuntimeHarness,
   createClusterWidget
 };
-
-globalThis.createDeferred = createDeferred;
-globalThis.createHostCommitControllerMock = createHostCommitControllerMock;
-globalThis.createSurfaceSessionControllerMock = createSurfaceSessionControllerMock;
-globalThis.createActivationControllerMock = createActivationControllerMock;
-globalThis.createRuntimeHarness = createRuntimeHarness;
-globalThis.createClusterWidget = createClusterWidget;
-globalThis.flushPromises = flushPromises;

@@ -1,7 +1,6 @@
 # Linear Shared API
 
-**Status:** ✅ Implemented | `LinearGaugeEngine` contracts for range/centered180/fixed360 wrappers, including hook
-extensions used by Wind/Compass linear widgets and the hide-textual-metrics graphics-only layout
+**Status:** Current. extensions used by Wind/Compass linear widgets and the hide-textual-metrics graphics-only layout
 
 ## Overview
 

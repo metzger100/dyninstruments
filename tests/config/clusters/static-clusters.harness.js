@@ -1,4 +1,3 @@
-// @ts-nocheck
 const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 
 function loadClusters() {
@@ -33,7 +32,7 @@ function loadClusters() {
   runIifeScript("config/clusters/map.js", context);
   runIifeScript("config/clusters/anchor.js", context);
 
-  return context.DyniPlugin.config.clusters.map((x) => x.def);
+  return context.DyniPlugin.config.clusters.map((/** @type {{ def: Record<string, unknown> }} */ x) => x.def);
 }
 
 module.exports = {

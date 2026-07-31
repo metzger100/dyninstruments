@@ -11,6 +11,9 @@
 })(this, function () {
   "use strict";
 
+  /** @type {DyniValueMathApi["isNullish"]} */
+  let isNullish;
+
   /** @param {unknown} input @returns {string[]} */
   function normalizeClasses(input) {
     if (Array.isArray(input)) {
@@ -75,7 +78,7 @@
     for (let i = 0; i < keys.length; i += 1) {
       const key = keys[i];
       const value = record[key];
-      if (!key || value == null || value === false) {
+      if (!key || isNullish(value) || value === false) {
         continue;
       }
       if (value === true) {
@@ -96,6 +99,7 @@
     const labelsApi = componentContext.components.require("StateScreenLabels");
     const labels = labelsApi;
     const defaultHtmlUtils = componentContext.components.require("HtmlWidgetUtils");
+    isNullish = componentContext.components.require("ValueMath").isNullish;
     const stateScreenTextFit = componentContext.components.require("StateScreenTextFit");
 
     /** @param {DyniStateScreenRenderArgs} cfg @param {string} labelText @returns {string} */

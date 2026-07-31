@@ -25,20 +25,16 @@ describe("FullCircleRadialTextLayout", function () {
 
     layout.drawDualModeText(harness.state, "flat", display.left, display.right);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(harness.captures.valueUnit.length).toBe(2);
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    const ctx = /** @type {DyniTestCanvasContext} */ (harness.state.ctx);
     harness.captures.valueUnit.forEach(function (row) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      harness.realText.setFont(harness.state.ctx, row.fit.vPx, harness.state.valueWeight, harness.state.family);
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      const valueWidth = harness.state.ctx.measureText(String(row.valueText)).width;
+      const fit = /** @type {{ gap: number, uPx: number, vPx: number }} */ (row.fit);
+      harness.realText.setFont(ctx, fit.vPx, harness.state.valueWeight, harness.state.family);
+      const valueWidth = ctx.measureText(String(row.valueText)).width;
       let totalWidth = valueWidth;
       if (row.unitText) {
-        // @ts-ignore -- pre-existing untyped test mock boundary
-        harness.realText.setFont(harness.state.ctx, row.fit.uPx, harness.state.labelWeight, harness.state.family);
-        // @ts-ignore -- pre-existing untyped test mock boundary
-        totalWidth += row.fit.gap + harness.state.ctx.measureText(String(row.unitText)).width;
+        harness.realText.setFont(ctx, fit.uPx, harness.state.labelWeight, harness.state.family);
+        totalWidth += fit.gap + ctx.measureText(String(row.unitText)).width;
       }
       expect(totalWidth <= row.w + 0.01 || row.scaled).toBe(true);
     });

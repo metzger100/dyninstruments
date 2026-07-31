@@ -3,7 +3,6 @@ const { createRenderOrderHarness, createMockCanvas, createMockContext2D } = requ
 
 describe("SemicircleRadialEngine", function () {
   it("draws sectors before the arc ring and keeps the pointer above ticks and labels", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const harness = createRenderOrderHarness([
       {
         a0: 20,
@@ -11,11 +10,9 @@ describe("SemicircleRadialEngine", function () {
         color: "#e0a92e"
       }
     ]);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       ctx: createMockContext2D()
     });
 

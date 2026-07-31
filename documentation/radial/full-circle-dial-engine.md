@@ -1,6 +1,6 @@
 # FullCircleRadialEngine
 
-**Status:** ✅ Implemented | shared full-circle dial renderer pipeline for Compass/Wind widgets
+**Status:** Current.
 
 ## Overview
 

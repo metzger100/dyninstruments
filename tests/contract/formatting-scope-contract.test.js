@@ -120,12 +120,20 @@ function expectAllCovered(maintained, covered, label) {
 /** @param {string[]} maintained */
 async function expectNoneEffectivelyIgnored(maintained) {
   const excluded = new Set(NEGATIVE_FIXTURE_EXCLUSIONS);
-  const ignored = [];
-  for (const relPath of maintained) {
-    if (excluded.has(relPath)) continue;
-    const info = await prettier.getFileInfo(path.join(root, relPath), { ignorePath });
-    if (info.ignored) ignored.push(relPath);
-  }
+  const ignored = (
+    await Promise.all(
+      maintained
+        .filter(function (relPath) {
+          return !excluded.has(relPath);
+        })
+        .map(async function (relPath) {
+          const info = await prettier.getFileInfo(path.join(root, relPath), { ignorePath });
+          return info.ignored ? relPath : undefined;
+        })
+    )
+  ).filter(function (relPath) {
+    return relPath !== undefined;
+  });
   expect(ignored, "maintained files effectively ignored by Prettier").toEqual([]);
 }
 

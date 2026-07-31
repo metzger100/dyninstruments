@@ -65,7 +65,7 @@
   "suppression": {
     "productionDyniLintDisableDirectiveCount": 29,
     "productionStandardSuppressionDirectiveCount": 0,
-    "note": "The frozen capture recorded 29 generic dyni-lint-disable-* directives and zero standard suppressions. Live enforcement now also covers plugin.mjs and @ts-nocheck; test-only exceptions are owned by the checked test inventory."
+    "note": "The frozen capture recorded 29 generic plugin-lint-disable-* directives and zero standard suppressions. Live enforcement now also covers plugin.mjs and @ts-nocheck; test-only exceptions are owned by the checked test inventory."
   },
   "unsafeSinks": {
     "innerHtmlAssignmentSites": [

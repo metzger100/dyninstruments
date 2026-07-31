@@ -23,7 +23,7 @@
   function readText(props, key, defaultValue) {
     if (Object.prototype.hasOwnProperty.call(props, key)) {
       const value = props[key];
-      return value == null ? "" : String(value);
+      return value === null || value === undefined ? "" : String(value);
     }
     return defaultValue;
   }

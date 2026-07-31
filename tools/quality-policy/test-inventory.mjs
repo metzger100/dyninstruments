@@ -2,42 +2,76 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
+import { pathToFileURL } from "node:url";
 import { readJsonPolicy } from "./read-json-policy.mjs";
 
 const root = process.cwd();
 const inventoryPath = path.join(root, "tools/quality-policy/test-inventory.json");
 const exceptionBaselinePath = path.join(root, "tools/quality-policy/test-exception-baseline.json");
-const CAPTURED_EXCEPTION_BASELINE_SHA256 = "cfb1ed41cda70c9c6db51146f036a22f2a8deffaff3517385a96c5943ebb7fb4";
+const CAPTURED_EXCEPTION_BASELINE_SHA256 = "1d4965b3294f15ac402063c2bbb706647059aa2c0922e48352bb81e86ab049d8";
 const ALLOWED_CLASSIFICATIONS = new Set(["strict", "harness-fragment", "split-spec-fragment", "fixture"]);
 const NON_STRICT_CLASSIFICATIONS = new Set(["harness-fragment", "split-spec-fragment", "fixture"]);
 const FIXTURE_ROOT = "tests/tools/lint-fixtures/";
 const FIXTURE_OWNER = "tests/tools/quality-owners.test.js";
+// tests/tools/vitest-allow-only.proof.test.js momentarily materializes one seeded `.only` file
+// per configured project to prove Vitest's allowOnly:false config rejects it, then deletes it.
+// Excluding these exact paths avoids a real race against a concurrently running scan of this
+// same set (this checker's own "real repo" self-test included).
+const TRANSIENT_ALLOW_ONLY_PROOF_FILES = new Set([
+  "tests/tools/dyni-focused-direct.proof.test.js",
+  "tests/tools/dyni-focused-node.proof.test.js",
+  "tests/contract/dyni-focused-contract.proof.test.js",
+  "tests/runtime/dyni-focused-dom.proof.test.js"
+]);
 
-let inventory;
-let exceptionBaseline;
-try {
-  inventory = readJsonPolicy(inventoryPath);
-  exceptionBaseline = readJsonPolicy(exceptionBaselinePath);
-} catch (error) {
-  console.error(/** @type {Error} */ (error).message);
-  process.exit(1);
+/** @returns {void} */
+function runTestInventoryCheckCli() {
+  let inventory;
+  let exceptionBaseline;
+  try {
+    inventory = readJsonPolicy(inventoryPath);
+    exceptionBaseline = readJsonPolicy(exceptionBaselinePath);
+  } catch (error) {
+    console.error(/** @type {Error} */ (error).message);
+    process.exit(1);
+  }
+  const entries = inventory.entries || {};
+  const liveFiles = collectLiveTestFiles();
+  /** @type {string[]} */
+  const errors = [];
+
+  checkExceptionBaselineSchema(exceptionBaseline, errors);
+  checkExceptionBaselineLiveness(exceptionBaseline.entries, liveFiles, errors);
+  checkImmutableExceptionBaseline(errors);
+  checkNoGlobCatchAllKeys(entries, errors);
+  checkInventoryCompleteness(entries, liveFiles, errors);
+  if (errors.length === 0) {
+    checkClassifications(entries, errors);
+    checkExceptionProvenance(entries, exceptionBaseline.entries, errors);
+    checkHarnessFragmentEntries(entries, liveFiles, errors);
+    checkSplitSpecFragmentEntries(entries, liveFiles, errors);
+    checkFixtureEntries(entries, liveFiles, errors);
+    checkTypecheckSuppressions(entries, errors);
+  }
+
+  if (errors.length > 0) {
+    for (const message of errors) console.error(message);
+    console.error(`\ntest inventory check failed: ${errors.length} problem(s).`);
+    process.exit(1);
+  }
+
+  console.log(`Test inventory check passed: ${Object.keys(entries).length} classified test files.`);
+  console.log(`SUMMARY_JSON=${JSON.stringify({ ok: true, entryCount: Object.keys(entries).length })}`);
 }
-const entries = inventory.entries || {};
-const liveFiles = collectLiveTestFiles();
-/** @type {string[]} */
-const errors = [];
 
-checkExceptionBaselineSchema(exceptionBaseline, errors);
-checkImmutableExceptionBaseline(errors);
-checkNoGlobCatchAllKeys(entries, errors);
-checkInventoryCompleteness(entries, liveFiles, errors);
-if (errors.length === 0) {
-  checkClassifications(entries, errors);
-  checkExceptionProvenance(entries, exceptionBaseline.entries, errors);
-  checkHarnessFragmentEntries(entries, liveFiles, errors);
-  checkSplitSpecFragmentEntries(entries, liveFiles, errors);
-  checkFixtureEntries(entries, liveFiles, errors);
-  checkTypecheckSuppressions(entries, errors);
+/** @param {any} entries @param {Set<string>} live @param {string[]} out */
+function checkExceptionBaselineLiveness(entries, live, out) {
+  if (!entries || typeof entries !== "object" || Array.isArray(entries)) return;
+  for (const relativePath of Object.keys(entries)) {
+    if (!live.has(relativePath)) {
+      out.push(`Stale test-exception baseline entry for a file that no longer exists: '${relativePath}'.`);
+    }
+  }
 }
 
 /** @param {any} data @param {Set<string>} live @param {string[]} out */
@@ -60,14 +94,20 @@ function checkSplitSpecFragmentEntries(data, live, out) {
   }
 }
 
-if (errors.length > 0) {
-  for (const message of errors) console.error(message);
-  console.error(`\ntest inventory check failed: ${errors.length} problem(s).`);
-  process.exit(1);
+/**
+ * Reuses this module's own file discovery (`collectJavaScriptFiles`) so the executable
+ * test/helper file set behind `check-test-focus.mjs` can never drift from this inventory's set.
+ * Excludes `FIXTURE_ROOT`: those files are deliberately-bad negative fixtures asserted directly by
+ * their owning test, never collected or executed by Vitest itself.
+ * @param {string} [projectRoot]
+ * @returns {string[]}
+ */
+export function discoverExecutableTestHelpers(projectRoot = process.cwd()) {
+  return collectJavaScriptFiles(path.join(projectRoot, "tests"))
+    .map((file) => path.relative(projectRoot, file).replaceAll(path.sep, "/"))
+    .filter((rel) => !rel.startsWith(FIXTURE_ROOT) && !TRANSIENT_ALLOW_ONLY_PROOF_FILES.has(rel))
+    .sort();
 }
-
-console.log(`Test inventory check passed: ${Object.keys(entries).length} classified test files.`);
-console.log(`SUMMARY_JSON=${JSON.stringify({ ok: true, entryCount: Object.keys(entries).length })}`);
 
 /** @returns {Set<string>} */
 function collectLiveTestFiles() {
@@ -89,7 +129,7 @@ function collectJavaScriptFiles(absoluteRoot) {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
       const absolutePath = path.join(directory, entry.name);
       if (entry.isDirectory()) visit(absolutePath);
-      else if (entry.isFile() && entry.name.endsWith(".js")) files.push(absolutePath);
+      else if (entry.isFile() && (entry.name.endsWith(".js") || entry.name.endsWith(".mjs"))) files.push(absolutePath);
     }
   }
 
@@ -251,4 +291,14 @@ function checkFixtureEntries(data, live, out) {
       out.push(`Fixture entry '${relativePath}' is missing a 'reason'.`);
     }
   }
+}
+
+/** @returns {boolean} */
+function isCliEntrypoint() {
+  if (!process.argv[1]) return false;
+  return pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url;
+}
+
+if (isCliEntrypoint()) {
+  runTestInventoryCheckCli();
 }

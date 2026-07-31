@@ -1,6 +1,6 @@
 # Guide: Create a New Full-Circle Dial
 
-**Status:** ✅ Ready | Current workflow with `FullCircleRadialEngine` + ClusterWidget registries
+**Status:** Current.
 
 ## Overview
 

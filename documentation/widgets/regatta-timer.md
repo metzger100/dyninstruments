@@ -1,6 +1,6 @@
 # Regatta Timer HTML Renderer
 
-**Status:** ✅ Implemented | Interactive countdown/sync/elapsed timer for `vessel/regattaTimer`
+**Status:** Current.
 
 ## Overview
 

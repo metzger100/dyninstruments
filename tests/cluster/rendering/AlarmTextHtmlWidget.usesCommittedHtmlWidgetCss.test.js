@@ -77,10 +77,6 @@ describe("AlarmTextHtmlWidget", function () {
   it("keeps MapZoom inner layout parity for main/rows and typography", function () {
     const alarmCss = readCss("widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css");
     const mapZoomCss = readCss("widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css");
-    // eslint-disable-next-line no-unused-vars -- imported shared setup retained for the strict test contract
-    const alarmMain = readRuleBody(alarmCss, ".dyni-html-root .dyni-alarm-main");
-    // eslint-disable-next-line no-unused-vars -- imported shared setup retained for the strict test contract
-    const mapZoomMain = readRuleBody(mapZoomCss, ".dyni-html-root .dyni-map-zoom-main");
     const alarmMainModes = readCombinedRuleBody(alarmCss, [
       ".dyni-html-root .dyni-alarm-main-flat",
       ".dyni-html-root .dyni-alarm-main-normal",

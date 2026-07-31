@@ -30,7 +30,7 @@ describe("MapZoomTextHtmlWidget fallback rendering", function () {
           /** @param {any} value @param {Record<string, any>} [formatterOptions] */
           applyFormatter(value, formatterOptions) {
             const cfg = formatterOptions || {};
-            if (value == null) return cfg.default;
+            if (value === null || value === undefined) return cfg.default;
             return String(value);
           }
         },

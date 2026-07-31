@@ -13,7 +13,6 @@ export {
   findMatchingBrace,
   findMatchingParen,
   findTopLevelComma,
-  isExternalFactorFallbackContext,
   maskCommentsAndStrings,
   readLiteralToken
 } from "./shared-source-scan.mjs";
@@ -23,6 +22,7 @@ const SKIP_DIRS = new Set([".git", "node_modules", "coverage", "artifacts"]);
 /** @typedef {{text: string, lineStarts: number[], maskedText: string}} FileData */
 /** @typedef {{file: string, line: number, [key: string]: any}} Finding */
 /** @typedef {{name: string, severity?: string, scope: {include: string[], exclude?: string[]}, run?: (rule: any, files: string[]) => any[], message: (finding: any) => string, [key: string]: any}} Rule */
+/** @typedef {{name: string, severity?: string, run?: (rule: any, files: string[]) => any[], message: (finding: any) => string, [key: string]: any}} RuleDefinition */
 
 let ROOT = process.cwd();
 let WARN_MODE = false;
@@ -30,14 +30,8 @@ let WARN_MODE = false;
 const fileCache = new Map();
 /** @type {Map<string, string[]>} */
 const scopeCache = new Map();
-/** @type {string[]|null} */
-let clusterPrefixCache = null;
-/** @type {any} */
-let rendererContractCache = null;
 /** @type {any} */
 let atomicityContractCache = null;
-
-export const RENDER_PROP_OBJECT_NAMES = new Set(["p", "props"]);
 
 /** @param {{root?: string, warnMode?: boolean}} [options] @returns {void} */
 export function resetContext(options = {}) {
@@ -45,8 +39,6 @@ export function resetContext(options = {}) {
   WARN_MODE = !!options.warnMode;
   fileCache.clear();
   scopeCache.clear();
-  clusterPrefixCache = null;
-  rendererContractCache = null;
   atomicityContractCache = null;
   resetSuppressionState();
   setKnownRuleNames([]);
@@ -58,16 +50,6 @@ export function getWarnMode() {
 
 export function getRoot() {
   return ROOT;
-}
-
-/** @returns {any} */
-export function getRendererContractCache() {
-  return rendererContractCache;
-}
-
-/** @param {any} value @returns {void} */
-export function setRendererContractCache(value) {
-  rendererContractCache = value;
 }
 
 /** @returns {any} */
@@ -115,37 +97,6 @@ export function getFileData(file) {
   const data = { text, lineStarts, maskedText: maskCommentsAndStrings(text) };
   fileCache.set(file, data);
   return data;
-}
-
-/** @returns {string[]} */
-export function getClusterPascalPrefixes() {
-  if (clusterPrefixCache) return clusterPrefixCache;
-
-  const clustersDir = path.join(ROOT, "config/clusters");
-  if (!fs.existsSync(clustersDir)) {
-    clusterPrefixCache = [];
-    return clusterPrefixCache;
-  }
-
-  clusterPrefixCache = fs
-    .readdirSync(clustersDir, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".js"))
-    .map((entry) => path.basename(entry.name, ".js"))
-    .map(function (name) {
-      return name
-        .split(/[-_]+/)
-        .filter(Boolean)
-        .map(function (segment) {
-          return segment[0].toUpperCase() + segment.slice(1);
-        })
-        .join("");
-    })
-    .filter(Boolean)
-    .sort(function (a, b) {
-      return b.length - a.length || a.localeCompare(b);
-    });
-
-  return clusterPrefixCache;
 }
 
 /** @param {string} absPath @param {Map<string, boolean>} out @returns {void} */

@@ -19,8 +19,10 @@ describe("SemicircleRadialTextLayout", function () {
     );
 
     expect(harness.captures.threeRows.length).toBe(1);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const block = harness.captures.threeRows[0];
+    if (!block) {
+      throw new Error("Expected the captured three-row block.");
+    }
     harness.realText.setFont(harness.state.ctx, block.sizes.cPx, harness.state.labelWeight, harness.state.family);
     const captionWidth = harness.state.ctx.measureText(String(block.caption)).width;
     harness.realText.setFont(harness.state.ctx, block.sizes.vPx, harness.state.valueWeight, harness.state.family);

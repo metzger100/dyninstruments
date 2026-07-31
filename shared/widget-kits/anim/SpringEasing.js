@@ -93,7 +93,7 @@
         if (!Number.isFinite(now)) {
           return current;
         }
-        if (lastAdvanceMs == null) {
+        if (lastAdvanceMs === null || lastAdvanceMs === undefined) {
           lastAdvanceMs = now;
           return current;
         }

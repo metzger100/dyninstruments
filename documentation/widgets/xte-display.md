@@ -1,6 +1,6 @@
 # XteDisplayWidget Module
 
-**Status:** ✅ Implemented | `widgets/text/XteDisplayWidget/XteDisplayWidget.js`
+**Status:** Current.
 
 ## Overview
 

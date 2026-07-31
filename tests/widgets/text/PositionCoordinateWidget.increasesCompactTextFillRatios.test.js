@@ -10,6 +10,13 @@ const {
   parseFontPx
 } = require("./PositionCoordinateWidget-setup");
 
+/**
+ * @typedef {{
+ *   computeModeLayout(args: Record<string, unknown>): { mode: string },
+ *   computeResponsiveInsets(W: number, H: number): { innerY: number }
+ * }} TextLayoutEngineRequireResult
+ */
+
 describe("PositionCoordinateWidget", function () {
   it("increases compact text fill ratios in stacked and flat-axis modes", function () {
     const cases = [
@@ -25,7 +32,7 @@ describe("PositionCoordinateWidget", function () {
           ratioThresholdNormal: 1.0,
           ratioThresholdFlat: 3.0
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {number} H @param {{ innerY: number }} insets @returns {number} */
         usableHeight(H, insets) {
           const headerH = Math.min(Math.max(1, Math.floor(H * 0.3)), Math.floor(H * 0.45));
           return Math.max(1, headerH - insets.innerY * 2);
@@ -51,7 +58,7 @@ describe("PositionCoordinateWidget", function () {
           ratioThresholdFlat: 3.0,
           default: "NA"
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {number} H @returns {number} */
         usableHeight(H) {
           return H;
         }
@@ -60,7 +67,9 @@ describe("PositionCoordinateWidget", function () {
 
     cases.forEach(function (item) {
       const compactHelpers = makeComponentContext();
-      const compactEngine = compactHelpers.components.require("TextLayoutEngine");
+      const compactEngine = /** @type {TextLayoutEngineRequireResult} */ (
+        compactHelpers.components.require("TextLayoutEngine")
+      );
       const compactCtx = createMockContext2D();
       const compactCaptured = captureTextCalls(compactCtx);
       const compactCanvas = createMockCanvas({
@@ -83,7 +92,9 @@ describe("PositionCoordinateWidget", function () {
       const compactTarget = findTextCall(compactCaptured, item.targetText);
 
       const largeHelpers = makeComponentContext();
-      const largeEngine = largeHelpers.components.require("TextLayoutEngine");
+      const largeEngine = /** @type {TextLayoutEngineRequireResult} */ (
+        largeHelpers.components.require("TextLayoutEngine")
+      );
       const largeCtx = createMockContext2D();
       const largeCaptured = captureTextCalls(largeCtx);
       const largeCanvas = createMockCanvas({
@@ -107,6 +118,7 @@ describe("PositionCoordinateWidget", function () {
 
       expect(compactTarget).toBeTruthy();
       expect(largeTarget).toBeTruthy();
+      if (!compactTarget || !largeTarget) throw new Error("expected target text call to be captured");
       if (item.name === "stacked") {
         expect(compactMode.mode).toBe("normal");
         expect(largeMode.mode).toBe("normal");
@@ -145,8 +157,7 @@ describe("PositionCoordinateWidget", function () {
       ratioThresholdFlat: 3.0
     });
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const naCount = fillTextValues(ctx).filter((t) => t === "NA").length;
+    const naCount = fillTextValues(ctx).filter(/** @param {string} t */ (t) => t === "NA").length;
     expect(naCount).toBeGreaterThanOrEqual(2);
   });
 
@@ -181,8 +192,7 @@ describe("PositionCoordinateWidget", function () {
       });
 
       const texts = fillTextValues(ctx);
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      expect(texts.filter((entry) => entry === "NA").length).toBeGreaterThanOrEqual(2);
+      expect(texts.filter(/** @param {string} entry */ (entry) => entry === "NA").length).toBeGreaterThanOrEqual(2);
       expect(texts).not.toContain("0");
     });
   });
@@ -215,13 +225,17 @@ describe("PositionCoordinateWidget", function () {
 
   it("normalizes known formatter fallback tokens for axis-rendered coordinate values", function () {
     const helpers = makeComponentContext({
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /**
+       * @param {unknown} raw
+       * @param {{ formatter?: string | ((...args: unknown[]) => unknown), formatterParameters?: unknown, default?: unknown }} [props]
+       * @returns {string | undefined}
+       */
       applyFormatter(raw, props) {
         const cfg = props || {};
         if (cfg.formatter === "formatLonLatsDecimal") {
-          return cfg.formatterParameters && cfg.formatterParameters[0] === "lat" ? "-----" : "--:--";
+          return Array.isArray(cfg.formatterParameters) && cfg.formatterParameters[0] === "lat" ? "-----" : "--:--";
         }
-        return cfg.default;
+        return /** @type {string | undefined} */ (cfg.default);
       }
     });
     const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
@@ -240,18 +254,16 @@ describe("PositionCoordinateWidget", function () {
     });
 
     const texts = fillTextValues(ctx);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(texts.filter((entry) => entry === "---").length).toBeGreaterThanOrEqual(2);
+    expect(texts.filter(/** @param {string} entry */ (entry) => entry === "---").length).toBeGreaterThanOrEqual(2);
     expect(texts).not.toContain("-----");
     expect(texts).not.toContain("--:--");
   });
 
   it("does not infer formatter failure from raw-equality output", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
     globalThis.avnav = {
       api: {
         formatter: {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {unknown} value @returns {string} */
           formatLonLatsDecimal(value) {
             return String(Number(value));
           }

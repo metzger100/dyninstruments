@@ -17,8 +17,7 @@ describe("MapZoomHtmlFit", function () {
     const moduleCache = Object.create(null);
     const modules = Object.create(null);
     Object.keys(MODULE_PATH_BY_ID).forEach((id) => {
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      const relPath = MODULE_PATH_BY_ID[id];
+      const relPath = MODULE_PATH_BY_ID[/** @type {keyof typeof MODULE_PATH_BY_ID} */ (id)];
       if (!moduleCache[id]) {
         moduleCache[id] = loadFresh(relPath);
       }
@@ -42,13 +41,13 @@ describe("MapZoomHtmlFit", function () {
           resolveForRoot: themeApi.resolveForRoot
         },
         format: {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {unknown} value */
           applyFormatter(value) {
             return String(value);
           }
         },
         dom: {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {Element | null} target */
           requirePluginRoot(target) {
             return target;
           },

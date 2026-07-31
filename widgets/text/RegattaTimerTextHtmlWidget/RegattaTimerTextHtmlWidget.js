@@ -40,6 +40,7 @@
 
     const toObject = valueMath.toObject;
     const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
+    const isNullish = valueMath.isNullish;
 
     /** @param {unknown} rawValue @returns {number} */
     function toDurationMinutes(rawValue) {
@@ -174,7 +175,7 @@
           return;
         }
 
-        const nextDisplayTime = modelState.displayTime == null ? "" : String(modelState.displayTime);
+        const nextDisplayTime = isNullish(modelState.displayTime) ? "" : String(modelState.displayTime);
         const nextColorPhase = modelState.colorPhase || "normal";
         const nextPhase = modelState.phase || "idle";
         const nextShellRectWidth = lastShellRect && lastShellRect.width ? lastShellRect.width : 0;

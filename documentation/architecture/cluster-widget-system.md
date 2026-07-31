@@ -1,6 +1,6 @@
 # Cluster Widget System
 
-**Status:** ✅ Implemented | Route-metadata-driven shell/surface orchestration
+**Status:** Current.
 
 ## Overview
 

@@ -20,8 +20,13 @@ describe("AlarmHtmlFit", function () {
     });
 
     expect(second).toBe(first);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(h.hostContext.__dyniAlarmHtmlFitCache.result).toBe(first);
+    const hostContextWithCache =
+      /** @type {{ __dyniAlarmHtmlFitCache?: { result: unknown } }} */
+      (h.hostContext);
+    if (!hostContextWithCache.__dyniAlarmHtmlFitCache) {
+      throw new Error("expected hostContext to carry a cached fit result");
+    }
+    expect(hostContextWithCache.__dyniAlarmHtmlFitCache.result).toBe(first);
   });
 
   it("derives idle strip chrome from shell width so accent and content reservation stay aligned", function () {

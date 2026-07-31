@@ -3,8 +3,14 @@ const { createComponentContextMock, loadFresh } = require("./VoltageRadialWidget
 
 describe("VoltageRadialWidget", function () {
   it("suppresses disabled sectors by toggle flags before low-end sector building", function () {
+    /** @typedef {{ alarmFrom?: number, warningFrom?: number }} SectorInput */
+    /** @typedef {{ buildSectors: (props: Record<string, unknown>, min: number, max: number, range: Record<string, unknown>, valueUtils: { buildLowEndSectors: (input: SectorInput) => unknown[] }, theme: { colors: { alarm: string, warning: string } }) => unknown[] }} CapturedConfig */
+    /** @type {CapturedConfig | undefined} */
     let captured;
-    const buildLowEndSectors = vi.fn(() => [{ a0: 10, a1: 11.6, color: "#654321" }]);
+    const buildLowEndSectors = vi.fn((/** @type {SectorInput} */ input) => {
+      void input;
+      return [{ a0: 10, a1: 11.6, color: "#654321" }];
+    });
 
     const mod = loadFresh("widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js");
     mod.create(
@@ -14,14 +20,14 @@ describe("VoltageRadialWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   const value = String(text).trim();
                   return value === "NO DATA" || /^-+$/.test(value)
-                    ? defaultText == null
+                    ? defaultText === null || defaultText === undefined
                       ? "---"
                       : defaultText
                     : String(text);
@@ -32,7 +38,7 @@ describe("VoltageRadialWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} raw @param {Record<string, unknown>} props @param {(value: number, options: Record<string, unknown>) => unknown} applyFormatter @param {(text: unknown, defaultText: unknown) => unknown} normalize @param {unknown} defaultFormatter @param {unknown} defaultParameters */
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -60,10 +66,10 @@ describe("VoltageRadialWidget", function () {
                   );
                   const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
-                  // @ts-ignore -- pre-existing untyped test mock boundary
-                  return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+                  const text = match ? match[0] : defaultText;
+                  return Number.isFinite(num) ? { num: num, text: text } : { num: NaN, text: defaultText };
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text */
                 extractNumberText(text) {
                   const match = String(text).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   return match ? match[0] : "";
@@ -77,7 +83,7 @@ describe("VoltageRadialWidget", function () {
           SemicircleRadialEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {CapturedConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -88,7 +94,7 @@ describe("VoltageRadialWidget", function () {
         },
         services: {
           format: {
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {unknown} value */
             applyFormatter(value) {
               return String(value);
             }
@@ -99,9 +105,12 @@ describe("VoltageRadialWidget", function () {
 
     const theme = { colors: { warning: "#123456", alarm: "#654321" } };
     const valueUtils = { buildLowEndSectors };
+    if (!captured) {
+      throw new Error("Expected the voltage renderer configuration.");
+    }
+    const rendererConfig = captured;
     expect(
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      captured.buildSectors(
+      rendererConfig.buildSectors(
         {
           voltageRadialWarningEnabled: false,
           voltageRadialAlarmEnabled: false
@@ -115,8 +124,7 @@ describe("VoltageRadialWidget", function () {
     ).toEqual([]);
     expect(buildLowEndSectors).not.toHaveBeenCalled();
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    captured.buildSectors(
+    rendererConfig.buildSectors(
       {
         voltageRadialWarningEnabled: false,
         voltageRadialAlarmEnabled: true,
@@ -129,13 +137,11 @@ describe("VoltageRadialWidget", function () {
       theme
     );
     expect(buildLowEndSectors).toHaveBeenCalledTimes(1);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(buildLowEndSectors.mock.calls[0][0].warningFrom).toBe(undefined);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(buildLowEndSectors.mock.calls[0][0].alarmFrom).toBe(11.6);
+    const firstInput = buildLowEndSectors.mock.calls[0]?.[0];
+    expect(firstInput?.warningFrom).toBe(undefined);
+    expect(firstInput?.alarmFrom).toBe(11.6);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    captured.buildSectors(
+    rendererConfig.buildSectors(
       {
         voltageRadialWarningEnabled: true,
         voltageRadialAlarmEnabled: false,
@@ -148,13 +154,14 @@ describe("VoltageRadialWidget", function () {
       theme
     );
     expect(buildLowEndSectors).toHaveBeenCalledTimes(2);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(buildLowEndSectors.mock.calls[1][0].warningFrom).toBe(12.2);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(buildLowEndSectors.mock.calls[1][0].alarmFrom).toBe(undefined);
+    const secondInput = buildLowEndSectors.mock.calls[1]?.[0];
+    expect(secondInput?.warningFrom).toBe(12.2);
+    expect(secondInput?.alarmFrom).toBe(undefined);
   });
 
   it("does not force fixed-decimal fallback text on raw formatter passthrough", function () {
+    /** @typedef {{ formatDisplay: (value: number, props: Record<string, unknown>) => { num: number, text: string } }} FormatCapturedConfig */
+    /** @type {FormatCapturedConfig | undefined} */
     let captured;
 
     const mod = loadFresh("widgets/radial/VoltageRadialWidget/VoltageRadialWidget.js");
@@ -165,14 +172,14 @@ describe("VoltageRadialWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   const value = String(text).trim();
                   return value === "NO DATA" || /^-+$/.test(value)
-                    ? defaultText == null
+                    ? defaultText === null || defaultText === undefined
                       ? "---"
                       : defaultText
                     : String(text);
@@ -183,7 +190,7 @@ describe("VoltageRadialWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} raw @param {Record<string, unknown>} props @param {(value: number, options: Record<string, unknown>) => unknown} applyFormatter @param {(text: unknown, defaultText: unknown) => unknown} normalize @param {unknown} defaultFormatter @param {unknown} defaultParameters */
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -211,10 +218,10 @@ describe("VoltageRadialWidget", function () {
                   );
                   const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
-                  // @ts-ignore -- pre-existing untyped test mock boundary
-                  return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+                  const text = match ? match[0] : defaultText;
+                  return Number.isFinite(num) ? { num: num, text: text } : { num: NaN, text: defaultText };
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text */
                 extractNumberText(text) {
                   const match = String(text).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   return match ? match[0] : "";
@@ -228,7 +235,7 @@ describe("VoltageRadialWidget", function () {
           SemicircleRadialEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {FormatCapturedConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -239,7 +246,7 @@ describe("VoltageRadialWidget", function () {
         },
         services: {
           format: {
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {unknown} value */
             applyFormatter(value) {
               return String(value);
             }
@@ -248,7 +255,9 @@ describe("VoltageRadialWidget", function () {
       })
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!captured) {
+      throw new Error("Expected the voltage formatter configuration.");
+    }
     expect(captured.formatDisplay(12.34, {})).toEqual({
       num: 12.34,
       text: "12.34"

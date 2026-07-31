@@ -4,13 +4,12 @@ const { createRenderer, makeProps, mountCommitted, withSurfacePolicy } = require
 describe("MapZoomTextHtmlWidget", function () {
   it("normalizes placeholder formatter output to the shared default token", function () {
     const renderer = createRenderer({
-      // @ts-ignore -- pre-existing untyped test mock boundary
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (cfg.formatter === "formatDecimalOpt") {
           return "NO DATA";
         }
-        return value == null ? cfg.default : String(value);
+        return value === null || value === undefined ? cfg.default : String(value);
       }
     });
     const mounted = mountCommitted(
@@ -26,10 +25,9 @@ describe("MapZoomTextHtmlWidget", function () {
 
   it("renders stable digits with tabular value classes and padded numbers", function () {
     const renderer = createRenderer({
-      // @ts-ignore -- pre-existing untyped test mock boundary
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
-        if (value == null) {
+        if (value === null || value === undefined) {
           return cfg.default;
         }
         return String(value);

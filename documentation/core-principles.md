@@ -1,6 +1,6 @@
 # Core Principles
 
-**Status:** ✅ Implemented | Non-negotiable architectural boundaries for all changes
+**Status:** Current.
 
 ## Overview
 
@@ -44,9 +44,9 @@ These rules are mandatory for all contributors and AI agents in this repository.
     requires it. → [conventions/coding-standards.md](conventions/coding-standards.md#fail-fast-keep-it-simple)
 18. Rule: Do not duplicate CSS, theme-token, or declarative config defaults inside runtime/widget logic. →
     [conventions/coding-standards.md](conventions/coding-standards.md#fail-fast-keep-it-simple)
-19. Rule: Generic `dyni-lint-disable-*` suppressions are forbidden in production source. Intentional exceptions are
+19. Rule: Generic `plugin-lint-disable-*` suppressions are forbidden in production source. Intentional exceptions are
     either a narrow canonical-owner allowlist entry owned by the rule itself, or — for genuine external-boundary catch
-    fallbacks only — the validated `dyni-boundary-*(category, owner, date[, expires])` marker. →
+    fallbacks only — the validated `plugin-boundary-*(category, owner, date[, expires])` marker. →
     [conventions/smell-prevention.md](conventions/smell-prevention.md#suppression-syntax)
 
 ## Key Details
@@ -67,9 +67,9 @@ These rules are mandatory for all contributors and AI agents in this repository.
 - No speculative legacy, compatibility, or fallback code paths unless an active external boundary contract requires
   them.
 - No duplication of CSS, theme-token, or declarative config defaults inside runtime/widget logic.
-- Generic `dyni-lint-disable-*` suppressions are forbidden in production source; the only allowed exceptions are a
+- Generic `plugin-lint-disable-*` suppressions are forbidden in production source; the only allowed exceptions are a
   narrow canonical-owner allowlist entry owned by the rule itself, or the validated
-  `dyni-boundary-*(category, owner, date[, expires])` marker for genuine external-boundary catch fallbacks.
+  `plugin-boundary-*(category, owner, date[, expires])` marker for genuine external-boundary catch fallbacks.
 - Rules that matter must be mechanically enforced (lint/check), not left as prose only; never fake green tests by
   weakening assertions to hide a failure.
 

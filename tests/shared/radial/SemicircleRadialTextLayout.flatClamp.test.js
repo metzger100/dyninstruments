@@ -19,8 +19,10 @@ describe("SemicircleRadialTextLayout", function () {
     );
 
     expect(harness.captures.valueUnit.length).toBe(1);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const row = harness.captures.valueUnit[0];
+    if (!row) {
+      throw new Error("Expected the captured value-and-unit row.");
+    }
     harness.realText.setFont(harness.state.ctx, row.fit.vPx, harness.state.valueWeight, harness.state.family);
     const valueWidth = harness.state.ctx.measureText(String(row.valueText)).width;
     let totalWidth = valueWidth;

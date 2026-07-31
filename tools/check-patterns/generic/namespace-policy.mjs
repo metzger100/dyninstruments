@@ -3,7 +3,7 @@
  * assignment or a CSS custom-property declaration that does not use the repo-registered
  * namespace prefix. The prefixes themselves are supplied by the rule definition (see
  * `rule.jsGlobalPrefix` / `rule.cssCustomPropertyPrefix`), so this file contains no
- * Dyninstruments-specific token and is liftable verbatim into another repository that
+ * project-specific token and is liftable verbatim into another repository that
  * registers its own prefix.
  */
 
@@ -13,7 +13,7 @@ const GLOBAL_ASSIGNMENT_RE = /\b(?:window|root|global|self)\.([A-Z][A-Za-z0-9_]*
 const CSS_CUSTOM_PROPERTY_RE = /(?:^|[^\w-])(--[A-Za-z0-9-]+)\s*:/g;
 
 /**
- * @param {import("../shared.mjs").Rule & {jsGlobalPrefix: string, cssCustomPropertyPrefix: string}} rule
+ * @param {import("../shared.mjs").RuleDefinition & {jsGlobalPrefix: string, cssCustomPropertyPrefix: string}} rule
  * @param {string[]} files
  * @returns {import("../shared.mjs").Finding[]}
  */

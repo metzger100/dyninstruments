@@ -30,7 +30,9 @@
     const htmlUtils = cfg.htmlUtils;
     const stableDigitsEnabled = cfg.stableDigitsEnabled === true;
     const valueClass = stableDigitsEnabled ? " dyni-tabular" : "";
-    const valueText = toText(metricFit.valueText != null ? metricFit.valueText : metric.valueText);
+    const valueText = toText(
+      metricFit.valueText !== null && metricFit.valueText !== undefined ? metricFit.valueText : metric.valueText
+    );
 
     if (mode === "flat") {
       return (

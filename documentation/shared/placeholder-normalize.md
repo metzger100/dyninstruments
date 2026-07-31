@@ -1,6 +1,6 @@
 # Placeholder Normalize
 
-**Status:** ✅ Implemented | Shared formatter-fallback normalization contract
+**Status:** Current.
 
 ## Overview
 

@@ -34,7 +34,7 @@ describe("tools/check-patterns.mjs", function () {
     try {
       work();
     }
-    // dyni-lint-disable-next-line catch-fallback-without-suppression
+    // plugin-lint-disable-next-line catch-fallback-without-suppression
     catch (e) {
       return "fallback";
     }
@@ -60,7 +60,7 @@ describe("tools/check-patterns.mjs", function () {
   function runTask() {
     try {
       work();
-    } catch (e) { return "fallback"; } /* dyni-lint-disable-line not-a-real-rule -- bogus rule name */
+    } catch (e) { return "fallback"; } /* plugin-lint-disable-line not-a-real-rule -- bogus rule name */
   }
   runTask();
 }());
@@ -79,7 +79,7 @@ describe("tools/check-patterns.mjs", function () {
   it("rejects generic suppressions in the module entrypoint", function () {
     const cwd = createWorkspace({
       "plugin.mjs": `
-// dyni-lint-disable-next-line unsafe-html-dom-sink -- generic production bypass
+// plugin-lint-disable-next-line unsafe-html-dom-sink -- generic production bypass
 root["innerHTML"] = markup;
 `
     });
@@ -90,7 +90,7 @@ root["innerHTML"] = markup;
     expect(result.summary.byRuleFailures["unsafe-html-dom-sink"]).toBe(1);
   });
 
-  it("accepts a valid permanent dyni-boundary marker for catch-fallback-without-suppression", function () {
+  it("accepts a valid permanent plugin-boundary marker for catch-fallback-without-suppression", function () {
     const cwd = createWorkspace({
       "runtime/example.js": `
 (function () {
@@ -99,7 +99,7 @@ root["innerHTML"] = markup;
     try {
       work();
     }
-    // dyni-boundary-next-line(category: dom-host-uncertainty, owner: Metzger100, date: 2026-07-17) -- DOM host boundary
+    // plugin-boundary-next-line(category: dom-host-uncertainty, owner: Metzger100, date: 2026-07-17) -- DOM host boundary
     catch (e) {
       return "fallback";
     }
@@ -116,7 +116,7 @@ root["innerHTML"] = markup;
     expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(0);
   });
 
-  it("accepts a valid temporary dyni-boundary marker with a future expiry", function () {
+  it("accepts a valid temporary plugin-boundary marker with a future expiry", function () {
     const cwd = createWorkspace({
       "runtime/example.js": `
 (function () {
@@ -124,7 +124,7 @@ root["innerHTML"] = markup;
   function runTask() {
     try {
       work();
-    } catch (e) { return "fallback"; } /* dyni-boundary-line(category: dom-host-uncertainty, owner: Metzger100, date: 2026-07-17, expires: 2099-01-01) -- temporary boundary */
+    } catch (e) { return "fallback"; } /* plugin-boundary-line(category: dom-host-uncertainty, owner: Metzger100, date: 2026-07-17, expires: 2099-01-01) -- temporary boundary */
   }
   runTask();
 }());
@@ -137,7 +137,7 @@ root["innerHTML"] = markup;
     expect(result.summary.byRuleFailures["catch-fallback-without-suppression"]).toBe(0);
   });
 
-  it("rejects an expired dyni-boundary marker", function () {
+  it("rejects an expired plugin-boundary marker", function () {
     const cwd = createWorkspace({
       "runtime/example.js": `
 (function () {
@@ -145,7 +145,7 @@ root["innerHTML"] = markup;
   function runTask() {
     try {
       work();
-    } catch (e) { return "fallback"; } /* dyni-boundary-line(category: dom-host-uncertainty, owner: Metzger100, date: 2020-01-01, expires: 2020-06-01) -- long expired */
+    } catch (e) { return "fallback"; } /* plugin-boundary-line(category: dom-host-uncertainty, owner: Metzger100, date: 2020-01-01, expires: 2020-06-01) -- long expired */
   }
   runTask();
 }());
@@ -160,7 +160,7 @@ root["innerHTML"] = markup;
     expect(out).toContain("expired");
   });
 
-  it("rejects a dyni-boundary marker missing a required field", function () {
+  it("rejects a plugin-boundary marker missing a required field", function () {
     const cwd = createWorkspace({
       "runtime/example.js": `
 (function () {
@@ -168,7 +168,7 @@ root["innerHTML"] = markup;
   function runTask() {
     try {
       work();
-    } catch (e) { return "fallback"; } /* dyni-boundary-line(category: dom-host-uncertainty, date: 2026-07-17) -- missing owner */
+    } catch (e) { return "fallback"; } /* plugin-boundary-line(category: dom-host-uncertainty, date: 2026-07-17) -- missing owner */
   }
   runTask();
 }());
@@ -183,13 +183,13 @@ root["innerHTML"] = markup;
     expect(out).toContain("owner");
   });
 
-  it("does not let a dyni-boundary marker suppress an unrelated rule", function () {
+  it("does not let a plugin-boundary marker suppress an unrelated rule", function () {
     const cwd = createWorkspace({
       "shared/example.js": `
 (function () {
   "use strict";
   function copy(axis) {
-    // dyni-boundary-next-line(category: dom-host-uncertainty, owner: Metzger100, date: 2026-07-17) -- does not apply to premature-legacy-support
+    // plugin-boundary-next-line(category: dom-host-uncertainty, owner: Metzger100, date: 2026-07-17) -- does not apply to premature-legacy-support
     const fallbackAxis = axis;
     return fallbackAxis;
   }
@@ -204,5 +204,21 @@ root["innerHTML"] = markup;
     expect(result.summary.ok).toBe(false);
     expect(result.summary.byRuleFailures["premature-legacy-support"]).toBeGreaterThan(0);
     expect(out).toContain("[premature-legacy-support]");
+  });
+
+  it("does not recognize the retired suppression prefix", function () {
+    const oldPrefix = "dyn" + "i-lint-disable-next-line";
+    const cwd = createWorkspace({
+      "runtime/example.js": `
+// ${oldPrefix} catch-fallback-without-suppression -- retired grammar
+(function () {
+  try { work(); } catch (e) { return "fallback"; }
+}());
+`
+    });
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+
+    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(0);
+    expect(result.summary.byRuleFailures["catch-fallback-without-suppression"]).toBe(1);
   });
 });

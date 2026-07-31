@@ -1,8 +1,20 @@
-// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
+/**
+ * @typedef {{ springEasingModule?: unknown }} CompassCachingHarnessOptions
+ * @typedef {{ angle: unknown, opts: unknown }} RimMarkerCall
+ * @typedef {{
+ *   ring: unknown[],
+ *   ticks: unknown[],
+ *   pointer: unknown[],
+ *   rimMarker: RimMarkerCall[],
+ *   textDraws: number
+ * }} CompassCachingCalls
+ */
+
+/** @param {CompassCachingHarnessOptions} [options] */
 function createCompassCachingHarness(options) {
   const opts = options || {};
   const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
@@ -12,13 +24,13 @@ function createCompassCachingHarness(options) {
   const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
   const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
   const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
-  const calls = {
+  const calls = /** @type {CompassCachingCalls} */ ({
     ring: [],
     ticks: [],
     pointer: [],
     rimMarker: [],
     textDraws: 0
-  };
+  });
   const theme = {
     surface: {
       fg: "#fff"
@@ -77,20 +89,55 @@ function createCompassCachingHarness(options) {
           create() {
             return {
               draw: {
+                /**
+                 * @param {DyniTestCanvasContext} ctx
+                 * @param {number} cx
+                 * @param {number} cy
+                 * @param {number} rOuter
+                 * @param {unknown} opts
+                 */
                 drawRing(ctx, cx, cy, rOuter, opts) {
                   calls.ring.push(opts);
                 },
+                /**
+                 * @param {DyniTestCanvasContext} ctx
+                 * @param {number} cx
+                 * @param {number} cy
+                 * @param {number} rOuter
+                 * @param {unknown} opts
+                 */
                 drawTicks(ctx, cx, cy, rOuter, opts) {
                   calls.ticks.push(opts);
                 },
+                /**
+                 * @param {DyniTestCanvasContext} ctx
+                 * @param {number} cx
+                 * @param {number} cy
+                 * @param {number} rOuter
+                 * @param {number} angle
+                 * @param {unknown} opts
+                 */
                 drawPointerAtRim(ctx, cx, cy, rOuter, angle, opts) {
                   calls.pointer.push(opts);
                 },
+                /**
+                 * @param {DyniTestCanvasContext} ctx
+                 * @param {number} cx
+                 * @param {number} cy
+                 * @param {number} rOuter
+                 * @param {number} angle
+                 * @param {unknown} opts
+                 */
                 drawRimMarker(ctx, cx, cy, rOuter, angle, opts) {
                   calls.rimMarker.push({ angle, opts });
                 }
               },
               angle: {
+                /**
+                 * @param {unknown} deg
+                 * @param {unknown} cfg
+                 * @param {unknown} rotationDeg
+                 */
                 degToCanvasRad(deg, cfg, rotationDeg) {
                   const d = Number(deg) + (Number(rotationDeg) || 0);
                   const norm = ((d % 360) + 360) % 360;
@@ -127,18 +174,29 @@ function createCompassCachingHarness(options) {
                 drawDisconnectOverlay() {}
               },
               value: {
+                /**
+                 * @param {unknown} value
+                 * @param {number} lo
+                 * @param {number} hi
+                 */
                 clamp(value, lo, hi) {
                   const n = Number(value);
                   if (!isFinite(n)) return lo;
                   return Math.max(lo, Math.min(hi, n));
                 },
+                /** @param {unknown} value */
                 isFiniteNumber(value) {
                   return typeof value === "number" && isFinite(value);
                 },
+                /**
+                 * @param {unknown} value
+                 * @param {number} defaultValue
+                 */
                 resolveFiniteNumber(value, defaultValue) {
                   const n = Number(value);
                   return isFinite(n) ? n : defaultValue;
                 },
+                /** @param {unknown} value */
                 formatDirection360(value) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
@@ -152,6 +210,7 @@ function createCompassCachingHarness(options) {
       },
       services: {
         canvas: {
+          /** @param {HTMLCanvasElement} canvas */
           setupCanvas(canvas) {
             const ctx = canvas.getContext("2d");
             const rect = canvas.getBoundingClientRect();
@@ -163,6 +222,7 @@ function createCompassCachingHarness(options) {
           }
         },
         dom: {
+          /** @param {unknown} target */
           requirePluginRoot(target) {
             return target;
           }
@@ -175,6 +235,10 @@ function createCompassCachingHarness(options) {
     spec,
     calls,
     theme,
+    /**
+     * @param {number} width
+     * @param {number} height
+     */
     computeLayout(width, height) {
       const api = fullCircleLayout.create(
         {},
@@ -201,6 +265,7 @@ function createCompassCachingHarness(options) {
   };
 }
 
+/** @param {Record<string, unknown>} [overrides] */
 function makeCompassProps(overrides) {
   return Object.assign(
     {

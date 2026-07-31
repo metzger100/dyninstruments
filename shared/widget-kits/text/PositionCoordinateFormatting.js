@@ -51,7 +51,7 @@
     if (value === true) {
       return true;
     }
-    if (value === false || value == null) {
+    if (value === false || value === null || value === undefined) {
       return false;
     }
     if (typeof value === "number") {
@@ -134,7 +134,7 @@
     const { componentContext, placeholderNormalize, toOptionalFiniteNumber } = services;
     const rawMode = props && props.coordinateRawValues === true;
     if (rawMode) {
-      if (rawValue == null || (typeof rawValue === "number" && Number.isNaN(rawValue))) {
+      if (rawValue === null || rawValue === undefined || (typeof rawValue === "number" && Number.isNaN(rawValue))) {
         return defaultText;
       }
     } else {

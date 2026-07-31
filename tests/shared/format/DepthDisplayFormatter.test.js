@@ -11,7 +11,11 @@ describe("DepthDisplayFormatter", function () {
     const placeholderNormalize = {
       /** @param {any} value @param {any} defaultText */
       normalize(value, defaultText) {
-        return value == null ? (defaultText == null ? "---" : defaultText) : String(value);
+        return value === null || value === undefined
+          ? defaultText === null || defaultText === undefined
+            ? "---"
+            : defaultText
+          : String(value);
       }
     };
 
@@ -33,7 +37,11 @@ describe("DepthDisplayFormatter", function () {
     const placeholderNormalize = {
       /** @param {any} value @param {any} defaultText */
       normalize(value, defaultText) {
-        return value == null ? (defaultText == null ? "---" : defaultText) : String(value);
+        return value === null || value === undefined
+          ? defaultText === null || defaultText === undefined
+            ? "---"
+            : defaultText
+          : String(value);
       }
     };
 
@@ -57,7 +65,11 @@ describe("DepthDisplayFormatter", function () {
     const placeholderNormalize = {
       /** @param {any} value @param {any} defaultText */
       normalize(value, defaultText) {
-        return value == null ? (defaultText == null ? "---" : defaultText) : String(value);
+        return value === null || value === undefined
+          ? defaultText === null || defaultText === undefined
+            ? "---"
+            : defaultText
+          : String(value);
       }
     };
 

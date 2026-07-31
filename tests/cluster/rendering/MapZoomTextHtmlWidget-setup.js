@@ -6,7 +6,16 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
-const MODULE_PATH_BY_ID = {
+/**
+ * @typedef {{ default?: unknown, formatter?: string }} FormatterOptions
+ * @typedef {{ applyFormatter?: (value: unknown, options?: FormatterOptions) => unknown, getNightModeState?: () => boolean, loadDep?: (id: string) => unknown, requirePluginRoot?: (target: Element | null) => Element | null }} RendererOptions
+ * @typedef {Record<string, unknown> & { caption?: string, default?: string | null, requiredZoom?: number | string | null, unit?: string, zoom?: number | string | null }} MapProps
+ * @typedef {{ mode?: string, orientation?: string, pageId?: string, checkAutoZoom?: () => boolean }} SurfaceOptions
+ * @typedef {{ __dyniHostCommitState?: { rootEl: HTMLElement, shellEl: HTMLElement } }} HostContext
+ * @typedef {{ createCommittedRenderer: (options: { hostContext: HostContext, mountEl: HTMLElement, shadowRoot: null }) => { mount: (mountEl: HTMLElement, payload: unknown) => void, postPatch: (payload: unknown) => void, update: (payload: unknown) => void } }} RendererSpec
+ */
+
+const MODULE_PATH_BY_ID = /** @type {Record<string, string>} */ ({
   HtmlWidgetUtils: "shared/widget-kits/html/HtmlWidgetUtils.js",
   MapZoomHtmlFit: "shared/widget-kits/nav/MapZoomHtmlFit.js",
   StableDigits: "shared/widget-kits/format/StableDigits.js",
@@ -25,18 +34,18 @@ const MODULE_PATH_BY_ID = {
   StateScreenInteraction: "shared/widget-kits/state/StateScreenInteraction.js",
   StateScreenTextFit: "shared/widget-kits/state/StateScreenTextFit.js",
   StateScreenMarkup: "shared/widget-kits/state/StateScreenMarkup.js"
-};
+});
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {RendererOptions} [options] */
 function createRenderer(options) {
   const opts = options || {};
-  const moduleCache = Object.create(null);
+  const moduleCache = /** @type {Record<string, unknown>} */ (Object.create(null));
   const applyFormatter =
     opts.applyFormatter ||
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {unknown} value @param {FormatterOptions} [formatterOptions] */
     function (value, formatterOptions) {
       const cfg = formatterOptions || {};
-      if (value == null) {
+      if (value === null || value === undefined) {
         return cfg.default;
       }
       if (cfg.formatter === "formatDecimalOpt") {
@@ -46,11 +55,12 @@ function createRenderer(options) {
     };
   const requirePluginRoot =
     opts.requirePluginRoot ||
-    function () {
-      if (!arguments[0] || typeof arguments[0].closest !== "function") {
+    /** @param {Element | null} target */
+    function (target) {
+      if (!target || typeof target.closest !== "function") {
         return null;
       }
-      return arguments[0].closest(".widget, .DirectWidget");
+      return target.closest(".widget, .DirectWidget");
     };
   const getNightModeState =
     opts.getNightModeState ||
@@ -59,9 +69,8 @@ function createRenderer(options) {
     };
   const loadDep =
     opts.loadDep ||
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {string} id */
     function (id) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       const relPath = MODULE_PATH_BY_ID[id];
       if (!relPath) {
         throw new Error("unexpected module lookup: " + id);
@@ -99,7 +108,7 @@ function createRenderer(options) {
   return loadFresh("widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js").create({}, componentContext);
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {MapProps} [overrides] */
 function makeProps(overrides) {
   return Object.assign(
     {
@@ -113,7 +122,7 @@ function makeProps(overrides) {
   );
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {MapProps} props @param {SurfaceOptions} [options] */
 function withSurfacePolicy(props, options) {
   const opts = options || {};
   const mode = opts.mode === "passive" ? "passive" : "dispatch";
@@ -135,11 +144,11 @@ function withSurfacePolicy(props, options) {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {RendererSpec} rendererSpec @param {MapProps} props @param {{ hostContext?: HostContext, shellSize?: { height: number, width: number } }} [options] */
 function mountCommitted(rendererSpec, props, options) {
   const opts = options || {};
   const shellSize = opts.shellSize || { width: 320, height: 180 };
-  const hostContext = opts.hostContext || {};
+  const hostContext = opts.hostContext || /** @type {HostContext} */ ({});
   const rootEl = document.createElement("div");
   rootEl.className = "widget dyniplugin dyni-host-html";
   const shellEl = document.createElement("div");
@@ -150,10 +159,18 @@ function mountCommitted(rendererSpec, props, options) {
   rootEl.appendChild(shellEl);
   hostContext.__dyniHostCommitState = { rootEl, shellEl };
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
   mountEl.getBoundingClientRect = vi.fn(() => ({
+    bottom: shellSize.height,
     width: shellSize.width,
-    height: shellSize.height
+    height: shellSize.height,
+    left: 0,
+    right: shellSize.width,
+    top: 0,
+    x: 0,
+    y: 0,
+    toJSON() {
+      return {};
+    }
   }));
 
   const committed = rendererSpec.createCommittedRenderer({
@@ -162,7 +179,7 @@ function mountCommitted(rendererSpec, props, options) {
     shadowRoot: null
   });
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {MapProps} nextProps @param {number} revision @param {boolean} layoutChanged */
   function payload(nextProps, revision, layoutChanged) {
     return {
       props: nextProps,
@@ -185,7 +202,7 @@ function mountCommitted(rendererSpec, props, options) {
   return {
     mountEl,
     committed,
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {MapProps} nextProps @param {boolean} layoutChanged */
     update(nextProps, layoutChanged) {
       const next = payload(nextProps, 2, layoutChanged === true);
       committed.update(next);

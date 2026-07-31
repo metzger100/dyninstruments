@@ -19,12 +19,10 @@ describe("MapZoomTextHtmlWidget", function () {
     });
     const moduleCache = Object.create(null);
     const renderer = createRenderer({
-      // @ts-ignore -- pre-existing untyped test mock boundary
       loadDep(id) {
         if (id === "MapZoomHtmlFit") {
           return { create: () => ({ compute: fitCompute }) };
         }
-        // @ts-ignore -- pre-existing untyped test mock boundary
         const relPath = MODULE_PATH_BY_ID[id];
         if (!relPath) {
           throw new Error("unexpected module lookup: " + id);
@@ -35,6 +33,7 @@ describe("MapZoomTextHtmlWidget", function () {
         return moduleCache[id];
       }
     });
+    /** @type {{ __dyniHostCommitState?: { rootEl: HTMLElement, shellEl: HTMLElement } }} */
     const hostContext = {};
     const committed = renderer.createCommittedRenderer({
       hostContext,
@@ -51,7 +50,7 @@ describe("MapZoomTextHtmlWidget", function () {
     shellEl.appendChild(mountEl);
     hostContext.__dyniHostCommitState = { rootEl, shellEl };
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {number} revision @param {boolean} layoutChanged */
     function payload(revision, layoutChanged) {
       return {
         props: withSurfacePolicy(makeProps(), { mode: "dispatch" }),

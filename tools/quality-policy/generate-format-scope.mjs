@@ -45,7 +45,7 @@ const PRETTIER_DIR_RULES = [
   { test: (p) => /^types\/.*\.d\.ts$/.test(p) },
   { test: (p) => /^schemas\/[^/]+\.json$/.test(p) },
   { test: (p) => /^(runtime|cluster|config|shared|widgets|tests|tools)\/.*\.js$/.test(p) },
-  { test: (p) => /^tools\/.*\.mjs$/.test(p) },
+  { test: (p) => /^(tools|tests)\/.*\.mjs$/.test(p) },
   { test: (p) => /^(shared|widgets)\/.*\.css$/.test(p) },
   { test: (p) => /^tests\/css\/.*\.css$/.test(p) },
   { test: (p) => /^[^/]+\.md$/.test(p) },
@@ -65,6 +65,13 @@ const QUALITY_POLICY_JSON_REASON =
 function classify(relativePath) {
   if (GITKEEP_PATHS.has(relativePath)) {
     return { owner: "unsupported", reason: "empty placeholder file", alternateValidation: "none needed" };
+  }
+  if (relativePath === "tools/quality-policy/shared-instructions.md") {
+    return {
+      owner: "unsupported",
+      reason: "extracted byte-for-byte verification artifact; whitespace is part of the checked content",
+      alternateValidation: "shared-instructions-block contract test"
+    };
   }
   if (PRETTIER_EXACT_FILES.has(relativePath)) return { owner: "prettier" };
   if (PRETTIER_DIR_RULES.some((rule) => rule.test(relativePath))) return { owner: "prettier" };
@@ -156,15 +163,17 @@ function classify(relativePath) {
 
 /**
  * Build the canonical format-scope classification for every tracked/untracked-but-not-ignored file.
+ * @param {string} [projectRoot]
  * @returns {{path: string, owner: string, reason?: string, alternateValidation?: string}[]}
  */
-export function buildFormatScope() {
+export function buildFormatScope(projectRoot = ROOT) {
   const discovered = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard"], {
-    cwd: ROOT,
+    cwd: projectRoot,
     encoding: "utf8"
   })
     .split("\n")
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter((relativePath) => fs.existsSync(path.join(projectRoot, relativePath)));
   const tracked = [...new Set(discovered)].sort();
   /** @type {{path: string, owner: string, reason?: string, alternateValidation?: string}[]} */
   const rows = [];

@@ -84,13 +84,13 @@ describe("runtime/theme-runtime.js", function () {
   });
 
   it("regatta button stroke weight inherits and overrides global stroke weight", function () {
+    /** @type {Record<string, string>} */
     const cssVars = { "--dyni-stroke-weight": "1.7" };
     const context = setupContext({
       getComputedStyle() {
         return {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {string} name */
           getPropertyValue(name) {
-            // @ts-ignore -- pre-existing untyped test mock boundary
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
           }
         };
@@ -102,7 +102,6 @@ describe("runtime/theme-runtime.js", function () {
     const inherited = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(rootEl);
     expect(inherited.regatta.buttonStrokeWeight).toBe(1.7);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     cssVars["--dyni-regatta-button-stroke-weight"] = "2.4";
     const overrideRootEl = createPluginRootElement();
     const overridden = context.DyniPlugin.runtime.theme.tokens.resolveForRoot(overrideRootEl);
@@ -110,16 +109,15 @@ describe("runtime/theme-runtime.js", function () {
   });
 
   it("resolver caches snapshots by canonical root state and invalidates on input changes", function () {
+    /** @type {Record<string, string>} */
     const inlineValues = { "--dyni-pointer": "#111111" };
     const inlineStyle = {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {string} name */
       getPropertyValue(name) {
-        // @ts-ignore -- pre-existing untyped test mock boundary
         return hasOwn.call(inlineValues, name) ? inlineValues[name] : "";
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {string} name @param {string} value */
       setProperty(name, value) {
-        // @ts-ignore -- pre-existing untyped test mock boundary
         inlineValues[String(name)] = String(value);
       }
     };
@@ -139,9 +137,7 @@ describe("runtime/theme-runtime.js", function () {
         return "default";
       }
     });
-    const rootEl = createPluginRootElement();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    rootEl.style = inlineStyle;
+    const rootEl = Object.assign(createPluginRootElement(), { style: inlineStyle });
 
     const first = resolver.resolveForRoot(rootEl);
     const second = resolver.resolveForRoot(rootEl);

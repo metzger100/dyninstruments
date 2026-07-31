@@ -1,6 +1,6 @@
 # Color System
 
-**Status:** ✅ Implemented | Role-based palette for readable marine instruments
+**Status:** Current.
 
 ## Overview
 

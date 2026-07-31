@@ -23,7 +23,7 @@
     if (typeof defaultText === "string") {
       return defaultText;
     }
-    if (defaultText == null) {
+    if (defaultText === null || defaultText === undefined) {
       return DEFAULT_PLACEHOLDER;
     }
     return String(defaultText);
@@ -34,7 +34,7 @@
    * @returns {boolean}
    */
   function isPlaceholder(text) {
-    if (text == null) {
+    if (text === null || text === undefined) {
       return true;
     }
     const raw = String(text);

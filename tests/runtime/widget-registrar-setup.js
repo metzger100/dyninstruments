@@ -6,7 +6,15 @@ const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
 const { createComponentContextMock } = require("../helpers/component-context-mock");
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @typedef {{ formatter?: string | ((...args: unknown[]) => unknown), formatterParameters?: string[] | string, default?: unknown }} FormatterOptions
+ * @typedef {import("vitest").Mock} TestMock
+ * @typedef {{ hostApi?: object, includeGlobalApi?: boolean, registerWidget?: TestMock, runtimeHostActions?: TestMock }} SetupOptions
+ * @typedef {{ def?: { cluster?: string } }} ClusterEntry
+ * @typedef {{ font: string, text: string }} TextCall
+ */
+
+/** @param {SetupOptions} [options] */
 function setupContext(options) {
   const opts = options || {};
   const registerWidget = opts.registerWidget || vi.fn();
@@ -65,8 +73,14 @@ function loadVesselDef() {
   runIifeScript("config/shared/vessel-voltage-editables.js", context);
   runIifeScript("config/clusters/vessel.js", context);
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
-  return context.DyniPlugin.config.clusters.find((c) => c.def && c.def.cluster === "vessel").def;
+  const clusters = /** @type {ClusterEntry[]} */ (context.DyniPlugin.config.clusters);
+  const vesselCluster = clusters.find(function (cluster) {
+    return cluster.def && cluster.def.cluster === "vessel";
+  });
+  if (!vesselCluster || !vesselCluster.def) {
+    throw new Error("vessel definition is missing");
+  }
+  return vesselCluster.def;
 }
 
 function makePositionComponentContext() {
@@ -97,10 +111,11 @@ function makePositionComponentContext() {
     },
     services: {
       format: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {unknown} raw @param {FormatterOptions} [props] */
         applyFormatter(raw, props) {
           const cfg = props || {};
           const fpRaw = cfg.formatterParameters;
+          /** @type {string[]} */
           let fp;
           if (Array.isArray(fpRaw)) {
             fp = fpRaw;
@@ -115,28 +130,19 @@ function makePositionComponentContext() {
           if (
             cfg &&
             typeof cfg.formatter === "string" &&
-            // @ts-ignore -- pre-existing untyped test mock boundary
             globalThis.avnav &&
-            // @ts-ignore -- pre-existing untyped test mock boundary
             globalThis.avnav.api &&
-            // @ts-ignore -- pre-existing untyped test mock boundary
             globalThis.avnav.api.formatter &&
-            // @ts-ignore -- pre-existing untyped test mock boundary
             typeof globalThis.avnav.api.formatter[cfg.formatter] === "function"
           ) {
-            // @ts-ignore -- pre-existing untyped test mock boundary
-            return globalThis.avnav.api.formatter[cfg.formatter].apply(
-              // @ts-ignore -- pre-existing untyped test mock boundary
-              globalThis.avnav.api.formatter,
-              [raw].concat(fp)
-            );
+            return globalThis.avnav.api.formatter[cfg.formatter](raw, ...fp);
           }
-          if (raw == null || Number.isNaN(raw)) return cfg.default || "---";
+          if (raw === null || raw === undefined || Number.isNaN(raw)) return cfg.default || "---";
           return String(raw);
         }
       },
       canvas: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {{ getBoundingClientRect: () => DOMRect, getContext: (kind: string) => unknown }} canvas */
         setupCanvas(canvas) {
           const ctx = canvas.getContext("2d");
           const rect = canvas.getBoundingClientRect();
@@ -148,7 +154,7 @@ function makePositionComponentContext() {
         }
       },
       dom: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {Element} target */
         requirePluginRoot(target) {
           return target;
         }
@@ -162,25 +168,25 @@ function makePositionComponentContext() {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {DyniTestCanvasContext} ctx */
 function fillTextValues(ctx) {
-  // @ts-ignore -- pre-existing untyped test mock boundary
-  return ctx.calls.filter((c) => c.name === "fillText").map((c) => String(c.args[0]));
+  return ctx.calls
+    .filter((/** @param {DyniTestCall} call */ call) => call.name === "fillText")
+    .map(/** @param {DyniTestCall} call */ (call) => String(call.args[0]));
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {DyniTestCanvasContext} ctx @returns {TextCall[]} */
 function captureTextCalls(ctx) {
-  // @ts-ignore -- pre-existing untyped test mock boundary
-  const captured = [];
+  const captured = /** @type {TextCall[]} */ ([]);
   const originalFillText = ctx.fillText;
-  ctx.fillText = function () {
+  /** @this {DyniTestCanvasContext} @param {...unknown} args */
+  ctx.fillText = function (...args) {
     captured.push({
-      text: String(arguments[0]),
+      text: String(args[0]),
       font: ctx.font
     });
-    return originalFillText.apply(this, arguments);
+    return originalFillText.call(this, String(args[0]), Number(args[1]), Number(args[2]));
   };
-  // @ts-ignore -- pre-existing untyped test mock boundary
   return captured;
 }
 

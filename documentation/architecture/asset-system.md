@@ -1,6 +1,6 @@
 # Asset System
 
-**Status:** ✅ Implemented | Component-declared runtime asset preloading and lookup
+**Status:** Current.
 
 ## Overview
 

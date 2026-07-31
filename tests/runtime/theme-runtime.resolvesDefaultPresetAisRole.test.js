@@ -140,6 +140,7 @@ describe("runtime/theme-runtime.js", function () {
   });
 
   it("applies global root overrides to all cascaded scoped tokens", function () {
+    /** @type {Record<string, string>} */
     const cssVars = {
       "--dyni-alarm": "#00ff00",
       "--dyni-warning": "#778899",
@@ -149,9 +150,8 @@ describe("runtime/theme-runtime.js", function () {
     const context = setupContext({
       getComputedStyle() {
         return {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {string} name */
           getPropertyValue(name) {
-            // @ts-ignore -- pre-existing untyped test mock boundary
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
           }
         };
@@ -174,6 +174,7 @@ describe("runtime/theme-runtime.js", function () {
   });
 
   it("uses scoped override over parent cascade for ais.warning", function () {
+    /** @type {Record<string, string>} */
     const cssVars = {
       "--dyni-alarm": "#00ff00",
       "--dyni-ais-warning": "#0000ff"
@@ -181,9 +182,8 @@ describe("runtime/theme-runtime.js", function () {
     const context = setupContext({
       getComputedStyle() {
         return {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {string} name */
           getPropertyValue(name) {
-            // @ts-ignore -- pre-existing untyped test mock boundary
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
           }
         };
@@ -198,15 +198,15 @@ describe("runtime/theme-runtime.js", function () {
   });
 
   it("uses kebab-case regatta input var override", function () {
+    /** @type {Record<string, string>} */
     const cssVars = {
       "--dyni-regatta-bar-warning": "#123abc"
     };
     const context = setupContext({
       getComputedStyle() {
         return {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {string} name */
           getPropertyValue(name) {
-            // @ts-ignore -- pre-existing untyped test mock boundary
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
           }
         };
@@ -221,6 +221,7 @@ describe("runtime/theme-runtime.js", function () {
   });
 
   it("prefers kebab-case regatta input var over deprecated alias", function () {
+    /** @type {Record<string, string>} */
     const cssVars = {
       "--dyni-regatta-bar-warning": "#aabbcc",
       "--dyni-regatta-barWarning": "#ddeeff"
@@ -228,9 +229,8 @@ describe("runtime/theme-runtime.js", function () {
     const context = setupContext({
       getComputedStyle() {
         return {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {string} name */
           getPropertyValue(name) {
-            // @ts-ignore -- pre-existing untyped test mock boundary
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
           }
         };

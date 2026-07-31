@@ -1,6 +1,6 @@
 # State Screens
 
-**Status:** ✅ Implemented | Shared state-screen vocabulary, precedence helper, and rendering primitives
+**Status:** Current.
 
 ## Overview
 

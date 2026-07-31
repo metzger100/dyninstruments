@@ -1,6 +1,6 @@
 # Gauge Shared API Reference
 
-**Status:** ✅ Implemented | Per-module API reference split out of `gauge-shared-api.md`
+**Status:** Current.
 
 ## Overview
 

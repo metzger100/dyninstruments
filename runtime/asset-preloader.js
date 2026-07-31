@@ -195,14 +195,13 @@
             });
             return value;
           })
-          // dyni-boundary-next-line(category: browser-asset-loading, owner: Metzger100, date: 2026-07-17) -- Known asset preload failures degrade to null after logging so widgets can fall back gracefully.
+          // plugin-boundary-next-line(category: browser-asset-loading, owner: Metzger100, date: 2026-07-17) -- Known asset preload failures degrade to null after logging so widgets can fall back gracefully.
           .catch(function (error) {
             cache.set(asset.key, {
               status: "failed",
               type: asset.type,
               value: null
             });
-            console.warn("dyninstruments: failed to preload asset '" + asset.key + "' from " + url + ":", error);
             return null;
           })
       );

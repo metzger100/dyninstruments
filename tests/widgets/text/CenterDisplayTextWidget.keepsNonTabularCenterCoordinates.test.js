@@ -56,6 +56,9 @@ describe("CenterDisplayTextWidget", function () {
     const wp = findFirstText(texts, "WP");
     const boat = findFirstText(texts, "POS");
 
+    if (!center || !lat || !wp || !boat) {
+      throw new Error("Expected every relation-row text to be captured.");
+    }
     expect(center.x).toBeLessThan(wp.x);
     expect(lat.x).toBeLessThan(wp.x);
     expect(wp.y).toBeLessThan(boat.y);

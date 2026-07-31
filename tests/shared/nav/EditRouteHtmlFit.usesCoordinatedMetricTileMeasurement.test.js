@@ -24,9 +24,8 @@ describe("EditRouteHtmlFit", function () {
 
     expect(h.textTileLayoutSpy.measureMetricTile).toHaveBeenCalled();
     expect(
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      h.textTileLayoutSpy.measureMetricTile.mock.calls.some((call) => {
-        const args = call[0] || {};
+      h.textTileLayoutSpy.measureMetricTile.mock.calls.some((/** @type {unknown[]} */ call) => {
+        const args = /** @type {{ metric?: { id?: string }, rect?: { h: number, w: number } }} */ (call[0] || {});
         return args.metric && args.metric.id === "dst" && args.rect && args.rect.w > 0 && args.rect.h > 0;
       })
     ).toBe(true);

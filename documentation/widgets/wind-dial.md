@@ -1,6 +1,6 @@
 # WindRadialWidget Module
 
-**Status:** ✅ Implemented | `widgets/radial/WindRadialWidget/WindRadialWidget.js`
+**Status:** Current.
 
 ## Overview
 

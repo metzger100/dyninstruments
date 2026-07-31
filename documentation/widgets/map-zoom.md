@@ -1,6 +1,6 @@
 # Map Zoom HTML Renderer
 
-**Status:** ✅ Implemented | Committed HTML renderer for map/zoom
+**Status:** Current.
 
 ## Overview
 

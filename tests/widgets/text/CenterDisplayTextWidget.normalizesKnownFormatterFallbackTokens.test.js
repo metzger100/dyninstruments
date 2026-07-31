@@ -11,7 +11,6 @@ const {
 describe("CenterDisplayTextWidget", function () {
   it("normalizes known formatter fallback tokens for coordinates and relation rows", function () {
     const helpers = makeComponentContext({
-      // @ts-ignore -- pre-existing untyped test mock boundary
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (cfg.formatter === "formatLonLatsDecimal") {
@@ -38,11 +37,8 @@ describe("CenterDisplayTextWidget", function () {
       })
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const texts = fillTextCalls(ctx).map((entry) => entry.text);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(texts.filter((entry) => entry === "---").length).toBeGreaterThanOrEqual(2);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(texts.filter((entry) => entry === "--- / ---").length).toBe(2);
     expect(texts).not.toContain("-----");
     expect(texts).not.toContain("--:--");

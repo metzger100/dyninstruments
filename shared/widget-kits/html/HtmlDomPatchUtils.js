@@ -68,7 +68,7 @@
     if (!rootEl) {
       return;
     }
-    const value = markup == null ? "" : String(markup);
+    const value = isNullish(markup) ? "" : String(markup);
     const desc = Object.getOwnPropertyDescriptor(rootEl, LAST_PATCHED_MARKUP_KEY);
     if (desc && desc.writable) {
       rootEl[LAST_PATCHED_MARKUP_KEY] = value;
@@ -146,7 +146,7 @@
     if (!rootEl || typeof rootEl.appendChild !== "function") {
       return null;
     }
-    const markup = nextHtml == null ? "" : String(nextHtml);
+    const markup = isNullish(nextHtml) ? "" : String(nextHtml);
     const patchedRoot = /** @type {DyniPatchedRootElement} */ (rootEl);
     if (readLastPatchedMarkup(patchedRoot) === markup) {
       return rootEl.firstElementChild || null;
@@ -194,8 +194,12 @@
     return currentRoot;
   }
 
-  /** @returns {DyniHtmlDomPatchUtilsApi} */
-  function create() {
+  /** @type {DyniValueMathApi["isNullish"]} */
+  let isNullish;
+
+  /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniHtmlDomPatchUtilsApi} */
+  function create(def, componentContext) {
+    isNullish = componentContext.components.require("ValueMath").isNullish;
     return {
       id: "HtmlDomPatchUtils",
       patchInnerHtml: patchInnerHtml

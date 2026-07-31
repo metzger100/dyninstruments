@@ -8,6 +8,10 @@
   const ns = root.DyniPlugin;
   const runtime = /** @type {DyniRuntimeNamespace & { getAvnavApi(rootRef: unknown): unknown }} */ (ns.runtime);
   const hasOwn = Object.prototype.hasOwnProperty;
+  const valueMathModule = /** @type {{ create(): DyniValueMathApi }} */ (
+    /** @type {unknown} */ (root.DyniComponents && root.DyniComponents.DyniValueMath)
+  );
+  const isNullish = valueMathModule.create().isNullish;
 
   /**
    * @param {unknown} raw
@@ -16,7 +20,7 @@
    */
   function applyFormatter(raw, props) {
     const p = /** @type {DyniFormatterOptions} */ (props || {});
-    if (raw == null || Number.isNaN(raw)) {
+    if (isNullish(raw) || Number.isNaN(raw)) {
       if (hasOwn.call(p, "default")) {
         return p.default;
       }
@@ -52,7 +56,7 @@
           return formatter.apply(avnavApi.formatter, formatterArgs);
         }
       }
-      // dyni-boundary-next-line(category: avnav-host-boundary, owner: Metzger100, date: 2026-07-17) -- Formatter dispatch is an external AvNav/custom boundary; documented fallback behavior must remain centralized here.
+      // plugin-boundary-next-line(category: avnav-host-boundary, owner: Metzger100, date: 2026-07-17) -- Formatter dispatch is an external AvNav/custom boundary; documented fallback behavior must remain centralized here.
     } catch (e) {
       /* intentional: formatter failures fall back to default/raw formatting */
     }

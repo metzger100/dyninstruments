@@ -1,6 +1,6 @@
 # ThreeValueTextWidget Module
 
-**Status:** ✅ Implemented | `widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js`
+**Status:** Current.
 
 ## Overview
 

@@ -150,7 +150,7 @@
       let consecutiveAnimateFrames = 0;
 
       function cancelPendingFrame() {
-        if (rafHandle == null) {
+        if (rafHandle === null || rafHandle === undefined) {
           return;
         }
         cancelFrame(rafHandle);
@@ -287,7 +287,7 @@
         }
         markDirty(reason);
 
-        if (rafHandle != null) {
+        if (rafHandle !== null && rafHandle !== undefined) {
           return false;
         }
 

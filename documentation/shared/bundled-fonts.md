@@ -1,6 +1,6 @@
 # Bundled Fonts
 
-**Status:** ✅ Implemented | Plugin-shipped Roboto and Roboto Mono assets for offline-capable rendering
+**Status:** Current.
 
 ## Overview
 

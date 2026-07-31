@@ -1,0 +1,19 @@
+{
+  "baselinePackageName": "dyninstruments",
+  "baselineSha256": "eb3369055d9a2b8f346d56fcbb4d85238e6c8dd4099a5f53a6043c739607fe77",
+  "productionRoots": ["config", "runtime", "cluster", "shared", "widgets"],
+  "legacyBelowDefaultFloors": {
+    "cluster/mappers/AnchorMapper.js": { "lines": 80, "branches": 61.11 },
+    "cluster/viewmodels/ActiveRouteViewModel.js": { "lines": 80, "branches": 58.82 },
+    "plugin.js": { "lines": 71.73, "branches": 65 },
+    "runtime/canvas-runtime.js": { "lines": 80, "branches": 53.84 },
+    "runtime/cluster/RouteActivationLatestWins.js": { "lines": 73.06, "branches": 63.88 },
+    "runtime/dom-runtime.js": { "lines": 58.13, "branches": 44.44 },
+    "runtime/plugin-bootstrap-core.js": { "lines": 77.68, "branches": 64.21 },
+    "runtime/surface/CanvasDomSurfaceAdapter.js": { "lines": 76.55, "branches": 51.67 },
+    "runtime/surface/index.js": { "lines": 38.7, "branches": 23.07 },
+    "shared/widget-kits/linear/LinearGaugeEngineDrawing.js": { "lines": 80, "branches": 63.46 },
+    "shared/widget-kits/linear/LinearGaugeEngineSupport.js": { "lines": 80, "branches": 50 },
+    "shared/widget-kits/radial/RadialToolkit.js": { "lines": 80, "branches": 50 }
+  }
+}

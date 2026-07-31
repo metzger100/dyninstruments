@@ -1,24 +1,16 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const { loadProjectTokens } = require("./generic-tokens-test-utils");
 
 const AGENTS_PATH = path.join(process.cwd(), "AGENTS.md");
+const EXTRACTED_PATH = path.join(process.cwd(), "tools/quality-policy/shared-instructions.md");
 const BEGIN_MARKER = "<!-- BEGIN SHARED_INSTRUCTIONS -->";
 const END_MARKER = "<!-- END SHARED_INSTRUCTIONS -->";
 
 // The enclosed block must be liftable verbatim into a future project template, so it must name
-// no Dyninstruments-specific concept (mapper, cluster, widget, theme, layout, responsive profile,
-// component loader, or the AvNav host itself).
-const PROJECT_TOKENS = [
-  "Dyni",
-  "dyninstruments",
-  "AvNav",
-  "avnav",
-  "componentContext",
-  "ClusterWidget",
-  "mapper",
-  "ResponsiveScaleProfile",
-  "widget-kits"
-];
+// no Dyninstruments-specific concept. `generic-tokens.json` is the single owner of that token
+// list, shared with skill-layer-contract.test.js and pattern-rule-generic-scope-contract.test.js.
+const PROJECT_TOKENS = loadProjectTokens();
 
 describe("shared-instructions block contract", function () {
   it("keeps exactly one balanced BEGIN/END marker pair in AGENTS.md", function () {
@@ -37,6 +29,10 @@ describe("shared-instructions block contract", function () {
     });
 
     expect(violations).toEqual([]);
+  });
+
+  it("keeps the extracted verification artifact byte-for-byte equal to the enclosed block", function () {
+    expect(extractEnclosedBlock(fs.readFileSync(AGENTS_PATH, "utf8"))).toBe(fs.readFileSync(EXTRACTED_PATH, "utf8"));
   });
 
   it("fails when a project-specific token is placed inside the block", function () {

@@ -17,7 +17,6 @@ describe("CenterDisplayTextWidget", function () {
 
     spec.renderCanvas(canvas, makeProps({ disconnect: true }));
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const texts = fillTextCalls(ctx).map((entry) => entry.text);
     expect(texts).toContain("GPS Lost");
     expect(texts).not.toContain("CENTER");

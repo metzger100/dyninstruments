@@ -1,7 +1,6 @@
 # Linear Gauge Style Guide
 
-**Status:** ✅ Implemented | Speed/Depth/Temperature/Voltage/Wind/Compass linear wrappers shipped, profile contracts
-documented for range/centered180/fixed360 kinds
+**Status:** Current. documented for range/centered180/fixed360 kinds
 
 ## Overview
 

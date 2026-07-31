@@ -126,6 +126,7 @@
   function create(def, componentContext) {
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const valueMath = componentContext.components.require("ValueMath");
+    const isNullish = valueMath.isNullish;
     const geometryScale = componentContext.components.require("GeometryScale");
     const phaseApi = componentContext.components.require("RegattaTimerPhase");
     const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
@@ -176,7 +177,7 @@
       const height = Math.max(1, Math.round(heightRaw));
       const mode = normalizeMode(cfg.mode);
       const phase = phaseApi.normalize(model.phase);
-      const displayTime = model.displayTime == null ? "00:00" : String(model.displayTime);
+      const displayTime = isNullish(model.displayTime) ? "00:00" : String(model.displayTime);
       const stableDigitsEnabled = cfg.stableDigitsEnabled === true;
       const cache = resolveRegattaCacheEntry(cfg.hostContext);
       const signature = buildSignature(

@@ -1,8 +1,22 @@
-// @ts-nocheck
 const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
+/**
+ * @typedef {{ height: number, width: number }} ShellRect
+ * @typedef {{ reset: () => unknown, start: () => unknown, sync: () => unknown }} RegattaActions
+ * @typedef {{ actions: { regatta: RegattaActions }, cluster: string, interaction: { mode: string }, kind: string, pageId: string, routeId: string }} RegattaSurfacePolicy
+ * @typedef {Record<string, unknown> & { surfacePolicy?: RegattaSurfacePolicy }} RegattaProps
+ * @typedef {{ cluster?: string, kind?: string, mode?: string, pageId?: string, routeId?: string }} SurfacePolicyOptions
+ * @typedef {{ destroy: () => void, ensureContext: () => boolean, playTone: (frequency?: unknown, durationMs?: unknown) => void }} AudioEngine
+ * @typedef {{ destroy: () => void, detach: (options?: Record<string, unknown>) => void, layoutSignature: (payload: Record<string, unknown>) => string, mount: (mountHostEl: HTMLElement, payload: Record<string, unknown>) => void, postPatch: (payload?: Record<string, unknown>) => boolean, update: (payload: Record<string, unknown>) => void }} CommittedRenderer
+ * @typedef {{ createCommittedRenderer: (context: Record<string, unknown>) => CommittedRenderer, id: string, wantsHideNativeHead?: boolean }} RendererSpec
+ * @typedef {{ audioEngine: AudioEngine, rendererSpec: RendererSpec }} RendererBundle
+ * @typedef {{ hostContext?: Record<string, unknown>, props?: RegattaProps, rendererBundle?: RendererBundle, rendererOptions?: unknown, shellSize?: ShellRect }} CreateMountedRendererOptions
+ * @typedef {{ maxH: number, maxW: number, text: string }} FitSingleLineBinaryArgs
+ */
+
+/** @param {unknown} styleText */
 function parseStyle(styleText) {
   return String(styleText || "")
     .split(";")
@@ -15,15 +29,17 @@ function parseStyle(styleText) {
       }
       acc[part.slice(0, idx).trim()] = part.slice(idx + 1).trim();
       return acc;
-    }, Object.create(null));
+    }, /** @type {Record<string, string>} */ (Object.create(null)));
 }
 
+/** @param {unknown} styleText @param {string} key */
 function readPx(styleText, key) {
   const raw = parseStyle(styleText)[key] || "";
   const match = raw.match(/^(\d+(?:\.\d+)?)px$/);
   return match ? Number(match[1]) : NaN;
 }
 
+/** @param {unknown} displayText */
 function toTimerSeconds(displayText) {
   const text = String(displayText || "");
   const parts = text.split(":");
@@ -36,9 +52,11 @@ function toTimerSeconds(displayText) {
   return NaN;
 }
 
+/** @param {unknown} [options] @returns {RendererBundle} */
 function buildRenderer(options) {
   const measureCtx = {
     font: "700 12px sans-serif",
+    /** @param {unknown} text */
     measureText(text) {
       const match = String(this.font || "").match(/(\d+(?:\.\d+)?)px/);
       const px = match ? Number(match[1]) : 12;
@@ -84,6 +102,7 @@ function buildRenderer(options) {
       create() {
         return {
           id: "TextLayoutEngine",
+          /** @param {FitSingleLineBinaryArgs} args */
           fitSingleLineBinary: vi.fn(function (args) {
             return {
               px: Math.min(args.maxH, Math.floor(args.maxW / Math.max(1, args.text.length * 0.52))),
@@ -100,6 +119,7 @@ function buildRenderer(options) {
     modules: modules,
     services: {
       dom: {
+        /** @param {unknown} target */
         requirePluginRoot(target) {
           return target || null;
         },
@@ -131,9 +151,8 @@ function buildRenderer(options) {
       }
     }
   });
-  const rendererSpec = loadFresh("widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.js").create(
-    {},
-    componentContext
+  const rendererSpec = /** @type {RendererSpec} */ (
+    loadFresh("widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.js").create({}, componentContext)
   );
   return {
     rendererSpec: rendererSpec,
@@ -141,6 +160,7 @@ function buildRenderer(options) {
   };
 }
 
+/** @param {RegattaProps} [overrides] @returns {RegattaProps} */
 function makeProps(overrides) {
   return Object.assign(
     {
@@ -160,6 +180,7 @@ function makeProps(overrides) {
   );
 }
 
+/** @param {RegattaProps} props @param {SurfacePolicyOptions | string} [modeOrOptions] @returns {RegattaProps} */
 function withSurfacePolicy(props, modeOrOptions) {
   const options = typeof modeOrOptions === "string" ? { mode: modeOrOptions } : modeOrOptions || {};
   const interactionMode = options.mode === "passive" ? "passive" : "dispatch";
@@ -181,6 +202,7 @@ function withSurfacePolicy(props, modeOrOptions) {
   });
 }
 
+/** @param {CreateMountedRendererOptions} [options] */
 function createMountedRenderer(options) {
   const opts = options || {};
   const shellSize = opts.shellSize || { width: 260, height: 130 };
@@ -203,6 +225,7 @@ function createMountedRenderer(options) {
     shadowRoot: null
   });
 
+  /** @param {RegattaProps} props @param {number} revision @param {ShellRect} [shellRect] */
   function payload(props, revision, shellRect) {
     const rect = shellRect || shellSize;
     return {
@@ -231,9 +254,11 @@ function createMountedRenderer(options) {
     audioEngine: audioEngine,
     currentProps: initialProps,
     currentRevision: 1,
+    /** @param {RegattaProps} nextProps @param {number} nextRevision @param {ShellRect} [nextShellRect] */
     payloadFor(nextProps, nextRevision, nextShellRect) {
       return payload(nextProps, nextRevision, nextShellRect);
     },
+    /** @param {RegattaProps} nextProps @param {ShellRect} [nextShellRect] */
     update(nextProps, nextShellRect) {
       this.currentProps = nextProps;
       this.currentRevision += 1;
@@ -252,11 +277,14 @@ function createMountedRenderer(options) {
       const timeEl = mountEl.querySelector(".dyni-regatta-time");
       return timeEl ? String(timeEl.textContent || "").trim() : "";
     },
+    /** @param {string} action */
     clickAction(action) {
       const selector = '[data-dyni-action="' + action + '"]';
       const el = mountEl.querySelector(selector);
       expect(el, "missing action target: " + selector).toBeTruthy();
-      el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+      if (el) {
+        el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+      }
     }
   };
 }

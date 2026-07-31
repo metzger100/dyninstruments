@@ -2,12 +2,20 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @typedef {Record<string, unknown>} RoutePointsProps
+ * @typedef {{ buildModel?: (args: { props?: RoutePointsProps }) => unknown, computeNaturalHeight?: () => unknown, fitCompute?: (args: { model?: { points?: unknown[] } }) => unknown, maybeReveal?: () => boolean, measureListScrollbarGutter?: () => number }} RendererOptions
+ * @typedef {{ actions?: unknown, activate?: (index: number) => boolean, mode?: string, orientation?: string, pageId?: string }} SurfaceOptions
+ * @typedef {{ __dyniHostCommitState?: { rootEl: HTMLElement, shellEl: HTMLElement } }} HostContext
+ * @typedef {{ createCommittedRenderer: (options: { hostContext: HostContext, mountEl: HTMLElement, shadowRoot: null }) => { destroy: () => unknown, detach: () => unknown, mount: (mountEl: HTMLElement, payload: unknown) => void, postPatch: (payload?: unknown) => unknown, update: (payload: unknown) => void } }} RendererSpec
+ */
+
+/** @param {RendererOptions} [options] */
 function createRenderer(options) {
   const opts = options || {};
   const buildModel =
     opts.buildModel ||
-    vi.fn(function (args) {
+    vi.fn(function (/** @type {{ props?: RoutePointsProps }} */ args) {
       const props = args && args.props ? args.props : {};
       const interactionState = props.__interactionState || (props.__canActivate === true ? "dispatch" : "passive");
       const points = Array.isArray(props.__points)
@@ -59,11 +67,12 @@ function createRenderer(options) {
     });
   const fitCompute =
     opts.fitCompute ||
-    vi.fn(function (args) {
+    vi.fn(function (/** @type {{ model?: { points?: unknown[] } }} */ args) {
       const model = args && args.model ? args.model : { points: [] };
+      const points = model.points || [];
       return {
         headerFit: { routeNameStyle: "", metaStyle: "" },
-        rowFits: model.points.map(function () {
+        rowFits: points.map(function () {
           return { ordinalStyle: "", nameStyle: "", infoStyle: "" };
         }),
         emptyStyle: ""
@@ -134,7 +143,7 @@ function createRenderer(options) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {RoutePointsProps} props @param {SurfaceOptions} [options] */
 function withSurfacePolicy(props, options) {
   const opts = options || {};
   const mode = opts.mode === "passive" ? "passive" : "dispatch";
@@ -152,11 +161,11 @@ function withSurfacePolicy(props, options) {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {RendererSpec} rendererSpec @param {RoutePointsProps} props @param {{ hostContext?: HostContext, shellSize?: { height: number, width: number } }} [options] */
 function mountCommitted(rendererSpec, props, options) {
   const opts = options || {};
   const shellSize = opts.shellSize || { width: 300, height: 160 };
-  const hostContext = opts.hostContext || {};
+  const hostContext = opts.hostContext || /** @type {HostContext} */ ({});
   const rootEl = document.createElement("div");
   rootEl.className = "widget dyniplugin dyni-host-html";
   const shellEl = document.createElement("div");
@@ -167,10 +176,18 @@ function mountCommitted(rendererSpec, props, options) {
   rootEl.appendChild(shellEl);
   hostContext.__dyniHostCommitState = { rootEl, shellEl };
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
   mountEl.getBoundingClientRect = vi.fn(() => ({
+    bottom: shellSize.height,
     width: shellSize.width,
-    height: shellSize.height
+    height: shellSize.height,
+    left: 0,
+    right: shellSize.width,
+    top: 0,
+    x: 0,
+    y: 0,
+    toJSON() {
+      return {};
+    }
   }));
 
   const committed = rendererSpec.createCommittedRenderer({
@@ -181,7 +198,7 @@ function mountCommitted(rendererSpec, props, options) {
 
   let revision = 0;
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {RoutePointsProps} nextProps @param {boolean} layoutChanged */
   function payload(nextProps, layoutChanged) {
     revision += 1;
     return {
@@ -206,7 +223,7 @@ function mountCommitted(rendererSpec, props, options) {
     mountEl,
     committed,
     postPatchResult,
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {RoutePointsProps} nextProps @param {boolean} [layoutChanged] */
     update(nextProps, layoutChanged) {
       const next = payload(nextProps, layoutChanged === true);
       committed.update(next);

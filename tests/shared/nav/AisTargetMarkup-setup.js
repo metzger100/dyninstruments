@@ -2,6 +2,11 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
+/**
+ * @typedef {Record<string, unknown>} MarkupOverrides
+ * @typedef {MarkupOverrides & { metrics?: Record<string, unknown> }} FitOverrides
+ */
+
 function createMarkup() {
   const stateScreenMarkup = loadFresh("shared/widget-kits/state/StateScreenMarkup.js").create(
     {},
@@ -28,14 +33,14 @@ function createHtmlUtils() {
   return loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js").create();
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {string} html */
 function parseHtml(html) {
   const host = document.createElement("div");
   host.innerHTML = html;
   return host;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {MarkupOverrides} [overrides] */
 function makeModel(overrides) {
   return Object.assign(
     {
@@ -93,7 +98,7 @@ function makeModel(overrides) {
   );
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {FitOverrides} [overrides] */
 function makeFit(overrides) {
   const out = Object.assign(
     {
@@ -163,20 +168,24 @@ function makeFit(overrides) {
   return out;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {Element} root @param {string} id */
 function expectFlatMetricStructure(root, id) {
   const metric = root.querySelector(".dyni-ais-target-metric-" + id);
-  expect(metric).toBeTruthy();
+  if (!metric) {
+    throw new Error("metric is missing: " + id);
+  }
   expect(metric.children).toHaveLength(3);
   expect(metric.children[0].className).toContain("dyni-ais-target-metric-caption");
   expect(metric.children[1].className).toContain("dyni-ais-target-metric-value");
   expect(metric.children[2].className).toContain("dyni-ais-target-metric-unit");
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {Element} root @param {string} id */
 function expectInlineMetricStructure(root, id) {
   const metric = root.querySelector(".dyni-ais-target-metric-" + id);
-  expect(metric).toBeTruthy();
+  if (!metric) {
+    throw new Error("metric is missing: " + id);
+  }
   expect(metric.children).toHaveLength(2);
   expect(metric.children[0].className).toContain("dyni-ais-target-metric-caption");
   expect(metric.children[1].className).toContain("dyni-ais-target-metric-value-row");

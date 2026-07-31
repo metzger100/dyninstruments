@@ -29,14 +29,10 @@ describe("AisTargetTextHtmlWidget", function () {
     });
     const narrowAccent = narrowMounted.mountEl.querySelector(".dyni-ais-target-state-accent");
     const wideAccent = wideMounted.mountEl.querySelector(".dyni-ais-target-state-accent");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const narrowWidth = readInlinePx(narrowAccent && narrowAccent.style ? narrowAccent.style.width : "");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const wideWidth = readInlinePx(wideAccent && wideAccent.style ? wideAccent.style.width : "");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const narrowRadius = readInlinePx(narrowAccent && narrowAccent.style ? narrowAccent.style.borderRadius : "");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const wideRadius = readInlinePx(wideAccent && wideAccent.style ? wideAccent.style.borderRadius : "");
+    const narrowWidth = readInlinePx(narrowAccent instanceof HTMLElement ? narrowAccent.style.width : "");
+    const wideWidth = readInlinePx(wideAccent instanceof HTMLElement ? wideAccent.style.width : "");
+    const narrowRadius = readInlinePx(narrowAccent instanceof HTMLElement ? narrowAccent.style.borderRadius : "");
+    const wideRadius = readInlinePx(wideAccent instanceof HTMLElement ? wideAccent.style.borderRadius : "");
 
     expect(narrowAccent).toBeTruthy();
     expect(wideAccent).toBeTruthy();

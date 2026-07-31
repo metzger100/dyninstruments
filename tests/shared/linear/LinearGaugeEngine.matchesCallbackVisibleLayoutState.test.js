@@ -3,10 +3,10 @@ const { createHarness, createMockCanvas, createMockContext2D } = require("./Line
 
 describe("LinearGaugeEngine", function () {
   it("matches callback-visible layout state with or without wrapper-owned ratioDefaults when config thresholds are present", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {{ ratioDefaults?: { flat: number, normal: number } }} [specOverrides] */
     function captureState(specOverrides) {
       const harness = createHarness();
-      let snapshot = null;
+      let snapshot = /** @type {Record<string, unknown> | null} */ (null);
       const renderer = harness.engine.createRenderer(
         Object.assign(
           {
@@ -20,7 +20,7 @@ describe("LinearGaugeEngine", function () {
               showEndLabels: "showEndLabels"
             },
             ratioProps: { normal: "n", flat: "f" },
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {{ layout: { trackBox: unknown, trackY: unknown }, mode: unknown, textFillScale: unknown }} state */
             drawFrame(state) {
               snapshot = {
                 mode: state.mode,

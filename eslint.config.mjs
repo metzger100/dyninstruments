@@ -5,6 +5,7 @@ import eslintComments from "@eslint-community/eslint-plugin-eslint-comments";
 import js from "@eslint/js";
 import jsdoc from "eslint-plugin-jsdoc";
 import globals from "globals";
+import { SHARED_STRICT_RULES } from "./tools/quality-policy/eslint-shared-rules.mjs";
 
 const repoRoot = path.dirname(fileURLToPath(import.meta.url));
 const testInventory = JSON.parse(
@@ -17,6 +18,7 @@ const relaxedTestFiles = Object.entries(testInventory.entries)
 const browserRuntimeGlobals = {
   ...globals.browser,
   AVNAV_BASE_URL: "readonly",
+  avnav: "readonly",
   DyniPlugin: "readonly",
   define: "readonly",
   module: "readonly",
@@ -64,6 +66,7 @@ export default [
       ecmaVersion: 2022
     },
     linterOptions: {
+      noInlineConfig: true,
       reportUnusedDisableDirectives: "error"
     },
     plugins: {
@@ -71,11 +74,9 @@ export default [
     },
     rules: {
       ...js.configs.recommended.rules,
-      eqeqeq: ["error", "smart"],
+      ...SHARED_STRICT_RULES,
       "eslint-comments/no-duplicate-disable": "error",
       "eslint-comments/no-unused-disable": "error",
-      "no-unused-vars": ["error", { args: "none", caughtErrors: "none" }],
-      "no-useless-assignment": "error",
       "no-eval": "error",
       "no-implied-eval": "error",
       "no-new-func": "error"
@@ -115,7 +116,9 @@ export default [
       ],
       "no-unused-vars": "off",
       "no-useless-assignment": "off",
-      "no-restricted-syntax": noRuntimeModules
+      "no-restricted-syntax": noRuntimeModules,
+      "no-console": "error",
+      "no-empty": ["error", { allowEmptyCatch: false }]
     }
   },
   {
@@ -163,6 +166,13 @@ export default [
     }
   },
   {
+    files: ["tests/**/*.mjs"],
+    languageOptions: {
+      globals: testGlobals,
+      sourceType: "module"
+    }
+  },
+  {
     files: relaxedTestFiles,
     rules: {
       // Temporary fragment/fixture files share setup globals or deliberate invalid bindings by design;
@@ -174,7 +184,7 @@ export default [
     }
   },
   {
-    files: ["tests/**/*.test.js"],
+    files: ["tests/**/*.test.js", "tests/**/*.test.mjs"],
     rules: {
       "no-restricted-syntax": [
         "error",

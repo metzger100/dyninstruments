@@ -62,7 +62,12 @@ describe("LinearGaugeEngine", function () {
         minor: "minor",
         showEndLabels: "showEndLabels"
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /**
+       * @param {{ trackThickness: number }} state
+       * @param {unknown} props
+       * @param {unknown} display
+       * @param {{ drawDefaultPointer: () => void, drawMarkerAtValue: (value: number, opts: { strokeStyle: string }) => void }} api
+       */
       drawFrame(state, props, display, api) {
         if (!isFinite(thinTrackThickness)) thinTrackThickness = state.trackThickness;
         else thickTrackThickness = state.trackThickness;
@@ -92,13 +97,9 @@ describe("LinearGaugeEngine", function () {
     );
 
     expect(thinTrackThickness).not.toBe(thickTrackThickness);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(thinHarness.calls.pointer[0].opts.depth).toBe(thickHarness.calls.pointer[0].opts.depth);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(thinHarness.calls.pointer[0].opts.side).toBe(thickHarness.calls.pointer[0].opts.side);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const thinMarker = thinHarness.calls.ticks[thinHarness.calls.ticks.length - 1];
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const thickMarker = thickHarness.calls.ticks[thickHarness.calls.ticks.length - 1];
     expect(thinMarker.len).toBe(thickMarker.len);
     expect(thinMarker.opts.lineWidth).toBe(thickMarker.opts.lineWidth);

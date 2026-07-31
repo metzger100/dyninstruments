@@ -16,7 +16,9 @@ describe("AisTargetTextHtmlWidget", function () {
     expect(html).toContain("dyni-ais-target-open-passive");
 
     const wrapper = mounted.mountEl.querySelector(".dyni-ais-target-html");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!wrapper) {
+      throw new Error("Expected the ais-target wrapper.");
+    }
     wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(showInfo).not.toHaveBeenCalled();
   });

@@ -4,6 +4,7 @@
  */
 const unitNodeTests = [
   "tests/tools/**/*.test.js",
+  "tests/tools/**/*.test.mjs",
   "tests/shared/property/**/*.test.js",
   "tests/shared/value/**/*.test.js",
   "tests/shared/format/**/*.test.js",
@@ -21,6 +22,7 @@ const unitNodeTests = [
 
 const contractTests = [
   "tests/contract/**/*.test.js",
+  "tests/contract/**/*.test.mjs",
   "tests/config/components.test.js",
   "tests/config/widget-definitions.test.js",
   "tests/layouts/bundled-layouts.test.js",
@@ -40,7 +42,7 @@ module.exports = {
     environment: "jsdom",
     globals: true,
     setupFiles: ["tests/setup/vitest.setup.js"],
-    include: ["tests/**/*.test.js"],
+    include: ["tests/**/*.test.js", "tests/**/*.test.mjs"],
     exclude: ["tests/tools/lint-fixtures/**"],
     coverage: {
       enabled: false,

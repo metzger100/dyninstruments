@@ -11,14 +11,15 @@ function createHarness() {
   const responsiveScaleProfileMod = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
   const layoutRectMathMod = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
   const geometryScaleMod = loadFresh("shared/widget-kits/layout/GeometryScale.js");
-  const calls = {
-    ring: [],
-    ticks: [],
-    pointer: [],
-    mode: [],
-    rebuild: [],
-    meta: []
-  };
+  const calls =
+    /** @type {{ meta: unknown[], mode: unknown[], pointer: unknown[], rebuild: unknown[], ring: unknown[], ticks: unknown[] }} */ ({
+      ring: [],
+      ticks: [],
+      pointer: [],
+      mode: [],
+      rebuild: [],
+      meta: []
+    });
   const theme = {
     surface: {
       fg: "#fff"
@@ -84,19 +85,16 @@ function createHarness() {
           create() {
             return {
               draw: {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} ctx @param {number} cx @param {number} cy @param {number} rOuter @param {unknown} opts */
                 drawRing(ctx, cx, cy, rOuter, opts) {
-                  // @ts-ignore -- pre-existing untyped test mock boundary
                   calls.ring.push(opts);
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} ctx @param {number} cx @param {number} cy @param {number} rOuter @param {unknown} opts */
                 drawTicks(ctx, cx, cy, rOuter, opts) {
-                  // @ts-ignore -- pre-existing untyped test mock boundary
                   calls.ticks.push(opts);
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} ctx @param {number} cx @param {number} cy @param {number} rOuter @param {number} angle @param {unknown} opts */
                 drawPointerAtRim(ctx, cx, cy, rOuter, angle, opts) {
-                  // @ts-ignore -- pre-existing untyped test mock boundary
                   calls.pointer.push(opts);
                 },
                 drawLabels() {},
@@ -107,18 +105,18 @@ function createHarness() {
                 drawDisconnectOverlay() {}
               },
               value: {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} n */
                 isFiniteNumber(n) {
                   return typeof n === "number" && isFinite(n);
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} value @param {number} defaultValue */
                 resolveFiniteNumber(value, defaultValue) {
                   const n = Number(value);
                   return isFinite(n) ? n : defaultValue;
                 }
               },
               angle: {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {number} deg @param {unknown} cfg @param {number} rotationDeg */
                 degToCanvasRad(deg, cfg, rotationDeg) {
                   const d = Number(deg) + (Number(rotationDeg) || 0);
                   const norm = ((d % 360) + 360) % 360;
@@ -136,7 +134,7 @@ function createHarness() {
       },
       services: {
         canvas: {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {{ getBoundingClientRect: () => DOMRect, getContext: (kind: string) => unknown }} canvas */
           setupCanvas(canvas) {
             const ctx = canvas.getContext("2d");
             const rect = canvas.getBoundingClientRect();
@@ -148,7 +146,7 @@ function createHarness() {
           }
         },
         dom: {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {Element} target */
           requirePluginRoot(target) {
             return target;
           }

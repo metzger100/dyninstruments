@@ -73,7 +73,18 @@ describe("WindRadialWidget internal display and layer branches", function () {
     expect(call.left.value).not.toBe(rawAngleText);
   });
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /**
+   * @param {Record<string, unknown>} [overrides]
+   * @returns {{
+   *   value: unknown,
+   *   geom: { cx: number, cy: number, rOuter: number, ringW: number },
+   *   theme: { colors: { laylineStb: string, laylinePort: string } },
+   *   draw: { drawAnnularSector: import("vitest").Mock, drawLabels: unknown, drawRing: import("vitest").Mock },
+   *   labels: { radiusOffset: number, fontPx: number },
+   *   labelWeight: number,
+   *   family: string
+   * }}
+   */
   function createLayerState(overrides) {
     return Object.assign(
       {
@@ -143,8 +154,15 @@ describe("WindRadialWidget internal display and layer branches", function () {
     const harness = createCapturedSpec();
     const state = createLayerState();
     const api = createLayerApi();
+    /** @type {{ labelFormatter: (n: number) => string, labelFilter: (n: number) => boolean } | undefined} */
     let labelOptions;
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /**
+     * @param {unknown} ctx
+     * @param {unknown} cx
+     * @param {unknown} cy
+     * @param {unknown} r
+     * @param {{ labelFormatter: (n: number) => string, labelFilter: (n: number) => boolean }} options
+     */
     state.draw.drawLabels = function (ctx, cx, cy, r, options) {
       labelOptions = options;
     };
@@ -152,21 +170,16 @@ describe("WindRadialWidget internal display and layer branches", function () {
     harness.cfg.rebuildLayer({}, "front", state, { angle: 10 }, api);
 
     expect(api.drawFullCircleTicks).toHaveBeenCalledTimes(1);
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!labelOptions) throw new Error("Expected drawLabels to capture options.");
     expect(labelOptions.labelFormatter(30)).toBe("30");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(labelOptions.labelFormatter(-90)).toBe("-90");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(labelOptions.labelFilter(-180)).toBe(false);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(labelOptions.labelFilter(180)).toBe(false);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(labelOptions.labelFilter(30)).toBe(true);
   });
 
   it("exposes a no-op translateFunction since the canvas surface owns rendering", function () {
-    // eslint-disable-next-line no-unused-vars -- imported shared setup retained for the strict test contract
-    const harness = createCapturedSpec();
+    createCapturedSpec();
     const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js").create(
       {},
       createComponentContextMock({

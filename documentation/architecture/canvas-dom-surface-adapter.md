@@ -1,6 +1,6 @@
 # Canvas DOM Surface Adapter
 
-**Status:** ✅ Implemented | Committed canvas surface lifecycle owner for canvas-dom routes
+**Status:** Current.
 
 ## Overview
 

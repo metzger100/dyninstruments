@@ -1,6 +1,6 @@
 # Editable Parameters
 
-**Status:** ✅ Reference | Covers official AvNav API + dyninstruments extensions (marked separately)
+**Status:** Current.
 
 ## Overview
 

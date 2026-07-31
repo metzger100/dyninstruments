@@ -1,6 +1,5 @@
 // @ts-check
-// eslint-disable-next-line no-unused-vars -- imported shared setup retained for the strict test contract
-const { createRenderer, mountCommitted, path, withSurfacePolicy } = require("./EditRouteTextHtmlWidget-setup");
+const { createRenderer, mountCommitted, withSurfacePolicy } = require("./EditRouteTextHtmlWidget-setup");
 
 describe("EditRouteTextHtmlWidget", function () {
   it("keeps high mode on the row layout path", function () {
@@ -26,7 +25,6 @@ describe("EditRouteTextHtmlWidget", function () {
           wrapperStyle: ""
         };
       }),
-      // @ts-ignore -- pre-existing untyped test mock boundary
       markupRender(args) {
         const model = args && args.model ? args.model : {};
         return (

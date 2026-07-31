@@ -1,6 +1,6 @@
 # Hide Seconds
 
-**Status:** ✅ Implemented | Shared formatter-swap contract for time displays
+**Status:** Current.
 
 ## Overview
 

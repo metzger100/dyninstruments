@@ -1,6 +1,6 @@
 # Documentation Table of Contents
 
-**Status:** ✅ Reference | Navigation index for AI-focused docs
+**Status:** Current.
 
 ## Overview
 

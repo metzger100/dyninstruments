@@ -71,7 +71,7 @@ function createActiveRouteWidget() {
     },
     /** @param {any} value */
     textLength(value) {
-      return value == null ? 0 : String(value).length;
+      return value === null || value === undefined ? 0 : String(value).length;
     },
     /** @param {any} rawText @param {any} stableDigitsEnabled @param {any} stableDigits @param {any} minWidth */
     normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
@@ -103,7 +103,7 @@ function createActiveRouteWidget() {
         /** @param {any} value @param {Record<string, any>} [formatterOptions] */
         applyFormatter(value, formatterOptions) {
           const cfg = formatterOptions || {};
-          return value == null ? cfg.default : String(value);
+          return value === null || value === undefined ? cfg.default : String(value);
         }
       },
       themeTokens: {

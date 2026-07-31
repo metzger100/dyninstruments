@@ -36,7 +36,7 @@ module.exports = [
     try {
       work();
     }
-    // dyni-lint-disable-next-line catch-fallback-without-suppression -- external formatter boundary still degrades to fallback text
+    // plugin-lint-disable-next-line catch-fallback-without-suppression -- external formatter boundary still degrades to fallback text
     catch (e) {
       return "fallback";
     }
@@ -50,14 +50,14 @@ module.exports = [
   function runTask() {
     try {
       work();
-    } catch (e) { return "fallback"; } /* dyni-lint-disable-line catch-fallback-without-suppression -- external formatter boundary still degrades to fallback text */
+    } catch (e) { return "fallback"; } /* plugin-lint-disable-line catch-fallback-without-suppression -- external formatter boundary still degrades to fallback text */
   }
   runTask();
 }());
 `
   },
   {
-    rule: "internal-hook-fallback",
+    rule: "internal-contract-fallback",
     severity: "block",
     rel: "shared/example.js",
     positive: `
@@ -81,7 +81,7 @@ module.exports = [
     disableNextLine: `
 (function () {
   "use strict";
-  // dyni-lint-disable-next-line internal-hook-fallback -- temporary bridge until hook contract is tightened
+  // plugin-lint-disable-next-line internal-contract-fallback -- temporary bridge until hook contract is tightened
   function normalizeAxis(candidate, fallbackAxis) {
     return candidate;
   }
@@ -91,7 +91,7 @@ module.exports = [
     disableLine: `
 (function () {
   "use strict";
-  function normalizeAxis(candidate, fallbackAxis) { return candidate; } /* dyni-lint-disable-line internal-hook-fallback -- temporary bridge until hook contract is tightened */
+  function normalizeAxis(candidate, fallbackAxis) { return candidate; } /* plugin-lint-disable-line internal-contract-fallback -- temporary bridge until hook contract is tightened */
   normalizeAxis({}, {});
 }());
 `
@@ -124,7 +124,7 @@ module.exports = [
 (function () {
   "use strict";
   function renderCanvas() {
-    // dyni-lint-disable-next-line redundant-null-type-guard -- caller contract is still being migrated
+    // plugin-lint-disable-next-line redundant-null-type-guard -- caller contract is still being migrated
     const label = String(labelRaw == null ? "" : labelRaw);
     return label;
   }
@@ -135,7 +135,7 @@ module.exports = [
 (function () {
   "use strict";
   function renderCanvas() {
-    const label = String(labelRaw == null ? "" : labelRaw); /* dyni-lint-disable-line redundant-null-type-guard -- caller contract is still being migrated */
+    const label = String(labelRaw == null ? "" : labelRaw); /* plugin-lint-disable-line redundant-null-type-guard -- caller contract is still being migrated */
     return label;
   }
   renderCanvas();
@@ -169,7 +169,7 @@ module.exports = [
 (function () {
   "use strict";
   function renderCanvas() {
-    // dyni-lint-disable-next-line hardcoded-runtime-default -- placeholder survives only until mapper owns this row state
+    // plugin-lint-disable-next-line hardcoded-runtime-default -- placeholder survives only until mapper owns this row state
     const row = parsed.left || { caption: "", value: "---", unit: "" };
     return row;
   }
@@ -180,7 +180,7 @@ module.exports = [
 (function () {
   "use strict";
   function renderCanvas() {
-    const row = parsed.left || { caption: "", value: "---", unit: "" }; /* dyni-lint-disable-line hardcoded-runtime-default -- placeholder survives only until mapper owns this row state */
+    const row = parsed.left || { caption: "", value: "---", unit: "" }; /* plugin-lint-disable-line hardcoded-runtime-default -- placeholder survives only until mapper owns this row state */
     return row;
   }
   renderCanvas();
@@ -214,7 +214,7 @@ module.exports = [
 (function () {
   "use strict";
   function renderCanvas() {
-    // dyni-lint-disable-next-line css-js-default-duplication -- typography defaults still live in JS until theme boundary is flattened
+    // plugin-lint-disable-next-line css-js-default-duplication -- typography defaults still live in JS until theme boundary is flattened
     const fontFamily = fontVar && fontVar.trim() ? fontVar.trim() : DEFAULT_FONT_STACK;
     return fontFamily;
   }
@@ -225,7 +225,7 @@ module.exports = [
 (function () {
   "use strict";
   function renderCanvas() {
-    const fontFamily = fontVar && fontVar.trim() ? fontVar.trim() : DEFAULT_FONT_STACK; /* dyni-lint-disable-line css-js-default-duplication -- typography defaults still live in JS until theme boundary is flattened */
+    const fontFamily = fontVar && fontVar.trim() ? fontVar.trim() : DEFAULT_FONT_STACK; /* plugin-lint-disable-line css-js-default-duplication -- typography defaults still live in JS until theme boundary is flattened */
     return fontFamily;
   }
   renderCanvas();
@@ -260,7 +260,7 @@ module.exports = [
 (function () {
   "use strict";
   function copy(axis) {
-    // dyni-lint-disable-next-line premature-legacy-support -- active migration still references legacy naming in one bridge point
+    // plugin-lint-disable-next-line premature-legacy-support -- active migration still references legacy naming in one bridge point
     const fallbackAxis = axis;
     return fallbackAxis;
   }
@@ -271,7 +271,7 @@ module.exports = [
 (function () {
   "use strict";
   function copy(axis) {
-    const fallbackAxis = axis; /* dyni-lint-disable-line premature-legacy-support -- active migration still references legacy naming in one bridge point */
+    const fallbackAxis = axis; /* plugin-lint-disable-line premature-legacy-support -- active migration still references legacy naming in one bridge point */
     return fallbackAxis;
   }
   copy({});
@@ -314,7 +314,7 @@ module.exports = [
   root.DyniPlugin.config.clusters.push({
     def: {
       editableParameters: {
-        // dyni-lint-disable-next-line editable-threshold-missing-internal -- migration keeps this threshold temporarily user-visible
+        // plugin-lint-disable-next-line editable-threshold-missing-internal -- migration keeps this threshold temporarily user-visible
         speedLinearRatioThresholdNormal: { type: "FLOAT", default: 1.1 },
         captionUnitScale: { type: "FLOAT", default: 0.8 }
       }
@@ -328,7 +328,7 @@ module.exports = [
   root.DyniPlugin.config.clusters.push({
     def: {
       editableParameters: {
-        speedLinearRatioThresholdNormal: { type: "FLOAT", default: 1.1 }, /* dyni-lint-disable-line editable-threshold-missing-internal -- migration keeps this threshold temporarily user-visible */
+        speedLinearRatioThresholdNormal: { type: "FLOAT", default: 1.1 }, /* plugin-lint-disable-line editable-threshold-missing-internal -- migration keeps this threshold temporarily user-visible */
         captionUnitScale: { type: "FLOAT", default: 0.8 }
       }
     }
@@ -364,7 +364,7 @@ module.exports = [
 (function () {
   "use strict";
   function readPath() {
-    // dyni-lint-disable-next-line absolute-home-path -- test fixture intentionally keeps one real-looking home path sample
+    // plugin-lint-disable-next-line absolute-home-path -- test fixture intentionally keeps one real-looking home path sample
     const absolute = "/Users/alice/Documents/avnav/viewer/util/api.js";
     return absolute;
   }
@@ -375,7 +375,7 @@ module.exports = [
 (function () {
   "use strict";
   function readPath() {
-    const absolute = "/home/alice/Documents/avnav/viewer/util/api.js"; /* dyni-lint-disable-line absolute-home-path -- test fixture intentionally keeps one real-looking home path sample */
+    const absolute = "/home/alice/Documents/avnav/viewer/util/api.js"; /* plugin-lint-disable-line absolute-home-path -- test fixture intentionally keeps one real-looking home path sample */
     return absolute;
   }
   readPath();
@@ -410,7 +410,7 @@ module.exports = [
 (function () {
   "use strict";
   function wireLegacy(widget) {
-    // dyni-lint-disable-next-line removed-theme-surface-architecture -- negative fixture for legacy-path rule coverage
+    // plugin-lint-disable-next-line removed-theme-surface-architecture -- negative fixture for legacy-path rule coverage
     const handlers = namedHandlers(widget);
     return handlers;
   }
@@ -421,7 +421,7 @@ module.exports = [
 (function () {
   "use strict";
   function wireLegacy(widget) {
-    const handlers = namedHandlers(widget); /* dyni-lint-disable-line removed-theme-surface-architecture -- negative fixture for legacy-path rule coverage */
+    const handlers = namedHandlers(widget); /* plugin-lint-disable-line removed-theme-surface-architecture -- negative fixture for legacy-path rule coverage */
     return handlers;
   }
   wireLegacy({});
@@ -444,13 +444,13 @@ module.exports = [
 `,
     disableNextLine: `
 .dyni-html-root .sample-value {
-  /* dyni-lint-disable-next-line legacy-theme-css-input-consumer -- negative fixture for css token migration rule coverage */
+  /* plugin-lint-disable-next-line legacy-theme-css-input-consumer -- negative fixture for css token migration rule coverage */
   font-weight: var(--dyni-font-weight, 700);
 }
 `,
     disableLine: `
 .dyni-html-root .sample-value {
-  font-weight: var(--dyni-font-weight, 700); /* dyni-lint-disable-line legacy-theme-css-input-consumer -- negative fixture for css token migration rule coverage */
+  font-weight: var(--dyni-font-weight, 700); /* plugin-lint-disable-line legacy-theme-css-input-consumer -- negative fixture for css token migration rule coverage */
 }
 `
   },
@@ -495,7 +495,7 @@ module.exports = [
     function translate(props) {
       return {
         renderer: "SpeedRadialWidget",
-        // dyni-lint-disable-next-line absent-numeric-sentinel -- negative fixture for absent-sentinel rule coverage
+        // plugin-lint-disable-next-line absent-numeric-sentinel -- negative fixture for absent-sentinel rule coverage
         warningFrom: props.warningEnabled ? props.warningFrom : NaN
       };
     }
@@ -511,7 +511,7 @@ module.exports = [
     function translate(props) {
       return {
         renderer: "SpeedRadialWidget",
-        warningFrom: props.warningEnabled ? props.warningFrom : NaN /* dyni-lint-disable-line absent-numeric-sentinel -- negative fixture for absent-sentinel rule coverage */
+        warningFrom: props.warningEnabled ? props.warningFrom : NaN /* plugin-lint-disable-line absent-numeric-sentinel -- negative fixture for absent-sentinel rule coverage */
       };
     }
     return { cluster: "sample", translate: translate };
@@ -562,7 +562,7 @@ module.exports = [
     const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
     function buildModel(props) {
       const p = props || {};
-      // dyni-lint-disable-next-line mapper-prop-renormalization -- negative fixture for mapper-prop-renormalization rule coverage
+      // plugin-lint-disable-next-line mapper-prop-renormalization -- negative fixture for mapper-prop-renormalization rule coverage
       return { zoomNumber: toOptionalFiniteNumber(p.zoom) };
     }
     return { id: "MapZoomTextHtmlWidget", buildModel: buildModel };
@@ -578,7 +578,7 @@ module.exports = [
     const toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
     function buildModel(props) {
       const p = props || {};
-      return { zoomNumber: toOptionalFiniteNumber(p.zoom) }; /* dyni-lint-disable-line mapper-prop-renormalization -- negative fixture for mapper-prop-renormalization rule coverage */
+      return { zoomNumber: toOptionalFiniteNumber(p.zoom) }; /* plugin-lint-disable-line mapper-prop-renormalization -- negative fixture for mapper-prop-renormalization rule coverage */
     }
     return { id: "MapZoomTextHtmlWidget", buildModel: buildModel };
   }
@@ -613,7 +613,7 @@ module.exports = [
 (function () {
   "use strict";
   function patch(rootEl, markup) {
-    // dyni-lint-disable-next-line unsafe-html-dom-sink -- negative fixture for unsafe-html-dom-sink rule coverage
+    // plugin-lint-disable-next-line unsafe-html-dom-sink -- negative fixture for unsafe-html-dom-sink rule coverage
     rootEl.innerHTML = markup;
     return rootEl;
   }
@@ -624,7 +624,7 @@ module.exports = [
 (function () {
   "use strict";
   function patch(rootEl, markup) {
-    rootEl.innerHTML = markup; /* dyni-lint-disable-line unsafe-html-dom-sink -- negative fixture for unsafe-html-dom-sink rule coverage */
+    rootEl.innerHTML = markup; /* plugin-lint-disable-line unsafe-html-dom-sink -- negative fixture for unsafe-html-dom-sink rule coverage */
     return rootEl;
   }
   patch({}, "<div></div>");

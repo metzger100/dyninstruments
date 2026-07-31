@@ -10,9 +10,14 @@ const {
   createMockContext2D
 } = require("./SemicircleRadialEngine.harness");
 
+/**
+ * @typedef {{ geom: { pointerDepth: number, pointerSide: number, ringW: number }, layout: { labels: { fontPx: number }, mode: string }, textFillScale: number }} RenderState
+ * @typedef {{ ratioDefaults?: { flat: number, normal: number } }} SpecOverrides
+ */
+
 describe("SemicircleRadialEngine", function () {
   it("matches callback-visible layout state with or without wrapper-owned ratioDefaults when config thresholds are present", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {SpecOverrides} [specOverrides] */
     function captureState(specOverrides) {
       let capturedState = null;
       const themeDefaults = makeThemeDefaults();
@@ -39,7 +44,6 @@ describe("SemicircleRadialEngine", function () {
             };
           }
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
         SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
         SemicircleRadialTextLayout: {
           create() {
@@ -47,7 +51,7 @@ describe("SemicircleRadialEngine", function () {
               createFitCache() {
                 return {};
               },
-              // @ts-ignore -- pre-existing untyped test mock boundary
+              /** @param {RenderState} state */
               drawModeText(state) {
                 capturedState = {
                   mode: state.layout.mode,
@@ -61,24 +65,18 @@ describe("SemicircleRadialEngine", function () {
             };
           }
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
         ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
-        // @ts-ignore -- pre-existing untyped test mock boundary
         LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-        // @ts-ignore -- pre-existing untyped test mock boundary
         GeometryScale: geometryScale
       };
-      // @ts-ignore -- pre-existing untyped test mock boundary
       const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
         .create({}, makeComponentContext(modules))
         .createRenderer(Object.assign({}, makeBaseSpec(), specOverrides || {}));
 
       renderer(
-        // @ts-ignore -- pre-existing untyped test mock boundary
         createMockCanvas({
           rectWidth: 300,
           rectHeight: 300,
-          // @ts-ignore -- pre-existing untyped test mock boundary
           ctx: createMockContext2D()
         }),
         {

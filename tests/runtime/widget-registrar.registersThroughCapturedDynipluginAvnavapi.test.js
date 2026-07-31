@@ -26,8 +26,7 @@ describe("runtime/widget-registrar.js", function () {
   });
 
   it("falls back to storeKey when storeKeys absent", function () {
-    // eslint-disable-next-line no-unused-vars -- imported shared setup retained for the strict test contract
-    const { context, registerWidget, hostActions } = setupContext();
+    const { context, registerWidget } = setupContext();
 
     const componentSpec = {};
     const widgetDef = {
@@ -46,8 +45,7 @@ describe("runtime/widget-registrar.js", function () {
   });
 
   it("preserves explicit falsy default values from widget definitions", function () {
-    // eslint-disable-next-line no-unused-vars -- imported shared setup retained for the strict test contract
-    const { context, registerWidget, hostActions } = setupContext();
+    const { context, registerWidget } = setupContext();
 
     const componentSpec = {};
 

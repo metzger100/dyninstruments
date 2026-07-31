@@ -30,7 +30,7 @@
       const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
         ? placeholderNormalize.normalize(p.default, undefined)
         : placeholderNormalize.normalize(undefined, undefined);
-      if (raw == null || (typeof raw === "string" && raw.trim() === "")) {
+      if (raw === null || raw === undefined || (typeof raw === "string" && raw.trim() === "")) {
         return defaultText;
       }
       const n = toOptionalFiniteNumber(raw);

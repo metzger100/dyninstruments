@@ -1,6 +1,11 @@
 const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @typedef {Record<string, unknown> & { className?: string, parentElement?: TestElement | null, querySelectorAll?: () => TestElement[] }} TestElement
+ * @typedef {{ alarmWidgetRoots?: TestElement[], hostApi?: object, includeGlobalApi?: boolean, pageRoots?: Record<string, TestElement>, routePointsActivate?: (index: number) => boolean }} BridgeOptions
+ */
+
+/** @param {TestElement} [options] */
 function makeElement(options) {
   const opts = options || {};
   return Object.assign(
@@ -14,7 +19,7 @@ function makeElement(options) {
   );
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {BridgeOptions} [options] */
 function createBridgeContext(options) {
   const opts = options || {};
   const pageRoots = opts.pageRoots || {};
@@ -30,7 +35,7 @@ function createBridgeContext(options) {
           }
         }
       : null);
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {TestElement | undefined} root @param {string} className */
   function hasClassName(root, className) {
     const value = root && root.className;
     if (typeof value !== "string") {
@@ -43,7 +48,6 @@ function createBridgeContext(options) {
   });
   const querySelectorAll = vi.fn(function (selector) {
     if (selector === ".alarmWidget") {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       return alarmWidgetRoots.filter(function (root) {
         return hasClassName(root, "alarmWidget");
       });
@@ -83,7 +87,7 @@ function createBridgeContext(options) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {number} index @param {Record<string, unknown>} [overrides] */
 function makeRoutePointPayload(index, overrides) {
   const basePoint = {
     idx: index,

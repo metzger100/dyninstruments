@@ -9,10 +9,11 @@ const {
   createMockContext2D
 } = require("./SemicircleRadialEngine.harness");
 
+/** @typedef {{ valueText: string }} TextDisplay */
+
 describe("SemicircleRadialEngine", function () {
   it("uses placeholder text for missing input on the default formatDisplay fallback", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const textLayoutCalls = [];
+    const textLayoutCalls = /** @type {Array<{ display: TextDisplay, state: unknown }>} */ ([]);
     const modules = {
       RadialToolkit: {
         create() {
@@ -36,7 +37,6 @@ describe("SemicircleRadialEngine", function () {
           };
         }
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
       SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
       SemicircleRadialTextLayout: {
         create() {
@@ -44,21 +44,20 @@ describe("SemicircleRadialEngine", function () {
             createFitCache() {
               return {};
             },
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /**
+             * @param {unknown} state
+             * @param {TextDisplay} display
+             */
             drawModeText(state, display) {
               textLayoutCalls.push({ state, display });
             }
           };
         }
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
       ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
-      // @ts-ignore -- pre-existing untyped test mock boundary
       LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-      // @ts-ignore -- pre-existing untyped test mock boundary
       GeometryScale: geometryScale
     };
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
       .create({}, makeComponentContext(modules))
       .createRenderer({
@@ -79,11 +78,9 @@ describe("SemicircleRadialEngine", function () {
         }
       });
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const canvas = createMockCanvas({
       rectWidth: 480,
       rectHeight: 110,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       ctx: createMockContext2D()
     });
     [null, undefined, "", "   "].forEach(function (rawSpeed) {
@@ -95,7 +92,6 @@ describe("SemicircleRadialEngine", function () {
       });
 
       expect(textLayoutCalls.length).toBeGreaterThan(0);
-      // @ts-ignore -- pre-existing untyped test mock boundary
       expect(textLayoutCalls[textLayoutCalls.length - 1].display.valueText).toBe("---");
     });
 
@@ -106,7 +102,6 @@ describe("SemicircleRadialEngine", function () {
       unit: "kn"
     });
     expect(textLayoutCalls.length).toBeGreaterThan(0);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(textLayoutCalls[textLayoutCalls.length - 1].display.valueText).toBe("4.2");
   });
 });

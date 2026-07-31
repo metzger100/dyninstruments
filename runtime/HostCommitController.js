@@ -103,7 +103,7 @@
     }
 
     function clearRafHandle() {
-      if (state.rafHandle == null) {
+      if (state.rafHandle === null || state.rafHandle === undefined) {
         return;
       }
       cancelFrame(state.rafHandle);
@@ -119,7 +119,7 @@
     }
 
     function clearTimeoutHandle() {
-      if (state.timeoutHandle == null) {
+      if (state.timeoutHandle === null || state.timeoutHandle === undefined) {
         return;
       }
       clearTimer(state.timeoutHandle);
@@ -223,7 +223,7 @@
         }
       }
 
-      if (state.timeoutHandle == null) {
+      if (state.timeoutHandle === null || state.timeoutHandle === undefined) {
         setStateField(
           "timeoutHandle",
           setTimer(function () {

@@ -29,6 +29,7 @@ describe("WindRadialWidget", function () {
   });
 
   it("does not append unit into value text when formatter returns raw passthrough", function () {
+    /** @typedef {{ unitText: string, valueText: string }} ValueDraw */
     const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
     const fullCircleLayout = loadFresh("shared/widget-kits/radial/FullCircleRadialLayout.js");
     const layerCache = loadFresh("shared/widget-kits/canvas/CanvasLayerCache.js");
@@ -36,8 +37,7 @@ describe("WindRadialWidget", function () {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
     const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const valueDrawCalls = [];
+    const valueDrawCalls = /** @type {ValueDraw[]} */ ([]);
 
     const spec = loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js").create(
       {},
@@ -114,7 +114,7 @@ describe("WindRadialWidget", function () {
                     return { vPx: 12, uPx: 10, gap: 6 };
                   },
                   drawCaptionMax() {},
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} ctx @param {string} family @param {number} x @param {number} y @param {number} w @param {number} h @param {string} valueText @param {string} unitText */
                   drawValueUnitWithFit(ctx, family, x, y, w, h, valueText, unitText) {
                     valueDrawCalls.push({
                       valueText: String(valueText),
@@ -131,22 +131,22 @@ describe("WindRadialWidget", function () {
                   drawThreeRowsBlock() {}
                 },
                 value: {
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} value @param {number} lo @param {number} hi */
                   clamp(value, lo, hi) {
                     const n = Number(value);
                     if (!isFinite(n)) return lo;
                     return Math.max(lo, Math.min(hi, n));
                   },
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} value */
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
                   },
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} value @param {number} defaultValue */
                   resolveFiniteNumber(value, defaultValue) {
                     const n = Number(value);
                     return isFinite(n) ? n : defaultValue;
                   },
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} value */
                   formatAngle180(value) {
                     const n = Number(value);
                     if (!isFinite(n)) return "---";
@@ -160,13 +160,13 @@ describe("WindRadialWidget", function () {
         },
         services: {
           format: {
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {unknown} value */
             applyFormatter(value) {
               return String(value);
             }
           },
           canvas: {
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {{ getBoundingClientRect: () => { height: number, width: number }, getContext: (kind: string) => unknown }} canvas */
             setupCanvas(canvas) {
               const ctx = canvas.getContext("2d");
               const rect = canvas.getBoundingClientRect();
@@ -178,7 +178,7 @@ describe("WindRadialWidget", function () {
             }
           },
           dom: {
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {Element | null} target */
             requirePluginRoot(target) {
               return target;
             }
@@ -201,9 +201,7 @@ describe("WindRadialWidget", function () {
       speedUnit: "kn"
     });
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(valueDrawCalls.some((c) => c.valueText === "5.5" && c.unitText === "kn")).toBe(true);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(valueDrawCalls.some((c) => c.valueText === "5.5 kn")).toBe(false);
   });
 
@@ -222,8 +220,7 @@ describe("WindRadialWidget", function () {
     expect(harness.calls.layline).toBe(2);
     expect(harness.calls.pointer).toBe(2);
     expect(harness.calls.text).toBeGreaterThan(0);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(ctx.calls.filter((c) => c.name === "drawImage")).toHaveLength(4);
+    expect(ctx.calls.filter((/** @type {DyniTestCall} */ c) => c.name === "drawImage")).toHaveLength(4);
   });
 
   it("invalidates static cache when geometry changes", function () {

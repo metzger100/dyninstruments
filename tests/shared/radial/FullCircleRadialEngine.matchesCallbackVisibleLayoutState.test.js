@@ -1,9 +1,13 @@
 // @ts-check
 const { createHarness, createMockCanvas, createMockContext2D } = require("./FullCircleRadialEngine-setup");
 
+/** @typedef {{ ratioDefaults?: { normal: number, flat: number } }} SpecOverrides */
+/** @typedef {{ mode: string, labels: { fontPx: number }, geom: { fixedPointerDepth: number }, textFillScale: number, layout: { compactGeometryScale: number } }} DrawFrameState */
+/** @typedef {{ mode: string }} DrawModeState */
+
 describe("FullCircleRadialEngine", function () {
   it("matches callback-visible layout state with or without wrapper-owned ratioDefaults when config thresholds are present", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {SpecOverrides} [specOverrides] */
     function captureState(specOverrides) {
       const harness = createHarness();
       let snapshot = null;
@@ -11,7 +15,7 @@ describe("FullCircleRadialEngine", function () {
         Object.assign(
           {
             ratioProps: { normal: "n", flat: "f" },
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {DrawFrameState} state */
             drawFrame(state) {
               snapshot = {
                 mode: state.mode,
@@ -54,19 +58,16 @@ describe("FullCircleRadialEngine", function () {
       ratioProps: { normal: "n", flat: "f" },
       ratioDefaults: { normal: 0.7, flat: 2.0 },
       drawMode: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {DrawModeState} state */
         high(state) {
-          // @ts-ignore -- pre-existing untyped test mock boundary
           harness.calls.mode.push(state.mode);
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {DrawModeState} state */
         normal(state) {
-          // @ts-ignore -- pre-existing untyped test mock boundary
           harness.calls.mode.push(state.mode);
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {DrawModeState} state */
         flat(state) {
-          // @ts-ignore -- pre-existing untyped test mock boundary
           harness.calls.mode.push(state.mode);
         }
       }

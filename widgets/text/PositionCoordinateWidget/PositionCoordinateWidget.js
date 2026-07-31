@@ -131,7 +131,7 @@
               }
               const safeHeight = meta.maxH * coordFormatting.TIME_STATUS_SCALE_LIMIT;
               const h = coordFormatting.readActualTextHeight(meta.valueMetrics);
-              return h == null ? meta.valuePx <= safeHeight : h <= safeHeight;
+              return h === null || h === undefined ? meta.valuePx <= safeHeight : h <= safeHeight;
             }
           });
         });
@@ -202,7 +202,7 @@
               }
               const safeHeight = meta.maxH * coordFormatting.TIME_STATUS_SCALE_LIMIT;
               const h = coordFormatting.readActualTextHeight(meta.metrics);
-              return h == null ? meta.px <= safeHeight : h <= safeHeight;
+              return h === null || h === undefined ? meta.px <= safeHeight : h <= safeHeight;
             }
           });
         });

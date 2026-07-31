@@ -4,7 +4,14 @@ const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-ca
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @typedef {{ default: string, formatter: string, formatterParameters: string[] }} CenterFormatterOptions
+ * @typedef {{ applyFormatter?: (value: unknown, options: CenterFormatterOptions) => unknown }} ContextOptions
+ * @typedef {{ activeMeasure?: unknown, boat?: unknown, coordinatesTabular?: unknown, default?: unknown, disconnect?: boolean, marker?: unknown, position?: unknown, ratioThresholdFlat?: number, ratioThresholdNormal?: number, stableDigits?: boolean, useRhumbLine?: boolean }} CenterOverrides
+ * @typedef {{ font?: string, text: string, textAlign?: string, x: number, y: number }} TextCall
+ */
+
+/** @param {ContextOptions} [options] */
 function makeComponentContext(options) {
   const opts = options || {};
   const themeTokens = {
@@ -63,7 +70,7 @@ function makeComponentContext(options) {
     },
     services: {
       format: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {unknown} value @param {CenterFormatterOptions} formatterOptions */
         applyFormatter(value, formatterOptions) {
           if (typeof opts.applyFormatter === "function") {
             return opts.applyFormatter(value, formatterOptions);
@@ -86,11 +93,11 @@ function makeComponentContext(options) {
             }
             return value.toFixed(1);
           }
-          return value == null ? formatterOptions.default : String(value);
+          return value === null || value === undefined ? formatterOptions.default : String(value);
         }
       },
       canvas: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {{ getBoundingClientRect: () => DOMRect, getContext: (kind: string) => unknown }} canvas */
         setupCanvas(canvas) {
           const ctx = canvas.getContext("2d");
           const rect = canvas.getBoundingClientRect();
@@ -98,7 +105,7 @@ function makeComponentContext(options) {
         }
       },
       dom: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {Element} target */
         requirePluginRoot(target) {
           return target;
         }
@@ -107,7 +114,7 @@ function makeComponentContext(options) {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {CenterOverrides} [overrides] */
 function makeProps(overrides) {
   const opts = overrides || {};
   return {
@@ -118,8 +125,12 @@ function makeProps(overrides) {
       measure: {
         activeMeasure: Object.prototype.hasOwnProperty.call(opts, "activeMeasure")
           ? opts.activeMeasure
-          : // @ts-ignore -- pre-existing untyped test mock boundary
-            { getPointAtIndex: (index) => (index === 0 ? { lat: 54.18, lon: 10.52 } : undefined) },
+          : {
+              /** @param {number} index */
+              getPointAtIndex(index) {
+                return index === 0 ? { lat: 54.18, lon: 10.52 } : undefined;
+              }
+            },
         useRhumbLine: opts.useRhumbLine === true
       }
     },
@@ -152,80 +163,75 @@ function makeProps(overrides) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {DyniTestCanvasContext} ctx @returns {DyniTestKnownArray<TextCall>} */
 function fillTextCalls(ctx) {
-  return (
+  return /** @type {DyniTestKnownArray<TextCall>} */ (
     ctx.calls
-      // @ts-ignore -- pre-existing untyped test mock boundary
       .filter((entry) => entry.name === "fillText")
-      // @ts-ignore -- pre-existing untyped test mock boundary
       .map((entry) => ({
         text: String(entry.args[0]),
-        x: entry.args[1],
-        y: entry.args[2]
+        x: Number(entry.args[1]),
+        y: Number(entry.args[2])
       }))
   );
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {TextCall[]} calls @param {string} text @returns {TextCall | undefined} */
 function findFirstText(calls, text) {
-  // @ts-ignore -- pre-existing untyped test mock boundary
   return calls.find((entry) => entry.text === text);
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {TextCall[]} calls @param {string} text */
 function findAllTexts(calls, text) {
-  // @ts-ignore -- pre-existing untyped test mock boundary
   return calls.filter((entry) => entry.text === text);
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {TextCall[]} calls @param {string} prefix @returns {TextCall | undefined} */
 function findFirstTextPrefix(calls, prefix) {
-  // @ts-ignore -- pre-existing untyped test mock boundary
   return calls.find((entry) => entry.text.indexOf(prefix) === 0);
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {DyniTestCanvasContext} ctx @returns {Array<{ font: string, text: string }>} */
 function captureTextFonts(ctx) {
-  // @ts-ignore -- pre-existing untyped test mock boundary
-  const captured = [];
+  const captured = /** @type {Array<{ font: string, text: string }>} */ ([]);
   const originalFillText = ctx.fillText;
-  ctx.fillText = function () {
+  /** @this {DyniTestCanvasContext} @param {...unknown} args */
+  ctx.fillText = function (...args) {
     captured.push({
-      text: String(arguments[0]),
+      text: String(args[0]),
       font: ctx.font
     });
-    return originalFillText.apply(this, arguments);
+    return originalFillText.call(this, String(args[0]), Number(args[1]), Number(args[2]));
   };
-  // @ts-ignore -- pre-existing untyped test mock boundary
   return captured;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {DyniTestCanvasContext} ctx @returns {DyniTestKnownArray<TextCall>} */
 function captureTextCalls(ctx) {
-  // @ts-ignore -- pre-existing untyped test mock boundary
-  const captured = [];
+  const captured = /** @type {DyniTestKnownArray<TextCall>} */ (
+    /** @type {unknown} */ (/** @type {TextCall[]} */ ([]))
+  );
   const originalFillText = ctx.fillText;
-  ctx.fillText = function () {
+  /** @this {DyniTestCanvasContext} @param {...unknown} args */
+  ctx.fillText = function (...args) {
     captured.push({
-      text: String(arguments[0]),
-      x: arguments[1],
-      y: arguments[2],
+      text: String(args[0]),
+      x: Number(args[1]),
+      y: Number(args[2]),
       textAlign: ctx.textAlign
     });
-    return originalFillText.apply(this, arguments);
+    return originalFillText.call(this, String(args[0]), Number(args[1]), Number(args[2]));
   };
-  // @ts-ignore -- pre-existing untyped test mock boundary
   return captured;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {string} font */
 function parseFontPx(font) {
   const match = /(\d+)px/.exec(String(font || ""));
   return match ? Number(match[1]) : 0;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {number} width @param {number} height @param {string} mode @param {number} relationCount */
 function computeLayoutSnapshot(width, height, mode, relationCount) {
   const layout = loadFresh("shared/widget-kits/nav/CenterDisplayLayout.js").create({}, makeComponentContext());
   const insets = layout.computeInsets(width, height);
@@ -243,9 +249,8 @@ function computeLayoutSnapshot(width, height, mode, relationCount) {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {TextCall[]} calls @param {number} width @param {number} height */
 function expectTextsInsideCanvas(calls, width, height) {
-  // @ts-ignore -- pre-existing untyped test mock boundary
   calls.forEach((entry) => {
     expect(entry.x).toBeGreaterThanOrEqual(0);
     expect(entry.x).toBeLessThanOrEqual(width);

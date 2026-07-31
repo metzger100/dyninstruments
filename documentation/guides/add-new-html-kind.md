@@ -1,6 +1,6 @@
 # Add New HTML Kind
 
-**Status:** ✅ Reference | Commit-driven HTML kind workflow
+**Status:** Current.
 
 ## Prerequisites
 

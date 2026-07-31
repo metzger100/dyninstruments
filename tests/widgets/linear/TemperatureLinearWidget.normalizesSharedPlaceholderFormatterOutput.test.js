@@ -3,6 +3,8 @@ const { createComponentContextMock, loadFresh } = require("./TemperatureLinearWi
 
 describe("TemperatureLinearWidget", function () {
   it("normalizes shared placeholder formatter output before parsing", function () {
+    /** @typedef {{ formatDisplay: (value: number, props: Record<string, unknown>) => { num: number, text: string } }} FormatConfig */
+    /** @type {FormatConfig | undefined} */
     let captured;
     let seenText = "";
 
@@ -14,12 +16,13 @@ describe("TemperatureLinearWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  if (text == null) return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined)
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   const value = String(text).trim();
                   return value === "NO DATA" || /^-+$/.test(value)
-                    ? defaultText == null
+                    ? defaultText === null || defaultText === undefined
                       ? "---"
                       : defaultText
                     : String(text);
@@ -30,7 +33,7 @@ describe("TemperatureLinearWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} raw @param {Record<string, unknown>} props @param {(value: number, options: Record<string, unknown>) => unknown} applyFormatter @param {(text: unknown, defaultText: unknown) => unknown} normalize @param {unknown} defaultFormatter @param {unknown} defaultParameters */
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -60,12 +63,12 @@ describe("TemperatureLinearWidget", function () {
                   const num = numberText ? Number(numberText) : NaN;
                   return Number.isFinite(num) ? { num: num, text: numberText } : { num: NaN, text: defaultText };
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text */
                 extractNumberText(text) {
                   seenText = String(text);
                   return "";
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} v @param {number} lo @param {number} hi */
                 clamp(v, lo, hi) {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
@@ -78,7 +81,7 @@ describe("TemperatureLinearWidget", function () {
           LinearGaugeEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {FormatConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -97,8 +100,10 @@ describe("TemperatureLinearWidget", function () {
       })
     );
 
+    if (!captured) {
+      throw new Error("Expected the temperature-linear formatter configuration.");
+    }
     expect(
-      // @ts-ignore -- pre-existing untyped test mock boundary
       captured.formatDisplay(23.4, {
         formatter: "formatTemperature",
         formatterParameters: ["celsius"]
@@ -108,8 +113,10 @@ describe("TemperatureLinearWidget", function () {
   });
 
   it("returns placeholder output for null temperature values", function () {
+    /** @typedef {{ formatDisplay: (value: unknown, props: Record<string, unknown>) => { num: number, text: string } }} NullFormatConfig */
+    /** @type {NullFormatConfig | undefined} */
     let captured;
-    const applyFormatter = vi.fn((value) => String(value));
+    const applyFormatter = vi.fn((/** @type {unknown} */ value) => String(value));
 
     loadFresh("widgets/linear/TemperatureLinearWidget/TemperatureLinearWidget.js").create(
       {},
@@ -118,10 +125,10 @@ describe("TemperatureLinearWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   return String(text);
                 }
@@ -131,13 +138,13 @@ describe("TemperatureLinearWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} raw @param {Record<string, unknown>} props @param {(value: number, options: Record<string, unknown>) => unknown} apply @param {(text: unknown, defaultText: unknown) => unknown} normalize @param {unknown} defaultFormatter @param {unknown} defaultParameters */
                 formatGaugeDisplay(raw, props, apply, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
                     ? p.default
                     : normalize(undefined, undefined);
-                  if (raw == null) {
+                  if (raw === null || raw === undefined) {
                     return { num: NaN, text: defaultText };
                   }
                   const n = Number(raw);
@@ -162,10 +169,10 @@ describe("TemperatureLinearWidget", function () {
                   );
                   const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
-                  // @ts-ignore -- pre-existing untyped test mock boundary
-                  return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+                  const text = match ? match[0] : defaultText;
+                  return Number.isFinite(num) ? { num: num, text: text } : { num: NaN, text: defaultText };
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} v @param {number} lo @param {number} hi */
                 clamp(v, lo, hi) {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
@@ -178,7 +185,7 @@ describe("TemperatureLinearWidget", function () {
           LinearGaugeEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {NullFormatConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -193,7 +200,9 @@ describe("TemperatureLinearWidget", function () {
       })
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!captured) {
+      throw new Error("Expected the null-temperature linear configuration.");
+    }
     expect(captured.formatDisplay(null, {})).toEqual({ num: NaN, text: "---" });
     expect(applyFormatter).not.toHaveBeenCalled();
   });

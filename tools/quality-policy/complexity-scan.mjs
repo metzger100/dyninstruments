@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Linter } from "eslint";
 import { STRICT_COMPLEXITY_RULES, STRICT_LIMITS } from "./eslint-complexity-config.mjs";
+import { readJsonPolicy } from "./read-json-policy.mjs";
 
 export { STRICT_LIMITS };
 
@@ -16,7 +17,10 @@ export { STRICT_LIMITS };
  */
 /** @typedef {(child: any, hint: string | null, childParentPath: string) => void} FunctionVisitor */
 
-export const PRODUCTION_ROOTS = ["config", "runtime", "cluster", "shared", "widgets"];
+const DEFAULT_SCOPE = {
+  productionRoots: ["config", "runtime", "cluster", "shared", "widgets"],
+  entrypoints: ["plugin.js", "plugin.mjs"]
+};
 
 const FUNCTION_TYPES = new Set(["FunctionDeclaration", "FunctionExpression", "ArrowFunctionExpression"]);
 
@@ -29,14 +33,26 @@ const METRIC_PATTERNS = {
 
 /** @param {string} root @returns {string[]} absolute paths of every shipped production JavaScript file */
 export function collectProductionFiles(root) {
+  const scope = readProjectComplexityScope(root);
   const files = [];
-  for (const entrypoint of ["plugin.js", "plugin.mjs"]) {
+  for (const entrypoint of scope.entrypoints) {
     if (fs.existsSync(path.join(root, entrypoint))) files.push(path.join(root, entrypoint));
   }
-  for (const relativeRoot of PRODUCTION_ROOTS) {
+  for (const relativeRoot of scope.productionRoots) {
     collectJsFiles(path.join(root, relativeRoot), files);
   }
   return files;
+}
+
+/** @param {string} root @returns {{ productionRoots: string[], entrypoints: string[] }} */
+export function readProjectComplexityScope(root) {
+  const scopePath = path.join(root, "tools/quality-policy/project-complexity-scope.json");
+  if (!fs.existsSync(scopePath)) return DEFAULT_SCOPE;
+  const scope = readJsonPolicy(scopePath);
+  if (!Array.isArray(scope.productionRoots) || !Array.isArray(scope.entrypoints)) {
+    throw new Error("Invalid project complexity scope: expected productionRoots and entrypoints arrays.");
+  }
+  return scope;
 }
 
 /** @param {string} directory @param {string[]} out */

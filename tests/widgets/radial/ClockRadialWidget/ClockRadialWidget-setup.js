@@ -4,13 +4,20 @@ const { createMockContext2D, createMockCanvas } = require("../../../helpers/mock
 
 const { createComponentContextMock } = require("../../../helpers/component-context-mock");
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @typedef {{ H?: number, W?: number, cx?: number, cy?: number, rOuter?: number }} StateOverrides
+ * @typedef {{ buildStaticKey?: unknown, drawFrame: (state: object, props: unknown, api: object) => void, rebuildLayer?: unknown }} RendererConfig
+ * @typedef {{ buildStaticKey?: unknown, drawFrame?: unknown, lastProps?: unknown, lastState?: unknown, rebuildLayer?: unknown, spec?: unknown }} Captured
+ * @typedef {{ getContext?: (kind: string) => unknown }} CanvasLike
+ */
+
+/** @param {number} deg */
 function mockDegToCanvasRad(deg) {
   const d = Number(deg);
   return ((d - 90) * Math.PI) / 180;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} ctx @param {StateOverrides} [overrides] */
 function makeMockState(ctx, overrides) {
   var o = overrides || {};
   return {
@@ -40,7 +47,7 @@ function makeMockState(ctx, overrides) {
       degToCanvasRad: mockDegToCanvasRad
     },
     value: {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {number} v @param {number} lo @param {number} hi */
       clamp: function (v, lo, hi) {
         var n = Number(v);
         if (!isFinite(n)) return lo;
@@ -66,28 +73,22 @@ function loadWidget() {
   return loadFresh("widgets/radial/ClockRadialWidget/ClockRadialWidget.js");
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {{ overrides?: StateOverrides }} [options] */
 function createWidget(options) {
   var opts = options || {};
-  var captured = {};
+  var captured = /** @type {Captured} */ ({});
   var mockEngine = {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {RendererConfig} cfg */
     createRenderer: function (cfg) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       captured.spec = cfg;
-      // @ts-ignore -- pre-existing untyped test mock boundary
       captured.buildStaticKey = cfg.buildStaticKey;
-      // @ts-ignore -- pre-existing untyped test mock boundary
       captured.rebuildLayer = cfg.rebuildLayer;
-      // @ts-ignore -- pre-existing untyped test mock boundary
       captured.drawFrame = cfg.drawFrame;
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {CanvasLike} canvas @param {unknown} props */
       return function (canvas, props) {
         var ctx = canvas.getContext && canvas.getContext("2d");
         var state = makeMockState(ctx, opts.overrides);
-        // @ts-ignore -- pre-existing untyped test mock boundary
         captured.lastState = state;
-        // @ts-ignore -- pre-existing untyped test mock boundary
         captured.lastProps = props;
         cfg.drawFrame(state, props, makeMockApi());
       };
@@ -108,7 +109,7 @@ function createWidget(options) {
       },
       services: {
         canvas: {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {{ getBoundingClientRect: () => DOMRect, getContext: (kind: string) => unknown }} canvas */
           setupCanvas: function (canvas) {
             var ctx = canvas.getContext("2d");
             var rect = canvas.getBoundingClientRect();

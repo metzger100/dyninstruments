@@ -78,6 +78,11 @@ describe("coverage inventory policy hardening", function () {
     const tempRoot = createWorkspace();
     try {
       writeJson(path.join(tempRoot, "package.json"), { name: "dyninstruments" });
+      writeJson(path.join(tempRoot, "tools/quality-policy/project-coverage-inventory-policy.json"), {
+        baselinePackageName: "dyninstruments",
+        baselineSha256: "0".repeat(64),
+        legacyBelowDefaultFloors: { "plugin.js": { lines: 1, branches: 1 } }
+      });
       writeJson(path.join(tempRoot, "tools/quality-policy/coverage-floor-baseline.json"), {
         entries: {
           "plugin.js": { lines: 1, branches: 1, legacyBelowDefault: true },
@@ -106,6 +111,10 @@ describe("coverage inventory policy hardening", function () {
       fs.mkdirSync(path.join(tempRoot, "tests/contract"), { recursive: true });
       fs.writeFileSync(path.join(tempRoot, "tests/contract/plugin.test.js"), "// owner\n");
       writeJson(path.join(tempRoot, "package.json"), { name: "dyninstruments" });
+      writeJson(path.join(tempRoot, "tools/quality-policy/project-coverage-inventory-policy.json"), {
+        baselinePackageName: "dyninstruments",
+        baselineSha256: "0".repeat(64)
+      });
       writeJson(path.join(tempRoot, "tools/quality-policy/coverage-floor-baseline.json"), {
         entries: { "config/example.js": { lines: 80, branches: 65 } }
       });

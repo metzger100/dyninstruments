@@ -86,7 +86,7 @@
       }
 
       const activateAttrs = ' data-rp-idx="' + String(row.index) + '"';
-      const infoText = rowFit.infoText != null ? rowFit.infoText : row.infoText;
+      const infoText = rowFit.infoText !== null && rowFit.infoText !== undefined ? rowFit.infoText : row.infoText;
 
       const ordinalHtml = showOrdinal
         ? '<div class="dyni-route-points-ordinal"' +

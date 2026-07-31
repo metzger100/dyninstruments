@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { PRODUCTION_ROOTS, STRICT_LIMITS, scanSource } from "./complexity-scan.mjs";
+import { readProjectComplexityScope, STRICT_LIMITS, scanSource } from "./complexity-scan.mjs";
 
 /** @typedef {import("./complexity-scan.mjs").ComplexityFinding} ComplexityFinding */
 
@@ -20,7 +20,9 @@ export function captureHistoricalComplexity(root, commit) {
   const trackedFiles = git(root, ["ls-tree", "-r", "--name-only", commit])
     .trim()
     .split("\n")
-    .filter(isProductionJavaScript);
+    .filter(function (file) {
+      return isProductionJavaScript(file, root);
+    });
   const findings = trackedFiles.flatMap(function (file) {
     return scanSource(git(root, ["show", `${commit}:${file}`]), file);
   });
@@ -49,11 +51,12 @@ function git(root, args) {
   return execFileSync("git", args, { cwd: root, encoding: "utf8", maxBuffer: 20 * 1024 * 1024 });
 }
 
-/** @param {string} file @returns {boolean} */
-function isProductionJavaScript(file) {
-  if (file === "plugin.js" || file === "plugin.mjs") return true;
-  return PRODUCTION_ROOTS.some(function (root) {
-    return file.startsWith(`${root}/`) && file.endsWith(".js");
+/** @param {string} file @param {string} root @returns {boolean} */
+function isProductionJavaScript(file, root) {
+  const scope = readProjectComplexityScope(root);
+  if (scope.entrypoints.includes(file)) return true;
+  return scope.productionRoots.some(function (productionRoot) {
+    return file.startsWith(`${productionRoot}/`) && file.endsWith(".js");
   });
 }
 

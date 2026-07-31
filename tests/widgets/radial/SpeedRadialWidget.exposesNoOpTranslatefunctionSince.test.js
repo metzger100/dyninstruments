@@ -6,6 +6,34 @@ const {
   runIifeScript
 } = require("./SpeedRadialWidget-setup");
 
+/**
+ * @typedef {(text: unknown, defaultText: unknown) => unknown} SpeedNormalize
+ * @typedef {{ formatter?: unknown, formatterParameters?: unknown, default?: unknown }} SpeedGaugeProps
+ * @typedef {(
+ *   value: number,
+ *   options: { formatter: unknown, formatterParameters: unknown, default: unknown }
+ * ) => unknown} SpeedApplyFormatter
+ * @typedef {(
+ *   raw: unknown,
+ *   props: SpeedGaugeProps,
+ *   applyFormatter: SpeedApplyFormatter,
+ *   normalize: SpeedNormalize,
+ *   defaultFormatter: unknown,
+ *   defaultParameters: unknown
+ * ) => { num: unknown, text: string }} SpeedFormatGaugeDisplay
+ * @typedef {{ buildHighEndSectors: (props: unknown) => unknown[] }} SpeedSectorMath
+ * @typedef {(raw: unknown, props: SpeedGaugeProps) => { num: unknown, text: unknown }} SpeedFormatDisplay
+ * @typedef {(
+ *   props: unknown,
+ *   minV: number,
+ *   maxV: number,
+ *   arc: unknown,
+ *   valueUtils: SpeedSectorMath,
+ *   theme: unknown
+ * ) => unknown[]} SpeedBuildSectors
+ * @typedef {{ formatDisplay: SpeedFormatDisplay, buildSectors: SpeedBuildSectors }} SpeedCapturedSpec
+ */
+
 describe("SpeedRadialWidget", function () {
   it("exposes a no-op translateFunction since the canvas surface owns rendering", function () {
     const mod = loadFresh("widgets/radial/SpeedRadialWidget/SpeedRadialWidget.js");
@@ -37,9 +65,9 @@ describe("SpeedRadialWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @type {SpeedNormalize} */
                 normalize(text, defaultText) {
-                  return defaultText == null ? "---" : defaultText;
+                  return defaultText === null || defaultText === undefined ? "---" : defaultText;
                 }
               };
             }
@@ -52,6 +80,7 @@ describe("SpeedRadialWidget", function () {
   });
 
   it("defaults the unit to kn and treats missing sector props as empty", function () {
+    /** @type {SpeedCapturedSpec | undefined} */
     let captured;
     let receivedFormatterParameters;
     let receivedProps;
@@ -64,7 +93,7 @@ describe("SpeedRadialWidget", function () {
           SemicircleRadialEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {SpeedCapturedSpec} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -78,7 +107,7 @@ describe("SpeedRadialWidget", function () {
                 resolveStandardTickSteps() {
                   return { major: 1, minor: 0.5 };
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @type {SpeedFormatGaugeDisplay} */
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   receivedFormatterParameters = defaultParameters;
                   return { num: raw, text: String(raw) };
@@ -89,7 +118,7 @@ describe("SpeedRadialWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @returns {unknown} */
                 normalize(text) {
                   return text;
                 }
@@ -100,20 +129,22 @@ describe("SpeedRadialWidget", function () {
       })
     );
 
+    if (!captured) {
+      throw new Error("SemicircleRadialEngine renderer configuration was not captured.");
+    }
+
     // formatDisplay called without the trailing unit argument (as the
     // engine does whenever a widget instance has no configured unit prop).
-    // @ts-ignore -- pre-existing untyped test mock boundary
     captured.formatDisplay(6.44, { formatter: "formatSpeed" });
     expect(receivedFormatterParameters).toEqual(["kn"]);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const sectors = captured.buildSectors(
       undefined,
       0,
       30,
       {},
       {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {unknown} props @returns {unknown[]} */
         buildHighEndSectors(props) {
           receivedProps = props;
           return [];

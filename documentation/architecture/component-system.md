@@ -1,6 +1,6 @@
 # Component System
 
-**Status:** ✅ Implemented | Registry fragments + assembled component map + runtime loader with explicit API shapes
+**Status:** Current.
 
 ## Overview
 

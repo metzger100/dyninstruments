@@ -24,7 +24,9 @@ describe("RoutePointsTextHtmlWidget", function () {
     expect(mounted.html()).toContain("dyni-route-points-passive");
 
     const wrapper = mounted.mountEl.querySelector(".dyni-route-points-html");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!wrapper) {
+      throw new Error("Expected the route-points wrapper.");
+    }
     wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(activate).not.toHaveBeenCalled();
   });

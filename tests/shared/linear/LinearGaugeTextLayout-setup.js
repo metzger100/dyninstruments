@@ -2,7 +2,10 @@ const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 const { createFontAwareContext, createTextLayout } = require("../../helpers/linear-label-fit");
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @typedef {{ h: number, w: number, x: number, y: number }} Box */
+/** @typedef {{ inlineBox?: Box, scaleX0: number, scaleX1: number, trackBox: { h: number, y: number }, trackY: number }} LinearLayout */
+
+/** @param {number} textFillScale */
 function createState(textFillScale) {
   return {
     ctx: createMockContext2D({ charWidth: 7 }),
@@ -18,12 +21,12 @@ function createState(textFillScale) {
         }
       }
     },
-    layout: {
+    layout: /** @type {LinearLayout} */ ({
       trackY: 20,
       trackBox: { y: 0, h: 40 },
       scaleX0: 0,
       scaleX1: 100
-    },
+    }),
     axis: {
       min: 0,
       max: 100

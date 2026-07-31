@@ -1,6 +1,23 @@
 // @ts-check
 const { createHarness, createMockCanvas, createMockContext2D, makeProps } = require("./XteDisplayWidget-setup");
 
+/**
+ * The harness's `ValueRow` typedef only declares `value`, but
+ * `drawValueUnitWithFit` (see XteDisplayWidget.harness.js) actually pushes
+ * `{ value, unit, w, h }` onto `calls.valueRows`. Cast through `unknown` to
+ * describe the real recorded shape without touching the read-only harness.
+ * @typedef {{ value: string, unit: string, w: number, h: number }} XteValueRow
+ */
+
+/**
+ * The harness's `DynamicDraw` typedef only declares `colors` and
+ * `pointerDepthWeight`, but `drawDynamicHighway` (see
+ * XteDisplayWidget.harness.js) also records `overflow` and `xteNormalized`
+ * on every pushed entry. Cast through `unknown` to describe the real
+ * recorded shape without touching the read-only harness.
+ * @typedef {{ overflow: boolean, xteNormalized: number }} XteDynamicDrawSample
+ */
+
 describe("XteDisplayWidget", function () {
   it("uses provided DST unit directly without local fallback", function () {
     const harness = createHarness();
@@ -12,8 +29,8 @@ describe("XteDisplayWidget", function () {
 
     harness.spec.renderCanvas(canvas, makeProps({ units: { dtw: undefined } }));
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[2].unit).toBe("");
+    const valueRow2 = /** @type {XteValueRow} */ (/** @type {unknown} */ (harness.calls.valueRows[2]));
+    expect(valueRow2.unit).toBe("");
   });
 
   it("uses dedicated track and bearing units when provided", function () {
@@ -34,10 +51,10 @@ describe("XteDisplayWidget", function () {
       })
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[0].unit).toBe("degT");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[3].unit).toBe("degM");
+    const trackRow = /** @type {XteValueRow} */ (/** @type {unknown} */ (harness.calls.valueRows[0]));
+    const bearingRow = /** @type {XteValueRow} */ (/** @type {unknown} */ (harness.calls.valueRows[3]));
+    expect(trackRow.unit).toBe("degT");
+    expect(bearingRow.unit).toBe("degM");
   });
 
   it("uses dedicated track/bearing units directly without heading-unit fallback", function () {
@@ -58,10 +75,10 @@ describe("XteDisplayWidget", function () {
       })
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[0].unit).toBe("");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[3].unit).toBe("");
+    const trackRowFallback = /** @type {XteValueRow} */ (/** @type {unknown} */ (harness.calls.valueRows[0]));
+    const bearingRowFallback = /** @type {XteValueRow} */ (/** @type {unknown} */ (harness.calls.valueRows[3]));
+    expect(trackRowFallback.unit).toBe("");
+    expect(bearingRowFallback.unit).toBe("");
   });
 
   it("normalizes marker placement using formatted distance magnitude", function () {
@@ -75,10 +92,9 @@ describe("XteDisplayWidget", function () {
     harness.spec.renderCanvas(canvas, makeProps({ xte: 1852 }));
 
     expect(harness.calls.dynamicDraws).toHaveLength(1);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.dynamicDraws[0].overflow).toBe(false);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.dynamicDraws[0].xteNormalized).toBeCloseTo(1.0, 6);
+    const dynamicDraw = /** @type {XteDynamicDrawSample} */ (/** @type {unknown} */ (harness.calls.dynamicDraws[0]));
+    expect(dynamicDraw.overflow).toBe(false);
+    expect(dynamicDraw.xteNormalized).toBeCloseTo(1.0, 6);
   });
 
   it("passes stronger compact text-fill scaling to waypoint and metric tiles", function () {
@@ -111,7 +127,7 @@ describe("XteDisplayWidget", function () {
   });
 
   it("keeps XTE side suffix alignment for R/L and preserves an empty slot at zero", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {number} xte @returns {string} */
     function renderXteValue(xte) {
       const harness = createHarness();
       harness.spec.renderCanvas(
@@ -122,7 +138,6 @@ describe("XteDisplayWidget", function () {
         }),
         makeProps({ stableDigits: true, xte: xte })
       );
-      // @ts-ignore -- pre-existing untyped test mock boundary
       return harness.calls.valueRows[1].value;
     }
 

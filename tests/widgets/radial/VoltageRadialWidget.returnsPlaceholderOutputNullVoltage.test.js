@@ -1,8 +1,11 @@
 // @ts-check
 const { createComponentContextMock, loadFresh } = require("./VoltageRadialWidget-setup");
 
+/** @typedef {{ formatDisplay: (raw: unknown, props: Record<string, unknown>) => { num: number, text: unknown } }} VoltageRendererConfig */
+
 describe("VoltageRadialWidget", function () {
   it("returns placeholder output for null voltage values", function () {
+    /** @type {VoltageRendererConfig | undefined} */
     let captured;
     const applyFormatter = vi.fn((value) => String(value));
 
@@ -14,10 +17,10 @@ describe("VoltageRadialWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText @returns {string | unknown} */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   return String(text);
                 }
@@ -27,13 +30,21 @@ describe("VoltageRadialWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /**
+                 * @param {unknown} raw
+                 * @param {Record<string, unknown>} props
+                 * @param {(n: number, opts: {formatter: unknown, formatterParameters: unknown, default: unknown}) => unknown} apply
+                 * @param {(text: unknown, defaultText: unknown) => unknown} normalize
+                 * @param {unknown} defaultFormatter
+                 * @param {unknown} defaultParameters
+                 * @returns {{num: number, text: unknown}}
+                 */
                 formatGaugeDisplay(raw, props, apply, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
                     ? p.default
                     : normalize(undefined, undefined);
-                  if (raw == null) {
+                  if (raw === null || raw === undefined) {
                     return { num: NaN, text: defaultText };
                   }
                   const n = Number(raw);
@@ -58,8 +69,7 @@ describe("VoltageRadialWidget", function () {
                   );
                   const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
-                  // @ts-ignore -- pre-existing untyped test mock boundary
-                  return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+                  return Number.isFinite(num) && match ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
                 },
                 resolveVoltageTickSteps() {
                   return { major: 1, minor: 0.2 };
@@ -70,7 +80,7 @@ describe("VoltageRadialWidget", function () {
           SemicircleRadialEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {VoltageRendererConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -85,7 +95,7 @@ describe("VoltageRadialWidget", function () {
       })
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!captured) throw new Error("Expected createRenderer to capture a config.");
     expect(captured.formatDisplay(null, {})).toEqual({ num: NaN, text: "---" });
     expect(applyFormatter).not.toHaveBeenCalled();
   });

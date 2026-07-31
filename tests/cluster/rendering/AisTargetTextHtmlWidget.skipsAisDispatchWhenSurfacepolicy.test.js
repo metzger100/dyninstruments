@@ -16,7 +16,9 @@ describe("AisTargetTextHtmlWidget", function () {
     );
 
     const wrapper = mounted.mountEl.querySelector(".dyni-ais-target-html");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!wrapper) {
+      throw new Error("Expected the ais-target wrapper.");
+    }
     expect(() => wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }))).not.toThrow();
   });
 
@@ -25,7 +27,9 @@ describe("AisTargetTextHtmlWidget", function () {
     const mounted = mountCommitted(setup.renderer, withSurfacePolicyBadShowInfo(makeProps()));
 
     const wrapper = mounted.mountEl.querySelector(".dyni-ais-target-html");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!wrapper) {
+      throw new Error("Expected the ais-target wrapper.");
+    }
     expect(() => wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }))).not.toThrow();
   });
 });

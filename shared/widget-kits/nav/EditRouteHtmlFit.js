@@ -33,7 +33,9 @@
     const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const fitMath = componentContext.components.require("TextFitMath");
     const fitSupport = componentContext.components.require("EditRouteHtmlFitSupport");
-    const toText = componentContext.components.require("ValueMath").toText;
+    const valueMath = componentContext.components.require("ValueMath");
+    const toText = valueMath.toText;
+    const isNullish = valueMath.isNullish;
 
     /**
      * @param {DyniEditRouteHtmlFitArgs | undefined} args
@@ -94,7 +96,7 @@
       const fitOut = {
         nameTextStyle: fitSupport.measureEditRouteStyle({
           rect: layout.nameTextRect,
-          text: toText(model.nameText != null ? model.nameText : model.routeNameText),
+          text: toText(!isNullish(model.nameText) ? model.nameText : model.routeNameText),
           maxPxRatio: fitSupport.resolveNamePxRatio(layout.mode),
           textApi: textApi,
           tileLayout: tileLayout,

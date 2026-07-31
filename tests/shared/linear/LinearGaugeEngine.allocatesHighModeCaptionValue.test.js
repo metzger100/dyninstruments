@@ -3,7 +3,10 @@ const { createHarness, createMockCanvas, createMockContext2D } = require("./Line
 
 describe("LinearGaugeEngine", function () {
   it("allocates high-mode caption/value row height according to captionUnitScale", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /**
+     * @param {number} scale
+     * @returns {import("./LinearGaugeEngine.harness").LinearGaugeHarness["calls"]}
+     */
     function renderHigh(scale) {
       const harness = createHarness();
       const renderer = harness.engine.createRenderer({

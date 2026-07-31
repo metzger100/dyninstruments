@@ -31,13 +31,9 @@ describe("FullCircleRadialTextLayout", function () {
     layout.drawDualModeText(base.state, "normal", display.left, display.right);
     layout.drawDualModeText(override.state, "normal", display.left, display.right);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const baseLeft = base.calls.threeRows[0];
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const baseRight = base.calls.threeRows[1];
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const overrideLeft = override.calls.threeRows[0];
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const overrideRight = override.calls.threeRows[1];
 
     expect(overrideRight.x - (overrideLeft.x + overrideLeft.w)).toBe(

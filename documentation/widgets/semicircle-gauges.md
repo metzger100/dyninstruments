@@ -1,6 +1,6 @@
 # Semicircle Gauges (Speed / Depth / Temperature / Voltage)
 
-**Status:** ✅ Refactored | shared renderer + per-gauge wrappers
+**Status:** Current.
 
 ## Overview
 

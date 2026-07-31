@@ -269,6 +269,21 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
     expect(h.observerInstances[0].observe).toHaveBeenCalledWith(h.dom.surfaceEl);
   });
 
+  it("accepts an omitted optional surface discriminator", function () {
+    const h = createHarness();
+    const attachPayload = {
+      rootEl: h.rootEl,
+      shellEl: h.dom.shellEl,
+      props: { value: 5 },
+      revision: 1
+    };
+
+    expect(function () {
+      h.controller.attach(attachPayload);
+    }).not.toThrow();
+    expect(h.frameQueue).toHaveLength(1);
+  });
+
   it("update repaints on changed props and skips repaint for shallow-identical props", function () {
     const h = createHarness();
     h.controller.attach(h.payload({ value: 7, caption: "SPD" }, 1));
@@ -343,6 +358,11 @@ describe("runtime/surface/CanvasDomSurfaceAdapter.js", function () {
   it("throws for strict non-compat contracts", function () {
     const context = createRuntime();
     const adapter = context.DyniPlugin.runtime._createCanvasDomSurfaceAdapter();
+
+    const payloadHarness = createHarness();
+    expect(function () {
+      payloadHarness.controller.attach(/** @type {any} */ (null));
+    }).toThrow("requires a payload object");
 
     expect(function () {
       adapter.createSurfaceController({

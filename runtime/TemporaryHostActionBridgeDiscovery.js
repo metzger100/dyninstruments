@@ -26,7 +26,7 @@
     }
     try {
       return Object.getOwnPropertyNames(obj);
-      // dyni-boundary-next-line(category: dom-host-uncertainty, owner: Metzger100, date: 2026-07-17) -- DOM host objects can reject property enumeration; the bridge treats that as a non-match and keeps scanning.
+      // plugin-boundary-next-line(category: dom-host-uncertainty, owner: Metzger100, date: 2026-07-17) -- DOM host objects can reject property enumeration; the bridge treats that as a non-match and keeps scanning.
     } catch (err) {
       return [];
     }
@@ -163,7 +163,7 @@
     try {
       const found = doc.querySelectorAll(".alarmWidget");
       return /** @type {Element[]} */ (Array.prototype.slice.call(found));
-      // dyni-boundary-next-line(category: dom-host-uncertainty, owner: Metzger100, date: 2026-07-17) -- DOM query selection can be unavailable on host stubs; the bridge falls back to unsupported.
+      // plugin-boundary-next-line(category: dom-host-uncertainty, owner: Metzger100, date: 2026-07-17) -- DOM query selection can be unavailable on host stubs; the bridge falls back to unsupported.
     } catch (err) {
       return [];
     }

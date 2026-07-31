@@ -2,14 +2,20 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @typedef {{ default?: unknown, formatter?: unknown, formatterParameters?: unknown[] }} FormatterOptions
+ * @typedef {{ applyFormatter?: (value: unknown, options?: FormatterOptions) => unknown }} RenderModelOptions
+ * @typedef {Record<string, unknown> & { captions?: Record<string, string>, default?: string, domain?: Record<string, unknown>, formatUnits?: Record<string, string>, layout?: Record<string, number>, units?: Record<string, string> }} AisProps
+ */
+
+/** @param {RenderModelOptions} [options] */
 function createRenderModel(options) {
   const opts = options || {};
   const applyFormatter =
     opts.applyFormatter ||
-    vi.fn(function (value, formatterOptions) {
+    vi.fn(function (/** @type {unknown} */ value, /** @type {FormatterOptions | undefined} */ formatterOptions) {
       const cfg = formatterOptions || {};
-      if (value == null || Number.isNaN(value)) {
+      if (value === null || value === undefined || Number.isNaN(value)) {
         return Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
       }
       const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
@@ -47,7 +53,7 @@ function createRenderModel(options) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {AisProps} props @param {{ mode?: string, orientation?: string, pageId?: string }} [options] */
 function withSurfacePolicy(props, options) {
   const opts = options || {};
   return Object.assign({}, props || {}, {
@@ -61,7 +67,7 @@ function withSurfacePolicy(props, options) {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {AisProps} [overrides] */
 function makeProps(overrides) {
   const patch = overrides || {};
   const base = {

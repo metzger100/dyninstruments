@@ -33,9 +33,10 @@ describe("LinearGaugeEngine", function () {
     expect(harness.calls.track).toHaveLength(0);
     expect(harness.calls.ticks).toHaveLength(0);
     expect(harness.calls.pointer).toHaveLength(0);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(ctx.calls.filter((entry) => entry.name === "fillText").map((entry) => String(entry.args[0]))).toContain(
-      "GPS Lost"
-    );
+    expect(
+      ctx.calls
+        .filter((/** @type {DyniTestCall} */ entry) => entry.name === "fillText")
+        .map((/** @type {DyniTestCall} */ entry) => String(entry.args[0]))
+    ).toContain("GPS Lost");
   });
 });

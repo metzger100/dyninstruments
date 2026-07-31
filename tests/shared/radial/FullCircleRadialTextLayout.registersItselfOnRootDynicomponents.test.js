@@ -9,6 +9,8 @@ const {
   runIifeScript
 } = require("./FullCircleRadialTextLayout-setup");
 
+/** @typedef {{ h: number, w: number, x: number, y: number }} SlotRect */
+
 describe("FullCircleRadialTextLayout high mode and compact fallback", function () {
   it("registers itself on root.DyniComponents when loaded outside a module system", function () {
     const context = createScriptContext();
@@ -27,11 +29,10 @@ describe("FullCircleRadialTextLayout high mode and compact fallback", function (
     layout.drawSingleModeText(harness.state, "high", makeSingleDisplay(), { slot: "top" });
     layout.drawSingleModeText(harness.state, "high", makeSingleDisplay(), { slot: "bottom" });
 
+    const slots = /** @type {{ bottom: SlotRect, top: SlotRect }} */ (harness.state.slots);
     expect(harness.calls.inline).toHaveLength(2);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.inline[0].x).toBe(harness.state.slots.top.x);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.inline[1].x).toBe(harness.state.slots.bottom.x);
+    expect(harness.calls.inline[0].x).toBe(slots.top.x);
+    expect(harness.calls.inline[1].x).toBe(slots.bottom.x);
   });
 
   it("draws dual high-mode text into the top and bottom slots for the mirrored pair", function () {
@@ -44,15 +45,12 @@ describe("FullCircleRadialTextLayout high mode and compact fallback", function (
 
     layout.drawDualModeText(harness.state, "high", display.left, display.right);
 
+    const slots = /** @type {{ bottom: SlotRect, top: SlotRect }} */ (harness.state.slots);
     expect(harness.calls.inline).toHaveLength(2);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(harness.calls.inline[0].caption).toBe(display.left.caption);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.inline[0].x).toBe(harness.state.slots.top.x);
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    expect(harness.calls.inline[0].x).toBe(slots.top.x);
     expect(harness.calls.inline[1].caption).toBe(display.right.caption);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.inline[1].x).toBe(harness.state.slots.bottom.x);
+    expect(harness.calls.inline[1].x).toBe(slots.bottom.x);
   });
 
   it("falls back to the compact single center row once safeRadius shrinks to the degenerate floor", function () {
@@ -65,9 +63,7 @@ describe("FullCircleRadialTextLayout high mode and compact fallback", function (
     layout.drawSingleModeText(harness.state, "normal", makeSingleDisplay());
 
     expect(harness.calls.valueUnit).toHaveLength(1);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(harness.calls.valueUnit[0].h).toBe(14);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(harness.calls.valueUnit[0].align).toBe("center");
   });
 
@@ -91,9 +87,7 @@ describe("FullCircleRadialTextLayout high mode and compact fallback", function (
     layout.drawDualModeText(harness.state, "normal", display.left, display.right);
 
     expect(harness.calls.threeRows).toHaveLength(2);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(harness.calls.threeRows[0].align).toBe("right");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(harness.calls.threeRows[1].align).toBe("left");
   });
 
@@ -107,8 +101,7 @@ describe("FullCircleRadialTextLayout high mode and compact fallback", function (
     const originalFitTextPx = harness.state.text.fitTextPx;
     harness.state.text.fitTextPx = function () {
       fitTextPxCalls += 1;
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      return originalFitTextPx.apply(this, arguments);
+      return originalFitTextPx.apply(this, Array.from(arguments));
     };
 
     layout.drawSingleModeText(harness.state, "normal", makeSingleDisplay());
@@ -119,9 +112,7 @@ describe("FullCircleRadialTextLayout high mode and compact fallback", function (
 
     expect(fitTextPxCalls).toBe(callsAfterFirstRender);
     expect(harness.calls.threeRows).toHaveLength(2);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(harness.calls.threeRows[1].w).toBe(harness.calls.threeRows[0].w);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(harness.calls.threeRows[1].sizes).toEqual(harness.calls.threeRows[0].sizes);
   });
 });

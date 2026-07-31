@@ -1,6 +1,6 @@
 # Plugin Core Contracts
 
-**Status:** ✅ Implemented | Core contract boundaries between AvNav upstream and dyninstruments
+**Status:** Current.
 
 ## Overview
 

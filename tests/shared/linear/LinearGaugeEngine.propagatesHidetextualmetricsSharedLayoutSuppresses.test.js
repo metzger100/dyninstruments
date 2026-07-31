@@ -3,9 +3,12 @@ const { createHarness, createMockCanvas, createMockContext2D } = require("./Line
 
 describe("LinearGaugeEngine", function () {
   it("propagates hideTextualMetrics into the shared layout and suppresses metric text draws", function () {
+    /** @typedef {{ captionBox: unknown, inlineBox: unknown, textBottomBox: unknown, textTopBox: unknown, valueBox: unknown }} LinearLayout */
+    /** @typedef {{ layout: LinearLayout, mode: string }} RenderState */
+    /** @typedef {{ drawDefaultPointer: () => void }} RenderApi */
+    /** @typedef {{ layout: LinearLayout, mode: string }} SnapshotEntry */
     const harness = createHarness();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const snapshots = [];
+    const snapshots = /** @type {SnapshotEntry[]} */ ([]);
     const renderer = harness.engine.createRenderer({
       rawValueKey: "speed",
       hideTextualMetricsProp: "speedLinearHideTextualMetrics",
@@ -17,7 +20,7 @@ describe("LinearGaugeEngine", function () {
         showEndLabels: "showEndLabels"
       },
       ratioProps: { normal: "n", flat: "f" },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {RenderState} state @param {unknown} props @param {unknown} display @param {RenderApi} api */
       drawFrame(state, props, display, api) {
         snapshots.push({
           mode: state.mode,
@@ -79,9 +82,7 @@ describe("LinearGaugeEngine", function () {
       }
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(snapshots.map((entry) => entry.mode)).toEqual(["flat", "normal", "high"]);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     snapshots.forEach(function (entry) {
       expect(entry.layout.captionBox).toBeNull();
       expect(entry.layout.valueBox).toBeNull();

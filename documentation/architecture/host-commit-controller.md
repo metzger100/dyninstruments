@@ -1,6 +1,6 @@
 # Host Commit Controller
 
-**Status:** ✅ Implemented | Deferred commit scheduler for `renderHtml` host mounting
+**Status:** Current.
 
 ## Overview
 

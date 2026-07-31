@@ -18,7 +18,7 @@ function getCommonShadowCssUrl() {
   return context.DyniPlugin.runtime.surfaces.getCommonShadowCssUrl();
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {object} [overrides] */
 function loadFactory(overrides) {
   const context = createScriptContext({
     ...(overrides || {}),
@@ -33,7 +33,7 @@ function loadFactory(overrides) {
   return context.DyniPlugin.runtime.createSurfaceSessionController;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {string} id */
 function createControllerMock(id) {
   return {
     id: id,
@@ -44,7 +44,7 @@ function createControllerMock(id) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {Record<string, ReturnType<typeof createControllerMock>>} [controllers] */
 function createSurfacesMock(controllers) {
   const bySurface = controllers || {
     html: createControllerMock("html"),
@@ -52,6 +52,7 @@ function createSurfacesMock(controllers) {
   };
 
   return {
+    /** @param {{ surface: string }} options */
     createController: vi.fn(function (options) {
       const controller = bySurface[options.surface];
       if (!controller) {
@@ -63,7 +64,7 @@ function createSurfacesMock(controllers) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {Record<string, unknown>} [overrides] */
 function createPayload(overrides) {
   const opts = overrides || {};
   const surface = Object.prototype.hasOwnProperty.call(opts, "surface") ? opts.surface : "html";

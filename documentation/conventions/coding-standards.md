@@ -1,6 +1,6 @@
 # Coding Standards
 
-**Status:** ✅ Implemented | Canonical JS structure, naming, doc comments, and reuse rules
+**Status:** Current.
 
 ## Overview
 
@@ -161,9 +161,9 @@ Example:
 - Renderer-side helpers may format with mapper-resolved formatter tokens, but they must not repeat mapper fallback or
   token-validation logic.
 - Do not pass display labels such as `m/s`, `°C`, or `hPa` into formatter parameters.
-- Generic `dyni-lint-disable-*` directives are forbidden in production source. Fix the root cause or add a narrow
+- Generic `plugin-lint-disable-*` directives are forbidden in production source. Fix the root cause or add a narrow
   checker-owned canonical-owner exception.
-- Only a genuine external catch boundary may use the validated `dyni-boundary-*` marker documented in
+- Only a genuine external catch boundary may use the validated `plugin-boundary-*` marker documented in
   [smell-prevention.md](smell-prevention.md#suppression-syntax).
 
 ## Temporary Workaround Marker

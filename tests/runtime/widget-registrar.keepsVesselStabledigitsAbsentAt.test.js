@@ -12,11 +12,9 @@ const {
 
 describe("runtime/widget-registrar.js", function () {
   it("keeps vessel stableDigits absent at registration so dateTime/timeStatus default at render time", function () {
-    // eslint-disable-next-line no-unused-vars -- imported shared setup retained for the strict test contract
-    const { context, registerWidget, hostActions } = setupContext();
+    const { context, registerWidget } = setupContext();
     const vesselDef = loadVesselDef();
     const componentSpec = {};
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const previousAvnav = globalThis.avnav;
 
     try {
@@ -28,15 +26,14 @@ describe("runtime/widget-registrar.js", function () {
       expect(Object.prototype.hasOwnProperty.call(registeredDef, "stableDigits")).toBe(false);
 
       const rawClock = new Date("2026-02-22T15:00:00Z");
-      // @ts-ignore -- pre-existing untyped test mock boundary
       globalThis.avnav = {
         api: {
           formatter: {
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {unknown} value */
             formatDate(value) {
               return value === rawClock ? "DATE" : "DATE_BAD";
             },
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {unknown} value */
             formatTime(value) {
               return value === rawClock ? "TIME" : "TIME_BAD";
             }
@@ -69,7 +66,11 @@ describe("runtime/widget-registrar.js", function () {
       expect(fillTextValues(registeredCtx)).toContain("DATE");
       expect(fillTextValues(registeredCtx)).toContain("TIME");
       expect(String(registeredCtx.textAlign)).toBe("center");
-      expect(String(registeredCaptured.find((entry) => entry.text === "TIME").font)).toContain("monospace");
+      const registeredTime = registeredCaptured.find((entry) => entry.text === "TIME");
+      if (!registeredTime) {
+        throw new Error("Expected the registered time text capture.");
+      }
+      expect(String(registeredTime.font)).toContain("monospace");
 
       const explicitProps = Object.assign({}, registeredDef, {
         displayVariant: "dateTime",
@@ -92,11 +93,13 @@ describe("runtime/widget-registrar.js", function () {
       expect(fillTextValues(explicitCtx)).toContain("DATE");
       expect(fillTextValues(explicitCtx)).toContain("TIME");
       expect(String(explicitCtx.textAlign)).toBe("center");
-      expect(String(explicitCaptured.find((entry) => entry.text === "TIME").font)).toContain("sans-serif");
+      const explicitTime = explicitCaptured.find((entry) => entry.text === "TIME");
+      if (!explicitTime) {
+        throw new Error("Expected the explicit time text capture.");
+      }
+      expect(String(explicitTime.font)).toContain("sans-serif");
     } finally {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       if (typeof previousAvnav === "undefined") delete globalThis.avnav;
-      // @ts-ignore -- pre-existing untyped test mock boundary
       else globalThis.avnav = previousAvnav;
     }
   });

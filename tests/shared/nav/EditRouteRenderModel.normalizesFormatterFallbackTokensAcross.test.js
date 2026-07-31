@@ -4,10 +4,10 @@ const { createRenderModel, makeProps, withSurfacePolicy } = require("./EditRoute
 describe("EditRouteRenderModel", function () {
   it("normalizes formatter fallback tokens to --- across edit-route metrics", function () {
     const renderModel = createRenderModel({
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {unknown} value @param {{ default?: unknown, formatter?: string }} [formatterOptions] */
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
-        if (value != null && !Number.isNaN(value)) {
+        if (value !== null && value !== undefined && !Number.isNaN(value)) {
           return "OK";
         }
         if (cfg.formatter === "formatDecimal") {
@@ -54,7 +54,7 @@ describe("EditRouteRenderModel", function () {
 
   it("enables stable-digits padding for numeric edit-route metrics when configured", function () {
     const renderModel = createRenderModel({
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {unknown} value @param {{ default?: unknown, formatter?: string }} [formatterOptions] */
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (cfg.formatter === "formatDecimal") {
@@ -69,7 +69,7 @@ describe("EditRouteRenderModel", function () {
         if (cfg.formatter === "formatClock") {
           return "12:34";
         }
-        return value == null ? cfg.default : String(value);
+        return value === null || value === undefined ? cfg.default : String(value);
       }
     });
     const model = renderModel.buildModel({
@@ -91,7 +91,7 @@ describe("EditRouteRenderModel", function () {
 
   it("keeps stable-digits padding intact in compact normal mode", function () {
     const renderModel = createRenderModel({
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {unknown} value @param {{ default?: unknown, formatter?: string }} [formatterOptions] */
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (cfg.formatter === "formatDecimal") {
@@ -106,7 +106,7 @@ describe("EditRouteRenderModel", function () {
         if (cfg.formatter === "formatClock") {
           return "12:34";
         }
-        return value == null ? cfg.default : String(value);
+        return value === null || value === undefined ? cfg.default : String(value);
       }
     });
     const model = renderModel.buildModel({
@@ -129,7 +129,7 @@ describe("EditRouteRenderModel", function () {
 
   it("uses formatClock for ETA when hideSeconds is enabled", function () {
     const renderModel = createRenderModel({
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {unknown} value @param {{ default?: unknown, formatter?: string }} [formatterOptions] */
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (cfg.formatter === "formatClock") {
@@ -144,7 +144,7 @@ describe("EditRouteRenderModel", function () {
         if (cfg.formatter === "formatDistance") {
           return "DST:" + String(value);
         }
-        return value == null ? cfg.default : String(value);
+        return value === null || value === undefined ? cfg.default : String(value);
       }
     });
     const rteEta = new Date("2026-03-06T11:45:00Z");

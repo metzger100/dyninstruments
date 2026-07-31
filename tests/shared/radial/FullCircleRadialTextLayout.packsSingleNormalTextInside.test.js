@@ -17,7 +17,6 @@ describe("FullCircleRadialTextLayout", function () {
     layout.drawSingleModeText(harness.state, "normal", makeSingleDisplay());
 
     expect(harness.calls.threeRows).toHaveLength(1);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const block = harness.calls.threeRows[0];
     expect(block.x).toBe(harness.state.geom.cx - Math.floor(block.w / 2));
     expect(block.y).toBe(harness.state.geom.cy - Math.floor(block.h / 2));

@@ -16,7 +16,7 @@
     font: "16px sans-serif",
     /** @param {any} text */
     measureText: function (text) {
-      var safeText = text == null ? "" : String(text);
+      var safeText = text === null || text === undefined ? "" : String(text);
       var fontPx = resolveFontPx(this.font);
       var ascent = fontPx * 0.78;
       var descent = fontPx * 0.22;

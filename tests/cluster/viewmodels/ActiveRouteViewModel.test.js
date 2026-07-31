@@ -23,7 +23,7 @@ describe("ActiveRouteViewModel", function () {
       },
       /** @param {any} value @returns {number | undefined} */
       num(value) {
-        if (value == null) {
+        if (value === null || value === undefined) {
           return undefined;
         }
         if (typeof value === "string" && value.trim() === "") {

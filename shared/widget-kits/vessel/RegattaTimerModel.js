@@ -99,8 +99,9 @@
     return Math.floor(value);
   }
 
-  /** @param {unknown} def @param {unknown} componentContext */
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
+    const isNullish = componentContext.components.require("ValueMath").isNullish;
     /** @param {DyniRegattaTimerModelOptions} options @returns {DyniRegattaTimerModel} */
     function createTimerModel(options) {
       const opts = /** @type {DyniRegattaTimerModelOptions} */ (options || {});
@@ -360,7 +361,7 @@
       }
 
       applySnapshot(snapshot);
-      if (phase === PHASE_COUNTDOWN && endTimeMs != null && endTimeMs <= Date.now()) {
+      if (phase === PHASE_COUNTDOWN && !isNullish(endTimeMs) && endTimeMs <= Date.now()) {
         beginElapsed(Date.now(), false);
       }
       if (phase !== PHASE_IDLE) {

@@ -1,6 +1,6 @@
 # Documentation Format
 
-**Status:** ✅ Implemented | Token-efficient format for all project docs
+**Status:** Current.
 
 ## Overview
 
@@ -17,7 +17,7 @@ Use this format for all new or updated documentation files. Keep docs compact, s
 ```markdown
 # [Title]
 
-**Status:** [✅ Implemented / ⏳ In Progress / ❌ Not Started] [Brief]
+**Status:** Current.
 
 ## Overview
 
@@ -29,14 +29,6 @@ Use this format for all new or updated documentation files. Keep docs compact, s
 - API signatures
 - Data types and values
 - Configuration keys
-
-## API/Interfaces
-
-[Tables or compact code blocks]
-
-## Fixed Issues (if any)
-
-[Only important items]
 
 ## Related
 
@@ -60,28 +52,6 @@ Use this format for all new or updated documentation files. Keep docs compact, s
 - File paths and code locations
 - Color values, proportions, constants (where relevant)
 - Critical implementation details
-- Fixed-issue notes for troubleshooting context
-
-## Token Budget Management
-
-Preserve tokens for implementation, not context gathering.
-
-| Budget | Allocation                                                   |
-| ------ | ------------------------------------------------------------ |
-| 20-30% | Reading relevant docs via `documentation/TABLEOFCONTENTS.md` |
-| 70-80% | Implementation, debugging, and validation                    |
-
-Anti-patterns:
-
-- Reading all docs sequentially
-- Re-reading the same docs repeatedly
-- Reading verbose examples when not needed
-
-Best practices:
-
-- Start with `documentation/TABLEOFCONTENTS.md`
-- Read only `Key Details` first
-- Open examples only when implementing a matching pattern
 
 ## Related
 

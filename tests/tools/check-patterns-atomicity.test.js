@@ -25,12 +25,26 @@ describe("tools/check-patterns atomicity rules", function () {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-check-patterns-atomicity-"));
     tempDirs.push(dir);
 
+    copyPolicies(dir);
+
     for (const [rel, content] of Object.entries(files)) {
       const abs = path.join(dir, rel);
       fs.mkdirSync(path.dirname(abs), { recursive: true });
       fs.writeFileSync(abs, content, "utf8");
     }
     return dir;
+  }
+
+  /** @param {string} dir */
+  function copyPolicies(dir) {
+    for (const rel of [
+      "tools/quality-policy/project-pattern-context.json",
+      "tools/quality-policy/project-pattern-scopes.json"
+    ]) {
+      const target = path.join(dir, rel);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(path.resolve(__dirname, "../..", rel), target);
+    }
   }
 
   /** @param {Record<string, string>} files */
@@ -55,7 +69,7 @@ config.clusters.push({ def: { editableParameters: {
 `,
       "widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js": `
 function create(def, Helpers) {
-  return Helpers.getModule("LinearGaugeEngine").create(def, Helpers).createRenderer({ // dyni-lint-disable-line legacy-component-loader-api -- fixture exercises widget-renderer-default-duplication
+  return Helpers.getModule("LinearGaugeEngine").create(def, Helpers).createRenderer({ // plugin-lint-disable-line legacy-component-loader-api -- fixture exercises widget-renderer-default-duplication
     ratioProps: { normal: "speedLinearRatioThresholdNormal", flat: "speedLinearRatioThresholdFlat" },
     ratioDefaults: { normal: 1.1, flat: 3.5 },
     rangeProps: { min: "speedLinearMinValue", max: "speedLinearMaxValue" },
@@ -81,7 +95,7 @@ config.clusters.push({ def: { editableParameters: {
 `,
       "widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js": `
 function create(def, Helpers) {
-  return Helpers.getModule("LinearGaugeEngine").create(def, Helpers).createRenderer({ // dyni-lint-disable-line legacy-component-loader-api -- fixture exercises widget-renderer-default-duplication
+  return Helpers.getModule("LinearGaugeEngine").create(def, Helpers).createRenderer({ // plugin-lint-disable-line legacy-component-loader-api -- fixture exercises widget-renderer-default-duplication
     ratioProps: { normal: "speedLinearRatioThresholdNormal", flat: "speedLinearRatioThresholdFlat" },
     ratioDefaults: { normal: 1.1, flat: 3.50 },
     rangeProps: { min: "speedLinearMinValue", max: "speedLinearMaxValue" },
@@ -101,7 +115,7 @@ const DEFAULT_RATIO_DEFAULTS = { normal: 1.1, flat: 3.5 };
 `,
       "shared/widget-kits/linear/LinearGaugeLayout.js": `
 function create(def, Helpers) {
-  const responsiveProfile = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers); // dyni-lint-disable-line legacy-component-loader-api -- fixture exercises engine-layout-default-drift
+  const responsiveProfile = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers); // plugin-lint-disable-line legacy-component-loader-api -- fixture exercises engine-layout-default-drift
   function computeLayout(W, H) {
     const responsive = responsiveProfile.computeProfile(W, H, {});
     return responsiveProfile.computeInsetPx(responsive, 0.04, 1);
@@ -124,7 +138,7 @@ const DEFAULT_RATIO_DEFAULTS = { normal: 0.8, flat: 2.2 };
 `,
       "shared/widget-kits/radial/FullCircleRadialLayout.js": `
 function create(def, Helpers) {
-  const responsiveProfile = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers); // dyni-lint-disable-line legacy-component-loader-api -- fixture exercises engine-layout-default-drift
+  const responsiveProfile = Helpers.getModule("ResponsiveScaleProfile").create(def, Helpers); // plugin-lint-disable-line legacy-component-loader-api -- fixture exercises engine-layout-default-drift
   function computeLayout(W, H) {
     const responsive = responsiveProfile.computeProfile(W, H, {});
     return responsiveProfile.computeInsetPx(responsive, 0.04, 1);
@@ -207,9 +221,9 @@ draw({ beginPath() {}, restore() {} });
     const result = run({
       "shared/widget-kits/radial/RadialTickMath.js": `
 function create(def, Helpers) {
-  const angleMath = Helpers.getModule("RadialAngleMath").create(def, Helpers); // dyni-lint-disable-line legacy-component-loader-api -- fixture exercises framework-method-typeof-guard
+  const angleMath = Helpers.getModule("RadialAngleMath").create(def, Helpers); // plugin-lint-disable-line legacy-component-loader-api -- fixture exercises framework-method-typeof-guard
   const mod = (angleMath && typeof angleMath.mod === "function") ? angleMath.mod : null;
-  const api = (Helpers && typeof Helpers.getModule === "function") ? Helpers.getModule("X") : null; // dyni-lint-disable-line legacy-component-loader-api -- fixture exercises framework-method-typeof-guard
+  const api = (Helpers && typeof Helpers.getModule === "function") ? Helpers.getModule("X") : null; // plugin-lint-disable-line legacy-component-loader-api -- fixture exercises framework-method-typeof-guard
   return { mod, api };
 }
 `
@@ -277,7 +291,7 @@ draw({});
     const result = run({
       "shared/widget-kits/linear/LinearCanvasPrimitives.js": `
 function draw(ctx) {
-  // dyni-lint-disable-next-line canvas-api-typeof-guard -- synthetic boundary exception for rule coverage
+  // plugin-lint-disable-next-line canvas-api-typeof-guard -- synthetic boundary exception for rule coverage
   if (typeof ctx.strokeRect === "function") ctx.strokeRect(0, 0, 1, 1);
 }
 draw({ strokeRect() {} });
@@ -293,8 +307,8 @@ draw({ strokeRect() {} });
     const result = run({
       "shared/theme/ThemeResolver.js": `
 function resolvePresetDefs(Helpers) {
-  // dyni-lint-disable-next-line framework-method-typeof-guard -- ThemeResolver bootstrap fixture validates helper-method guard suppression.
-  const presetsMod = (Helpers && typeof Helpers.getModule === "function") ? Helpers.getModule("ThemeModel") : null; // dyni-lint-disable-line legacy-component-loader-api -- ThemeResolver bootstrap fixture validates helper-method guard suppression.
+  // plugin-lint-disable-next-line framework-method-typeof-guard -- ThemeResolver bootstrap fixture validates helper-method guard suppression.
+  const presetsMod = (Helpers && typeof Helpers.getModule === "function") ? Helpers.getModule("ThemeModel") : null; // plugin-lint-disable-line legacy-component-loader-api -- ThemeResolver bootstrap fixture validates helper-method guard suppression.
   return presetsMod;
 }
 resolvePresetDefs({ getModule() { return null; } });

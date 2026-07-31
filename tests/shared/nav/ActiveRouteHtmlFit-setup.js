@@ -34,7 +34,7 @@ function createMeasureContext() {
   return ctx;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {{ font?: unknown }} [themeOverrides] */
 function createHarness(themeOverrides) {
   const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
   const textTileLayoutModule = loadFresh("shared/widget-kits/text/TextTileLayout.js");
@@ -100,7 +100,7 @@ function createHarness(themeOverrides) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {Record<string, unknown>} [overrides] */
 function makeModel(overrides) {
   return Object.assign(
     {
@@ -125,13 +125,13 @@ function makeModel(overrides) {
   );
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} style */
 function extractPx(style) {
   const match = String(style || "").match(new RegExp("^font-size:(\\d+)px\\x3b$"));
   return match ? Number(match[1]) : 0;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} style */
 function expectStyleFormat(style) {
   expect(typeof style).toBe("string");
   expect(style).toMatch(new RegExp("^font-size:\\d+px\\x3b$"));

@@ -1,5 +1,4 @@
 // @ts-check
-// @ts-ignore -- pre-existing untyped test mock boundary
 const { EFFECT_STATE_KEY, createComponentContextMock, loadFresh } = require("./RoutePointsDomEffects-setup");
 
 describe("RoutePointsDomEffects (part2 - fallback and guard branches)", function () {
@@ -15,7 +14,7 @@ describe("RoutePointsDomEffects (part2 - fallback and guard branches)", function
     );
   }
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {object} target @param {string} key @param {number} value */
   function defineFixedMetric(target, key, value) {
     Object.defineProperty(target, key, {
       configurable: true,
@@ -25,7 +24,7 @@ describe("RoutePointsDomEffects (part2 - fallback and guard branches)", function
     });
   }
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {number} rowCount */
   function createListRoot(rowCount) {
     const root = document.createElement("div");
     const list = document.createElement("div");
@@ -48,7 +47,7 @@ describe("RoutePointsDomEffects (part2 - fallback and guard branches)", function
     return { root, list };
   }
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {HTMLElement} root @returns {Record<string, unknown> & { __dyniHostCommitState: { rootEl: HTMLElement, shellEl: null } }} */
   function createHostContext(root) {
     return {
       __dyniHostCommitState: {
@@ -151,9 +150,8 @@ describe("RoutePointsDomEffects (part2 - fallback and guard branches)", function
       const domEffects = createDomEffects();
       const created = createListRoot(5);
       defineFixedMetric(created.list, "clientHeight", 0);
-      // @ts-ignore -- pre-existing untyped test mock boundary
       created.list.getBoundingClientRect = function () {
-        return { height: 50, top: 0 };
+        return /** @type {DOMRect} */ ({ height: 50, top: 0 });
       };
       created.list.scrollTop = 0;
 
@@ -166,15 +164,16 @@ describe("RoutePointsDomEffects (part2 - fallback and guard branches)", function
       const domEffects = createDomEffects();
       const created = createListRoot(1);
       const row = created.list.querySelector('[data-rp-row="0"]');
+      if (!row) {
+        throw new Error("Expected the route-points row.");
+      }
 
       defineFixedMetric(row, "offsetTop", NaN);
-      // @ts-ignore -- pre-existing untyped test mock boundary
       row.getBoundingClientRect = function () {
-        return { top: 130 };
+        return /** @type {DOMRect} */ ({ top: 130 });
       };
-      // @ts-ignore -- pre-existing untyped test mock boundary
       created.list.getBoundingClientRect = function () {
-        return { top: 100 };
+        return /** @type {DOMRect} */ ({ top: 100 });
       };
       created.list.scrollTop = 5;
 
@@ -187,6 +186,9 @@ describe("RoutePointsDomEffects (part2 - fallback and guard branches)", function
       const domEffects = createDomEffects();
       const created = createListRoot(1);
       const row = created.list.querySelector('[data-rp-row="0"]');
+      if (!row) {
+        throw new Error("Expected the route-points row.");
+      }
 
       defineFixedMetric(row, "offsetTop", 30.5);
       defineFixedMetric(row, "offsetHeight", 20);
@@ -244,8 +246,8 @@ describe("RoutePointsDomEffects (part2 - fallback and guard branches)", function
 
       // Simulate a race where another in-flight reveal bumped the token
       // before this scheduled timer fires.
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      hostContext[EFFECT_STATE_KEY].token += 1;
+      const effectState = /** @type {{ token: number }} */ (hostContext[EFFECT_STATE_KEY]);
+      effectState.token += 1;
 
       vi.runAllTimers();
 

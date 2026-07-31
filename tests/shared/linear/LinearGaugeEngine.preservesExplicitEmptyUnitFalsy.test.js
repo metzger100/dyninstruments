@@ -17,7 +17,11 @@ describe("LinearGaugeEngine", function () {
         minor: "minor",
         showEndLabels: "showEndLabels"
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /**
+       * @param {unknown} raw
+       * @param {Record<string, unknown>} props
+       * @param {string} unit
+       */
       formatDisplay(raw, props, unit) {
         receivedUnit = unit;
         const n = Number(raw);

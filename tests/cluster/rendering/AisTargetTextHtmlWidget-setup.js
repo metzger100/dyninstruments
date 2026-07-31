@@ -6,7 +6,16 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @typedef {{ default?: unknown, formatter?: string, formatterParameters?: unknown[] }} FormatterOptions
+ * @typedef {{ applyFormatter?: (value: unknown, options?: FormatterOptions) => unknown, fitCompute?: () => unknown }} RendererOptions
+ * @typedef {Record<string, unknown> & { captions?: Record<string, string>, default?: string, domain?: Record<string, unknown>, formatUnits?: Record<string, string>, layout?: Record<string, number>, units?: Record<string, string> }} AisProps
+ * @typedef {{ containerOrientation?: string, interactionMode?: string, pageId?: string, showInfo?: () => boolean }} SurfaceOptions
+ * @typedef {{ __dyniHostCommitState?: { rootEl: HTMLElement, shellEl: HTMLElement } }} HostContext
+ * @typedef {{ createCommittedRenderer: (options: { hostContext: HostContext, mountEl: HTMLElement, shadowRoot: null }) => { destroy: () => unknown, detach: () => unknown, mount: (mountEl: HTMLElement, payload: unknown) => void, postPatch: (payload: unknown) => void, update: (payload: unknown) => void } }} RendererSpec
+ */
+
+/** @param {RendererOptions} [options] */
 function createRenderer(options) {
   const opts = options || {};
   const fitCompute =
@@ -48,12 +57,12 @@ function createRenderer(options) {
 
   const applyFormatter =
     opts.applyFormatter ||
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {unknown} value @param {FormatterOptions} [formatterOptions] */
     function (value, formatterOptions) {
       const cfg = formatterOptions || {};
       const formatter = cfg.formatter;
       const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
-      if (value == null) {
+      if (value === null || value === undefined) {
         return cfg.default;
       }
       if (formatter === "formatDistance") {
@@ -116,7 +125,7 @@ function createRenderer(options) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {AisProps} [overrides] */
 function makeProps(overrides) {
   const base = {
     domain: {
@@ -164,7 +173,7 @@ function makeProps(overrides) {
   return out;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {AisProps} props @param {SurfaceOptions} [options] */
 function withSurfacePolicy(props, options) {
   const opts = options || {};
   const interactionMode = opts.interactionMode === "passive" ? "passive" : "dispatch";
@@ -185,11 +194,11 @@ function withSurfacePolicy(props, options) {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {RendererSpec} rendererSpec @param {AisProps} props @param {{ hostContext?: HostContext, shellSize?: { height: number, width: number } }} [options] */
 function mountCommitted(rendererSpec, props, options) {
   const opts = options || {};
   const shellSize = opts.shellSize || { width: 320, height: 180 };
-  const hostContext = opts.hostContext || {};
+  const hostContext = opts.hostContext || /** @type {HostContext} */ ({});
   const rootEl = document.createElement("div");
   rootEl.className = "widget dyniplugin dyni-host-html";
   const shellEl = document.createElement("div");
@@ -200,10 +209,18 @@ function mountCommitted(rendererSpec, props, options) {
   rootEl.appendChild(shellEl);
   hostContext.__dyniHostCommitState = { rootEl, shellEl };
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
   mountEl.getBoundingClientRect = vi.fn(() => ({
+    bottom: shellSize.height,
     width: shellSize.width,
-    height: shellSize.height
+    height: shellSize.height,
+    left: 0,
+    right: shellSize.width,
+    top: 0,
+    x: 0,
+    y: 0,
+    toJSON() {
+      return {};
+    }
   }));
 
   const committed = rendererSpec.createCommittedRenderer({
@@ -212,7 +229,7 @@ function mountCommitted(rendererSpec, props, options) {
     shadowRoot: null
   });
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {AisProps} nextProps @param {number} revision @param {boolean} layoutChanged */
   function payload(nextProps, revision, layoutChanged) {
     return {
       props: nextProps,
@@ -235,7 +252,7 @@ function mountCommitted(rendererSpec, props, options) {
   return {
     mountEl,
     committed,
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {AisProps} nextProps @param {number} revision @param {boolean} layoutChanged */
     update(nextProps, revision, layoutChanged) {
       const next = payload(nextProps, revision, layoutChanged === true);
       committed.update(next);
@@ -248,13 +265,13 @@ function mountCommitted(rendererSpec, props, options) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} styleValue */
 function readInlinePx(styleValue) {
   const match = String(styleValue || "").match(/^(\d+)px$/);
   return match ? Number(match[1]) : NaN;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {AisProps} props @param {SurfaceOptions} [options] */
 function withSurfacePolicyNoAisAction(props, options) {
   const opts = options || {};
   const interactionMode = opts.interactionMode === "passive" ? "passive" : "dispatch";
@@ -268,7 +285,7 @@ function withSurfacePolicyNoAisAction(props, options) {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {AisProps} props */
 function withSurfacePolicyBadShowInfo(props) {
   return Object.assign({}, props || {}, {
     surfacePolicy: {

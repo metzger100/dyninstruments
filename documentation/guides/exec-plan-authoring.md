@@ -1,6 +1,6 @@
 # Guide: Execution Plan Authoring
 
-**Status:** ✅ Reference | Structural template for high-success multi-session plans
+**Status:** Current.
 
 ## Overview
 

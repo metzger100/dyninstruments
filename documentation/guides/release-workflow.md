@@ -1,6 +1,6 @@
 # Guide: Release Workflow
 
-**Status:** ✅ Implemented | Local-centric release process for dyninstruments
+**Status:** Current.
 
 ## Overview
 

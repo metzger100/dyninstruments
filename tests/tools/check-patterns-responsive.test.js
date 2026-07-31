@@ -25,12 +25,26 @@ describe("tools/check-patterns responsive rules", function () {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-check-patterns-responsive-"));
     tempDirs.push(dir);
 
+    copyPolicies(dir);
+
     for (const [rel, content] of Object.entries(files)) {
       const abs = path.join(dir, rel);
       fs.mkdirSync(path.dirname(abs), { recursive: true });
       fs.writeFileSync(abs, content, "utf8");
     }
     return dir;
+  }
+
+  /** @param {string} dir */
+  function copyPolicies(dir) {
+    for (const rel of [
+      "tools/quality-policy/project-pattern-context.json",
+      "tools/quality-policy/project-pattern-scopes.json"
+    ]) {
+      const target = path.join(dir, rel);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(path.resolve(__dirname, "../..", rel), target);
+    }
   }
 
   /** @param {any} result */
@@ -106,7 +120,7 @@ measureMetricTile({ h: 20 });
     const cwd = createWorkspace({
       "shared/widget-kits/text/TextTileLayout.js": `
 function measureMetricTile(rect) {
-  // dyni-lint-disable-next-line responsive-layout-hard-floor -- intentional canvas viability guard for this synthetic test
+  // plugin-lint-disable-next-line responsive-layout-hard-floor -- intentional canvas viability guard for this synthetic test
   return Math.max(9, Math.floor(rect.h * 0.5));
 }
 measureMetricTile({ h: 20 });

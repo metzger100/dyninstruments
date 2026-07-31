@@ -53,7 +53,7 @@ describe("PositionCoordinateWidget", function () {
           : "";
         return (axis === "lat" ? "LAT:" : "LON:") + String(raw);
       }
-      return raw == null ? cfg.default : String(raw);
+      return raw === null || raw === undefined ? cfg.default : String(raw);
     }
 
     const helpersTabular = makeComponentContext({
@@ -101,6 +101,7 @@ describe("PositionCoordinateWidget", function () {
 
     expect(tabularLat).toBeTruthy();
     expect(plainLat).toBeTruthy();
+    if (!tabularLat || !plainLat) throw new Error("expected LAT text call to be captured");
     expect(String(tabularLat.font)).toContain("monospace");
     expect(String(plainLat.font)).toContain("sans-serif");
   });

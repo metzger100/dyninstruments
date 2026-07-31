@@ -1,6 +1,6 @@
 # Testing Infrastructure
 
-**Status:** ✅ Implemented | Vitest baseline, split projects, helper catalog, and HTML widget test pattern
+**Status:** Current.
 
 ## Overview
 
@@ -59,10 +59,11 @@ Every file under `tests/**/*.js` is classified exactly once in `tools/quality-po
 `node tools/quality-policy/test-inventory.mjs` (run as part of `typecheck:tests`) enforces completeness (every live file
 classified exactly once, no stale entries), rejects directory-wide glob catch-all keys, and validates temporary entries
 obey narrow filename/parent rules and carry a reason and removal path. The SHA-256-locked
-`tools/quality-policy/test-exception-baseline.json` captures the 229 existing non-strict paths and classifications, so
-the exception set may shrink but cannot gain a new path or change classification. Fixtures are restricted to
+`tools/quality-policy/test-exception-baseline.json` captures the existing non-strict paths and classifications, so the
+exception set may shrink but cannot gain a new path or change classification. Fixtures are restricted to
 `tests/tools/lint-fixtures/`, must name `tests/tools/quality-owners.test.js`, and must be referenced by that owner. The
-checker also rejects duplicate raw JSON keys and any `@ts-nocheck` directive outside the two temporary fragment classes.
+checker also rejects duplicate raw JSON keys and every type-suppression directive. The test layer is fully strict: add
+or refine a precise declaration in `types/test-harness.d.ts` when a mock boundary needs a shape.
 `tests/tools/test-inventory.test.js` exercises every failure branch against a disposable temp workspace.
 
 `tsconfig.tests.json` (repo root) is a separate strict, no-emit `checkJs` project whose `files` list is exactly the
@@ -70,9 +71,9 @@ checker also rejects duplicate raw JSON keys and any `@ts-nocheck` directive out
 limit, split it by behavior into strict `Base.<topic>.test.js` files and extract shared setup once into a strict helper
 or an existing captured harness; numeric `*.partN.test.js` files are not permitted.
 `tests/contract/typecheck-tests-inventory-contract.test.js` proves the two lists stay in lockstep. Temporary fragments
-carry `// @ts-nocheck` so they stay exempt even when `require()`-reached from a strict file; `fixture` files are never
-reached from a strict file at all. `npm run typecheck` runs both boundaries: `typecheck:source` (production,
-`tsconfig.checkjs.json`) followed by `typecheck:tests` (test inventory check plus `tsc -p tsconfig.tests.json`).
+and fixtures must remain type-safe in their own declared boundary; `fixture` files are never reached from a strict file
+at all. `npm run typecheck` runs both boundaries: `typecheck:source` (production, `tsconfig.checkjs.json`) followed by
+`typecheck:tests` (test inventory check plus `tsc -p tsconfig.tests.json`).
 
 `eslint.config.mjs` reads `test-inventory.json` at config-load time and scopes the relaxed
 `no-empty`/`no-undef`/`no-unused-vars`/`no-useless-assignment` rule set to exactly the non-strict inventory entries list

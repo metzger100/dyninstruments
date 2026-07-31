@@ -59,7 +59,12 @@ function createRadialTextApi() {
   );
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @typedef {{ cPx: number, g1: number, g2: number, total: number, uPx: number, vPx: number }} InlineFit
+ * @typedef {{ gap: number, uPx: number, vPx: number }} ValueUnitFit
+ */
+
+/** @param {string} mode @param {number} width @param {number} height */
 function createHarness(mode, width, height) {
   const layoutApi = createLayoutApi();
   const insets = layoutApi.computeInsets(width, height);
@@ -71,15 +76,16 @@ function createHarness(mode, width, height) {
     insets: insets,
     responsive: insets.responsive
   });
-  const calls = {
-    measureValueUnitFit: 0,
-    fitInlineCapValUnit: 0,
-    fitTextPx: 0,
-    drawCaptionMax: [],
-    drawValueUnitWithFit: [],
-    drawInlineCapValUnit: [],
-    drawThreeRowsBlock: []
-  };
+  const calls =
+    /** @type {{ drawCaptionMax: Array<{ capMaxPx: number, caption: string, h: number, w: number, x: number, y: number }>, drawInlineCapValUnit: Array<{ caption: string, fit: InlineFit, h: number, unitText: string, valueText: string, w: number, x: number, y: number }>, drawThreeRowsBlock: Array<{ align: string, caption: string, h: number, secScale: number, sizes: object, unitText: string, valueText: string, w: number, x: number, y: number }>, drawValueUnitWithFit: Array<{ fit: ValueUnitFit, h: number, unitText: string, valueText: string, w: number, x: number, y: number }>, fitInlineCapValUnit: number, fitTextPx: number, measureValueUnitFit: number }} */ ({
+      measureValueUnitFit: 0,
+      fitInlineCapValUnit: 0,
+      fitTextPx: 0,
+      drawCaptionMax: [],
+      drawValueUnitWithFit: [],
+      drawInlineCapValUnit: [],
+      drawThreeRowsBlock: []
+    });
   const textApi = {
     measureValueUnitFit() {
       calls.measureValueUnitFit += 1;
@@ -89,19 +95,17 @@ function createHarness(mode, width, height) {
       calls.fitInlineCapValUnit += 1;
       return { cPx: 3, vPx: 4, uPx: 3, g1: 2, g2: 2, total: 100 };
     },
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {unknown} ctx @param {string} text @param {number} maxW @param {number} maxH */
     fitTextPx(ctx, text, maxW, maxH) {
       calls.fitTextPx += 1;
       return Math.max(1, Math.min(Math.floor(Number(maxH) || 0), 1));
     },
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {unknown} ctx @param {string} family @param {number} x @param {number} y @param {number} w @param {number} h @param {string} caption @param {number} capMaxPx */
     drawCaptionMax(ctx, family, x, y, w, h, caption, capMaxPx) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       calls.drawCaptionMax.push({ x, y, w, h, caption, capMaxPx });
     },
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {unknown} ctx @param {string} family @param {number} x @param {number} y @param {number} w @param {number} h @param {string} valueText @param {string} unitText @param {ValueUnitFit} fit */
     drawValueUnitWithFit(ctx, family, x, y, w, h, valueText, unitText, fit) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       calls.drawValueUnitWithFit.push({
         x,
         y,
@@ -112,9 +116,8 @@ function createHarness(mode, width, height) {
         fit: { ...fit }
       });
     },
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {unknown} ctx @param {string} family @param {number} x @param {number} y @param {number} w @param {number} h @param {string} caption @param {string} valueText @param {string} unitText @param {InlineFit} fit */
     drawInlineCapValUnit(ctx, family, x, y, w, h, caption, valueText, unitText, fit) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       calls.drawInlineCapValUnit.push({
         x,
         y,
@@ -126,9 +129,8 @@ function createHarness(mode, width, height) {
         fit: { ...fit }
       });
     },
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {unknown} ctx @param {string} family @param {number} x @param {number} y @param {number} w @param {number} h @param {string} caption @param {string} valueText @param {string} unitText @param {number} secScale @param {string} align @param {{ cPx: number, uPx: number, vPx: number }} sizes */
     drawThreeRowsBlock(ctx, family, x, y, w, h, caption, valueText, unitText, secScale, align, sizes) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       calls.drawThreeRowsBlock.push({
         x,
         y,
@@ -162,7 +164,7 @@ function createHarness(mode, width, height) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {string} mode @param {number} width @param {number} height */
 function createRealTextHarness(mode, width, height) {
   const layoutApi = createLayoutApi();
   const insets = layoutApi.computeInsets(width, height);
@@ -175,12 +177,13 @@ function createRealTextHarness(mode, width, height) {
     responsive: insets.responsive
   });
   const realText = createRadialTextApi();
-  const captures = {
-    valueUnit: [],
-    threeRows: []
-  };
+  const captures =
+    /** @type {{ threeRows: Array<{ caption: string, scaled: boolean, sizes: InlineFit, unitText: string, valueText: string, w: number }>, valueUnit: Array<{ fit: ValueUnitFit, scaled: boolean, unitText: string, valueText: string, w: number }> }} */ ({
+      valueUnit: [],
+      threeRows: []
+    });
   const ctx = createMockContext2D({ charWidth: 1 });
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {string} text */
   ctx.measureText = function (text) {
     const match = String(ctx.font || "").match(/([0-9]+(?:\.[0-9]+)?)px/);
     const px = match ? Number(match[1]) : 10;
@@ -195,7 +198,7 @@ function createRealTextHarness(mode, width, height) {
     drawCaptionMax: realText.drawCaptionMax,
     drawInlineCapValUnit: realText.drawInlineCapValUnit,
     drawDisconnectOverlay: realText.drawDisconnectOverlay,
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {DyniTestCanvasContext} ctxArg @param {string} family @param {number} x @param {number} y @param {number} w @param {number} h @param {string} valueText @param {string} unitText @param {ValueUnitFit} fit @param {string} align @param {number} valueWeight @param {number} labelWeight */
     drawValueUnitWithFit(ctxArg, family, x, y, w, h, valueText, unitText, fit, align, valueWeight, labelWeight) {
       const start = ctxArg.calls.length;
       realText.drawValueUnitWithFit(
@@ -212,39 +215,26 @@ function createRealTextHarness(mode, width, height) {
         valueWeight,
         labelWeight
       );
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      const scaled = ctxArg.calls.slice(start).some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      const scaled = ctxArg.calls
+        .slice(start)
+        .some(/** @param {DyniTestCall} entry */ (entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
       captures.valueUnit.push({ w, valueText, unitText, fit, scaled });
     },
+    /** @param {DyniTestCanvasContext} ctxArg @param {string} family @param {number} x @param {number} y @param {number} w @param {number} h @param {string} caption @param {string} valueText @param {string} unitText @param {number} secScale @param {string} align @param {InlineFit} sizes @param {number} valueWeight @param {number} labelWeight */
     drawThreeRowsBlock(
-      // @ts-ignore -- pre-existing untyped test mock boundary
       ctxArg,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       family,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       x,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       y,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       w,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       h,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       caption,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       valueText,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       unitText,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       secScale,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       align,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       sizes,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       valueWeight,
-      // @ts-ignore -- pre-existing untyped test mock boundary
       labelWeight
     ) {
       const start = ctxArg.calls.length;
@@ -264,9 +254,9 @@ function createRealTextHarness(mode, width, height) {
         valueWeight,
         labelWeight
       );
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      const scaled = ctxArg.calls.slice(start).some((entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      const scaled = ctxArg.calls
+        .slice(start)
+        .some(/** @param {DyniTestCall} entry */ (entry) => entry.name === "scale" && Number(entry.args[0]) < 1);
       captures.threeRows.push({
         w,
         caption,

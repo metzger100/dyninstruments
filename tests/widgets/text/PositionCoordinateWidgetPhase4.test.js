@@ -61,10 +61,10 @@ describe("PositionCoordinateWidget phase 4", function () {
         ) {
           return avnav.api.formatter[props.formatter].apply(avnav.api.formatter, [raw].concat(fp));
         }
-      } catch (ignore) {
+      } catch (_ignore) {
         // intentionally ignored
       }
-      if (raw == null || Number.isNaN(raw)) return (props && props.default) || "---";
+      if (raw === null || raw === undefined || Number.isNaN(raw)) return (props && props.default) || "---";
       return String(raw);
     });
 

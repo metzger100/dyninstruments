@@ -1,6 +1,6 @@
 # Full-Circle Dial Style Guide
 
-**Status:** ✅ Implemented | CompassRadialWidget + WindRadialWidget
+**Status:** Current.
 
 ## Overview
 

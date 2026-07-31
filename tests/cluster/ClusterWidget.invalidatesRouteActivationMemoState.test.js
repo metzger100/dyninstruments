@@ -40,9 +40,9 @@ describe("ClusterWidget", function () {
       return true;
     });
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @type {{ discarded: boolean } | null} */
     let discardedActivation = null;
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @type {string | null} */
     let lastMemoKey = null;
     const activationController = {
       activateCommittedRoute: vi.fn(function (payload) {
@@ -57,9 +57,7 @@ describe("ClusterWidget", function () {
           payload.rootEl.id +
           "|" +
           payload.shellEl.id;
-        // @ts-ignore -- pre-existing untyped test mock boundary
         if (lastMemoKey === memoKey) {
-          // @ts-ignore -- pre-existing untyped test mock boundary
           return discardedActivation;
         }
         lastMemoKey = memoKey;
@@ -188,8 +186,10 @@ describe("ClusterWidget", function () {
     expect(harness.surfaceSessionController.detachForShellReplacement).not.toHaveBeenCalled();
     expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledTimes(1);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    deferred.resolve();
+    if (!deferred.resolve) {
+      throw new Error("deferred.resolve must be a function");
+    }
+    /** @type {() => void} */ (deferred.resolve)();
     await flushPromises();
 
     expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledTimes(1);

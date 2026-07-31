@@ -151,7 +151,16 @@
     "tests/contract/format-scope-contract.test.js": {
       "classification": "strict"
     },
+    "tests/contract/generic-tokens-single-owner-contract.test.js": {
+      "classification": "strict"
+    },
+    "tests/contract/generic-tokens-test-utils.js": {
+      "classification": "strict"
+    },
     "tests/contract/hotspot-budget-contract.test.js": {
+      "classification": "strict"
+    },
+    "tests/contract/shared-core-manifest-contract.test.js": {
       "classification": "strict"
     },
     "tests/contract/pattern-rule-generic-scope-contract.test.js": {
@@ -475,6 +484,9 @@
       "reason": "Shared harness factory consumed by one or more sibling test files; not an independently executed spec.",
       "removalPath": "Inline this harness into tests/shared/radial/SemicircleRadialEngine.test.js when its test family next changes."
     },
+    "tests/shared/radial/SemicircleRadialEngine.render-order-harness.js": {
+      "classification": "strict"
+    },
     "tests/shared/radial/SemicircleRadialLayout.test.js": {
       "classification": "strict"
     },
@@ -578,6 +590,45 @@
       "classification": "strict"
     },
     "tests/tools/check-file-size.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-generic-surface.test.js": {
+      "classification": "strict"
+    },
+    "tests/tools/check-schema.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/check-doc-links.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/check-doc-links-proof.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/hooks-install.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/hooks-doctor.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/check-test-focus.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/complexity-scan.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/eslint-config.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/prettier-config.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/run-format.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/vitest-projects.test.mjs": {
+      "classification": "strict"
+    },
+    "tests/tools/vitest-allow-only.proof.test.js": {
       "classification": "strict"
     },
     "tests/tools/check-patterns-atomicity.test.js": {

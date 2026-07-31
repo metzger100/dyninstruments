@@ -68,13 +68,10 @@ describe("SemicircleRadialEngine", function () {
         }
       }
     };
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
       .create({}, makeComponentContext(modules))
       .createRenderer(makeBaseSpec());
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const ctx = createMockContext2D();
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const canvas = createMockCanvas({
       rectWidth: 220,
       rectHeight: 140,
@@ -91,9 +88,10 @@ describe("SemicircleRadialEngine", function () {
     expect(layoutCalls.computeMode).toBe(0);
     expect(drawCalls.arc).toBe(0);
     expect(drawCalls.modeText).toBe(0);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(ctx.calls.filter((entry) => entry.name === "fillText").map((entry) => String(entry.args[0]))).toContain(
-      "GPS Lost"
-    );
+    expect(
+      ctx.calls
+        .filter(/** @param {DyniTestCall} entry */ (entry) => entry.name === "fillText")
+        .map(/** @param {DyniTestCall} entry */ (entry) => String(entry.args[0]))
+    ).toContain("GPS Lost");
   });
 });

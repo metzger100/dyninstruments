@@ -3,6 +3,8 @@ const { createComponentContextMock, loadFresh } = require("./VoltageLinearWidget
 
 describe("VoltageLinearWidget", function () {
   it("suppresses disabled sectors and keeps warning-only behavior", function () {
+    /** @typedef {{ buildSectors: (props: Record<string, unknown>, min: number, max: number, range: { max: number, min: number }, valueUtils: Record<string, unknown>, theme: { colors: { alarm: string, warning: string } }) => unknown[] }} SectorsConfig */
+    /** @type {SectorsConfig | undefined} */
     let captured;
 
     const mod = loadFresh("widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js");
@@ -13,14 +15,14 @@ describe("VoltageLinearWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   const value = String(text).trim();
                   return value === "NO DATA" || /^-+$/.test(value)
-                    ? defaultText == null
+                    ? defaultText === null || defaultText === undefined
                       ? "---"
                       : defaultText
                     : String(text);
@@ -31,7 +33,7 @@ describe("VoltageLinearWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} raw @param {Record<string, unknown>} props @param {(value: number, options: Record<string, unknown>) => unknown} applyFormatter @param {(text: unknown, defaultText: unknown) => unknown} normalize @param {unknown} defaultFormatter @param {unknown} defaultParameters */
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -59,15 +61,15 @@ describe("VoltageLinearWidget", function () {
                   );
                   const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
-                  // @ts-ignore -- pre-existing untyped test mock boundary
-                  return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+                  const text = match ? match[0] : defaultText;
+                  return Number.isFinite(num) ? { num: num, text: text } : { num: NaN, text: defaultText };
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text */
                 extractNumberText(text) {
                   const match = String(text).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   return match ? match[0] : "";
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} v @param {number} lo @param {number} hi */
                 clamp(v, lo, hi) {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
@@ -80,7 +82,7 @@ describe("VoltageLinearWidget", function () {
           LinearGaugeEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {SectorsConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -91,7 +93,7 @@ describe("VoltageLinearWidget", function () {
         },
         services: {
           format: {
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {unknown} value */
             applyFormatter(value) {
               return String(value);
             }
@@ -100,9 +102,12 @@ describe("VoltageLinearWidget", function () {
       })
     );
 
+    if (!captured) {
+      throw new Error("Expected the voltage-linear sectors configuration.");
+    }
+    const sectorsConfig = captured;
     expect(
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      captured.buildSectors(
+      sectorsConfig.buildSectors(
         {
           voltageLinearWarningEnabled: false,
           voltageLinearAlarmEnabled: false
@@ -118,8 +123,7 @@ describe("VoltageLinearWidget", function () {
     ).toEqual([]);
 
     expect(
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      captured.buildSectors(
+      sectorsConfig.buildSectors(
         {
           voltageLinearWarningEnabled: true,
           voltageLinearAlarmEnabled: false,
@@ -137,8 +141,10 @@ describe("VoltageLinearWidget", function () {
   });
 
   it("returns placeholder output for null voltage values", function () {
+    /** @typedef {{ formatDisplay: (value: unknown, props: Record<string, unknown>) => { num: number, text: string } }} FormatConfig */
+    /** @type {FormatConfig | undefined} */
     let captured;
-    const applyFormatter = vi.fn((value) => String(value));
+    const applyFormatter = vi.fn((/** @type {unknown} */ value) => String(value));
 
     loadFresh("widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js").create(
       {},
@@ -147,10 +153,10 @@ describe("VoltageLinearWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   return String(text);
                 }
@@ -160,13 +166,13 @@ describe("VoltageLinearWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} raw @param {Record<string, unknown>} props @param {(value: number, options: Record<string, unknown>) => unknown} apply @param {(text: unknown, defaultText: unknown) => unknown} normalize @param {unknown} defaultFormatter @param {unknown} defaultParameters */
                 formatGaugeDisplay(raw, props, apply, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
                     ? p.default
                     : normalize(undefined, undefined);
-                  if (raw == null) {
+                  if (raw === null || raw === undefined) {
                     return { num: NaN, text: defaultText };
                   }
                   const n = Number(raw);
@@ -191,10 +197,10 @@ describe("VoltageLinearWidget", function () {
                   );
                   const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
-                  // @ts-ignore -- pre-existing untyped test mock boundary
-                  return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+                  const text = match ? match[0] : defaultText;
+                  return Number.isFinite(num) ? { num: num, text: text } : { num: NaN, text: defaultText };
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} v @param {number} lo @param {number} hi */
                 clamp(v, lo, hi) {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
@@ -207,7 +213,7 @@ describe("VoltageLinearWidget", function () {
           LinearGaugeEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {FormatConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -222,7 +228,9 @@ describe("VoltageLinearWidget", function () {
       })
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!captured) {
+      throw new Error("Expected the voltage-linear formatter configuration.");
+    }
     expect(captured.formatDisplay(null, {})).toEqual({ num: NaN, text: "---" });
     expect(applyFormatter).not.toHaveBeenCalled();
   });

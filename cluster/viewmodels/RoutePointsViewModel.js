@@ -20,6 +20,8 @@
   let toFiniteNumber;
   /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */
   let toOptionalFiniteNumber;
+  /** @type {DyniValueMathApi["isNullish"]} */
+  let isNullish;
 
   /** @param {unknown} rawPoint @param {number} index */
   function normalizePoint(rawPoint, index) {
@@ -55,13 +57,14 @@
     trimText = valueMath.trimText;
     toFiniteNumber = valueMath.toFiniteNumber;
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
+    isNullish = valueMath.isNullish;
 
     /** @param {DyniMapperProps|null|undefined} props @param {DyniViewModelToolkit|null|undefined} toolkit @returns {Record<string, unknown>} */
     function build(props, toolkit) {
       const p = /** @type {DyniMapperProps} */ (props || {});
       const num = (toolkit && toolkit.num) || toFiniteNumber;
       const selectedIndex =
-        p.editingIndex == null || (typeof p.editingIndex === "string" && p.editingIndex.trim() === "")
+        isNullish(p.editingIndex) || (typeof p.editingIndex === "string" && p.editingIndex.trim() === "")
           ? undefined
           : num(p.editingIndex);
       const route = normalizeRoute(p.editingRoute);

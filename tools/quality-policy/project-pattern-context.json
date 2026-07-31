@@ -1,0 +1,22 @@
+{
+  "clusterPascalPrefixes": [
+    "CourseHeading",
+    "Environment",
+    "Anchor",
+    "Default",
+    "Vessel",
+    "Speed",
+    "Wind",
+    "Map",
+    "Nav"
+  ],
+  "renderPropObjectNames": ["p", "props"],
+  "externalFallbackContextHints": [
+    "root.avnav",
+    "avnav.api",
+    "getComputedStyle",
+    "devicePixelRatio",
+    "ownerDocument",
+    "documentElement"
+  ]
+}

@@ -2,6 +2,12 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
+/**
+ * @typedef {{ default?: unknown, formatter?: string }} FormatterOptions
+ * @typedef {{ applyFormatter?: (value: unknown, options?: FormatterOptions) => unknown }} RenderModelOptions
+ * @typedef {Record<string, unknown> & { default?: string, domain?: Record<string, unknown>, formatUnits?: Record<string, string>, formatting?: Record<string, string>, layout?: Record<string, unknown>, units?: Record<string, string> }} RoutePointsProps
+ */
+
 function createLayoutApi() {
   const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
   const routePointsLayoutSizing = loadFresh("shared/widget-kits/nav/RoutePointsLayoutSizing.js");
@@ -18,19 +24,20 @@ function createLayoutApi() {
   );
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {RenderModelOptions} [options] */
 function createRenderModel(options) {
   const opts = options || {};
   const applyFormatter =
     opts.applyFormatter ||
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {unknown} value @param {FormatterOptions} [formatterOptions] */
     function (value, formatterOptions) {
       const cfg = formatterOptions || {};
       if (cfg.formatter === "formatLonLats") {
-        if (!value || !Number.isFinite(value.lat) || !Number.isFinite(value.lon)) {
+        const coordinate = /** @type {{ lat?: unknown, lon?: unknown } | null} */ (value);
+        if (!coordinate || !Number.isFinite(coordinate.lat) || !Number.isFinite(coordinate.lon)) {
           return cfg.default;
         }
-        return "LL:" + value.lat.toFixed(2) + "," + value.lon.toFixed(2);
+        return "LL:" + Number(coordinate.lat).toFixed(2) + "," + Number(coordinate.lon).toFixed(2);
       }
 
       const numeric = Number(value);
@@ -99,7 +106,7 @@ function createRenderModel(options) {
   return loadFresh("shared/widget-kits/nav/RoutePointsRenderModel.js").create({}, componentContext);
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {RoutePointsProps} props @param {{ mode?: string, orientation?: string }} [options] */
 function withSurfacePolicy(props, options) {
   const opts = options || {};
   const interactionMode = opts.mode === "passive" ? "passive" : "dispatch";
@@ -116,7 +123,7 @@ function withSurfacePolicy(props, options) {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {RoutePointsProps} [overrides] */
 function makeProps(overrides) {
   return Object.assign(
     {
@@ -157,13 +164,13 @@ function makeProps(overrides) {
   );
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} style */
 function extractHeight(style) {
   const match = String(style || "").match(new RegExp("height:(\\d+)px\\x3b"));
   return match ? Number(match[1]) : 0;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} style */
 function extractMinHeight(style) {
   const match = String(style || "").match(new RegExp("min-height:(\\d+)px\\x3b"));
   return match ? Number(match[1]) : 0;

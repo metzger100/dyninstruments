@@ -102,17 +102,14 @@ describe("SemicircleRadialEngine", function () {
         }
       }
     };
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
       .create({}, makeComponentContext(modules))
       .createRenderer(makeBaseSpec());
 
     renderer(
-      // @ts-ignore -- pre-existing untyped test mock boundary
       createMockCanvas({
         rectWidth: 220,
         rectHeight: 140,
-        // @ts-ignore -- pre-existing untyped test mock boundary
         ctx: createMockContext2D()
       }),
       {

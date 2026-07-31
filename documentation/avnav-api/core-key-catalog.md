@@ -1,6 +1,6 @@
 # Core Key Catalog
 
-**Status:** ✅ Implemented | Complete plugin key/unit contracts for core integration
+**Status:** Current.
 
 ## Overview
 

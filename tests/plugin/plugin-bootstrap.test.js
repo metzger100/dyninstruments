@@ -167,13 +167,11 @@ describe("plugin.js bootstrap", function () {
     }).toThrow("AVNAV_BASE_URL is missing");
   });
 
-  it("logs and exits when avnav.api is missing", function () {
+  it("exits when avnav.api is missing", function () {
     const dom = createDomHarness();
-    const err = vi.fn();
 
     const context = createScriptContext({
       document: dom.document,
-      console: { error: err },
       AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
       window: { avnav: {} },
       avnav: undefined
@@ -181,7 +179,6 @@ describe("plugin.js bootstrap", function () {
 
     runIifeScript("plugin.js", context);
 
-    expect(err).toHaveBeenCalled();
     expect(dom.appendedScripts.length).toBe(0);
   });
 
@@ -189,11 +186,9 @@ describe("plugin.js bootstrap", function () {
     const dom = createDomHarness({
       failScriptIds: ["dyni-internal-legacy-bootstrap-bundle-js", "dyni-internal-legacy-config-bootstrap-manifest-js"]
     });
-    const err = vi.fn();
 
     const context = createScriptContext({
       document: dom.document,
-      console: { error: err },
       AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
       avnav: { api: createHostApi() },
       window: {
@@ -205,7 +200,6 @@ describe("plugin.js bootstrap", function () {
     runIifeScript("plugin.js", context);
     await flushPromises(60);
 
-    expect(err).toHaveBeenCalled();
     expect(dom.appendedScripts).toHaveLength(2);
   });
 

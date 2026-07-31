@@ -5,37 +5,10 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { maskCommentsAndStrings } from "./check-patterns/shared.mjs";
 import { detectOnelinerKind } from "./check-file-size/oneliner-rules.mjs";
+import { readJsonPolicy } from "./quality-policy/read-json-policy.mjs";
 
 const MAX_ALLOWED_LINES = 400;
-const SCAN_ROOTS = [
-  "plugin.js",
-  "plugin.mjs",
-  "runtime",
-  "cluster",
-  "config",
-  "shared",
-  "widgets",
-  "tests",
-  "documentation",
-  "tools",
-  "types",
-  "AGENTS.md",
-  "CLAUDE.md",
-  "CONTRIBUTING.md",
-  "README.md",
-  "ROADMAP.md",
-  "ARCHITECTURE.md"
-];
-const SCAN_EXTENSIONS = new Set([".js", ".mjs", ".ts", ".md"]);
-const EXEMPT_PATTERNS = [
-  /\.css$/,
-  /\.json$/,
-  /^exec-plans\//,
-  /^\.agents\/skills\//,
-  /^tools\/lint-fixtures\//,
-  /^tools\/test-data\//,
-  /\.config\./
-];
+const PROJECT_SCOPE_PATH = "tools/quality-policy/project-file-size-scope.json";
 const EXCLUDED_DIRS = new Set(["node_modules", ".git"]);
 const VALID_ONELINER_MODES = new Set(["warn", "block"]);
 const ONELINER_KINDS = [
@@ -62,6 +35,12 @@ const ONELINER_KINDS = [
  * }} FileSizeSummary
  */
 /** @typedef {{ root?: string, onelinerMode?: string, print?: boolean }} FileSizeCheckOptions */
+/** @typedef {{ scanRoots: string[], scanExtensions: string[], exemptPatterns: string[], remedyMessage: string }} ProjectFileSizeScope */
+
+/** @returns {ProjectFileSizeScope} */
+function loadProjectScope() {
+  return readJsonPolicy(path.join(process.cwd(), PROJECT_SCOPE_PATH));
+}
 
 /**
  * @param {FileSizeCheckOptions} [options]
@@ -70,8 +49,9 @@ const ONELINER_KINDS = [
 export function runFileSizeCheck(options = {}) {
   const root = path.resolve(options.root || process.cwd());
   const onelinerMode = normalizeOnelinerMode(options.onelinerMode || "block");
+  const scope = loadProjectScope();
 
-  const targetFiles = collectTargetFiles(root);
+  const targetFiles = collectTargetFiles(root, scope);
   /** @type {SizeViolation[]} */
   const violations = [];
   /** @type {OnelinerFinding[]} */
@@ -115,7 +95,7 @@ export function runFileSizeCheck(options = {}) {
     printOnelinerFindings(onelinerFindings, onelinerMode);
     for (const violation of violations) {
       console.error(
-        `[file-size] ${violation.path}: ${violation.lines} ${violation.lineType} (limit 400). Split this file — extract reusable logic into shared/widget-kits/ or create a dedicated helper module. One-liners/oneliners are not allowed as a workaround for line limits. See documentation/conventions/coding-standards.md`
+        `[file-size] ${violation.path}: ${violation.lines} ${violation.lineType} (limit 400). ${scope.remedyMessage} One-liners/oneliners are not allowed as a workaround for line limits. See documentation/conventions/coding-standards.md`
       );
     }
     const printSummary = ok ? console.log : console.error;
@@ -140,36 +120,45 @@ export function runFileSizeCheckCli(argv = process.argv.slice(2)) {
   process.exit(summary.ok ? 0 : 1);
 }
 
-/** @param {string} root @returns {TargetFile[]} */
-function collectTargetFiles(root) {
+/** @param {string} root @param {ProjectFileSizeScope} scope @returns {TargetFile[]} */
+function collectTargetFiles(root, scope) {
   /** @type {Map<string, TargetFile>} */
   const collected = new Map();
+  const scanExtensions = new Set(scope.scanExtensions);
+  const exemptPatterns = scope.exemptPatterns.map((pattern) => new RegExp(pattern));
 
-  for (const scanRoot of SCAN_ROOTS) {
+  for (const scanRoot of scope.scanRoots) {
     const absolutePath = path.join(root, scanRoot);
     if (!fs.existsSync(absolutePath)) continue;
-    walk(absolutePath, collected, root);
+    walk(absolutePath, collected, root, scanExtensions, exemptPatterns);
   }
 
   return Array.from(collected.values()).sort((a, b) => a.rel.localeCompare(b.rel));
 }
 
-/** @param {string} currentPath @param {Map<string, TargetFile>} collected @param {string} root @returns {void} */
-function walk(currentPath, collected, root) {
+/**
+ * @param {string} currentPath
+ * @param {Map<string, TargetFile>} collected
+ * @param {string} root
+ * @param {Set<string>} scanExtensions
+ * @param {RegExp[]} exemptPatterns
+ * @returns {void}
+ */
+function walk(currentPath, collected, root, scanExtensions, exemptPatterns) {
   const stat = fs.statSync(currentPath);
 
   if (stat.isFile()) {
     const rel = toRelPath(root, currentPath);
-    if (isExemptPath(rel)) return;
+    if (isExemptPath(rel, exemptPatterns)) return;
     const extension = path.extname(rel).toLowerCase();
-    if (!SCAN_EXTENSIONS.has(extension)) return;
+    if (!scanExtensions.has(extension)) return;
     collected.set(rel, { abs: currentPath, rel });
     return;
   }
 
   for (const entry of fs.readdirSync(currentPath, { withFileTypes: true })) {
     if (entry.isDirectory() && EXCLUDED_DIRS.has(entry.name)) continue;
-    walk(path.join(currentPath, entry.name), collected, root);
+    walk(path.join(currentPath, entry.name), collected, root, scanExtensions, exemptPatterns);
   }
 }
 
@@ -277,9 +266,9 @@ function getLineTypeLabel(relPath) {
   return relPath.endsWith(".md") ? "total lines" : "non-empty lines";
 }
 
-/** @param {string} relPath @returns {boolean} */
-function isExemptPath(relPath) {
-  for (const pattern of EXEMPT_PATTERNS) {
+/** @param {string} relPath @param {RegExp[]} exemptPatterns @returns {boolean} */
+function isExemptPath(relPath, exemptPatterns) {
+  for (const pattern of exemptPatterns) {
     if (pattern.test(relPath)) return true;
   }
   return false;

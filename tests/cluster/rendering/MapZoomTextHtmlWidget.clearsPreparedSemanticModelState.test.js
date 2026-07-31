@@ -5,7 +5,7 @@ describe("MapZoomTextHtmlWidget", function () {
   it("clears prepared semantic model state on detach and destroy", function () {
     const applyFormatter = vi.fn(function (value, formatterOptions) {
       const cfg = formatterOptions || {};
-      return value == null ? cfg.default : String(value);
+      return value === null || value === undefined ? cfg.default : String(value);
     });
     const renderer = createRenderer({ applyFormatter });
     const hostContext = {};

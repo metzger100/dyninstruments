@@ -1,6 +1,6 @@
 # AvNav Formatters
 
-**Status:** ✅ Reference | Covers official AvNav API + dyninstruments usage
+**Status:** Current.
 
 ## Overview
 

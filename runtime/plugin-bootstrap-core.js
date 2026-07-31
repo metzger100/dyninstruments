@@ -274,7 +274,7 @@
             });
           }
         )
-        // dyni-boundary-next-line(category: browser-runtime-boundary, owner: Metzger100, date: 2026-07-17) -- Top-level bootstrap should log startup failures without turning them into unhandled browser promise rejections.
+        // plugin-boundary-next-line(category: browser-runtime-boundary, owner: Metzger100, date: 2026-07-17) -- Top-level bootstrap should log startup failures without turning them into unhandled browser promise rejections.
         .catch(function (error) {
           logger.error("dyninstruments bootstrap failed:", error);
           return undefined;

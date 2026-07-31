@@ -1,6 +1,6 @@
 # HTML Widget Visual Style Guide
 
-**Status:** ✅ Implemented | Normative visual contract for `surface: "html"` kinds
+**Status:** Current.
 
 ## Overview
 

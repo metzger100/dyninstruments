@@ -21,7 +21,7 @@ function createDomEffects() {
   );
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {object} target @param {string} key @param {number} value */
 function defineFixedMetric(target, key, value) {
   Object.defineProperty(target, key, {
     configurable: true,
@@ -31,7 +31,7 @@ function defineFixedMetric(target, key, value) {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {number} rowCount */
 function createListRoot(rowCount) {
   const root = document.createElement("div");
   const list = document.createElement("div");
@@ -54,7 +54,7 @@ function createListRoot(rowCount) {
   return { root, list };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {HTMLElement} root */
 function createHostContext(root) {
   return {
     __dyniHostCommitState: {
@@ -64,7 +64,7 @@ function createHostContext(root) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {{ maybeRevealActiveRow: (options: object) => unknown }} domEffects @param {{ __dyniHostCommitState: { rootEl: HTMLElement } }} hostContext @param {HTMLElement} list @param {object} [args] */
 function runReveal(domEffects, hostContext, list, args) {
   const scheduled = domEffects.maybeRevealActiveRow(
     Object.assign(

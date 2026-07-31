@@ -11,6 +11,7 @@
     /** @type {unknown} */ (root.DyniComponents && root.DyniComponents.DyniValueMath)
   );
   const valueMath = valueMathModule.create();
+  const isNullish = valueMath.isNullish;
 
   /** @param {string} message @returns {Error} */
   function createBridgeError(message) {
@@ -69,10 +70,10 @@
 
     const hostPoint = /** @type {DyniTemporaryRoutePointSnapshot} */ ({
       idx: idx,
-      name: input.name == null ? "" : String(input.name).trim(),
+      name: isNullish(input.name) ? "" : String(input.name).trim(),
       lat: lat,
       lon: lon,
-      routeName: input.routeName == null ? "" : String(input.routeName).trim()
+      routeName: isNullish(input.routeName) ? "" : String(input.routeName).trim()
     });
 
     if (Object.prototype.hasOwnProperty.call(input, "course")) {

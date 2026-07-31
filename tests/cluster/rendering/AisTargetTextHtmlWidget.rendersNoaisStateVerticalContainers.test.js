@@ -28,10 +28,10 @@ describe("AisTargetTextHtmlWidget", function () {
 
   it("renders stableDigits metric values with tabular classes", function () {
     const renderer = createRenderer({
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {unknown} value @param {{ default?: unknown }} [formatterOptions] */
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
-        if (value == null) {
+        if (value === null || value === undefined) {
           return cfg.default;
         }
         return String(value);

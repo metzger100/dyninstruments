@@ -61,6 +61,9 @@ describe("CenterDisplayTextWidget", function () {
       expect(lonCall).toBeTruthy();
       expect(wpValueCall).toBeTruthy();
       expect(boatValueCall).toBeTruthy();
+      if (!latCall || !lonCall) {
+        throw new Error("Expected both coordinate font captures.");
+      }
       expect(Math.abs(parseFontPx(latCall.font) - parseFontPx(lonCall.font))).toBeLessThanOrEqual(1);
     });
   });

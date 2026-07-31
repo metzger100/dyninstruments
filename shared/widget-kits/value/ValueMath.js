@@ -26,6 +26,11 @@
     return typeof value === "number" && Number.isFinite(value);
   }
 
+  /** @param {unknown} value @returns {value is null | undefined} */
+  function isNullish(value) {
+    return value === null || value === undefined;
+  }
+
   /** @param {unknown} value @returns {number | undefined} */
   function toFiniteNumber(value) {
     const n = Number(value);
@@ -40,7 +45,7 @@
 
   /** @param {unknown} value @returns {number | undefined} */
   function toOptionalFiniteNumber(value) {
-    if (value == null) {
+    if (value === null || value === undefined) {
       return undefined;
     }
     if (typeof value === "string" && value.trim() === "") {
@@ -62,7 +67,7 @@
     const high = toFiniteNumber(hi);
     const safeLo = typeof low === "number" ? low : 0;
     const safeHi = typeof high === "number" ? high : safeLo;
-    if (value == null) {
+    if (value === null || value === undefined) {
       return safeLo;
     }
     if (typeof value === "string" && value.trim() === "") {
@@ -96,17 +101,17 @@
 
   /** @param {unknown} value @returns {string} */
   function toText(value) {
-    return value == null ? "" : String(value);
+    return value === null || value === undefined ? "" : String(value);
   }
 
   /** @param {unknown} value @returns {string} */
   function trimText(value) {
-    return value == null ? "" : String(value).trim();
+    return value === null || value === undefined ? "" : String(value).trim();
   }
 
   /** @param {unknown} value @param {number} min @param {number} max @param {number} defaultValue @returns {number} */
   function clampNumber(value, min, max, defaultValue) {
-    if (value == null) {
+    if (value === null || value === undefined) {
       return defaultValue;
     }
     if (typeof value === "string" && value.trim() === "") {
@@ -135,7 +140,7 @@
 
   /** @param {unknown} value @returns {boolean} */
   function hasText(value) {
-    return value != null && String(value).trim().length > 0;
+    return value !== null && value !== undefined && String(value).trim().length > 0;
   }
 
   /** @param {unknown} value @returns {string | undefined} */
@@ -146,13 +151,13 @@
   /** @param {unknown} valueText @param {unknown} displayUnit @param {unknown} defaultText @returns {string} */
   function appendUnit(valueText, displayUnit, defaultText) {
     const text = toText(valueText) || toText(defaultText);
-    const unit = displayUnit == null ? "" : String(displayUnit);
+    const unit = displayUnit === null || displayUnit === undefined ? "" : String(displayUnit);
     return unit ? text + unit : text;
   }
 
   /** @param {unknown} value @returns {number} */
   function textLength(value) {
-    if (value == null) {
+    if (value === null || value === undefined) {
       return 0;
     }
     return String(value).length;
@@ -360,6 +365,7 @@
     return {
       id: "ValueMath",
       isFiniteNumber: isFiniteNumber,
+      isNullish: isNullish,
       toFiniteNumber: toFiniteNumber,
       resolveFiniteNumber: resolveFiniteNumber,
       toOptionalFiniteNumber: toOptionalFiniteNumber,

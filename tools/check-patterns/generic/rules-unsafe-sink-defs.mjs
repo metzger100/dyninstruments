@@ -2,25 +2,13 @@
 
 import { runUnsafeHtmlDomSinkRule } from "../rules-unsafe-sink.mjs";
 
-/** @typedef {import("../shared.mjs").Rule} Rule */
+/** @typedef {import("../shared.mjs").RuleDefinition} RuleDefinition */
 
-/** @type {Rule[]} */
+/** @type {RuleDefinition[]} */
 export const UNSAFE_SINK_RULES = [
   {
     name: "unsafe-html-dom-sink",
     severity: "block",
-    scope: {
-      include: [
-        "widgets/**/*.js",
-        "cluster/**/*.js",
-        "shared/**/*.js",
-        "runtime/**/*.js",
-        "config/**/*.js",
-        "plugin.js",
-        "plugin.mjs"
-      ],
-      exclude: ["tests/**", "tools/**"]
-    },
     run: runUnsafeHtmlDomSinkRule,
     /** @param {{file: string, line: number, sinkName: string}} finding */
     message: ({ file, line, sinkName }) =>

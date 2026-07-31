@@ -24,6 +24,9 @@ describe("CenterDisplayTextWidget", function () {
 
     expect(latCall).toBeTruthy();
     expect(lonCall).toBeTruthy();
+    if (!latCall || !lonCall) {
+      throw new Error("Expected both coordinate font captures.");
+    }
     expect(Math.abs(parseFontPx(latCall.font) - parseFontPx(lonCall.font))).toBeLessThanOrEqual(1);
   });
 });

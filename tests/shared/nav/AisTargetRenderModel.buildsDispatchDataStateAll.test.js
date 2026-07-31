@@ -55,7 +55,7 @@ describe("AisTargetRenderModel", function () {
       /** @param {any} value @param {any} formatterOptions */
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
-        if (value == null || Number.isNaN(value)) {
+        if (value === null || value === undefined || Number.isNaN(value)) {
           return Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
         }
         return String(value);

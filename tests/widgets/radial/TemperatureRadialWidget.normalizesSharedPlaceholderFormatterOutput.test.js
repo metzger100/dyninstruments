@@ -8,6 +8,8 @@ const {
 
 describe("TemperatureRadialWidget", function () {
   it("normalizes shared placeholder formatter output before parsing", function () {
+    /** @typedef {{ formatDisplay: (value: number, props: Record<string, unknown>) => { num: number, text: string } }} FormatConfig */
+    /** @type {FormatConfig | undefined} */
     let captured;
     let seenText = "";
     const renderCanvas = vi.fn();
@@ -20,14 +22,14 @@ describe("TemperatureRadialWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   const value = String(text).trim();
                   return value === "NO DATA" || /^-+$/.test(value)
-                    ? defaultText == null
+                    ? defaultText === null || defaultText === undefined
                       ? "---"
                       : defaultText
                     : String(text);
@@ -38,7 +40,7 @@ describe("TemperatureRadialWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} raw @param {Record<string, unknown>} props @param {(value: number, options: Record<string, unknown>) => unknown} applyFormatter @param {(text: unknown, defaultText: unknown) => unknown} normalize @param {unknown} defaultFormatter @param {unknown} defaultParameters */
                 formatGaugeDisplay(raw, props, applyFormatter, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
@@ -68,7 +70,7 @@ describe("TemperatureRadialWidget", function () {
                   const num = numberText ? Number(numberText) : NaN;
                   return Number.isFinite(num) ? { num: num, text: numberText } : { num: NaN, text: defaultText };
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text */
                 extractNumberText(text) {
                   seenText = String(text);
                   return "";
@@ -82,7 +84,7 @@ describe("TemperatureRadialWidget", function () {
           SemicircleRadialEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {FormatConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return renderCanvas;
@@ -102,18 +104,24 @@ describe("TemperatureRadialWidget", function () {
     );
 
     expect(
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      captured.formatDisplay(300, {
-        formatter: "formatTemperature",
-        formatterParameters: ["celsius"]
-      })
+      (() => {
+        if (!captured) {
+          throw new Error("Expected the temperature formatter configuration.");
+        }
+        return captured.formatDisplay(300, {
+          formatter: "formatTemperature",
+          formatterParameters: ["celsius"]
+        });
+      })()
     ).toEqual({ num: NaN, text: "---" });
     expect(seenText).toBe("---");
   });
 
   it("returns placeholder output for null temperature values", function () {
+    /** @typedef {{ formatDisplay: (value: unknown, props: Record<string, unknown>) => { num: number, text: string } }} NullFormatConfig */
+    /** @type {NullFormatConfig | undefined} */
     let captured;
-    const applyFormatter = vi.fn((value) => String(value));
+    const applyFormatter = vi.fn((/** @type {unknown} */ value) => String(value));
 
     const mod = loadFresh("widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js");
     mod.create(
@@ -123,10 +131,10 @@ describe("TemperatureRadialWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   return String(text);
                 }
@@ -136,13 +144,13 @@ describe("TemperatureRadialWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} raw @param {Record<string, unknown>} props @param {(value: number, options: Record<string, unknown>) => unknown} apply @param {(text: unknown, defaultText: unknown) => unknown} normalize @param {unknown} defaultFormatter @param {unknown} defaultParameters */
                 formatGaugeDisplay(raw, props, apply, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
                     ? p.default
                     : normalize(undefined, undefined);
-                  if (raw == null) {
+                  if (raw === null || raw === undefined) {
                     return { num: NaN, text: defaultText };
                   }
                   const n = Number(raw);
@@ -167,8 +175,8 @@ describe("TemperatureRadialWidget", function () {
                   );
                   const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
-                  // @ts-ignore -- pre-existing untyped test mock boundary
-                  return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+                  const text = match ? match[0] : defaultText;
+                  return Number.isFinite(num) ? { num: num, text: text } : { num: NaN, text: defaultText };
                 },
                 resolveTemperatureTickSteps() {
                   return { major: 10, minor: 2 };
@@ -179,7 +187,7 @@ describe("TemperatureRadialWidget", function () {
           SemicircleRadialEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {NullFormatConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -194,14 +202,20 @@ describe("TemperatureRadialWidget", function () {
       })
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!captured) {
+      throw new Error("Expected the null-temperature formatter configuration.");
+    }
     expect(captured.formatDisplay(null, {})).toEqual({ num: NaN, text: "---" });
     expect(applyFormatter).not.toHaveBeenCalled();
   });
 
   it("builds high-end sectors from the temperature warning/alarm props", function () {
+    /** @typedef {{ buildSectors: (props: Record<string, unknown>, min: number, max: number, arc: Record<string, unknown>, valueUtils: { buildHighEndSectors: (props: Record<string, number>, min: number, max: number, arc: Record<string, unknown>, options: { alarmColor: string, warningColor: string }) => unknown[] }, theme: { colors: { alarm: string, warning: string } }) => unknown[] }} SectorsConfig */
+    /** @type {SectorsConfig | undefined} */
     let captured;
+    /** @type {Record<string, number> | undefined} */
     let receivedProps;
+    /** @type {{ alarmColor: string, warningColor: string } | undefined} */
     let receivedOptions;
 
     const mod = loadFresh("widgets/radial/TemperatureRadialWidget/TemperatureRadialWidget.js");
@@ -212,9 +226,9 @@ describe("TemperatureRadialWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  return defaultText == null ? "---" : defaultText;
+                  return defaultText === null || defaultText === undefined ? "---" : defaultText;
                 }
               };
             }
@@ -234,7 +248,7 @@ describe("TemperatureRadialWidget", function () {
           SemicircleRadialEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {SectorsConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -247,14 +261,16 @@ describe("TemperatureRadialWidget", function () {
     );
 
     const theme = { colors: { warning: "#123456", alarm: "#654321" } };
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!captured) {
+      throw new Error("Expected the temperature sectors configuration.");
+    }
     const sectors = captured.buildSectors(
       { tempRadialAlarmFrom: 35, tempRadialWarningFrom: 30 },
       -20,
       40,
       {},
       {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {Record<string, number>} props @param {number} minV @param {number} maxV @param {Record<string, unknown>} arc @param {{ alarmColor: string, warningColor: string }} options */
         buildHighEndSectors(props, minV, maxV, arc, options) {
           receivedProps = props;
           receivedOptions = options;
@@ -272,9 +288,10 @@ describe("TemperatureRadialWidget", function () {
       { a0: 35, a1: 40, color: "#654321" }
     ]);
     expect(receivedProps).toEqual({ warningFrom: 30, alarmFrom: 35 });
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!receivedOptions) {
+      throw new Error("Expected high-end sector options.");
+    }
     expect(receivedOptions.warningColor).toBe(theme.colors.warning);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(receivedOptions.alarmColor).toBe(theme.colors.alarm);
   });
 
@@ -308,9 +325,9 @@ describe("TemperatureRadialWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  return defaultText == null ? "---" : defaultText;
+                  return defaultText === null || defaultText === undefined ? "---" : defaultText;
                 }
               };
             }

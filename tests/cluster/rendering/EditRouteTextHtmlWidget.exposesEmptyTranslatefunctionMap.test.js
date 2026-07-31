@@ -22,7 +22,9 @@ describe("EditRouteTextHtmlWidget", function () {
     );
 
     const wrapper = mounted.mountEl.querySelector(".dyni-edit-route-html");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!wrapper) {
+      throw new Error("Expected the edit-route wrapper.");
+    }
     wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(openEditRoute).toHaveBeenCalledTimes(1);
 
@@ -31,7 +33,6 @@ describe("EditRouteTextHtmlWidget", function () {
 
     // The listener was explicitly removed on detach, so the stale wrapper
     // reference must no longer invoke the dispatch action.
-    // @ts-ignore -- pre-existing untyped test mock boundary
     wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(openEditRoute).toHaveBeenCalledTimes(1);
 
@@ -48,7 +49,9 @@ describe("EditRouteTextHtmlWidget", function () {
     });
 
     const wrapper = mounted.mountEl.querySelector(".dyni-edit-route-html");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!wrapper) {
+      throw new Error("Expected the edit-route wrapper.");
+    }
     expect(() => wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }))).not.toThrow();
     expect(mounted.html()).toContain("dyni-edit-route-open-dispatch");
   });
@@ -64,7 +67,9 @@ describe("EditRouteTextHtmlWidget", function () {
     );
 
     const wrapper = mounted.mountEl.querySelector(".dyni-edit-route-html");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!wrapper) {
+      throw new Error("Expected the edit-route wrapper.");
+    }
     expect(() => wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }))).not.toThrow();
   });
 
@@ -79,7 +84,9 @@ describe("EditRouteTextHtmlWidget", function () {
     );
 
     const wrapper = mounted.mountEl.querySelector(".dyni-edit-route-html");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!wrapper) {
+      throw new Error("Expected the edit-route wrapper.");
+    }
     expect(() => wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }))).not.toThrow();
   });
 
@@ -116,8 +123,16 @@ describe("EditRouteTextHtmlWidget", function () {
     const setup = createRenderer({ fitCompute: vi.fn(() => null) });
     mountCommitted(setup.renderer, withSurfacePolicy({ __canOpen: true, __token: "falsy-fit" }, { mode: "dispatch" }));
 
-    const calls = setup.markupRender.mock.calls;
-    const lastArgs = calls[calls.length - 1][0];
+    const markupMock = setup.markupRender.mock;
+    if (!markupMock) {
+      throw new Error("Expected the default markup renderer mock.");
+    }
+    const calls = markupMock.calls;
+    const lastCall = calls[calls.length - 1];
+    if (!lastCall || !lastCall[0] || typeof lastCall[0] !== "object") {
+      throw new Error("Expected the markup renderer call payload.");
+    }
+    const lastArgs = /** @type {{ fit: { nameTextStyle: string, sourceBadgeStyle: string } }} */ (lastCall[0]);
     expect(lastArgs.fit.nameTextStyle).toBe("");
     expect(lastArgs.fit.sourceBadgeStyle).toBe("");
   });

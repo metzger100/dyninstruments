@@ -1,23 +1,26 @@
 // @ts-check
 const { createHarness, createMockCanvas, createMockContext2D } = require("./FullCircleRadialEngine-setup");
 
+/** @typedef {{ variant?: string }} RendererProps */
+/** @typedef {{ staticKey: string }} RendererState */
+/** @typedef {{ getCacheMeta(key: string): { count: number } | undefined, setCacheMeta(key: string, metaValue: unknown): unknown }} CacheMetaApi */
+
 describe("FullCircleRadialEngine", function () {
   it("exposes cache metadata helpers for widget-owned sprite state", function () {
     const harness = createHarness();
     const renderer = harness.engine.createRenderer({
       cacheLayers: ["face"],
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {RendererState} state @param {RendererProps} props */
       buildStaticKey(state, props) {
         return { variant: props.variant || "x" };
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {unknown} layerCtx @param {unknown} layerName @param {RendererState} state @param {RendererProps} props @param {CacheMetaApi} api */
       rebuildLayer(layerCtx, layerName, state, props, api) {
         api.setCacheMeta("labels:" + state.staticKey, { count: 8 });
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {RendererState} state @param {RendererProps} props @param {CacheMetaApi} api */
       drawFrame(state, props, api) {
         const entry = api.getCacheMeta("labels:" + state.staticKey);
-        // @ts-ignore -- pre-existing untyped test mock boundary
         harness.calls.meta.push(entry && entry.count);
       }
     });
@@ -46,7 +49,7 @@ describe("FullCircleRadialEngine", function () {
         drawFrameCalls += 1;
       }
     });
-    const ctx = createMockContext2D();
+    const ctx = /** @type {DyniTestCanvasContext} */ (createMockContext2D());
     const canvas = createMockCanvas({
       rectWidth: 320,
       rectHeight: 160,
@@ -57,7 +60,6 @@ describe("FullCircleRadialEngine", function () {
 
     expect(drawFrameCalls).toBe(0);
     expect(rebuildCalls).toBe(0);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(ctx.calls.filter((entry) => entry.name === "fillText").map((entry) => String(entry.args[0]))).toContain(
       "GPS Lost"
     );

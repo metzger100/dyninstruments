@@ -1,6 +1,6 @@
 # XteDisplayLinearWidget Module
 
-**Status:** ✅ Implemented | `widgets/text/XteDisplayLinearWidget/XteDisplayLinearWidget.js`
+**Status:** Current.
 
 ## Overview
 

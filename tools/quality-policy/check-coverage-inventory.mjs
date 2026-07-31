@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { readJsonPolicy } from "./read-json-policy.mjs";
+import { readCoverageSummary } from "./coverage-summary-adapter.mjs";
 
 const root = process.cwd();
 const floorsPath = path.join(root, "tools/quality-policy/coverage-floors.json");
@@ -10,34 +11,26 @@ const baselinePath = path.join(root, "tools/quality-policy/coverage-floor-baseli
 const summaryPath = path.join(root, "coverage/coverage-summary.json");
 const DEFAULT_LINES = 80;
 const DEFAULT_BRANCHES = 65;
-const CAPTURED_BASELINE_SHA256 = "eb3369055d9a2b8f346d56fcbb4d85238e6c8dd4099a5f53a6043c739607fe77";
-const LEGACY_BELOW_DEFAULT_FLOORS = new Map([
-  ["cluster/mappers/AnchorMapper.js", { lines: 80, branches: 61.11 }],
-  ["cluster/viewmodels/ActiveRouteViewModel.js", { lines: 80, branches: 58.82 }],
-  ["plugin.js", { lines: 71.73, branches: 65 }],
-  ["runtime/canvas-runtime.js", { lines: 80, branches: 53.84 }],
-  ["runtime/cluster/RouteActivationLatestWins.js", { lines: 73.06, branches: 63.88 }],
-  ["runtime/dom-runtime.js", { lines: 58.13, branches: 44.44 }],
-  ["runtime/plugin-bootstrap-core.js", { lines: 77.68, branches: 64.21 }],
-  ["runtime/surface/CanvasDomSurfaceAdapter.js", { lines: 76.55, branches: 51.67 }],
-  ["runtime/surface/index.js", { lines: 38.7, branches: 23.07 }],
-  ["shared/widget-kits/linear/LinearGaugeEngineDrawing.js", { lines: 80, branches: 63.46 }],
-  ["shared/widget-kits/linear/LinearGaugeEngineSupport.js", { lines: 80, branches: 50 }],
-  ["shared/widget-kits/radial/RadialToolkit.js", { lines: 80, branches: 50 }]
-]);
-
-const PRODUCTION_ROOTS = ["config", "runtime", "cluster", "shared", "widgets"];
+const policyPath = path.join(root, "tools/quality-policy/project-coverage-inventory-policy.json");
+const DEFAULT_PROJECT_POLICY = {
+  productionRoots: ["config", "runtime", "cluster", "shared", "widgets"],
+  legacyBelowDefaultFloors: {}
+};
 
 let floors;
 let baseline;
+/** @type {any} */
+let policy;
 try {
   floors = readJsonPolicy(floorsPath);
   baseline = readJsonPolicy(baselinePath);
+  policy = fs.existsSync(policyPath) ? readJsonPolicy(policyPath) : DEFAULT_PROJECT_POLICY;
 } catch (error) {
   console.error(/** @type {Error} */ (error).message);
   process.exit(1);
 }
 const liveFiles = collectLiveProductionFiles();
+const projectCoveragePolicy = policy;
 /** @type {string[]} */
 const errors = [];
 
@@ -45,7 +38,7 @@ checkTopLevelSchema(floors, "coverage inventory", errors);
 checkTopLevelSchema(baseline, "coverage floor baseline", errors);
 checkInventoryCompleteness(floors, liveFiles, errors);
 checkEntrySchema(floors, errors);
-checkImmutableBaselineCapture(errors);
+checkImmutableBaselineCapture(policy, errors);
 checkBaselineSchema(baseline, floors, errors);
 checkFloorPolicy(floors, baseline, errors);
 
@@ -69,7 +62,7 @@ function collectLiveProductionFiles() {
   for (const entrypoint of ["plugin.js", "plugin.mjs"]) {
     if (fs.existsSync(path.join(root, entrypoint))) files.add(entrypoint);
   }
-  for (const relativeRoot of PRODUCTION_ROOTS) {
+  for (const relativeRoot of policy.productionRoots || []) {
     for (const file of collectJavaScriptFiles(path.join(root, relativeRoot))) {
       files.add(path.relative(root, file).replaceAll(path.sep, "/"));
     }
@@ -125,14 +118,13 @@ function checkTopLevelSchema(data, label, out) {
 }
 
 /** @param {string[]} out */
-function checkImmutableBaselineCapture(out) {
-  const packagePath = path.join(root, "package.json");
-  if (!fs.existsSync(packagePath)) return;
-  const packageJson = readJsonPolicy(packagePath);
-  if (packageJson.name !== "dyninstruments") return;
-
+/** @param {any} projectPolicy @param {string[]} out */
+function checkImmutableBaselineCapture(projectPolicy, out) {
+  if (!projectPolicy.baselineSha256 || !projectPolicy.baselinePackageName) return;
+  const packageJson = readJsonPolicy(path.join(root, "package.json"));
+  if (packageJson.name !== projectPolicy.baselinePackageName) return;
   const actualDigest = createHash("sha256").update(fs.readFileSync(baselinePath)).digest("hex");
-  if (actualDigest !== CAPTURED_BASELINE_SHA256) {
+  if (actualDigest !== projectPolicy.baselineSha256) {
     out.push(
       "Immutable coverage-floor baseline differs from the captured baseline snapshot. Ratchet active floors upward without editing coverage-floor-baseline.json."
     );
@@ -183,13 +175,13 @@ function checkBaselineSchema(data, floorsData, out) {
     const hasLegacyMarker = Object.prototype.hasOwnProperty.call(entry, "legacyBelowDefault");
     if (hasLegacyMarker && entry.legacyBelowDefault !== true) {
       out.push(`Coverage-floor baseline entry '${relativePath}' has invalid 'legacyBelowDefault' value.`);
-    } else if (hasLegacyMarker && !LEGACY_BELOW_DEFAULT_FLOORS.has(relativePath)) {
+    } else if (hasLegacyMarker && !projectCoveragePolicy.legacyBelowDefaultFloors[relativePath]) {
       out.push(`Coverage-floor baseline entry '${relativePath}' is not an approved legacy coverage-debt path.`);
     } else if (!isBelowDefault && hasLegacyMarker) {
       out.push(`Coverage-floor baseline entry '${relativePath}' has a stale 'legacyBelowDefault' marker.`);
     } else if (hasLegacyMarker) {
       const captured = /** @type {{ lines: number, branches: number }} */ (
-        LEGACY_BELOW_DEFAULT_FLOORS.get(relativePath)
+        projectCoveragePolicy.legacyBelowDefaultFloors[relativePath]
       );
       if (entry.lines !== captured.lines || entry.branches !== captured.branches) {
         out.push(`Coverage-floor baseline entry '${relativePath}' differs from its captured legacy floor.`);
@@ -235,16 +227,12 @@ function checkMeasuredFloors(data, out) {
   const measured = Object.entries(data.entries).filter(([, entry]) => entry.classification === "measured");
   if (measured.length === 0) return;
 
-  if (!fs.existsSync(summaryPath)) {
-    out.push(`Missing ${path.relative(root, summaryPath)}. Run 'npm run test:coverage' before this check.`);
+  let summaryByRelativePath;
+  try {
+    summaryByRelativePath = readCoverageSummary(root, summaryPath);
+  } catch (error) {
+    out.push(/** @type {Error} */ (error).message);
     return;
-  }
-
-  const summary = JSON.parse(fs.readFileSync(summaryPath, "utf8"));
-  const summaryByRelativePath = new Map();
-  for (const [absoluteKey, fileSummary] of Object.entries(summary)) {
-    if (absoluteKey === "total") continue;
-    summaryByRelativePath.set(path.relative(root, absoluteKey).replaceAll(path.sep, "/"), fileSummary);
   }
 
   for (const [relativePath, entry] of measured) {

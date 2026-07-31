@@ -1,6 +1,6 @@
 # ClockRadialWidget Module
 
-**Status:** ✅ Implemented | `widgets/radial/ClockRadialWidget/ClockRadialWidget.js`
+**Status:** Current.
 
 ## Overview
 

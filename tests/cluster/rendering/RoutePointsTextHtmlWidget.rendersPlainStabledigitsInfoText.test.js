@@ -1,6 +1,5 @@
 // @ts-check
-// eslint-disable-next-line no-unused-vars -- imported shared setup retained for the strict test contract
-const { createRenderer, mountCommitted, path, withSurfacePolicy } = require("./RoutePointsTextHtmlWidget-setup");
+const { createRenderer, mountCommitted, withSurfacePolicy } = require("./RoutePointsTextHtmlWidget-setup");
 
 describe("RoutePointsTextHtmlWidget", function () {
   it("renders plain stableDigits info text through the widget path", function () {

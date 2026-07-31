@@ -25,7 +25,7 @@ describe("WindLinearWidget", function () {
                 },
                 /** @param {any} value */
                 toOptionalFiniteNumber(value) {
-                  if (value == null) return undefined;
+                  if (value === null || value === undefined) return undefined;
                   if (typeof value === "string" && value.trim() === "") return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
@@ -183,7 +183,7 @@ describe("WindLinearWidget", function () {
                 },
                 /** @param {any} value */
                 toOptionalFiniteNumber(value) {
-                  if (value == null) return undefined;
+                  if (value === null || value === undefined) return undefined;
                   if (typeof value === "string" && value.trim() === "") return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;

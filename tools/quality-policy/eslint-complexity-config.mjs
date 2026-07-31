@@ -19,12 +19,16 @@ export const STRICT_LIMITS = Object.freeze({
 /** @typedef {keyof typeof STRICT_LIMITS} ComplexityMetricKey */
 
 /**
- * ESLint rule-config fragment for the four complexity-family rules, at warn severity.
- * @type {import("eslint").Linter.RulesRecord}
+ * @param {"error"|"warn"} severity
+ * @returns {import("eslint").Linter.RulesRecord}
  */
-export const STRICT_COMPLEXITY_RULES = {
-  complexity: ["warn", STRICT_LIMITS.complexity],
-  "max-statements": ["warn", STRICT_LIMITS["max-statements"]],
-  "max-depth": ["warn", STRICT_LIMITS["max-depth"]],
-  "max-params": ["warn", STRICT_LIMITS["max-params"]]
-};
+export function createComplexityRules(severity) {
+  return {
+    complexity: [severity, STRICT_LIMITS.complexity],
+    "max-statements": [severity, STRICT_LIMITS["max-statements"]],
+    "max-depth": [severity, STRICT_LIMITS["max-depth"]],
+    "max-params": [severity, STRICT_LIMITS["max-params"]]
+  };
+}
+
+export const STRICT_COMPLEXITY_RULES = createComplexityRules("warn");

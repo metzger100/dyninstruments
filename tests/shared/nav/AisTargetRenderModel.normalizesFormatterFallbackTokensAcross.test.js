@@ -4,7 +4,7 @@ const { createRenderModel, makeProps, withSurfacePolicy } = require("./AisTarget
 describe("AisTargetRenderModel", function () {
   it("normalizes formatter fallback tokens to --- across AIS metrics", function () {
     const setup = createRenderModel({
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {unknown} value @param {{ default?: unknown, formatter?: unknown, formatterParameters?: unknown[] }} [formatterOptions] */
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (cfg.formatter === "formatDistance") {

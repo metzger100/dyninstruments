@@ -13,7 +13,9 @@
   "use strict";
 
   /** @param {unknown} def @param {unknown} componentContext */
+  /** @param {unknown} def @param {DyniComponentContext} componentContext */
   function create(def, componentContext) {
+    const isNullish = componentContext.components.require("ValueMath").isNullish;
     /** @param {DyniMapperProps|null|undefined} props @param {DyniMapperRouteContextWithViewModel} routeContext @returns {Record<string, unknown>} */
     function translate(props, routeContext) {
       const p = /** @type {DyniMapperProps} */ (props || {});
@@ -121,7 +123,7 @@
       if (req === "pitch") {
         const rawPitch = p.pitch;
         const pitchValue =
-          rawPitch == null || (typeof rawPitch === "string" && rawPitch.trim() === "") ? undefined : rawPitch;
+          isNullish(rawPitch) || (typeof rawPitch === "string" && rawPitch.trim() === "") ? undefined : rawPitch;
         return {
           value: pitchValue,
           caption: cap("pitch"),
@@ -133,7 +135,7 @@
       if (req === "roll") {
         const rawRoll = p.roll;
         const rollValue =
-          rawRoll == null || (typeof rawRoll === "string" && rawRoll.trim() === "") ? undefined : rawRoll;
+          isNullish(rawRoll) || (typeof rawRoll === "string" && rawRoll.trim() === "") ? undefined : rawRoll;
         return {
           value: rollValue,
           caption: cap("roll"),

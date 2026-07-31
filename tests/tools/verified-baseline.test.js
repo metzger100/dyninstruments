@@ -5,12 +5,19 @@ const root = process.cwd();
 const baseline = require(path.join(root, "tools/quality-policy/verified-baseline.json"));
 const complexityFindings = require(path.join(root, baseline.complexityDiagnostic.stableIdentityFindings));
 const vitestConfig = require(path.join(root, "vitest.config.js"));
+const testInventory = require(path.join(root, "tools/quality-policy/test-inventory.json"));
+const testExceptionBaseline = require(path.join(root, "tools/quality-policy/test-exception-baseline.json"));
+const complexityBaseline = require(path.join(root, "tools/quality-policy/complexity-baseline.json"));
+const coverageFloors = require(path.join(root, "tools/quality-policy/coverage-floors.json"));
+const qualityGates = fs.readFileSync(path.join(root, "documentation/conventions/quality-gates.md"), "utf8");
 const { verifyHistoricalComplexityCapture } = require(
   path.join(root, "tools/quality-policy/historical-complexity-capture.mjs")
 );
 
 const PRODUCTION_ROOTS = ["config", "runtime", "cluster", "shared", "widgets"];
-const SUPPRESSION_PATTERN = /eslint-disable|@ts-ignore|@ts-expect-error|@ts-nocheck|prettier-ignore|istanbul ignore/;
+const MAINTAINED_SUPPRESSION_ROOTS = PRODUCTION_ROOTS.concat(["tests", "tools"]);
+const SUPPRESSION_COMMENT_PATTERN =
+  /^\s*(?:\/\/|\/\*)\s*(?:eslint-disable|@ts-ignore|@ts-expect-error|@ts-nocheck|prettier-ignore|istanbul ignore)\b/m;
 
 /** @typedef {{ file: string, identity: string, metric: string, value: number, limit: number }} ComplexityFinding */
 /** @typedef {Record<string, number | Record<string, number>>} CoverageThresholds */
@@ -25,20 +32,19 @@ describe("pre-tightening quality baseline", function () {
     expect(fs.existsSync(path.join(root, baseline.inventories.productionMjsEntry))).toBe(true);
   });
 
-  it("blocks standard suppression directives across both shipped entrypoints and production roots", function () {
+  it("keeps the whole maintained JavaScript surface free of suppression directives", function () {
     const directiveCount = PRODUCTION_ROOTS.concat([]).reduce(
       function (total, relativeRoot) {
-        return total + countMatches(path.join(root, relativeRoot), ".js", /dyni-lint-disable-/);
+        return total + countMatches(path.join(root, relativeRoot), ".js", /plugin-lint-disable-/);
       },
-      countMatches(root, "plugin.js", /dyni-lint-disable-/, true) +
-        countMatches(root, "plugin.mjs", /dyni-lint-disable-/, true)
+      countMatches(root, "plugin.js", /plugin-lint-disable-/, true) +
+        countMatches(root, "plugin.mjs", /plugin-lint-disable-/, true)
     );
-    const standardSuppressionCount = PRODUCTION_ROOTS.reduce(
+    const standardSuppressionCount = MAINTAINED_SUPPRESSION_ROOTS.reduce(
       function (total, relativeRoot) {
-        return total + countMatches(path.join(root, relativeRoot), ".js", SUPPRESSION_PATTERN);
+        return total + countSuppressionComments(path.join(root, relativeRoot));
       },
-      countMatches(root, "plugin.js", SUPPRESSION_PATTERN, true) +
-        countMatches(root, "plugin.mjs", SUPPRESSION_PATTERN, true)
+      countSuppressionComments(root, "plugin.js", true) + countSuppressionComments(root, "plugin.mjs", true)
     );
 
     expect(directiveCount).toBe(0);
@@ -70,6 +76,23 @@ describe("pre-tightening quality baseline", function () {
 
   it("prevents configured global or critical coverage floors from being lowered", function () {
     expectThresholdsAtLeast(vitestConfig.test.coverage.thresholds, baseline.coverage.configuredThresholds);
+  });
+
+  it("keeps the quality-gate policy counts synchronized with their asserted data", function () {
+    expect(Object.keys(testInventory.entries)).toHaveLength(558);
+    expect(Object.keys(testExceptionBaseline.entries)).toHaveLength(20);
+    expect(complexityBaseline.entries).toHaveLength(175);
+    expect(Object.keys(coverageFloors.entries)).toHaveLength(228);
+    expect(qualityGates).toContain("(558 entries)");
+    expect(qualityGates).toContain("(20 captured non-strict paths)");
+    expect(qualityGates).toContain("228 measured entries");
+    expect(qualityGates).toContain("175-entry active ledger");
+  });
+
+  it("keeps every captured test exception tied to a live file", function () {
+    Object.keys(testExceptionBaseline.entries).forEach(function (relativePath) {
+      expect(fs.existsSync(path.join(root, relativePath)), relativePath).toBe(true);
+    });
   });
 
   it("records historical complexity by stable file, function, and metric identity", function () {
@@ -159,5 +182,15 @@ function countMatches(baseDirectory, targetOrExtension, pattern, singleFile) {
   return files.reduce(function (total, file) {
     const matches = fs.readFileSync(file, "utf8").match(new RegExp(pattern, "g"));
     return total + (matches ? matches.length : 0);
+  }, 0);
+}
+
+/** @param {string} baseDirectory @param {string} [targetFile] @param {boolean} [singleFile] */
+function countSuppressionComments(baseDirectory, targetFile, singleFile) {
+  const files = singleFile
+    ? [path.join(baseDirectory, /** @type {string} */ (targetFile))].filter(fs.existsSync)
+    : collectFiles(baseDirectory, ".js").concat(collectFiles(baseDirectory, ".mjs"));
+  return files.reduce(function (total, file) {
+    return total + Number(SUPPRESSION_COMMENT_PATTERN.test(fs.readFileSync(file, "utf8")));
   }, 0);
 }

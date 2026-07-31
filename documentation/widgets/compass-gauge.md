@@ -1,6 +1,6 @@
 # CompassRadialWidget Module
 
-**Status:** ✅ Implemented | `widgets/radial/CompassRadialWidget/CompassRadialWidget.js`
+**Status:** Current.
 
 ## Overview
 

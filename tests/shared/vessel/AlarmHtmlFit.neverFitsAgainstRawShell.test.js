@@ -63,7 +63,12 @@ describe("AlarmHtmlFit", function () {
       shellRect: shellRect
     });
 
-    const fitArgs = textLayoutApi.fitInlineTriplet.mock.calls[0][0];
+    const fitCall = textLayoutApi.fitInlineTriplet.mock.calls[0];
+    const fitArg = fitCall && fitCall[0];
+    if (!fitArg || typeof fitArg !== "object") {
+      throw new Error("Expected the inline-fit input.");
+    }
+    const fitArgs = /** @type {{ gap: number, maxW: number }} */ (fitArg);
     const measureCtx = h.hostContext.__dyniAlarmMeasureCtx;
     measureCtx.font = "600 " + result.captionPx + "px sans-serif";
     const captionWidth = measureCtx.measureText("ALARM").width;

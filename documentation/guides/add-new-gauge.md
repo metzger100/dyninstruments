@@ -1,6 +1,6 @@
 # Guide: Create a New Semicircle Gauge
 
-**Status:** ✅ Ready | Current workflow with `SemicircleRadialEngine` + ClusterWidget registries
+**Status:** Current.
 
 ## Prerequisites
 

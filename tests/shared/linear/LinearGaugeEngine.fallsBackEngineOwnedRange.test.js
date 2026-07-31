@@ -4,6 +4,7 @@ const { createHarness, createMockCanvas, createMockContext2D } = require("./Line
 describe("LinearGaugeEngine", function () {
   it("falls back to engine-owned range defaults when range props are absent", function () {
     const harness = createHarness();
+    /** @type {{ min: number, max: number } | null} */
     let axisSnapshot = null;
     const renderer = harness.engine.createRenderer({
       rawValueKey: "value",
@@ -14,7 +15,7 @@ describe("LinearGaugeEngine", function () {
         minor: "minor",
         showEndLabels: "showEndLabels"
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {{ axis: { min: number, max: number } }} state */
       drawFrame(state) {
         axisSnapshot = state.axis;
       }

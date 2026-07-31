@@ -1,6 +1,6 @@
 # Vertical Container Contract
 
-**Status:** ✅ Implemented | Route-owned vertical shell sizing with renderer shadow CSS
+**Status:** Current.
 
 ## Overview
 

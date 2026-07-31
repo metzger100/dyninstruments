@@ -1,0 +1,25 @@
+{
+  "note": "Project-owned scope data for tools/check-file-size.mjs (the generic mechanism). Regex patterns are source strings for `new RegExp(pattern)`.",
+  "scanRoots": [
+    "plugin.js",
+    "plugin.mjs",
+    "runtime",
+    "cluster",
+    "config",
+    "shared",
+    "widgets",
+    "tests",
+    "documentation",
+    "tools",
+    "types",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "CONTRIBUTING.md",
+    "README.md",
+    "ROADMAP.md",
+    "ARCHITECTURE.md"
+  ],
+  "scanExtensions": [".js", ".mjs", ".ts", ".md"],
+  "exemptPatterns": ["\\.css$", "\\.json$", "^exec-plans/", "^\\.agents/skills/", "^tools/lint-fixtures/", "^tools/test-data/", "\\.config\\."],
+  "remedyMessage": "Split this file — extract reusable logic into shared/widget-kits/ or create a dedicated helper module."
+}

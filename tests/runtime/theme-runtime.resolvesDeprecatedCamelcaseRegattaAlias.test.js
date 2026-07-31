@@ -3,6 +3,7 @@ const { createPluginRootElement, getAppliedOutput, hasOwn, setupContext } = requ
 
 describe("runtime/theme-runtime.js", function () {
   it("resolves deprecated camelCase regatta alias input var with one warning", function () {
+    /** @type {Record<string, string>} */
     const cssVars = {
       "--dyni-regatta-barWarning": "#654321"
     };
@@ -11,9 +12,8 @@ describe("runtime/theme-runtime.js", function () {
       console: { warn: warn },
       getComputedStyle() {
         return {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {string} name */
           getPropertyValue(name) {
-            // @ts-ignore -- pre-existing untyped test mock boundary
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
           }
         };
@@ -184,13 +184,13 @@ describe("runtime/theme-runtime.js", function () {
   });
 
   it("opacity.caption respects root CSS input override", function () {
+    /** @type {Record<string, string>} */
     const cssVars = { "--dyni-caption-opacity": "0.6" };
     const context = setupContext({
       getComputedStyle() {
         return {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {string} name */
           getPropertyValue(name) {
-            // @ts-ignore -- pre-existing untyped test mock boundary
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
           }
         };
@@ -205,13 +205,13 @@ describe("runtime/theme-runtime.js", function () {
   });
 
   it("opacity.unit respects root CSS input override", function () {
+    /** @type {Record<string, string>} */
     const cssVars = { "--dyni-unit-opacity": "0.4" };
     const context = setupContext({
       getComputedStyle() {
         return {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {string} name */
           getPropertyValue(name) {
-            // @ts-ignore -- pre-existing untyped test mock boundary
             return hasOwn.call(cssVars, name) ? cssVars[name] : "";
           }
         };

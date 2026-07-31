@@ -3,7 +3,7 @@ const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
 function createHostRoot() {
   return {
     classList: {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {string} name */
       contains(name) {
         return name === "dyniplugin" || name === "dyni-host-html";
       }
@@ -11,10 +11,10 @@ function createHostRoot() {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {object} rootEl */
 function createShell(rootEl) {
   return {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {string} selector */
     closest(selector) {
       return selector === ".widget.dyniplugin" ? rootEl : null;
     }
@@ -22,84 +22,70 @@ function createShell(rootEl) {
 }
 
 function createHarness() {
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @type {ReturnType<typeof createShell> | null} */
   let shell = null;
-  // @ts-ignore -- pre-existing untyped test mock boundary
-  const rafQueue = [];
-  // @ts-ignore -- pre-existing untyped test mock boundary
-  const canceledRafs = [];
+  const rafQueue = /** @type {Array<{ callback: () => void, id: number }>} */ ([]);
+  const canceledRafs = /** @type {number[]} */ ([]);
   let rafId = 0;
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
-  const timeoutQueue = [];
-  // @ts-ignore -- pre-existing untyped test mock boundary
-  const clearedTimeouts = [];
+  const timeoutQueue = /** @type {Array<{ callback: () => void, delay: number | undefined, id: number }>} */ ([]);
+  const clearedTimeouts = /** @type {number[]} */ ([]);
   let timeoutId = 0;
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
-  const observerInstances = [];
-  // @ts-ignore -- pre-existing untyped test mock boundary
-  function MutationObserverStub(callback) {
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    this.callback = callback;
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    this.observe = vi.fn();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    this.disconnect = vi.fn();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    observerInstances.push(this);
+  const observerInstances = /** @type {MutationObserverStub[]} */ ([]);
+  class MutationObserverStub {
+    /** @param {(records: Array<{ type: string }>) => void} callback */
+    constructor(callback) {
+      this.callback = callback;
+      this.observe = vi.fn();
+      this.disconnect = vi.fn();
+      observerInstances.push(this);
+    }
   }
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {() => void} callback */
   function requestAnimationFrameStub(callback) {
     rafId += 1;
     rafQueue.push({ id: rafId, callback: callback });
     return rafId;
   }
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {number} handle */
   function cancelAnimationFrameStub(handle) {
     canceledRafs.push(handle);
     const next = [];
     for (let i = 0; i < rafQueue.length; i++) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       if (rafQueue[i].id !== handle) {
-        // @ts-ignore -- pre-existing untyped test mock boundary
         next.push(rafQueue[i]);
       }
     }
     rafQueue.length = 0;
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    Array.prototype.push.apply(rafQueue, next);
+    rafQueue.push(...next);
   }
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {() => void} callback @param {number} [delay] */
   function setTimeoutStub(callback, delay) {
     timeoutId += 1;
     timeoutQueue.push({ id: timeoutId, callback: callback, delay: delay });
     return timeoutId;
   }
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {number} handle */
   function clearTimeoutStub(handle) {
     clearedTimeouts.push(handle);
     const next = [];
     for (let i = 0; i < timeoutQueue.length; i++) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       if (timeoutQueue[i].id !== handle) {
-        // @ts-ignore -- pre-existing untyped test mock boundary
         next.push(timeoutQueue[i]);
       }
     }
     timeoutQueue.length = 0;
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    Array.prototype.push.apply(timeoutQueue, next);
+    timeoutQueue.push(...next);
   }
 
   const document = {
     body: {},
     querySelector: vi.fn(function () {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       return shell;
     })
   };
@@ -121,7 +107,6 @@ function createHarness() {
   runIifeScript("runtime/HostCommitController.js", context);
 
   function runNextRaf() {
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const task = rafQueue.shift();
     if (!task) {
       throw new Error("No requestAnimationFrame callback queued");
@@ -131,7 +116,6 @@ function createHarness() {
   }
 
   function runNextTimeout() {
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const task = timeoutQueue.shift();
     if (!task) {
       throw new Error("No timeout callback queued");
@@ -140,10 +124,9 @@ function createHarness() {
     return task.id;
   }
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {number} [index] */
   function triggerObserver(index) {
-    const targetIndex = Number.isInteger(index) ? index : 0;
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    const targetIndex = Number.isInteger(index) ? Number(index) : 0;
     const observer = observerInstances[targetIndex];
     if (!observer) {
       throw new Error("No MutationObserver instance at index " + String(targetIndex));
@@ -153,20 +136,15 @@ function createHarness() {
 
   return {
     createController: context.DyniPlugin.runtime.createHostCommitController,
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {ReturnType<typeof createShell> | null} nextShell */
     setShell(nextShell) {
       shell = nextShell;
     },
     document,
-    // @ts-ignore -- pre-existing untyped test mock boundary
     rafQueue,
-    // @ts-ignore -- pre-existing untyped test mock boundary
     canceledRafs,
-    // @ts-ignore -- pre-existing untyped test mock boundary
     timeoutQueue,
-    // @ts-ignore -- pre-existing untyped test mock boundary
     clearedTimeouts,
-    // @ts-ignore -- pre-existing untyped test mock boundary
     observerInstances,
     runNextRaf,
     runNextTimeout,

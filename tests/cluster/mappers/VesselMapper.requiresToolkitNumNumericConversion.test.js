@@ -5,11 +5,11 @@ describe("VesselMapper", function () {
   it("requires toolkit.num for numeric conversion and still returns empty object for unknown kind", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const toolkitWithoutNum = {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {string} name */
       cap(name) {
         return "C:" + name;
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {string} name */
       unit(name) {
         return "U:" + name;
       },
@@ -37,17 +37,17 @@ describe("VesselMapper", function () {
   it("uses toolkit.num directly when it is available", function () {
     const mapper = loadFresh("cluster/mappers/VesselMapper.js").create();
     const toolkitWithNum = {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {string} name */
       cap(name) {
         return "C:" + name;
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {string} name */
       unit(name) {
         return "U:" + name;
       },
       out: toolkit.out,
       makeAngleFormatter: toolkit.makeAngleFormatter,
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {unknown} value */
       num(value) {
         return Number(value);
       }

@@ -21,6 +21,8 @@
   let htmlUtils;
   /** @type {DyniValueMathApi["toSafeInteger"]} */
   let toSafeInteger;
+  /** @type {DyniValueMathApi["isNullish"]} */
+  let isNullish;
 
   /** @param {unknown} node @returns {boolean} */
   function isConnectedNode(node) {
@@ -57,7 +59,7 @@
 
   /** @param {DyniRoutePointsDomEffectState | null | undefined} state */
   function clearPending(state) {
-    if (!state || state.timerHandle == null) {
+    if (!state || isNullish(state.timerHandle)) {
       return;
     }
     clearTimeout(state.timerHandle);
@@ -168,7 +170,7 @@
       nextScrollTop = rowBottom - viewportHeight;
     }
 
-    if (nextScrollTop == null) {
+    if (isNullish(nextScrollTop)) {
       return false;
     }
 
@@ -199,7 +201,7 @@
 
   /** @param {unknown} activeKey @param {number} selectedIndex @returns {string} */
   function normalizeActiveKey(activeKey, selectedIndex) {
-    const text = activeKey == null ? "" : String(activeKey).trim();
+    const text = isNullish(activeKey) ? "" : String(activeKey).trim();
     if (text) {
       return text;
     }
@@ -317,7 +319,9 @@
   /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniRoutePointsDomEffectsApi} */
   function create(def, componentContext) {
     htmlUtils = componentContext.components.require("HtmlWidgetUtils");
-    toSafeInteger = componentContext.components.require("ValueMath").toSafeInteger;
+    const valueMath = componentContext.components.require("ValueMath");
+    toSafeInteger = valueMath.toSafeInteger;
+    isNullish = valueMath.isNullish;
 
     return {
       id: "RoutePointsDomEffects",

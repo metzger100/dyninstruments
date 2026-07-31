@@ -9,7 +9,10 @@ const {
 
 const failFastRuleCases = require("../../tools/test-data/check-patterns-failfast-cases.js");
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @param {{ findings?: import("./check-patterns.harness.js").DyniPatternFinding[], warnings?: import("./check-patterns.harness.js").DyniPatternFinding[] }} result
+ * @param {string} severity
+ */
 function reportMessages(result, severity) {
   return severity === "block" ? joinMessages(result.findings || []) : joinWarningMessages(result.warnings || []);
 }

@@ -4,7 +4,7 @@ const { flushPromises } = require("../helpers/async");
 
 const hasOwn = Object.prototype.hasOwnProperty;
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {object} [overrides] */
 function setupContext(overrides) {
   const context = createScriptContext(
     Object.assign(
@@ -43,7 +43,7 @@ function createPluginRootElement() {
     nodeType: 1,
     className: "widget dyniplugin",
     classList: {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {string} name */
       contains(name) {
         return name === "widget" || name === "dyniplugin";
       }
@@ -60,7 +60,10 @@ function createPluginRootElement() {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @param {{ style: { setProperty: { mock: { calls: unknown[][] } } } }} rootEl
+ * @param {string} outputVar
+ */
 function getAppliedOutput(rootEl, outputVar) {
   const calls = rootEl.style.setProperty.mock.calls;
   for (let i = 0; i < calls.length; i += 1) {

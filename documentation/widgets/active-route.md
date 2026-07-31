@@ -1,6 +1,6 @@
 # Active Route HTML Renderer
 
-**Status:** ✅ Implemented | Committed HTML renderer for nav/activeRoute
+**Status:** Current.
 
 ## Overview
 

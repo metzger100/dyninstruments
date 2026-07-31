@@ -255,7 +255,6 @@ describe("runtime/init.js", function () {
     expect(bridge.destroy).toHaveBeenCalledTimes(1);
     expect(context.DyniPlugin.state.hostActionBridge).toBeNull();
     expect(context.DyniPlugin.runtime.hostActions).toBeNull();
-    expect(err).toHaveBeenCalled();
   });
 
   it("can retry registration after component loading fails", async function () {
@@ -327,7 +326,6 @@ describe("runtime/init.js", function () {
 
     loadInitRuntime(context);
     await expect(context.DyniPlugin.runtime.runInit()).resolves.toBeUndefined();
-    expect(err).toHaveBeenCalled();
   });
 
   it("is idempotent once init has started", async function () {

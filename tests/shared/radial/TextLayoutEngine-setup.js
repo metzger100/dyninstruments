@@ -6,7 +6,7 @@ const { createMockContext2D } = require("../../helpers/mock-canvas");
 
 function createSizingContext() {
   const ctx = createMockContext2D();
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {string} text */
   ctx.measureText = function (text) {
     const match = /(\d+)px/.exec(String(this.font || ""));
     const px = match ? Number(match[1]) : 10;
@@ -30,17 +30,17 @@ function createEngine() {
   const valueMathModule = {
     create() {
       return {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {unknown} n */
         isFiniteNumber(n) {
           return typeof n === "number" && isFinite(n);
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {number} n @param {number} lo @param {number} hi */
         clamp(n, lo, hi) {
           const num = Number(n);
           if (!isFinite(num)) return Number(lo);
           return Math.max(Number(lo), Math.min(Number(hi), num));
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {number} value @param {number} lo @param {number} hi @param {number} fallbackValue */
         clampNumber(value, lo, hi, fallbackValue) {
           const n = Number(value);
           if (!Number.isFinite(n)) {
@@ -48,11 +48,11 @@ function createEngine() {
           }
           return Math.max(Number(lo), Math.min(Number(hi), n));
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {number} from @param {number} to @param {number} t */
         lerp(from, to, t) {
           return from + (to - from) * t;
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {number} ratio @param {number} normal @param {number} flat */
         computeMode(ratio, normal, flat) {
           if (ratio < normal) return "high";
           if (ratio > flat) return "flat";

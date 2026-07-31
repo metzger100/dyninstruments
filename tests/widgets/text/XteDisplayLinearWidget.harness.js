@@ -1,10 +1,23 @@
-// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
+/**
+ * @typedef {{ mode: unknown, gaugeBar: unknown, geom: unknown, ticks: unknown, showEndLabels: unknown, xteScale: unknown, color: unknown, strokeWeight: unknown, pointerDepthWeight: unknown, pointerSideWeight: unknown }} EnsureLayerKey
+ * @typedef {{ x0: number, x1: number, y: number, style: Record<string, unknown> }} TrackCall
+ * @typedef {{ x: number, y: number, len: number, style: Record<string, unknown> }} TickCall
+ * @typedef {{ metric?: unknown, [key: string]: unknown }} TileArgs
+ * @typedef {{ text?: unknown, maxPx?: unknown, [key: string]: unknown }} FittedLineArgs
+ * @typedef {{ kind: string, [key: string]: unknown }} StateScreenArgs
+ * @typedef {{ formatter?: string, formatterParameters?: unknown[], default?: unknown }} FormatterSpec
+ * @typedef {{ forceStableDigitsClip?: boolean, blockWaypointName?: boolean, applyFormatter?: (value: unknown, spec: FormatterSpec) => unknown }} CreateHarnessOptions
+ * @typedef {{ stateKinds: string[], tracks: TrackCall[], ticks: TickCall[], metricTiles: unknown[], metricMeasures: unknown[], waypointMeasures: FittedLineArgs[], waypointDraws: FittedLineArgs[], ensureKeys: EnsureLayerKey[], tickLabelValues: number[], fillColors: unknown[] }} LinearCalls
+ */
+
+/** @param {CreateHarnessOptions} [options] */
 function createHarness(options) {
   const opts = options || {};
+  /** @type {LinearCalls} */
   const calls = {
     stateKinds: [],
     tracks: [],
@@ -62,9 +75,11 @@ function createHarness(options) {
   );
   const canvasLayerCache = {
     id: "CanvasLayerCache",
+    /** @param {unknown} spec */
     createLayerCache(spec) {
       const cache = realCacheApi.createLayerCache(spec);
       return {
+        /** @param {HTMLCanvasElement} canvas @param {EnsureLayerKey} key @param {(...args: unknown[]) => unknown} rebuildFn */
         ensureLayer(canvas, key, rebuildFn) {
           calls.ensureKeys.push(key);
           return cache.ensureLayer(canvas, key, rebuildFn);
@@ -79,11 +94,13 @@ function createHarness(options) {
   const realPrimitives = loadFresh("shared/widget-kits/linear/LinearCanvasPrimitives.js").create();
   const primitives = {
     id: "LinearCanvasPrimitives",
+    /** @param {CanvasRenderingContext2D} ctx @param {number} x0 @param {number} x1 @param {number} y @param {Record<string, unknown>} style */
     drawTrack(ctx, x0, x1, y, style) {
       calls.tracks.push({ x0: x0, x1: x1, y: y, style: style });
       return realPrimitives.drawTrack(ctx, x0, x1, y, style);
     },
     drawBand: realPrimitives.drawBand,
+    /** @param {CanvasRenderingContext2D} ctx @param {number} x @param {number} y @param {number} len @param {Record<string, unknown>} style */
     drawTick(ctx, x, y, len, style) {
       calls.ticks.push({ x: x, y: y, len: len, style: style });
       return realPrimitives.drawTick(ctx, x, y, len, style);
@@ -93,10 +110,12 @@ function createHarness(options) {
 
   const gaugeMathModule = loadFresh("shared/widget-kits/linear/LinearGaugeMath.js");
   const linearGaugeMath = {
+    /** @param {unknown} def @param {unknown} componentContext */
     create(def, componentContext) {
       const api = gaugeMathModule.create(def, componentContext);
       const realFormatTickLabel = api.formatTickLabel;
       return Object.assign({}, api, {
+        /** @param {number} value */
         formatTickLabel(value) {
           calls.tickLabelValues.push(value);
           return realFormatTickLabel(value);
@@ -107,9 +126,11 @@ function createHarness(options) {
 
   const tileLayout = {
     id: "TextTileLayout",
+    /** @param {TileArgs} args */
     drawMetricTile(args) {
       calls.metricTiles.push(args.metric);
     },
+    /** @param {TileArgs} args */
     measureMetricTile(args) {
       calls.metricMeasures.push(args.metric);
       if (opts.forceStableDigitsClip === true) {
@@ -123,6 +144,7 @@ function createHarness(options) {
         textW: 10
       };
     },
+    /** @param {FittedLineArgs} args */
     measureFittedLine(args) {
       calls.waypointMeasures.push(args);
       if (opts.blockWaypointName === true) {
@@ -133,6 +155,7 @@ function createHarness(options) {
         px: Math.min(12, Number(args.maxPx) || 12)
       };
     },
+    /** @param {FittedLineArgs} args */
     drawFittedLine(args) {
       calls.waypointDraws.push(args);
     }
@@ -147,9 +170,11 @@ function createHarness(options) {
           }
         },
         value: {
+          /** @param {unknown} value */
           isFiniteNumber(value) {
             return typeof value === "number" && Number.isFinite(value);
           },
+          /** @param {unknown} value @param {number} min @param {number} max @param {number} fallback */
           clampNumber(value, min, max, fallback) {
             const n = Number(value);
             if (!Number.isFinite(n)) {
@@ -157,11 +182,13 @@ function createHarness(options) {
             }
             return Math.max(min, Math.min(max, n));
           },
+          /** @param {unknown} value */
           trimText(value) {
             return typeof value === "string" ? value.trim() : "";
           }
         },
         text: {
+          /** @param {CanvasRenderingContext2D} ctx @param {unknown} px @param {unknown} weight @param {string} family */
           setFont(ctx, px, weight, family) {
             ctx.font = String(weight) + " " + String(px) + "px " + family;
           }
@@ -172,6 +199,7 @@ function createHarness(options) {
 
   const stateOverlay = {
     id: "StateScreenCanvasOverlay",
+    /** @param {StateScreenArgs} args */
     drawStateScreen(args) {
       calls.stateKinds.push(args.kind);
     }
@@ -180,8 +208,9 @@ function createHarness(options) {
   const applyFormatter =
     typeof opts.applyFormatter === "function"
       ? opts.applyFormatter
-      : function (value, spec) {
-          if (value == null || Number.isNaN(value)) {
+      : /** @param {unknown} value @param {FormatterSpec} spec */
+        function (value, spec) {
+          if (value === null || value === undefined || Number.isNaN(value)) {
             return spec && Object.prototype.hasOwnProperty.call(spec, "default") ? spec.default : "---";
           }
           if (spec && spec.formatter === "formatDistance") {
@@ -224,6 +253,7 @@ function createHarness(options) {
       services: {
         format: { applyFormatter: applyFormatter },
         canvas: {
+          /** @param {HTMLCanvasElement} canvas */
           setupCanvas(canvas) {
             const ctx = canvas.getContext("2d");
             const rect = canvas.getBoundingClientRect();
@@ -235,6 +265,7 @@ function createHarness(options) {
           }
         },
         dom: {
+          /** @param {unknown} target */
           requirePluginRoot(target) {
             return target;
           }
@@ -246,9 +277,20 @@ function createHarness(options) {
   return { spec: spec, calls: calls, theme: theme };
 }
 
+/**
+ * @typedef {{ xte?: unknown, cog?: unknown, dtw?: unknown, btw?: unknown, wpName?: unknown, disconnect?: unknown }} DisplayOverrides
+ * @typedef {{ xte?: unknown, track?: unknown, dtw?: unknown, brg?: unknown }} CaptionOverrides
+ * @typedef {{ xte?: unknown, track?: unknown, dtw?: unknown, brg?: unknown }} UnitOverrides
+ * @typedef {{ xte?: unknown, dtw?: unknown }} FormatUnitOverrides
+ * @typedef {{ leadingZero?: unknown, showWpName?: unknown, hideTextualMetrics?: unknown, easing?: unknown, ratioThresholdNormal?: unknown, ratioThresholdFlat?: unknown, tickMajor?: unknown, tickMinor?: unknown, showEndLabels?: unknown }} LayoutOverrides
+ * @typedef {{ display?: DisplayOverrides, captions?: CaptionOverrides, units?: UnitOverrides, formatUnits?: FormatUnitOverrides, xteScale?: unknown, layout?: LayoutOverrides, stableDigits?: unknown, default?: unknown }} MakePropsOverrides
+ */
+
+/** @param {number} width @param {number} height */
 function createCanvas(width, height) {
   const ctx = createMockContext2D();
   const fill = ctx.fill.bind(ctx);
+  /** @type {string[]} */
   const fillColors = [];
   ctx.fill = function () {
     fillColors.push(ctx.fillStyle);
@@ -262,6 +304,7 @@ function createCanvas(width, height) {
   return { canvas: canvas, ctx: ctx, fillColors: fillColors };
 }
 
+/** @param {MakePropsOverrides} [overrides] */
 function makeProps(overrides) {
   const base = {
     display: {
@@ -324,6 +367,7 @@ function makeProps(overrides) {
   return merged;
 }
 
+/** @param {DyniTestCall[]} ctxCalls */
 function findPointerTriangles(ctxCalls) {
   const triangles = [];
   for (let i = 0; i + 5 < ctxCalls.length; i += 1) {

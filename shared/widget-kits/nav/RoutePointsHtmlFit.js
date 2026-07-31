@@ -18,6 +18,8 @@
   };
   /** @type {DyniValueMathApi["toText"]} */
   let toText;
+  /** @type {DyniValueMathApi["isNullish"]} */
+  let isNullish;
 
   /**
    * @param {DyniRoutePointsInfoFitArgs | undefined} args
@@ -29,7 +31,7 @@
   function selectInfoText(args, htmlUtils, htmlMeasureUtils, tileLayout) {
     const cfg = /** @type {DyniRoutePointsInfoFitArgs} */ (args || {});
     const valueText = toText(cfg.valueText);
-    const plainText = cfg.plainText == null ? valueText : toText(cfg.plainText);
+    const plainText = isNullish(cfg.plainText) ? valueText : toText(cfg.plainText);
     const valueFit = htmlMeasureUtils.measurePx(
       {
         rect: cfg.rect,
@@ -83,7 +85,7 @@
 
   /** @param {DyniRoutePointsHtmlFitModel} model @param {number} pointCount @returns {DyniRoutePointsHeaderTexts} */
   function toHeaderTexts(model, pointCount) {
-    const routeName = toText(model.routeNameText != null ? model.routeNameText : model.routeName);
+    const routeName = toText(!isNullish(model.routeNameText) ? model.routeNameText : model.routeName);
     let metaText = toText(model.metaText);
     if (!metaText) {
       const waypointsText = toText(model.waypointsText);
@@ -99,12 +101,12 @@
   function toRowTexts(points, index) {
     const source = Array.isArray(points) ? points[index] : null;
     const point = source && typeof source === "object" ? source : {};
-    const resolvedInfoText = point.infoText != null ? point.infoText : point.info;
+    const resolvedInfoText = !isNullish(point.infoText) ? point.infoText : point.info;
     return {
-      ordinalText: toText(point.ordinalText != null ? point.ordinalText : index + 1),
-      nameText: toText(point.nameText != null ? point.nameText : point.name),
-      infoText: toText(point.infoText != null ? point.infoText : point.info),
-      infoPlainText: toText(point.infoPlainText != null ? point.infoPlainText : resolvedInfoText)
+      ordinalText: toText(!isNullish(point.ordinalText) ? point.ordinalText : index + 1),
+      nameText: toText(!isNullish(point.nameText) ? point.nameText : point.name),
+      infoText: toText(!isNullish(point.infoText) ? point.infoText : point.info),
+      infoPlainText: toText(!isNullish(point.infoPlainText) ? point.infoPlainText : resolvedInfoText)
     };
   }
 
@@ -140,7 +142,9 @@
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const routePointsInfoText = componentContext.components.require("RoutePointsInfoText");
-    toText = componentContext.components.require("ValueMath").toText;
+    const valueMath = componentContext.components.require("ValueMath");
+    toText = valueMath.toText;
+    isNullish = valueMath.isNullish;
 
     /** @param {DyniRoutePointsHtmlFitArgs | undefined} args @returns {DyniRoutePointsHtmlFitResult | null} */
     function compute(args) {

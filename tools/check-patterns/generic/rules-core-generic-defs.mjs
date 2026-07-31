@@ -1,5 +1,4 @@
-// Generic-set rule definitions for the fail-fast/dead-code family: no Dyninstruments-specific
-// concept appears in these rules' detection or message text, so they are liftable verbatim.
+// Generic rule definitions for the fail-fast/dead-code family.
 
 import {
   runDeadCodeRule,
@@ -8,16 +7,12 @@ import {
   runUnusedFallbackRule
 } from "../rules-core.mjs";
 
-/** @typedef {import("../shared.mjs").Rule} Rule */
+/** @typedef {import("../shared.mjs").RuleDefinition} RuleDefinition */
 
-/** @type {Rule[]} */
+/** @type {RuleDefinition[]} */
 export const CORE_GENERIC_RULES = [
   {
     name: "todo-without-owner",
-    scope: {
-      include: ["**/*.js", "**/*.md"],
-      exclude: ["node_modules/**", "README.md", "CONTRIBUTING.md", "ROADMAP.md"]
-    },
     detect: /\b(?:TODO|FIXME|HACK|XXX)\b/,
     allowlist: [],
     run: runTodoWithoutOwner,
@@ -27,17 +22,6 @@ export const CORE_GENERIC_RULES = [
   },
   {
     name: "unused-fallback",
-    scope: {
-      include: [
-        "widgets/**/*.js",
-        "cluster/**/*.js",
-        "shared/**/*.js",
-        "runtime/**/*.js",
-        "config/**/*.js",
-        "plugin.js"
-      ],
-      exclude: ["tests/**", "tools/**"]
-    },
     run: runUnusedFallbackRule,
     /** @param {{file: string, line: number, name: string}} finding */
     message: ({ file, line, name }) =>
@@ -45,17 +29,6 @@ export const CORE_GENERIC_RULES = [
   },
   {
     name: "dead-code",
-    scope: {
-      include: [
-        "widgets/**/*.js",
-        "cluster/**/*.js",
-        "shared/**/*.js",
-        "runtime/**/*.js",
-        "config/**/*.js",
-        "plugin.js"
-      ],
-      exclude: ["tests/**", "tools/**"]
-    },
     run: runDeadCodeRule,
     functionAllowlist: ["create", "translateFunction", "translate", "renderCanvas"],
     /** @param {{file: string, line: number, detail: string}} finding */
@@ -64,17 +37,6 @@ export const CORE_GENERIC_RULES = [
   },
   {
     name: "default-truthy-fallback",
-    scope: {
-      include: [
-        "widgets/**/*.js",
-        "cluster/**/*.js",
-        "shared/**/*.js",
-        "runtime/**/*.js",
-        "config/**/*.js",
-        "plugin.js"
-      ],
-      exclude: ["tests/**", "tools/**"]
-    },
     run: runDefaultTruthyFallbackRule,
     /** @param {{file: string, line: number, expression: string}} finding */
     message: ({ file, line, expression }) =>

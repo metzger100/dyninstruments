@@ -1,6 +1,6 @@
 # Guide: Manual AvNav Validation Checklist
 
-**Status:** ✅ Implemented | Profile-aware live-host checklist for release validation
+**Status:** Current.
 
 ## Overview
 

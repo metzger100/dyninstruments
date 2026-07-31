@@ -45,19 +45,22 @@ describe("XteDisplayWidget", function () {
     expect(harness.calls.staticDraws).toHaveLength(1);
     expect(harness.calls.dynamicDraws).toHaveLength(2);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const drawImageCalls = canvas.__ctx.calls.filter((entry) => entry.name === "drawImage");
+    const drawImageCalls = canvas.__ctx.calls.filter((/** @type {DyniTestCall} */ entry) => entry.name === "drawImage");
     expect(drawImageCalls.length).toBeGreaterThan(0);
-    const layerCanvas = drawImageCalls[0].args[0];
+    const drawImage = drawImageCalls[0];
+    if (!drawImage || !drawImage.args[0] || typeof drawImage.args[0] !== "object") {
+      throw new Error("Expected a cached layer canvas draw.");
+    }
+    const layerCanvas = /** @type {{ __ctx: DyniTestCanvasContext }} */ (drawImage.args[0]);
     const layerCalls = layerCanvas.__ctx.calls;
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const layerSetTransform = layerCalls.find((entry) => entry.name === "setTransform");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const layerClearRect = layerCalls.find((entry) => entry.name === "clearRect");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const setTransformIndex = layerCalls.findIndex((entry) => entry.name === "setTransform");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const clearRectIndex = layerCalls.findIndex((entry) => entry.name === "clearRect");
+
+    if (!layerSetTransform || !layerClearRect) {
+      throw new Error("Expected cache transform and clear calls.");
+    }
 
     expect(layerSetTransform.args).toEqual([2, 0, 0, 2, 0, 0]);
     expect(layerClearRect.args).toEqual([0, 0, 320, 180]);
@@ -100,16 +103,22 @@ describe("XteDisplayWidget", function () {
 
     harness.spec.renderCanvas(canvas, makeProps());
     expect(harness.calls.staticDraws).toHaveLength(1);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.dynamicDraws[0].pointerDepthWeight).toBe(1);
+    const initialDynamicDraw = harness.calls.dynamicDraws[0];
+    if (!initialDynamicDraw) {
+      throw new Error("Expected the initial dynamic draw.");
+    }
+    expect(initialDynamicDraw.pointerDepthWeight).toBe(1);
 
     harness.theme.pointerDepthWeight = 1.6;
     harness.spec.renderCanvas(canvas, makeProps());
 
     expect(harness.calls.staticDraws).toHaveLength(1);
     expect(harness.calls.dynamicDraws).toHaveLength(2);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.dynamicDraws[1].pointerDepthWeight).toBe(1.6);
+    const updatedDynamicDraw = harness.calls.dynamicDraws[1];
+    if (!updatedDynamicDraw) {
+      throw new Error("Expected the updated dynamic draw.");
+    }
+    expect(updatedDynamicDraw.pointerDepthWeight).toBe(1.6);
   });
 
   it("keeps the static cache when only dynamic pointer/alarm colors change", function () {
@@ -130,10 +139,12 @@ describe("XteDisplayWidget", function () {
 
     expect(harness.calls.staticDraws).toHaveLength(1);
     expect(harness.calls.dynamicDraws).toHaveLength(2);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.dynamicDraws[1].colors.pointer).toBe("#00ccee");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.dynamicDraws[1].colors.alarm).toBe("#ff1100");
+    const recoloredDraw = harness.calls.dynamicDraws[1];
+    if (!recoloredDraw) {
+      throw new Error("Expected the recolored dynamic draw.");
+    }
+    expect(recoloredDraw.colors.pointer).toBe("#00ccee");
+    expect(recoloredDraw.colors.alarm).toBe("#ff1100");
   });
 
   it("keeps the highway frame visible and suppresses the indicator when required values are missing", function () {
@@ -147,10 +158,13 @@ describe("XteDisplayWidget", function () {
     harness.spec.renderCanvas(canvas, makeProps({ xte: undefined }));
     expect(harness.calls.staticDraws).toHaveLength(1);
     expect(harness.calls.dynamicDraws).toHaveLength(0);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[1].value).toBe("---");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[2].value).toBe("0.72");
+    const missingXteRow = harness.calls.valueRows[1];
+    const distanceRow = harness.calls.valueRows[2];
+    if (!missingXteRow || !distanceRow) {
+      throw new Error("Expected XTE value rows.");
+    }
+    expect(missingXteRow.value).toBe("---");
+    expect(distanceRow.value).toBe("0.72");
 
     harness.spec.renderCanvas(canvas, makeProps({ disconnect: true }));
     expect(harness.calls.overlays).toBe(0);
@@ -179,12 +193,13 @@ describe("XteDisplayWidget", function () {
 
     expect(harness.calls.staticDraws).toHaveLength(1);
     expect(harness.calls.dynamicDraws).toHaveLength(1);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[0].value).toBe("---");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[2].value).toBe("---");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[3].value).toBe("---");
+    const [cogRow, , btwRow, dtwRow] = harness.calls.valueRows;
+    if (!cogRow || !btwRow || !dtwRow) {
+      throw new Error("Expected graphics-only value rows.");
+    }
+    expect(cogRow.value).toBe("---");
+    expect(btwRow.value).toBe("---");
+    expect(dtwRow.value).toBe("---");
   });
 
   it("renders noTarget state-screen when wpName is an empty string", function () {
@@ -267,10 +282,12 @@ describe("XteDisplayWidget", function () {
       })
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.layoutHistory[0].nameRect).toBeNull();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.layoutHistory[0].metricRects).toBeNull();
+    const graphicsLayout = harness.calls.layoutHistory[0];
+    if (!graphicsLayout) {
+      throw new Error("Expected graphics-only layout history.");
+    }
+    expect(graphicsLayout.nameRect).toBeNull();
+    expect(graphicsLayout.metricRects).toBeNull();
     expect(harness.calls.waypointTextFillScales).toHaveLength(0);
     expect(harness.calls.metricTextFillScales).toHaveLength(0);
     expect(harness.calls.valueRows).toHaveLength(0);
@@ -280,7 +297,7 @@ describe("XteDisplayWidget", function () {
 
   it("normalizes known formatter fallback tokens to --- across all metric rows", function () {
     const harness = createHarness({
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {unknown} value @param {{ default?: unknown, formatter?: string }} [formatterOptions] */
       applyFormatter(value, formatterOptions) {
         const cfg = formatterOptions || {};
         if (cfg.formatter === "formatDistance") {
@@ -300,13 +317,7 @@ describe("XteDisplayWidget", function () {
 
     harness.spec.renderCanvas(canvas, makeProps());
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[0].value).toBe("---");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[1].value).toBe("---");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[2].value).toBe("---");
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.valueRows[3].value).toBe("---");
+    expect(harness.calls.valueRows).toHaveLength(4);
+    harness.calls.valueRows.forEach((row) => expect(row.value).toBe("---"));
   });
 });

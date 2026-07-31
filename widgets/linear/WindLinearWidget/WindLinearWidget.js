@@ -35,7 +35,7 @@
 
     /** @param {unknown} rawSpeed @param {DyniWindLinearProps} props @param {unknown} speedUnit @param {string} defaultText @returns {string} */
     function resolveSpeedText(rawSpeed, props, speedUnit, defaultText) {
-      if (rawSpeed == null || (typeof rawSpeed === "string" && rawSpeed.trim() === "")) {
+      if (rawSpeed === null || rawSpeed === undefined || (typeof rawSpeed === "string" && rawSpeed.trim() === "")) {
         return defaultText;
       }
       const n = toOptionalFiniteNumber(rawSpeed);

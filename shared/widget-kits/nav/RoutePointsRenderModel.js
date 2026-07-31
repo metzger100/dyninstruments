@@ -126,7 +126,7 @@
 
   /** @param {string[]} parts @param {string} label @param {unknown} value */
   function appendIdentityPart(parts, label, value) {
-    if (value == null) {
+    if (value === null || value === undefined) {
       return;
     }
     const text = String(value).trim();

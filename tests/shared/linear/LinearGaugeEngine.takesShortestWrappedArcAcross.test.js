@@ -7,8 +7,7 @@ describe("LinearGaugeEngine", function () {
     const nowSpy = vi.spyOn(Date, "now");
 
     try {
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      const headingsForward = [];
+      const headingsForward = /** @type {number[]} */ ([]);
       const forwardRenderer = harness.engine.createRenderer({
         rawValueKey: "heading",
         axisMode: "fixed360",
@@ -21,7 +20,7 @@ describe("LinearGaugeEngine", function () {
           minor: "minor",
           showEndLabels: "showEndLabels"
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {{ heading?: unknown }} props */
         resolveAxis(props) {
           headingsForward.push(Number(props.heading));
           return {
@@ -52,8 +51,7 @@ describe("LinearGaugeEngine", function () {
         minor: 30
       });
 
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      const headingsBackward = [];
+      const headingsBackward = /** @type {number[]} */ ([]);
       const backwardRenderer = harness.engine.createRenderer({
         rawValueKey: "heading",
         axisMode: "fixed360",
@@ -66,7 +64,7 @@ describe("LinearGaugeEngine", function () {
           minor: "minor",
           showEndLabels: "showEndLabels"
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {{ heading?: unknown }} props */
         resolveAxis(props) {
           headingsBackward.push(Number(props.heading));
           return {
@@ -97,13 +95,9 @@ describe("LinearGaugeEngine", function () {
         minor: 30
       });
 
-      // @ts-ignore -- pre-existing untyped test mock boundary
       expect(headingsForward[0]).toBe(350);
-      // @ts-ignore -- pre-existing untyped test mock boundary
       expect(headingsForward[1]).toBeGreaterThan(350);
-      // @ts-ignore -- pre-existing untyped test mock boundary
       expect(headingsBackward[0]).toBe(10);
-      // @ts-ignore -- pre-existing untyped test mock boundary
       expect(headingsBackward[1]).toBeLessThan(10);
     } finally {
       nowSpy.mockRestore();

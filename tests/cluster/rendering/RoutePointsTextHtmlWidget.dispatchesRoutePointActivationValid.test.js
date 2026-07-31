@@ -48,7 +48,9 @@ describe("RoutePointsTextHtmlWidget", function () {
     );
 
     const row = mounted.mountEl.querySelector('[data-rp-idx="3"]');
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!row) {
+      throw new Error("Expected the route-points row.");
+    }
     row.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(activate).toHaveBeenCalledWith({
       index: 3,
@@ -63,7 +65,9 @@ describe("RoutePointsTextHtmlWidget", function () {
     });
 
     const wrapper = mounted.mountEl.querySelector(".dyni-route-points-html");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!wrapper) {
+      throw new Error("Expected the route-points wrapper.");
+    }
     wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(activate).toHaveBeenCalledTimes(1);
   });

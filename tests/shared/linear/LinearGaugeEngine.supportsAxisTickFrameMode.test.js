@@ -3,18 +3,23 @@ const { createHarness, createMockCanvas, createMockContext2D } = require("./Line
 
 describe("LinearGaugeEngine", function () {
   it("supports axis/tick/frame/mode hooks without breaking default rendering pipeline", function () {
+    /** @typedef {{ max: number, min: number }} Axis */
+    /** @typedef {{ pointerDepth: number, pointerSide: number, trackY: number }} TrackLayout */
+    /** @typedef {{ layout: TrackLayout }} RenderState */
+    /** @typedef {{ drawDefaultPointer: () => void, drawMarkerAtValue: (value: number, options: { len?: number, lineWidth?: number, strokeStyle: string }) => void, math: { mapValueToX: (...args: unknown[]) => unknown }, primitives: { drawTrack: (...args: unknown[]) => unknown } }} RenderApi */
+    /** @typedef {{ calls: DyniTestCall[] }} LayerContext */
     const harness = createHarness();
     let resolveAxisCalls = 0;
     let buildTicksCalls = 0;
     let drawFrameCalls = 0;
     let drawModeCalls = 0;
     let markerTrackY = NaN;
+    /** @type {TrackLayout | null} */
     let markerTrackLayout = null;
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const layerContexts = [];
+    const layerContexts = /** @type {LayerContext[]} */ ([]);
     const ownerDocument = {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {string} tagName */
       createElement(tagName) {
         if (String(tagName || "").toLowerCase() !== "canvas") {
           return { tagName: String(tagName || "").toUpperCase() };
@@ -27,7 +32,7 @@ describe("LinearGaugeEngine", function () {
           parentElement: null,
           __ctx: layerCtx,
           ownerDocument: ownerDocument,
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {string} type */
           getContext(type) {
             return type === "2d" ? layerCtx : null;
           },
@@ -59,25 +64,25 @@ describe("LinearGaugeEngine", function () {
         minor: "minor",
         showEndLabels: "showEndLabels"
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {unknown} props @param {unknown} range @param {Axis} defaultAxis @param {RenderApi} api */
       resolveAxis(props, range, defaultAxis, api) {
         resolveAxisCalls += 1;
         expect(defaultAxis).toEqual({ min: 0, max: 360 });
         expect(typeof api.math.mapValueToX).toBe("function");
         return { min: -180, max: 180 };
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {Axis} axis @param {unknown} tickMajor @param {unknown} tickMinor @param {unknown} props @param {RenderApi} api */
       buildTicks(axis, tickMajor, tickMinor, props, api) {
         buildTicksCalls += 1;
         expect(axis).toEqual({ min: -180, max: 180 });
         expect(typeof api.primitives.drawTrack).toBe("function");
         return { major: [0], minor: [-90, 90] };
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {number} tickValue */
       formatTickLabel(tickValue) {
         return "L" + String(Math.round(tickValue));
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {RenderState} state @param {unknown} props @param {unknown} display @param {RenderApi} api */
       drawFrame(state, props, display, api) {
         drawFrameCalls += 1;
         markerTrackY = state.layout.trackY;
@@ -91,7 +96,7 @@ describe("LinearGaugeEngine", function () {
         api.drawMarkerAtValue(75, { strokeStyle: "#3366cc" });
       },
       drawMode: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {RenderState} state @param {unknown} props @param {unknown} display @param {RenderApi} api */
         normal(state, props, display, api) {
           drawModeCalls += 1;
         }
@@ -121,11 +126,9 @@ describe("LinearGaugeEngine", function () {
     expect(drawModeCalls).toBe(1);
     expect(harness.calls.pointer).toHaveLength(1);
     const explicitMarker = harness.calls.ticks.find(function (entry) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       return entry.opts && entry.opts.strokeStyle === "#00ff00";
     });
     const defaultMarker = harness.calls.ticks.find(function (entry) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       return entry.opts && entry.opts.strokeStyle === "#3366cc";
     });
     expect(explicitMarker).toEqual(
@@ -146,37 +149,34 @@ describe("LinearGaugeEngine", function () {
       })
     );
     expect(markerTrackLayout).toBeTruthy();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.pointer[0] && harness.calls.pointer[0].opts && harness.calls.pointer[0].opts.depth).toBe(
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      markerTrackLayout.pointerDepth
+    const pointer = harness.calls.pointer[0];
+    if (
+      !markerTrackLayout ||
+      !pointer ||
+      !pointer.opts ||
+      !defaultMarker ||
+      !defaultMarker.opts ||
+      !explicitMarker ||
+      !explicitMarker.opts
+    ) {
+      throw new Error("Expected linear gauge draw calls and layout.");
+    }
+    const resolvedMarkerLayout = /** @type {TrackLayout} */ (markerTrackLayout);
+    const resolvedDefaultMarker = /** @type {{ len: number, opts: { lineWidth: number }, y: number }} */ (
+      /** @type {unknown} */ (defaultMarker)
     );
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(harness.calls.pointer[0] && harness.calls.pointer[0].opts && harness.calls.pointer[0].opts.side).toBe(
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      Math.max(1, Math.floor(markerTrackLayout.pointerSide / 2))
-    );
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(defaultMarker && defaultMarker.len).toBe(Math.max(1, Math.floor(markerTrackLayout.pointerDepth * 0.45)));
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(defaultMarker && defaultMarker.opts && defaultMarker.opts.lineWidth).toBe(
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      Math.max(1, Math.floor(markerTrackLayout.pointerDepth * 0.2))
-    );
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(defaultMarker && defaultMarker.y - defaultMarker.len).toBe(markerTrackY);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(explicitMarker && explicitMarker.len).toBe(9);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(explicitMarker && explicitMarker.opts && explicitMarker.opts.lineWidth).toBe(7);
+    expect(pointer.opts.depth).toBe(resolvedMarkerLayout.pointerDepth);
+    expect(pointer.opts.side).toBe(Math.max(1, Math.floor(resolvedMarkerLayout.pointerSide / 2)));
+    expect(resolvedDefaultMarker.len).toBe(Math.max(1, Math.floor(resolvedMarkerLayout.pointerDepth * 0.45)));
+    expect(resolvedDefaultMarker.opts.lineWidth).toBe(Math.max(1, Math.floor(resolvedMarkerLayout.pointerDepth * 0.2)));
+    expect(resolvedDefaultMarker.y - resolvedDefaultMarker.len).toBe(markerTrackY);
+    expect(explicitMarker.len).toBe(9);
+    expect(explicitMarker.opts.lineWidth).toBe(7);
     expect(harness.calls.drawCaptionMax).toBe(0);
     expect(harness.calls.drawValueUnitWithFit).toBe(0);
     expect(harness.calls.drawInlineCapValUnit).toBe(0);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const fillTextCalls = layerContexts
-      .flatMap((lc) => (lc && lc.calls) || [])
-      .filter((entry) => entry.name === "fillText");
+    const fillTextCalls = layerContexts.flatMap((lc) => lc.calls).filter((entry) => entry.name === "fillText");
     const labels = fillTextCalls.map((entry) => entry.args[0]);
     expect(labels).toContain("L0");
   });

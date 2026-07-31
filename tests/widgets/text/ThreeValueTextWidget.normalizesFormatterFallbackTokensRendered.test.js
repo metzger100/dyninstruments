@@ -49,6 +49,9 @@ describe("ThreeValueTextWidget", function () {
     const valueCall = findTextCall(captured, " 07.5");
 
     expect(valueCall).toBeTruthy();
+    if (!valueCall) {
+      throw new Error("Expected the stable-digits value text capture.");
+    }
     expect(String(valueCall.font)).toContain("monospace");
   });
 });

@@ -1,7 +1,6 @@
 # Runtime Lifecycle
 
-**Status:** ✅ Implemented | dual-entrypoint plugin startup ownership + runtime theme commit materialization +
-commit-driven surface reconciliation
+**Status:** Current. commit-driven surface reconciliation
 
 ## Overview
 

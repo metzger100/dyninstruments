@@ -20,12 +20,12 @@ describe("DefaultLinearWidget", function () {
     const placeholderNormalize = opts.placeholderNormalize || {
       /** @param {any} text @param {any} defaultText @returns {any} */
       normalize(text, defaultText) {
-        if (text == null) {
-          return defaultText == null ? "---" : defaultText;
+        if (text === null || text === undefined) {
+          return defaultText === null || defaultText === undefined ? "---" : defaultText;
         }
         const value = String(text).trim();
         if (!value || value === "NO DATA" || /^-+$/.test(value)) {
-          return defaultText == null ? "---" : defaultText;
+          return defaultText === null || defaultText === undefined ? "---" : defaultText;
         }
         return String(text);
       }
@@ -33,7 +33,7 @@ describe("DefaultLinearWidget", function () {
     const valueMath = opts.valueMath || {
       /** @param {any} value @returns {any} */
       toOptionalFiniteNumber(value) {
-        if (value == null) return undefined;
+        if (value === null || value === undefined) return undefined;
         if (typeof value === "string" && value.trim() === "") return undefined;
         const n = Number(value);
         return Number.isFinite(n) ? n : undefined;

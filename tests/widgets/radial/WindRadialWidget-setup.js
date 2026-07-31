@@ -10,11 +10,15 @@ const { createWindCachingHarness } = require("./WindRadialWidget.caching.harness
 
 const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 
+/**
+ * @typedef {{ left: { value: string }, mode: unknown, opts: unknown, right: { value: string } }} WindDrawCall
+ * @typedef {{ drawMode: { normal: (state: unknown, props: Record<string, unknown>) => void }, rebuildLayer: (...args: unknown[]) => unknown }} WindRendererConfig
+ */
+
 function createCapturedSpec() {
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @type {WindRendererConfig | undefined} */
   let captured;
-  // @ts-ignore -- pre-existing untyped test mock boundary
-  const drawCalls = [];
+  const drawCalls = /** @type {WindDrawCall[]} */ ([]);
   loadFresh("widgets/radial/WindRadialWidget/WindRadialWidget.js").create(
     {},
     createComponentContextMock({
@@ -26,9 +30,16 @@ function createCapturedSpec() {
         FullCircleRadialTextLayout: {
           create() {
             return {
-              // @ts-ignore -- pre-existing untyped test mock boundary
+              /** @param {unknown} state @param {unknown} mode @param {unknown} left @param {unknown} right @param {unknown} opts */
               drawDualModeText(state, mode, left, right, opts) {
-                drawCalls.push({ mode, left, right, opts });
+                drawCalls.push(
+                  /** @type {WindDrawCall} */ ({
+                    mode,
+                    left: /** @type {{ value: string }} */ (left),
+                    right: /** @type {{ value: string }} */ (right),
+                    opts
+                  })
+                );
               }
             };
           }
@@ -36,9 +47,9 @@ function createCapturedSpec() {
         FullCircleRadialEngine: {
           create() {
             return {
-              // @ts-ignore -- pre-existing untyped test mock boundary
+              /** @param {unknown} cfg */
               createRenderer(cfg) {
-                captured = cfg;
+                captured = /** @type {WindRendererConfig} */ (cfg);
                 return function () {};
               }
             };
@@ -47,7 +58,7 @@ function createCapturedSpec() {
       },
       services: {
         format: {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {unknown} value */
           applyFormatter(value) {
             return String(value);
           }
@@ -57,10 +68,11 @@ function createCapturedSpec() {
   );
   return {
     get cfg() {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      if (!captured) {
+        throw new Error("Wind renderer configuration was not captured.");
+      }
       return captured;
     },
-    // @ts-ignore -- pre-existing untyped test mock boundary
     drawCalls
   };
 }

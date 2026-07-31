@@ -32,10 +32,13 @@ describe("CenterDisplayTextWidget", function () {
     expect(lat).toBeTruthy();
     expect(lon).toBeTruthy();
     expect(wp).toBeTruthy();
-    expect(center.x).toBeLessThan(lat.x);
-    expect(center.x).toBeLessThan(lon.x);
     expect(latCall).toBeTruthy();
     expect(lonCall).toBeTruthy();
+    if (!center || !lat || !lon || !wp || !latCall || !lonCall) {
+      throw new Error("Expected every relation-row text to be captured.");
+    }
+    expect(center.x).toBeLessThan(lat.x);
+    expect(center.x).toBeLessThan(lon.x);
     expect(latCall.textAlign).toBe("right");
     expect(lonCall.textAlign).toBe("right");
     expect(lat.y).toBeLessThan(wp.y);

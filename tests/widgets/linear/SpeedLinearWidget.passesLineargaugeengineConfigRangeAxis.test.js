@@ -24,12 +24,12 @@ describe("SpeedLinearWidget", function () {
               return {
                 /** @param {any} text @param {any} defaultText @returns {any} */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   const value = String(text).trim();
                   return value === "NO DATA" || /^-+$/.test(value)
-                    ? defaultText == null
+                    ? defaultText === null || defaultText === undefined
                       ? "---"
                       : defaultText
                     : String(text);
@@ -177,12 +177,12 @@ describe("SpeedLinearWidget", function () {
               return {
                 /** @param {any} text @param {any} defaultText @returns {any} */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   const value = String(text).trim();
                   return value === "NO DATA" || /^-+$/.test(value)
-                    ? defaultText == null
+                    ? defaultText === null || defaultText === undefined
                       ? "---"
                       : defaultText
                     : String(text);

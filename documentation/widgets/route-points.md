@@ -1,6 +1,6 @@
 # Route Points HTML Renderer
 
-**Status:** ✅ Implemented | Committed HTML renderer for nav/routePoints with parity bridge dispatch
+**Status:** Current.
 
 ## Overview
 

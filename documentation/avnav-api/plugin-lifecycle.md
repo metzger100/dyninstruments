@@ -1,6 +1,6 @@
 # Plugin Lifecycle (AvNav Host API)
 
-**Status:** ✅ Reference | Host-facing widget lifecycle callbacks and dyninstruments integration notes
+**Status:** Current.
 
 ## Overview
 

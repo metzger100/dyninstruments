@@ -1,6 +1,6 @@
 # Default Instruments Cluster
 
-**Status:** ✅ Implemented | `config/clusters/default.js`
+**Status:** Current.
 
 ## Overview
 

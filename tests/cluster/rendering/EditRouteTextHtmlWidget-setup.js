@@ -6,12 +6,20 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @typedef {Record<string, unknown>} EditRouteProps
+ * @typedef {{ buildModel?: (args: { props?: EditRouteProps }) => unknown, fitCompute?: () => unknown, markupRender?: { mock?: { calls: unknown[][] } } & ((args: { model?: Record<string, unknown> & { canOpenEditRoute?: boolean } }) => string) }} RendererOptions
+ * @typedef {{ mode?: string, openEditRoute?: () => boolean, orientation?: string, pageId?: string }} SurfaceOptions
+ * @typedef {{ __dyniHostCommitState?: { rootEl: HTMLElement, shellEl: HTMLElement } }} HostContext
+ * @typedef {{ createCommittedRenderer: (options: { hostContext: HostContext, mountEl: HTMLElement, shadowRoot: null }) => { destroy: () => unknown, detach: () => unknown, layoutSignature: (...args: unknown[]) => unknown, mount: (mountEl: HTMLElement, payload: unknown) => void, postPatch: (payload: unknown) => void, update: (payload: unknown) => void } }} RendererSpec
+ */
+
+/** @param {RendererOptions} [options] */
 function createRenderer(options) {
   const opts = options || {};
   const buildModel =
     opts.buildModel ||
-    vi.fn(function (args) {
+    vi.fn(function (/** @type {{ props?: EditRouteProps }} */ args) {
       const props = args && args.props ? args.props : {};
       const canOpen = props.__canOpen === true;
       return {
@@ -42,7 +50,7 @@ function createRenderer(options) {
     }));
   const markupRender =
     opts.markupRender ||
-    vi.fn(function (args) {
+    vi.fn(function (/** @type {{ model?: Record<string, unknown> & { canOpenEditRoute?: boolean } }} */ args) {
       const model = args && args.model ? args.model : {};
       const state = model.canOpenEditRoute ? "dispatch" : "passive";
       return (
@@ -98,7 +106,7 @@ function createRenderer(options) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {EditRouteProps} props @param {SurfaceOptions} [options] */
 function withSurfacePolicy(props, options) {
   const opts = options || {};
   const mode = opts.mode === "passive" ? "passive" : "dispatch";
@@ -119,11 +127,11 @@ function withSurfacePolicy(props, options) {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {RendererSpec} rendererSpec @param {EditRouteProps} props @param {{ hostContext?: HostContext, shellSize?: { height: number, width: number } }} [options] */
 function mountCommitted(rendererSpec, props, options) {
   const opts = options || {};
   const shellSize = opts.shellSize || { width: 320, height: 180 };
-  const hostContext = opts.hostContext || {};
+  const hostContext = opts.hostContext || /** @type {HostContext} */ ({});
   const rootEl = document.createElement("div");
   rootEl.className = "widget dyniplugin dyni-host-html";
   const shellEl = document.createElement("div");
@@ -134,10 +142,18 @@ function mountCommitted(rendererSpec, props, options) {
   rootEl.appendChild(shellEl);
   hostContext.__dyniHostCommitState = { rootEl, shellEl };
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
   mountEl.getBoundingClientRect = vi.fn(() => ({
+    bottom: shellSize.height,
     width: shellSize.width,
-    height: shellSize.height
+    height: shellSize.height,
+    left: 0,
+    right: shellSize.width,
+    top: 0,
+    x: 0,
+    y: 0,
+    toJSON() {
+      return {};
+    }
   }));
 
   const committed = rendererSpec.createCommittedRenderer({
@@ -148,7 +164,7 @@ function mountCommitted(rendererSpec, props, options) {
 
   let revision = 0;
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {EditRouteProps} nextProps @param {boolean} layoutChanged */
   function payload(nextProps, layoutChanged) {
     revision += 1;
     return {
@@ -172,7 +188,7 @@ function mountCommitted(rendererSpec, props, options) {
   return {
     mountEl,
     committed,
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {EditRouteProps} nextProps @param {boolean} layoutChanged */
     update(nextProps, layoutChanged) {
       const next = payload(nextProps, layoutChanged === true);
       committed.update(next);
@@ -184,7 +200,7 @@ function mountCommitted(rendererSpec, props, options) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {EditRouteProps} props */
 function withSurfacePolicyNoRouteEditor(props) {
   return Object.assign({}, props || {}, {
     surfacePolicy: {
@@ -196,7 +212,7 @@ function withSurfacePolicyNoRouteEditor(props) {
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {EditRouteProps} props */
 function withSurfacePolicyBadOpenEditRoute(props) {
   return Object.assign({}, props || {}, {
     surfacePolicy: {

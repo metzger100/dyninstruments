@@ -4,7 +4,7 @@ This file is guidance for agents working in this repository.
 
 <!-- BEGIN SHARED_INSTRUCTIONS -->
 
-**Critical:** AGENTS.md is a routing map. Use it to find focused docs, not to store full implementation details.
+**Critical:** This file is a routing map. Use it to find focused documentation, not to store implementation details.
 
 ---
 
@@ -68,6 +68,13 @@ explicit README deliverables and exit conditions for these categories.
       classifications; no suppression, skip, or lowered threshold was added to reach green.
 - [ ] For releases, followed this project's release workflow exactly, without rerunning quality inside the publish step.
 
+---
+
+## Required Documentation Shape
+
+Every maintained documentation page has a title, a plain `**Status:** Current.` line, and `## Overview`,
+`## Key Details`, and `## Related` sections. Additional interface material is optional when it helps explain a public
+contract. Keep documentation concise, concrete, and linked from the navigation index when it is new.
 <!-- END SHARED_INSTRUCTIONS -->
 
 ---
@@ -96,54 +103,8 @@ explicit README deliverables and exit conditions for these categories.
 
 ## 6. Documentation Structure Reference
 
-```text
-documentation/
-├── TABLEOFCONTENTS.md              # Navigation index (read THIS FIRST)
-├── core-principles.md              # Non-negotiable project rules
-├── avnav-api/
-│   ├── plugin-lifecycle.md         # registerWidget, render cycle, props
-│   ├── editable-parameters.md      # Types, conditions, defaults
-│   └── formatters.md               # formatSpeed, formatDistance, etc.
-├── architecture/
-│   ├── component-system.md            # UMD loader, dependencies, config/components.js
-│   └── cluster-widget-system.md       # ClusterWidget, kind→renderer routing
-├── radial/
-│   ├── gauge-style-guide.md        # Proportions, colors, pointer, layout modes
-│   └── gauge-shared-api.md         # Shared RadialToolkit API documentation
-├── shared/
-│   ├── helpers.md                  # Component context services (canvas setup, resolveTextColor)
-│   ├── css-theming.md              # CSS vars, day/night, font stack
-│   └── theme-tokens.md             # runtime.theme token snapshot + cache behavior
-├── widgets/
-│   ├── semicircle-gauges.md        # Speed/Depth/Temperature/Voltage shared
-│   ├── three-elements.md           # ThreeValueTextWidget numeric renderer
-│   ├── wind-dial.md                # WindRadialWidget full-circle wind compass
-│   └── compass-gauge.md            # CompassRadialWidget rotating compass card
-└── guides/
-    ├── add-new-gauge.md            # Step-by-step: create a new gauge
-    ├── add-new-cluster.md          # Step-by-step: create a new cluster widget
-    └── documentation-maintenance.md # Docs sync + validation workflow
-```
-
-### Example Workflow
-
-**Bad (Token wasteful):**
-
-```text
-Task: Add new BarometerGauge
-❌ Read all documentation files and large source areas sequentially.
-```
-
-**Good (Token efficient):**
-
-```text
-Task: Add new BarometerGauge
-✅ Read TABLEOFCONTENTS.md
-✅ Read conventions/coding-standards.md and conventions/smell-prevention.md
-✅ Identify: guides/add-new-gauge.md, radial/gauge-style-guide.md
-✅ Read only those 2 additional files
-✅ Begin implementation
-```
+Use [documentation/TABLEOFCONTENTS.md](documentation/TABLEOFCONTENTS.md) as the maintained documentation map. It is the
+only source of the directory structure and canonical documentation links.
 
 ---
 

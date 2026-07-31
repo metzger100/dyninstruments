@@ -4,6 +4,15 @@ const { createMockCanvas, createMockContext2D } = require("../helpers/mock-canva
 
 const { createComponentContextMock } = require("../helpers/component-context-mock");
 
+/**
+ * @typedef {{ default?: unknown, formatter?: string, formatterParameters?: unknown[] }} FormatterOptions
+ * @typedef {{ ratioThresholdFlat: number, ratioThresholdNormal: number }} ActiveRouteProps
+ * @typedef {{ normalize: (value: string, fallback: unknown) => unknown }} PlaceholderNormalize
+ * @typedef {{ resolveRatioModeForRect: (options: Record<string, unknown>) => unknown }} HtmlUtils
+ * @typedef {{ createCommittedRenderer: (options: { hostContext: HostContext, mountEl: HTMLElement, shadowRoot: null }) => { mount: (mountEl: HTMLElement, payload: unknown) => void, postPatch: (payload: unknown) => void } }} RendererSpec
+ * @typedef {{ __dyniHostCommitState?: { rootEl: HTMLElement, shellEl: HTMLElement } }} HostContext
+ */
+
 function createActiveRouteWidget() {
   const fitCompute = vi.fn(function () {
     return {
@@ -16,11 +25,11 @@ function createActiveRouteWidget() {
     };
   });
   const htmlFitStub = {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {ActiveRouteProps} props */
     ensureDisplayProps(props) {
       return props;
     },
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {ActiveRouteProps} props @param {unknown} shellRect @param {HtmlUtils} htmlUtils */
     resolveDisplayMode(props, shellRect, htmlUtils) {
       return htmlUtils.resolveRatioModeForRect({
         shellRect: shellRect,
@@ -31,7 +40,7 @@ function createActiveRouteWidget() {
         defaultMode: "normal"
       });
     },
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {unknown} rawValue @param {unknown} formatter @param {unknown[]} formatterParameters @param {unknown} defaultText @param {PlaceholderNormalize} placeholderNormalize */
     formatActiveRouteMetric(rawValue, formatter, formatterParameters, defaultText, placeholderNormalize) {
       const out = String(
         componentContext.format.applyFormatter(rawValue, {
@@ -42,11 +51,11 @@ function createActiveRouteWidget() {
       );
       return placeholderNormalize.normalize(out, defaultText);
     },
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {unknown} value */
     textLength(value) {
-      return value == null ? 0 : String(value).length;
+      return value === null || value === undefined ? 0 : String(value).length;
     },
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {string} rawText @param {boolean} stableDigitsEnabled @param {{ normalize: (value: string, options: Record<string, unknown>) => unknown, resolveIntegerWidth: (value: string, minWidth: number) => number }} stableDigits @param {number} minWidth */
     normalizeStableValue(rawText, stableDigitsEnabled, stableDigits, minWidth) {
       if (!stableDigitsEnabled) {
         return { padded: rawText, plain: rawText };
@@ -72,10 +81,10 @@ function createActiveRouteWidget() {
     },
     services: {
       format: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {unknown} value @param {FormatterOptions} [formatterOptions] */
         applyFormatter(value, formatterOptions) {
           const cfg = formatterOptions || {};
-          return value == null ? cfg.default : String(value);
+          return value === null || value === undefined ? cfg.default : String(value);
         }
       },
       themeTokens: {
@@ -95,9 +104,9 @@ function createActiveRouteWidget() {
   return loadFresh("widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js").create({}, componentContext);
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {RendererSpec} rendererSpec @param {unknown} props */
 function mountHtml(rendererSpec, props) {
-  const hostContext = {};
+  const hostContext = /** @type {HostContext} */ ({});
   const rootEl = document.createElement("div");
   const shellEl = document.createElement("div");
   const mountEl = document.createElement("div");
@@ -124,8 +133,8 @@ function mountHtml(rendererSpec, props) {
 }
 
 function createRenderModelContext() {
-  const moduleCache = Object.create(null);
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  const moduleCache = /** @type {Record<string, unknown>} */ (Object.create(null));
+  /** @param {string} id */
   function loadModuleById(id) {
     if (!moduleCache[id]) {
       if (id === "EditRouteLayout") {
@@ -225,10 +234,10 @@ function createRenderModelContext() {
     modules,
     services: {
       format: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {unknown} value @param {FormatterOptions} [formatterOptions] */
         applyFormatter(value, formatterOptions) {
           const cfg = formatterOptions || {};
-          if (value == null || Number.isNaN(value)) {
+          if (value === null || value === undefined || Number.isNaN(value)) {
             return Object.prototype.hasOwnProperty.call(cfg, "default") ? cfg.default : "---";
           }
           if (cfg.formatter === "formatDecimal") {
@@ -291,7 +300,7 @@ function createSpringMotion() {
   return loadFresh("shared/widget-kits/anim/SpringEasing.js").create({}, createComponentContextMock({})).createMotion();
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {Element} root @param {string} selector */
 function readTextContent(root, selector) {
   const node = root.querySelector(selector);
   return node ? node.textContent : "";

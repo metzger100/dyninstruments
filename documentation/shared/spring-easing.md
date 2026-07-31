@@ -1,6 +1,6 @@
 # Spring Easing
 
-**Status:** ✅ Active | Critically damped spring smoothing for animated canvas values
+**Status:** Current.
 
 ## Overview
 

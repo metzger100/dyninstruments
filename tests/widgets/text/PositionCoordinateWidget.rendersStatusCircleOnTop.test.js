@@ -47,11 +47,10 @@ describe("PositionCoordinateWidget", function () {
 
   it("supports the timeStatus display variant without wrapper props", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     globalThis.avnav = {
       api: {
         formatter: {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {unknown} value @returns {string} */
           formatTime(value) {
             return value === rawClock ? "TIME_OBJ" : "TIME_BAD";
           }
@@ -89,11 +88,10 @@ describe("PositionCoordinateWidget", function () {
 
   it("uses formatClock on the lon axis for timeStatus when hideSeconds is enabled", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     globalThis.avnav = {
       api: {
         formatter: {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {unknown} value @returns {string} */
           formatClock(value) {
             return value === rawClock ? "CLOCK_OBJ" : "CLOCK_BAD";
           }
@@ -131,7 +129,7 @@ describe("PositionCoordinateWidget", function () {
   });
 
   it("downscales timeStatus emoji lines in flat mode to avoid clipping", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {string} statusText @returns {{ texts: string[], finalValuePx: number }} */
     function renderFlatCase(statusText) {
       const helpers = makeComponentContext();
       const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
@@ -156,9 +154,11 @@ describe("PositionCoordinateWidget", function () {
         ratioThresholdFlat: 3.0,
         default: "NA"
       });
+      const finalValueCall = findTextCall(captured, statusText + " 15:49:45");
+      if (!finalValueCall) throw new Error("expected final status text call to be captured");
       return {
         texts: fillTextValues(ctx),
-        finalValuePx: parseFontPx(findTextCall(captured, statusText + " 15:49:45").font)
+        finalValuePx: parseFontPx(finalValueCall.font)
       };
     }
 
@@ -173,7 +173,7 @@ describe("PositionCoordinateWidget", function () {
   });
 
   it("downscales timeStatus emoji in high mode to avoid top-line clipping", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {string} statusText @returns {{ texts: string[], finalValuePx: number }} */
     function renderHighCase(statusText) {
       const helpers = makeComponentContext();
       const spec = loadFresh("widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js").create({}, helpers);
@@ -197,8 +197,9 @@ describe("PositionCoordinateWidget", function () {
         ratioThresholdFlat: 3.0,
         default: "NA"
       });
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      const valuePx = helpers.fontCalls.filter((entry) => entry.weight === 730).map((entry) => entry.px);
+      const valuePx = helpers.fontCalls
+        .filter(/** @param {{ weight: number, px: number }} entry */ (entry) => entry.weight === 730)
+        .map(/** @param {{ weight: number, px: number }} entry */ (entry) => entry.px);
       return {
         texts: fillTextValues(ctx),
         finalValuePx: valuePx.length ? valuePx[valuePx.length - 1] : 0
@@ -219,15 +220,14 @@ describe("PositionCoordinateWidget", function () {
 
   it("renders stacked raw date/time values in normal mode", function () {
     const rawClock = new Date("2026-02-22T15:00:00Z");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     globalThis.avnav = {
       api: {
         formatter: {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {unknown} value @returns {string} */
           formatDate(value) {
             return value === rawClock ? "DATE_RAW" : "DATE_BAD";
           },
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {unknown} value @returns {string} */
           formatTime(value) {
             return value === rawClock ? "TIME_RAW" : "TIME_BAD";
           }
@@ -264,7 +264,6 @@ describe("PositionCoordinateWidget", function () {
     const formatter = vi.fn((value, axis) => {
       return axis === "lat" ? "LAT:" + Number(value).toFixed(2) : "LON:" + Number(value).toFixed(2);
     });
-    // @ts-ignore -- pre-existing untyped test mock boundary
     globalThis.avnav = {
       api: { formatter: { formatLonLatsDecimal: formatter } }
     };
@@ -292,10 +291,8 @@ describe("PositionCoordinateWidget", function () {
       });
 
       const texts = fillTextValues(ctx);
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      expect(texts.some((t) => t.startsWith("LAT:54.12"))).toBe(true);
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      expect(texts.some((t) => t.startsWith("LON:10.99"))).toBe(true);
+      expect(texts.some(/** @param {string} t */ (t) => t.startsWith("LAT:54.12"))).toBe(true);
+      expect(texts.some(/** @param {string} t */ (t) => t.startsWith("LON:10.99"))).toBe(true);
     });
 
     expect(formatter).toHaveBeenCalled();

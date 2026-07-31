@@ -1,6 +1,6 @@
 # Guide: Documentation Maintenance
 
-**Status:** ✅ Active | Workflow for keeping docs aligned with code
+**Status:** Current.
 
 ## Overview
 
@@ -170,7 +170,7 @@ boundaries.
 
 `check-patterns` is enforced in full mode inside `check:core`. Every live rule is blocking (there are no warn-only
 rollout rules); a live rule reporting any finding fails the gate. This includes fail-closed cross-file clone detection
-(`duplicate-functions`, `duplicate-block-clones`), block-mode atomicity/fail-fast rules (`internal-hook-fallback`,
+(`duplicate-functions`, `duplicate-block-clones`), block-mode atomicity/fail-fast rules (`internal-contract-fallback`,
 `redundant-null-type-guard`, `hardcoded-runtime-default`, `widget-renderer-default-duplication`,
 `engine-layout-default-drift`, `canvas-api-typeof-guard`, `try-finally-canvas-drawing`, `framework-method-typeof-guard`,
 `inline-config-default-duplication`), fail-closed repository hygiene rules (`absolute-home-path`), the blocking mapper

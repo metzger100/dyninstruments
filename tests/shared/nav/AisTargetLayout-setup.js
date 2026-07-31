@@ -20,7 +20,7 @@ function createLayout() {
   );
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {{ captionRect: { h: number, y: number }, unitRect: { y: number }, valueRect: { h: number, y: number }}} box */
 function expectStackedSubRects(box) {
   expect(box.captionRect).toBeTruthy();
   expect(box.valueRect).toBeTruthy();
@@ -29,7 +29,7 @@ function expectStackedSubRects(box) {
   expect(box.unitRect.y).toBeGreaterThanOrEqual(box.valueRect.y + box.valueRect.h);
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {{ labelRect: { w: number, x: number }, unitRect: { x: number }, valueRect: { x: number }, valueTextRect: { w: number, x: number }}} box */
 function expectInlineSubRects(box) {
   expect(box.labelRect).toBeTruthy();
   expect(box.valueRect).toBeTruthy();
@@ -39,13 +39,13 @@ function expectInlineSubRects(box) {
   expect(box.unitRect.x).toBeGreaterThanOrEqual(box.valueTextRect.x + box.valueTextRect.w);
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} styleText @param {string} key */
 function readPxFromStyle(styleText, key) {
   const match = String(styleText || "").match(new RegExp(key + ":(\\d+)px;"));
   return match ? Number(match[1]) : NaN;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {number} shellWidth */
 function expectedAlarmStripWidth(shellWidth) {
   const preferred = Math.round(shellWidth * 0.072);
   const maxWidth = Math.max(8, Math.floor(shellWidth * 0.19));

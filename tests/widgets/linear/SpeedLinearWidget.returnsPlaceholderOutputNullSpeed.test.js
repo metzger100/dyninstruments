@@ -3,8 +3,10 @@ const { createComponentContextMock, loadFresh } = require("./SpeedLinearWidget-s
 
 describe("SpeedLinearWidget", function () {
   it("returns placeholder output for null speed values", function () {
+    /** @typedef {{ formatDisplay: (value: unknown, props: Record<string, unknown>, unit: string) => { num: number, text: string } }} FormatConfig */
+    /** @type {FormatConfig | undefined} */
     let captured;
-    const applyFormatter = vi.fn((value) => String(value));
+    const applyFormatter = vi.fn((/** @type {unknown} */ value) => String(value));
 
     loadFresh("widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js").create(
       {},
@@ -13,10 +15,10 @@ describe("SpeedLinearWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   return String(text);
                 }
@@ -26,13 +28,13 @@ describe("SpeedLinearWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} raw @param {Record<string, unknown>} props @param {(value: number, options: Record<string, unknown>) => unknown} apply @param {(text: unknown, defaultText: unknown) => unknown} normalize @param {unknown} defaultFormatter @param {unknown} defaultParameters */
                 formatGaugeDisplay(raw, props, apply, normalize, defaultFormatter, defaultParameters) {
                   const p = props || {};
                   const defaultText = Object.prototype.hasOwnProperty.call(p, "default")
                     ? p.default
                     : normalize(undefined, undefined);
-                  if (raw == null) {
+                  if (raw === null || raw === undefined) {
                     return { num: NaN, text: defaultText };
                   }
                   const n = Number(raw);
@@ -57,8 +59,8 @@ describe("SpeedLinearWidget", function () {
                   );
                   const match = String(formatted).match(new RegExp("-?\\d+(?:\\.\\d+)?"));
                   const num = match ? Number(match[0]) : NaN;
-                  // @ts-ignore -- pre-existing untyped test mock boundary
-                  return Number.isFinite(num) ? { num: num, text: match[0] } : { num: NaN, text: defaultText };
+                  const text = match ? match[0] : defaultText;
+                  return Number.isFinite(num) ? { num: num, text: text } : { num: NaN, text: defaultText };
                 },
                 resolveStandardTickSteps() {
                   return { major: 5, minor: 1 };
@@ -69,7 +71,7 @@ describe("SpeedLinearWidget", function () {
           LinearGaugeEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {FormatConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -84,7 +86,9 @@ describe("SpeedLinearWidget", function () {
       })
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!captured) {
+      throw new Error("Expected the speed-linear formatter configuration.");
+    }
     expect(captured.formatDisplay(null, {}, "kn")).toEqual({
       num: NaN,
       text: "---"
@@ -93,7 +97,8 @@ describe("SpeedLinearWidget", function () {
   });
 
   it("treats blank and missing high-end thresholds as unset", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @typedef {{ buildSectors: (props: Record<string, unknown>, min: number, max: number, axis: { max: number, min: number }, valueApi: { clamp: (value: unknown, min: number, max: number) => number }, theme: { colors: { alarm: string, warning: string } }) => unknown[] }} SectorConfig */
+    /** @type {SectorConfig | undefined} */
     let captured;
 
     loadFresh("widgets/linear/SpeedLinearWidget/SpeedLinearWidget.js").create(
@@ -103,10 +108,10 @@ describe("SpeedLinearWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   return String(text);
                 }
@@ -116,7 +121,7 @@ describe("SpeedLinearWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} raw */
                 formatGaugeDisplay(raw) {
                   const n = Number(raw);
                   return Number.isFinite(n) ? { num: n, text: String(n) } : { num: NaN, text: "---" };
@@ -130,7 +135,7 @@ describe("SpeedLinearWidget", function () {
           LinearGaugeEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {SectorConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -141,7 +146,7 @@ describe("SpeedLinearWidget", function () {
         },
         services: {
           format: {
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {unknown} value */
             applyFormatter(value) {
               return String(value);
             }
@@ -153,16 +158,20 @@ describe("SpeedLinearWidget", function () {
     const theme = { colors: { warning: "#123456", alarm: "#654321" } };
     const axis = { min: 0, max: 30 };
     const valueApi = {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {unknown} v @param {number} lo @param {number} hi */
       clamp(v, lo, hi) {
         return Math.max(lo, Math.min(hi, Number(v)));
       }
     };
 
+    if (!captured) {
+      throw new Error("Expected the speed-linear sectors configuration.");
+    }
+    const sectorConfig = captured;
+
     [null, undefined, "", "   "].forEach(function (rawThreshold) {
       expect(
-        // @ts-ignore -- pre-existing untyped test mock boundary
-        captured.buildSectors(
+        sectorConfig.buildSectors(
           {
             speedLinearWarningFrom: rawThreshold,
             speedLinearAlarmFrom: rawThreshold
@@ -177,8 +186,7 @@ describe("SpeedLinearWidget", function () {
     });
 
     expect(
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      captured.buildSectors(
+      sectorConfig.buildSectors(
         {
           speedLinearWarningFrom: 20,
           speedLinearAlarmFrom: 25

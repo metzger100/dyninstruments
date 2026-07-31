@@ -3,8 +3,9 @@ const { createHarness, createMockCanvas, createMockContext2D } = require("./Line
 
 describe("LinearGaugeEngine", function () {
   it("uses placeholder text for missing input on the default formatDisplay fallback", function () {
+    /** @typedef {{ num: number, text: string }} DisplaySnapshot */
     const harness = createHarness();
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @type {DisplaySnapshot | null} */
     let displaySnapshot = null;
     const renderer = harness.engine.createRenderer({
       rawValueKey: "value",
@@ -17,7 +18,7 @@ describe("LinearGaugeEngine", function () {
         minor: "minor",
         showEndLabels: "showEndLabels"
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {unknown} state @param {unknown} props @param {DisplaySnapshot} display @param {{ drawDefaultPointer: () => void }} api */
       drawFrame(state, props, display, api) {
         displaySnapshot = display;
         api.drawDefaultPointer();
@@ -41,11 +42,11 @@ describe("LinearGaugeEngine", function () {
         f: 3.5
       });
 
-      // @ts-ignore -- pre-existing untyped test mock boundary
       expect(displaySnapshot).toBeTruthy();
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      if (!displaySnapshot) {
+        throw new Error("Expected a display snapshot from drawFrame.");
+      }
       expect(Number.isNaN(displaySnapshot.num)).toBe(true);
-      // @ts-ignore -- pre-existing untyped test mock boundary
       expect(displaySnapshot.text).toBe("---");
     });
 
@@ -60,9 +61,11 @@ describe("LinearGaugeEngine", function () {
       f: 3.5
     });
     expect(displaySnapshot).toBeTruthy();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(displaySnapshot.num).toBe(4.2);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(displaySnapshot.text).toBe("4.2");
+    if (!displaySnapshot) {
+      throw new Error("Expected a display snapshot from drawFrame.");
+    }
+    const finalSnapshot = /** @type {DisplaySnapshot} */ (displaySnapshot);
+    expect(finalSnapshot.num).toBe(4.2);
+    expect(finalSnapshot.text).toBe("4.2");
   });
 });

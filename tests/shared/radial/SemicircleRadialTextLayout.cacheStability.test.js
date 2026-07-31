@@ -4,6 +4,8 @@ const { createHarness, defaultDisplay, loadFresh } = require("./SemicircleRadial
 describe("SemicircleRadialTextLayout", function () {
   it("keeps draw output stable across cache hits", function () {
     const textLayout = loadFresh("shared/widget-kits/radial/SemicircleRadialTextLayout.js").create();
+    /** @typedef {"drawInlineCapValUnit" | "drawThreeRowsBlock" | "drawValueUnitWithFit"} DrawKey */
+    /** @type {Array<{ drawKey: DrawKey, harness: ReturnType<typeof createHarness> }>} */
     const cases = [
       {
         harness: createHarness("flat", 240, 90),
@@ -26,7 +28,6 @@ describe("SemicircleRadialTextLayout", function () {
       textLayout.drawModeText(item.harness.state, display, cache);
       textLayout.drawModeText(item.harness.state, display, cache);
 
-      // @ts-ignore -- pre-existing untyped test mock boundary
       expect(item.harness.calls[item.drawKey][1]).toEqual(item.harness.calls[item.drawKey][0]);
     });
   });

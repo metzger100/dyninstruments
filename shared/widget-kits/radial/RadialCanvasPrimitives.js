@@ -12,6 +12,8 @@
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
   const POINTER_TIP_INSET_FACTOR = 0.013;
+  /** @type {DyniValueMathApi["isNullish"]} */
+  let isNullish;
 
   /**
    * @param {unknown} def
@@ -20,6 +22,7 @@
    */
   function create(def, componentContext) {
     const angle = componentContext.components.require("RadialAngleMath");
+    isNullish = componentContext.components.require("ValueMath").isNullish;
     const toCanvas = angle.degToCanvasRad;
 
     /**
@@ -31,12 +34,12 @@
     function withCtx(ctx, fn, style) {
       ctx.save();
       if (style) {
-        if (style.alpha != null) ctx.globalAlpha = Number(style.alpha);
-        if (style.strokeStyle != null) ctx.strokeStyle = /** @type {string} */ (style.strokeStyle);
-        if (style.fillStyle != null) ctx.fillStyle = /** @type {string} */ (style.fillStyle);
-        if (style.lineWidth != null) ctx.lineWidth = /** @type {number} */ (style.lineWidth);
-        if (style.lineCap != null) ctx.lineCap = /** @type {CanvasLineCap} */ (style.lineCap);
-        if (style.lineJoin != null) ctx.lineJoin = /** @type {CanvasLineJoin} */ (style.lineJoin);
+        if (!isNullish(style.alpha)) ctx.globalAlpha = Number(style.alpha);
+        if (!isNullish(style.strokeStyle)) ctx.strokeStyle = /** @type {string} */ (style.strokeStyle);
+        if (!isNullish(style.fillStyle)) ctx.fillStyle = /** @type {string} */ (style.fillStyle);
+        if (!isNullish(style.lineWidth)) ctx.lineWidth = /** @type {number} */ (style.lineWidth);
+        if (!isNullish(style.lineCap)) ctx.lineCap = /** @type {CanvasLineCap} */ (style.lineCap);
+        if (!isNullish(style.lineJoin)) ctx.lineJoin = /** @type {CanvasLineJoin} */ (style.lineJoin);
         if (Array.isArray(style.dash)) ctx.setLineDash(style.dash);
       }
       fn();
@@ -62,8 +65,8 @@
         },
         {
           strokeStyle: opts.strokeStyle,
-          lineWidth: opts.lineWidth != null ? opts.lineWidth : 1,
-          alpha: opts.alpha != null ? opts.alpha : 1,
+          lineWidth: !isNullish(opts.lineWidth) ? opts.lineWidth : 1,
+          alpha: !isNullish(opts.alpha) ? opts.alpha : 1,
           dash: opts.dash
         }
       );
@@ -94,8 +97,8 @@
         },
         {
           strokeStyle: opts.strokeStyle,
-          lineWidth: opts.lineWidth != null ? opts.lineWidth : 1,
-          alpha: opts.alpha != null ? opts.alpha : 1,
+          lineWidth: !isNullish(opts.lineWidth) ? opts.lineWidth : 1,
+          alpha: !isNullish(opts.alpha) ? opts.alpha : 1,
           dash: opts.dash
         }
       );
@@ -144,7 +147,7 @@
         {
           fillStyle: opts.fillStyle,
           strokeStyle: opts.strokeStyle,
-          alpha: opts.alpha != null ? opts.alpha : 1
+          alpha: !isNullish(opts.alpha) ? opts.alpha : 1
         }
       );
     }
@@ -197,7 +200,7 @@
         },
         {
           strokeStyle: opts.strokeStyle,
-          alpha: opts.alpha != null ? opts.alpha : 1
+          alpha: !isNullish(opts.alpha) ? opts.alpha : 1
         }
       );
     }
@@ -247,7 +250,7 @@
         },
         {
           fillStyle: opts.fillStyle || opts.color,
-          alpha: opts.alpha != null ? opts.alpha : 1
+          alpha: !isNullish(opts.alpha) ? opts.alpha : 1
         }
       );
     }
@@ -289,7 +292,7 @@
         },
         {
           strokeStyle: opts.strokeStyle,
-          alpha: opts.alpha != null ? opts.alpha : 1
+          alpha: !isNullish(opts.alpha) ? opts.alpha : 1
         }
       );
     }

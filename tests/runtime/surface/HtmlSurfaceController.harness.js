@@ -1,4 +1,3 @@
-// @ts-nocheck
 const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 
 /** @param {Record<string, any>} [options] */

@@ -18,6 +18,8 @@
   };
   /** @type {DyniValueMathApi["toText"]} */
   let toText;
+  /** @type {DyniValueMathApi["isNullish"]} */
+  let isNullish;
 
   /**
    * @param {DyniEditRouteMetricModel | null | undefined} model
@@ -47,16 +49,16 @@
    */
   function resolveMetricLabel(model, id) {
     const entry = toMetricEntry(model, id);
-    if (entry.labelText != null) {
+    if (!isNullish(entry.labelText)) {
       return toText(entry.labelText);
     }
-    if (entry.label != null) {
+    if (!isNullish(entry.label)) {
       return toText(entry.label);
     }
-    if (model && model[id + "LabelText"] != null) {
+    if (model && !isNullish(model[id + "LabelText"])) {
       return toText(model[id + "LabelText"]);
     }
-    if (model && model[id + "Label"] != null) {
+    if (model && !isNullish(model[id + "Label"])) {
       return toText(model[id + "Label"]);
     }
     return "";
@@ -69,16 +71,16 @@
    */
   function resolveMetricValue(model, id) {
     const entry = toMetricEntry(model, id);
-    if (entry.valueText != null) {
+    if (!isNullish(entry.valueText)) {
       return toText(entry.valueText);
     }
-    if (entry.value != null) {
+    if (!isNullish(entry.value)) {
       return toText(entry.value);
     }
-    if (model && model[id + "ValueText"] != null) {
+    if (model && !isNullish(model[id + "ValueText"])) {
       return toText(model[id + "ValueText"]);
     }
-    if (model && model[id + "Value"] != null) {
+    if (model && !isNullish(model[id + "Value"])) {
       return toText(model[id + "Value"]);
     }
     return "";
@@ -91,16 +93,16 @@
    */
   function resolveMetricPlainValue(model, id) {
     const entry = toMetricEntry(model, id);
-    if (entry.plainValueText != null) {
+    if (!isNullish(entry.plainValueText)) {
       return toText(entry.plainValueText);
     }
-    if (entry.plainValue != null) {
+    if (!isNullish(entry.plainValue)) {
       return toText(entry.plainValue);
     }
-    if (model && model[id + "PlainValueText"] != null) {
+    if (model && !isNullish(model[id + "PlainValueText"])) {
       return toText(model[id + "PlainValueText"]);
     }
-    if (model && model[id + "PlainValue"] != null) {
+    if (model && !isNullish(model[id + "PlainValue"])) {
       return toText(model[id + "PlainValue"]);
     }
     return resolveMetricValue(model, id);
@@ -113,16 +115,16 @@
    */
   function resolveMetricUnit(model, id) {
     const entry = toMetricEntry(model, id);
-    if (entry.unitText != null) {
+    if (!isNullish(entry.unitText)) {
       return toText(entry.unitText);
     }
-    if (entry.unit != null) {
+    if (!isNullish(entry.unit)) {
       return toText(entry.unit);
     }
-    if (model && model[id + "UnitText"] != null) {
+    if (model && !isNullish(model[id + "UnitText"])) {
       return toText(model[id + "UnitText"]);
     }
-    if (model && model[id + "Unit"] != null) {
+    if (model && !isNullish(model[id + "Unit"])) {
       return toText(model[id + "Unit"]);
     }
     return "";
@@ -252,7 +254,9 @@
     const htmlMeasureUtils = componentContext.components.require("HtmlMeasureUtils");
     const htmlUtils = componentContext.components.require("HtmlWidgetUtils");
     const modeRatio = componentContext.components.require("NavModeRatio");
-    toText = componentContext.components.require("ValueMath").toText;
+    const valueMath = componentContext.components.require("ValueMath");
+    toText = valueMath.toText;
+    isNullish = valueMath.isNullish;
 
     /** @param {DyniEditRouteMeasureLineArgs | null | undefined} args @returns {number} */
     function measureEditRoutePx(args) {

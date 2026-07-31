@@ -13,7 +13,7 @@ describe("LinearGaugeEngine", function () {
         minor: "minor",
         showEndLabels: "showEndLabels"
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {unknown} state @param {{ style?: string }} props */
       buildStaticKey(state, props) {
         return { style: props.style || "a" };
       }

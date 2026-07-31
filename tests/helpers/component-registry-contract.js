@@ -184,7 +184,7 @@ function dependencyViolations(components, forbiddenIds) {
   Object.keys(components).forEach(function (componentId) {
     try {
       visitDependency(componentId, components, {}, {});
-    } catch (error) {
+    } catch (_error) {
       violations.push({ type: "dependency-cycle", componentId });
     }
   });

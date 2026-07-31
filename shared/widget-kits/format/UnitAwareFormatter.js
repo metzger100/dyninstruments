@@ -31,7 +31,10 @@
       formatterParameters: [token],
       default: defaultText
     });
-    return placeholderNormalize.normalize(formatted == null ? defaultText : String(formatted).trim(), defaultText);
+    return placeholderNormalize.normalize(
+      formatted === null || formatted === undefined ? defaultText : String(formatted).trim(),
+      defaultText
+    );
   }
 
   /**

@@ -29,6 +29,7 @@
     const valueMath = componentContext.components.require("ValueMath");
     const clamp = valueMath.clamp;
     const lerp = valueMath.lerp;
+    const isNullish = valueMath.isNullish;
 
     /** @param {number} value @param {number} lineWidth @returns {number} */
     function snapCoord(value, lineWidth) {
@@ -269,7 +270,7 @@
       let fittedText;
       if (typeof fit.text === "string") {
         fittedText = fit.text.trim();
-      } else if (fit.text == null) {
+      } else if (isNullish(fit.text)) {
         fittedText = "";
       } else {
         fittedText = String(fit.text).trim();

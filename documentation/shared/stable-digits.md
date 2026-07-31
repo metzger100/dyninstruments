@@ -1,6 +1,6 @@
 # Stable Digits
 
-**Status:** ✅ Implemented | Shared numeric normalization for fixed-width value rendering
+**Status:** Current.
 
 ## Overview
 

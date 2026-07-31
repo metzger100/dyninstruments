@@ -5,6 +5,7 @@ const path = require("node:path");
 /** Ordered `npm run` leaves that check:core must reach, in exact composition order. */
 const REQUIRED_CHECK_CORE_GROUPS = [
   "check:standard",
+  "check:shared-core",
   "typecheck",
   "package:check",
   "test:split",
@@ -69,7 +70,7 @@ describe("package command surface", function () {
       "vitest run tests/tools/operation-count-evaluator.test.js tests/contract/route-points-render-model-scaling-contract.test.js tests/shared/html/HtmlDomPatchUtils.scaling-contract.test.js tests/shared/text/TextLayoutPrimitives.scaling-contract.test.js"
     );
     expect(scripts["check:core"]).toBe(
-      "npm run check:standard && npm run typecheck && npm run package:check && npm run test:split && npm run test:focus:check && npm run check:smells && npm run check:complexity && npm run check:scaling && npm run docs:check && npm run check:filesize"
+      "npm run check:standard && npm run check:shared-core && npm run typecheck && npm run package:check && npm run test:split && npm run test:focus:check && npm run check:smells && npm run check:complexity && npm run check:scaling && npm run docs:check && npm run check:filesize"
     );
   });
 

@@ -77,7 +77,6 @@
   function requireAvnavApi() {
     const avnavApi = runtime.getAvnavApi(root);
     if (!avnavApi) {
-      console.error("dyninstruments: avnav.api missing");
       return null;
     }
     if (typeof avnavApi.registerWidget !== "function") {
@@ -152,7 +151,7 @@
       })
       .catch(function (error) {
         clearGenerationState(generation.id);
-        console.error("dyninstruments init failed:", error);
+        avnavApi.log("dyninstruments init failed: " + String(error));
         throw error;
       });
 

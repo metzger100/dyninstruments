@@ -4,7 +4,7 @@ const { createComponentContextMock } = require("../../helpers/component-context-
 describe("DepthLinearWidget", function () {
   /** @param {any} value @returns {any} */
   function toOptionalFiniteNumber(value) {
-    if (value == null) return undefined;
+    if (value === null || value === undefined) return undefined;
     if (typeof value === "string" && value.trim() === "") return undefined;
     const n = Number(value);
     return Number.isFinite(n) ? n : undefined;
@@ -70,12 +70,12 @@ describe("DepthLinearWidget", function () {
             return {
               /** @param {any} text @param {any} defaultText @returns {any} */
               normalize(text, defaultText) {
-                if (text == null) {
-                  return defaultText == null ? "---" : defaultText;
+                if (text === null || text === undefined) {
+                  return defaultText === null || defaultText === undefined ? "---" : defaultText;
                 }
                 const value = String(text).trim();
                 return value === "NO DATA" || /^-+$/.test(value)
-                  ? defaultText == null
+                  ? defaultText === null || defaultText === undefined
                     ? "---"
                     : defaultText
                   : String(text);
@@ -194,12 +194,12 @@ describe("DepthLinearWidget", function () {
             return {
               /** @param {any} text @param {any} defaultText @returns {any} */
               normalize(text, defaultText) {
-                if (text == null) {
-                  return defaultText == null ? "---" : defaultText;
+                if (text === null || text === undefined) {
+                  return defaultText === null || defaultText === undefined ? "---" : defaultText;
                 }
                 const value = String(text).trim();
                 return value === "NO DATA" || /^-+$/.test(value)
-                  ? defaultText == null
+                  ? defaultText === null || defaultText === undefined
                     ? "---"
                     : defaultText
                   : String(text);
@@ -282,8 +282,8 @@ describe("DepthLinearWidget", function () {
             return {
               /** @param {any} text @param {any} defaultText @returns {any} */
               normalize(text, defaultText) {
-                if (text == null) {
-                  return defaultText == null ? "---" : defaultText;
+                if (text === null || text === undefined) {
+                  return defaultText === null || defaultText === undefined ? "---" : defaultText;
                 }
                 return String(text);
               }
@@ -355,8 +355,8 @@ describe("DepthLinearWidget", function () {
             return {
               /** @param {any} text @param {any} defaultText @returns {any} */
               normalize(text, defaultText) {
-                if (text == null) {
-                  return defaultText == null ? "---" : defaultText;
+                if (text === null || text === undefined) {
+                  return defaultText === null || defaultText === undefined ? "---" : defaultText;
                 }
                 return String(text);
               }

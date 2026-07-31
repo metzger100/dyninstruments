@@ -2,10 +2,17 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
+/**
+ * @typedef {{ height: number, width: number }} ShellRect
+ * @typedef {{ captionText?: string, unitText?: string, valueText: string }} Metric
+ * @typedef {{ colorRole: string, effectiveLayoutHeight: number, frontText: string, hasAccent: boolean, isVerticalCommitted: boolean, kind: string, layout?: unknown, metrics: Record<string, Metric>, mode: string, nameText: string, showTcpaBranch: boolean, stableDigitsEnabled?: boolean, stateLabel: string, visibleMetricIds: string[] }} AisModel
+ * @typedef {{ layout: { computeLayout: (options: Record<string, unknown>) => unknown } }} AisHarness
+ */
+
 function createMeasureContext() {
   return {
     font: "700 12px sans-serif",
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {string} text */
     measureText(text) {
       const source = String(this.font || "");
       const match = source.match(/(\d+(?:\.\d+)?)px/);
@@ -85,7 +92,7 @@ function createHarness() {
         resolveForRoot: themeApi.resolveForRoot
       },
       dom: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {Element | null} target */
         requirePluginRoot(target) {
           return target || null;
         },
@@ -101,10 +108,10 @@ function createHarness() {
   return { fit, layout, themeApi, radialTextApi };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {AisHarness} harness @param {ShellRect} shellRect @param {Partial<AisModel>} [overrides] */
 function buildModel(harness, shellRect, overrides) {
   const patch = overrides || {};
-  const base = {
+  const base = /** @type {AisModel} */ ({
     mode: "normal",
     kind: "data",
     showTcpaBranch: true,
@@ -122,12 +129,11 @@ function buildModel(harness, shellRect, overrides) {
       tcpa: { captionText: "TCPA", valueText: "0.5", unitText: "min" },
       brg: { captionText: "BRG", valueText: "112", unitText: "°" }
     }
-  };
-  const model = Object.assign({}, base, patch);
-  const patchedMetrics = patch.metrics && typeof patch.metrics === "object" ? patch.metrics : {};
+  });
+  const model = /** @type {AisModel} */ (Object.assign({}, base, patch));
+  const patchedMetrics = patch.metrics || {};
   model.metrics = Object.create(null);
   Object.keys(base.metrics).forEach((id) => {
-    // @ts-ignore -- pre-existing untyped test mock boundary
     model.metrics[id] = Object.assign({}, base.metrics[id], patchedMetrics[id] || {});
   });
   model.layout =
@@ -144,14 +150,14 @@ function buildModel(harness, shellRect, overrides) {
   return model;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} style */
 function extractPx(style) {
   const source = String(style || "");
   const match = source.match(new RegExp("^font-size:(\\d+)px\\x3b$"));
   return match ? Number(match[1]) : 0;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} style */
 function expectStyleFormat(style) {
   expect(typeof style).toBe("string");
   if (style === "") {

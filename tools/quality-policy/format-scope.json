@@ -691,7 +691,7 @@
       "alternateValidation": "none needed"
     },
     {
-      "path": "exec-plans/active/PLAN42.md",
+      "path": "exec-plans/active/PLAN43.md",
       "owner": "prettier"
     },
     {
@@ -1831,6 +1831,14 @@
       "owner": "prettier"
     },
     {
+      "path": "tests/contract/generic-tokens-single-owner-contract.test.js",
+      "owner": "prettier"
+    },
+    {
+      "path": "tests/contract/generic-tokens-test-utils.js",
+      "owner": "prettier"
+    },
+    {
       "path": "tests/contract/hotspot-budget-contract.test.js",
       "owner": "prettier"
     },
@@ -1860,6 +1868,10 @@
     },
     {
       "path": "tests/contract/route-points-render-model-scaling-contract.test.js",
+      "owner": "prettier"
+    },
+    {
+      "path": "tests/contract/shared-core-manifest-contract.test.js",
       "owner": "prettier"
     },
     {
@@ -2837,6 +2849,10 @@
       "owner": "prettier"
     },
     {
+      "path": "tests/shared/radial/SemicircleRadialEngine.render-order-harness.js",
+      "owner": "prettier"
+    },
+    {
       "path": "tests/shared/radial/SemicircleRadialEngine.rendersDisconnectedStateScreenBefore.test.js",
       "owner": "prettier"
     },
@@ -3065,6 +3081,14 @@
       "owner": "prettier"
     },
     {
+      "path": "tests/tools/check-doc-links-proof.test.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tests/tools/check-doc-links.test.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tests/tools/check-file-size-oneliner.test.js",
       "owner": "prettier"
     },
@@ -3074,6 +3098,10 @@
     },
     {
       "path": "tests/tools/check-file-size.test.js",
+      "owner": "prettier"
+    },
+    {
+      "path": "tests/tools/check-generic-surface.test.js",
       "owner": "prettier"
     },
     {
@@ -3121,6 +3149,14 @@
       "owner": "prettier"
     },
     {
+      "path": "tests/tools/check-schema.test.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tests/tools/check-test-focus.test.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tests/tools/codex-config.test.js",
       "owner": "prettier"
     },
@@ -3133,11 +3169,27 @@
       "owner": "prettier"
     },
     {
+      "path": "tests/tools/complexity-scan.test.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tests/tools/coverage-inventory-policy.test.js",
       "owner": "prettier"
     },
     {
       "path": "tests/tools/coverage-inventory.test.js",
+      "owner": "prettier"
+    },
+    {
+      "path": "tests/tools/eslint-config.test.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tests/tools/hooks-doctor.test.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tests/tools/hooks-install.test.mjs",
       "owner": "prettier"
     },
     {
@@ -3173,6 +3225,10 @@
       "owner": "prettier"
     },
     {
+      "path": "tests/tools/prettier-config.test.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tests/tools/quality-owners.test.js",
       "owner": "prettier"
     },
@@ -3193,11 +3249,23 @@
       "owner": "prettier"
     },
     {
+      "path": "tests/tools/run-format.test.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tests/tools/test-inventory.test.js",
       "owner": "prettier"
     },
     {
       "path": "tests/tools/verified-baseline.test.js",
+      "owner": "prettier"
+    },
+    {
+      "path": "tests/tools/vitest-allow-only.proof.test.js",
+      "owner": "prettier"
+    },
+    {
+      "path": "tests/tools/vitest-projects.test.mjs",
       "owner": "prettier"
     },
     {
@@ -3551,6 +3619,10 @@
       "owner": "prettier"
     },
     {
+      "path": "tools/check-generic-surface.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tools/check-patterns.mjs",
       "owner": "prettier"
     },
@@ -3599,7 +3671,15 @@
       "owner": "prettier"
     },
     {
+      "path": "tools/check-patterns/generic/rules-responsive-generic-defs.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tools/check-patterns/generic/rules-unsafe-sink-defs.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/check-patterns/project/pattern-context.mjs",
       "owner": "prettier"
     },
     {
@@ -3640,6 +3720,14 @@
     },
     {
       "path": "tools/check-patterns/project/rules-responsive-defs.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/check-patterns/project/rules.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/check-patterns/rule-policy.mjs",
       "owner": "prettier"
     },
     {
@@ -3703,6 +3791,10 @@
       "owner": "prettier"
     },
     {
+      "path": "tools/check-shared-core.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tools/check-test-focus.mjs",
       "owner": "prettier"
     },
@@ -3761,7 +3853,15 @@
       "alternateValidation": "npm run check:core"
     },
     {
+      "path": "tools/quality-policy/coverage-summary-adapter.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tools/quality-policy/eslint-complexity-config.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/quality-policy/eslint-shared-rules.mjs",
       "owner": "prettier"
     },
     {
@@ -3773,6 +3873,12 @@
     {
       "path": "tools/quality-policy/generate-format-scope.mjs",
       "owner": "prettier"
+    },
+    {
+      "path": "tools/quality-policy/generic-tokens.json",
+      "owner": "unsupported",
+      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "alternateValidation": "npm run check:core"
     },
     {
       "path": "tools/quality-policy/historical-complexity-capture.mjs",
@@ -3801,6 +3907,36 @@
       "alternateValidation": "npm run check:core"
     },
     {
+      "path": "tools/quality-policy/project-complexity-scope.json",
+      "owner": "unsupported",
+      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tools/quality-policy/project-coverage-inventory-policy.json",
+      "owner": "unsupported",
+      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tools/quality-policy/project-file-size-scope.json",
+      "owner": "unsupported",
+      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tools/quality-policy/project-pattern-context.json",
+      "owner": "unsupported",
+      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tools/quality-policy/project-pattern-scopes.json",
+      "owner": "unsupported",
+      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "alternateValidation": "npm run check:core"
+    },
+    {
       "path": "tools/quality-policy/read-json-policy.mjs",
       "owner": "prettier"
     },
@@ -3813,6 +3949,18 @@
       "owner": "unsupported",
       "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
       "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tools/quality-policy/shared-core-manifest.json",
+      "owner": "unsupported",
+      "reason": "quality-policy data file read directly by its owning tools/quality-policy/*.mjs checker; reformatting is a reviewed policy-data decision, not an automated one",
+      "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tools/quality-policy/shared-instructions.md",
+      "owner": "unsupported",
+      "reason": "extracted byte-for-byte verification artifact; whitespace is part of the checked content",
+      "alternateValidation": "shared-instructions-block contract test"
     },
     {
       "path": "tools/quality-policy/test-exception-baseline.json",
@@ -4023,6 +4171,10 @@
       "owner": "prettier"
     },
     {
+      "path": "types/test-harness.d.ts",
+      "owner": "prettier"
+    },
+    {
       "path": "vitest.config.js",
       "owner": "prettier"
     },
@@ -4164,7 +4316,7 @@
     }
   ],
   "countByOwner": {
-    "prettier": 991,
-    "unsupported": 33
+    "prettier": 1017,
+    "unsupported": 41
   }
 }

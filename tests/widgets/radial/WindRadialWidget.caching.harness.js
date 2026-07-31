@@ -1,4 +1,3 @@
-// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
@@ -20,6 +19,7 @@ function createFullCircleLayoutApi() {
   );
 }
 
+/** @param {unknown} theme @param {number} width @param {number} height */
 function computeWindLayout(theme, width, height) {
   const api = createFullCircleLayoutApi();
   const mode = api.computeMode(width, height, 0.7, 2.0);
@@ -49,7 +49,7 @@ function createWindCachingHarness() {
     labels: 0,
     pointer: 0,
     text: 0,
-    sequence: []
+    sequence: /** @type {string[]} */ ([])
   };
   const theme = {
     surface: {
@@ -158,19 +158,19 @@ function createWindCachingHarness() {
                 drawDisconnectOverlay() {}
               },
               value: {
-                clamp(value, lo, hi) {
+                clamp(/** @type {unknown} */ value, /** @type {number} */ lo, /** @type {number} */ hi) {
                   const n = Number(value);
                   if (!isFinite(n)) return lo;
                   return Math.max(lo, Math.min(hi, n));
                 },
-                isFiniteNumber(value) {
+                isFiniteNumber(/** @type {unknown} */ value) {
                   return typeof value === "number" && isFinite(value);
                 },
-                resolveFiniteNumber(value, defaultValue) {
+                resolveFiniteNumber(/** @type {unknown} */ value, /** @type {number} */ defaultValue) {
                   const n = Number(value);
                   return isFinite(n) ? n : defaultValue;
                 },
-                formatAngle180(value) {
+                formatAngle180(/** @type {unknown} */ value) {
                   const n = Number(value);
                   if (!isFinite(n)) return "---";
                   return String(Math.round(n));
@@ -183,12 +183,12 @@ function createWindCachingHarness() {
       },
       services: {
         format: {
-          applyFormatter(value) {
+          applyFormatter(/** @type {unknown} */ value) {
             return String(value);
           }
         },
         canvas: {
-          setupCanvas(canvas) {
+          setupCanvas(/** @type {HTMLCanvasElement} */ canvas) {
             const ctx = canvas.getContext("2d");
             const rect = canvas.getBoundingClientRect();
             return {
@@ -199,7 +199,7 @@ function createWindCachingHarness() {
           }
         },
         dom: {
-          requirePluginRoot(target) {
+          requirePluginRoot(/** @type {Element} */ target) {
             return target;
           }
         }
@@ -210,6 +210,7 @@ function createWindCachingHarness() {
   return { spec, calls, theme };
 }
 
+/** @param {Record<string, unknown>} [overrides] */
 function makeWindProps(overrides) {
   return Object.assign(
     {

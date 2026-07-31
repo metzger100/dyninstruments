@@ -1,6 +1,6 @@
 # HTML Renderer Lifecycle
 
-**Status:** ✅ Implemented | Commit-driven shadow-root lifecycle for surface html kinds
+**Status:** Current.
 
 ## Overview
 

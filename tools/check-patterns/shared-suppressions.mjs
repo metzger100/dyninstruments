@@ -1,4 +1,4 @@
-// Lint-directive / suppression-comment parsing (dyni-lint-disable-*, dyni-boundary-*).
+// Lint-directive / suppression-comment parsing (plugin-lint-disable-*, plugin-boundary-*).
 
 import { getFileData, lineAt } from "./shared.mjs";
 
@@ -61,14 +61,14 @@ function parseLintDirectives(text, lineStarts) {
 
   while ((match = commentRe.exec(text))) {
     const raw = match[0];
-    if (!raw.includes("dyni-lint-disable-") && !raw.includes("dyni-boundary-")) {
+    if (!raw.includes("plugin-lint-disable-") && !raw.includes("plugin-boundary-")) {
       continue;
     }
 
     const line = lineAt(match.index, lineStarts);
     const body = raw.startsWith("//") ? raw.slice(2).trim() : raw.slice(2, -2).trim();
 
-    if (body.includes("dyni-boundary-")) {
+    if (body.includes("plugin-boundary-")) {
       parseBoundaryMarker(body, line, suppressionsByLine, invalids);
       continue;
     }
@@ -91,11 +91,11 @@ function parseLintDirectives(text, lineStarts) {
  * @returns {void}
  */
 function parseLintDisableDirective(body, line, knownRules, suppressionsByLine, invalids) {
-  const parsed = /^dyni-lint-disable-(next-line|line)\s+([a-z0-9-]+)\s+--\s+(.+)$/s.exec(body);
+  const parsed = /^plugin-lint-disable-(next-line|line)\s+([a-z0-9-]+)\s+--\s+(.+)$/s.exec(body);
   if (!parsed) {
     invalids.push({
       line,
-      detail: `Malformed suppression directive '${body}'. Expected 'dyni-lint-disable-next-line <rule-name> -- <reason>' or 'dyni-lint-disable-line <rule-name> -- <reason>'.`
+      detail: `Malformed suppression directive '${body}'. Expected 'plugin-lint-disable-next-line <rule-name> -- <reason>' or 'plugin-lint-disable-line <rule-name> -- <reason>'.`
     });
     return;
   }
@@ -113,7 +113,7 @@ function parseLintDisableDirective(body, line, knownRules, suppressionsByLine, i
   }
   invalids.push({
     line,
-    detail: `Generic production suppression '${mode} ${ruleName}' is forbidden. Use a checker-owned canonical exception, or a validated dyni-boundary marker for an external catch fallback.`
+    detail: `Generic production suppression '${mode} ${ruleName}' is forbidden. Use a checker-owned canonical exception, or a validated plugin-boundary marker for an external catch fallback.`
   });
 }
 
@@ -125,11 +125,11 @@ function parseLintDisableDirective(body, line, knownRules, suppressionsByLine, i
  * @returns {void}
  */
 function parseBoundaryMarker(body, line, suppressionsByLine, invalids) {
-  const parsed = /^dyni-boundary-(next-line|line)\(([^)]*)\)\s+--\s+(.+)$/s.exec(body);
+  const parsed = /^plugin-boundary-(next-line|line)\(([^)]*)\)\s+--\s+(.+)$/s.exec(body);
   if (!parsed) {
     invalids.push({
       line,
-      detail: `Malformed boundary marker '${body}'. Expected 'dyni-boundary-next-line(category: <slug>, owner: <handle>, date: <YYYY-MM-DD>[, expires: <YYYY-MM-DD>]) -- <reason>' or the '-line' variant.`
+      detail: `Malformed boundary marker '${body}'. Expected 'plugin-boundary-next-line(category: <slug>, owner: <handle>, date: <YYYY-MM-DD>[, expires: <YYYY-MM-DD>]) -- <reason>' or the '-line' variant.`
     });
     return;
   }

@@ -1,6 +1,6 @@
 # CenterDisplayTextWidget Module
 
-**Status:** ✅ Implemented | `widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js`
+**Status:** Current.
 
 ## Overview
 

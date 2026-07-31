@@ -1,6 +1,6 @@
 # Component Context
 
-**Status:** ✅ Implemented | Defined by runtime services and passed through `componentContext`
+**Status:** Current.
 
 ## Overview
 

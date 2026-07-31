@@ -78,7 +78,9 @@ describe("RoutePointsHtmlFit", function () {
 
     const infoCall = h.radialTextApi.fitSingleTextPx.mock.calls.find((args) => args[1] === "09°/1.2nm");
     expect(infoCall).toBeDefined();
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!infoCall) {
+      throw new Error("expected a matching fitSingleTextPx call");
+    }
     expect(infoCall[5]).toBe("monospace");
   });
 });

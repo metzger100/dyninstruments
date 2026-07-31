@@ -1,6 +1,6 @@
 # TextLayoutEngine
 
-**Status:** ✅ Implemented | Shared text mode, fit cache, and row layout facade for text widgets
+**Status:** Current.
 
 ## Overview
 

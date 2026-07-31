@@ -88,6 +88,7 @@ describe("TextLayoutEngine", function () {
 
   it("draws inline and block layouts with expected text output", function () {
     const engine = createEngine();
+    /** @type {DyniTestCanvasContext} */
     const ctx = createSizingContext();
 
     const inlineFit = engine.fitInlineTriplet({
@@ -145,7 +146,6 @@ describe("TextLayoutEngine", function () {
       labelWeight: 610
     });
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const textEntries = ctx.calls.filter((entry) => entry.name === "fillText").map((entry) => String(entry.args[0]));
     expect(textEntries).toContain("SPD");
     expect(textEntries).toContain("12.3");

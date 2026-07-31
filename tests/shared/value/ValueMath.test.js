@@ -98,7 +98,7 @@ describe("ValueMath", function () {
       return String(raw) + " kn";
     });
     const normalize = vi.fn(function (text, defaultText) {
-      return text == null ? defaultText || "---" : String(text);
+      return text === null || text === undefined ? defaultText || "---" : String(text);
     });
 
     expect(value.formatGaugeDisplay(null, {}, applyFormatter, normalize, "formatSpeed", ["kn"])).toEqual({

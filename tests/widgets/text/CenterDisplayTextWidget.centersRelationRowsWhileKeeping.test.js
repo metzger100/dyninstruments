@@ -39,6 +39,9 @@ describe("CenterDisplayTextWidget", function () {
       expect(pos).toBeTruthy();
       expect(latCall).toBeTruthy();
       expect(lonCall).toBeTruthy();
+      if (!wp || !pos || !latCall || !lonCall) {
+        throw new Error("Expected every relation-row text to be captured.");
+      }
       expect(latCall.textAlign).toBe("right");
       expect(lonCall.textAlign).toBe("right");
       expect(wp.x).toBeGreaterThan(layout.rowRects[0].x);

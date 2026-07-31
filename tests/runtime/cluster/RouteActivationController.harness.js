@@ -1,28 +1,45 @@
-// @ts-nocheck
+// @ts-check
 const { createScriptContext, runIifeScript } = require("../../helpers/eval-iife");
 const { flushPromises } = require("../../helpers/async");
 
+/** @typedef {{ create?: (def: Record<string, unknown>, context: { components: { require: (id: string) => unknown } }) => unknown }} HarnessModule */
+/** @typedef {{ promise: Promise<HarnessModule>, reject: (reason?: unknown) => void, resolve: () => void }} DeferredModule */
+/** @typedef {{ config?: Record<string, unknown>, runtime?: Record<string, unknown> }} BaseContextExtra */
+/** @typedef {import("node:vm").Context} VmContext */
+
 const originalDyniPlugin = globalThis.DyniPlugin;
 
+/** @returns {DeferredModule} */
 function createDeferred() {
-  let resolve;
-  let reject;
-  const promise = new Promise(function (_resolve, _reject) {
-    resolve = _resolve;
-    reject = _reject;
+  /** @type {() => void} */
+  let resolve = function () {};
+  /** @type {(reason?: unknown) => void} */
+  let reject = function () {};
+  const promise = new Promise(function (resolvePromise, rejectPromise) {
+    resolve = function () {
+      resolvePromise({});
+    };
+    reject = function (reason) {
+      rejectPromise(reason);
+    };
   });
   return { promise, resolve, reject };
 }
 
+/** @param {{ deferredLoads?: Record<string, DeferredModule>, initialLoadedIds?: string[], modules?: Record<string, HarnessModule> }} [options] */
 function createLoaderHarness(options) {
   const opts = options || {};
   const loaded = new Set(opts.initialLoadedIds || []);
+  /** @type {string[]} */
   const loadRecords = [];
+  /** @type {{ def: Record<string, unknown>, id: string }[]} */
   const createRecords = [];
   const modules = opts.modules || {};
   const deferredLoads = opts.deferredLoads || Object.create(null);
+  /** @type {Record<string, DeferredModule>} */
   const pendingLoads = Object.create(null);
 
+  /** @param {string} id @returns {HarnessModule} */
   function getModule(id) {
     const mod = modules[id];
     if (!mod) {
@@ -31,16 +48,18 @@ function createLoaderHarness(options) {
     return mod;
   }
 
+  /** @returns {{ components: { require: (id: string) => unknown } }} */
   function resolveDependencyContext() {
     return {
       components: {
-        require(id) {
+        require(/** @type {string} */ id) {
           return createInstance(id, {});
         }
       }
     };
   }
 
+  /** @param {string} id @param {Record<string, unknown>} def */
   function createInstance(id, def) {
     createRecords.push({ id: id, def: def });
     if (!loaded.has(id)) {
@@ -50,6 +69,7 @@ function createLoaderHarness(options) {
     return typeof mod.create === "function" ? mod.create(def, resolveDependencyContext()) : mod;
   }
 
+  /** @param {string} id @returns {Promise<HarnessModule>} */
   function loadComponent(id) {
     loadRecords.push(id);
     if (loaded.has(id)) {
@@ -70,6 +90,7 @@ function createLoaderHarness(options) {
     pendingLoads,
     loadComponent,
     createInstance,
+    /** @param {string[]} ids */
     areComponentsLoaded(ids) {
       return (
         Array.isArray(ids) &&
@@ -78,6 +99,7 @@ function createLoaderHarness(options) {
         })
       );
     },
+    /** @param {string} id */
     resolveLoad(id) {
       const deferred = pendingLoads[id];
       if (!deferred) {
@@ -88,20 +110,26 @@ function createLoaderHarness(options) {
   };
 }
 
+/** @typedef {{ DISCARDED_ACTIVATION: unknown, createWidgetController: Function, [key: string]: unknown }} RouteActivationApi */
+
+/** @param {VmContext} context @returns {RouteActivationApi} */
 function loadController(context) {
   runIifeScript("runtime/cluster/RouteActivationPayloadBuilder.js", context);
   runIifeScript("runtime/cluster/RouteActivationLatestWins.js", context);
   runIifeScript("runtime/cluster/RouteActivationController.js", context);
-  return context.DyniPlugin.runtime.routeActivation;
+  const routeContext = /** @type {{ DyniPlugin: { runtime: { routeActivation: unknown } } }} */ (context);
+  return /** @type {RouteActivationApi} */ (routeContext.DyniPlugin.runtime.routeActivation);
 }
 
+/** @param {BaseContextExtra} [extra] */
 function createBaseContext(extra) {
-  const runtime = extra.runtime || {};
+  const options = extra || {};
+  const runtime = options.runtime || {};
   return createScriptContext({
     DyniPlugin: {
       runtime: runtime,
       state: {},
-      config: extra.config || {
+      config: options.config || {
         shared: {},
         components: {},
         clusterRoutes: { byRouteId: {} }
@@ -128,6 +156,4 @@ module.exports = {
   createBaseContext
 };
 
-globalThis.flushPromises = flushPromises;
-globalThis.createScriptContext = createScriptContext;
-globalThis.createDeferred = createDeferred;
+Object.assign(globalThis, { createDeferred, createScriptContext, flushPromises });

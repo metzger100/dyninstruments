@@ -152,7 +152,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
         if (cfg.formatter === "formatDirection") {
           return "NO DATA";
         }
-        return value == null ? cfg.default : String(value);
+        return value === null || value === undefined ? cfg.default : String(value);
       }
     });
     const mounted = mountCommitted(setup.renderer, withSurfacePolicy(makeProps(), { mode: "dispatch" }));
@@ -293,7 +293,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
   it("reuses prepared semantic model across layoutSignature and patchDom and invalidates on structural boundaries", function () {
     const applyFormatter = vi.fn(function (value, formatterOptions) {
       const cfg = formatterOptions || {};
-      if (value == null) {
+      if (value === null || value === undefined) {
         return cfg.default;
       }
       if (cfg.formatter === "formatDistance") {
@@ -369,7 +369,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
   it("clears prepared semantic model state on detach and destroy", function () {
     const applyFormatter = vi.fn(function (value, formatterOptions) {
       const cfg = formatterOptions || {};
-      return value == null ? cfg.default : String(value);
+      return value === null || value === undefined ? cfg.default : String(value);
     });
     const setup = createRenderer({ applyFormatter });
     const hostContext = {};
@@ -401,7 +401,7 @@ describe("ActiveRouteTextHtmlWidget", function () {
     committed.mount(mountEl, payload);
     expect(applyFormatter).toHaveBeenCalledTimes(3);
 
-    committed.detach("test");
+    committed.detach();
     committed.layoutSignature(payload);
     expect(applyFormatter).toHaveBeenCalledTimes(6);
 

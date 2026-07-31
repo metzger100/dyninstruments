@@ -1,13 +1,19 @@
 // @ts-check
 const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
+/**
+ * @typedef {{ captionBox: unknown, valueBox: unknown }} RowBoxPair
+ * @typedef {{ layout: { highVariant?: unknown, inlineBox: unknown, normalVariant?: unknown } }} ModeState
+ * @typedef {{ rowBoxes: { bottom: RowBoxPair | null, captionBox: unknown, top: RowBoxPair | null, valueBox: unknown } }} ModeDisplay
+ */
+
 describe("LinearGaugeEngine", function () {
   it("passes layout variants and split-high row boxes to mode overrides", function () {
     const harness = createHarness();
-    let normalState;
-    let normalDisplay;
-    let highState;
-    let highDisplay;
+    let normalState = /** @type {ModeState | undefined} */ (undefined);
+    let normalDisplay = /** @type {ModeDisplay | undefined} */ (undefined);
+    let highState = /** @type {ModeState | undefined} */ (undefined);
+    let highDisplay = /** @type {ModeDisplay | undefined} */ (undefined);
     const renderer = harness.engine.createRenderer({
       rawValueKey: "value",
       ratioProps: { normal: "n", flat: "f" },
@@ -21,12 +27,20 @@ describe("LinearGaugeEngine", function () {
       },
       layout: { normalVariant: "stacked", highVariant: "split" },
       drawMode: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /**
+         * @param {ModeState} state
+         * @param {Record<string, unknown>} props
+         * @param {ModeDisplay} display
+         */
         normal(state, props, display) {
           normalState = state;
           normalDisplay = display;
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /**
+         * @param {ModeState} state
+         * @param {Record<string, unknown>} props
+         * @param {ModeDisplay} display
+         */
         high(state, props, display) {
           highState = state;
           highDisplay = display;
@@ -71,31 +85,25 @@ describe("LinearGaugeEngine", function () {
       }
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!normalState || !normalDisplay || !highState || !highDisplay) {
+      throw new Error("expected drawMode.normal and drawMode.high to run synchronously during render");
+    }
+    if (!highDisplay.rowBoxes.top || !highDisplay.rowBoxes.bottom) {
+      throw new Error("expected split-high layout to populate top and bottom row boxes");
+    }
+
     expect(normalState.layout.normalVariant).toBe("stacked");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(normalDisplay.rowBoxes.captionBox).toBeTruthy();
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(normalDisplay.rowBoxes.valueBox).toBeTruthy();
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(normalDisplay.rowBoxes.top).toBeNull();
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(normalDisplay.rowBoxes.bottom).toBeNull();
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(normalState.layout.inlineBox).toBeNull();
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(highState.layout.highVariant).toBe("split");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(highDisplay.rowBoxes.captionBox).toBeNull();
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(highDisplay.rowBoxes.valueBox).toBeNull();
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(highDisplay.rowBoxes.top.captionBox).toBeTruthy();
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(highDisplay.rowBoxes.top.valueBox).toBeTruthy();
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(highDisplay.rowBoxes.bottom.captionBox).toBeTruthy();
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(highDisplay.rowBoxes.bottom.valueBox).toBeTruthy();
   });
 });

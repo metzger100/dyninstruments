@@ -270,7 +270,7 @@
     createWidgetController: createWidgetController,
     /** @param {unknown} error */
     reportActivationError: function (error) {
-      console.error("dyninstruments route activation failed:", error);
+      throw error;
     }
   });
 })(this);

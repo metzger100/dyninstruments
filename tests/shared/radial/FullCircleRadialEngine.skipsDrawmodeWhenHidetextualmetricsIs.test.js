@@ -1,23 +1,24 @@
 // @ts-check
 const { createHarness, createMockCanvas, createMockContext2D } = require("./FullCircleRadialEngine-setup");
 
+/** @typedef {{ mode: string }} DrawModeState */
+
 describe("FullCircleRadialEngine", function () {
   it("skips drawMode when hideTextualMetrics is enabled", function () {
     const harness = createHarness();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const calls = [];
+    const calls = /** @type {string[]} */ ([]);
     const renderer = harness.engine.createRenderer({
       hideTextualMetricsProp: "compassRadialHideTextualMetrics",
       drawMode: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {DrawModeState} state */
         flat(state) {
           calls.push(state.mode);
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {DrawModeState} state */
         high(state) {
           calls.push(state.mode);
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {DrawModeState} state */
         normal(state) {
           calls.push(state.mode);
         }
@@ -35,18 +36,17 @@ describe("FullCircleRadialEngine", function () {
       }
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(calls).toHaveLength(0);
   });
 
   it("falls back to engine-owned ratio defaults when wind threshold props are absent", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {{ windFlat?: number, windNormal?: number }} [props] */
     function captureMode(props) {
       const harness = createHarness();
-      let mode = null;
+      let mode = /** @type {string | null} */ (null);
       const renderer = harness.engine.createRenderer({
         ratioProps: { normal: "windNormal", flat: "windFlat" },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {DrawModeState} state */
         drawFrame(state) {
           mode = state.mode;
         }

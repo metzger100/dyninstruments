@@ -2,33 +2,47 @@
 const { createComponentContextMock, loadFresh } = require("./ActiveRouteHtmlFit-setup");
 
 describe("ActiveRouteHtmlFit (part 3 - formatActiveRouteMetric / compute edge cases)", function () {
+  /**
+   * @typedef {{
+   *   fonts: string[],
+   *   calls: Array<{ text: string, font: string }>,
+   *   font?: string,
+   *   _font?: string,
+   *   measureText?: (text: unknown) => { width: number }
+   * }} MeasureContext
+   */
+
+  /**
+   * @typedef {{
+   *   __dyniHtmlMeasureUtilsCtx: MeasureContext,
+   *   __dyniActiveRouteHtmlFitCache?: unknown
+   * }} FitHostContext
+   */
+
   function createMeasureContext() {
-    const ctx = {
+    const ctx = /** @type {MeasureContext} */ ({
       fonts: [],
       calls: []
-    };
+    });
     Object.defineProperty(ctx, "font", {
       enumerable: true,
       configurable: true,
+      /** @this {MeasureContext} */
       get() {
         return this._font || "700 12px sans-serif";
       },
+      /** @this {MeasureContext} @param {unknown} value */
       set(value) {
         this._font = String(value || "");
         this.fonts.push(this._font);
       }
     });
-    // @ts-ignore -- pre-existing untyped test mock boundary
     ctx.font = "700 12px sans-serif";
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    ctx.measureText = function (text) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+    ctx.measureText = /** @this {MeasureContext} */ function (/** @type {unknown} */ text) {
       this.calls.push({
         text: String(text),
-        // @ts-ignore -- pre-existing untyped test mock boundary
         font: String(this.font || "")
       });
-      // @ts-ignore -- pre-existing untyped test mock boundary
       const source = String(this.font || "");
       const match = source.match(/(\d+(?:\.\d+)?)px/);
       const px = match ? Number(match[1]) : 12;
@@ -38,7 +52,7 @@ describe("ActiveRouteHtmlFit (part 3 - formatActiveRouteMetric / compute edge ca
     return ctx;
   }
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {{ font?: unknown }} [themeOverrides] @param {Record<string, unknown>} [moduleOverrides] */
   function createHarness(themeOverrides, moduleOverrides) {
     const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
     const textTileLayoutModule = loadFresh("shared/widget-kits/text/TextTileLayout.js");
@@ -90,7 +104,7 @@ describe("ActiveRouteHtmlFit (part 3 - formatActiveRouteMetric / compute edge ca
           resolveForRoot: themeApi.resolveForRoot
         },
         dom: {
-          // @ts-ignore -- pre-existing untyped test mock boundary
+          /** @param {unknown} target @returns {unknown} */
           requirePluginRoot(target) {
             return target || null;
           },
@@ -107,7 +121,7 @@ describe("ActiveRouteHtmlFit (part 3 - formatActiveRouteMetric / compute edge ca
     };
   }
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {Record<string, unknown>} [overrides] */
   function makeModel(overrides) {
     return Object.assign(
       {
@@ -132,7 +146,7 @@ describe("ActiveRouteHtmlFit (part 3 - formatActiveRouteMetric / compute edge ca
     );
   }
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {unknown} style */
   function expectStyleFormat(style) {
     expect(typeof style).toBe("string");
     expect(style).toMatch(new RegExp("^font-size:\\d+px\\x3b$"));
@@ -142,7 +156,7 @@ describe("ActiveRouteHtmlFit (part 3 - formatActiveRouteMetric / compute edge ca
     return loadFresh("shared/widget-kits/html/HtmlMeasureUtils.js").create({}, createComponentContextMock({}));
   }
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {string} metricId */
   function createLayoutMissingMetric(metricId) {
     const responsiveScaleProfileModule = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMathModule = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
@@ -156,8 +170,7 @@ describe("ActiveRouteHtmlFit (part 3 - formatActiveRouteMetric / compute edge ca
       })
     );
     return Object.assign({}, realLayout, {
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      computeLayout: function (args) {
+      computeLayout: function (/** @type {unknown} */ args) {
         const layout = realLayout.computeLayout(args);
         delete layout.metricRects[metricId];
         return layout;
@@ -243,7 +256,7 @@ describe("ActiveRouteHtmlFit (part 3 - formatActiveRouteMetric / compute edge ca
       const h = createHarness(undefined, {
         HtmlMeasureUtils: { create: () => stub }
       });
-      const hostContext = { __dyniHtmlMeasureUtilsCtx: createMeasureContext() };
+      const hostContext = /** @type {FitHostContext} */ ({ __dyniHtmlMeasureUtilsCtx: createMeasureContext() });
       const out = h.fit.compute({
         model: makeModel(),
         shellRect: { width: 320, height: 180 },
@@ -252,7 +265,6 @@ describe("ActiveRouteHtmlFit (part 3 - formatActiveRouteMetric / compute edge ca
       });
       expect(out).not.toBeNull();
       expectStyleFormat(out.routeNameStyle);
-      // @ts-ignore -- pre-existing untyped test mock boundary
       expect(hostContext.__dyniActiveRouteHtmlFitCache).toBeUndefined();
     });
   });

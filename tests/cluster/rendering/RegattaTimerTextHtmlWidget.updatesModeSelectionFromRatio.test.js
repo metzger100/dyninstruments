@@ -62,19 +62,20 @@ describe("RegattaTimerTextHtmlWidget", function () {
       shellSize: { width: 220, height: 120 }
     });
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {string} expectedModeClass */
     function expectTopBar(expectedModeClass) {
       const wrapper = mounted.wrapper();
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      if (!wrapper) {
+        throw new Error("Expected the regatta wrapper.");
+      }
       const bar = wrapper.querySelector(".dyni-regatta-bar");
-      // @ts-ignore -- pre-existing untyped test mock boundary
       const display = wrapper.querySelector(".dyni-regatta-display");
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      if (!bar || !display) {
+        throw new Error("Expected regatta bar and display.");
+      }
       expect(wrapper.className).toContain(expectedModeClass);
       expect(bar).toBeTruthy();
-      // @ts-ignore -- pre-existing untyped test mock boundary
       expect(bar.parentElement).toBe(wrapper);
-      // @ts-ignore -- pre-existing untyped test mock boundary
       expect(display.querySelector(".dyni-regatta-bar")).toBeFalsy();
     }
 
@@ -127,25 +128,20 @@ describe("RegattaTimerTextHtmlWidget", function () {
     const controls = mounted.mountEl.querySelector(".dyni-regatta-controls");
     const timer = mounted.mountEl.querySelector(".dyni-regatta-time");
     const button = mounted.mountEl.querySelector(".dyni-regatta-btn-sync");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!wrapper || !display || !controls || !timer || !button) {
+      throw new Error("Expected compact regatta controls.");
+    }
     const timerSize = readPx(timer.getAttribute("style"), "font-size");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const buttonHeight = readPx(button.getAttribute("style"), "height");
 
     expect(timerSize).toBeGreaterThan(0);
     expect(buttonHeight).toBeGreaterThan(0);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(parseStyle(button.getAttribute("style"))["max-height"]).toBe(
-      // @ts-ignore -- pre-existing untyped test mock boundary
       parseStyle(button.getAttribute("style"))["height"]
     );
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(parseStyle(button.getAttribute("style"))["min-height"]).toBe("0");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(parseStyle(display.getAttribute("style"))["min-height"]).toBe("0");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(parseStyle(controls.getAttribute("style"))["min-height"]).toBe("0");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(wrapper.className).toContain("dyni-regatta-mode-normal");
   });
 
@@ -166,11 +162,11 @@ describe("RegattaTimerTextHtmlWidget", function () {
     const controls = mounted.mountEl.querySelector(".dyni-regatta-controls");
     const syncButton = mounted.mountEl.querySelector(".dyni-regatta-btn-sync");
     const resetButton = mounted.mountEl.querySelector(".dyni-regatta-btn-reset");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!controls || !syncButton || !resetButton) {
+      throw new Error("Expected countdown controls.");
+    }
     const controlsStyle = parseStyle(controls.getAttribute("style"));
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const syncStyle = parseStyle(syncButton.getAttribute("style"));
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const resetStyle = parseStyle(resetButton.getAttribute("style"));
 
     expect(syncButton).toBeTruthy();
@@ -194,23 +190,19 @@ describe("RegattaTimerTextHtmlWidget", function () {
     });
     const timeEl = mounted.mountEl.querySelector(".dyni-regatta-time");
     const startBtn = mounted.mountEl.querySelector(".dyni-regatta-btn-start");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!timeEl || !startBtn) {
+      throw new Error("Expected narrow-shell timer controls.");
+    }
     const timerFont = readPx(timeEl.getAttribute("style"), "font-size");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const buttonFont = readPx(startBtn.getAttribute("style"), "font-size");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const buttonHeight = readPx(startBtn.getAttribute("style"), "height");
 
     expect(buttonFont).toBeGreaterThan(0);
     expect(buttonFont).toBeLessThan(timerFont);
     expect(buttonHeight).toBeGreaterThan(0);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(parseStyle(startBtn.getAttribute("style"))["min-height"]).toBe("0");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(startBtn.getAttribute("style")).not.toContain("min-width");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(startBtn.getAttribute("style")).not.toContain("em");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(startBtn.getAttribute("style")).not.toContain("32px");
   });
 

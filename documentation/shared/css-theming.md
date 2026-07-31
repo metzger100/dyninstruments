@@ -1,7 +1,6 @@
 # CSS Theming
 
-**Status:** ✅ Implemented | Input vars resolved by `runtime.theme` + commit-time output materialization by
-`runtime.theme`
+**Status:** Current. `runtime.theme`
 
 ## Overview
 

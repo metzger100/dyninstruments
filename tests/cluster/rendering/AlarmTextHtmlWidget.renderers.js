@@ -135,7 +135,7 @@ function createAisRendererWithRealLayout() {
           const cfg = formatterOptions || {};
           const formatter = cfg.formatter;
           const params = Array.isArray(cfg.formatterParameters) ? cfg.formatterParameters : [];
-          if (value == null) {
+          if (value === null || value === undefined) {
             return cfg.default;
           }
           if (formatter === "formatDistance") {

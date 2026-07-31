@@ -1,6 +1,6 @@
 # AIS Target HTML Renderer
 
-**Status:** ✅ Implemented | Committed HTML renderer for map/aisTarget
+**Status:** Current.
 
 ## Overview
 

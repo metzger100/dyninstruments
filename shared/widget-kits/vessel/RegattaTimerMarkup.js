@@ -93,7 +93,8 @@
       const phase = phaseApi.normalize(model.phase);
       const colorPhase = normalizeColorPhase(model.colorPhase);
       const interactionState = normalizeInteractionState(options.interactionState);
-      const displayText = model.displayTime == null ? "" : String(model.displayTime);
+      const displayText =
+        model.displayTime === null || model.displayTime === undefined ? "" : String(model.displayTime);
       const baseButtonStyle = typeof fit.buttonStyle === "string" ? fit.buttonStyle : "";
       const stableDigitsEnabled = options.stableDigitsEnabled === true;
 

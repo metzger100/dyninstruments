@@ -31,7 +31,7 @@
 
     /** @param {unknown} rawValue @returns {string} */
     function textOrEmpty(rawValue) {
-      return rawValue == null ? "" : String(rawValue);
+      return rawValue === null || rawValue === undefined ? "" : String(rawValue);
     }
 
     /** @param {unknown} payload @returns {string} */

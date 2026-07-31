@@ -10,6 +10,10 @@ const {
   createMockContext2D
 } = require("./SemicircleRadialEngine.harness");
 
+/**
+ * @typedef {{ buildSectors?: (props: Record<string, unknown>, min: number, max: number) => unknown[], rangeDefaults?: { max: number, min: number } }} SemicircleSpec
+ */
+
 describe("SemicircleRadialEngine", function () {
   it("falls back to engine-owned range defaults when range props are absent", function () {
     let capturedRange = null;
@@ -36,7 +40,6 @@ describe("SemicircleRadialEngine", function () {
           };
         }
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
       SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
       SemicircleRadialTextLayout: {
         create() {
@@ -48,32 +51,24 @@ describe("SemicircleRadialEngine", function () {
           };
         }
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
       ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
-      // @ts-ignore -- pre-existing untyped test mock boundary
       LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-      // @ts-ignore -- pre-existing untyped test mock boundary
       GeometryScale: geometryScale
     };
-    const spec = makeBaseSpec();
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    const spec = /** @type {SemicircleSpec} */ (makeBaseSpec());
     delete spec.rangeDefaults;
-    // @ts-ignore -- pre-existing untyped test mock boundary
     spec.buildSectors = function (props, minV, maxV) {
       capturedRange = { min: minV, max: maxV };
       return [];
     };
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
       .create({}, makeComponentContext(modules))
       .createRenderer(spec);
 
     renderer(
-      // @ts-ignore -- pre-existing untyped test mock boundary
       createMockCanvas({
         rectWidth: 300,
         rectHeight: 300,
-        // @ts-ignore -- pre-existing untyped test mock boundary
         ctx: createMockContext2D()
       }),
       {

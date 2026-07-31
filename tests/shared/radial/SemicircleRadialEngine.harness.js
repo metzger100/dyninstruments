@@ -1,7 +1,115 @@
-// @ts-nocheck
 const { loadFresh } = require("../../helpers/load-umd");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
+
+/**
+ * @typedef {{
+ *   sectorAngles: (from: unknown, to: unknown, minV: number, maxV: number, arc: DyniHarnessArc) => ({ a0: number, a1: number } | null),
+ *   buildHighEndSectors: (props: Record<string, unknown> | undefined, minV: number, maxV: number, arc: DyniHarnessArc, options?: Record<string, unknown>) => DyniHarnessColoredAngleRange[],
+ *   buildLowEndSectors: (props: Record<string, unknown> | undefined, minV: number, maxV: number, arc: DyniHarnessArc, options?: Record<string, unknown>) => DyniHarnessColoredAngleRange[]
+ * }} DyniHarnessSectorMathUtils
+ */
+
+/** @typedef {{ startDeg: unknown, endDeg: unknown }} DyniHarnessArc */
+
+/** @typedef {{ a0: number, a1: number, color?: unknown }} DyniHarnessColoredAngleRange */
+
+/** @typedef {{ angleCfg?: unknown, [key: string]: unknown }} DyniHarnessDrawOptions */
+
+/** @typedef {{ majors: number[], minors: number[] }} DyniHarnessTickAngles */
+
+/** @typedef {(layerCtx: CanvasRenderingContext2D, layerName: string, layerCanvas: HTMLCanvasElement) => void} DyniHarnessLayerRebuildFn */
+
+/**
+ * @typedef {{
+ *   surface?: Record<string, unknown>,
+ *   colors?: Record<string, unknown>,
+ *   font?: Record<string, unknown>,
+ *   strokeWeight?: unknown,
+ *   pointerDepthWeight?: unknown,
+ *   pointerSideWeight?: unknown,
+ *   radial?: {
+ *     ticks?: Record<string, unknown>,
+ *     pointer?: Record<string, unknown>,
+ *     ring?: Record<string, unknown>,
+ *     labels?: Record<string, unknown>
+ *   }
+ * }} DyniHarnessThemeOverrides
+ */
+
+/**
+ * @typedef {{
+ *   surface: Record<string, unknown>,
+ *   colors: Record<string, unknown>,
+ *   font: Record<string, unknown>,
+ *   strokeWeight: unknown,
+ *   pointerDepthWeight: unknown,
+ *   pointerSideWeight: unknown,
+ *   radial: {
+ *     ticks: Record<string, unknown>,
+ *     pointer: Record<string, unknown>,
+ *     ring: Record<string, unknown>,
+ *     labels: Record<string, unknown>
+ *   }
+ * }} DyniHarnessResolvedTheme
+ */
+
+/** @typedef {{ surface?: Record<string, unknown>, font?: Record<string, unknown>, [key: string]: unknown }} DyniHarnessThemeSnapshot */
+
+/**
+ * @typedef {{
+ *   theme?: { resolveForRoot?: (rootEl: unknown) => DyniHarnessThemeSnapshot },
+ *   angle?: unknown,
+ *   resolveSurface?: (canvas: HTMLCanvasElement) => unknown,
+ *   [key: string]: unknown
+ * }} DyniHarnessToolkitInstance
+ */
+
+/** @typedef {{ create: (def: unknown, componentContext: unknown) => DyniHarnessToolkitInstance }} DyniHarnessToolkitFactory */
+
+/** @typedef {{ ctx: unknown, W: number, H: number }} DyniHarnessCanvasSetup */
+
+/** @typedef {{ canvas: { setupCanvas(canvas: HTMLCanvasElement): DyniHarnessCanvasSetup | null } }} DyniHarnessComponentContext */
+
+/** @typedef {{ layers?: string[] }} DyniHarnessLayerCacheSpec */
+
+/**
+ * @typedef {{
+ *   props: Record<string, unknown>,
+ *   minV: number,
+ *   maxV: number,
+ *   arc: DyniHarnessArc,
+ *   valueUtils: DyniHarnessSectorMathUtils,
+ *   theme: DyniHarnessResolvedTheme
+ * }} DyniHarnessBuildSectorsCall
+ */
+
+/**
+ * @typedef {{
+ *   rawValueKey?: string,
+ *   unitDefault?: unknown,
+ *   rangeDefaults?: { min: number, max: number },
+ *   ratioProps?: { normal: string, flat: string },
+ *   hideTextualMetricsProp?: unknown,
+ *   ratioDefaults?: { normal: number, flat: number },
+ *   tickSteps?: (range: number) => { major: unknown, minor: unknown },
+ *   formatDisplay?: (raw: unknown) => DyniHarnessFormattedDisplay,
+ *   buildSectors?: (
+ *     props: Record<string, unknown>,
+ *     minV: number,
+ *     maxV: number,
+ *     arc: DyniHarnessArc,
+ *     valueUtils: DyniHarnessSectorMathUtils,
+ *     theme: DyniHarnessResolvedTheme
+ *   ) => DyniHarnessColoredAngleRange[]
+ * }} DyniHarnessRendererSpec
+ */
+
+/** @typedef {{ num: unknown, text: string }} DyniHarnessFormattedDisplay */
+
+/** @typedef {Record<string, unknown>} DyniHarnessRenderState */
+
+/** @typedef {Record<string, unknown>} DyniHarnessDisplay */
 
 const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
 
@@ -34,6 +142,7 @@ function createLayoutModule() {
   );
 }
 
+/** @returns {DyniHarnessRendererSpec} */
 function makeBaseSpec() {
   return {
     rawValueKey: "speed",
@@ -48,6 +157,7 @@ function makeBaseSpec() {
     tickSteps() {
       return { major: 10, minor: 2 };
     },
+    /** @param {unknown} raw @returns {DyniHarnessFormattedDisplay} */
     formatDisplay(raw) {
       const n = Number(raw);
       return { num: n, text: String(n.toFixed(1)) };
@@ -58,6 +168,10 @@ function makeBaseSpec() {
   };
 }
 
+/**
+ * @param {DyniHarnessThemeOverrides} [overrides]
+ * @returns {DyniHarnessResolvedTheme}
+ */
 function makeThemeDefaults(overrides) {
   const extra = overrides || {};
   const radial = extra.radial || {};
@@ -81,9 +195,11 @@ function makeThemeDefaults(overrides) {
       },
       extra.font || {}
     ),
-    strokeWeight: extra.strokeWeight != null ? extra.strokeWeight : 1,
-    pointerDepthWeight: extra.pointerDepthWeight != null ? extra.pointerDepthWeight : 1,
-    pointerSideWeight: extra.pointerSideWeight != null ? extra.pointerSideWeight : 1,
+    strokeWeight: extra.strokeWeight !== null && extra.strokeWeight !== undefined ? extra.strokeWeight : 1,
+    pointerDepthWeight:
+      extra.pointerDepthWeight !== null && extra.pointerDepthWeight !== undefined ? extra.pointerDepthWeight : 1,
+    pointerSideWeight:
+      extra.pointerSideWeight !== null && extra.pointerSideWeight !== undefined ? extra.pointerSideWeight : 1,
     radial: {
       ticks: Object.assign(
         {
@@ -119,24 +235,36 @@ function makeThemeDefaults(overrides) {
   };
 }
 
+/** @param {Record<string, unknown>} modules */
 function makeComponentContext(modules) {
   const fallbackAngleMath = loadFresh("shared/widget-kits/radial/RadialAngleMath.js").create(
     {},
     createComponentContextMock()
   );
 
+  /**
+   * @param {unknown} toolkit
+   * @returns {unknown}
+   */
   function withCanonicalThemeTokens(toolkit) {
-    if (!toolkit || typeof toolkit.create !== "function") {
+    const candidate = /** @type {{ create?: unknown } | null | undefined} */ (toolkit);
+    if (!candidate || typeof candidate.create !== "function") {
       return toolkit;
     }
+    const factory = /** @type {DyniHarnessToolkitFactory} */ (candidate);
     return {
+      /**
+       * @param {unknown} def
+       * @param {DyniHarnessComponentContext} componentContext
+       * @returns {DyniHarnessToolkitInstance}
+       */
       create(def, componentContext) {
-        const created = toolkit.create(def, componentContext);
+        const created = factory.create(def, componentContext);
         if (!created || !created.theme || typeof created.theme.resolveForRoot !== "function") {
           return created;
         }
         const originalResolveForRoot = created.theme.resolveForRoot;
-        created.theme.resolveForRoot = function (rootEl) {
+        created.theme.resolveForRoot = function (/** @type {unknown} */ rootEl) {
           const resolved = originalResolveForRoot(rootEl);
           if (!resolved.surface || typeof resolved.surface !== "object") {
             resolved.surface = { fg: "#fff" };
@@ -158,7 +286,7 @@ function makeComponentContext(modules) {
           created.angle = fallbackAngleMath;
         }
         if (typeof created.resolveSurface !== "function") {
-          created.resolveSurface = function resolveSurface(canvas) {
+          created.resolveSurface = function resolveSurface(/** @type {HTMLCanvasElement} */ canvas) {
             const setup = componentContext.canvas.setupCanvas(canvas);
             return setup && setup.W && setup.H && setup.ctx ? setup : null;
           };
@@ -173,12 +301,18 @@ function makeComponentContext(modules) {
       CanvasLayerCache: {
         create() {
           return {
+            /** @param {DyniHarnessLayerCacheSpec} [spec] */
             createLayerCache(spec) {
               const layers = spec && Array.isArray(spec.layers) && spec.layers.length ? spec.layers : ["layer"];
               return {
+                /**
+                 * @param {HTMLCanvasElement} canvas
+                 * @param {unknown} _key
+                 * @param {DyniHarnessLayerRebuildFn} rebuild
+                 */
                 ensureLayer(canvas, _key, rebuild) {
                   for (let i = 0; i < layers.length; i += 1) {
-                    rebuild(canvas.getContext("2d"), layers[i], canvas);
+                    rebuild(/** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d")), layers[i], canvas);
                   }
                 },
                 blit() {},
@@ -199,6 +333,10 @@ function makeComponentContext(modules) {
     }),
     services: {
       canvas: {
+        /**
+         * @param {HTMLCanvasElement} canvas
+         * @returns {DyniHarnessCanvasSetup}
+         */
         setupCanvas(canvas) {
           const ctx = canvas.getContext("2d");
           const rect = canvas.getBoundingClientRect();
@@ -210,6 +348,7 @@ function makeComponentContext(modules) {
         }
       },
       dom: {
+        /** @param {unknown} target @returns {unknown} */
         requirePluginRoot(target) {
           return target;
         }
@@ -218,94 +357,9 @@ function makeComponentContext(modules) {
   });
 }
 
-function createRenderOrderHarness(sectorList) {
-  const sequence = [];
-  const arcRingCalls = [];
-  const pointerCalls = [];
-  const tickCalls = [];
-  const labelCalls = [];
-  const buildSectorsCalls = [];
-  const themeDefaults = makeThemeDefaults();
-  const resolveTheme = vi.fn(function () {
-    return themeDefaults;
-  });
-  const gaugeValueMath = createValueMath();
-  const gaugeToolkit = {
-    create() {
-      return {
-        theme: { resolveForRoot: resolveTheme },
-        text: {
-          drawDisconnectOverlay() {}
-        },
-        value: gaugeValueMath,
-        draw: {
-          drawArcRing(ctx, cx, cy, rOuter, startDeg, endDeg, opts) {
-            sequence.push("ring");
-            arcRingCalls.push(opts);
-          },
-          drawAnnularSector(ctx, cx, cy, rOuter, opts) {
-            sequence.push("sector");
-          },
-          drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, opts) {
-            sequence.push("pointer");
-            pointerCalls.push(opts);
-          },
-          drawTicksFromAngles(ctx, cx, cy, rOuter, ticks, opts) {
-            sequence.push("ticks");
-            tickCalls.push(opts);
-          },
-          drawLabels(ctx, cx, cy, rOuter, opts) {
-            sequence.push("labels");
-            labelCalls.push(opts);
-          }
-        }
-      };
-    }
-  };
-  const textLayoutCalls = [];
-  const modules = {
-    RadialToolkit: gaugeToolkit,
-    SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
-    SemicircleRadialTextLayout: {
-      create() {
-        return {
-          createFitCache() {
-            return {};
-          },
-          drawModeText(state, display) {
-            textLayoutCalls.push({ state, display });
-          }
-        };
-      }
-    },
-    ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
-    LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-    GeometryScale: geometryScale
-  };
-  const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
-    .create({}, makeComponentContext(modules))
-    .createRenderer({
-      ...makeBaseSpec(),
-      buildSectors(props, minV, maxV, arc, valueUtils, theme) {
-        buildSectorsCalls.push({ props, minV, maxV, arc, valueUtils, theme });
-        return sectorList;
-      }
-    });
+const { createRenderOrderHarness } = require("./SemicircleRadialEngine.render-order-harness");
 
-  return {
-    renderer,
-    sequence,
-    arcRingCalls,
-    pointerCalls,
-    tickCalls,
-    labelCalls,
-    buildSectorsCalls,
-    textLayoutCalls,
-    resolveTheme,
-    themeDefaults
-  };
-}
-
+/** @param {number} width @param {number} height */
 function createCanvas(width, height) {
   const ctx = createMockContext2D();
   const canvas = createMockCanvas({
@@ -316,6 +370,7 @@ function createCanvas(width, height) {
   return { canvas: canvas, ctx: ctx };
 }
 
+/** @param {DyniHarnessColoredAngleRange[]} [sectorList] */
 function createBaseSequence(sectorList) {
   return createRenderOrderHarness(sectorList || []);
 }

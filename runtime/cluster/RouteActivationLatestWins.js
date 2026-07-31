@@ -143,7 +143,7 @@
         });
       }
 
-      // dyni-boundary-next-line(category: avnav-host-boundary, owner: Metzger100, date: 2026-07-17) -- Load failures reject the activation promise; destroy resolves through the sentinel path.
+      // plugin-boundary-next-line(category: avnav-host-boundary, owner: Metzger100, date: 2026-07-17) -- Load failures reject the activation promise; destroy resolves through the sentinel path.
       runLoadCycle().catch(function (error) {
         if (entry.settled) {
           return;

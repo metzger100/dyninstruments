@@ -1,13 +1,9 @@
 // @ts-check
 const {
-  // eslint-disable-next-line no-unused-vars -- imported shared setup retained for the strict test contract
-  createCompassCachingHarness,
   createComponentContextMock,
   createMockCanvas,
   createMockContext2D,
-  loadFresh,
-  // eslint-disable-next-line no-unused-vars -- imported shared setup retained for the strict test contract
-  makeCompassProps
+  loadFresh
 } = require("./CompassRadialWidget-setup");
 
 describe("CompassRadialWidget", function () {
@@ -61,7 +57,12 @@ describe("CompassRadialWidget", function () {
     expect(harness.calls.rimMarker).toHaveLength(0);
   });
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /**
+   * @typedef {{ fillStyle?: string }} DrawOptions
+   * @typedef {{ angle: number, opts: DrawOptions }} RimMarkerCall
+   * @typedef {{ springEasingModule?: { create: () => { createMotion: () => unknown } } }} HarnessOptions
+   */
+  /** @param {HarnessOptions} [options] */
   function createCompassCachingHarness(options) {
     const opts = options || {};
     const fullCircleEngine = loadFresh("shared/widget-kits/radial/FullCircleRadialEngine.js");
@@ -71,13 +72,14 @@ describe("CompassRadialWidget", function () {
     const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
     const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
     const geometryScale = loadFresh("shared/widget-kits/layout/GeometryScale.js");
-    const calls = {
-      ring: [],
-      ticks: [],
-      pointer: [],
-      rimMarker: [],
-      textDraws: 0
-    };
+    const calls =
+      /** @type {{ pointer: DrawOptions[], rimMarker: RimMarkerCall[], ring: DrawOptions[], textDraws: number, ticks: DrawOptions[] }} */ ({
+        ring: [],
+        ticks: [],
+        pointer: [],
+        rimMarker: [],
+        textDraws: 0
+      });
     const theme = {
       surface: {
         fg: "#fff"
@@ -136,29 +138,25 @@ describe("CompassRadialWidget", function () {
             create() {
               return {
                 draw: {
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} ctx @param {number} cx @param {number} cy @param {number} rOuter @param {DrawOptions} opts */
                   drawRing(ctx, cx, cy, rOuter, opts) {
-                    // @ts-ignore -- pre-existing untyped test mock boundary
                     calls.ring.push(opts);
                   },
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} ctx @param {number} cx @param {number} cy @param {number} rOuter @param {DrawOptions} opts */
                   drawTicks(ctx, cx, cy, rOuter, opts) {
-                    // @ts-ignore -- pre-existing untyped test mock boundary
                     calls.ticks.push(opts);
                   },
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} ctx @param {number} cx @param {number} cy @param {number} rOuter @param {number} angle @param {DrawOptions} opts */
                   drawPointerAtRim(ctx, cx, cy, rOuter, angle, opts) {
-                    // @ts-ignore -- pre-existing untyped test mock boundary
                     calls.pointer.push(opts);
                   },
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} ctx @param {number} cx @param {number} cy @param {number} rOuter @param {number} angle @param {DrawOptions} opts */
                   drawRimMarker(ctx, cx, cy, rOuter, angle, opts) {
-                    // @ts-ignore -- pre-existing untyped test mock boundary
                     calls.rimMarker.push({ angle, opts });
                   }
                 },
                 angle: {
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} deg @param {unknown} cfg @param {unknown} rotationDeg */
                   degToCanvasRad(deg, cfg, rotationDeg) {
                     const d = Number(deg) + (Number(rotationDeg) || 0);
                     const norm = ((d % 360) + 360) % 360;
@@ -195,22 +193,22 @@ describe("CompassRadialWidget", function () {
                   drawDisconnectOverlay() {}
                 },
                 value: {
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} value @param {number} lo @param {number} hi */
                   clamp(value, lo, hi) {
                     const n = Number(value);
                     if (!isFinite(n)) return lo;
                     return Math.max(lo, Math.min(hi, n));
                   },
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} value */
                   isFiniteNumber(value) {
                     return typeof value === "number" && isFinite(value);
                   },
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} value @param {number} defaultValue */
                   resolveFiniteNumber(value, defaultValue) {
                     const n = Number(value);
                     return isFinite(n) ? n : defaultValue;
                   },
-                  // @ts-ignore -- pre-existing untyped test mock boundary
+                  /** @param {unknown} value */
                   formatDirection360(value) {
                     const n = Number(value);
                     if (!isFinite(n)) return "---";
@@ -224,7 +222,7 @@ describe("CompassRadialWidget", function () {
         },
         services: {
           canvas: {
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {{ getBoundingClientRect: () => { height: number, width: number }, getContext: (kind: string) => unknown }} canvas */
             setupCanvas(canvas) {
               const ctx = canvas.getContext("2d");
               const rect = canvas.getBoundingClientRect();
@@ -236,7 +234,7 @@ describe("CompassRadialWidget", function () {
             }
           },
           dom: {
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {Element | null} target */
             requirePluginRoot(target) {
               return target;
             }
@@ -249,7 +247,7 @@ describe("CompassRadialWidget", function () {
       spec,
       calls,
       theme,
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {number} width @param {number} height */
       computeLayout(width, height) {
         const api = fullCircleLayout.create(
           {},
@@ -276,7 +274,7 @@ describe("CompassRadialWidget", function () {
     };
   }
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {Record<string, unknown>} [overrides] */
   function makeCompassProps(overrides) {
     return Object.assign(
       {

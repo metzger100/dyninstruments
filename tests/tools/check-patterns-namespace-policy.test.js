@@ -25,12 +25,26 @@ describe("tools/check-patterns namespace-policy rule", function () {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-check-patterns-namespace-"));
     tempDirs.push(dir);
 
+    copyPolicies(dir);
+
     for (const [rel, content] of Object.entries(files)) {
       const abs = path.join(dir, rel);
       fs.mkdirSync(path.dirname(abs), { recursive: true });
       fs.writeFileSync(abs, content, "utf8");
     }
     return dir;
+  }
+
+  /** @param {string} dir */
+  function copyPolicies(dir) {
+    for (const rel of [
+      "tools/quality-policy/project-pattern-context.json",
+      "tools/quality-policy/project-pattern-scopes.json"
+    ]) {
+      const target = path.join(dir, rel);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(path.resolve(__dirname, "../..", rel), target);
+    }
   }
 
   /** @param {any} result */

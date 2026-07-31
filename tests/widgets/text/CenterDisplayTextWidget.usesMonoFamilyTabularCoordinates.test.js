@@ -53,6 +53,9 @@ describe("CenterDisplayTextWidget", function () {
     expect(plainLat).toBeTruthy();
     expect(monoRelation).toBeTruthy();
     expect(plainRelation).toBeTruthy();
+    if (!monoLat || !plainLat || !monoRelation || !plainRelation) {
+      throw new Error("Expected all coordinate font captures.");
+    }
     expect(String(monoLat.font)).toContain("monospace");
     expect(String(monoRelation.font)).toContain("monospace");
     expect(String(plainLat.font)).toContain("sans-serif");

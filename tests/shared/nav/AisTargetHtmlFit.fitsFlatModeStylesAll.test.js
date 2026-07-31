@@ -65,7 +65,9 @@ describe("AisTargetHtmlFit", function () {
 
     const valueCall = h.radialTextApi.fitSingleTextPx.mock.calls.find((args) => args[1] === "4.2");
     expect(valueCall).toBeDefined();
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!valueCall) {
+      throw new Error("valueCall is missing");
+    }
     expect(valueCall[5]).toBe("monospace");
   });
 });

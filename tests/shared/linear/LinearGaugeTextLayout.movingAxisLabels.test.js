@@ -3,10 +3,9 @@ const { createFontAwareContext, createState, createTextLayout } = require("./Lin
 
 describe("LinearGaugeTextLayout", function () {
   it("keeps first and last visible non-endpoint labels edge-protected on moving axes", function () {
+    /** @typedef {{ align: string, text: string, type: string, x: number, y: number }} TextCall */
     const textLayout = createTextLayout();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const calls = [];
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    const calls = /** @type {TextCall[]} */ ([]);
     const layerCtx = createFontAwareContext(calls, { charFactor: 1 });
     const state = createState(1);
     state.ctx = layerCtx;
@@ -24,20 +23,23 @@ describe("LinearGaugeTextLayout", function () {
     };
 
     textLayout.drawTickLabels(layerCtx, state, { major: [12, 42, 342, 372], minor: [] }, false, {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {number} value @param {number} minV @param {number} maxV @param {number} x0 @param {number} x1 */
       mapValueToX(value, minV, maxV, x0, x1) {
         return x0 + (x1 - x0) * ((value - minV) / (maxV - minV));
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {number} value */
       formatTickLabel(value) {
         return String(value).padStart(3, "0");
       }
     });
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const fills = calls.filter((entry) => entry.type === "fillText");
     const firstVisible = fills.find((entry) => entry.text === "042");
     const lastVisible = fills.find((entry) => entry.text === "342");
+
+    if (!firstVisible || !lastVisible) {
+      throw new Error("Expected both protected axis labels.");
+    }
 
     expect(fills.map((entry) => entry.text)).not.toContain("12");
     expect(fills.map((entry) => entry.text)).not.toContain("372");
@@ -48,10 +50,9 @@ describe("LinearGaugeTextLayout", function () {
   });
 
   it("keeps centered wind-like labels drawn while hiding only exact axis endpoints", function () {
+    /** @typedef {{ text: string, type: string }} TextCall */
     const textLayout = createTextLayout();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const calls = [];
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    const calls = /** @type {TextCall[]} */ ([]);
     const layerCtx = createFontAwareContext(calls);
     const state = createState(1);
     state.ctx = layerCtx;
@@ -77,18 +78,17 @@ describe("LinearGaugeTextLayout", function () {
       },
       false,
       {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {number} value @param {number} minV @param {number} maxV @param {number} x0 @param {number} x1 */
         mapValueToX(value, minV, maxV, x0, x1) {
           return x0 + (x1 - x0) * ((value - minV) / (maxV - minV));
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {number} value */
         formatTickLabel(value) {
           return String(value);
         }
       }
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     const fills = calls.filter((entry) => entry.type === "fillText");
     const drawnLabels = fills.map((entry) => entry.text);
 
@@ -98,21 +98,20 @@ describe("LinearGaugeTextLayout", function () {
   });
 
   it("caps tick label y against inlineBox top when present", function () {
+    /** @typedef {{ text: string, x: number, y: number }} TextCall */
     const textLayout = createTextLayout();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const calls = [];
+    const calls = /** @type {TextCall[]} */ ([]);
     const state = createState(1);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     state.layout.inlineBox = { x: 0, y: 26, w: 100, h: 12 };
     const layerCtx = {
       font: "",
       textAlign: "",
       textBaseline: "",
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {string} text */
       measureText(text) {
         return { width: String(text || "").length * 6 };
       },
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {string} text @param {number} x @param {number} y */
       fillText(text, x, y) {
         calls.push({ text: text, x: x, y: y });
       }
@@ -127,19 +126,21 @@ describe("LinearGaugeTextLayout", function () {
       }
     });
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(calls[0].y).toBe(12);
+    const firstCall = calls[0];
+    if (!firstCall) {
+      throw new Error("Expected one tick label call.");
+    }
+    expect(firstCall.y).toBe(12);
   });
 
   it("uses layout-owned label font sizes without a local readable-floor override", function () {
     const textLayout = createTextLayout();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const fonts = [];
+    const fonts = /** @type {string[]} */ ([]);
     const layerCtx = {
       font: "",
       textAlign: "",
       textBaseline: "",
-      // @ts-ignore -- pre-existing untyped test mock boundary
+      /** @param {string} text */
       measureText(text) {
         return { width: String(text || "").length * 6 };
       },
@@ -163,7 +164,10 @@ describe("LinearGaugeTextLayout", function () {
       }
     );
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(fonts[0]).toContain("4px");
+    const firstFont = fonts[0];
+    if (!firstFont) {
+      throw new Error("Expected one label font capture.");
+    }
+    expect(firstFont).toContain("4px");
   });
 });

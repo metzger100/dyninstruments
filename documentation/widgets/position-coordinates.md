@@ -1,6 +1,6 @@
 # PositionCoordinateWidget Module
 
-**Status:** ✅ Implemented | `widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js`
+**Status:** Current.
 
 ## Overview
 

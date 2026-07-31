@@ -1,32 +1,68 @@
 #!/usr/bin/env node
+
+/**
+ * @file check-doc-links - Linkinator scan over every Prettier-owned Markdown file
+ * Documentation: documentation/conventions/quality-gates.md
+ */
+
 import fs from "node:fs";
 import path from "node:path";
 import { check } from "linkinator";
 
-const root = process.cwd();
-const config = JSON.parse(fs.readFileSync(path.join(root, "linkinator.config.json"), "utf8"));
-const paths = collectMarkdownPaths(root);
-
-/** @param {string} repositoryRoot @returns {string[]} */
-function collectMarkdownPaths(repositoryRoot) {
-  const scopePath = path.join(repositoryRoot, "tools/quality-policy/format-scope.json");
+/**
+ * @param {string} root
+ * @returns {string[]}
+ */
+export function discoverSeedMarkdownFiles(root) {
+  const scopePath = path.join(root, "tools", "quality-policy", "format-scope.json");
   const scope = JSON.parse(fs.readFileSync(scopePath, "utf8"));
   return scope.rows
-    .filter((/** @type {any} */ row) => row.owner === "prettier" && row.path.endsWith(".md"))
-    .map((/** @type {any} */ row) => row.path);
+    .filter((/** @type {{owner: string, path: string}} */ row) => row.owner === "prettier" && row.path.endsWith(".md"))
+    .map((/** @type {{path: string}} */ row) => row.path)
+    .sort();
 }
 
-const result = await check({
-  ...config,
-  path: paths,
-  serverRoot: root
-});
+/**
+ * @param {{root?: string, print?: boolean}} [options]
+ * @returns {Promise<{ok: boolean, seeds: string[], links: number, broken: {url: string, parent?: string}[]}>}
+ */
+export async function runDocLinksCheck(options = {}) {
+  const root = options.root || process.cwd();
+  const print = options.print !== false;
+  const seeds = discoverSeedMarkdownFiles(root);
+  // linkinator.config.json is a fixed project config, not part of the (possibly fake) scan
+  // root under test, so it is always read from the real repository root.
+  const config = JSON.parse(fs.readFileSync(path.join(process.cwd(), "linkinator.config.json"), "utf8"));
 
-if (!result.passed) {
-  for (const link of result.links.filter((entry) => entry.state === "BROKEN")) {
-    console.error(`${link.url} <- ${link.parent || "unknown source"}`);
+  const result = await check({
+    ...config,
+    path: seeds,
+    serverRoot: root
+  });
+
+  const broken = result.links
+    .filter((link) => link.state === "BROKEN")
+    .map((link) => ({ url: link.url, parent: link.parent }));
+  const ok = broken.length === 0;
+
+  if (print) {
+    if (ok) {
+      console.log(
+        `Documentation links passed: ${seeds.length} seeded file(s), ${result.links.length} link(s) checked.`
+      );
+    } else {
+      console.error("Documentation link check failed:\n");
+      for (const link of broken) {
+        console.error(`- ${link.url} (linked from ${link.parent || "a seed file"})`);
+      }
+    }
   }
-  process.exit(1);
+
+  return { ok, seeds, links: result.links.length, broken };
 }
 
-console.log(`Documentation links passed: ${result.links.length} local and skipped external links checked.`);
+if (import.meta.url === `file://${process.argv[1]}`) {
+  runDocLinksCheck().then((result) => {
+    process.exitCode = result.ok ? 0 : 1;
+  });
+}

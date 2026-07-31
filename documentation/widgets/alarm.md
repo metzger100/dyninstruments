@@ -1,6 +1,6 @@
 # Alarm HTML Renderer
 
-**Status:** ✅ Implemented | Native HTML alarm tile for `vessel/alarm`
+**Status:** Current.
 
 ## Overview
 

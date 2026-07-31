@@ -2,7 +2,7 @@
 const { createComponentContextMock, loadFresh } = require("./EditRouteHtmlFitSupport-setup");
 
 describe("EditRouteHtmlFitSupport (part 2 - isLineTrimmed / selectMetricValue / resolveMetricPx / measure* / resolveNamePxRatio)", function () {
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {Record<string, unknown>} [moduleOverrides] */
   function createSupport(moduleOverrides) {
     const componentContext = createComponentContextMock({
       modules: Object.assign({}, moduleOverrides || {})
@@ -37,7 +37,21 @@ describe("EditRouteHtmlFitSupport (part 2 - isLineTrimmed / selectMetricValue / 
   });
 
   describe("selectMetricValue", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /**
+     * @typedef {{
+     *   textApi: unknown,
+     *   ctx: unknown,
+     *   text: string,
+     *   maxW: number,
+     *   maxH: number,
+     *   maxPx: number,
+     *   textFillScale: unknown,
+     *   family: unknown,
+     *   weight: unknown
+     * }} MeasureFittedLineArgs
+     */
+
+    /** @param {(args: MeasureFittedLineArgs) => { text: string, px: number }} measureFittedLine */
     function baseArgs(measureFittedLine) {
       return {
         primaryText: "12345.6",

@@ -3,9 +3,13 @@ const { createHarness, createMockCanvas, createMockContext2D } = require("./Line
 
 describe("LinearGaugeEngine", function () {
   it("falls back to engine-owned ratio defaults when wind threshold props are absent", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /**
+     * @param {{ windNormal?: number, windFlat?: number }} [props]
+     * @returns {string | null}
+     */
     function captureMode(props) {
       const harness = createHarness();
+      /** @type {string | null} */
       let mode = null;
       const renderer = harness.engine.createRenderer({
         rawValueKey: "angle",
@@ -18,7 +22,7 @@ describe("LinearGaugeEngine", function () {
           showEndLabels: "showEndLabels"
         },
         ratioProps: { normal: "windNormal", flat: "windFlat" },
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {{ mode: string }} state */
         drawFrame(state) {
           mode = state.mode;
         }

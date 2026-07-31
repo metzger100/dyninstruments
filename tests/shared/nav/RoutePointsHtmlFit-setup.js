@@ -2,10 +2,12 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
+/** @typedef {{ emptyText: string, hasRoute: boolean, metaText: string, mode: string, points: Array<{ infoPlainText?: string, infoText: string, nameText: string, ordinalText: string }>, ratioThresholdFlat: number, ratioThresholdNormal: number, routeNameText: string, showHeader: boolean, stableDigitsEnabled?: boolean }} RoutePointsModel */
+
 function createMeasureContext() {
   return {
     font: "700 12px sans-serif",
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {string} text */
     measureText(text) {
       const source = String(this.font || "");
       const match = source.match(/(\d+(?:\.\d+)?)px/);
@@ -82,7 +84,7 @@ function createHarness() {
         resolveForRoot: themeApi.resolveForRoot
       },
       dom: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {Element | null} target */
         requirePluginRoot(target) {
           return target || null;
         },
@@ -97,9 +99,9 @@ function createHarness() {
   return { fit, layout, targetEl, hostContext, themeApi, radialTextApi };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {Partial<RoutePointsModel>} [overrides] */
 function buildModel(overrides) {
-  const base = {
+  const base = /** @type {RoutePointsModel} */ ({
     mode: "normal",
     showHeader: true,
     hasRoute: true,
@@ -116,18 +118,18 @@ function buildModel(overrides) {
       },
       { ordinalText: "2", nameText: "Finish", infoText: "081°/1.2nm" }
     ]
-  };
+  });
   return Object.assign({}, base, overrides || {});
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} style */
 function extractPx(style) {
   const source = String(style || "");
   const match = source.match(new RegExp("^font-size:(\\d+)px\\x3b$"));
   return match ? Number(match[1]) : 0;
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} style */
 function expectStyleFormat(style) {
   expect(typeof style).toBe("string");
   if (style === "") {
@@ -136,7 +138,7 @@ function expectStyleFormat(style) {
   expect(style).toMatch(new RegExp("^font-size:\\d+px\\x3b$"));
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {string} mode */
 function resolveEmptyCapRatio(mode) {
   if (mode === "flat") {
     return 0.5;

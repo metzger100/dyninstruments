@@ -1,12 +1,5 @@
 // @ts-check
-const {
-  createRenderer,
-  makeProps,
-  mountCommitted,
-  // eslint-disable-next-line no-unused-vars -- imported shared setup retained for the strict test contract
-  path,
-  withSurfacePolicy
-} = require("./AisTargetTextHtmlWidget-setup");
+const { createRenderer, makeProps, mountCommitted, withSurfacePolicy } = require("./AisTargetTextHtmlWidget-setup");
 
 describe("AisTargetTextHtmlWidget", function () {
   it("rebinds the dispatch listener across successive dispatch-state updates", function () {
@@ -22,14 +15,15 @@ describe("AisTargetTextHtmlWidget", function () {
     );
 
     let wrapper = mounted.mountEl.querySelector(".dyni-ais-target-html");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!wrapper) {
+      throw new Error("Expected the ais-target wrapper.");
+    }
     wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(showInfoA).toHaveBeenCalledTimes(1);
 
     // Update while remaining in dispatch state with a changed distance forces
     // new markup, which reassigns wrapperEl while a clickHandler is still set
     // -- this is the rebind path.
-    // @ts-ignore -- pre-existing untyped test mock boundary
     mounted.update(
       withSurfacePolicy(makeProps({ domain: { distance: 9.9 } }), {
         interactionMode: "dispatch",
@@ -40,7 +34,9 @@ describe("AisTargetTextHtmlWidget", function () {
     );
 
     wrapper = mounted.mountEl.querySelector(".dyni-ais-target-html");
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!wrapper) {
+      throw new Error("Expected the ais-target wrapper.");
+    }
     wrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(showInfoB).toHaveBeenCalledTimes(1);
     expect(showInfoA).toHaveBeenCalledTimes(1);
@@ -58,8 +54,10 @@ describe("AisTargetTextHtmlWidget", function () {
     );
 
     const staleWrapper = mounted.mountEl.querySelector(".dyni-ais-target-html");
+    if (!staleWrapper) {
+      throw new Error("Expected the ais-target wrapper.");
+    }
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     mounted.update(
       withSurfacePolicy(makeProps(), {
         interactionMode: "passive",
@@ -72,7 +70,6 @@ describe("AisTargetTextHtmlWidget", function () {
     // The stale wrapper still carries its original listener (patchInnerHtml
     // replaced the DOM under jsdom), but lastModel now reports passive state,
     // so the click handler's own re-check must block the dispatch.
-    // @ts-ignore -- pre-existing untyped test mock boundary
     staleWrapper.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(showInfo).not.toHaveBeenCalled();
   });

@@ -1,6 +1,6 @@
 # Canvas Layer Cache
 
-**Status:** ✅ Implemented | Shared offscreen canvas layer cache for reusable background rendering
+**Status:** Current.
 
 ## Overview
 

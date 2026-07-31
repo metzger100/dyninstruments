@@ -1,7 +1,6 @@
 # Theme Tokens
 
-**Status:** ✅ Implemented | `runtime.theme` semantic ownership + `componentContext.theme.tokens.resolveForRoot(rootEl)`
-snapshot reuse
+**Status:** Current. snapshot reuse
 
 ## Overview
 

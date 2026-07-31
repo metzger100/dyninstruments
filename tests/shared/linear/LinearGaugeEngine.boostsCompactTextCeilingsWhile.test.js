@@ -100,9 +100,7 @@ describe("LinearGaugeEngine", function () {
     );
 
     expect(stackedHarness.calls.captionMaxPx[0]).toBeGreaterThan(stackedHarness.calls.captionMaxPx[1]);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(stackedHarness.calls.valueFits[0].vPx).toBeGreaterThan(stackedHarness.calls.valueFits[1].vPx);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(inlineHarness.calls.inlineFits[0].vPx).toBeGreaterThan(inlineHarness.calls.inlineFits[1].vPx);
   });
 });

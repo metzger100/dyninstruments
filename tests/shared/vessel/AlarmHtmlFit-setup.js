@@ -2,6 +2,14 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
+/**
+ * @typedef {{ font: string, measureText: (text: string) => { width: number } }} MeasureContext
+ * @typedef {{ captionText?: unknown, ctx?: MeasureContext, family?: unknown, gap?: unknown, labelWeight?: unknown, maxH?: unknown, maxW?: unknown, secScale?: unknown, valueText?: unknown, valueWeight?: unknown }} InlineFitOptions
+ * @typedef {import("vitest").Mock} TestMock
+ * @typedef {{ fitInlineTriplet: TestMock, fitThreeRowBlock: TestMock, fitValueUnitCaptionRows: TestMock }} TextLayoutApi
+ * @typedef {{ textLayoutApi?: TextLayoutApi }} HarnessOptions
+ */
+
 function createAisLayout() {
   const responsiveScaleProfile = loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js");
   const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
@@ -27,7 +35,7 @@ function createAisLayout() {
 function createMeasureContext() {
   return {
     font: "700 12px sans-serif",
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {string} text */
     measureText(text) {
       const source = String(this.font || "");
       const match = source.match(/(\d+(?:\.\d+)?)px/);
@@ -40,15 +48,18 @@ function createMeasureContext() {
 
 function createMeasuredTextLayoutApi() {
   return {
-    fitThreeRowBlock: vi.fn((args) => {
+    fitThreeRowBlock: vi.fn((/** @type {unknown} */ args) => {
       return { cPx: 11, vPx: 19 };
     }),
-    fitValueUnitCaptionRows: vi.fn((args) => {
+    fitValueUnitCaptionRows: vi.fn((/** @type {unknown} */ args) => {
       return { cPx: 10, vPx: 17 };
     }),
-    fitInlineTriplet: vi.fn((args) => {
+    fitInlineTriplet: vi.fn((/** @type {InlineFitOptions | undefined} */ args) => {
       const cfg = args || {};
       const ctx = cfg.ctx;
+      if (!ctx) {
+        throw new Error("fitInlineTriplet requires a measurement context");
+      }
       const captionText = String(cfg.captionText || "");
       const valueText = String(cfg.valueText || "");
       const family = cfg.family || "sans-serif";
@@ -109,7 +120,7 @@ function createMeasuredTextLayoutApi() {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {HarnessOptions} [options] */
 function createHarness(options) {
   const cfg = options || {};
   const htmlUtilsModule = loadFresh("shared/widget-kits/html/HtmlWidgetUtils.js");
@@ -117,24 +128,21 @@ function createHarness(options) {
   const layoutRectMath = loadFresh("shared/widget-kits/layout/LayoutRectMath.js");
   const aisLayoutMath = loadFresh("shared/widget-kits/nav/AisTargetLayoutMath.js");
   const aisLayoutSizing = loadFresh("shared/widget-kits/nav/AisTargetLayoutSizing.js");
-  const fitCalls = {
+  const fitCalls = /** @type {{ flat: unknown[], high: unknown[], normal: unknown[] }} */ ({
     high: [],
     normal: [],
     flat: []
-  };
+  });
   const textLayoutApi = cfg.textLayoutApi || {
-    fitThreeRowBlock: vi.fn((args) => {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+    fitThreeRowBlock: vi.fn((/** @type {unknown} */ args) => {
       fitCalls.high.push(args);
       return { cPx: 11, vPx: 19 };
     }),
-    fitValueUnitCaptionRows: vi.fn((args) => {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+    fitValueUnitCaptionRows: vi.fn((/** @type {unknown} */ args) => {
       fitCalls.normal.push(args);
       return { cPx: 10, vPx: 17 };
     }),
-    fitInlineTriplet: vi.fn((args) => {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+    fitInlineTriplet: vi.fn((/** @type {unknown} */ args) => {
       fitCalls.flat.push(args);
       return { sPx: 9, vPx: 15 };
     })
@@ -172,7 +180,7 @@ function createHarness(options) {
         resolveForRoot: themeApi.resolveForRoot
       },
       dom: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {Element | null} target */
         requirePluginRoot(target) {
           return target || null;
         },
@@ -194,7 +202,7 @@ function createHarness(options) {
   };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {Record<string, unknown>} [overrides] */
 function makeModel(overrides) {
   return Object.assign(
     {
@@ -211,12 +219,12 @@ function makeModel(overrides) {
   );
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {number} width @param {number} height */
 function computePadX(width, height) {
   return Math.max(2, Math.floor(Math.min(width, height) * 0.03));
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} styleText @returns {Record<string, string>} */
 function parseStyleText(styleText) {
   return String(styleText || "")
     .split(";")
@@ -234,7 +242,7 @@ function parseStyleText(styleText) {
     }, Object.create(null));
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {Record<string, string> | undefined} styleMap @param {string} key */
 function readPx(styleMap, key) {
   const raw = styleMap && styleMap[key] ? styleMap[key] : "";
   const match = String(raw).match(new RegExp("^(-?\\d+(?:\\.\\d+)?)px$"));

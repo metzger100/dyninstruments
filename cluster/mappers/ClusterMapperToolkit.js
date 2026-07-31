@@ -150,7 +150,7 @@
         if (Object.prototype.hasOwnProperty.call(p, key)) {
           const value = p[key];
           if (typeof value !== "undefined") {
-            return value == null ? "" : String(value);
+            return value === null || value === undefined ? "" : String(value);
           }
         }
         return resolved.family.labels[token] || token;

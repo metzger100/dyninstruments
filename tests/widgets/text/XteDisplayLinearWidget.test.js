@@ -71,10 +71,12 @@ describe("XteDisplayLinearWidget", function () {
     const expectedCenter = Math.round((track.x0 + track.x1) / 2);
 
     expect(pointer).toBeTruthy();
-    expect(pointer.tip[0]).toBe(expectedCenter);
-    expect(pointer.tip[1]).toBeGreaterThan(track.y);
-    expect(pointer.leftBase[1]).toBeGreaterThan(pointer.tip[1]);
-    expect(pointer.rightBase[1]).toBeGreaterThan(pointer.tip[1]);
+    const resolvedPointer =
+      /** @type {{ leftBase: [number, number], rightBase: [number, number], tip: [number, number] }} */ (pointer);
+    expect(resolvedPointer.tip[0]).toBe(expectedCenter);
+    expect(resolvedPointer.tip[1]).toBeGreaterThan(track.y);
+    expect(resolvedPointer.leftBase[1]).toBeGreaterThan(resolvedPointer.tip[1]);
+    expect(resolvedPointer.rightBase[1]).toBeGreaterThan(resolvedPointer.tip[1]);
   });
 
   it("clamps overflow pointer to the gauge edge and uses alarm color", function () {

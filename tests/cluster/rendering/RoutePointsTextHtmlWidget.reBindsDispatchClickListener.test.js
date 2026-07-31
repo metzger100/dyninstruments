@@ -24,7 +24,9 @@ describe("RoutePointsTextHtmlWidget (part10 - update/detach/destroy lifecycle)",
     expect(mounted.html()).toContain("Route2");
 
     const row = mounted.mountEl.querySelector('[data-rp-idx="3"]');
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    if (!row) {
+      throw new Error("Expected the route-points row.");
+    }
     row.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
 
     expect(activate).toHaveBeenCalledTimes(1);
@@ -43,8 +45,10 @@ describe("RoutePointsTextHtmlWidget (part10 - update/detach/destroy lifecycle)",
     );
 
     const row = mounted.mountEl.querySelector('[data-rp-idx="3"]');
+    if (!row) {
+      throw new Error("Expected the route-points row.");
+    }
     const textNode = document.createTextNode("WP4");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     row.appendChild(textNode);
     textNode.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
 
@@ -60,9 +64,11 @@ describe("RoutePointsTextHtmlWidget (part10 - update/detach/destroy lifecycle)",
     );
 
     const wrapper = mounted.mountEl.querySelector(".dyni-route-points-html");
+    if (!wrapper) {
+      throw new Error("Expected the route-points wrapper.");
+    }
     const bogusRow = document.createElement("div");
     bogusRow.setAttribute("data-rp-idx", "-1");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     wrapper.appendChild(bogusRow);
     bogusRow.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
 
@@ -78,9 +84,11 @@ describe("RoutePointsTextHtmlWidget (part10 - update/detach/destroy lifecycle)",
     );
 
     const wrapper = mounted.mountEl.querySelector(".dyni-route-points-html");
+    if (!wrapper) {
+      throw new Error("Expected the route-points wrapper.");
+    }
     const orphanRow = document.createElement("div");
     orphanRow.setAttribute("data-rp-idx", "99");
-    // @ts-ignore -- pre-existing untyped test mock boundary
     wrapper.appendChild(orphanRow);
     orphanRow.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
 
@@ -98,8 +106,10 @@ describe("RoutePointsTextHtmlWidget (part10 - update/detach/destroy lifecycle)",
     );
 
     const row = mounted.mountEl.querySelector('[data-rp-idx="3"]');
+    if (!row) {
+      throw new Error("Expected the route-points row.");
+    }
     expect(function () {
-      // @ts-ignore -- pre-existing untyped test mock boundary
       row.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     }).not.toThrow();
   });
@@ -114,13 +124,15 @@ describe("RoutePointsTextHtmlWidget (part10 - update/detach/destroy lifecycle)",
     expect(mounted.mountEl.children.length).toBeGreaterThan(0);
 
     const row = mounted.mountEl.querySelector('[data-rp-idx="3"]');
+    if (!row) {
+      throw new Error("Expected the route-points row.");
+    }
 
     mounted.committed.detach();
 
     expect(mounted.mountEl.children.length).toBe(0);
     expect(mounted.committed.postPatch()).toBe(false);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     row.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
     expect(activate).not.toHaveBeenCalled();
 

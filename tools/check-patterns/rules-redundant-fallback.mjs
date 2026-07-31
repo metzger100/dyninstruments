@@ -1,18 +1,16 @@
 import path from "node:path";
 import {
-  RENDER_PROP_OBJECT_NAMES,
   filesForScope,
   findMatchingBrace,
   findMatchingParen,
   findTopLevelComma,
   getFileData,
-  getRendererContractCache,
-  isExternalFactorFallbackContext,
+  getRoot,
   lineAt,
   maskCommentsAndStrings,
-  readLiteralToken,
-  setRendererContractCache
+  readLiteralToken
 } from "./shared.mjs";
+import { getProjectPatternContext, isExternalFallbackContext } from "./project/pattern-context.mjs";
 
 /** @typedef {import("./shared.mjs").FileData} FileData */
 /** @typedef {import("./shared.mjs").Finding} Finding */
@@ -24,6 +22,7 @@ export function runRedundantInternalFallbackRule(rule, files) {
   /** @type {Finding[]} */
   const out = [];
   const contractsByRenderer = getRendererFallbackContracts();
+  const propObjectNames = new Set(getProjectPatternContext().renderPropObjectNames);
 
   for (const file of files) {
     const data = getFileData(file);
@@ -39,13 +38,13 @@ export function runRedundantInternalFallbackRule(rule, files) {
       while ((fallbackMatch = detectFallbackTextProp.exec(data.maskedText))) {
         const objectName = fallbackMatch[1];
         const propName = fallbackMatch[2];
-        if (!RENDER_PROP_OBJECT_NAMES.has(objectName)) {
+        if (!propObjectNames.has(objectName)) {
           continue;
         }
         if (!Object.prototype.hasOwnProperty.call(contract, propName)) {
           continue;
         }
-        if (isExternalFactorFallbackContext(data.maskedText, fallbackMatch.index)) {
+        if (isExternalFallbackContext(data.maskedText, fallbackMatch.index)) {
           continue;
         }
 
@@ -82,13 +81,13 @@ export function runRedundantInternalFallbackRule(rule, files) {
         const objectName = literalMatch[1];
         const propName = literalMatch[2];
         const operator = literalMatch[3];
-        if (!RENDER_PROP_OBJECT_NAMES.has(objectName)) {
+        if (!propObjectNames.has(objectName)) {
           continue;
         }
         if (!Object.prototype.hasOwnProperty.call(contract, propName)) {
           continue;
         }
-        if (isExternalFactorFallbackContext(data.maskedText, literalMatch.index)) {
+        if (isExternalFallbackContext(data.maskedText, literalMatch.index)) {
           continue;
         }
 
@@ -221,7 +220,7 @@ function normalizeExpressionForCompare(expression) {
 
 /** @returns {Record<string, RendererFallbackContract>} */
 function getRendererFallbackContracts() {
-  const cached = getRendererContractCache();
+  const cached = rendererFallbackContractsByRoot.get(getRoot());
   if (cached) {
     return cached;
   }
@@ -272,9 +271,12 @@ function getRendererFallbackContracts() {
     }
   }
 
-  setRendererContractCache(contracts);
+  rendererFallbackContractsByRoot.set(getRoot(), contracts);
   return contracts;
 }
+
+/** @type {Map<string, Record<string, RendererFallbackContract>>} */
+const rendererFallbackContractsByRoot = new Map();
 
 /** @param {string} prefixText @returns {Record<string, string>} */
 function collectMapperAliasKinds(prefixText) {

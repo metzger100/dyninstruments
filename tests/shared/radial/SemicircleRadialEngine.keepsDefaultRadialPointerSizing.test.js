@@ -10,12 +10,13 @@ const {
   createMockContext2D
 } = require("./SemicircleRadialEngine.harness");
 
+/** @typedef {{ depth: number, fillStyle: string, halfWidth: number }} PointerOpts */
+
 describe("SemicircleRadialEngine", function () {
   it("keeps default radial pointer sizing independent from ring width changes", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {number} ringWidthFactor */
     function renderPointer(ringWidthFactor) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      const pointerCalls = [];
+      const pointerCalls = /** @type {PointerOpts[]} */ ([]);
       const gaugeValueMath = createValueMath();
       const themeDefaults = makeThemeDefaults();
       themeDefaults.radial.ring.widthFactor = ringWidthFactor;
@@ -35,7 +36,14 @@ describe("SemicircleRadialEngine", function () {
               draw: {
                 drawArcRing() {},
                 drawAnnularSector() {},
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /**
+                 * @param {unknown} ctx
+                 * @param {number} cx
+                 * @param {number} cy
+                 * @param {number} rOuter
+                 * @param {number} angleDeg
+                 * @param {PointerOpts} opts
+                 */
                 drawPointerAtRim(ctx, cx, cy, rOuter, angleDeg, opts) {
                   pointerCalls.push(opts);
                 },
@@ -45,7 +53,6 @@ describe("SemicircleRadialEngine", function () {
             };
           }
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
         SemicircleRadialLayout: loadFresh("shared/widget-kits/radial/SemicircleRadialLayout.js"),
         SemicircleRadialTextLayout: {
           create() {
@@ -57,24 +64,18 @@ describe("SemicircleRadialEngine", function () {
             };
           }
         },
-        // @ts-ignore -- pre-existing untyped test mock boundary
         ResponsiveScaleProfile: loadFresh("shared/widget-kits/layout/ResponsiveScaleProfile.js"),
-        // @ts-ignore -- pre-existing untyped test mock boundary
         LayoutRectMath: loadFresh("shared/widget-kits/layout/LayoutRectMath.js"),
-        // @ts-ignore -- pre-existing untyped test mock boundary
         GeometryScale: geometryScale
       };
-      // @ts-ignore -- pre-existing untyped test mock boundary
       const renderer = loadFresh("shared/widget-kits/radial/SemicircleRadialEngine.js")
         .create({}, makeComponentContext(modules))
         .createRenderer(makeBaseSpec());
 
       renderer(
-        // @ts-ignore -- pre-existing untyped test mock boundary
         createMockCanvas({
           rectWidth: 480,
           rectHeight: 110,
-          // @ts-ignore -- pre-existing untyped test mock boundary
           ctx: createMockContext2D()
         }),
         {
@@ -84,7 +85,6 @@ describe("SemicircleRadialEngine", function () {
         }
       );
 
-      // @ts-ignore -- pre-existing untyped test mock boundary
       return pointerCalls[0];
     }
 

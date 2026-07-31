@@ -5,7 +5,7 @@ describe("MapZoomTextHtmlWidget", function () {
   it("reuses prepared semantic model across layoutSignature and patchDom and invalidates on structural boundaries", function () {
     const applyFormatter = vi.fn(function (value, formatterOptions) {
       const cfg = formatterOptions || {};
-      if (value == null) {
+      if (value === null || value === undefined) {
         return cfg.default;
       }
       if (cfg.formatter === "formatDecimalOpt") {
@@ -14,6 +14,7 @@ describe("MapZoomTextHtmlWidget", function () {
       return String(value);
     });
     const renderer = createRenderer({ applyFormatter });
+    /** @type {{ __dyniHostCommitState?: { rootEl: HTMLElement, shellEl: HTMLElement } }} */
     const hostContext = {};
     const committed = renderer.createCommittedRenderer({
       hostContext,
@@ -30,7 +31,7 @@ describe("MapZoomTextHtmlWidget", function () {
     shellEl.appendChild(mountEl);
     hostContext.__dyniHostCommitState = { rootEl, shellEl };
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {ReturnType<typeof withSurfacePolicy>} props @param {number} revision @param {{ width: number, height: number }} shellRect @param {boolean} layoutChanged */
     function buildPayload(props, revision, shellRect, layoutChanged) {
       return {
         props,

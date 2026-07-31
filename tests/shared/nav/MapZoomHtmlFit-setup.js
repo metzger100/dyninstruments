@@ -2,20 +2,26 @@ const { loadFresh } = require("../../helpers/load-umd");
 
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @typedef {{ requiredPxByText?: Record<string, number>, singleLineWidthByText?: Record<string, number>, valuePxByText?: Record<string, number> }} HarnessOptions
+ * @typedef {{ text?: unknown, valueText?: unknown }} FitArguments
+ */
+
+/** @param {HarnessOptions} [options] */
 function createHarness(options) {
   const opts = options || {};
-  const calls = {
-    high: [],
-    normal: [],
-    flat: [],
-    singleLine: []
-  };
+  const calls =
+    /** @type {{ flat: FitArguments[], high: FitArguments[], normal: FitArguments[], singleLine: FitArguments[] }} */ ({
+      high: [],
+      normal: [],
+      flat: [],
+      singleLine: []
+    });
   const valuePxByText = opts.valuePxByText || Object.create(null);
   const requiredPxByText = opts.requiredPxByText || Object.create(null);
   const singleLineWidthByText = opts.singleLineWidthByText || Object.create(null);
 
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {Record<string, number>} map @param {unknown} text @param {number} fallback */
   function resolvePx(map, text, fallback) {
     const key = String(text);
     if (Object.prototype.hasOwnProperty.call(map, key)) {
@@ -31,8 +37,7 @@ function createHarness(options) {
       gapBase: 2,
       responsive: { textFillScale: 1 }
     })),
-    fitThreeRowBlock: vi.fn((args) => {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+    fitThreeRowBlock: vi.fn((/** @type {FitArguments} */ args) => {
       calls.high.push(args);
       return {
         cPx: 10,
@@ -40,8 +45,7 @@ function createHarness(options) {
         uPx: 8
       };
     }),
-    fitValueUnitCaptionRows: vi.fn((args) => {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+    fitValueUnitCaptionRows: vi.fn((/** @type {FitArguments} */ args) => {
       calls.normal.push(args);
       return {
         cPx: 10,
@@ -49,13 +53,11 @@ function createHarness(options) {
         uPx: 8
       };
     }),
-    fitInlineTriplet: vi.fn((args) => {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+    fitInlineTriplet: vi.fn((/** @type {FitArguments} */ args) => {
       calls.flat.push(args);
       return { sPx: 10, vPx: resolvePx(valuePxByText, args.valueText, 20) };
     }),
-    fitSingleLineBinary: vi.fn((args) => {
-      // @ts-ignore -- pre-existing untyped test mock boundary
+    fitSingleLineBinary: vi.fn((/** @type {FitArguments} */ args) => {
       calls.singleLine.push(args);
       const px = resolvePx(requiredPxByText, args.text, 7);
       const width = resolvePx(singleLineWidthByText, args.text, px);
@@ -100,7 +102,7 @@ function createHarness(options) {
         resolveForRoot: themeApi.resolveForRoot
       },
       dom: {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {Element | null} target */
         requirePluginRoot(target) {
           return target || null;
         },
@@ -115,7 +117,7 @@ function createHarness(options) {
   return { fit, calls, themeApi, hostContext, shellEl };
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {string} mode @param {boolean} showRequired */
 function createModel(mode, showRequired) {
   return {
     mode: mode,

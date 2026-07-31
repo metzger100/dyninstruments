@@ -21,6 +21,10 @@ function createWorkspace() {
   fs.mkdirSync(path.join(tempRoot, "config"), { recursive: true });
   fs.writeFileSync(path.join(tempRoot, "plugin.js"), "// plugin\n");
   fs.writeFileSync(path.join(tempRoot, "config/example.js"), "// example\n");
+  writeJson(path.join(tempRoot, "tools/quality-policy/project-coverage-inventory-policy.json"), {
+    productionRoots: ["config"],
+    legacyBelowDefaultFloors: { "plugin.js": { lines: 71.73, branches: 65 } }
+  });
   return tempRoot;
 }
 

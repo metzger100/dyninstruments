@@ -1,6 +1,6 @@
 # Core Formatter Catalog
 
-**Status:** ✅ Implemented | Canonical formatter signatures from AvNav core snapshot
+**Status:** Current.
 
 ## Overview
 

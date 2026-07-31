@@ -25,22 +25,16 @@ describe("FullCircleRadialTextLayout", function () {
 
     layout.drawDualModeText(harness.state, "normal", display.left, display.right);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(harness.captures.threeRows.length).toBe(2);
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    const ctx = /** @type {DyniTestCanvasContext} */ (harness.state.ctx);
     harness.captures.threeRows.forEach(function (block) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      harness.realText.setFont(harness.state.ctx, block.sizes.cPx, harness.state.labelWeight, harness.state.family);
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      const captionWidth = harness.state.ctx.measureText(String(block.caption)).width;
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      harness.realText.setFont(harness.state.ctx, block.sizes.vPx, harness.state.valueWeight, harness.state.family);
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      const valueWidth = harness.state.ctx.measureText(String(block.valueText)).width;
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      harness.realText.setFont(harness.state.ctx, block.sizes.uPx, harness.state.labelWeight, harness.state.family);
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      const unitWidth = harness.state.ctx.measureText(String(block.unitText)).width;
+      const sizes = /** @type {{ cPx: number, uPx: number, vPx: number }} */ (block.sizes);
+      harness.realText.setFont(ctx, sizes.cPx, harness.state.labelWeight, harness.state.family);
+      const captionWidth = ctx.measureText(String(block.caption)).width;
+      harness.realText.setFont(ctx, sizes.vPx, harness.state.valueWeight, harness.state.family);
+      const valueWidth = ctx.measureText(String(block.valueText)).width;
+      harness.realText.setFont(ctx, sizes.uPx, harness.state.labelWeight, harness.state.family);
+      const unitWidth = ctx.measureText(String(block.unitText)).width;
 
       const overflows = captionWidth > block.w + 0.01 || valueWidth > block.w + 0.01 || unitWidth > block.w + 0.01;
       expect(overflows ? block.scaled : true).toBe(true);

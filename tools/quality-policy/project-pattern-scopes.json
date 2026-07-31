@@ -1,0 +1,245 @@
+{
+  "rules": {
+    "canvas-api-typeof-guard": {
+      "scope": { "include": ["shared/**/*.js", "widgets/**/*.js"], "exclude": ["tests/**", "tools/**"] },
+      "remedy": "Keep this repository's trusted drawing contracts direct."
+    },
+    "try-finally-canvas-drawing": {
+      "scope": { "include": ["shared/**/*.js"], "exclude": ["tests/**", "tools/**"] },
+      "remedy": "Keep this repository's drawing lifecycle free of defensive wrappers."
+    },
+    "framework-method-typeof-guard": {
+      "scope": { "include": ["shared/**/*.js", "widgets/**/*.js"], "exclude": ["tests/**", "tools/**"] },
+      "remedy": "Use this repository's resolved internal component contracts directly."
+    },
+    "todo-without-owner": {
+      "scope": {
+        "include": ["**/*.js", "**/*.md"],
+        "exclude": ["node_modules/**", "README.md", "CONTRIBUTING.md", "ROADMAP.md"]
+      },
+      "remedy": "Keep repository work markers attributable and dated."
+    },
+    "unused-fallback": {
+      "scope": {
+        "include": [
+          "widgets/**/*.js",
+          "cluster/**/*.js",
+          "shared/**/*.js",
+          "runtime/**/*.js",
+          "config/**/*.js",
+          "plugin.js"
+        ],
+        "exclude": ["tests/**", "tools/**"]
+      },
+      "remedy": "Remove obsolete repository fallback paths rather than retaining inactive code."
+    },
+    "dead-code": {
+      "scope": {
+        "include": [
+          "widgets/**/*.js",
+          "cluster/**/*.js",
+          "shared/**/*.js",
+          "runtime/**/*.js",
+          "config/**/*.js",
+          "plugin.js"
+        ],
+        "exclude": ["tests/**", "tools/**"]
+      },
+      "remedy": "Keep repository production modules reachable and intentional."
+    },
+    "default-truthy-fallback": {
+      "scope": {
+        "include": [
+          "widgets/**/*.js",
+          "cluster/**/*.js",
+          "shared/**/*.js",
+          "runtime/**/*.js",
+          "config/**/*.js",
+          "plugin.js"
+        ],
+        "exclude": ["tests/**", "tools/**"]
+      },
+      "remedy": "Preserve this repository's explicit default values."
+    },
+    "duplicate-functions": {
+      "scope": {
+        "include": ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js"],
+        "exclude": ["**/tests/**", "**/tools/**"]
+      },
+      "remedy": "Consolidate repeated repository behavior in its owned shared module."
+    },
+    "duplicate-block-clones": {
+      "scope": {
+        "include": ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js"],
+        "exclude": ["**/tests/**", "**/tools/**"]
+      },
+      "remedy": "Consolidate repeated repository behavior in its owned shared module."
+    },
+    "invalid-lint-suppression": {
+      "scope": {
+        "include": [
+          "widgets/**/*.js",
+          "widgets/**/*.css",
+          "cluster/**/*.js",
+          "shared/**/*.js",
+          "shared/**/*.css",
+          "runtime/**/*.js",
+          "config/**/*.js",
+          "plugin.js",
+          "plugin.mjs",
+          "plugin.css",
+          "tests/**/*.js",
+          "tests/**/*.mjs",
+          "tools/**/*.js",
+          "tools/**/*.mjs"
+        ],
+        "exclude": ["tests/tools/**", "tools/test-data/**", "tools/check-patterns/shared-suppressions.mjs"]
+      },
+      "remedy": "Use only the repository's validated exception grammar."
+    },
+    "catch-fallback-without-suppression": {
+      "scope": {
+        "include": ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
+        "exclude": ["tests/**", "tools/**"]
+      },
+      "remedy": "Keep intentional repository boundary fallbacks explicitly documented."
+    },
+    "internal-contract-fallback": {
+      "scope": {
+        "include": ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
+        "exclude": ["tests/**", "tools/**"]
+      },
+      "remedy": "Keep repository-internal contracts strict after their ownership boundary."
+    },
+    "redundant-null-type-guard": {
+      "scope": {
+        "include": ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
+        "exclude": ["tests/**", "tools/**"]
+      },
+      "remedy": "Trust repository validation after its declared boundary."
+    },
+    "premature-legacy-support": {
+      "scope": {
+        "include": ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "runtime/**/*.js", "plugin.js"],
+        "exclude": ["tests/**", "tools/**"]
+      },
+      "remedy": "Keep repository compatibility support tied to an active contract."
+    },
+    "absolute-home-path": {
+      "scope": {
+        "include": [
+          "**/*.md",
+          "**/*.js",
+          "**/*.mjs",
+          "**/*.cjs",
+          "**/*.json",
+          "**/*.yml",
+          "**/*.yaml",
+          "**/*.txt",
+          "**/*.sh"
+        ],
+        "exclude": ["tests/**", "tools/**", ".vscode/**", ".idea/**"]
+      },
+      "remedy": "Use repository-relative paths in maintained material."
+    },
+    "exec-plan-reference": {
+      "scope": {
+        "include": [
+          "**/*.md",
+          "**/*.js",
+          "**/*.mjs",
+          "**/*.cjs",
+          "**/*.json",
+          "**/*.jsonc",
+          "**/*.yml",
+          "**/*.yaml",
+          "**/*.txt",
+          "**/*.sh",
+          "**/*.css",
+          "**/*.html"
+        ],
+        "exclude": [
+          "exec-plans/**",
+          "releases/**",
+          "artifacts/**",
+          ".codex/**",
+          ".kilo/**",
+          ".vscode/**",
+          ".idea/**",
+          "package-lock.json"
+        ]
+      },
+      "remedy": "Describe this repository's behavior without relying on historical execution-plan labels."
+    },
+    "empty-catch": {
+      "scope": { "include": ["**/*.js"], "exclude": ["tests/**", "tools/**"] },
+      "remedy": "Route repository failures to their owning boundary."
+    },
+    "console-in-runtime": {
+      "scope": {
+        "include": ["widgets/**/*.js", "cluster/**/*.js", "shared/**/*.js", "config/**/*.js"],
+        "exclude": ["runtime/**", "plugin.js"]
+      },
+      "remedy": "Keep repository logging at its owned runtime boundary."
+    },
+    "no-nul-byte": {
+      "scope": {
+        "include": [
+          "plugin.js",
+          "plugin.mjs",
+          "runtime/**/*.js",
+          "cluster/**/*.js",
+          "config/**/*.js",
+          "shared/**/*.js",
+          "widgets/**/*.js",
+          "tests/**/*.js",
+          "documentation/**/*.md",
+          "tools/**/*.mjs",
+          "types/**/*.d.ts"
+        ],
+        "exclude": ["tools/test-data/**", "tools/lint-fixtures/**"]
+      },
+      "remedy": "Keep maintained repository text free of binary NUL bytes."
+    },
+    "responsive-layout-hard-floor": {
+      "scope": {
+        "include": [
+          "shared/widget-kits/text/TextLayoutEngine.js",
+          "shared/widget-kits/text/TextLayoutComposite.js",
+          "shared/widget-kits/text/TextTileLayout.js",
+          "shared/widget-kits/nav/ActiveRouteLayout.js",
+          "shared/widget-kits/nav/CenterDisplayLayout.js",
+          "shared/widget-kits/xte/XteHighwayLayout.js",
+          "shared/widget-kits/linear/LinearGaugeLayout.js",
+          "shared/widget-kits/linear/LinearGaugeTextLayout.js",
+          "shared/widget-kits/radial/SemicircleRadialLayout.js",
+          "shared/widget-kits/radial/SemicircleRadialTextLayout.js",
+          "shared/widget-kits/radial/FullCircleRadialLayout.js",
+          "shared/widget-kits/radial/FullCircleRadialTextLayout.js",
+          "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
+          "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
+          "widgets/linear/WindLinearWidget/WindLinearWidget.js",
+          "widgets/radial/WindRadialWidget/WindRadialWidget.js",
+          "widgets/radial/CompassRadialWidget/CompassRadialWidget.js"
+        ],
+        "exclude": ["tests/**", "tools/**"]
+      },
+      "remedy": "Use the repository-owned responsive sizing contract or an intentional technical-safety exception."
+    },
+    "unsafe-html-dom-sink": {
+      "scope": {
+        "include": [
+          "widgets/**/*.js",
+          "cluster/**/*.js",
+          "shared/**/*.js",
+          "runtime/**/*.js",
+          "config/**/*.js",
+          "plugin.js",
+          "plugin.mjs"
+        ],
+        "exclude": ["tests/**", "tools/**"]
+      },
+      "remedy": "Use only this repository's reviewed markup boundaries."
+    }
+  }
+}

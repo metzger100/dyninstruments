@@ -1,6 +1,6 @@
 # Canvas Layer Caching Convention
 
-**Status:** ✅ Implemented | Standard static/dynamic cache contract for canvas widgets
+**Status:** Current.
 
 ## Overview
 

@@ -898,7 +898,7 @@ recorded.
 
 ---
 
-### Phase H — Repair the baseline and documentation data
+### Phase H — complete
 
 Intent: remove the fail-open surface in fact 19 and the stale counts in fact 21.
 
@@ -921,6 +921,18 @@ Dependencies: Phase F.
 
 Exit conditions: `npm run check:all` green; `test-exception-baseline.json` has 20 entries, all resolving to live paths,
 with a re-anchored digest; every count in `quality-gates.md` is test-asserted.
+
+#### H completion — pruned, re-anchored, and asserted
+
+`test-exception-baseline.json` now contains exactly the 20 live non-strict test paths. Its immutable SHA-256 anchor in
+`test-inventory.mjs` was re-anchored in the same change, and the checker now rejects a stale baseline path directly
+instead of allowing it to remain inert. The live test-inventory and exception-baseline counts are both asserted by the
+quality policy tests.
+
+The narrated policy counts in `documentation/conventions/quality-gates.md` now match the checked data: 557 test
+inventory entries, 20 captured non-strict paths, 175 active complexity entries, and 228 measured coverage-floor entries.
+`tests/tools/verified-baseline.test.js` asserts each source count and each corresponding documentation phrase, so future
+policy/data drift fails rather than silently aging the narrative.
 
 ---
 
@@ -1095,11 +1107,395 @@ Record per phase, in order: the commands run, the recorded numbers, the equivale
 results. Every retirement records its replacement owner and parity proof here. Every Tier 1 candidate reclassified to
 Tier 2 records its reason here.
 
+### Phase A — Establish the manifest and the genericness owner (landed)
+
+#### A1. Standalone evidence (clean-worktree recheck)
+
+`npm run check:all` exits 0. Coverage summary: Statements 92.26% (13232/14342), Branches 79.77% (9311/11671), Functions
+96.83% (2018/2084), Lines 93.24% (12918/13854). `Coverage inventory check passed: 228 classified production files.`
+`test:split` reports 453 test files / 1995 tests passing (grew from the 450/1980 baseline by the 3 new contract tests, 1
+new tools test, and their assertions added in this phase).
+
+Rule-name lists (unchanged from the baseline recorded in fact 10): 19 `GENERIC_RULES` —
+`invalid-lint-suppression, catch-fallback-without-suppression, internal-hook-fallback, redundant-null-type-guard, absolute-home-path, exec-plan-reference, empty-catch, console-in-widgets, duplicate-functions, duplicate-block-clones, todo-without-owner, unused-fallback, dead-code, default-truthy-fallback, canvas-api-typeof-guard, try-finally-canvas-drawing, framework-method-typeof-guard, premature-legacy-support, unsafe-html-dom-sink`;
+23 `PROJECT_RULES` (unchanged names, listed in `tools/check-patterns/rules.mjs`).
+
+`test-inventory.json` has 545 entries (541 baseline + 4 added in this phase:
+`generic-tokens-single-owner-contract.test.js`, `generic-tokens-test-utils.js`, `shared-core-manifest-contract.test.js`,
+`check-generic-surface.test.js`, all classified `strict`). `test-exception-baseline.json` is unchanged at 229 entries.
+`complexity-baseline.json` is unchanged at 175 entries, matching fact 21. Suppression counts under `tests/` are
+unchanged from fact 17/18 — this phase touched no `@ts-ignore`/`eslint-disable`/etc. site. No number differs from facts
+1, 10, 17, 19, or 21 other than the two additive counts above (test files and rule catalog growth from new
+contract/self-tests), so the plan's baseline stands unamended except for the A3 sequencing note below.
+
+#### A2. Genericness token owner
+
+Added `tools/quality-policy/generic-tokens.json` (three arrays exactly as specified in the Shared Core Contract) and
+`tools/check-generic-surface.mjs` exporting `runGenericSurfaceCheck()`. Wired as `npm run check:generic-surface` (warn
+severity) inside `check:smells`, per this repository's own warn→block severity model
+([smell-prevention.md](../../documentation/conventions/smell-prevention.md#severity-model)) — a full-list finding is
+real, tracked debt, not a silent grandfather, and `check:all` stays green while Phases C/D/E close it.
+
+Target-set-3 scope decision (documented in `tools/check-generic-surface.mjs`): "every Tier 1 tool module" is scoped, at
+this stage of convergence, to the pattern-engine mechanism only — `check-patterns.mjs`, `shared.mjs`,
+`shared-source-scan.mjs`, `shared-suppressions.mjs`, `ast-utils.mjs`, `duplicate-utils.mjs`, `atomicity-contracts.mjs`,
+`atomicity-parser.mjs`, `rules.mjs` — plus every file under `check-patterns/generic/` for target-set-4. Per-category
+rule runners (`rules-mapper.mjs`, `rules-mapper-complexity.mjs`, `rules-responsive.mjs`, `rules-redundant-fallback.mjs`)
+are excluded: their detection logic is inherently project-domain (mapper/cluster/responsive-profile business rules), so
+they are not Tier 1 candidates and including them would produce permanent, never-zero warnings that defeat the
+warn→block promotion model. Broader tool-wide scanning (release scripts, schema checker, etc.) is deferred to the phases
+that actually adopt/donate those specific files (B, F).
+
+Finding list recorded from the initial `npm run check:generic-surface` run (54 findings across 23 scanned targets),
+matching facts 7 and 8 exactly plus extending them to the five generic skill files: 3 generic skill files
+(`create-plan`, `doc-sync`, `scan-smells`) reference `widget`/`renderer`/`editable`/`gauge`; the pattern-engine files
+(`shared.mjs`, `shared-source-scan.mjs`, `shared-suppressions.mjs`, `rules.mjs`, `atomicity-contracts.mjs`) reference
+`cluster`/`renderer`/`avnav`/`dyni`/`widget`/`editable`/`mapper`; every `check-patterns/generic/*-defs.mjs` file
+references `dyni`/`dyninstruments` in its file-header comment plus `widget`/`cluster`/`mapper`/`plugin.js`/`plugin.mjs`
+in scope globs (scope globs are deliberately not exempt per the Shared Core Contract). This is the work list for Phases
+C (engine/rule-definition purification) and E (skill-text convergence).
+
+While wiring A2, two generic rule **messages** (not identifiers, not detection logic — a pure wording fix, not the rule
+rename Phase D owns) were reworded to drop literal product paths that added no detection value: `console-in-widgets`'s
+message tag changed from `[console-in-widget]` to `[console-call-boundary]` and no longer names `plugin.js`;
+`duplicate-functions`/`duplicate-block-clones` messages no longer name `shared/widget-kits/`. Finding sets are unchanged
+(verified: same regex/`run` function, only the returned string differs); no test asserted the old wording beyond the
+stable `[duplicate-fn-body]`/`[duplicate-block]` bracket tags, which are untouched.
+
+#### A3. Retire the six blocklists — landed with a recorded, phase-scoped exception
+
+All three call sites (`tests/contract/shared-instructions-block-contract.test.js`,
+`tests/contract/skill-layer-contract.test.js`, `tests/contract/pattern-rule-generic-scope-contract.test.js`) now read
+`tools/quality-policy/generic-tokens.json` through the shared `tests/contract/generic-tokens-test-utils.js` loader
+instead of an inline literal array — verified by `generic-tokens-single-owner-contract.test.js`, which asserts (a) every
+call site imports the shared loader and calls it, and (b) a token added to `generic-tokens.json` is picked up by the
+loader every call site shares.
+
+Applying the **full** canonical list as a blocking assertion was verified safe for
+`shared-instructions-block-contract.test.js` only (zero findings against the current `AGENTS.md` block) and is applied
+there directly. For `skill-layer-contract.test.js` and `pattern-rule-generic-scope-contract.test.js`, applying the full
+list today would immediately block on real, pre-existing debt whose fix is explicitly owned by later phases: 3 generic
+skill files' vocabulary (Phase E) and the `console-in-widgets` rule identifier itself (Phase D, which requires the
+finding-equivalence proof before any rename — doing that proof and rename here would batch Phase D into Phase A). Per
+the non-negotiable "never weaken a gate to reach green" balanced against "do not batch phases," these two call sites
+keep enforcing exactly their historically-passing token subset (the old literal arrays, unchanged), now sourced from and
+asserted to be a verified subset of the canonical list, while `check:generic-surface` (warn severity, A2) tracks the
+remaining canonical-list debt for those exact two surfaces. Each file documents this explicitly and names the promoting
+phase in-line. This is a scoped, single, named, tracked deferral — not a suppression budget or grandfathering ledger
+(that non-negotiable targets `@ts-ignore`-style comment debt in Phase G, a different mechanism entirely).
+
+#### A4. Shared core manifest
+
+Added `tools/quality-policy/shared-core-manifest.json` with the six already-identical paths from fact 2 (SHA-256 each),
+and `tools/check-shared-core.mjs` exporting `runSharedCoreCheck()`, failing on a missing path, a digest mismatch, or a
+caller-supplied known-Tier-1 path absent from the manifest (`knownTier1Paths` option; no known-path source exists yet
+beyond the manifest itself at this phase, so this failure mode is proven only by its negative fixture for now). Wired as
+`npm run check:shared-core` inside `check:core`, immediately after `check:standard`. Added
+`tests/contract/shared-core-manifest-contract.test.js`, asserting the manifest's own SHA-256 against a value computed in
+the test itself plus three negative fixtures (missing path, digest mismatch, unlisted known path).
+
+#### Exit conditions verified
+
+`npm run check:all` exits 0 (coverage/inventory numbers unchanged from A1, pasted above). `npm run check:shared-core`
+exits 0 over the six seed entries (`SUMMARY_JSON={"ok":true,"checkedEntries":6,"findings":0}`).
+`tools/quality-policy/generic-tokens.json` is the only genericness token source in the repository (mechanically proven
+by `generic-tokens-single-owner-contract.test.js`; the two skill-layer/pattern-rule call sites keep a documented,
+tested, phase-named subset rather than the full list, recorded above). The Phase A2 finding list (54 findings) is
+recorded above.
+
+**Next phase: B — Make every generic checker importable and self-tested.**
+
 ---
+
+### Phase B — Make every generic checker importable and self-tested (landed)
+
+#### B1. Importable checker surface and project-owned scope
+
+The resumed worktree now exposes callable checker entries for `check-file-size` (`runFileSizeCheck`), `check-test-focus`
+(`runTestFocusCheck`), `check-schema` (`runSchemaCheck`), `check-doc-links` (`runDocLinksCheck`),
+`check-doc-links-proof` (`runDocLinksProof`), `hooks-install` (`runHooksInstall`), `hooks-doctor`
+(`runHooksDoctorCheck`), and the formatting owner (`runFormat`). `generate-format-scope` already exposes
+`buildFormatScope`, its non-checker public operation.
+
+`tools/check-file-size.mjs` reads the repository scan roots, extensions, exemptions, and remedy wording from the new
+project-owned `tools/quality-policy/project-file-size-scope.json`; it no longer embeds the Dyninstruments scope or its
+shared-kit remedy. The current-tree behavior is preserved and verified by its existing core and oneliner suites, plus
+the complete gate's zero findings: 969 checked files, zero line-limit violations, and zero oneliner findings. The
+schema, focus, documentation-link, hook, and format owners all completed their real-tree checks in the final gate.
+
+#### B2. Self-tests and strict inventory
+
+Added ESM self-tests for `check-schema`, `check-doc-links`, `check-doc-links-proof`, `check-test-focus`,
+`complexity-scan`, `eslint.config`, `.prettierrc.json`, `vitest.config.js`, `hooks-install`, `hooks-doctor`, and
+`run-format`. The five formerly untested checkers each have a negative proof: invalid schema payload, broken local
+Markdown target, broken documentation fixture, focused-test forms, and an over-budget complexity fixture. The format
+runner additionally proves formatted, unformatted, and write-mode fixture behavior.
+
+The new manifest precondition contract imports every manifest `.mjs` entry, requires a `run*` export, and requires a
+referencing self-test. The present seed manifest has no `.mjs` entries; this contract therefore becomes binding as later
+phases add generic checkers. The existing documentation-links contract remains the replacement owner for the sibling's
+viewer-only header test: it proves broken Documentation targets fail while preserving this repository's documented
+optional `Documentation:` and registry-owned dependency contract.
+
+Converted self-test files are: `tests/tools/check-doc-links-proof.test.mjs`, `tests/tools/check-doc-links.test.mjs`,
+`tests/tools/check-schema.test.mjs`, `tests/tools/check-test-focus.test.mjs`, `tests/tools/complexity-scan.test.mjs`,
+`tests/tools/eslint-config.test.mjs`, `tests/tools/hooks-doctor.test.mjs`, `tests/tools/hooks-install.test.mjs`,
+`tests/tools/prettier-config.test.mjs`, `tests/tools/run-format.test.mjs`,
+`tests/tools/vitest-allow-only.proof.test.js`, and `tests/tools/vitest-projects.test.mjs`. `vitest.config.js` and
+`eslint.config.mjs` route `.test.mjs` files to the relevant existing projects without changing the product-test dialect.
+The strict test inventory and `tsconfig.tests.json` now contain 557 files and agree exactly.
+
+The first ported Vitest project-ownership test exposed a real `**` glob translation defect; the translator now keeps
+globstar-directory matching atomic and verifies all tracked test files have exactly one project owner. Focused Phase B
+self-tests passed: 11 files / 36 tests. The complete split reports 465 files / 2036 tests.
+
+`documentation/conventions/quality-gates.md` now names `check-test-focus.mjs` as the focused-test owner instead of
+claiming no maintained owner.
+
+#### Phase B exit conditions verified
+
+`npm run check:all` exits 0. `npm run check:shared-core` exits 0 with six seed entries and zero findings.
+`npm run typecheck:tests` reports `Test inventory check passed: 557 classified test files.` The full coverage summary is
+Statements 92.26% (13232/14342), Branches 79.77% (9311/11671), Functions 96.83% (2018/2084), and Lines 93.24%
+(12918/13854). `Coverage inventory check passed: 228 classified production files.`
+
+**Next phase: C — Adopt the canonical pattern engine and de-brand it.**
+
+---
+
+### Phase C — Adopt the canonical pattern engine and de-brand it (landed)
+
+The suppression grammar now uses `plugin-lint-disable-*` and `plugin-boundary-*`; the old prefix is rejected by a
+negative test. Cluster prefixes, renderer-property names, and external-boundary hints now live in
+`project-pattern-context.json`; generic rule scopes and remedies resolve from `project-pattern-scopes.json` at runtime.
+The generic engine scan is clean (`checkedTargets: 17`, `findings: 0`), while the unrelated skill vocabulary remains the
+separately recorded later work. Project-specific runner modules were kept Tier 2 because their detection embeds
+repository paths and domain contracts; they are not in the shared manifest.
+
+`npm run check:all` exits 0: 465 test files / 2038 tests; coverage Statements 92.26% (13232/14342), Branches 79.77%
+(9311/11671), Functions 96.83% (2018/2084), Lines 93.24% (12918/13854); coverage inventory 228 production files.
+`npm run check:shared-core` reports 24 entries and zero findings. The sibling has not yet landed its paired phase, so
+the required out-of-band Tier 1 `cmp` cannot yet be green; no cross-repository path was added to a committed tool.
+
+**Next phase: D — Rename the remaining canonical rule identities only after its finding-equivalence proof.**
+
+#### Shared-core reconciliation addendum
+
+The prior B/C manifest claims were inconsistent with the paired acceptance contract. The twelve checker files recorded
+by Polar Recorder and the pattern-engine files recorded here are not byte-identical across the two repositories; the
+workflow file is also different. They are therefore Tier 2, not shared-core entries. Both manifests now contain the five
+files proven identical: `.codex/config.toml`, `.nvmrc`, `.prettierrc.json`, `schemas/avnav-plugin-base.schema.json`, and
+`exec-plans/active/.gitkeep`. The out-of-band commands `cmp` on the manifest and on each of those five paths all exit 0.
+`npm run check:shared-core` exits 0 with `checkedEntries: 5` in both repositories. This reclassification restores the
+contract without a committed cross-repository read.
+
+### Phase D — Adopt the canonical rule identifiers (landed as Tier 2)
+
+The pattern engine is Tier 2 after reconciliation, so this migration leaves the five-entry shared-core manifest
+unchanged. `internal-hook-fallback` became `internal-contract-fallback`, `console-in-widgets` became
+`console-in-runtime`, and `responsive-layout-hard-floor` moved to `GENERIC_RULES` while keeping its existing runner and
+project-owned scope. `no-nul-byte` is now a generic regex rule; the existing integrity contract and binary fixture
+remain its negative-fixture owner. `npm run check:patterns` reports zero findings, and the focused registry and fixture
+suite passes 2 files / 9 tests. The Tier 2 registry contract proves the final classifications, retired-name absence, and
+registry concatenation.
+
+The rename-equivalence contract runs each retired/current pair over both the repository tree and a temporary fixture
+containing an internal-contract fallback and a runtime-boundary console call; it compares `file:line` finding sets, so
+only the identifier changes. The complete registry list is intentionally asserted by the Tier 2 contract test rather
+than a new Tier 1 identifier registry, because the pattern engine remains out of the reconciled shared core. The
+five-entry `shared-core-manifest.json` was verified unchanged. `npm run check:all` exits 0 after this evidence update.
+
+No later phase was started.
+
+### Phase E — shared instructions, skills, and documentation shape (landed locally; paired comparison pending)
+
+The extracted shared instruction block now matches its asserted source byte-for-byte. The five generic skill hashes are
+`preflight ac4b57bf5e765e607edf6371f8d0af1f90ef01d5a44ed989753ea61848b12868`,
+`create-plan 67e91f8fe4a614d9d755023a4e5f33f1b36eeeda817336f1e19c40af57f51e37`,
+`doc-sync 9be9eb94f87bf31d2a893f89a566114aff7e11894492906ec3454630a79152a2`,
+`scan-smells 2b8ca3666e809adff6ba91f6f50879684743e36c564f9bccb9b5e32884f2f005`, and
+`grill-me-repo 01dbea2ec180f575a51458bb012147c2f8859796d3ede608f8a18067cf9ddad6`. The 73 emoji status values under
+`documentation/` were normalized to `**Status:** Current.`.
+
+No new E artifact was added to the manifest: this task intentionally performed no cross-repository read, so byte
+identity was not proven. Tier 2 pending the next paired `cmp`: `tools/quality-policy/shared-instructions.md`, the five
+generic skill files, `documentation/conventions/documentation-format.md`, and
+`documentation/guides/exec-plan-authoring.md`. `npm run check:all` and `npm run check:shared-core` were run after E.
+
+### Phase F — policy mechanisms and project scope (landed locally; paired comparison pending)
+
+Coverage inventory scope, immutable baseline identity, and the 12 legacy below-default floor records now live in
+`project-coverage-inventory-policy.json`; the checker continues to classify all 228 production files. Complexity still
+reports 175 tracked entries and digest `6cb1b99a13afea4bc95111d76bef23cd8b6f23ae23cbf038049835046d0dd207`. Formatter
+discovery was regenerated to 1,054 rows (`prettier`: 1,013; `unsupported`: 41), and jscpd reports zero clones. The
+checker and every complexity/coverage/test inventory baseline or scope data file remain Tier 2: no paired byte
+comparison occurred, and baseline paths, captured debt, and scope are project-owned. `npm run check:shared-core`,
+`npm run check:coverage-inventory`, and `npm run check:complexity` passed; `npm run check:all` was started for final
+handoff after the typecheck correction.
+
+No Phase G, H, or K work was started.
+
+### Phase G — complete
+
+Added `types/test-harness.d.ts` and listed it explicitly in `tsconfig.tests.json`; the test-inventory contract permits
+that one shared declaration outside the strict test-file inventory and rejects any other such exception. The 35 named
+`-setup.js`/`.harness.js` files have had the historical test-mock-boundary `@ts-ignore` comment removed. A repository
+search confirms zero remaining instances in those harness files; the other 121 files remain untouched by G1.
+
+The required whole-suite stripped-tree probe was rerun from a fresh temporary copy, removing every remaining historical
+test-mock-boundary suppression before invoking `tsc -p tsconfig.tests.json --pretty false`. It reports **1,219**
+diagnostics in **150** test files (baseline: 1,667 in 151), a measured reduction of **448**; no setup/harness file is
+among the diagnostic paths. The code breakdown is TS7006 565, TS2339 151, TS18048 99, TS7005 67, TS18047 64, TS2353 44,
+TS18046 40, TS7034 34, TS2554 32, TS2345 25, TS7053 23, TS2739 15, TS2571 12, TS2722 11, TS2322 11, TS2551 6, TS2532 6,
+TS2741 5, TS2493 5, TS2790 2, and TS2721/TS2531 one each. The unanticipated caller-side strictness findings are retained
+as real Wave 2–4 work; no suppression, ignore, `any`, compiler relaxation, or threshold change was used to hide them.
+This measured result supersedes the planned estimate and is the sequencing input for G2.
+
+After correcting the shared harness return contracts and removing the first two strict-null suppressions in G2, the same
+fresh stripped-tree probe reports **986** diagnostics. This is the first measured G2 checkpoint: TS7006 565, TS2339 113,
+TS7005 67, TS18047 64, TS18048 51, TS7034 34, TS7053 23, TS2571 12, TS2722 11, TS18046 11, TS2345 9, TS2551 6, TS2322 6,
+TS2493 5, TS2532 4, TS2790 2, and TS2740/TS2721/TS2531 one each. The result is below the G1 plain-test estimate and
+confirms that the remaining work is still overwhelmingly Wave 1 implicit-any typing.
+
+No Phase G tooling has been retired yet, so there is no replacement or release-artifact parity proof to record at this
+checkpoint. The reconciled five-entry shared-core manifest is unchanged. The new test-harness declaration and the
+Phase-G changes to the test TypeScript inventory are Tier 2: no Polar Recorder read or byte-identity proof was made, and
+the inventory/file list is repository-owned. Manual development tooling remains untouched; its retention decision
+belongs to the later, explicitly named retirement work only.
+
+#### G2 completion — the remaining 105 files' historical suppression eliminated
+
+The remaining 105 non-setup/harness test files carrying the `// @ts-ignore -- pre-existing untyped test mock boundary`
+sentinel (of the 156 files fact 39 identified; 35 were setup/harness files closed in G1's own checkpoint above) have had
+every instance of that sentinel removed and every diagnostic it was hiding fixed with real JSDoc types — not `any`, not
+a re-added suppression, not a widened product type. `git grep -c "pre-existing untyped test mock boundary" -- tests/`
+now returns zero matches repository-wide. `npx tsc -p tsconfig.tests.json --pretty false` exits 0 against the live
+(non-stripped) tree, which is now a true measurement rather than a suppressed one: there is nothing left to strip for
+this sentinel.
+
+Work was parallelized across five file batches (~20–22 files each, partitioned by directory so no two batches touched
+the same file) plus, within two batches, further sub-delegation by directory; every fix followed the same discipline:
+add local JSDoc typedefs or reuse existing `types/test-harness.d.ts` ambient types, add non-behavior-changing
+`if (!x) throw new Error(...)` narrowing guards where TypeScript's control-flow analysis needed one (mirroring the
+pattern already established elsewhere in this suite), and verify per-file via a targeted `tsc` grep plus `vitest run`
+before moving on.
+
+**A verification pass over all 105 changed files caught a real rule violation**: several agents had used `any` (in
+`@param`/`@returns`/`@type` JSDoc annotations) as an escape hatch instead of tracing the real runtime shape, across 16
+files (nav/`FullCircleRadialEngine` tests, all four linear-widget tests, five radial-widget tests, three text-widget
+tests). Four corrective passes traced every one of those `any` usages back to its real call site (the widget source
+under `widgets/`, the shared engine under `shared/widget-kits/`, or the harness's own real runtime shape) and replaced
+it with a precise structural type or a narrowly-justified `unknown` (only where the value is genuinely never
+property-accessed). One corrective agent was interrupted by a session API-limit reset mid-task (2 of 5 files done); the
+remaining 2 files (`VoltageRadialWidget.returnsPlaceholderOutputNullVoltage.test.js`,
+`WindRadialWidget.usesCustomDefaultPlaceholderBoth.test.js`) were finished directly. A repository-wide re-grep for
+`@param \{any\}|@returns \{any\}|@type \{any\}|:\s*any\b|<any>|as any\b` across all 105 files now returns zero matches.
+
+**The verification pass also caught one genuine behavioral regression**, not just a typing shortcut: an agent fixing
+`tests/widgets/text/CenterDisplayTextWidget-setup.js`'s `findFirstText`/`findFirstTextPrefix` helpers changed them from
+"return `undefined` on no match" to "throw on no match" to silence a possibly-undefined diagnostic at call sites that
+always expect a match — without checking that one sibling test
+(`CenterDisplayTextWidget.centersRelationRowsWhileKeeping.test.js`) explicitly asserts the no-match case
+(`expect(findFirstText(texts, "MEAS")).toBeUndefined()`). This was caught by the full `test:split` run (not by the
+per-batch targeted vitest runs, which only exercised the batch's own files), fixed by reverting both helpers to their
+original `TextCall | undefined`-returning behavior, and adding the narrowing guards at the three call sites that
+actually dereference the result instead (`exposesCenterDisplayRendererContract`, `keepsNonTabularCenterCoordinates`,
+`rendersNormalModeCaptionLeft`, `centersRelationRowsWhileKeeping`). All CenterDisplayTextWidget tests pass again with no
+behavior change beyond the fix itself.
+
+**Two pre-existing, unrelated defects surfaced by the first full `check:all` run in this session were also fixed**,
+since they blocked the "green at phase end" non-negotiable and are not new debt from this wave:
+`tests/tools/coverage-inventory-policy.test.js`'s two `spawnSync`-isolated-workspace tests never provided a
+`tools/quality-policy/project-coverage-inventory-policy.json` fixture, so the immutable-baseline hash check they meant
+to exercise silently no-opped (a Phase F project-owned-data extraction the test fixtures were never updated for); fixed
+by adding that fixture file with a deliberately mismatching `baselineSha256`, which lets the intended check fire.
+`tools/quality-policy/shared-instructions.md` (an untracked Phase E artifact) had never been run through
+`npm run docs:lint`; its extraction-artifact leading blank lines (the byte-for-byte contract's own requirement — proven
+by `generate-format-scope.mjs` already carrying, unused until now, an "unsupported" classification for exactly this
+path) tripped `MD012`, fixed by adding it to `.markdownlint-cli2.jsonc`'s ignore list and regenerating
+`tools/quality-policy/format-scope.json` so `run-format.mjs` also stops trying to reformat it (both mechanisms needed
+the same one-line addition; neither alone was sufficient). One ESLint `no-useless-assignment` finding in
+`tests/runtime/widget-registrar-setup.js` (an initializer immediately overwritten on every branch) was fixed by removing
+the dead initializer.
+
+**Exit conditions verified**: `npm run check:all` exits 0 — 465 test files / 2042 tests pass, coverage unchanged at
+Statements 92.26%, Branches 79.77%, Functions 96.83%, Lines 93.24%,
+`Coverage inventory check passed: 228 classified production files.`,
+`Test inventory check passed: 557 classified test files.` No suppression, `any`, widened product type, lowered
+threshold, or skipped test was used anywhere in this wave.
+
+#### G2 remaining scope — a newly measured, distinct debt class
+
+Auditing the full `@ts-ignore`/`@ts-expect-error`/`@ts-nocheck` family across `tests/` after eliminating the 105-file
+sentinel found 16 shared `.harness.js` files still carrying a file-level `// @ts-nocheck`
+(`tests/cluster/ClusterWidget.harness.js` and 15 siblings under `tests/cluster/rendering/`, `tests/config/clusters/`,
+`tests/runtime/`, `tests/shared/linear/`, `tests/shared/radial/`, `tests/tools/`, `tests/widgets/radial/`,
+`tests/widgets/text/`). These are **not** part of the 1,153-instance sentinel this phase targets — that sentinel is now
+fully eliminated — and 13 of the 16 files are untouched by this session (last committed well before this plan). Measured
+cost of removing them: `tsc -p tsconfig.tests.json --pretty false` with all 16 headers stripped reports **511**
+diagnostics confined to exactly those 16 files (verified directly against the live tree, not a copy — an earlier attempt
+to measure this via a copied/stripped workspace silently produced a false "zero" reading because the copy directory was
+not a git repository, so the `git grep`-based strip step ran on an empty file list; the real, git-aware measurement is
+the 511 figure). This is real, substantial, and out of this wave's scope: it is recorded here as the explicit starting
+input for the next G2 (or G3-adjacent) wave, exactly as this phase's own methodology requires measuring before starting.
+3 of the 16 files (`LinearGaugeEngine.harness.js`, `check-patterns.harness.js`, `XteDisplayWidget.harness.js`) already
+gained additive local typedefs from this wave's consuming-file fixes (used only via intersection casts in the consuming
+files, per rule 4's preference for local types); their own `@ts-nocheck` header was deliberately left in place since
+typing the harness file's full internals was out of this wave's scope.
+
+The other 5 of the 21 total remaining `@ts-ignore` family hits are non-issues: 2 are literal fixture/regex strings in
+`tests/tools/test-inventory.test.js` and `tests/tools/verified-baseline.test.js` that test the suppression-detection
+mechanism itself. The 13 `eslint-disable`/`prettier-ignore`/`istanbul ignore` occurrences under `tests/` were not
+measured or touched in this wave and remain an open count for G4's "exactly zero, every kind" target.
+
+#### G3–G4 completion — strict linting and suppression closure
+
+The remaining test-layer suppression directives were eliminated and the test TypeScript project now passes without
+suppression comments. ESLint applies `linterOptions.noInlineConfig`, strict `eqeqeq`, caught-error checking, and
+error-level `no-warning-comments` for all six suppression terms across every configured role. The shared strict rules
+live in `tools/quality-policy/eslint-shared-rules.mjs`; shipped runtime code also rejects `console` and empty catches.
+The obsolete relaxed-test class was removed rather than retained.
+
+`invalid-lint-suppression` now covers production, test, and tool sources. Fixture literals that deliberately exercise
+the scanner are excluded by their dedicated fixture locations, while `tests/tools/verified-baseline.test.js` scans the
+whole maintained source surface for actual suppression comments and requires zero. The ESLint policy test independently
+proves that a reintroduced test `@ts-ignore` fails. `types/test-harness.d.ts` is the documented extension point for
+genuinely untypeable mock boundaries.
+
+The strict-equality migration briefly exceeded the frozen complexity budget; it was corrected by adding the canonical,
+type-narrowing `ValueMath.isNullish` helper and using it at the affected boundaries. `npm run check:complexity`, source,
+test, and tool typechecks, lint, formatting, focused policy contracts, and the verified baseline contract pass.
+
+---
+
+### Phase K — pair verification and closeout (completed)
+
+The paired out-of-band comparison passed for all five manifest entries: `.codex/config.toml`, `.nvmrc`,
+`.prettierrc.json`, `schemas/avnav-plugin-base.schema.json`, and `exec-plans/active/.gitkeep`. The manifest itself,
+`generic-tokens.json`, the extracted `SHARED_INSTRUCTIONS` artifact, and all five generic skill files are now
+byte-identical. The two initially discovered generic-artifact drifts were reconciled here: the canonical domain-token
+list retains `viewer`, and the extracted instructions match the shared block verbatim.
+
+P1–P14 are evidenced by the paired full-gate results recorded in the preceding completed phases, the local
+`check:shared-core` and `check:generic-surface` results from this closeout (both zero findings in both repositories),
+the direct `cmp` sweep, and the paired documentation gates. The execution host still terminates the aggregate
+`check:all` process at its fixed command-duration limit, so its exact constituent gates were rerun independently. All
+are green: the configured Vitest projects report 465 files and 2,047 tests passing; merged native coverage reports
+92.28% statements, 79.87% branches, 96.83% functions, and 93.26% lines; the locked coverage inventory passes for 228
+production files; and the strict test inventory passes for 558 files. Formatting, linting, actionlint, duplication,
+shared-core, source/test/tool typechecks, package contracts, focus checks, smells/patterns, complexity, scaling,
+file-size, and documentation gates also pass. No threshold, suppression, ignore, or exception was changed to obtain
+these results.
+
+The following candidates are Tier 2 by paired comparison and are intentionally absent from the manifest: the pattern
+engines and rule registries (product scopes and detection domains), documentation-format and execution-plan guides
+(repository-specific conventions), and complexity, coverage, and test-inventory mechanisms (repository paths, captured
+debt, and coverage-report formats). The manifest is the authoritative greenfield handoff; a greenfield environment is
+derived from it rather than copied from either role model.
 
 ## Related
 
-- Paired plan: Polar Recorder `exec-plans/active/PLAN9.md`
+- Paired plan: Polar Recorder `exec-plans/completed/PLAN9.md`
 - [PLAN41.md](../completed/PLAN41.md) — the contract convergence this plan completes
 - [PLAN40.md](../completed/PLAN40.md) — the fail-closed gate set this plan must not weaken
 - [PLAN39.md](../completed/PLAN39.md) — the test split that produced the 209 dead baseline entries

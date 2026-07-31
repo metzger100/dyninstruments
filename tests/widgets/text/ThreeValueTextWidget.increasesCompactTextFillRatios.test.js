@@ -16,7 +16,7 @@ describe("ThreeValueTextWidget", function () {
         compact: { width: 100, height: 180 },
         large: { width: 180, height: 300 },
         targetText: "SPD",
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {number} H @param {{innerY: number}} insets @param {number} secScale @returns {number} */
         usableHeight(H, insets, secScale) {
           const hTop = Math.round(H * (secScale / (1 + secScale + secScale)));
           return Math.max(1, hTop - insets.innerY * 2);
@@ -27,7 +27,7 @@ describe("ThreeValueTextWidget", function () {
         compact: { width: 160, height: 120 },
         large: { width: 360, height: 260 },
         targetText: "SPD",
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {number} H @param {{innerY: number}} insets @param {number} secScale @returns {number} */
         usableHeight(H, insets, secScale) {
           const hTop = Math.round(H * (1 / (1 + secScale)));
           const hBot = H - hTop;
@@ -39,7 +39,7 @@ describe("ThreeValueTextWidget", function () {
         compact: { width: 220, height: 40 },
         large: { width: 520, height: 140 },
         targetText: "12.3",
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {number} H @returns {number} */
         usableHeight(H) {
           return H;
         }
@@ -84,6 +84,9 @@ describe("ThreeValueTextWidget", function () {
       expect(largeMode.mode).toBe(item.name);
       expect(compactTarget).toBeTruthy();
       expect(largeTarget).toBeTruthy();
+      if (!compactTarget || !largeTarget) {
+        throw new Error("Expected both captured target text calls.");
+      }
       // The safety-factor margin (ROW_SAFE_RATIO) is applied uniformly to both compact
       // and large, but the responsive profile's textFillScale interacts with it at
       // boundary cases. The invariant: compact fill ratio must be within 10% of large

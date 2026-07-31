@@ -3,7 +3,8 @@ const { createComponentContextMock, loadFresh } = require("./VoltageLinearWidget
 
 describe("VoltageLinearWidget", function () {
   it("treats blank and missing low-end thresholds as unset", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @typedef {{ buildSectors: (props: Record<string, unknown>, min: number, max: number, axis: { min: number, max: number }, valueApi: Record<string, unknown>, theme: { colors: { warning: string, alarm: string } }) => unknown[] }} SectorConfig */
+    /** @type {SectorConfig | undefined} */
     let captured;
 
     loadFresh("widgets/linear/VoltageLinearWidget/VoltageLinearWidget.js").create(
@@ -13,10 +14,10 @@ describe("VoltageLinearWidget", function () {
           PlaceholderNormalize: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} text @param {unknown} defaultText */
                 normalize(text, defaultText) {
-                  if (text == null) {
-                    return defaultText == null ? "---" : defaultText;
+                  if (text === null || text === undefined) {
+                    return defaultText === null || defaultText === undefined ? "---" : defaultText;
                   }
                   return String(text);
                 }
@@ -26,12 +27,12 @@ describe("VoltageLinearWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} raw */
                 formatGaugeDisplay(raw) {
                   const n = Number(raw);
                   return Number.isFinite(n) ? { num: n, text: String(n) } : { num: NaN, text: "---" };
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} v @param {number} lo @param {number} hi */
                 clamp(v, lo, hi) {
                   return Math.max(lo, Math.min(hi, Number(v)));
                 },
@@ -44,7 +45,7 @@ describe("VoltageLinearWidget", function () {
           LinearGaugeEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {SectorConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -55,7 +56,7 @@ describe("VoltageLinearWidget", function () {
         },
         services: {
           format: {
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {unknown} value */
             applyFormatter(value) {
               return String(value);
             }
@@ -64,13 +65,17 @@ describe("VoltageLinearWidget", function () {
       })
     );
 
+    if (!captured) {
+      throw new Error("Expected the voltage-linear sectors configuration.");
+    }
+    const sectorConfig = captured;
+
     const theme = { colors: { warning: "#123456", alarm: "#654321" } };
     const axis = { min: 10, max: 15 };
 
     [null, undefined, "", "   "].forEach(function (rawThreshold) {
       expect(
-        // @ts-ignore -- pre-existing untyped test mock boundary
-        captured.buildSectors(
+        sectorConfig.buildSectors(
           {
             voltageLinearWarningEnabled: true,
             voltageLinearAlarmEnabled: true,
@@ -87,8 +92,7 @@ describe("VoltageLinearWidget", function () {
     });
 
     expect(
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      captured.buildSectors(
+      sectorConfig.buildSectors(
         {
           voltageLinearWarningEnabled: true,
           voltageLinearAlarmEnabled: true,

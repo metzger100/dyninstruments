@@ -23,7 +23,7 @@
 
     /** @param {unknown} rawValue @returns {DyniClockTime | null} */
     function parseTime(rawValue) {
-      if (rawValue == null || rawValue === "") {
+      if (rawValue === null || rawValue === undefined || rawValue === "") {
         return null;
       }
       /** @type {Date | undefined} */

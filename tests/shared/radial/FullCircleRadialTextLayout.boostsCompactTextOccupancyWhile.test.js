@@ -19,13 +19,12 @@ describe("FullCircleRadialTextLayout", function () {
     layout.drawSingleModeText(large.state, "normal", display);
     layout.drawSingleModeText(compact.state, "normal", display);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(compact.calls.threeRows[0].sizes.vPx).toBeGreaterThan(large.calls.threeRows[0].sizes.vPx);
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(compact.calls.threeRows[0].sizes.cPx).toBeGreaterThan(large.calls.threeRows[0].sizes.cPx);
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    const compactSizes = /** @type {{ cPx: number, vPx: number }} */ (compact.calls.threeRows[0].sizes);
+    const largeSizes = /** @type {{ cPx: number, vPx: number }} */ (large.calls.threeRows[0].sizes);
+
+    expect(compactSizes.vPx).toBeGreaterThan(largeSizes.vPx);
+    expect(compactSizes.cPx).toBeGreaterThan(largeSizes.cPx);
     expect(compact.calls.threeRows[0].w).toBe(large.calls.threeRows[0].w);
-    // @ts-ignore -- pre-existing untyped test mock boundary
     expect(compact.calls.threeRows[0].h).toBe(large.calls.threeRows[0].h);
   });
 });

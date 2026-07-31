@@ -1,4 +1,7 @@
+const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
+const { loadProjectTokens } = require("./generic-tokens-test-utils");
 
 const root = process.cwd();
 
@@ -7,6 +10,15 @@ const root = process.cwd();
 // generic/project split: the generic set must be liftable verbatim into a future greenfield
 // environment. Scope globs (e.g. "cluster/**/*.js") are structural file-location patterns, not
 // rule semantics, so they are deliberately excluded from this check.
+//
+// `generic-tokens.json` is the single owner of the canonical token list, shared with
+// shared-instructions-block-contract.test.js and skill-layer-contract.test.js. This block-severity
+// gate enforces the subset already proven clean (verified below to be a subset of the canonical
+// list). `npm run check:generic-surface` runs the full canonical list at warn severity over every
+// generic rule definition file; the remaining debt it reports (for example the domain token
+// 'widget' inside the `console-in-runtime` identifier) is tracked separately by the
+// generic-surface check until the full genericness promotion is complete.
+const CANONICAL_TOKENS = loadProjectTokens();
 const PROJECT_TOKENS = [
   "Dyni",
   "componentContext",
@@ -48,6 +60,13 @@ const FAKE_ARGS = {
 };
 
 describe("pattern-rule generic/project scope contract", function () {
+  it("keeps its enforced token subset inside the generic-tokens.json canonical list", function () {
+    const lowerCanonical = CANONICAL_TOKENS.map((token) => token.toLowerCase());
+    PROJECT_TOKENS.forEach(function (token) {
+      expect(lowerCanonical, "canonical list must contain '" + token + "'").toContain(token.toLowerCase());
+    });
+  });
+
   it("keeps every generic rule's name/detection/message free of project-specific tokens", async function () {
     const rulesModule = await import(path.join(root, "tools/check-patterns/rules.mjs"));
 
@@ -83,10 +102,138 @@ describe("pattern-rule generic/project scope contract", function () {
     expect(rulesModule.PROJECT_RULES.length).toBeGreaterThan(0);
     expect(rulesModule.RULES.length).toBe(rulesModule.GENERIC_RULES.length + rulesModule.PROJECT_RULES.length);
   });
+
+  it("keeps the complete Tier 2 registry classification and concatenation contract", async function () {
+    const rulesModule = await import(path.join(root, "tools/check-patterns/rules.mjs"));
+    const genericNames = rulesModule.GENERIC_RULES.map(function (/** @type {any} */ rule) {
+      return rule.name;
+    });
+    const projectNames = rulesModule.PROJECT_RULES.map(function (/** @type {any} */ rule) {
+      return rule.name;
+    });
+
+    expect(genericNames).toEqual([
+      "invalid-lint-suppression",
+      "catch-fallback-without-suppression",
+      "internal-contract-fallback",
+      "redundant-null-type-guard",
+      "absolute-home-path",
+      "exec-plan-reference",
+      "empty-catch",
+      "console-in-runtime",
+      "no-nul-byte",
+      "duplicate-functions",
+      "duplicate-block-clones",
+      "todo-without-owner",
+      "unused-fallback",
+      "dead-code",
+      "default-truthy-fallback",
+      "canvas-api-typeof-guard",
+      "try-finally-canvas-drawing",
+      "framework-method-typeof-guard",
+      "premature-legacy-support",
+      "responsive-layout-hard-floor",
+      "unsafe-html-dom-sink"
+    ]);
+    expect(projectNames).toEqual([
+      "hardcoded-runtime-default",
+      "css-js-default-duplication",
+      "removed-theme-surface-architecture",
+      "legacy-theme-css-input-consumer",
+      "forbidden-globals",
+      "legacy-component-loader-api",
+      "runtime-service-reach-through",
+      "formatter-availability-heuristic",
+      "renderer-numeric-coercion-without-boundary-contract",
+      "redundant-internal-fallback",
+      "widget-renderer-default-duplication",
+      "engine-layout-default-drift",
+      "inline-config-default-duplication",
+      "canonical-helper-redefinition",
+      "editable-threshold-missing-internal",
+      "absent-numeric-sentinel",
+      "mapper-prop-renormalization",
+      "mapper-logic-leakage",
+      "cluster-renderer-cluster-prefix",
+      "responsive-profile-ownership",
+      "mapper-output-complexity",
+      "namespace-token-consistency"
+    ]);
+    expect([...genericNames, ...projectNames]).not.toEqual(
+      expect.arrayContaining(["internal-hook-fallback", "console-in-widgets"])
+    );
+    expect(rulesModule.RULES).toEqual([...rulesModule.GENERIC_RULES, ...rulesModule.PROJECT_RULES]);
+  });
+
+  it("keeps renamed rules finding-equivalent on the current tree and fixture inputs", async function () {
+    const rulesModule = await import(path.join(root, "tools/check-patterns/rules.mjs"));
+    const sharedModule = await import(path.join(root, "tools/check-patterns/shared.mjs"));
+    const { runRegexRule } = rulesModule;
+    const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-rule-rename-"));
+
+    try {
+      writeFixture(path.join(fixtureRoot, "widgets/CanonicalRenameFixture.js"));
+      const renames = [
+        ["internal-hook-fallback", "internal-contract-fallback"],
+        ["console-in-widgets", "console-in-runtime"]
+      ];
+
+      renames.forEach(function ([oldName, newName]) {
+        const newRule = rulesModule.RULES.find(function (/** @type {any} */ rule) {
+          return rule.name === newName;
+        });
+        expect(newRule, "missing renamed rule '" + newName + "'").toBeDefined();
+        const oldRule = { ...newRule, name: oldName };
+
+        expect(findingLocations(oldRule, root, sharedModule, runRegexRule)).toEqual(
+          findingLocations(newRule, root, sharedModule, runRegexRule)
+        );
+        expect(findingLocations(oldRule, fixtureRoot, sharedModule, runRegexRule)).toEqual(
+          findingLocations(newRule, fixtureRoot, sharedModule, runRegexRule)
+        );
+      });
+    } finally {
+      sharedModule.resetContext({ root });
+      fs.rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  });
 });
 
 /** @param {{message?: Function}} rule */
 function renderMessage(rule) {
   if (typeof rule.message !== "function") return "";
   return String(rule.message(FAKE_ARGS));
+}
+
+/** @param {string} fixturePath */
+function writeFixture(fixturePath) {
+  fs.mkdirSync(path.dirname(fixturePath), { recursive: true });
+  fs.writeFileSync(
+    fixturePath,
+    [
+      "function normalizeConfig(value, fallbackValue) {",
+      "  return fallbackValue;",
+      "}",
+      "console.log(normalizeConfig(1, 2));"
+    ].join("\n"),
+    "utf8"
+  );
+}
+
+/**
+ * @param {any} rule
+ * @param {string} scanRoot
+ * @param {any} sharedModule
+ * @param {(rule: any, files: string[]) => any[]} runRegexRule
+ * @returns {string[]}
+ */
+function findingLocations(rule, scanRoot, sharedModule, runRegexRule) {
+  sharedModule.resetContext({ root: scanRoot });
+  const files = sharedModule.filesForScope(rule.scope);
+  const run = rule.run || runRegexRule;
+  return run(rule, files)
+    .map(function (/** @type {any} */ finding) {
+      return finding.file + ":" + finding.line;
+    })
+    .sort();
 }

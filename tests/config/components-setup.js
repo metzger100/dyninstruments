@@ -80,20 +80,19 @@ const CLUSTER_ROUTE_SCRIPTS = [
   "config/cluster-routes/finalize.js"
 ];
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {object} context @param {string[]} scripts */
 function runScripts(context, scripts) {
-  // @ts-ignore -- pre-existing untyped test mock boundary
   scripts.forEach(function (scriptPath) {
     runIifeScript(scriptPath, context);
   });
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {object} context */
 function loadFullComponentRegistry(context) {
   runScripts(context, ["runtime/namespace.js"].concat(COMPONENT_REGISTRY_FRAGMENT_SCRIPTS, ["config/components.js"]));
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {object} context */
 function loadPhase7StartupEnvironment(context) {
   loadFullComponentRegistry(context);
   runScripts(context, SHARED_CONFIG_SCRIPTS);
@@ -102,7 +101,7 @@ function loadPhase7StartupEnvironment(context) {
   runScripts(context, ["config/widget-definitions.js", "runtime/asset-preloader.js", "runtime/component-loader.js"]);
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {string} baseUrl */
 function getCommonShadowCssUrl(baseUrl) {
   const context = createScriptContext({
     DyniPlugin: {
@@ -121,7 +120,7 @@ function getCommonShadowCssUrl(baseUrl) {
   return context.DyniPlugin.runtime.surfaces.getCommonShadowCssUrl();
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {Record<string, { shadowCss?: unknown }>} components @param {string[]} componentIds */
 function collectShadowCssUrls(components, componentIds) {
   const seen = Object.create(null);
   const urls = [];

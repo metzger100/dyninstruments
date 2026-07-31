@@ -3,7 +3,7 @@ const { createHarness, createMockCanvas, createMockContext2D } = require("./Line
 
 describe("LinearGaugeEngine", function () {
   it("uses linear.labels.insetFactor to position tick labels", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {number} insetFactor */
     function renderLabelY(insetFactor) {
       const harness = createHarness();
       harness.theme.linear.labels.insetFactor = insetFactor;
@@ -18,10 +18,10 @@ describe("LinearGaugeEngine", function () {
         }
       });
 
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      const layerContexts = [];
+      /** @typedef {{ calls: DyniTestCall[] }} LayerContext */
+      const layerContexts = /** @type {LayerContext[]} */ ([]);
       const ownerDocument = {
-        // @ts-ignore -- pre-existing untyped test mock boundary
+        /** @param {string} tagName */
         createElement(tagName) {
           if (String(tagName || "").toLowerCase() !== "canvas") {
             return { tagName: String(tagName || "").toUpperCase() };
@@ -34,7 +34,7 @@ describe("LinearGaugeEngine", function () {
             parentElement: null,
             __ctx: layerCtx,
             ownerDocument: ownerDocument,
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {string} type */
             getContext(type) {
               return type === "2d" ? layerCtx : null;
             },
@@ -74,11 +74,10 @@ describe("LinearGaugeEngine", function () {
         }
       );
 
-      // @ts-ignore -- pre-existing untyped test mock boundary
       const fillTextCalls = layerContexts
         .flatMap((lc) => (lc && lc.calls) || [])
         .filter((entry) => entry.name === "fillText");
-      const ys = fillTextCalls.map((entry) => entry.args[2]);
+      const ys = fillTextCalls.map((entry) => Number(entry.args[2]));
       expect(ys.length).toBeGreaterThan(0);
       return Math.min.apply(null, ys);
     }

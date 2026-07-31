@@ -7,6 +7,14 @@ const {
   loadController
 } = require("./RouteActivationController-setup");
 
+/** @param {{ resolve?: () => void }} deferred */
+function resolveDeferred(deferred) {
+  if (!deferred.resolve) {
+    throw new Error("deferred.resolve is not defined");
+  }
+  deferred.resolve();
+}
+
 describe("runtime/cluster/RouteActivationController.js", function () {
   it("keeps one current cold activation across route switches and hydrates the latest route snapshot", async function () {
     const activeMapperTranslate = vi.fn(function (props, routeContext) {
@@ -212,14 +220,10 @@ describe("runtime/cluster/RouteActivationController.js", function () {
 
     expect(first).toBe(second);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    deferredLoads.ActiveRouteMapper.resolve();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    deferredLoads.ActiveRouteViewModel.resolve();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    deferredLoads.ActiveRouteTextHtmlWidget.resolve();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    deferredLoads.ClusterMapperToolkit.resolve();
+    resolveDeferred(deferredLoads.ActiveRouteMapper);
+    resolveDeferred(deferredLoads.ActiveRouteViewModel);
+    resolveDeferred(deferredLoads.ActiveRouteTextHtmlWidget);
+    resolveDeferred(deferredLoads.ClusterMapperToolkit);
 
     await flushPromises();
 
@@ -237,12 +241,9 @@ describe("runtime/cluster/RouteActivationController.js", function () {
       "ClusterMapperToolkit"
     ]);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    deferredLoads.SecondaryRouteMapper.resolve();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    deferredLoads.SecondaryRouteViewModel.resolve();
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    deferredLoads.SecondaryRouteTextHtmlWidget.resolve();
+    resolveDeferred(deferredLoads.SecondaryRouteMapper);
+    resolveDeferred(deferredLoads.SecondaryRouteViewModel);
+    resolveDeferred(deferredLoads.SecondaryRouteTextHtmlWidget);
 
     await flushPromises();
 

@@ -1,6 +1,6 @@
 # Guide: Create a New Linear Gauge
 
-**Status:** ✅ Implemented | Profile playbooks for shipped Speed/Depth/Temperature/Voltage/Wind/Compass linear kinds
+**Status:** Current.
 
 ## Prerequisites
 

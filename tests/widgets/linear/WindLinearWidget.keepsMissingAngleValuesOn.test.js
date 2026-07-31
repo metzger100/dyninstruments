@@ -3,7 +3,9 @@ const { createComponentContextMock, loadFresh } = require("./WindLinearWidget-se
 
 describe("WindLinearWidget", function () {
   it("keeps missing angle values on placeholder path instead of numeric zero formatting", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @typedef {{ caption: unknown, value: string, unit: unknown }} MetricDisplay */
+    /** @typedef {{ formatDisplay: (value: unknown, props: Record<string, unknown>) => { num: number, text: string, secScale: number, left: MetricDisplay, right: MetricDisplay } }} DisplayConfig */
+    /** @type {DisplayConfig | undefined} */
     let captured;
 
     loadFresh("widgets/linear/WindLinearWidget/WindLinearWidget.js").create(
@@ -15,20 +17,20 @@ describe("WindLinearWidget", function () {
           ValueMath: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} value @param {number} lo @param {number} hi @returns {number} */
                 clamp(value, lo, hi) {
                   const n = Number(value);
                   if (!isFinite(n)) return lo;
                   return Math.max(lo, Math.min(hi, n));
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} value @returns {number | undefined} */
                 toOptionalFiniteNumber(value) {
-                  if (value == null) return undefined;
+                  if (value === null || value === undefined) return undefined;
                   if (typeof value === "string" && value.trim() === "") return undefined;
                   const n = Number(value);
                   return Number.isFinite(n) ? n : undefined;
                 },
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {unknown} value @returns {string} */
                 formatAngle180(value) {
                   const n = Number(value);
                   return isFinite(n) ? String(Math.round(n)) : "---";
@@ -39,7 +41,7 @@ describe("WindLinearWidget", function () {
           LinearGaugeEngine: {
             create() {
               return {
-                // @ts-ignore -- pre-existing untyped test mock boundary
+                /** @param {DisplayConfig} cfg */
                 createRenderer(cfg) {
                   captured = cfg;
                   return function () {};
@@ -50,7 +52,7 @@ describe("WindLinearWidget", function () {
         },
         services: {
           format: {
-            // @ts-ignore -- pre-existing untyped test mock boundary
+            /** @param {unknown} value */
             applyFormatter(value) {
               return String(value);
             }
@@ -59,9 +61,13 @@ describe("WindLinearWidget", function () {
       })
     );
 
+    if (!captured) {
+      throw new Error("Expected the wind-linear display configuration.");
+    }
+    const displayConfig = captured;
+
     [null, undefined, "", "   "].forEach(function (rawAngle) {
-      // @ts-ignore -- pre-existing untyped test mock boundary
-      const display = captured.formatDisplay(rawAngle, {
+      const display = displayConfig.formatDisplay(rawAngle, {
         default: "---",
         angleCaption: "AWA",
         speedCaption: "AWS",
@@ -75,8 +81,7 @@ describe("WindLinearWidget", function () {
       expect(display.left.value).toBe("---");
     });
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const valid = captured.formatDisplay("4.2", {
+    const valid = displayConfig.formatDisplay("4.2", {
       default: "---",
       angleCaption: "AWA",
       speedCaption: "AWS",

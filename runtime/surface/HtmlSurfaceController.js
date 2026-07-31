@@ -86,7 +86,7 @@
 
   /** @param {unknown} signature @param {string} methodName @returns {string} */
   function normalizeSignature(signature, methodName) {
-    if (signature == null) {
+    if (signature === null || signature === undefined) {
       return "null";
     }
     const type = typeof signature;

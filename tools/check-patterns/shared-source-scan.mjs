@@ -1,14 +1,5 @@
 // Source masking and brace/paren/comma scanning helpers shared across check-patterns rules.
 
-const EXTERNAL_FACTOR_CONTEXT_HINTS = [
-  "root.avnav",
-  "avnav.api",
-  "getComputedStyle",
-  "devicePixelRatio",
-  "ownerDocument",
-  "documentElement"
-];
-
 /** @param {string} text @returns {string} */
 export function maskCommentsAndStrings(text) {
   let out = "";
@@ -203,12 +194,4 @@ export function readLiteralToken(text, startIndex) {
     return { token: numeric[0], end: i + numeric[0].length };
   }
   return null;
-}
-
-/** @param {string} maskedText @param {number} index @returns {boolean} */
-export function isExternalFactorFallbackContext(maskedText, index) {
-  const start = Math.max(0, index - 220);
-  const end = Math.min(maskedText.length, index + 220);
-  const snippet = maskedText.slice(start, end);
-  return EXTERNAL_FACTOR_CONTEXT_HINTS.some((hint) => snippet.includes(hint));
 }

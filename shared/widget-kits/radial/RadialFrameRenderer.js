@@ -11,6 +11,8 @@
 })(this, function () {
   "use strict";
   const hasOwn = Object.prototype.hasOwnProperty;
+  /** @type {DyniValueMathApi["isNullish"]} */
+  let isNullish;
 
   /**
    * @param {unknown} def
@@ -19,6 +21,7 @@
    */
   function create(def, componentContext) {
     const angle = componentContext.components.require("RadialAngleMath");
+    isNullish = componentContext.components.require("ValueMath").isNullish;
     const tick = componentContext.components.require("RadialTickMath");
     const primitive = componentContext.components.require("RadialCanvasPrimitives");
 
@@ -119,7 +122,7 @@
         },
         {
           strokeStyle: opts.strokeStyle,
-          alpha: opts.alpha != null ? opts.alpha : 1
+          alpha: !isNullish(opts.alpha) ? opts.alpha : 1
         }
       );
     }
@@ -203,7 +206,7 @@
             }
 
             let text;
-            if (labelsMap && labelsMap[deg] != null) text = String(labelsMap[deg]);
+            if (labelsMap && !isNullish(labelsMap[deg])) text = String(labelsMap[deg]);
             else text = labelFormatter(deg);
 
             if (!text) {
@@ -228,7 +231,7 @@
         },
         {
           fillStyle: opts.fillStyle,
-          alpha: opts.alpha != null ? opts.alpha : 1
+          alpha: !isNullish(opts.alpha) ? opts.alpha : 1
         }
       );
     }
@@ -253,13 +256,13 @@
 
       if (opts.ticks) {
         const tOpts = /** @type {DyniRadialDrawOptions} */ (Object.assign({}, opts.ticks));
-        tOpts.rotationDeg = tOpts.rotationDeg != null ? tOpts.rotationDeg : rot;
+        tOpts.rotationDeg = !isNullish(tOpts.rotationDeg) ? tOpts.rotationDeg : rot;
         drawTicks(ctx, cx, cy, rOuter, tOpts);
       }
 
       if (opts.labels) {
         const lOpts = /** @type {DyniRadialDrawOptions} */ (Object.assign({}, opts.labels));
-        lOpts.rotationDeg = lOpts.rotationDeg != null ? lOpts.rotationDeg : rot;
+        lOpts.rotationDeg = !isNullish(lOpts.rotationDeg) ? lOpts.rotationDeg : rot;
         drawLabels(ctx, cx, cy, rOuter, lOpts);
       }
     }

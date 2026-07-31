@@ -3,10 +3,21 @@ const { createHarness, createMockCanvas, createMockContext2D } = require("./Line
 
 describe("LinearGaugeEngine", function () {
   it("matches callback-visible axis and layout state with or without wrapper-owned rangeDefaults when config bounds are present", function () {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {boolean} includeRangeDefaults */
     function captureState(includeRangeDefaults) {
       const harness = createHarness();
-      let snapshot = null;
+      let snapshot = /** @type {Record<string, unknown> | null} */ (null);
+      /**
+       * @type {{
+       *   axisMode: string,
+       *   drawFrame: (state: { axis: unknown, layout: { trackBox: unknown, trackY: unknown }, mode: unknown, textFillScale: unknown }) => void,
+       *   rangeDefaults?: { max: number, min: number },
+       *   rangeProps: { max: string, min: string },
+       *   ratioProps: { flat: string, normal: string },
+       *   rawValueKey: string,
+       *   tickProps: { major: string, minor: string, showEndLabels: string }
+       * }}
+       */
       const spec = {
         rawValueKey: "value",
         axisMode: "range",
@@ -17,7 +28,6 @@ describe("LinearGaugeEngine", function () {
           showEndLabels: "showEndLabels"
         },
         ratioProps: { normal: "n", flat: "f" },
-        // @ts-ignore -- pre-existing untyped test mock boundary
         drawFrame(state) {
           snapshot = {
             mode: state.mode,
@@ -29,7 +39,6 @@ describe("LinearGaugeEngine", function () {
         }
       };
       if (includeRangeDefaults) {
-        // @ts-ignore -- pre-existing untyped test mock boundary
         spec.rangeDefaults = { min: 0, max: 30 };
       }
 

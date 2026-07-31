@@ -93,7 +93,7 @@ describe("RadialValueMath", function () {
     const v = create();
     const applyFormatter = vi.fn((value) => String(value) + " kn");
     const normalize = vi.fn((text, defaultText) => {
-      if (text == null) {
+      if (text === null || text === undefined) {
         return defaultText;
       }
       return String(text);
@@ -128,7 +128,7 @@ describe("RadialValueMath", function () {
     const v = create();
     const applyFormatter = vi.fn();
     const normalize = vi.fn((text, defaultText) => {
-      if (text == null) {
+      if (text === null || text === undefined) {
         return defaultText;
       }
       return String(text);
@@ -173,7 +173,7 @@ describe("RadialValueMath", function () {
     const v = create();
     const applyFormatter = vi.fn((value) => String(value));
     const normalize = vi.fn((text, defaultText) => {
-      if (text == null) {
+      if (text === null || text === undefined) {
         return defaultText;
       }
       return String(text);
@@ -196,7 +196,7 @@ describe("RadialValueMath", function () {
       (value, options) => `fmt:${value}:${options.formatter}:${options.formatterParameters.join(",")}`
     );
     const normalize = vi.fn((text, defaultText) => {
-      if (text == null) {
+      if (text === null || text === undefined) {
         return defaultText;
       }
       return String(text);

@@ -1,6 +1,7 @@
 import path from "node:path";
 import { parseAst, staticMemberName, walkAst } from "./ast-utils.mjs";
-import { getClusterPascalPrefixes, getFileData, lineAt } from "./shared.mjs";
+import { getProjectPatternContext } from "./project/pattern-context.mjs";
+import { getFileData, lineAt } from "./shared.mjs";
 
 /** @typedef {import("./shared.mjs").Finding} Finding */
 /** @typedef {import("./shared.mjs").Rule} Rule */
@@ -331,7 +332,7 @@ function isFunctionNode(node) {
 export function runClusterRendererClusterPrefixRule(rule, files) {
   /** @type {Finding[]} */
   const out = [];
-  const prefixes = getClusterPascalPrefixes();
+  const prefixes = getProjectPatternContext().clusterPascalPrefixes;
   if (!prefixes.length) return out;
 
   for (const file of files) {

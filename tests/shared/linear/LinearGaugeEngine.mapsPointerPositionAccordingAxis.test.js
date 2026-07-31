@@ -1,6 +1,8 @@
 // @ts-check
 const { createHarness, createMockCanvas, createMockContext2D } = require("./LinearGaugeEngine.harness");
 
+/** @typedef {{ x: number }} PointerCallWithX */
+
 describe("LinearGaugeEngine", function () {
   it("maps pointer position according to axis mode", function () {
     const harnessRange = createHarness();
@@ -80,12 +82,15 @@ describe("LinearGaugeEngine", function () {
       minor: 30
     });
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const xRange = harnessRange.calls.pointer[0].x;
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const xCentered = harnessCentered.calls.pointer[0].x;
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    const xFixed = harnessFixed.calls.pointer[0].x;
+    const xRange = /** @type {typeof harnessRange.calls.pointer[0] & PointerCallWithX} */ (
+      harnessRange.calls.pointer[0]
+    ).x;
+    const xCentered = /** @type {typeof harnessCentered.calls.pointer[0] & PointerCallWithX} */ (
+      harnessCentered.calls.pointer[0]
+    ).x;
+    const xFixed = /** @type {typeof harnessFixed.calls.pointer[0] & PointerCallWithX} */ (
+      harnessFixed.calls.pointer[0]
+    ).x;
 
     expect(xRange).toBeCloseTo(xFixed, 0);
     expect(xCentered).toBeGreaterThan(xFixed);

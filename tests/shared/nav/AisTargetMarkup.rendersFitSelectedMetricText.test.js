@@ -19,9 +19,10 @@ describe("AisTargetMarkup", function () {
     });
     const root = parseHtml(html);
 
-    // @ts-ignore -- pre-existing untyped test mock boundary
-    expect(root.querySelector(".dyni-ais-target-metric-dst .dyni-ais-target-metric-value-text").textContent).toBe(
-      "4.2"
-    );
+    const valueTextEl = root.querySelector(".dyni-ais-target-metric-dst .dyni-ais-target-metric-value-text");
+    if (!valueTextEl) {
+      throw new Error("value text element is missing");
+    }
+    expect(valueTextEl.textContent).toBe("4.2");
   });
 });

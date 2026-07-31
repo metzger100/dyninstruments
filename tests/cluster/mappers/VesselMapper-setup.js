@@ -37,7 +37,12 @@ const toolkit = loadFresh("cluster/mappers/ClusterMapperToolkit.js")
     unit_alarm: ""
   });
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/**
+ * @typedef {{ build: (props: AlarmProps) => unknown }} AlarmViewModel
+ * @typedef {Record<string, unknown> & { alarmInfo?: Record<string, { category: string, repeat?: boolean, running?: boolean }> }} AlarmProps
+ */
+
+/** @param {string} kind @param {unknown} activeToolkit @param {AlarmViewModel} [viewModel] */
 function routeContext(kind, activeToolkit, viewModel) {
   return makeRouteContext({
     routeId: "vessel:" + kind,
@@ -56,18 +61,18 @@ function createAlarmMapper() {
   return createMapper();
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} value */
 function trimText(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-// @ts-ignore -- pre-existing untyped test mock boundary
+/** @param {unknown} value */
 function toMaybeNumber(value) {
   return typeof value === "undefined" || value === null || value === "" ? undefined : Number(value);
 }
 
 function makeAlarmViewModel() {
-  // @ts-ignore -- pre-existing untyped test mock boundary
+  /** @param {string} category */
   function priority(category) {
     if (category === "critical") {
       return 0;
@@ -79,7 +84,7 @@ function makeAlarmViewModel() {
   }
 
   return {
-    // @ts-ignore -- pre-existing untyped test mock boundary
+    /** @param {AlarmProps} props */
     build(props) {
       const alarmInfo = props.alarmInfo || {};
       const activeAlarms = Object.keys(alarmInfo)
