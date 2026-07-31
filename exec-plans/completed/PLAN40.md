@@ -6,7 +6,7 @@ Written after repository verification and the cross-repository quality-system au
 
 This plan closes the remaining Dyninstruments migration gaps: honest complete-suite command semantics, a bounded fast
 gate, portable Codex configuration, corrected generic-schema provenance, synchronized contributor documentation, and
-final mechanical alignment evidence with Polar Recorder.
+final mechanical alignment evidence with paired project.
 
 The coding agent may choose equivalent test-helper names and file splits. The public command meanings, the exact
 top-level `check:fast` composition, complete non-coverage ownership in `check:core`, portable Codex configuration,
@@ -21,8 +21,8 @@ these assumptions explicit:
    scaffolder, shared quality package, default remote-CI profile, or generic `doctor` command is separate future work.
 3. The current local-first governance remains deliberate for this repository. The transport-only tag publisher stays
    transport-only; no PR workflow, CODEOWNERS file, branch ruleset, or pre-commit framework is introduced here.
-4. Required gates must remain independently runnable and must never read the sibling Polar Recorder checkout.
-5. The paired implementation plan is Polar Recorder
+4. Required gates must remain independently runnable and must never read the sibling paired project checkout.
+5. The paired implementation plan is paired project
    `exec-plans/active/PLAN7.md — Close quality-contract gaps and establish the final hybrid-profile role model`.
 6. Common alignment means the same guarantees and contributor vocabulary, not byte-identical product-specific tools.
 
@@ -34,7 +34,7 @@ repository evidence instead of weakening a gate or silently improvising.
 ## Goal
 
 Finish the Dyninstruments migration as an honest, extraction-ready viewer-profile role model whose shared quality
-contracts align with Polar Recorder while its legitimate legacy ratchets remain intact.
+contracts align with paired project while its legitimate legacy ratchets remain intact.
 
 Expected outcomes after completion:
 
@@ -46,7 +46,7 @@ Expected outcomes after completion:
 - The command graph has no obsolete direct `test:contract` substitute for the complete suite.
 - `.codex/config.toml` is portable, byte-identical to the paired exemplar, and contains no OS-specific or unpinned MCP
   command.
-- The plugin-schema corpus accurately records that Polar Recorder now shares the generic base/schema cases.
+- The plugin-schema corpus accurately records that paired project now shares the generic base/schema cases.
 - Contributor and quality documentation distinguish the shared role-model contract from Dyninstruments-specific Vitest,
   coverage, complexity, mapper, widget, and layout policy.
 - The current full quality gate, hook diagnostics, package checks, and paired mechanical comparison pass from clean
@@ -64,7 +64,7 @@ was written:
 2. The completed audit ran `npm run check:all` successfully: 442 Vitest files and 1,924 tests passed; aggregate coverage
    was 93.24% lines and 79.77% branches.
 3. Node 26, npm 12.0.1, `packageManager = npm@12.0.1`, and all direct development dependencies are exact. Twelve common
-   maintained-tool versions currently match Polar Recorder exactly.
+   maintained-tool versions currently match paired project exactly.
 4. `check:all` is exactly `npm run check:core && npm run test:coverage:check`; `check:strict` is exactly
    `npm run check:all`.
 5. `check:core` currently runs `test:contract` but never invokes `test:split`. It therefore omits the `unit-node` and
@@ -78,22 +78,22 @@ was written:
    `check:core` reaches `test:split` exactly once or that the three project classes are complete.
 9. `package:check` owns Ajv schema validation plus focused release-tool tests; `test:coverage:check` owns the complete
    coverage run plus the per-file coverage inventory.
-10. The command graph has no current repeated npm-script path equivalent to Polar Recorder's duplicated `check:smells`;
+10. The command graph has no current repeated npm-script path equivalent to paired project's duplicated `check:smells`;
     the Dyn change must not introduce one.
 11. `schemas/avnav-plugin-base.schema.json` is byte-identical in both repositories, and both schema corpora contain the
     same generic valid and invalid case payloads.
 12. `tools/quality-policy/plugin-schema-corpus.json` still says that no sibling has published a base/profile split.
-    Polar Recorder now has `schemas/avnav-plugin-base.schema.json`, `schemas/plugin.schema.json`, and the matching
+    paired project now has `schemas/avnav-plugin-base.schema.json`, `schemas/plugin.schema.json`, and the matching
     generic corpus, so that note is false.
 13. `.codex/config.toml` contains useful project-document and sandbox defaults, but also configures Windows `cmd`,
     Windows environment paths, and `chrome-devtools-mcp@latest`.
-14. Polar Recorder currently tracks an empty file named `.codex`; neither current shape is a portable paired
+14. paired project currently tracks an empty file named `.codex`; neither current shape is a portable paired
     configuration.
 15. `.github/workflows/publish-release.yml` is the only workflow. It is intentionally tag-only and pins
     `actions/checkout` v6.0.2 and `softprops/action-gh-release` v2.6.2 by reviewed commit SHA.
 16. `.githooks/pre-push` invokes exactly one `npm run check:all`; `npm run hooks:doctor` passes after hook activation.
 17. The complexity policy has 175 active legacy findings backed by a digest-anchored historical capture. The current
-    gate rejects new identities and raises; this legitimate migration ratchet must not be replaced by Polar Recorder's
+    gate rejects new identities and raises; this legitimate migration ratchet must not be replaced by paired project's
     greenfield strict-only model.
 18. Coverage owns all 228 production files with 80% line/65% branch defaults and twelve frozen below-default legacy
     paths. No coverage floor or exception is in scope for change.
@@ -139,7 +139,7 @@ such.
 ### Alignment is semantic, not a copied tool tree
 
 Dyninstruments keeps Vitest/jsdom, its 228-file coverage inventory, historical complexity capture, mapper boundaries,
-theme contracts, and layout/package profile. Polar Recorder keeps Python, Node's test runner, c8, Ruff, mypy, and
+theme contracts, and layout/package profile. paired project keeps Python, Node's test runner, c8, Ruff, mypy, and
 server-plugin policy. Only public meanings, common maintained-tool pins, generic schema cases, AI configuration, hook
 and release intent, and evidence vocabulary align.
 
@@ -173,7 +173,7 @@ No implementation phase may delete valid migration evidence merely to resemble a
 
 ### Repository independence and paired work
 
-- No required script, hook, test, release command, or documentation checker may resolve `../polarrecorder`.
+- No required script, hook, test, release command, or documentation checker may resolve `../paired-project`.
 - The paired checkout may be read only by the final one-off alignment comparison, never by a committed gate.
 - Do not create the future scaffolder, shared npm package, remote-CI profile, CODEOWNERS file, or generic project
   manifest in this plan.
@@ -264,7 +264,7 @@ No implementation phase may delete valid migration evidence merely to resemble a
 - Remove the Windows `cmd` launcher, Windows environment variables, and the `chrome-devtools-mcp@latest` server block.
 - Do not replace it with a different networked or platform-specific MCP. Browser tooling is not required by the
   repository's quality gate.
-- Use the exact same normalized file bytes as Polar Recorder.
+- Use the exact same normalized file bytes as paired project.
 
 #### C2. Add a local drift proof
 
@@ -287,7 +287,7 @@ No implementation phase may delete valid migration evidence merely to resemble a
 #### D1. Repair the corpus note
 
 - Update only the note/provenance text in `tools/quality-policy/plugin-schema-corpus.json`.
-- State that the generic AvNav base schema and generic case payloads are shared with Polar Recorder, while
+- State that the generic AvNav base schema and generic case payloads are shared with paired project, while
   `dynLayoutsProfile` remains local.
 - Do not change any generic or layouts-profile valid/invalid case in this phase.
 
@@ -343,7 +343,7 @@ No implementation phase may delete valid migration evidence merely to resemble a
 ### Phase F — Prove standalone quality and paired alignment
 
 **Intent:** Close the migration with reproducible evidence, not prose-only parity claims.  
-**Dependencies:** Phases B–E and completion of the paired Polar Recorder plan.
+**Dependencies:** Phases B–E and completion of the paired paired project plan.
 
 #### F1. Run focused and complete local gates
 
@@ -367,7 +367,7 @@ No implementation phase may delete valid migration evidence merely to resemble a
   - identical `.codex/config.toml`;
   - no required command in either repository references the sibling path.
 - Record justified profile differences: Vitest/V8/jsdom and historical ratchets here; Python/c8/Ruff/mypy and
-  strict-zero-debt complexity in Polar Recorder.
+  strict-zero-debt complexity in paired project.
 - Keep this comparison one-off unless a separately approved shared-package design gives it a stable owner.
 
 #### F3. Close the active plan
@@ -426,7 +426,7 @@ Therefore widget/layout fixtures and theme-token extreme fixtures do not change.
 ### Portable role-model configuration
 
 - [ ] `.codex/config.toml` contains no OS-specific command/environment and no unpinned MCP.
-- [ ] The file is byte-identical to Polar Recorder's normalized configuration.
+- [ ] The file is byte-identical to paired project's normalized configuration.
 - [ ] A local test proves required keys and forbidden-token rejection.
 - [ ] The schema corpus no longer makes the false no-sibling claim.
 - [ ] Generic schema and generic case payloads still match the paired repository.
@@ -463,7 +463,7 @@ Therefore widget/layout fixtures and theme-token extreme fixtures do not change.
   `check:fast`/`check:core`/`check:all`/`check:strict` strings, `test:split` composition, `.codex/config.toml`
   Windows/MCP content, the schema-corpus false no-sibling note, and README/quality-gate/testing-infrastructure line
   counts all matched exactly as recorded. No baseline drift found; no plan amendment was required.
-- Read Polar Recorder's `exec-plans/active/PLAN7.md` read-only to confirm the shared contract (same `check:fast` string,
+- Read paired project's `exec-plans/active/PLAN7.md` read-only to confirm the shared contract (same `check:fast` string,
   same `check:core`/`check:all`/`check:strict` aliasing, same Codex/independence/role-model boundaries). No sibling file
   was edited.
 
@@ -488,8 +488,8 @@ Therefore widget/layout fixtures and theme-token extreme fixtures do not change.
 - Added `tests/tools/codex-config.test.js` (dependency-free text-based proof, no TOML parser): asserts every required
   portable key is present, asserts no MCP server block, and includes two negative fixtures — a reintroduced
   Windows/`@latest` MCP block fails the violation check, and a fixture missing `sandbox_mode` fails it too.
-- `diff .codex/config.toml ../polarrecorder/.codex` shows Polar Recorder's file is still the pre-existing zero-byte
-  marker (Polar Recorder's PLAN7 Phase D — replacing that marker with its own `config.toml` — has not landed yet; see
+- `diff .codex/config.toml ../paired-project/.codex` shows paired project's file is still the pre-existing zero-byte
+  marker (paired project's PLAN7 Phase D — replacing that marker with its own `config.toml` — has not landed yet; see
   the paired-comparison note below). Byte-identity therefore cannot be proven this round; the Dyninstruments file
   matches the exact minimal portable shape both plans specify verbatim.
 - Focused run: `npx vitest run --project unit-node tests/tools/codex-config.test.js` → 4/4 passed.
@@ -497,14 +497,14 @@ Therefore widget/layout fixtures and theme-token extreme fixtures do not change.
 ### Phase D — Schema-corpus provenance
 
 - `tools/quality-policy/plugin-schema-corpus.json`: rewrote only the `note` field. It no longer claims "no sibling
-  repository has published its own schema base/profile split"; it now states Polar Recorder publishes the same
+  repository has published its own schema base/profile split"; it now states paired project publishes the same
   base/profile split with a byte-identical `genericBase` corpus. No `genericBase`/`dynLayoutsProfile` case array was
   changed.
 - Verified byte-identity directly:
-  `diff dyninstruments/schemas/avnav-plugin-base.schema.json polarrecorder/schemas/avnav-plugin-base.schema.json` → no
-  output (identical); Polar Recorder's `tools/quality-policy/plugin-schema-corpus.json`
+  `diff dyninstruments/schemas/avnav-plugin-base.schema.json paired-project/schemas/avnav-plugin-base.schema.json` → no
+  output (identical); paired project's `tools/quality-policy/plugin-schema-corpus.json`
   `genericBase.valid`/`genericBase.invalid` arrays are structurally identical to Dyninstruments' (compared by inspection
-  of both files; Polar Recorder's own note explicitly says it is "kept byte-identical to Dyninstruments' equivalent
+  of both files; paired project's own note explicitly says it is "kept byte-identical to Dyninstruments' equivalent
   genericBase corpus").
 - `tests/contract/plugin-schema-base-profile-contract.test.js`: added a locking assertion that `corpus.genericBase`
   deep-equals the exact intended local payload (independent of the sibling), so a future accidental edit to the local
@@ -554,16 +554,16 @@ plus the new file `tests/tools/codex-config.test.js`. No file under `plugin.js`,
 debt-baseline entry was added anywhere.
 
 Repository independence:
-`grep -rl "polarrecorder" package.json .githooks tools tests documentation AGENTS.md CLAUDE.md README.md CONTRIBUTING.md`
+`grep -rl "paired-project" package.json .githooks tools tests documentation AGENTS.md CLAUDE.md README.md CONTRIBUTING.md`
 (excluding `exec-plans/`, where this plan's own prose names the paired repository by design) returns no match — no
 required script, hook, test, release command, or documentation checker resolves the sibling repository.
 
-### Paired comparison with Polar Recorder PLAN7 — complete
+### Paired comparison with paired project PLAN7 — complete
 
-Re-ran the one-off, read-only comparison on 2026-07-27 after Polar Recorder archived `PLAN7.md`; both worktrees were
+Re-ran the one-off, read-only comparison on 2026-07-27 after paired project archived `PLAN7.md`; both worktrees were
 clean. The shared Node/npm declarations, all 12 common direct development-dependency versions, and the exact
 `check:fast`, `check:all`, and `check:strict` script strings match. Dyninstruments' `check:core` reaches `test:split`
-exactly once; Polar Recorder's complete core graph has the same meaning with its documented Python-specific leaf.
+exactly once; paired project's complete core graph has the same meaning with its documented Python-specific leaf.
 
 The repositories have byte-identical `.codex/config.toml` files (SHA-256
 `be6ded57d66fa0d9101ef7eb2b9fb1aa3105e2871f8eca93218da1c6dc937f64`), generic AvNav base schemas, and
@@ -572,7 +572,7 @@ match. Required commands in neither repository resolve a sibling path; remaining
 provenance/documentation only. No unexplained common-contract drift was found.
 
 The current Dyninstruments `npm run check:all` gate passed after this comparison. With the prior local evidence and
-Polar Recorder's archived PLAN7 evidence, all PLAN40 acceptance criteria are now met. This plan was moved to
+paired project's archived PLAN7 evidence, all PLAN40 acceptance criteria are now met. This plan was moved to
 `exec-plans/completed/PLAN40.md` on 2026-07-27.
 
 ---
@@ -585,4 +585,4 @@ Polar Recorder's archived PLAN7 evidence, all PLAN40 acceptance criteria are now
 - [Execution-plan authoring](../../documentation/guides/exec-plan-authoring.md)
 - [Documentation maintenance](../../documentation/guides/documentation-maintenance.md)
 - [Completed migration plan](../completed/PLAN39.md)
-- Polar Recorder paired plan: `../../../polarrecorder/exec-plans/active/PLAN7.md`
+- paired project paired plan: `../../../paired-project/exec-plans/active/PLAN7.md`

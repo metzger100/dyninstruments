@@ -6,6 +6,7 @@ import { createHash } from "node:crypto";
 import { readJsonPolicy } from "./read-json-policy.mjs";
 import { readVersionedProfile } from "./profile-schema.mjs";
 import { readCoverageSummary } from "./coverage-summary-adapter.mjs";
+import { runCoveragePolicy } from "../portable-core/coverage-engine.mjs";
 
 let root = process.cwd();
 let floorsPath = path.join(root, "tools/quality-policy/coverage-floors.json");
@@ -276,6 +277,25 @@ function checkMeasuredFloors(data, out) {
       );
     }
   }
+  /** @type {Record<string, {lines: number, functions: number, statements: number, branches: number}>} */
+  const normalizedSummary = {};
+  /** @type {Record<string, number>} */
+  const lineFloors = {};
+  /** @type {Record<string, number>} */
+  const baselineLines = {};
+  for (const [relativePath, entry] of measured) {
+    const fileSummary = summaryByRelativePath.get(relativePath);
+    if (!fileSummary) continue;
+    normalizedSummary[relativePath] = {
+      lines: fileSummary.lines.pct,
+      functions: fileSummary.functions?.pct ?? fileSummary.lines.pct,
+      statements: fileSummary.statements?.pct ?? fileSummary.lines.pct,
+      branches: fileSummary.branches.pct
+    };
+    lineFloors[relativePath] = entry.lines;
+    baselineLines[relativePath] = baseline.entries[relativePath].lines;
+  }
+  out.push(...runCoveragePolicy({ summary: normalizedSummary, floors: lineFloors, baseline: baselineLines }).failures);
 }
 
 /** @param {any} data @param {string[]} out */

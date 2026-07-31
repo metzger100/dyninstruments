@@ -1,3 +1,5 @@
+import { runReleasePolicy } from "./portable-core/release-engine.mjs";
+
 const NUMERIC_IDENTIFIER = "(?:0|[1-9]\\d*)";
 const NON_NUMERIC_IDENTIFIER = "(?:\\d*[A-Za-z-][0-9A-Za-z-]*)";
 const PRERELEASE_IDENTIFIER = `(?:${NUMERIC_IDENTIFIER}|${NON_NUMERIC_IDENTIFIER})`;
@@ -12,7 +14,7 @@ export const VERSION_REGEX = new RegExp(VERSION_PATTERN_SOURCE);
 
 /** @param {string} version @returns {boolean} */
 export function isValidReleaseVersion(version) {
-  return VERSION_REGEX.test(version);
+  return VERSION_REGEX.test(version) && runReleasePolicy({ version, payload: [] }).ok;
 }
 
 /** @param {string} tag @returns {string} */

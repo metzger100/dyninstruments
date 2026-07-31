@@ -6,8 +6,7 @@
  */
 
 import { spawnSync } from "node:child_process";
-import fs from "node:fs";
-import path from "node:path";
+import { runHookPolicy } from "./portable-core/hook-engine.mjs";
 
 /**
  * @param {{root?: string, print?: boolean}} [options]
@@ -16,7 +15,6 @@ import path from "node:path";
 export function runHooksDoctorCheck(options = {}) {
   const root = options.root || process.cwd();
   const print = options.print !== false;
-  const hookPath = path.join(root, ".githooks", "pre-push");
   /** @type {string[]} */
   const problems = [];
 
@@ -30,11 +28,9 @@ export function runHooksDoctorCheck(options = {}) {
     problems.push(`core.hooksPath is "${configuredPath || "(unset)"}", expected ".githooks".`);
   }
 
-  if (!fs.existsSync(hookPath)) {
-    problems.push(`Missing hook file at ${hookPath}.`);
-  } else {
-    const isExecutable = (fs.statSync(hookPath).mode & 0o111) !== 0;
-    if (!isExecutable) problems.push(`${hookPath} is not executable.`);
+  const hookResult = runHookPolicy({ root, paths: [".githooks/pre-push"] });
+  for (const failure of hookResult.failures) {
+    problems.push(failure.includes("missing hook") ? `Missing hook file at ${root}/.githooks/pre-push.` : failure);
   }
 
   if (print) {

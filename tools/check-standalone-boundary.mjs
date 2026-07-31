@@ -14,8 +14,8 @@ const TEXT_EXTENSIONS = new Set([".js", ".mjs", ".json", ".md", ".yml", ".yaml",
 const FORBIDDEN_PATTERNS = [
   { kind: "absolute-home-path", pattern: /\/home\/(?!<user>)[^\s"'`)]{2,}/ },
   { kind: "absolute-home-path", pattern: /\/Users\/(?!<user>)[^\s"'`)]{2,}/ },
-  { kind: "checkout-reference", pattern: /\b(?:sibling|other|external)\s+(?:repository|checkout)\b/i },
-  { kind: "checkout-reference", pattern: /\bcross[- ]checkout\b/i }
+  { kind: "checkout-reference", pattern: /\bpolarrecorder\b/i },
+  { kind: "checkout-reference", pattern: /\bpolar recorder\b/i }
 ];
 
 /** @typedef {{path: string, line: number, kind: string}} BoundaryFinding */
@@ -61,7 +61,7 @@ function collectTextFiles(root) {
       else if (entry.isFile() && TEXT_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
         const relativePath = path.relative(root, absolutePath).replaceAll(path.sep, "/");
         if (relativePath.startsWith("tools/test-data/")) continue;
-        if (!relativePath.startsWith("exec-plans/")) files.push(relativePath);
+        files.push(relativePath);
       }
     }
   }

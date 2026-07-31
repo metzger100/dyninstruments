@@ -2041,6 +2041,10 @@
       "owner": "prettier"
     },
     {
+      "path": "tests/portable-core/portable-policy-engines.test.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tests/runtime/asset-preloader.test.js",
       "owner": "prettier"
     },
@@ -3851,6 +3855,62 @@
       "owner": "prettier"
     },
     {
+      "path": "tools/portable-core/complexity-engine.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/portable-core/coverage-engine.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/portable-core/doc-link-engine.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/portable-core/file-size-engine.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/portable-core/focused-test-engine.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/portable-core/format-engine.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/portable-core/hook-engine.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/portable-core/json.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/portable-core/lint-policy.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/portable-core/path-policy.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/portable-core/release-engine.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/portable-core/schema-engine.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/portable-core/suppression-engine.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/portable-core/test-inventory-engine.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tools/quality-policy/check-coverage-inventory.mjs",
       "owner": "prettier"
     },
@@ -4390,7 +4450,7 @@
     }
   ],
   "countByOwner": {
-    "prettier": 1025,
+    "prettier": 1040,
     "unsupported": 48
   }
 }

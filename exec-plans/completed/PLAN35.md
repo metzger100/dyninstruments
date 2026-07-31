@@ -2,7 +2,7 @@
 
 ## Status
 
-Written after repository verification, review of the PolarRecorder quality system, and the repository owner's 2026-07-17
+Written after repository verification, review of the PairedProject quality system, and the repository owner's 2026-07-17
 request to plan the identified hardening improvements.
 
 This plan strengthens the mechanical guarantees around AI-authored production code, tests, quality policy, and delivery.

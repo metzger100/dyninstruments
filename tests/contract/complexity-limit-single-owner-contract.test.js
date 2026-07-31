@@ -2,7 +2,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const root = process.cwd();
-const OWNER_PATH = "tools/quality-policy/eslint-complexity-config.mjs";
+const OWNER_PATH = "tools/portable-core/complexity-engine.mjs";
+const ADAPTER_PATH = "tools/quality-policy/eslint-complexity-config.mjs";
 const SCAN_ROOTS = ["tools"];
 
 // Matches an ESLint complexity-family rule entry declaring a literal numeric limit, e.g.
@@ -10,9 +11,9 @@ const SCAN_ROOTS = ["tools"];
 // literal values together would mean the limits drifted back into a duplicated hardcoded copy.
 const LIMIT_PATTERNS = {
   complexity: /\bcomplexity["']?\s*:\s*(?:\[[^,]*,\s*)?10\b/,
-  "max-statements": /["']?max-statements["']?\s*:\s*(?:\[[^,]*,\s*)?40\b/,
-  "max-depth": /["']?max-depth["']?\s*:\s*(?:\[[^,]*,\s*)?4\b/,
-  "max-params": /["']?max-params["']?\s*:\s*(?:\[[^,]*,\s*)?6\b/
+  statements: /\bstatements["']?\s*:\s*(?:\[[^,]*,\s*)?40\b/,
+  depth: /\bdepth["']?\s*:\s*(?:\[[^,]*,\s*)?4\b/,
+  params: /\bparams["']?\s*:\s*(?:\[[^,]*,\s*)?6\b/
 };
 
 describe("complexity limit single-owner contract", function () {
@@ -26,15 +27,19 @@ describe("complexity limit single-owner contract", function () {
 
   it("keeps the shared owner module itself declaring all four limits", function () {
     expect(declaresAllFourLimits(OWNER_PATH)).toBe(true);
+    const adapter = fs.readFileSync(path.join(root, ADAPTER_PATH), "utf8");
+    expect(adapter).toContain('"max-statements": PORTABLE_LIMITS.statements');
+    expect(adapter).toContain('"max-depth": PORTABLE_LIMITS.depth');
+    expect(adapter).toContain('"max-params": PORTABLE_LIMITS.params');
   });
 
   it("flags a seeded second copy of all four limit values as a drift violation", function () {
     const seeded = [
       "export const DUPLICATE_LIMITS = {",
       "  complexity: 10,",
-      '  "max-statements": 40,',
-      '  "max-depth": 4,',
-      '  "max-params": 6',
+      "  statements: 40,",
+      "  depth: 4,",
+      "  params: 6",
       "};"
     ].join("\n");
 

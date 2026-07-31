@@ -25,8 +25,8 @@ assumptions explicit:
 3. This plan **supersedes PLAN40 Status assumption 3** on the repository owner's explicit instruction. A read-only
    pull-request quality workflow is now in scope. The transport-only tag publisher stays transport-only, and no
    CODEOWNERS file, branch ruleset, or pre-commit framework is introduced.
-4. Required gates must remain independently runnable and must never read the sibling Polar Recorder checkout.
-5. The paired implementation plan is Polar Recorder
+4. Required gates must remain independently runnable and must never read the sibling paired project checkout.
+5. The paired implementation plan is paired project
    `exec-plans/active/PLAN8.md — Converge the shared quality contract into an extraction-ready common core`.
 6. Common alignment means the same guarantees, contracts, and contributor vocabulary — not byte-identical
    product-specific tools.
@@ -74,17 +74,17 @@ The following facts were checked against Dyninstruments `397ab8e2` before this p
    functions, and 93.24% lines. The coverage inventory reports 228 classified production files.
 3. There are 445 tracked `tests/**/*.test.js` files. Vitest 4.1.10 runs the `unit-node`, `contract`, and `unit-dom`
    projects; coverage uses `@vitest/coverage-v8`.
-4. `.prettierrc.json` sets `printWidth: 120` and `proseWrap: "always"` plus explicit defaults. Polar Recorder sets
+4. `.prettierrc.json` sets `printWidth: 120` and `proseWrap: "always"` plus explicit defaults. paired project sets
    `printWidth: 100` with no `proseWrap`.
-5. Adopting Polar Recorder's Prettier settings here would reformat all 88 maintained Markdown files and at least 149
+5. Adopting paired project's Prettier settings here would reformat all 88 maintained Markdown files and at least 149
    sampled JavaScript files. Adopting this repository's settings there reformats about 35 Markdown, 66 of 104
-   JavaScript/MJS, and 4 JSON/YAML files. The cheaper, single-repository direction is therefore for Polar Recorder to
+   JavaScript/MJS, and 4 JSON/YAML files. The cheaper, single-repository direction is therefore for paired project to
    adopt this repository's configuration unchanged; no `.prettierrc.json` change is in scope here.
 6. `.markdownlint-cli2.jsonc` disables 14 rules and globs only `*.md` and `documentation/**/*.md`. A live run lints 80
    files.
 7. Eight tracked Markdown files are Prettier-formatted but never markdownlint-checked: the seven
    `.agents/skills/*/SKILL.md` files and `.githooks/README.md`.
-8. Running markdownlint over all 88 tracked non-historical Markdown files with Polar Recorder's stricter rule set
+8. Running markdownlint over all 88 tracked non-historical Markdown files with paired project's stricter rule set
    (`default: true` minus `MD013`, `MD033`, `MD041`) produces **0 issues**. The 14 locally disabled rules are therefore
    unnecessary for the current content.
 9. The `ignores` entry `node_modules/**` does not match nested paths such as `.kilo/node_modules/**`. A full-repository
@@ -92,17 +92,17 @@ The following facts were checked against Dyninstruments `397ab8e2` before this p
 10. `tests/contract/ai-instruction-pointer-contract.test.js` requires `CLAUDE.md` to be at most 8 total lines, to
     contain `[AGENTS.md](AGENTS.md)`, and not to contain the `SHARED_INSTRUCTIONS` begin marker. It does not require the
     mandatory preflight file names.
-11. Polar Recorder's `tools/check-agents-pointer.mjs`, executed against this repository, fails with three findings: the
+11. paired project's `tools/check-agents-pointer.mjs`, executed against this repository, fails with three findings: the
     three mandatory preflight file names are absent from `CLAUDE.md`. This repository's `CLAUDE.md` is 6 total and 4
-    non-empty lines; Polar Recorder's is 24 total and 17 non-empty lines and fails the 8-line rule here. The two
+    non-empty lines; paired project's is 24 total and 17 non-empty lines and fails the 8-line rule here. The two
     contracts are mutually exclusive.
 12. `tests/contract/documentation-format-contract.test.js` requires a title, a `**Status:**` line, `## Overview`, and
     `## Related`, and excludes `documentation/TABLEOFCONTENTS.md`.
-13. Polar Recorder's `tools/check-doc-format.mjs` additionally requires `## Key Details`. Executed against this
+13. paired project's `tools/check-doc-format.mjs` additionally requires `## Key Details`. Executed against this
     repository it reports 74 documents checked and 47 failures.
 14. `documentation/core-principles.md` has only `## Overview` and `## Related`. It is the highest-precedence document in
     both repositories' stated precedence order.
-15. `tools/check-patterns/` defines 41 rule names. Polar Recorder defines 24. Exactly 9 identifiers match:
+15. `tools/check-patterns/` defines 41 rule names. paired project defines 24. Exactly 9 identifiers match:
     `canvas-api-typeof-guard`, `default-truthy-fallback`, `exec-plan-reference`, `framework-method-typeof-guard`,
     `hardcoded-runtime-default`, `premature-legacy-support`, `redundant-null-type-guard`,
     `responsive-layout-hard-floor`, and `try-finally-canvas-drawing`.
@@ -112,10 +112,10 @@ The following facts were checked against Dyninstruments `397ab8e2` before this p
     `internal-hook-fallback`/`internal-namespace-fallback`, and `invalid-lint-suppression`/`python-suppression`.
     Equivalence is asserted, not yet proven, for each pair.
 17. The engines differ architecturally. This repository uses a declarative `RULES` array with per-rule `scope`,
-    `severity`, and suppression support. Polar Recorder uses imperative discovery plus `check*` functions over a flat
+    `severity`, and suppression support. paired project uses imperative discovery plus `check*` functions over a flat
     `PATTERN_RULE_IDS` allow-list.
 18. `tools/quality-policy/complexity-scan.mjs` runs ESLint with `complexity: 10`, `max-statements: 40`, `max-depth: 4`,
-    and `max-params: 6` as warnings and parses the resulting messages. Polar Recorder's
+    and `max-params: 6` as warnings and parses the resulting messages. paired project's
     `tools/quality-policy/eslint.complexity.config.mjs` uses the identical four rules at identical limits as errors.
     **The complexity owner is already the same maintained tool in both repositories**; the limits are duplicated as
     hardcoded literals in each, which is a drift risk.
@@ -125,7 +125,7 @@ The following facts were checked against Dyninstruments `397ab8e2` before this p
 20. Hotspot budgets are a hardcoded two-entry array inside `tests/contract/hotspot-budget-contract.test.js`. Polar
     Recorder stores them in `tools/quality-policy/hotspot-budgets.json` with a separate checker.
 21. Prettier scope is an inlined glob list duplicated across the `format` and `format:check` scripts in `package.json`.
-    Polar Recorder generates `tools/quality-policy/format-scope.json` from
+    paired project generates `tools/quality-policy/format-scope.json` from
     `git ls-files --cached --others --exclude-standard`, fails a contract test on any unclassified file, and seeds its
     link checker from the same inventory.
 22. `.github/workflows/` contains only `publish-release.yml`. It triggers on `v*` tags, declares top-level
@@ -133,10 +133,10 @@ The following facts were checked against Dyninstruments `397ab8e2` before this p
     no pull-request or push quality workflow, so all enforcement depends on the optional `.githooks/pre-push` hook.
 23. `.agents/skills/` contains seven skills: `add-widget`, `create-plan`, `doc-sync`, `grill-me-repo`, `mapper-review`,
     `preflight`, and `scan-smells`. `skills-lock.json` pins five upstream skills from `mattpocock/skills` by SHA-256.
-    Polar Recorder has no `.agents/` directory and no skill lock.
+    paired project has no `.agents/` directory and no skill lock.
 24. `AGENTS.md` wraps its entire body in `<!-- BEGIN SHARED_INSTRUCTIONS -->` and `<!-- END SHARED_INSTRUCTIONS -->`,
     including project-specific content (Dyni components, gauges, cluster widgets, mapper rules, theme fixtures). Its
-    section numbering skips section 3. Polar Recorder's `AGENTS.md` has no markers at all, so the mechanism currently
+    section numbering skips section 3. paired project's `AGENTS.md` has no markers at all, so the mechanism currently
     delimits nothing generic and cannot be paired.
 25. Three concerns carry different file names for the same job: `tools/validate-schemas.mjs` versus
     `tools/check-schema.mjs`, `tools/check-vitest-only.mjs` versus `tools/check-test-focus.mjs`, and
@@ -157,7 +157,7 @@ The paired plans use this vocabulary. Profile-specific extensions are allowed on
 | AI instruction pointer    | Vitest contract, preflight-name based                                      | Extend the existing contract test                                     |
 | Documentation shape       | Vitest contract, four required elements                                    | Extend the existing contract test                                     |
 | Markdown lint             | markdownlint-cli2, `default: true` minus 3 rules                           | Full maintained-surface glob                                          |
-| Formatting settings       | This repository's `.prettierrc.json`                                       | Unchanged; Polar Recorder adopts it                                   |
+| Formatting settings       | This repository's `.prettierrc.json`                                       | Unchanged; paired project adopts it                                   |
 | Maintained-file inventory | Generated scope inventory plus contract test                               | Port the generator; retire inlined globs                              |
 | Pattern rules             | Declarative rule array, canonical identifiers                              | Split into generic and project rule sets                              |
 | Complexity limits         | ESLint `complexity`/`max-statements`/`max-depth`/`max-params` at 10/40/4/6 | One shared config; the legacy ledger stays a documented local overlay |
@@ -231,7 +231,7 @@ resemble an empty project.
 
 ### Repository independence and paired work
 
-- No required script, hook, test, workflow, release command, or documentation checker may resolve `../polarrecorder`.
+- No required script, hook, test, workflow, release command, or documentation checker may resolve `../paired-project`.
 - The paired checkout may be read only by the final one-off alignment comparison, never by a committed gate.
 - Do not create the future scaffolder, shared npm package, or generic project manifest in this plan.
 - Do not claim byte identity for product-coupled tools. Record justified differences instead.
@@ -265,14 +265,14 @@ Dependencies: none.
 
 #### A2. Confirm the contradiction evidence still reproduces
 
-- Re-run Polar Recorder's pointer checker and documentation-format checker against this repository read-only and confirm
+- Re-run paired project's pointer checker and documentation-format checker against this repository read-only and confirm
   the three pointer findings and the 47 documentation failures.
 - If either number has changed, amend this plan's baseline before proceeding.
 
 #### A3. Agree the converged contract in writing
 
 - Record in this plan's progress section that the Target Alignment Contract table is the frozen reference for both
-  repositories, including the decision that Polar Recorder adopts this repository's Prettier configuration unchanged.
+  repositories, including the decision that paired project adopts this repository's Prettier configuration unchanged.
 
 Exit conditions: `check:all` green; baseline facts 2, 8, 11, 13, 15, and 22 reconfirmed or amended with evidence.
 
@@ -305,7 +305,7 @@ Dependencies: Phase A.
 
 - Add a negative assertion for each converged rule: missing link, present marker, over-length pointer, missing preflight
   name, and named-but-absent preflight file.
-- Verify read-only that the resulting `CLAUDE.md` also satisfies Polar Recorder's current checker, and record the
+- Verify read-only that the resulting `CLAUDE.md` also satisfies paired project's current checker, and record the
   result.
 
 Exit conditions: `npm run test:contract` green; the converged contract has one positive and five negative assertions;
@@ -336,7 +336,7 @@ Dependencies: Phase A.
 
 #### C3. Confirm shape convergence
 
-- Re-run Polar Recorder's documentation-format checker against this repository read-only and record that it now reports
+- Re-run paired project's documentation-format checker against this repository read-only and record that it now reports
   zero failures.
 
 Exit conditions: `npm run check:docformat` and `npm run docs:check` green; 47 documents updated with substantive
@@ -442,7 +442,7 @@ Dependencies: Phases D and E.
 
 - Rename `tools/validate-schemas.mjs` to `tools/check-schema.mjs` and `tools/check-vitest-only.mjs` to
   `tools/check-test-focus.mjs`, updating every script and test reference.
-- Keep `documentation/guides/manual-avnav-validation.md` as the canonical name; Polar Recorder renames toward it.
+- Keep `documentation/guides/manual-avnav-validation.md` as the canonical name; paired project renames toward it.
 - Register the `DyniComponents` namespace token and the `dyni-` CSS custom-property prefix with one configurable generic
   namespace rule, so both repositories enforce namespace policy through the same mechanism.
 
@@ -504,7 +504,7 @@ Dependencies: Phase D, which brings the skill files under lint.
 
 #### H3. Hand the generic set to the paired repository
 
-- Record the five generic skill files and the lock shape in this plan's progress section as the payload Polar Recorder
+- Record the five generic skill files and the lock shape in this plan's progress section as the payload paired project
   adopts, so the paired plan has an exact input.
 
 Exit conditions: seven skills classified; generic skills proven token-free; lock integrity contract-tested; the handoff
@@ -672,15 +672,15 @@ date. Keep the paired-comparison table from Phase J2 in this section.
 - `node -e "require('./tools/quality-policy/complexity-baseline.json').length"` → 175 entries, matching baseline
   fact 19.
 - `.github/workflows/` contains only `publish-release.yml`, matching baseline fact 22.
-- A2 (read-only, not a committed gate): imported `../polarrecorder/tools/check-agents-pointer.mjs` and
-  `../polarrecorder/tools/check-doc-format.mjs` and called their exported functions with `root` pointed at this
+- A2 (read-only, not a committed gate): imported `../paired-project/tools/check-agents-pointer.mjs` and
+  `../paired-project/tools/check-doc-format.mjs` and called their exported functions with `root` pointed at this
   checkout.
   - `runAgentsPointerCheck({root: "./dyninstruments"})` → `ok: false`, 3 failures, one per missing mandatory preflight
     name. Matches baseline fact 11 exactly.
   - `runDocFormatCheck({root: "./dyninstruments"})` → `checkedDocs: 74`, `failures: 47`. Matches baseline facts 13/15
     exactly.
 - A3: the Target Alignment Contract table above is frozen as the reference for both repositories, including the decision
-  that Polar Recorder adopts this repository's `.prettierrc.json` unchanged (baseline fact 5).
+  that paired project adopts this repository's `.prettierrc.json` unchanged (baseline fact 5).
 - Conclusion: all baseline facts checked in Phase A reproduce exactly as recorded. No amendment needed. Proceeding to
   Phase B.
 
@@ -694,7 +694,7 @@ date. Keep the paired-comparison table from Phase J2 in this section.
   canonical-file note; stays at 9 non-empty lines, under the 40-line cap.
 - `npx vitest run --project contract tests/contract/ai-instruction-pointer-contract.test.js` → 6/6 passed.
 - `npx vitest run --project contract` (full contract project) → 30 files, 145 tests passed.
-- Re-ran Polar Recorder's `check-agents-pointer.mjs` read-only against the updated `CLAUDE.md`:
+- Re-ran paired project's `check-agents-pointer.mjs` read-only against the updated `CLAUDE.md`:
   `{"ok": true, "failures": []}` — the pointer now satisfies both repositories' rules.
 - `npm run format` reformatted `CLAUDE.md`, the contract test file, and `exec-plans/active/PLAN41.md` (Prettier
   compressed one assertion into a long-packed one-liner; restructured it into a named `hasLineCapFailure` variable to
@@ -730,7 +730,7 @@ date. Keep the paired-comparison table from Phase J2 in this section.
   links were whole-file references); added the new file to `documentation/TABLEOFCONTENTS.md` and to
   `gauge-shared-api.md`'s `## Related` section.
 - `npx vitest run --project contract tests/contract/documentation-format-contract.test.js` → 6/6 passed.
-- Re-ran Polar Recorder's `check-doc-format.mjs` read-only against the repository:
+- Re-ran paired project's `check-doc-format.mjs` read-only against the repository:
   `{"ok": true, "checkedDocs": 75, "failures": 0}` (75 because of the new split-out file) — zero failures, confirming
   shape convergence (C3).
 - `npm run format` reformatted the touched Markdown files (whitespace/table-column alignment only, no content changes).
@@ -981,7 +981,7 @@ date. Keep the paired-comparison table from Phase J2 in this section.
   (`.agents/skills/{preflight,create-plan,doc-sync,scan-smells,grill-me-repo}/SKILL.md`, now token-free per the contract
   above) plus the `skills-lock.json` shape
   (`{ version: 1, skills: { <name>: { source, sourceType, computedHash: <64-char SHA-256 hex> } } }`) are the exact
-  payload Polar Recorder's paired plan should adopt to establish its own `.agents/` directory and skill lock.
+  payload paired project's paired plan should adopt to establish its own `.agents/` directory and skill lock.
 - `grep -inE "\\bDyni|dyninstruments|\\bAvNav\\b|avnav|componentContext|ClusterWidget|\\bmapper\\b|ResponsiveScaleProfile|widget-kits"`
   over all five generic skill files → zero matches.
 - `npx vitest run --project contract tests/contract/skill-layer-contract.test.js` → 6/6 passed.
@@ -1034,29 +1034,29 @@ date. Keep the paired-comparison table from Phase J2 in this section.
   `npm run check:complexity` verifies the historical-capture digest
   (`6cb1b99a13afea4bc95111d76bef23cd8b6f23ae23cbf038049835046d0dd207`, unchanged from Phase A) and reports 0 new
   violations.
-- J2: one-off read-only comparison against the sibling Polar Recorder checkout at `../polarrecorder` (not a committed
+- J2: one-off read-only comparison against the sibling paired project checkout at `../paired-project` (not a committed
   gate; this repository's own tools never resolve that path). The sibling checkout has a concurrent session actively
   implementing its paired `PLAN8.md` (uncommitted changes present throughout its tree), so this comparison reads its
   current on-disk state, not a final snapshot:
 
   | Dimension                          | Result                                             | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
   | ---------------------------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | Pointer contract semantics         | Contract-equivalent                                | Polar Recorder converted its standalone `check-agents-pointer.mjs` into `tests/js/agents-pointer.test.mjs`, asserting the same `MAX_POINTER_LINES = 40` and the same three `MANDATORY_PREFLIGHT_FILES`, matching this repo's `tests/contract/ai-instruction-pointer-contract.test.js`.                                                                                                                                                                                                                                                                                                                    |
-  | Both `CLAUDE.md` files             | Contract-equivalent                                | Both name the three mandatory preflight files, link to `AGENTS.md`, and stay well under 40 non-empty lines; wording and length differ (Polar Recorder's carries a short "Claude-Specific Notes" section this repo's does not), which is expected — the contract requires shape, not byte identity.                                                                                                                                                                                                                                                                                                        |
-  | Documentation-shape requirements   | Identical                                          | Polar Recorder's `tests/js/doc-format-contract.test.mjs` requires exactly `REQUIRED_SECTIONS = ["Overview", "Key Details", "Related"]` plus title and `**Status:**`, matching `tests/contract/documentation-format-contract.test.js` verbatim.                                                                                                                                                                                                                                                                                                                                                            |
-  | Canonical pattern-rule identifiers | Identical (for the proven-equivalent set)          | Polar Recorder's rule registry now uses `todo-without-owner`, `invalid-lint-suppression`, and `absolute-home-path` (previously `unowned-todo`, its Python-specific suppression check, and `absolute-home-path` already) — the same canonical names this repository settled on in Phase E. `catch-fallback`, `internal-namespace-fallback`, `commented-out-code`, and `promise-empty-catch` remain distinct from this repository's `catch-fallback-without-suppression`, `internal-hook-fallback`, `dead-code`, and `empty-catch`, consistent with Phase E1's finding that those pairs are not equivalent. |
-  | Complexity limit values            | Identical mechanism, justified severity difference | Polar Recorder now has its own `tools/quality-policy/eslint-complexity-config.mjs` exporting `STRICT_LIMITS` (10/40/4/6) — the same filename and shape as this repository's Phase F1 module. Its `eslint.complexity.config.mjs` reads those limits at `"error"` severity with no ratchet ledger; this repository reads them at `"warn"` severity layered under the 175-entry historical ratchet. The severity/ratchet difference is the documented, justified one from PLAN40/Architecture Notes — Polar Recorder has no legacy debt to grandfather.                                                      |
-  | markdownlint rule sets             | Identical config, one open difference              | Both set `"default": true` with only `MD013`/`MD033`/`MD041` disabled and glob `**/*.md`. Polar Recorder's `ignores` still uses the un-nested `"node_modules/**"` form rather than `"**/node_modules/**"`; this repository's Phase D1 hard constraint required the nested form specifically for this repository's untracked `.kilo/node_modules` tree. Recorded as an open item for the sibling's own PLAN8, not something this comparison may fix.                                                                                                                                                       |
-  | Prettier configuration files       | Identical (byte-for-byte)                          | `diff dyninstruments/.prettierrc.json polarrecorder/.prettierrc.json` produced no output — Polar Recorder adopted this repository's configuration unchanged, matching baseline fact 5's decision.                                                                                                                                                                                                                                                                                                                                                                                                         |
-  | Workflow inventory and permissions | Identical shape                                    | Both repositories now have exactly two workflow files (`publish-release.yml`, `quality.yml`); Polar Recorder's `quality.yml` declares the same top-level `permissions: contents: read`.                                                                                                                                                                                                                                                                                                                                                                                                                   |
-  | Generic skill payload              | Contract-equivalent                                | Polar Recorder's `.agents/skills/` contains the same five generic skill names (`preflight`, `create-plan`, `doc-sync`, `scan-smells`, `grill-me-repo`), each independently rewritten to its own vocabulary but structurally aligned — `preflight/SKILL.md` is line-for-line the same length (139 lines) with only terminology substitutions (`module` vs `component/module`), confirming both sides converged on the same generic-instruction shape without copying byte-for-byte.                                                                                                                        |
+  | Pointer contract semantics         | Contract-equivalent                                | paired project converted its standalone `check-agents-pointer.mjs` into `tests/js/agents-pointer.test.mjs`, asserting the same `MAX_POINTER_LINES = 40` and the same three `MANDATORY_PREFLIGHT_FILES`, matching this repo's `tests/contract/ai-instruction-pointer-contract.test.js`.                                                                                                                                                                                                                                                                                                                    |
+  | Both `CLAUDE.md` files             | Contract-equivalent                                | Both name the three mandatory preflight files, link to `AGENTS.md`, and stay well under 40 non-empty lines; wording and length differ (paired project's carries a short "Claude-Specific Notes" section this repo's does not), which is expected — the contract requires shape, not byte identity.                                                                                                                                                                                                                                                                                                        |
+  | Documentation-shape requirements   | Identical                                          | paired project's `tests/js/doc-format-contract.test.mjs` requires exactly `REQUIRED_SECTIONS = ["Overview", "Key Details", "Related"]` plus title and `**Status:**`, matching `tests/contract/documentation-format-contract.test.js` verbatim.                                                                                                                                                                                                                                                                                                                                                            |
+  | Canonical pattern-rule identifiers | Identical (for the proven-equivalent set)          | paired project's rule registry now uses `todo-without-owner`, `invalid-lint-suppression`, and `absolute-home-path` (previously `unowned-todo`, its Python-specific suppression check, and `absolute-home-path` already) — the same canonical names this repository settled on in Phase E. `catch-fallback`, `internal-namespace-fallback`, `commented-out-code`, and `promise-empty-catch` remain distinct from this repository's `catch-fallback-without-suppression`, `internal-hook-fallback`, `dead-code`, and `empty-catch`, consistent with Phase E1's finding that those pairs are not equivalent. |
+  | Complexity limit values            | Identical mechanism, justified severity difference | paired project now has its own `tools/quality-policy/eslint-complexity-config.mjs` exporting `STRICT_LIMITS` (10/40/4/6) — the same filename and shape as this repository's Phase F1 module. Its `eslint.complexity.config.mjs` reads those limits at `"error"` severity with no ratchet ledger; this repository reads them at `"warn"` severity layered under the 175-entry historical ratchet. The severity/ratchet difference is the documented, justified one from PLAN40/Architecture Notes — paired project has no legacy debt to grandfather.                                                      |
+  | markdownlint rule sets             | Identical config, one open difference              | Both set `"default": true` with only `MD013`/`MD033`/`MD041` disabled and glob `**/*.md`. paired project's `ignores` still uses the un-nested `"node_modules/**"` form rather than `"**/node_modules/**"`; this repository's Phase D1 hard constraint required the nested form specifically for this repository's untracked `.kilo/node_modules` tree. Recorded as an open item for the sibling's own PLAN8, not something this comparison may fix.                                                                                                                                                       |
+  | Prettier configuration files       | Identical (byte-for-byte)                          | `diff dyninstruments/.prettierrc.json paired-project/.prettierrc.json` produced no output — paired project adopted this repository's configuration unchanged, matching baseline fact 5's decision.                                                                                                                                                                                                                                                                                                                                                                                                         |
+  | Workflow inventory and permissions | Identical shape                                    | Both repositories now have exactly two workflow files (`publish-release.yml`, `quality.yml`); paired project's `quality.yml` declares the same top-level `permissions: contents: read`.                                                                                                                                                                                                                                                                                                                                                                                                                   |
+  | Generic skill payload              | Contract-equivalent                                | paired project's `.agents/skills/` contains the same five generic skill names (`preflight`, `create-plan`, `doc-sync`, `scan-smells`, `grill-me-repo`), each independently rewritten to its own vocabulary but structurally aligned — `preflight/SKILL.md` is line-for-line the same length (139 lines) with only terminology substitutions (`module` vs `component/module`), confirming both sides converged on the same generic-instruction shape without copying byte-for-byte.                                                                                                                        |
 
   This comparison was run as a one-off command sequence during this session; it is not wired into any script, test,
-  hook, or workflow, and no committed file resolves `../polarrecorder`.
+  hook, or workflow, and no committed file resolves `../paired-project`.
 
 - J3: recording completion evidence per phase (above, dated 2026-07-27) is complete for A through J. Per the session's
   explicit instruction, this plan is **not** archived to `exec-plans/completed/` in this session — Phase J3's archival
-  step requires the paired Polar Recorder plan (`PLAN8.md`) to reach the same point first, and that paired session is
+  step requires the paired paired project plan (`PLAN8.md`) to reach the same point first, and that paired session is
   still in progress as observed during the J2 comparison above.
 
 ---
@@ -1085,9 +1085,9 @@ All Acceptance Criteria groups from this plan's "Acceptance Criteria" section we
 
 #### J3 — plan closure
 
-The paired Polar Recorder plan (`PLAN8.md`) has reached completion and was moved from
+The paired paired project plan (`PLAN8.md`) has reached completion and was moved from
 `exec-plans/active/PLAN8.md` to `exec-plans/completed/PLAN8.md` on the sibling side (confirmed 2026-07-28 by reading
-`../polarrecorder/exec-plans/completed/PLAN8.md` directly, plus the user's explicit confirmation that both plans are
+`../paired-project/exec-plans/completed/PLAN8.md` directly, plus the user's explicit confirmation that both plans are
 now implemented). `npm run check:all`, `npm run hooks:doctor`, and `npm run package:check` were re-confirmed green
 immediately before this move (coverage 92.26%/79.77%/96.83%/93.24%, 228 classified production files, unchanged from
 Verified Baseline fact 2; complexity ledger still 175 entries). Moved this file from `exec-plans/active/PLAN41.md` to
@@ -1106,4 +1106,4 @@ and `tools/quality-policy/format-scope.json`'s regeneration to reflect the new p
 - [Execution-plan authoring](../../documentation/guides/exec-plan-authoring.md)
 - [Documentation maintenance](../../documentation/guides/documentation-maintenance.md)
 - [Preceding alignment plan](../completed/PLAN40.md)
-- Polar Recorder paired plan: `../../../polarrecorder/exec-plans/completed/PLAN8.md`
+- paired project paired plan: `../../../paired-project/exec-plans/completed/PLAN8.md`

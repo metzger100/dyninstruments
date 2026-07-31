@@ -5,6 +5,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { maskCommentsAndStrings } from "./check-patterns/shared.mjs";
 import { detectOnelinerKind } from "./check-file-size/oneliner-rules.mjs";
+import { runFileSizePolicy } from "./portable-core/file-size-engine.mjs";
 import { readVersionedProfile } from "./quality-policy/profile-schema.mjs";
 
 const MAX_ALLOWED_LINES = 400;
@@ -68,7 +69,7 @@ export function runFileSizeCheck(options = {}) {
     const lines = countLinesByFileType(file.rel, content);
     const fileOnelinerFindings = shouldCheckOneliners(file.rel) ? detectOnelinerFindings(content) : [];
 
-    if (lines > MAX_ALLOWED_LINES) {
+    if (!runFileSizePolicy({ files: { [file.rel]: content }, limit: MAX_ALLOWED_LINES }).ok) {
       violations.push({ path: file.rel, lines, lineType: getLineTypeLabel(file.rel) });
     }
 

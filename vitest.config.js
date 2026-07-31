@@ -5,6 +5,7 @@
 const unitNodeTests = [
   "tests/tools/**/*.test.js",
   "tests/tools/**/*.test.mjs",
+  "tests/portable-core/**/*.test.mjs",
   "tests/shared/property/**/*.test.js",
   "tests/shared/value/**/*.test.js",
   "tests/shared/format/**/*.test.js",

@@ -250,7 +250,8 @@ required to run the quality gates.
 The standalone quality-core contract is checked with `npm run check:shared-core`; the blocking genericness check is
 `npm run check:generic-surface`, and `npm run check:suppressions` owns the zero-inline-suppression source scan.
 `npm run portable-core:attest` emits only anonymous contract and content digests for local review. A completed change
-must also pass `npm run check:all` from an isolated copy containing only this repository.
+must also pass `npm run check:all` from an isolated copy containing only this repository. The standalone-boundary check
+scans all maintained text, including archived execution plans, for references that would identify another checkout.
 
 The complete local gate is:
 

@@ -520,6 +520,9 @@
     "tests/portable-core/portable-core-contract.test.js": {
       "classification": "strict"
     },
+    "tests/portable-core/portable-policy-engines.test.mjs": {
+      "classification": "strict"
+    },
     "tests/runtime/asset-preloader.test.js": {
       "classification": "strict"
     },

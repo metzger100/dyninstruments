@@ -88,7 +88,7 @@ describe("portable quality-core boundary", function () {
     const clean = runStandaloneBoundaryCheck({ root: ROOT, print: false });
     expect(clean.summary.ok).toBe(true);
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "portable-core-boundary-"));
-    fs.writeFileSync(path.join(root, "note.md"), ["external", "checkout"].join(" ") + "\n", "utf8");
+    fs.writeFileSync(path.join(root, "note.md"), ["polar", "recorder"].join("") + "\n", "utf8");
     const failing = runStandaloneBoundaryCheck({ root, print: false });
     expect(failing.summary.ok).toBe(false);
     expect(failing.findings[0].kind).toBe("checkout-reference");
@@ -112,7 +112,7 @@ describe("portable quality-core boundary", function () {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "portable-core-profile-"));
     const profilePath = path.join(root, "profile.json");
     fs.writeFileSync(profilePath, JSON.stringify({ schemaVersion: 2, clean: true }), "utf8");
-    expect(() => readVersionedProfile(profilePath, ["clean"])).toThrow(/schemaVersion 1/);
+    expect(() => readVersionedProfile(profilePath, ["clean"])).toThrow(/schema version/i);
     fs.writeFileSync(profilePath, JSON.stringify({ schemaVersion: 1, clean: true, unknown: true }), "utf8");
     expect(() => readVersionedProfile(profilePath, ["clean"])).toThrow(/unknown field/);
     cleanup(root);

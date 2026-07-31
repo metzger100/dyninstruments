@@ -14,6 +14,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { runFormatPolicy } from "../portable-core/format-engine.mjs";
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..", "..");
 
@@ -25,6 +26,9 @@ export function runFormat({ mode = "check", root = ROOT } = {}) {
   const scopePath = path.join(root, "tools", "quality-policy", "format-scope.json");
   /** @type {{rows: {path: string, owner: string}[]}} */
   const scope = JSON.parse(fs.readFileSync(scopePath, "utf8"));
+  const owners = [...new Set(scope.rows.map((row) => row.owner))];
+  const policy = runFormatPolicy({ rows: scope.rows, owners });
+  if (!policy.ok) return { ok: false };
   const prettierPaths = scope.rows.filter((row) => row.owner === "prettier").map((row) => row.path);
   if (prettierPaths.length === 0) return { ok: true };
 

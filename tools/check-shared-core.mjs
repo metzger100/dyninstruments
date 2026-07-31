@@ -204,7 +204,7 @@ function checkSignature(root, findings) {
   }
   const expected = createHash("sha256").update(fs.readFileSync(manifestPath)).digest("hex");
   const actual = fs.readFileSync(signaturePath, "utf8");
-  if (actual !== expected) {
+  if (actual !== expected && actual !== `${expected}\n`) {
     findings.push({
       path: SIGNATURE_PATH,
       kind: "signature",

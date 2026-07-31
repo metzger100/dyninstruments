@@ -44,9 +44,9 @@ These rules are mandatory for all contributors and AI agents in this repository.
     requires it. → [conventions/coding-standards.md](conventions/coding-standards.md#fail-fast-keep-it-simple)
 18. Rule: Do not duplicate CSS, theme-token, or declarative config defaults inside runtime/widget logic. →
     [conventions/coding-standards.md](conventions/coding-standards.md#fail-fast-keep-it-simple)
-19. Rule: Generic `plugin-lint-disable-*` suppressions are forbidden in production source. Intentional exceptions are
-    either a narrow canonical-owner allowlist entry owned by the rule itself, or — for genuine external-boundary catch
-    fallbacks only — the validated `plugin-boundary-*(category, owner, date[, expires])` marker. →
+19. Rule: Inline suppression directives and boundary-marker exceptions are forbidden in maintained source, tests, tools,
+    configuration comments, documentation examples, and plans. Record policy context in versioned profile data; keep
+    source comments free of checker-control syntax. →
     [conventions/smell-prevention.md](conventions/smell-prevention.md#suppression-policy)
 
 ## Key Details
@@ -67,9 +67,8 @@ These rules are mandatory for all contributors and AI agents in this repository.
 - No speculative legacy, compatibility, or fallback code paths unless an active external boundary contract requires
   them.
 - No duplication of CSS, theme-token, or declarative config defaults inside runtime/widget logic.
-- Generic `plugin-lint-disable-*` suppressions are forbidden in production source; the only allowed exceptions are a
-  narrow canonical-owner allowlist entry owned by the rule itself, or the validated
-  `plugin-boundary-*(category, owner, date[, expires])` marker for genuine external-boundary catch fallbacks.
+- Maintained source, tests, tools, configuration comments, documentation examples, and plans have no inline suppression
+  directives or boundary-marker exceptions. Policy context belongs in versioned profile data, not comments.
 - Rules that matter must be mechanically enforced (lint/check), not left as prose only; never fake green tests by
   weakening assertions to hide a failure.
 

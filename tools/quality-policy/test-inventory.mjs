@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { readJsonPolicy } from "./read-json-policy.mjs";
 import { readVersionedProfile } from "./profile-schema.mjs";
+import { runTestInventoryPolicy } from "../portable-core/test-inventory-engine.mjs";
 
 const root = process.cwd();
 const CAPTURED_EXCEPTION_BASELINE_SHA256 = "1d4965b3294f15ac402063c2bbb706647059aa2c0922e48352bb81e86ab049d8";
@@ -38,6 +39,13 @@ export function runTestInventoryCheck(options = {}) {
   checkImmutableExceptionBaseline(projectRoot, projectPolicy, errors);
   checkNoGlobCatchAllKeys(entries, errors);
   checkInventoryCompleteness(entries, liveFiles, errors);
+  const portableEntries = Object.fromEntries(
+    Object.entries(entries).map(([name, entry]) => [
+      name,
+      { classification: entry.classification === "strict" ? "strict" : "fixture" }
+    ])
+  );
+  errors.push(...runTestInventoryPolicy({ entries: portableEntries, livePaths: [...liveFiles] }).failures);
   if (errors.length === 0) {
     checkClassifications(entries, errors);
     checkExceptionProvenance(entries, exceptionBaseline.entries, errors);

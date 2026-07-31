@@ -13,7 +13,7 @@ describe("shared-core manifest contract", function () {
     const { runSharedCoreCheck } = await import("../../tools/check-shared-core.mjs");
     const manifestBytes = fs.readFileSync(path.join(ROOT, MANIFEST_PATH));
     const signature = fs.readFileSync(path.join(ROOT, SIGNATURE_PATH), "utf8");
-    expect(signature).toBe(sha256(manifestBytes));
+    expect(signature.trim()).toBe(sha256(manifestBytes));
     const result = runSharedCoreCheck({ root: ROOT, print: false });
     expect(result.findings).toEqual([]);
     expect(result.summary.ok).toBe(true);
@@ -35,7 +35,7 @@ describe("shared-core manifest contract", function () {
     const { runSharedCoreCheck } = await import("../../tools/check-shared-core.mjs");
     const root = createWorkspace({
       "missing.txt": "0".repeat(64),
-      "tools/check-shared-core.mjs": "0".repeat(64)
+      ".agents/skills/create-plan/SKILL.md": "0".repeat(64)
     });
     const result = runSharedCoreCheck({ root, print: false });
     expect(result.summary.ok).toBe(false);

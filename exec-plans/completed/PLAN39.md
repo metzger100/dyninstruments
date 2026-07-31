@@ -5,7 +5,7 @@
 Written after repository verification and the cross-repository quality-system review on 2026-07-26.
 
 This plan covers the remaining Dyninstruments quality-migration defects, the common maintained-tool and release
-contracts shared with Polar Recorder, portable policy evidence, quality-tool self-protection, generic AvNav metadata
+contracts shared with paired project, portable policy evidence, quality-tool self-protection, generic AvNav metadata
 schema separation, novice onboarding evidence, and final documentation synchronization.
 
 The coding agent may choose equivalent internal helper names and file splits as long as the behavioral, structural,
@@ -22,7 +22,7 @@ No pre-plan interview was run. The plan therefore makes these explicit assumptio
    scaffolder, not this exemplar migration.
 3. This repository remains independently buildable and testable. Its required gate must never read the sibling Polar
    Recorder checkout.
-4. The paired Polar Recorder plan is
+4. The paired paired project plan is
    `PLAN6 — Complete the quality migration and establish the aligned hybrid-profile exemplar`. The plans coordinate
    observable contracts; neither repository becomes a package dependency of the other.
 5. Extracting a third, versioned `avnav-plugin-quality` package and `create-avnav-plugin` scaffolder is a subsequent
@@ -34,7 +34,7 @@ No pre-plan interview was run. The plan therefore makes these explicit assumptio
 ## Goal
 
 Finish the Dyninstruments quality migration so it is a trustworthy JavaScript viewer/layout exemplar for a future
-generic AvNav plugin environment and exposes the same common guarantees as Polar Recorder without copying
+generic AvNav plugin environment and exposes the same common guarantees as paired project without copying
 product-specific policy.
 
 Expected outcomes after completion:
@@ -44,7 +44,7 @@ Expected outcomes after completion:
 - Tracked source contains no literal NUL bytes or other binary-classifying separators.
 - Every maintained JavaScript quality tool is covered by the maintained ESLint baseline and strict no-emit typechecking.
 - Common direct tool versions, npm overrides, actionlint checksums, GitHub Action pins, SemVer corpus, and public
-  command semantics match the paired Polar Recorder outcome.
+  command semantics match the paired paired project outcome.
 - `plugin.json` validation separates a generic AvNav metadata base from the Dyninstruments layout profile.
 - Required quality checks work from a shallow clone/source archive without needing the historical Git commit object.
 - Setup, optional advisory review, clone-local hooks, manual AvNav validation, and release preparation are documented
@@ -95,7 +95,7 @@ was written:
     below-default paths. The test inventory owns 528 JS test/helper files. Neither ledger may be weakened in this plan.
 16. `schemas/plugin.schema.json` is Dyninstruments-specific: it requires a non-empty `layouts` array and rejects every
     other property. `tools/validate-schemas.mjs` validates it and the bundled layout schema with Ajv.
-17. `tools/release-version.mjs` and Polar Recorder's implementation classify all 20 valid and 42 invalid entries in
+17. `tools/release-version.mjs` and paired project's implementation classify all 20 valid and 42 invalid entries in
     Polar's SemVer corpus identically, but Dyn has no committed shared corpus file.
 18. The publisher pins checkout v6.0.2 but `softprops/action-gh-release` v2.2.2. Polar currently pins checkout v4.4.0
     and `action-gh-release` v2.6.2. Both use actionlint 1.7.12 with the same four official platform checksums.
@@ -136,7 +136,7 @@ Git regeneration may remain an explicit maintainer audit command.
   integration.
 - Do not add a bundler, runtime build output, ES-module conversion of classic runtime scripts, or runtime npm
   dependency.
-- Do not make Dyninstruments invoke, import, or inspect Polar Recorder from `setup`, hooks, tests, `check:all`, package,
+- Do not make Dyninstruments invoke, import, or inspect paired project from `setup`, hooks, tests, `check:all`, package,
   or release commands.
 
 ### Quality integrity
@@ -433,10 +433,10 @@ triggered.
 
 ### Cross-repository alignment
 
-- [x] Common exact dev dependencies and the `js-yaml` override match Polar Recorder's target snapshot.
+- [x] Common exact dev dependencies and the `js-yaml` override match paired project's target snapshot.
 - [x] Node/npm, actionlint version/checksums, publisher Action SHAs, and public `check:all` semantics match.
-- [x] The SemVer corpus is byte-identical to Polar Recorder's and passes the real `release-version.mjs` implementation.
-- [~] The generic AvNav schema corpus is **not yet** byte-identical to a Polar Recorder corpus — Polar Recorder's own
+- [x] The SemVer corpus is byte-identical to paired project's and passes the real `release-version.mjs` implementation.
+- [~] The generic AvNav schema corpus is **not yet** byte-identical to a paired project corpus — paired project's own
   PLAN6 has not executed its schema base/profile phase, so no upstream corpus exists to match (verified read-only
   2026-07-27). Dyninstruments' corpus is written so its `genericBase` section can be adopted byte-for-byte once Polar
   Recorder lands a matching profile. See Completion Evidence for detail.
@@ -449,7 +449,7 @@ triggered.
 - [x] Existing bundled layouts and release ZIP contents are unchanged.
 - [x] Advisory checks remain maintainer-only/networked; required gates remain offline after setup.
 - [x] Native setup passes without dirtying the worktree.
-- [~] The optional pinned development-container path is **deferred** (not added) — Polar Recorder has no such path to
+- [~] The optional pinned development-container path is **deferred** (not added) — paired project has no such path to
   mirror yet, and this execution environment has no Docker/Podman available to prove one. Shipping an unverified
   container config would violate the no-unverified-success rule. See Completion Evidence.
 - [~] The manual AvNav checklist exists, is referenced by `release:prepare`, and defines the exact fields/coverage areas
@@ -465,7 +465,7 @@ triggered.
 - [x] `npm run hooks:doctor` passes after explicit installation.
 - [x] `npm run check:all` passes.
 - [x] Documentation and package/release checks pass.
-- [x] This repository's worktree is clean of unintended changes after final proof; Polar Recorder was verified read-only
+- [x] This repository's worktree is clean of unintended changes after final proof; paired project was verified read-only
       and remains at its pre-session state (only its own pre-existing uncommitted
       `tools/quality-policy/format-scope.json` change and untracked `PLAN6.md`, unchanged by this session).
 - [x] Completion evidence is recorded below; the plan is moved to `exec-plans/completed/PLAN39.md` after this edit.
@@ -483,8 +483,8 @@ Implemented and verified on 2026-07-27, starting from `fa36fb6f` (clean tree, no
 - `npm run setup`, `npm run hooks:doctor`, `npm run check:all` all passed on the untouched baseline: 437 test files,
   1,899 tests, coverage 93.24% lines / 79.77% branches / 92.26% statements / 96.83% functions, complexity 175 tracked
   baseline entries. `npm audit --json` reported 8 findings (1 moderate, 7 high) in dev-only tooling.
-- Polar Recorder's paired `PLAN6.md` was read in full, read-only, at its own HEAD
-  `addd6656a5293988a9457934af87515ef3c082b8`. **Key finding: PLAN6 had not been executed** — Polar Recorder was still in
+- paired project's paired `PLAN6.md` was read in full, read-only, at its own HEAD
+  `addd6656a5293988a9457934af87515ef3c082b8`. **Key finding: PLAN6 had not been executed** — paired project was still in
   its own pre-migration baseline state (no `@eslint/js`, version drift on `eslint`/`globals`/`@types/node`, checkout
   pinned to v4.4.0 not v6.0.2, no schema base/profile split, still Git-blob-anchored complexity provenance, no live-host
   checklist). This changed the cross-repo alignment strategy: items with an explicit shared target already stated
@@ -520,13 +520,13 @@ Implemented and verified on 2026-07-27, starting from `fa36fb6f` (clean tree, no
   on the registry at implementation time). `jscpd`, `@types/node`, `stylelint-config-standard`, and `typescript` were
   already at the target versions.
 - Added `"overrides": { "js-yaml": "5.2.2", "fast-uri": "3.1.4" }`. `js-yaml` matches the shared target exactly;
-  `fast-uri` is a Dyninstruments-only fix (transitive via `ajv`, which Polar Recorder does not have yet) discovered by a
+  `fast-uri` is a Dyninstruments-only fix (transitive via `ajv`, which paired project does not have yet) discovered by a
   fresh `npm audit` after the version bumps. `npm audit` now reports 0 vulnerabilities (down from 8).
 - Re-pinned `.github/workflows/publish-release.yml`'s `softprops/action-gh-release` from v2.2.2 to v2.6.2
   (`3bb12739c298aeb8a4eeaf626c5b8d85266b0e65`), matching the Hard Constraints target exactly; `actions/checkout` was
-  already at v6.0.2. `tools/actionlint.sh`'s version/checksums were already byte-identical to Polar Recorder's. Extended
+  already at v6.0.2. `tools/actionlint.sh`'s version/checksums were already byte-identical to paired project's. Extended
   `tests/contract/release-workflow-contract.test.js` with an exact-SHA assertion for both pinned actions.
-  `npm run actions:lint` passes. Verified with the sibling repo: Polar Recorder's own workflow is still pinned to
+  `npm run actions:lint` passes. Verified with the sibling repo: paired project's own workflow is still pinned to
   checkout v4.4.0 (unexecuted PLAN6); the Dyninstruments target now matches the value both plans specify, and the
   difference is Polar's own remaining work, not something this session can or should change there. **Real regression
   caught and fixed**: Linkinator 8.0.2 changed its internal static-server host from `localhost` to `127.0.0.1`; the
@@ -572,8 +572,8 @@ Implemented and verified on 2026-07-27, starting from `fa36fb6f` (clean tree, no
 - Added `tools/quality-policy/plugin-schema-corpus.json` (generic base + Dyn-profile valid/invalid cases) and
   `tests/contract/plugin-schema-base-profile-contract.test.js` proving every case against the real schemas, plus the
   real `plugin.json`. Documented in the corpus's own `note` field (and above) that the generic section cannot yet be
-  byte-matched against a Polar Recorder corpus because none exists.
-- Copied `tools/quality-policy/semver-corpus.json` from Polar Recorder byte-identical for the `valid`/`invalid` arrays
+  byte-matched against a paired project corpus because none exists.
+- Copied `tools/quality-policy/semver-corpus.json` from paired project byte-identical for the `valid`/`invalid` arrays
   (20 valid / 42 invalid, diffed byte-for-byte against the sibling file) with a Dyninstruments-appropriate `note`. Added
   `tests/tools/release-version-semver-corpus.test.js` running the real `tools/release-version.mjs` against every row.
 
@@ -603,7 +603,7 @@ Implemented and verified on 2026-07-27, starting from `fa36fb6f` (clean tree, no
   `documentation/guides/release-workflow.md` for: the real Prettier ignore-resolution behavior, the three-way
   `typecheck` split, the portable `check:complexity`/maintainer-only regeneration audit, the schema base/profile split,
   the pinned Action SHAs, and the `dependencies:audit`/manual-checklist pointers.
-- **Deliberate deviation — development container**: not added. Polar Recorder (the paired exemplar this item says to
+- **Deliberate deviation — development container**: not added. paired project (the paired exemplar this item says to
   mirror) has no development-container path of its own yet, so there is nothing to copy, and this execution environment
   has no Docker or Podman available to build and prove one. Shipping an unverified container configuration would violate
   the plan's own "never claim unverified success" rule, so this deliverable is deferred rather than faked. Native
@@ -635,7 +635,7 @@ Implemented and verified on 2026-07-27, starting from `fa36fb6f` (clean tree, no
   `rules-failfast.mjs` 298→307; also `rules-legacy-support.mjs` 339→351, `rules-mapper.mjs` 280→315,
   `rules-duplicates.mjs` 272→279, `rules-core.mjs` 261→262 (after the de-duplication fix),
   `check-coverage-inventory.mjs` 258→273 — none reached 400 and none needed splitting.
-- Polar Recorder verified unchanged: only its own pre-existing uncommitted `tools/quality-policy/format-scope.json` and
+- paired project verified unchanged: only its own pre-existing uncommitted `tools/quality-policy/format-scope.json` and
   untracked `PLAN6.md`, identical to the state observed at the start of this session.
 - No commit, push, tag, or release was created in either repository.
 
@@ -647,7 +647,7 @@ Implemented and verified on 2026-07-27, starting from `fa36fb6f` (clean tree, no
    (install/activate/load, one radial/linear/HTML widget, day/night switch, route/AIS interactions, package
    upgrade/rollback) before the next release that ships this migration.
 2. **Development-container proof** — deferred, not implemented (see Phase G above); no action needed unless a maintainer
-   wants to pursue it once Docker/Podman is available and/or Polar Recorder publishes one to mirror.
+   wants to pursue it once Docker/Podman is available and/or paired project publishes one to mirror.
 
 ## Related
 

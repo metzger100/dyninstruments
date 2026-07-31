@@ -31,10 +31,10 @@ explicit:
 2. This repository remains a JavaScript/browser **role model**, not a greenfield template. Neither repository can be
    used directly for a greenfield project, and this plan does not try to make that true. The greenfield environment will
    be written separately and derived from the byte-identical core this plan produces.
-3. Required gates must remain independently runnable. No gate may read the sibling Polar Recorder checkout, at any
+3. Required gates must remain independently runnable. No gate may read the sibling paired project checkout, at any
    phase, for any reason. Cross-repository identity is proven by both repositories committing the **same manifest
    digests**, verified locally in each.
-4. The paired implementation plan is Polar Recorder `exec-plans/active/PLAN9.md`, with the same title. The two plans
+4. The paired implementation plan is paired project `exec-plans/active/PLAN9.md`, with the same title. The two plans
    share the Shared Core Contract, the Canonical Rule Identifiers table, and the Paired Acceptance Matrix verbatim.
 5. Donation direction is decided per artifact on audited merit, not per repository. This repository donates some
    implementations and adopts others.
@@ -79,7 +79,7 @@ Expected outcomes after completion:
 
 ## Verified Baseline
 
-Verified against this checkout at `c743f965` and the Polar Recorder checkout at `e03962b` on 2026-07-28. Both worktrees
+Verified against this checkout at `c743f965` and the paired project checkout at `e03962b` on 2026-07-28. Both worktrees
 clean, both on `main`.
 
 1. `npm run check:all` exits 0 in both repositories. This repository reports 450 test files, 1980 tests, 92.26 %
@@ -87,7 +87,7 @@ clean, both on `main`.
 2. 91 tracked paths exist in both repositories. Exactly 6 are byte-identical: `.codex/config.toml`,
    `.github/workflows/quality.yml`, `.nvmrc`, `.prettierrc.json`, `schemas/avnav-plugin-base.schema.json`, and
    `exec-plans/active/.gitkeep`. The other 85 diverge.
-3. After normalising `dyninstruments|polarrecorder|Dyni|DyniComponents|…` to a single token, collapsing whitespace, and
+3. After normalising `dyninstruments|paired-project|Dyni|DyniComponents|…` to a single token, collapsing whitespace, and
    dropping blank lines, residual divergence across shared tooling files is: `install.sh` 1 %,
    `tools/quality-policy/run-format.mjs` 36 %, `tools/release-prepare.mjs` 36 %, `linkinator.config.json` 38 %,
    `tools/quality-policy/generate-format-scope.mjs` 45 %, `tools/release-create.mjs` 50 %, `.githooks/pre-push` 55 %,
@@ -102,22 +102,22 @@ clean, both on `main`.
    `tools/check-file-size/oneliner-rules.mjs` exports `detectOnelinerKind` here and `ONELINER_MESSAGE_BY_KIND` /
    `detectOneliners` / `countFindingsByKind` there. The intersection is empty.
 5. `tools/check-test-focus.mjs` in this repository exports nothing; it is a pure CLI script and therefore not
-   importable. Polar Recorder's exports `runTestFocusCheck`. Its `tools/check-file-size.mjs` exports `runFileSizeCheck`;
+   importable. paired project's exports `runTestFocusCheck`. Its `tools/check-file-size.mjs` exports `runFileSizeCheck`;
    this repository's does not.
 6. Six separate token blocklists define "generic", and no two agree.
    `tests/contract/shared-instructions-block-contract.test.js` and `tests/contract/skill-layer-contract.test.js` use
    `Dyni, dyninstruments, AvNav, avnav, componentContext, ClusterWidget, mapper, ResponsiveScaleProfile, widget-kits`.
    `tests/contract/pattern-rule-generic-scope-contract.test.js` drops `dyninstruments` and `widget-kits` and adds
-   `editable`. Polar Recorder uses a different list in each of three files, and its `tests/js/skills-lock.test.mjs` list
+   `editable`. paired project uses a different list in each of three files, and its `tests/js/skills-lock.test.mjs` list
    forbids **this repository's** tokens while explicitly permitting its own.
 7. `widget` and `cluster` appear in no blocklist in this repository. Consequence: `GENERIC_RULES` contains a rule named
    `console-in-widgets`, and `npm run test:contract` passes.
 8. Grepping the generic tool layer here finds 26 or more project-token occurrences: `tools/check-patterns/shared.mjs`
    contains `cluster` 12 times and `renderer` 4 times; `tools/check-patterns/shared-suppressions.mjs` contains `dyni` 11
-   times; five `tools/check-patterns/generic/rules-*-defs.mjs` files name `Dyninstruments` in comments. Polar Recorder's
+   times; five `tools/check-patterns/generic/rules-*-defs.mjs` files name `Dyninstruments` in comments. paired project's
    generic layer leaks 5 occurrences, all in `tools/check-patterns/shared.mjs`.
 9. `tests/contract/pattern-rule-generic-scope-contract.test.js` checks only rule semantics (name, `detect` regex,
-   rendered message) and documents in-file that scope globs are deliberately excluded. Polar Recorder's
+   rendered message) and documents in-file that scope globs are deliberately excluded. paired project's
    `tests/js/check-patterns-registry.test.mjs` scans whole generic rule-definition **file contents** instead. The two
    contracts check different things.
 10. Rule-name sets: 19 generic and 23 project rules here; 16 generic and 12 project rules there. Exactly 8 generic names
@@ -137,7 +137,7 @@ clean, both on `main`.
     Recorder's copy in `tools/check-patterns/generic/structural-rules.mjs` carries the same detection with a
     project-free message.
 14. `tools/quality-policy/eslint-complexity-config.mjs` freezes `STRICT_LIMITS` at complexity 10, max-statements 40,
-    max-depth 4, max-params 6, and exports `STRICT_COMPLEXITY_RULES` at **warn** severity. Polar Recorder freezes the
+    max-depth 4, max-params 6, and exports `STRICT_COMPLEXITY_RULES` at **warn** severity. paired project freezes the
     identical four values in a same-named file but builds its rules at **error** severity in a second file,
     `tools/quality-policy/eslint.complexity.config.mjs`, which does not exist here. Its own header states there is no
     baseline, scanner, or exception ledger anywhere in that repository.
@@ -176,17 +176,17 @@ clean, both on `main`.
 22. `documentation/conventions/quality-gates.md:121` records the focused-test gate's maintained owner as literally "no
     maintained owner". Mechanically, no file under `tests/**` references `tools/check-schema.mjs`,
     `tools/check-test-focus.mjs`, `tools/check-doc-links.mjs`, `tools/check-doc-links-proof.mjs`, or
-    `tools/quality-policy/complexity-scan.mjs`. Polar Recorder self-tests all five equivalents.
-23. Polar Recorder self-tests `prettier-config`, `eslint-config`, `vitest-projects`, `setup`, and `header-contract`;
+    `tools/quality-policy/complexity-scan.mjs`. paired project self-tests all five equivalents.
+23. paired project self-tests `prettier-config`, `eslint-config`, `vitest-projects`, `setup`, and `header-contract`;
     this repository has no equivalent. This repository self-tests `actionlint`, `check-file-size`,
-    `check-file-size-oneliner`, `package-scripts`, and `operation-count-evaluator`; Polar Recorder has no equivalent.
+    `check-file-size-oneliner`, `package-scripts`, and `operation-count-evaluator`; paired project has no equivalent.
 24. `skills-lock.json` here holds 5 entries named `grill-me`, `improve-codebase-architecture`, `prd-to-plan`,
     `request-refactor-plan`, `write-a-prd`, with `sourceType: "github"` and source `mattpocock/skills`. The actual
     `.agents/skills/` directories are `add-widget`, `create-plan`, `doc-sync`, `grill-me-repo`, `mapper-review`,
     `preflight`, `scan-smells`. **No lock entry name matches any local skill directory.**
     `tests/contract/skill-layer-contract.test.js` checks only entry shape — a source string, a sourceType string, and a
     64-character hex hash. It never compares a hash to a file. The lock is therefore never verified against anything.
-25. Polar Recorder's `skills-lock.json` names the 5 shared skills with `sourceType: "sibling-repository"` and source
+25. paired project's `skills-lock.json` names the 5 shared skills with `sourceType: "sibling-repository"` and source
     `dyninstruments/.agents/skills/<name>/SKILL.md`, and its `tests/js/skills-lock.test.mjs` does assert
     `sha256(local SKILL.md) === computedHash`. Recomputing confirms its hashes match **its own local files**
     (`preflight` → `dedbc2e3…`), while this repository's `preflight/SKILL.md` hashes to `af0e5f8b…`. The recorded
@@ -208,22 +208,22 @@ clean, both on `main`.
 29. `docs:check` here is
     `docs:lint && docs:links:proof && docs:links && check:doclinks && check:reachability && check:docformat`. There it
     is the first three only, with TOC, format, reachability, smell-catalog, and pointer contracts reached through
-    `test:tools`. Polar Recorder has a dedicated `tests/js/doc-toc-contract.test.mjs`; this repository folds TOC into
+    `test:tools`. paired project has a dedicated `tests/js/doc-toc-contract.test.mjs`; this repository folds TOC into
     reachability.
 30. `jscpd.config.json` here sets `threshold: 0.25`, `minLines: 30`, `minTokens: 120`, no `path`, and ignores `tests/**`
     and `documentation/**`. There it sets `threshold: 0`, default `minLines`/`minTokens`,
     `path: ["viewer", "plugin.js", "plugin.mjs"]`, and `gitignore: true`. This repository additionally has the
-    `duplicate-functions` and `duplicate-block-clones` generic pattern rules; Polar Recorder instead has
+    `duplicate-functions` and `duplicate-block-clones` generic pattern rules; paired project instead has
     `tools/check-js-duplication.mjs` (with an `acorn` dependency) and `tools/check-duplication.py`.
 31. `eslint.config.mjs` differences: this repository does not set `noInlineConfig` and has no `no-warning-comments`
     rule; it uses `eqeqeq: ["error", "smart"]`, `no-unused-vars` with `caughtErrors: "none"`, no `no-console`, no
     `no-empty`, and it has `no-useless-assignment` and `@eslint-community/eslint-plugin-eslint-comments` with
-    `reportUnusedDisableDirectives: "error"`. Polar Recorder sets `noInlineConfig: true` on every group, bans the six
+    `reportUnusedDisableDirectives: "error"`. paired project sets `noInlineConfig: true` on every group, bans the six
     suppression terms via `no-warning-comments` at error, uses strict `eqeqeq` and `caughtErrors: "all"` with
     `caughtErrorsIgnorePattern: "^_"`, and sets `no-console` and `no-empty` with `allowEmptyCatch: false` on shipped
     runtime. Only this repository drives a relaxed test-file class from `test-inventory.json`.
 32. `vitest.config.js` here is CommonJS `module.exports` with no `defineConfig`, `globals: true`, projects `unit-node` /
-    `contract` / `unit-dom`, and explicit **file lists** for the first two with a catch-all `unit-dom`. Polar Recorder's
+    `contract` / `unit-dom`, and explicit **file lists** for the first two with a catch-all `unit-dom`. paired project's
     `vitest.config.mjs` uses `defineConfig`, no globals, projects `tools` / `viewer` / `plugin`, and glob patterns only,
     with an in-file rationale that file lists risk silent exclusion. Test files here are `.test.js` using `require()`
     and `expect()`; there they are `.test.mjs` using `import` and `node:assert/strict`.
@@ -232,16 +232,16 @@ clean, both on `main`.
     `tools/check-dependencies.mjs`, `tools/check-publisher-workflow.mjs`, `tools/quality-policy/typecheck-source.mjs`,
     `tools/quality-policy/typecheck-tools.mjs`, `tools/setup.mjs`, `tools/release-runtime.mjs`,
     `tools/viewer-harness.mjs` and its two submodules, and `tools/quality-policy/canonical_json.py`.
-34. `tools/check-file-size.mjs:33` excludes `/^exec-plans\//` here, and Polar Recorder's `collectTargetFiles` never
+34. `tools/check-file-size.mjs:33` excludes `/^exec-plans\//` here, and paired project's `collectTargetFiles` never
     collects `exec-plans/`, so plan files are exempt from the 400-line limit in both.
 35. `tools/quality-policy/format-scope.json` has the identical schema in both (`{rows: [{path, owner}], countByOwner}`)
     and is generated. `tests/contract/format-scope-contract.test.js` asserts the committed rows equal fresh discovery,
     so adding any tracked file requires rerunning `npm run format:scope`.
 36. `exec-plans/completed/PLAN41.md` is the most recent completed plan here; `exec-plans/active/` contains only
-    `.gitkeep`. Polar Recorder's most recent completed plan is `PLAN8.md`.
+    `.gitkeep`. paired project's most recent completed plan is `PLAN8.md`.
 37. The `todo-without-owner` scope divergence is observable, not theoretical. This repository's rule scopes
     `["**/*.js", "**/*.md"]` excluding only `node_modules/**`, `README.md`, `CONTRIBUTING.md`, and `ROADMAP.md`, so it
-    scans `exec-plans/**` too. Polar Recorder's `todo-without-owner:markdown` uses `collectMarkdownTodoTargets`, which
+    scans `exec-plans/**` too. paired project's `todo-without-owner:markdown` uses `collectMarkdownTodoTargets`, which
     walks `documentation/` plus six root Markdown files and never reaches `exec-plans/`. Writing the bare marker word in
     a plan file therefore fails `npm run check:patterns` here and passes there — verified while authoring this plan.
     Fact 34's file-size exemption does not extend to the pattern rules.
@@ -273,7 +273,7 @@ clean, both on `main`.
     be JSDoc in the `.js` file or a declaration in `types/`. `types/` already carries `globals/`, `kits/`, `pending/`,
     `bootstrap.d.ts`, and `runtime-init.d.ts`, so a shared test-harness declaration has an established home. Negative
     fact: no `types/test-harness.d.ts` exists today.
-41. Adopting Polar Recorder's `no-warning-comments` rule (fact 31) bans the literal string `ts-ignore` anywhere in a
+41. Adopting paired project's `no-warning-comments` rule (fact 31) bans the literal string `ts-ignore` anywhere in a
     linted file. Landing that rule while 1153 such comments exist would fail `npm run lint` immediately, so the
     suppressions must be eliminated **before** the rule lands, not alongside it.
 
@@ -281,7 +281,7 @@ clean, both on `main`.
 
 ## Shared Core Contract
 
-This section is verbatim identical in Dyninstruments `PLAN42.md` and Polar Recorder `PLAN9.md`. Neither may be edited
+This section is verbatim identical in Dyninstruments `PLAN42.md` and paired project `PLAN9.md`. Neither may be edited
 without amending the other in the same task.
 
 ### Definitions
@@ -305,29 +305,29 @@ Direction is decided on audited merit, per artifact.
 | `tools/check-patterns.mjs`, `check-patterns/shared*.mjs`, `check-patterns/rules-*.mjs` | Dyninstruments          | Severity model, `--warn` mode, per-finding suppression, declarative default runner              |
 | Suppression marker grammar                                                             | Dyninstruments, renamed | Owner, date, reason, and expiry validation; prefix must be de-branded                           |
 | `tools/check-patterns/generic/*` rule definitions                                      | Merge                   | Union of both sets under canonical names, with scope and remedy externalised                    |
-| `tools/check-file-size.mjs` and `check-file-size/*`                                    | Polar Recorder          | Exports `runFileSizeCheck`, so it is importable and self-testable                               |
-| `tools/check-test-focus.mjs`                                                           | Polar Recorder          | Exports `runTestFocusCheck`; the Dyninstruments copy exports nothing                            |
-| `tools/check-schema.mjs`                                                               | Polar Recorder          | Has a self-test; the Dyninstruments copy has none                                               |
-| `tools/check-doc-links.mjs`, `check-doc-links-proof.mjs`                               | Polar Recorder          | Have self-tests                                                                                 |
-| `tools/hooks-install.mjs`, `tools/hooks-doctor.mjs`                                    | Polar Recorder          | Have self-tests and richer repair output                                                        |
-| `tools/quality-policy/run-format.mjs`, `generate-format-scope.mjs`                     | Polar Recorder          | Lowest residual divergence already, and self-tested                                             |
+| `tools/check-file-size.mjs` and `check-file-size/*`                                    | paired project          | Exports `runFileSizeCheck`, so it is importable and self-testable                               |
+| `tools/check-test-focus.mjs`                                                           | paired project          | Exports `runTestFocusCheck`; the Dyninstruments copy exports nothing                            |
+| `tools/check-schema.mjs`                                                               | paired project          | Has a self-test; the Dyninstruments copy has none                                               |
+| `tools/check-doc-links.mjs`, `check-doc-links-proof.mjs`                               | paired project          | Have self-tests                                                                                 |
+| `tools/hooks-install.mjs`, `tools/hooks-doctor.mjs`                                    | paired project          | Have self-tests and richer repair output                                                        |
+| `tools/quality-policy/run-format.mjs`, `generate-format-scope.mjs`                     | paired project          | Lowest residual divergence already, and self-tested                                             |
 | `tools/quality-policy/check-coverage-inventory.mjs` and its data schema                | Dyninstruments          | "Every shipped file classified exactly once" is the stronger fail-closed invariant              |
 | `tools/quality-policy/test-inventory.mjs` and its data schema                          | Dyninstruments          | Per-file classification generalises; the flat helper list does not                              |
 | `complexity-scan.mjs`, `complexity-budget.mjs`, `complexity-capture-integrity.mjs`     | Dyninstruments          | An empty baseline reproduces strict enforcement, so one mechanism serves both postures          |
 | `tools/quality-policy/eslint-complexity-config.mjs`                                    | Merge                   | One owner exporting `STRICT_LIMITS` plus a severity-parameterised rule fragment                 |
 | `tools/release-*.mjs`, `tools/release-path-policy.mjs`, `release-zip-builder.mjs`      | Dyninstruments          | All-JavaScript; no Python release path                                                          |
 | `install.sh`                                                                           | Dyninstruments          | Already 1 % residual divergence                                                                 |
-| `eslint.config.mjs` base strictness                                                    | Polar Recorder          | `noInlineConfig`, banned suppression terms, strict `eqeqeq`, `caughtErrors: "all"`              |
+| `eslint.config.mjs` base strictness                                                    | paired project          | `noInlineConfig`, banned suppression terms, strict `eqeqeq`, `caughtErrors: "all"`              |
 | `eslint.config.mjs` test scoping                                                       | Dyninstruments          | Inventory-driven relaxation is the more precise mechanism                                       |
-| `jscpd.config.json` thresholds                                                         | Polar Recorder          | `threshold: 0` at 5 lines / 50 tokens is the stronger bound                                     |
+| `jscpd.config.json` thresholds                                                         | paired project          | `threshold: 0` at 5 lines / 50 tokens is the stronger bound                                     |
 | Duplication second layer                                                               | Dyninstruments          | `duplicate-functions` and `duplicate-block-clones` replace two bespoke tools                    |
-| `vitest.config` shape                                                                  | Polar Recorder          | `defineConfig`, ESM, glob-only projects, no silent-exclusion risk                               |
-| `documentation/conventions/documentation-format.md`                                    | Polar Recorder          | Matches what both already enforce                                                               |
-| `documentation/guides/exec-plan-authoring.md`                                          | Polar Recorder          | `**Status:** Current.`, no emoji vocabulary                                                     |
-| `.githooks/pre-push`, `.githooks/README.md`                                            | Polar Recorder shape    | Documented shape, plus an optional repo-local virtualenv `PATH` block that is inert without one |
+| `vitest.config` shape                                                                  | paired project          | `defineConfig`, ESM, glob-only projects, no silent-exclusion risk                               |
+| `documentation/conventions/documentation-format.md`                                    | paired project          | Matches what both already enforce                                                               |
+| `documentation/guides/exec-plan-authoring.md`                                          | paired project          | `**Status:** Current.`, no emoji vocabulary                                                     |
+| `.githooks/pre-push`, `.githooks/README.md`                                            | paired project shape    | Documented shape, plus an optional repo-local virtualenv `PATH` block that is inert without one |
 | `.markdownlint-cli2.jsonc`, `linkinator.config.json`                                   | Merge                   | Same rule set, union of ignores, strictest link options                                         |
 | `tsconfig.*.json` `compilerOptions`                                                    | Merge                   | Identical options; `files` and `include` stay project-owned                                     |
-| `skills-lock.json` semantics                                                           | Polar Recorder          | Hash is verified against the local file; Dyninstruments never compares a hash                   |
+| `skills-lock.json` semantics                                                           | paired project          | Hash is verified against the local file; Dyninstruments never compares a hash                   |
 | `skills-lock.json` shape assertions                                                    | Dyninstruments          | Explicit generic/project skill classification                                                   |
 | `SHARED_INSTRUCTIONS` block                                                            | Merge                   | Resolved per conflict in the table below                                                        |
 | `.github/workflows/*`, `.nvmrc`, `.prettierrc.json`, `.codex/config.toml`, base schema | Already identical       | No change                                                                                       |
@@ -338,7 +338,7 @@ Direction is decided on audited merit, per artifact.
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `BEGIN` marker position      | `BEGIN` goes immediately after the one-line file purpose and before the routing-map note, so both blocks enclose sections 0 through 4  |
 | Plan-citation rule           | Adopt the Dyninstruments reading: a literal pointer to a real `PLANn.md` file is permitted; citing a plan or phase as authority is not |
-| Required documentation shape | Adopt the Polar Recorder inclusion: the shape rule belongs inside the shared block, since both repositories enforce it                 |
+| Required documentation shape | Adopt the paired project inclusion: the shape rule belongs inside the shared block, since both repositories enforce it                 |
 | Quality-checklist skeleton   | Union of both item sets, with every product-specific item moved below the `END` marker                                                 |
 | Gate-name references         | The block names only `check:all`, `check:fast`, and `check:core`; every other command name lives below the `END` marker                |
 
@@ -346,7 +346,7 @@ Direction is decided on audited merit, per artifact.
 
 One identifier and one classification per concept. Both repositories rename to match.
 
-| Concept                            | Canonical name                       | Class   | Was (Dyninstruments)                 | Was (Polar Recorder)                    |
+| Concept                            | Canonical name                       | Class   | Was (Dyninstruments)                 | Was (paired project)                    |
 | ---------------------------------- | ------------------------------------ | ------- | ------------------------------------ | --------------------------------------- |
 | Unsafe HTML or DOM sink            | `unsafe-html-dom-sink`               | generic | `unsafe-html-dom-sink`               | `inner-html-assignment`                 |
 | Swallowed catch                    | `empty-catch`                        | generic | `empty-catch`                        | `promise-empty-catch`                   |
@@ -369,7 +369,7 @@ real.
 One file, `tools/quality-policy/generic-tokens.json`, with three arrays, identical in both repositories:
 
 - `projectTokens` — every product token of **both** repositories, so a Tier 1 file naming either is rejected: `dyni`,
-  `dyninstruments`, `dynicomponents`, `dyniplugin`, `polarrecorder`, `polar recorder`, `polar.json`, `windy`.
+  `dyninstruments`, `dynicomponents`, `dyniplugin`, `paired-project`, `paired data`, `windy`.
 - `domainTokens` — product-domain nouns that make a file un-liftable even when neither project is named: `widget`,
   `cluster`, `gauge`, `renderer`, `mapper`, `viewer`, `layout profile`, `componentContext`, `ClusterWidget`,
   `ResponsiveScaleProfile`, `widget-kits`, `editable`, `pluginhandler`, `configcache`.
@@ -430,7 +430,7 @@ compare the two.
 
 A committed digest manifest resolves the tension. Each repository verifies its own files against the manifest locally.
 Identity across the pair is a property of the **manifest being the same file**, which is a review-time fact, not a
-runtime dependency. This is the same trick Polar Recorder already applies correctly to its own skill files; it was
+runtime dependency. This is the same trick paired project already applies correctly to its own skill files; it was
 simply pointed at the wrong target.
 
 ### Externalising scope is what makes a rule generic
@@ -511,7 +511,7 @@ repository stays exactly as project-specific as it is today.
 
 - No gate, test, tool, or config may read, resolve, or stat a path outside this repository. `sibling-repository` as a
   `sourceType` value is forbidden.
-- Tier 1 changes land in this repository and Polar Recorder in the same working session, verified by an out-of-band
+- Tier 1 changes land in this repository and paired project in the same working session, verified by an out-of-band
   `cmp` before either side's phase is closed.
 - If a Tier 1 file cannot be made identical, it is not Tier 1. Reclassify it to Tier 2, record the reason in this plan,
   and remove it from the manifest — do not weaken the manifest check.
@@ -587,13 +587,13 @@ Dependencies: Phase A.
 
 #### B1. Adopt the donated checker implementations
 
-- Replace `tools/check-file-size.mjs` and `tools/check-file-size/*` with Polar Recorder's implementation, exporting
+- Replace `tools/check-file-size.mjs` and `tools/check-file-size/*` with paired project's implementation, exporting
   `runFileSizeCheck`. Move this repository's scope lists and its `shared/widget-kits/` remedy sentence into
   `tools/quality-policy/project-file-size-scope.json`.
-- Replace `tools/check-test-focus.mjs` with Polar Recorder's, exporting `runTestFocusCheck`.
+- Replace `tools/check-test-focus.mjs` with paired project's, exporting `runTestFocusCheck`.
 - Replace `tools/check-schema.mjs`, `tools/check-doc-links.mjs`, `tools/check-doc-links-proof.mjs`,
   `tools/hooks-install.mjs`, `tools/hooks-doctor.mjs`, `tools/quality-policy/run-format.mjs`, and
-  `tools/quality-policy/generate-format-scope.mjs` with Polar Recorder's implementations, with this repository's paths,
+  `tools/quality-policy/generate-format-scope.mjs` with paired project's implementations, with this repository's paths,
   schema profile, and owner classifications supplied as project-owned data.
 - Prove each replacement behavior-preserving: run the old and new checker over the current tree and diff their findings
   before deleting the old one.
@@ -602,7 +602,7 @@ Dependencies: Phase A.
 
 - Add self-tests with negative fixtures for `check-schema`, `check-test-focus`, `check-doc-links`,
   `check-doc-links-proof`, and `complexity-scan` — the five owners fact 22 shows are untested here.
-- Port Polar Recorder's `prettier-config`, `eslint-config`, `vitest-projects`, and `header-contract` self-tests (fact
+- Port paired project's `prettier-config`, `eslint-config`, `vitest-projects`, and `header-contract` self-tests (fact
   23). Skip `setup` unless `npm run setup` gains a script.
 - Add a contract test asserting that every path in `shared-core-manifest.json` ending in `.mjs` exports at least one
   `run*` function, and that each has a referencing self-test.
@@ -660,7 +660,7 @@ Dependencies: Phases A and B.
 - Add `tools/check-patterns.mjs`, `tools/check-patterns/rules.mjs`, `shared.mjs`, `shared-source-scan.mjs`,
   `shared-suppressions.mjs`, `ast-utils.mjs`, `duplicate-utils.mjs`, every `rules-*.mjs` runner, and every
   `generic/*.mjs` definition file to `shared-core-manifest.json`.
-- Verify out-of-band with `cmp` that each added path is byte-identical to Polar Recorder's after its paired phase.
+- Verify out-of-band with `cmp` that each added path is byte-identical to paired project's after its paired phase.
 
 Exit conditions: `npm run check:all` green; `npm run check:shared-core` green; `runGenericSurfaceCheck()` reports zero
 findings over `tools/check-patterns/**` excluding `project/`; no generic-layer file contains `dyni`, `cluster`,
@@ -745,10 +745,10 @@ Dependencies: Phase A.
 
 #### E4. Converge the generic convention documents
 
-- Replace `documentation/conventions/documentation-format.md` with Polar Recorder's text: `**Status:** Current.`, the
+- Replace `documentation/conventions/documentation-format.md` with paired project's text: `**Status:** Current.`, the
   four sections, no emoji vocabulary, no `## Fixed Issues` section, no Token Budget table. Add both as manifest entries
   once identical.
-- Replace `documentation/guides/exec-plan-authoring.md` with Polar Recorder's text, keeping this repository's Exec-Plan
+- Replace `documentation/guides/exec-plan-authoring.md` with paired project's text, keeping this repository's Exec-Plan
   Citation Rule section, which is stronger and product-neutral.
 - Sweep the emoji `**Status:**` vocabulary out of all 77 documents so the documented and enforced rules agree.
 - Move the hand-maintained ASCII `documentation/` tree out of `AGENTS.md` §6. It is accurate today but is an unchecked
@@ -781,7 +781,7 @@ Dependencies: Phases A and B.
 #### F2. Converge the coverage inventory
 
 - Keep this repository's per-file `entries` schema and 299-line checker as canonical, refactored so the language-
-  specific coverage reader is an injected adapter rather than inline logic. Polar Recorder supplies a Python adapter
+  specific coverage reader is an injected adapter rather than inline logic. paired project supplies a Python adapter
   through the same extension point.
 - Add `check-coverage-inventory.mjs` and its adapter contract to the manifest. `coverage-floors.json` and
   `coverage-floor-baseline.json` stay Tier 2 with this repository's 228 entries unchanged.
@@ -804,7 +804,7 @@ Dependencies: Phases A and B.
   repositories; keep `files` and `include` project-owned. Add a contract test asserting the shared options block rather
   than adding whole files to the manifest.
 - `install.sh`: extract the five project constants into a header block and add the remainder to the manifest.
-- `.githooks/pre-push` and `.githooks/README.md`: adopt Polar Recorder's shape including the optional repo-local
+- `.githooks/pre-push` and `.githooks/README.md`: adopt paired project's shape including the optional repo-local
   virtualenv `PATH` block, which is inert here. Bring the README into the four-section documentation shape. Add both to
   the manifest.
 
@@ -866,7 +866,7 @@ never left half-landed.
 Only after G2 reports zero suppressions repository-wide.
 
 - Add `linterOptions: { noInlineConfig: true }` to every ESLint group, including the test groups, and add
-  `no-warning-comments` at error over the six suppression terms, matching Polar Recorder.
+  `no-warning-comments` at error over the six suppression terms, matching paired project.
 - Tighten `eqeqeq` from `["error", "smart"]` to `"error"`, and `no-unused-vars` from `caughtErrors: "none"` to
   `caughtErrors: "all"` with `caughtErrorsIgnorePattern: "^_"`. Fix the resulting findings; do not relax the rules.
 - Add `no-console` and `no-empty` with `allowEmptyCatch: false` on shipped runtime, keeping `console-in-runtime` as the
@@ -945,8 +945,8 @@ Dependencies: Phase E.
 #### J1. Settle the wiring
 
 - Keep this repository's wiring as canonical: `docs:check` includes the documentation contract tests, so the command
-  name means "all documentation gates". Polar Recorder moves its five contracts into `docs:check` to match.
-- Add the dedicated table-of-contents contract this repository lacks, ported from Polar Recorder's
+  name means "all documentation gates". paired project moves its five contracts into `docs:check` to match.
+- Add the dedicated table-of-contents contract this repository lacks, ported from paired project's
   `doc-toc-contract.test.mjs`, rather than leaving it folded into reachability.
 - Add a contract test asserting `docs:check` composition, so the wiring cannot silently diverge again.
 
@@ -959,11 +959,11 @@ reachability; the composition assertion passes.
 
 Intent: prove every row of the Paired Acceptance Matrix in both repositories.
 
-Dependencies: all previous phases, and Polar Recorder `PLAN9.md` Phases A through H.
+Dependencies: all previous phases, and paired project `PLAN9.md` Phases A through H.
 
 #### K1. Verify identity out of band
 
-- Run `cmp` over every manifest path against the Polar Recorder checkout and record a zero-difference result for every
+- Run `cmp` over every manifest path against the paired project checkout and record a zero-difference result for every
   entry. This is a review action, not a gate: no committed check may read the sibling checkout.
 - Confirm `shared-core-manifest.json` `entries`, `generic-tokens.json`, the extracted shared-instructions text, and the
   five generic skill files are byte-identical.
@@ -981,7 +981,7 @@ Dependencies: all previous phases, and Polar Recorder `PLAN9.md` Phases A throug
   inventory, and stating that the greenfield environment is derived from it rather than from either repository.
 - Record in this plan which Tier 1 candidates were reclassified to Tier 2 and why, so the greenfield authors inherit the
   reasoning and not just the result.
-- Move `PLAN42.md` to `exec-plans/completed/` and update the Polar Recorder plan's pointer.
+- Move `PLAN42.md` to `exec-plans/completed/` and update the paired project plan's pointer.
 
 Exit conditions: every row P1 through P14 of the Paired Acceptance Matrix verified and recorded in both plans; both
 gates green; no reclassification left unexplained.
@@ -1033,7 +1033,7 @@ Documentation files that must change:
   carries all three arrays.
 - `runGenericSurfaceCheck()` reports zero findings over the shared-instructions text, the five generic skill files,
   every Tier 1 tool module's full content, and every generic rule definition's content and rendered semantics.
-- No Tier 1 file contains `dyni`, `dyninstruments`, `polarrecorder`, `widget`, `cluster`, `gauge`, `renderer`, `mapper`,
+- No Tier 1 file contains `dyni`, `dyninstruments`, `paired-project`, `widget`, `cluster`, `gauge`, `renderer`, `mapper`,
   `viewer`, `avnav`, or any other listed token.
 - The scope-glob exemption is gone, and scope globs live in project-owned data.
 
@@ -1282,7 +1282,7 @@ the required out-of-band Tier 1 `cmp` cannot yet be green; no cross-repository p
 #### Shared-core reconciliation addendum
 
 The prior B/C manifest claims were inconsistent with the paired acceptance contract. The twelve checker files recorded
-by Polar Recorder and the pattern-engine files recorded here are not byte-identical across the two repositories; the
+by paired project and the pattern-engine files recorded here are not byte-identical across the two repositories; the
 workflow file is also different. They are therefore Tier 2, not shared-core entries. Both manifests now contain the five
 files proven identical: `.codex/config.toml`, `.nvmrc`, `.prettierrc.json`, `schemas/avnav-plugin-base.schema.json`, and
 `exec-plans/active/.gitkeep`. The out-of-band commands `cmp` on the manifest and on each of those five paths all exit 0.
@@ -1359,7 +1359,7 @@ confirms that the remaining work is still overwhelmingly Wave 1 implicit-any typ
 
 No Phase G tooling has been retired yet, so there is no replacement or release-artifact parity proof to record at this
 checkpoint. The reconciled five-entry shared-core manifest is unchanged. The new test-harness declaration and the
-Phase-G changes to the test TypeScript inventory are Tier 2: no Polar Recorder read or byte-identity proof was made, and
+Phase-G changes to the test TypeScript inventory are Tier 2: no paired project read or byte-identity proof was made, and
 the inventory/file list is repository-owned. Manual development tooling remains untouched; its retention decision
 belongs to the later, explicitly named retirement work only.
 
@@ -1495,7 +1495,7 @@ derived from it rather than copied from either role model.
 
 ## Related
 
-- Paired plan: Polar Recorder `exec-plans/completed/PLAN9.md`
+- Paired plan: paired project `exec-plans/completed/PLAN9.md`
 - [PLAN41.md](../completed/PLAN41.md) — the contract convergence this plan completes
 - [PLAN40.md](../completed/PLAN40.md) — the fail-closed gate set this plan must not weaken
 - [PLAN39.md](../completed/PLAN39.md) — the test split that produced the 209 dead baseline entries

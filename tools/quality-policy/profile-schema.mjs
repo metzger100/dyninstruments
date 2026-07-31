@@ -1,4 +1,5 @@
 import { readJsonPolicy } from "./read-json-policy.mjs";
+import { runProfileSchemaCheck } from "../portable-core/schema-engine.mjs";
 
 /** @typedef {Record<string, unknown> & {schemaVersion: number}} VersionedProfile */
 
@@ -10,13 +11,17 @@ import { readJsonPolicy } from "./read-json-policy.mjs";
  */
 export function readVersionedProfile(filePath, allowedKeys) {
   const profile = readJsonPolicy(filePath);
-  if (!profile || typeof profile !== "object" || Array.isArray(profile) || profile.schemaVersion !== 1) {
+  if (!profile || typeof profile !== "object" || Array.isArray(profile)) {
     throw new Error(`Invalid profile '${filePath}': schemaVersion 1 is required.`);
   }
-  const allowed = new Set(["schemaVersion", ...allowedKeys]);
-  const unknown = Object.keys(profile).filter((key) => !allowed.has(key));
-  if (unknown.length > 0) {
-    throw new Error(`Invalid profile '${filePath}': unknown field(s): ${unknown.join(", ")}.`);
+  const result = runProfileSchemaCheck({
+    profile,
+    allowedFields: ["schemaVersion", ...allowedKeys],
+    schemaVersion: 1
+  });
+  if (!result.ok) {
+    const failures = result.failures.map((failure) => failure.replace("unknown profile field", "unknown field"));
+    throw new Error(`Invalid profile '${filePath}': ${failures.join("; ")}.`);
   }
   return /** @type {VersionedProfile} */ (profile);
 }
