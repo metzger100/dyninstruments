@@ -39,6 +39,8 @@ authoritative; GitHub publishes only committed release inputs.
   notes are archival records and remain outside formatter ownership. `tests/contract/formatting-scope-contract.test.js`
   proves `format`/`format:check` cover every maintained file and that negative-fixture exclusions stay narrowly scoped
   by exact path.
+- The standalone boundary checker scans product/configuration text and active project surfaces for external checkout
+  references; completed execution plans are archival records and remain outside that scan.
 - `check:smells` runs the blocking static pattern and generic-surface gates; semantic smell contracts live in
   `test:contract`.
 - `docs:check` starts with markdownlint-cli2, then runs Linkinator for local Markdown links/fragments and the retained

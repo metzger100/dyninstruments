@@ -95,6 +95,15 @@ describe("portable quality-core boundary", function () {
     cleanup(root);
   });
 
+  it("ignores archived execution plans when checking the standalone boundary", async function () {
+    const { runStandaloneBoundaryCheck } = await import("../../tools/check-standalone-boundary.mjs");
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "portable-core-archived-plan-"));
+    fs.mkdirSync(path.join(root, "exec-plans/completed"), { recursive: true });
+    fs.writeFileSync(path.join(root, "exec-plans/completed/PLAN1.md"), ["polar", "recorder"].join("") + "\n", "utf8");
+    expect(runStandaloneBoundaryCheck({ root, print: false }).ok).toBe(true);
+    cleanup(root);
+  });
+
   it("rejects a generated inline suppression while keeping the maintained source clean", async function () {
     const { runSuppressionCheck } = await import("../../tools/check-suppressions.mjs");
     const clean = runSuppressionCheck({ root: ROOT, print: false });

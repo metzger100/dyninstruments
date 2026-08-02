@@ -254,7 +254,8 @@ The standalone quality-core contract is checked with `npm run check:shared-core`
 `npm run check:generic-surface`, and `npm run check:suppressions` owns the zero-inline-suppression source scan.
 `npm run portable-core:attest` emits only anonymous contract, content, generic-rule, and conformance digests for local
 review. A completed change must also pass `npm run check:all` from an isolated copy containing only this repository. The
-canonical standalone command is `npm run check:standalone`.
+canonical standalone command is `npm run check:standalone`; it checks product/configuration text and active project
+surfaces for external checkout references while leaving completed execution plans as archival records.
 
 The complete local gate is:
 

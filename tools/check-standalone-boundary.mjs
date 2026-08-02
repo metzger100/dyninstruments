@@ -45,7 +45,12 @@ function listMaintainedFiles(root) {
   return listRegularFiles(root).filter((file) => {
     const rel = relativePath(root, file);
     const first = rel.split("/")[0];
-    return !SKIP_DIRS.has(first) && !rel.startsWith("tools/test-data/") && TEXT_EXTENSIONS.has(path.extname(rel));
+    return (
+      !SKIP_DIRS.has(first) &&
+      !rel.startsWith("exec-plans/completed/") &&
+      !rel.startsWith("tools/test-data/") &&
+      TEXT_EXTENSIONS.has(path.extname(rel))
+    );
   });
 }
 
