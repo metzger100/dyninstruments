@@ -1,75 +1,84 @@
 #!/usr/bin/env node
 
 /**
- * @file check-standalone-boundary - Audits maintained text for non-portable checkout references
- * Documentation: documentation/conventions/quality-gates.md
+ * Check that maintained repository text and package commands stay inside one local root.
  */
 
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-const SKIP_DIRS = new Set([".git", "node_modules", "coverage", "artifacts", "releases", ".vscode"]);
-const TEXT_EXTENSIONS = new Set([".js", ".mjs", ".json", ".md", ".yml", ".yaml", ".toml", ".sh", ".css"]);
-const FORBIDDEN_PATTERNS = [
-  { kind: "absolute-home-path", pattern: /\/home\/(?!<user>)[^\s"'`)]{2,}/ },
-  { kind: "absolute-home-path", pattern: /\/Users\/(?!<user>)[^\s"'`)]{2,}/ },
-  { kind: "checkout-reference", pattern: /\bpolarrecorder\b/i },
-  { kind: "checkout-reference", pattern: /\bpolar recorder\b/i }
+import { listRegularFiles, relativePath } from "./portable-core/path-policy.mjs";
+
+const SKIP_DIRS = new Set([".git", ".claude", ".vscode", "node_modules", "venv", "coverage", "artifacts", "releases"]);
+const TEXT_EXTENSIONS = new Set([
+  ".md",
+  ".js",
+  ".mjs",
+  ".py",
+  ".json",
+  ".jsonc",
+  ".toml",
+  ".sh",
+  ".css",
+  ".html",
+  ".txt",
+  ".yml",
+  ".yaml"
+]);
+const BOUNDARY_PATTERNS = [
+  new RegExp(`${"/"}(?:home|Users)${"/"}(?!<user>)[^\\s"'\`)]{2,}`),
+  /\bpolarrecorder\b/i,
+  /\bpolar recorder\b/i
 ];
 
-/** @typedef {{path: string, line: number, kind: string}} BoundaryFinding */
+/**
+ * @typedef {{path: string, reason: string}}
+ * BoundaryFinding
+ */
 
 /**
+ * @param {string} root
+ * @returns {string[]}
+ */
+function listMaintainedFiles(root) {
+  return listRegularFiles(root).filter((file) => {
+    const rel = relativePath(root, file);
+    const first = rel.split("/")[0];
+    return !SKIP_DIRS.has(first) && !rel.startsWith("tools/test-data/") && TEXT_EXTENSIONS.has(path.extname(rel));
+  });
+}
+
+/**
+ * Run the standalone-boundary audit.
  * @param {{root?: string, print?: boolean}} [options]
- * @returns {{summary: {ok: boolean, checkedFiles: number, findings: number}, findings: BoundaryFinding[]}}
+ * @returns {{ok: boolean, findings: BoundaryFinding[]}}
  */
 export function runStandaloneBoundaryCheck(options = {}) {
-  const root = path.resolve(options.root || process.cwd());
-  const files = collectTextFiles(root);
-  /** @type {BoundaryFinding[]} */
+  const root = fs.realpathSync(path.resolve(options.root || process.cwd()));
   const findings = [];
-  for (const relativePath of files) {
-    const source = fs.readFileSync(path.join(root, relativePath), "utf8");
-    const lines = source.split(/\r?\n/);
-    for (const [index, line] of lines.entries()) {
-      for (const rule of FORBIDDEN_PATTERNS) {
-        if (rule.pattern.test(line)) findings.push({ path: relativePath, line: index + 1, kind: rule.kind });
-      }
+  for (const file of listMaintainedFiles(root)) {
+    const source = fs.readFileSync(file, "utf8");
+    for (const pattern of BOUNDARY_PATTERNS) {
+      if (pattern.test(source))
+        findings.push({ path: relativePath(root, file), reason: "standalone boundary token found" });
     }
   }
-  const summary = { ok: findings.length === 0, checkedFiles: files.length, findings: findings.length };
+  const packagePath = path.join(root, "package.json");
+  if (fs.existsSync(packagePath)) {
+    const packageText = fs.readFileSync(packagePath, "utf8");
+    if (/\$\{[^}]*?(?:CHECKOUT|REPOSITORY|WORKSPACE)[^}]*?\}/i.test(packageText)) {
+      findings.push({ path: "package.json", reason: "package script uses an external-root environment variable" });
+    }
+  }
+  const result = { ok: findings.length === 0, findings };
   if (options.print !== false) {
-    for (const finding of findings)
-      console.error(`[standalone-boundary] ${finding.path}:${finding.line}: ${finding.kind}`);
-    const print = summary.ok ? console.log : console.error;
-    print("SUMMARY_JSON=" + JSON.stringify(summary));
+    if (result.ok) console.log("Standalone boundary check passed.");
+    else for (const finding of findings) console.error(`[standalone-boundary] ${finding.path}: ${finding.reason}`);
   }
-  return { summary, findings };
+  return result;
 }
 
-/** @param {string} root @returns {string[]} */
-function collectTextFiles(root) {
-  /** @type {string[]} */
-  const files = [];
-  /** @param {string} directory */
-  function visit(directory) {
-    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-      if (entry.isDirectory() && SKIP_DIRS.has(entry.name)) continue;
-      const absolutePath = path.join(directory, entry.name);
-      if (entry.isDirectory()) visit(absolutePath);
-      else if (entry.isFile() && TEXT_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
-        const relativePath = path.relative(root, absolutePath).replaceAll(path.sep, "/");
-        if (relativePath.startsWith("tools/test-data/")) continue;
-        files.push(relativePath);
-      }
-    }
-  }
-  visit(root);
-  return files.sort((left, right) => left.localeCompare(right));
-}
-
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
-  const { summary } = runStandaloneBoundaryCheck();
-  process.exitCode = summary.ok ? 0 : 1;
+if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
+  process.exit(runStandaloneBoundaryCheck().ok ? 0 : 1);
 }

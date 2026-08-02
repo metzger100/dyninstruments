@@ -243,6 +243,7 @@ interface DyniHtmlWidgetUtilsApi {
   patchInnerHtml(rootEl: unknown, nextHtml: unknown): Element | null;
   isEditingMode(props: unknown): boolean;
   canDispatchSurfaceInteraction(props: unknown): boolean;
+  dispatchSurfaceAction(event: Event, props: unknown, groupKey: string, actionKey: string): void;
 }
 
 interface DyniHtmlMeasureUtilsApi {

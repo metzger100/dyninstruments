@@ -94,7 +94,15 @@
           "tools/**/*.js",
           "tools/**/*.mjs"
         ],
-        "exclude": ["tests/tools/**", "tools/test-data/**", "tools/check-patterns/shared-suppressions.mjs"]
+        "exclude": [
+          "tests/tools/**",
+          "tests/portable-core/**",
+          "tools/test-data/**",
+          "tools/portable-core/**",
+          "tools/quality-policy/**",
+          "tools/starter-templates.mjs",
+          "tools/check-patterns/shared-suppressions.mjs"
+        ]
       },
       "remedy": "Use only the repository's validated exception grammar."
     },
@@ -234,7 +242,6 @@
           "cluster/**/*.js",
           "shared/**/*.js",
           "runtime/**/*.js",
-          "config/**/*.js",
           "plugin.js",
           "plugin.mjs"
         ],

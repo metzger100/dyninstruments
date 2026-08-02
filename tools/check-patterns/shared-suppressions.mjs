@@ -1,4 +1,4 @@
-// Lint-directive / suppression-comment parsing (plugin-lint-disable-*, plugin-boundary-*).
+// Lint-directive and suppression-comment parsing for checker-owned markers.
 
 import { getFileData, lineAt } from "./shared.mjs";
 

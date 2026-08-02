@@ -129,18 +129,7 @@
           return;
         }
         clickHandler = function onClick(ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          const policy = htmlUtils.resolveSurfacePolicy(lastProps);
-          const actions =
-            policy && typeof policy.actions === "object" && policy.actions
-              ? /** @type {{ alarm?: { stopAll?: () => void } }} */ (policy.actions)
-              : null;
-          const alarmActions = actions ? actions.alarm : null;
-          if (!alarmActions || typeof alarmActions.stopAll !== "function") {
-            return;
-          }
-          alarmActions.stopAll();
+          htmlUtils.dispatchSurfaceAction(ev, lastProps, "alarm", "stopAll");
         };
         rootEl.addEventListener("click", clickHandler);
       }

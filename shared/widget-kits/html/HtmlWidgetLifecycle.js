@@ -30,7 +30,7 @@
    */
   function createMountHandler(spec) {
     const cfg = /** @type {DyniHtmlMountSpec} */ (spec && typeof spec === "object" ? spec : {});
-    return function mount(mountHostEl, payload) {
+    return function (mountHostEl, payload) {
       const mounted = mountRootDiv(mountHostEl);
       cfg.applyMounted(mounted);
       cfg.patchDom(payload);
@@ -42,7 +42,7 @@
    * @returns {(payload: unknown) => string}
    */
   function createResizeSignatureHandler(buildModel) {
-    return function layoutSignature(payload) {
+    return function (payload) {
       const source = /** @type {{ props?: unknown, shellRect?: unknown }} */ (payload || {});
       const model = buildModel(source.props ? source.props : {}, source.shellRect ? source.shellRect : null);
       return joinSignatureParts(model.resizeSignatureParts);

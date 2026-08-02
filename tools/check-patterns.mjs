@@ -13,6 +13,7 @@ import { GENERIC_RULES } from "./check-patterns/rules.mjs";
 import { PROJECT_RULES } from "./check-patterns/project/rules.mjs";
 
 export const RULES = [...GENERIC_RULES, ...PROJECT_RULES];
+export const PATTERN_RULE_IDS = Object.freeze(RULES.map((rule) => rule.name));
 
 /** @param {{root?: string, warnMode?: boolean, print?: boolean}} [options] @returns {any} */
 export function runPatternCheck(options = {}) {

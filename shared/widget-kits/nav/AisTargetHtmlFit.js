@@ -101,7 +101,8 @@
     }
     const colorRole = toText(model.colorRole);
     const aisTokens = tokens && tokens.colors && tokens.colors.ais ? tokens.colors.ais : null;
-    const color = aisTokens && typeof aisTokens[colorRole] === "string" ? aisTokens[colorRole].trim() : "";
+    const colorToken = aisTokens ? Object.entries(aisTokens).find(([role]) => role === colorRole)?.[1] : undefined;
+    const color = typeof colorToken === "string" ? colorToken.trim() : "";
     if (!color) {
       return "";
     }

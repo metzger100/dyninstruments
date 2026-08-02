@@ -70,18 +70,7 @@
         }
 
         clickHandler = function onDispatchClick(ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          const policy = htmlUtils.resolveSurfacePolicy(lastProps);
-          const actions =
-            policy && typeof policy.actions === "object" && policy.actions
-              ? /** @type {{ routeEditor?: { openEditRoute?: () => void } }} */ (policy.actions)
-              : null;
-          const routeEditorActions = actions ? actions.routeEditor : null;
-          if (!routeEditorActions || typeof routeEditorActions.openEditRoute !== "function") {
-            return;
-          }
-          routeEditorActions.openEditRoute();
+          htmlUtils.dispatchSurfaceAction(ev, lastProps, "routeEditor", "openEditRoute");
         };
         wrapperEl.addEventListener("click", clickHandler);
       }

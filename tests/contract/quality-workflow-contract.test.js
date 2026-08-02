@@ -58,7 +58,6 @@ describe("read-only pull-request quality workflow", function () {
 
     expect(runCommands).toEqual([
       'echo "version=$(cat .nvmrc)" >> "$GITHUB_OUTPUT"',
-      "npm ci",
       "npm run setup",
       "npm run check:all"
     ]);

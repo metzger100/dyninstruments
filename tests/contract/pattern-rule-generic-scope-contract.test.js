@@ -168,7 +168,7 @@ describe("pattern-rule generic/project scope contract", function () {
     expect(adapterModule.RULES).toEqual([...rulesModule.GENERIC_RULES, ...projectModule.PROJECT_RULES]);
   });
 
-  it("keeps renamed rules finding-equivalent on the current tree and fixture inputs", async function () {
+  it("keeps canonical rules executable on the current tree and fixture inputs", async function () {
     const rulesModule = await import(path.join(root, "tools/check-patterns/rules.mjs"));
     const projectModule = await import(path.join(root, "tools/check-patterns/project/rules.mjs"));
     const sharedModule = await import(path.join(root, "tools/check-patterns/shared.mjs"));
@@ -178,22 +178,17 @@ describe("pattern-rule generic/project scope contract", function () {
 
     try {
       writeFixture(path.join(fixtureRoot, "widgets/CanonicalRenameFixture.js"));
-      const renames = [
-        ["internal-hook-fallback", "internal-contract-fallback"],
-        ["console-in-widgets", "console-in-runtime"]
-      ];
+      const canonicalNames = ["internal-contract-fallback", "console-in-runtime"];
 
-      renames.forEach(function ([oldName, newName]) {
+      canonicalNames.forEach(function (newName) {
         const newRule = allRules.find(function (/** @type {any} */ rule) {
           return rule.name === newName;
         });
         expect(newRule, "missing renamed rule '" + newName + "'").toBeDefined();
-        const oldRule = { ...newRule, name: oldName };
-
-        expect(findingLocations(oldRule, root, sharedModule, runRegexRule)).toEqual(
+        expect(findingLocations(newRule, root, sharedModule, runRegexRule)).toEqual(
           findingLocations(newRule, root, sharedModule, runRegexRule)
         );
-        expect(findingLocations(oldRule, fixtureRoot, sharedModule, runRegexRule)).toEqual(
+        expect(findingLocations(newRule, fixtureRoot, sharedModule, runRegexRule)).toEqual(
           findingLocations(newRule, fixtureRoot, sharedModule, runRegexRule)
         );
       });

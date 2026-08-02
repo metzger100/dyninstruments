@@ -162,11 +162,11 @@
     if (raw) {
       return parseOverride(raw, tokenDef);
     }
-    const deprecatedAliasInputVar = tokenDef.deprecatedInputVar;
-    if (deprecatedAliasInputVar) {
-      const aliasRaw = inputReader(style, deprecatedAliasInputVar);
+    const aliasInputVar = tokenDef.deprecatedInputVar;
+    if (aliasInputVar) {
+      const aliasRaw = inputReader(style, aliasInputVar);
       if (aliasRaw) {
-        logDeprecationWarning(deprecatedAliasInputVar, tokenDef.inputVar, warnedDeprecations);
+        logDeprecationWarning(aliasInputVar, tokenDef.inputVar, warnedDeprecations);
         return parseOverride(aliasRaw, tokenDef);
       }
     }

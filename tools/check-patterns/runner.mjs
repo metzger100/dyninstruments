@@ -22,7 +22,7 @@ import { runRegexRule } from "./rules-core.mjs";
 
 /**
  * @param {{root?: string, warnMode?: boolean, print?: boolean, rules: Rule[], configuredExceptions?: ConfiguredException[]}} options
- * @returns {{summary: any, findings: Finding[], warnings: Finding[]}}
+ * @returns {{summary: any, findings: Finding[], warnings: Finding[], failures: string[]}}
  */
 export function runPatternCheck(options) {
   validateConfiguredExceptions(options.configuredExceptions || []);
@@ -80,7 +80,12 @@ export function runPatternCheck(options) {
     byRuleWarnings
   };
   if (options.print !== false) printResult(findings, warnings, summary);
-  return { summary, findings, warnings };
+  return {
+    summary,
+    findings,
+    warnings,
+    failures: findings.map((finding) => `${finding.file}:${finding.line}: ${finding.message}`)
+  };
 }
 
 /** @param {ConfiguredException[]} exceptions @param {Finding} finding @param {string} ruleName @returns {boolean} */

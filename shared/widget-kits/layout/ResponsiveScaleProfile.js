@@ -84,6 +84,23 @@
     }
 
     /**
+     * @param {unknown} W
+     * @param {unknown} H
+     * @param {DyniResponsiveScaleSpec | undefined} spec
+     * @param {unknown} padRatio
+     * @param {unknown} gapRatio
+     * @returns {{ responsive: DyniResponsiveScaleProfile, pad: number, gap: number }}
+     */
+    function computeInsetPair(W, H, spec, padRatio, gapRatio) {
+      const responsive = computeProfile(W, H, spec);
+      return {
+        responsive: responsive,
+        pad: computeInsetPx(responsive, padRatio, 1),
+        gap: computeInsetPx(responsive, gapRatio, 1)
+      };
+    }
+
+    /**
      * @param {DyniResponsiveScaleProfile | undefined} profile
      * @param {unknown} spanPx
      * @param {unknown} ratio
@@ -141,6 +158,7 @@
       id: "ResponsiveScaleProfile",
       computeProfile: computeProfile,
       computeInsetPx: computeInsetPx,
+      computeInsetPair: computeInsetPair,
       computeIntrinsicSpacePx: computeIntrinsicSpacePx,
       computeIntrinsicTileSpacing: computeIntrinsicTileSpacing,
       scaleShare: scaleShare,

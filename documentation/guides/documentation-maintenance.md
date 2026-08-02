@@ -74,8 +74,8 @@ For the full command graph and checker ownership map, see
 `check:core` includes:
 
 - `npm run check:standard` (full-repository Prettier, ESLint, Stylelint, actionlint, jscpd)
-- `npm run check:shared-core`, `npm run check:standalone-boundary`, and `npm run check:suppressions` (signed portable
-  inventory, repository-local path/reference proof, and independent zero-suppression scan)
+- `npm run check:shared-core`, `npm run check:standalone`, and `npm run check:suppressions` (signed portable inventory,
+  repository-local path/reference proof, and independent zero-suppression scan)
 - `npm run typecheck` (strict no-emit source and test scopes in `tsconfig.checkjs.json` and `tsconfig.tests.json`)
 - `npm run package:check` (Ajv schema validation plus bootstrap-derived registry closure, release manifest, and staging
   contract tests)

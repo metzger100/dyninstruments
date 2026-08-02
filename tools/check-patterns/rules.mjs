@@ -1,59 +1,52 @@
-import { runRegexRule } from "./rules-core.mjs";
 import { applyRulePolicies } from "./rule-policy.mjs";
-import { FAILFAST_GENERIC_RULES } from "./generic/rules-failfast-generic-defs.mjs";
-import { REGEX_GENERIC_RULES } from "./generic/rules-regex-generic-defs.mjs";
-import { DUPLICATES_RULES } from "./generic/rules-duplicates-defs.mjs";
-import { CORE_GENERIC_RULES } from "./generic/rules-core-generic-defs.mjs";
-import { ATOMICITY_GENERIC_RULES } from "./generic/rules-atomicity-generic-defs.mjs";
-import { LEGACY_SUPPORT_GENERIC_RULES } from "./generic/rules-legacy-support-generic-defs.mjs";
-import { UNSAFE_SINK_RULES } from "./generic/rules-unsafe-sink-defs.mjs";
-import { RESPONSIVE_GENERIC_RULES } from "./generic/rules-responsive-generic-defs.mjs";
+import { getFileData } from "./shared.mjs";
+import { runRegexRule } from "./rules-core.mjs";
+import { CANONICAL_GENERIC_RULE_IDS, runGenericRule } from "../portable-core/generic-rule-engine.mjs";
 
-const CANONICAL_GENERIC_RULE_IDS = [
-  "absolute-home-path",
-  "exec-plan-reference",
-  "no-nul-byte",
-  "unsafe-html-dom-sink",
-  "dead-code",
-  "console-in-runtime",
-  "default-truthy-fallback",
-  "redundant-null-type-guard",
-  "empty-catch",
-  "premature-legacy-support",
-  "unused-fallback",
-  "responsive-layout-hard-floor",
-  "canvas-api-typeof-guard",
-  "try-finally-canvas-drawing",
-  "todo-without-owner",
-  "duplicate-functions",
-  "duplicate-block-clones",
-  "catch-fallback-without-suppression",
-  "internal-contract-fallback",
-  "framework-method-typeof-guard",
-  "invalid-lint-suppression"
-];
-
-export const GENERIC_RULES = applyRulePolicies([
-  ...orderCanonicalGenericRules([
-    ...FAILFAST_GENERIC_RULES,
-    ...REGEX_GENERIC_RULES,
-    ...DUPLICATES_RULES,
-    ...CORE_GENERIC_RULES,
-    ...ATOMICITY_GENERIC_RULES,
-    ...LEGACY_SUPPORT_GENERIC_RULES,
-    ...RESPONSIVE_GENERIC_RULES,
-    ...UNSAFE_SINK_RULES
-  ])
-]);
-
-/** @param {import("./shared.mjs").RuleDefinition[]} rules @returns {import("./shared.mjs").RuleDefinition[]} */
-function orderCanonicalGenericRules(rules) {
-  const byName = new Map(rules.map((rule) => [rule.name, rule]));
-  return CANONICAL_GENERIC_RULE_IDS.map((name) => {
-    const rule = byName.get(name);
-    if (!rule) throw new Error(`Missing canonical generic rule '${name}'.`);
-    return rule;
-  });
+/** @param {any} rule @param {string[]} files @returns {any[]} */
+function runSignedGenericRule(rule, files) {
+  const descriptors = files.map((file) => ({ path: file, content: getFileData(file).text }));
+  return runGenericRule(rule.name, descriptors, {
+    canvasAliases: ["ctx"],
+    frameworkRoots: ["Helpers"],
+    sinkAllowlist: {
+      "shared/widget-kits/html/HtmlDomPatchUtils.js": [
+        { pattern: "rootEl\\.innerHTML", count: 1 },
+        { pattern: "template\\.innerHTML", count: 1 }
+      ],
+      "runtime/asset-preloader.js": [
+        { pattern: "\\bimg\\.onload", count: 1 },
+        { pattern: "\\bimg\\.onerror", count: 1 }
+      ],
+      "plugin.js": [
+        { pattern: "\\bscriptEl\\.onload", count: 1 },
+        { pattern: "\\bscriptEl\\.onerror", count: 1 }
+      ],
+      "plugin.mjs": [
+        { pattern: "\\bscriptEl\\.onload", count: 1 },
+        { pattern: "\\bscriptEl\\.onerror", count: 1 }
+      ],
+      "runtime/plugin-bootstrap-core.js": [
+        { pattern: "\\bscriptEl\\.onload", count: 1 },
+        { pattern: "\\bscriptEl\\.onerror", count: 1 },
+        { pattern: "\\blinkEl\\.onload", count: 1 },
+        { pattern: "\\blinkEl\\.onerror", count: 1 }
+      ]
+    }
+  }).map((finding) => ({
+    file: finding.path,
+    line: finding.line,
+    message: finding.message
+  }));
 }
+
+export const GENERIC_RULES = applyRulePolicies(
+  CANONICAL_GENERIC_RULE_IDS.map((name) => ({
+    name,
+    severity: "block",
+    run: runSignedGenericRule,
+    message: () => `[${name}] canonical signed generic rule`
+  }))
+);
 
 export { CANONICAL_GENERIC_RULE_IDS, runRegexRule };

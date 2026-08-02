@@ -171,14 +171,7 @@
 
     /** @param {unknown} W @param {unknown} H @returns {DyniLinearLayoutInsets} */
     function computeInsets(W, H) {
-      const responsive = profileApi.computeProfile(W, H, { scales: RESPONSIVE_SCALES });
-      const pad = profileApi.computeInsetPx(responsive, PAD_RATIO, 1);
-      const gap = profileApi.computeInsetPx(responsive, GAP_RATIO, 1);
-      return {
-        pad: pad,
-        gap: gap,
-        responsive: responsive
-      };
+      return profileApi.computeInsetPair(W, H, { scales: RESPONSIVE_SCALES }, PAD_RATIO, GAP_RATIO);
     }
 
     /** @param {unknown} W @param {unknown} H @param {DyniLinearLayoutInsets | null | undefined} insets @returns {DyniRect} */

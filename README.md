@@ -239,10 +239,11 @@ dyninstruments is developed with AI-assisted tooling. See [CONTRIBUTING.md](CONT
 architecture, coding standards, and release process.
 
 This repository is a viewer-profile quality role model: its shared quality-gate meanings (`check:fast`, `check:core`,
-`check:all`) are defined by the local command graph, while its Vitest/coverage/complexity ratchets remain
-Dyninstruments-specific. To create a deliberately small learning project without copying product code, run
-`npm run starter:create -- --output=/absolute/path --id=my-plugin --name="My Plugin"`; the generated dependency-free
-project has its own blocking `npm run check:all` command and a host-boundary test.
+`check:all`) are executed by the signed role graph, while its Vitest/coverage/complexity ratchets remain
+Dyninstruments-specific. To create a deliberately small lesson, run
+`npm run starter:create -- --output=/absolute/path --id=my-plugin --name="My Plugin"`. For a quality-grade greenfield
+environment use `--level quality --profile viewer-only` or `--profile python-plus-viewer`; both profiles are
+dependency-free at runtime, include their own blocking `npm run check:all`, and can be copied outside this checkout.
 
 Use Node 26 with npm 12.0.1. Run `npm run setup` once; it installs the locked dependencies and provisions the
 checksum-verified actionlint binary outside `node_modules`. An optional `.codex/config.toml` provides portable Codex CLI
@@ -251,10 +252,9 @@ required to run the quality gates.
 
 The standalone quality-core contract is checked with `npm run check:shared-core`; the blocking genericness check is
 `npm run check:generic-surface`, and `npm run check:suppressions` owns the zero-inline-suppression source scan.
-`npm run portable-core:attest` emits only anonymous contract, content, and generic-rule-tree digests for local review. A
-completed change must also pass `npm run check:all` from an isolated copy containing only this repository. The
-standalone-boundary check scans all maintained text, including archived execution plans, for references that would
-identify another checkout.
+`npm run portable-core:attest` emits only anonymous contract, content, generic-rule, and conformance digests for local
+review. A completed change must also pass `npm run check:all` from an isolated copy containing only this repository. The
+canonical standalone command is `npm run check:standalone`.
 
 The complete local gate is:
 

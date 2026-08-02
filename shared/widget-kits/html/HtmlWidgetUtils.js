@@ -245,6 +245,23 @@
     );
   }
 
+  /** @param {Event} event @param {unknown} props @param {string} groupKey @param {string} actionKey @returns {void} */
+  function dispatchSurfaceAction(event, props, groupKey, actionKey) {
+    event.preventDefault();
+    event.stopPropagation();
+    const policy = resolveSurfacePolicy(props);
+    const actions =
+      policy && typeof policy.actions === "object" && policy.actions
+        ? /** @type {Record<string, unknown>} */ (policy.actions)
+        : null;
+    const group =
+      actions && typeof actions[groupKey] === "object" && actions[groupKey]
+        ? /** @type {Record<string, unknown>} */ (actions[groupKey])
+        : null;
+    const action = group && typeof group[actionKey] === "function" ? group[actionKey] : null;
+    if (action) action();
+  }
+
   /**
    * @param {unknown} def
    * @param {DyniComponentContext} componentContext
@@ -283,7 +300,8 @@
       applyMirroredContext: applyMirroredContext,
       patchInnerHtml: patchInnerHtml,
       isEditingMode: isEditingMode,
-      canDispatchSurfaceInteraction: canDispatchSurfaceInteraction
+      canDispatchSurfaceInteraction: canDispatchSurfaceInteraction,
+      dispatchSurfaceAction: dispatchSurfaceAction
     };
   }
 

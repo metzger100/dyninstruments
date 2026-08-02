@@ -86,12 +86,12 @@ describe("portable quality-core boundary", function () {
   it("blocks a seeded non-standalone reference while allowing the local clean surface", async function () {
     const { runStandaloneBoundaryCheck } = await import("../../tools/check-standalone-boundary.mjs");
     const clean = runStandaloneBoundaryCheck({ root: ROOT, print: false });
-    expect(clean.summary.ok).toBe(true);
+    expect(clean.ok).toBe(true);
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "portable-core-boundary-"));
     fs.writeFileSync(path.join(root, "note.md"), ["polar", "recorder"].join("") + "\n", "utf8");
     const failing = runStandaloneBoundaryCheck({ root, print: false });
-    expect(failing.summary.ok).toBe(false);
-    expect(failing.findings[0].kind).toBe("checkout-reference");
+    expect(failing.ok).toBe(false);
+    expect(failing.findings[0].reason).toContain("boundary token");
     cleanup(root);
   });
 

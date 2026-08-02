@@ -33,12 +33,12 @@ const RESPONSIVE_OWNER_SPECS = [
   {
     file: "shared/widget-kits/radial/SemicircleRadialLayout.js",
     label: "SemicircleRadialLayout",
-    requiredMethods: ["computeProfile", "computeInsetPx"]
+    requiredMethods: ["computeProfile", "computeInsetPair"]
   },
   {
     file: "shared/widget-kits/radial/FullCircleRadialLayout.js",
     label: "FullCircleRadialLayout",
-    requiredMethods: ["computeProfile", "computeInsetPx"]
+    requiredMethods: ["computeProfile", "computeInsetPair"]
   }
 ];
 

@@ -211,6 +211,13 @@ interface DyniResponsiveScaleProfileApi {
   id: "ResponsiveScaleProfile";
   computeProfile(W: unknown, H: unknown, spec?: DyniResponsiveScaleSpec): DyniResponsiveScaleProfile;
   computeInsetPx(profile: DyniResponsiveScaleProfile | undefined, ratio: unknown, floor: unknown): number;
+  computeInsetPair(
+    W: unknown,
+    H: unknown,
+    spec: DyniResponsiveScaleSpec | undefined,
+    padRatio: unknown,
+    gapRatio: unknown
+  ): { responsive: DyniResponsiveScaleProfile; pad: number; gap: number };
   computeIntrinsicSpacePx(
     profile: DyniResponsiveScaleProfile | undefined,
     spanPx: unknown,

@@ -4,19 +4,21 @@ const path = require("node:path");
 
 /** Ordered `npm run` leaves that check:core must reach, in exact composition order. */
 const REQUIRED_CHECK_CORE_GROUPS = [
-  "check:standard",
-  "check:shared-core",
-  "check:standalone-boundary",
-  "check:suppressions",
-  "typecheck",
-  "package:check",
-  "test:split",
-  "test:focus:check",
-  "check:smells",
-  "check:complexity",
-  "check:scaling",
-  "docs:check",
-  "check:filesize"
+  "standard",
+  "portable-core",
+  "generic-surface",
+  "standalone",
+  "suppressions",
+  "typing",
+  "packaging",
+  "focus",
+  "smells",
+  "product-contracts",
+  "test-split",
+  "complexity",
+  "scaling",
+  "documentation",
+  "file-size"
 ];
 
 /** @param {string} scriptBody @returns {string[]} */
@@ -30,10 +32,10 @@ function orderedNpmRunTokens(scriptBody) {
  * @param {string} checkCoreBody
  */
 function assertCompleteCheckCoreGraph(checkCoreBody) {
-  const orderedTokens = orderedNpmRunTokens(checkCoreBody);
+  const orderedTokens = checkCoreBody.split("--roles ")[1].split(",");
   expect(orderedTokens).toEqual(REQUIRED_CHECK_CORE_GROUPS);
-  expect(orderedTokens.filter((token) => token === "test:split")).toHaveLength(1);
-  expect(orderedTokens).not.toContain("test:contract");
+  expect(orderedTokens.filter((token) => token === "test-split")).toHaveLength(1);
+  expect(orderedTokens).not.toContain("test-contract");
 }
 
 describe("package command surface", function () {
@@ -72,17 +74,17 @@ describe("package command surface", function () {
       "vitest run tests/tools/operation-count-evaluator.test.js tests/contract/route-points-render-model-scaling-contract.test.js tests/shared/html/HtmlDomPatchUtils.scaling-contract.test.js tests/shared/text/TextLayoutPrimitives.scaling-contract.test.js"
     );
     expect(scripts["check:core"]).toBe(
-      "npm run check:standard && npm run check:shared-core && npm run check:standalone-boundary && npm run check:suppressions && npm run typecheck && npm run package:check && npm run test:split && npm run test:focus:check && npm run check:smells && npm run check:complexity && npm run check:scaling && npm run docs:check && npm run check:filesize"
+      "node tools/portable-core/gate-orchestrator.mjs --roles standard,portable-core,generic-surface,standalone,suppressions,typing,packaging,focus,smells,product-contracts,test-split,complexity,scaling,documentation,file-size"
     );
   });
 
   it("reaches the complete configured Vitest suite through test:split exactly once", function () {
     assertCompleteCheckCoreGraph(scripts["check:core"]);
-    expect(scripts["test:split"]).toBe("vitest run");
+    expect(scripts["test:split"]).toBe("npm run test:node && npm run test:dom");
   });
 
   it("rejects the former incomplete core composition that substituted test:contract for test:split", function () {
-    const formerIncompleteCore = scripts["check:core"].replace("test:split", "test:contract");
+    const formerIncompleteCore = scripts["check:core"].replace("test-split", "test-contract");
     expect(function () {
       assertCompleteCheckCoreGraph(formerIncompleteCore);
     }).toThrow();
@@ -90,7 +92,7 @@ describe("package command surface", function () {
 
   it("exposes test:contract as a standalone leaf outside check:core", function () {
     expect(scripts["test:contract"]).toBe("vitest run --project contract");
-    expect(orderedNpmRunTokens(scripts["check:core"])).not.toContain("test:contract");
+    expect(scripts["check:core"]).not.toContain("test-contract");
   });
 
   it("runs all three configured Vitest projects through test:split", function () {
@@ -119,10 +121,10 @@ describe("package command surface", function () {
     visit("check:all");
 
     REQUIRED_CHECK_CORE_GROUPS.forEach(function (group) {
-      expect(reachable.has(group), `${group} must be reachable from check:all`).toBe(true);
+      expect(scripts["check:core"], `${group} must be in the signed role graph`).toContain(group);
     });
-    expect(reachable.has("test:split")).toBe(true);
-    expect(reachable.has("test:contract")).toBe(false);
+    expect(scripts["check:core"]).toContain("test-split");
+    expect(scripts["check:core"]).not.toContain("test-contract");
   });
 
   it("aggregates the production, test, and tool typecheck boundaries", function () {

@@ -144,7 +144,7 @@
     }
     const raw = style.getPropertyValue("--dyni-theme-preset");
     const value = typeof raw === "string" ? raw.trim() : "";
-    return value || null;
+    return value === "" ? null : value;
   }
 
   /** @param {Element | null | undefined} docElement @returns {string} */
