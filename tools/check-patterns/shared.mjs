@@ -17,7 +17,7 @@ export {
   readLiteralToken
 } from "./shared-source-scan.mjs";
 
-const SKIP_DIRS = new Set([".git", "node_modules", "coverage", "artifacts"]);
+const SKIP_DIRS = new Set([".git", "node_modules", "coverage", "artifacts", ".quality-cache"]);
 
 /** @typedef {{text: string, lineStarts: number[], maskedText: string}} FileData */
 /** @typedef {{file: string, line: number, [key: string]: any}} Finding */

@@ -6,3 +6,4 @@ releases/*.zip
 assets/fonts/*.woff2
 exec-plans/completed/
 .codex/
+.quality-cache/

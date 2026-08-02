@@ -245,6 +245,12 @@ Dyninstruments-specific. To create a deliberately small lesson, run
 environment use `--level quality --profile viewer-only` or `--profile python-plus-viewer`; both profiles are
 dependency-free at runtime, include their own blocking `npm run check:all`, and can be copied outside this checkout.
 
+The neutral quality distribution is vendored from one source owner. Verify its deterministic output with
+`npm run distribution:source:check`; maintainers regenerate it with `npm run distribution:source:write`, then run
+`npm run check:distribution` and `npm run check:alignment -- --peer /path/to/the/peer-repository`. Neither command
+requires Git metadata, a sibling checkout, or network access. Archive copies of this repository and both generated
+profiles are expected to pass their complete `npm run check:all` gate independently.
+
 Use Node 26 with npm 12.0.1. Run `npm run setup` once; it installs the locked dependencies and provisions the
 checksum-verified actionlint binary outside `node_modules`. An optional `.codex/config.toml` provides portable Codex CLI
 defaults (project-doc pickup, sandbox/approval mode, cached web search); it is contributor tooling only and is never

@@ -9,11 +9,14 @@
 
 import { getFileData, lineAt } from "../shared.mjs";
 
-const GLOBAL_ASSIGNMENT_RE = /\b(?:window|root|global|self)\.([A-Z][A-Za-z0-9_]*)\s*=/g;
+const GLOBAL_ASSIGNMENT_RE = /\b(?:window|root|global|self)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*=/g;
 const CSS_CUSTOM_PROPERTY_RE = /(?:^|[^\w-])(--[A-Za-z0-9-]+)\s*:/g;
+const KEBAB_CASE_FILENAME = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*\.js$/;
+const PASCAL_CASE = /^[A-Z][A-Za-z0-9]*$/;
+const CAMEL_CASE = /^[a-z][A-Za-z0-9]*$/;
 
 /**
- * @param {import("../shared.mjs").RuleDefinition & {jsGlobalPrefix: string, cssCustomPropertyPrefix: string}} rule
+ * @param {any} rule
  * @param {string[]} files
  * @returns {import("../shared.mjs").Finding[]}
  */
@@ -26,6 +29,7 @@ export function runNamespacePolicyRule(rule, files) {
     } else {
       out.push(...scanJs(rule, file, data));
     }
+    out.push(...scanNaming(rule, file, data));
   }
   return out;
 }
@@ -39,11 +43,13 @@ function scanJs(rule, file, data) {
   const out = [];
   let match;
   GLOBAL_ASSIGNMENT_RE.lastIndex = 0;
-  while ((match = GLOBAL_ASSIGNMENT_RE.exec(data.maskedText))) {
+  const sourceData = /** @type {any} */ (data);
+  const masked = sourceData.maskedText ?? sourceData.masked ?? sourceData.text;
+  while ((match = GLOBAL_ASSIGNMENT_RE.exec(masked))) {
     const globalName = match[1];
     if (globalName.startsWith(rule.jsGlobalPrefix)) continue;
     const line = lineAt(match.index, data.lineStarts);
-    out.push({ file, line, message: rule.message({ file, line, kind: "js-global", token: globalName }) });
+    out.push({ file, line, message: messageFor(rule, { file, line, kind: "js-global", token: globalName }) });
   }
   return out;
 }
@@ -61,7 +67,49 @@ function scanCss(rule, file, data) {
     const propertyName = match[1];
     if (propertyName.startsWith(rule.cssCustomPropertyPrefix)) continue;
     const line = lineAt(match.index, data.lineStarts);
-    out.push({ file, line, message: rule.message({ file, line, kind: "css-custom-property", token: propertyName }) });
+    out.push({
+      file,
+      line,
+      message: messageFor(rule, {
+        file,
+        line,
+        kind: "css-custom-property",
+        token: propertyName
+      })
+    });
   }
   return out;
+}
+
+/** @param {any} rule @param {string} file @param {any} data @returns {import("../shared.mjs").Finding[]} */
+function scanNaming(rule, file, data) {
+  const out = [];
+  const text = data.text;
+  const base = file.split("/").pop() || file;
+  if (rule.filenameCase === "kebab" && !KEBAB_CASE_FILENAME.test(base)) {
+    out.push({ file, line: 1, message: "JS filenames must be kebab-case" });
+  }
+  if (rule.memberCase === "pascal") {
+    for (const match of text.matchAll(new RegExp(`${rule.jsGlobalPrefix}\\.([A-Za-z_$][\\w$]*)\\s*=`, "g"))) {
+      if (!PASCAL_CASE.test(match[1])) {
+        out.push({ file, line: 1, message: `exported namespace member '${match[1]}' must be PascalCase` });
+      }
+    }
+  }
+  if (rule.functionCase === "camel") {
+    for (const match of text.matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g)) {
+      if (!CAMEL_CASE.test(match[1])) {
+        out.push({ file, line: 1, message: `function '${match[1]}' must be camelCase` });
+      }
+    }
+  }
+  return out;
+}
+
+/** @param {any} rule @param {{file: string, line: number, kind: string, token: string}} finding @returns {string} */
+function messageFor(rule, finding) {
+  if (rule.message) return rule.message(finding);
+  return finding.kind === "js-global"
+    ? `illegal global window.${finding.token} assignment`
+    : `CSS custom property '${finding.token}' does not use the registered namespace prefix`;
 }

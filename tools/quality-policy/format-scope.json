@@ -691,6 +691,10 @@
       "alternateValidation": "none needed"
     },
     {
+      "path": "exec-plans/active/PLAN47.md",
+      "owner": "prettier"
+    },
+    {
       "path": "install.sh",
       "owner": "unsupported",
       "reason": "Shell file without a maintained formatter in this inventory",
@@ -3641,6 +3645,14 @@
       "alternateValidation": "bash -n syntax check"
     },
     {
+      "path": "tools/check-alignment.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/check-distribution.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tools/check-doc-links-proof.mjs",
       "owner": "prettier"
     },
@@ -3945,6 +3957,12 @@
       "owner": "prettier"
     },
     {
+      "path": "tools/quality-policy/alignment-inventory.json",
+      "owner": "unsupported",
+      "reason": "Policy data read by its owning quality checker",
+      "alternateValidation": "npm run check:core"
+    },
+    {
       "path": "tools/quality-policy/check-coverage-inventory.mjs",
       "owner": "prettier"
     },
@@ -3981,6 +3999,18 @@
     {
       "path": "tools/quality-policy/coverage-summary-adapter.mjs",
       "owner": "prettier"
+    },
+    {
+      "path": "tools/quality-policy/distribution-manifest.json",
+      "owner": "unsupported",
+      "reason": "Policy data read by its owning quality checker",
+      "alternateValidation": "npm run check:core"
+    },
+    {
+      "path": "tools/quality-policy/distribution-source.json",
+      "owner": "unsupported",
+      "reason": "Policy data read by its owning quality checker",
+      "alternateValidation": "npm run check:core"
     },
     {
       "path": "tools/quality-policy/eslint-complexity-config.mjs",
@@ -4165,6 +4195,10 @@
       "alternateValidation": "npm run check:core"
     },
     {
+      "path": "tools/regenerate-distribution-manifest.mjs",
+      "owner": "prettier"
+    },
+    {
       "path": "tools/release-create.mjs",
       "owner": "prettier"
     },
@@ -4186,6 +4220,10 @@
     },
     {
       "path": "tools/release-zip-builder.mjs",
+      "owner": "prettier"
+    },
+    {
+      "path": "tools/starter-quality-template-parts.mjs",
       "owner": "prettier"
     },
     {
@@ -4510,7 +4548,7 @@
     }
   ],
   "countByOwner": {
-    "prettier": 1049,
-    "unsupported": 52
+    "prettier": 1054,
+    "unsupported": 55
   }
 }
