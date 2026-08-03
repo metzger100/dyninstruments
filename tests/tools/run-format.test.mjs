@@ -16,11 +16,11 @@ const ROOT = process.cwd();
 function makeFixtureRoot(sampleContent) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "run-format-fixture-"));
   fs.symlinkSync(path.join(ROOT, "node_modules"), path.join(root, "node_modules"));
-  fs.writeFileSync(path.join(root, "sample.mjs"), sampleContent);
   fs.mkdirSync(path.join(root, "tools", "quality-policy"), { recursive: true });
-  fs.writeFileSync(
-    path.join(root, "tools", "quality-policy", "format-scope.json"),
-    JSON.stringify({ rows: [{ path: "sample.mjs", owner: "prettier" }] })
+  fs.writeFileSync(path.join(root, "tools", "sample.mjs"), sampleContent);
+  fs.copyFileSync(
+    path.join(ROOT, "tools", "quality-policy", "project-format-scope.json"),
+    path.join(root, "tools", "quality-policy", "project-format-scope.json")
   );
   return root;
 }

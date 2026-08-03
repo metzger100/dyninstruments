@@ -217,10 +217,9 @@ This repository is one proof profile for the shared AvNav plugin AI environment;
 is validated by the same single execution plan. Keep neutral quality sources byte-identical. Run
 `npm run distribution:source:check` before a handoff, use `npm run distribution:source:write` only for an intentional
 source update, and prove both local and peer inventories with `npm run check:distribution` and
-`npm run check:alignment -- --peer /path/to/the/peer-repository`. Generate a lesson with `npm run starter:create` and
-use `--level quality --profile viewer-only` or `--profile python-plus-viewer` for the complete environment. A clean
-archive copy must pass `npm run check:all` without Git metadata, a sibling checkout, or inherited caches; generated
-runtime artifacts contain no development dependencies.
+`npm run check:alignment -- --peer /path/to/the/peer-repository`. A clean archive copy must pass `npm run check:all`
+without Git metadata, a sibling checkout, or inherited caches; generated runtime artifacts contain no development
+dependencies.
 
 ## 9) Releasing
 

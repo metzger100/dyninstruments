@@ -10,6 +10,8 @@ import os from "node:os";
 import path from "node:path";
 import { runDocLinksCheck } from "./check-doc-links.mjs";
 
+const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+
 /**
  * @param {{broken: boolean}} options
  * @returns {string}
@@ -32,14 +34,9 @@ function makeFixtureRoot({ broken }) {
     ].join("\n")
   );
   fs.writeFileSync(path.join(root, "documentation", "other.md"), "# Other\n");
-  fs.writeFileSync(
-    path.join(root, "tools", "quality-policy", "format-scope.json"),
-    JSON.stringify({
-      rows: [
-        { path: "README.md", owner: "prettier" },
-        { path: "documentation/other.md", owner: "prettier" }
-      ]
-    })
+  fs.copyFileSync(
+    path.join(ROOT, "tools", "quality-policy", "project-format-scope.json"),
+    path.join(root, "tools", "quality-policy", "project-format-scope.json")
   );
   return root;
 }

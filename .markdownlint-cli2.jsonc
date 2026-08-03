@@ -4,6 +4,8 @@
     "**/node_modules/**",
     "artifacts/**",
     "coverage/**",
+    // Kept excluded even while empty, so a future completed plan can be archived here without
+    // reconfiguring this file.
     "exec-plans/completed/**",
     "releases/**",
     // Byte-for-byte extracted verbatim from AGENTS.md's SHARED_INSTRUCTIONS block; its leading

@@ -240,10 +240,7 @@ architecture, coding standards, and release process.
 
 This repository is a viewer-profile quality role model: its shared quality-gate meanings (`check:fast`, `check:core`,
 `check:all`) are executed by the signed role graph, while its Vitest/coverage/complexity ratchets remain
-Dyninstruments-specific. To create a deliberately small lesson, run
-`npm run starter:create -- --output=/absolute/path --id=my-plugin --name="My Plugin"`. For a quality-grade greenfield
-environment use `--level quality --profile viewer-only` or `--profile python-plus-viewer`; both profiles are
-dependency-free at runtime, include their own blocking `npm run check:all`, and can be copied outside this checkout.
+Dyninstruments-specific.
 
 The neutral quality distribution is vendored from one source owner. Verify its deterministic output with
 `npm run distribution:source:check`; maintainers regenerate it with `npm run distribution:source:write`, then run

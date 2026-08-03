@@ -3,6 +3,11 @@ const path = require("node:path");
 const prettier = require("prettier");
 const { parse: parseJsonc } = require("jsonc-parser");
 
+/** @returns {Promise<{buildFormatScope: (root?: string) => {path: string, owner: string}[]}>} */
+function loadGenerator() {
+  return import(path.join(process.cwd(), "tools/quality-policy/generate-format-scope.mjs"));
+}
+
 const root = process.cwd();
 const ignorePath = path.join(root, ".prettierignore");
 
@@ -20,31 +25,41 @@ const MAINTAINED_CSS_GLOBS = [{ file: "plugin.css" }, { dir: "shared" }, { dir: 
 
 const MAINTAINED_MARKDOWN_ROOTS = ["documentation", ".agents/skills", "exec-plans/active", ".githooks"];
 
+// `collectPrettierScope()` below now calls the in-process `buildFormatScope()` generator directly
+// (nothing is committed to compare against anymore). The four cases that read it -- the three
+// "covers every maintained ... file" cases and "keeps format and format:check targeting the exact
+// same file set" -- therefore no longer hold an independent oracle: they check this test's own
+// maintained-file walk against the generator's own output, so a shared bug in the generator would
+// not be caught by either side. The "same file set" case in particular is tautological, comparing
+// two calls to the identical function. Six other cases in this file stay fully independent through
+// Prettier's real `getFileInfo` ignore resolution and markdownlint's own ignore-pattern parsing;
+// two cases (the negative-fixture-exclusion cases) are no-ops today because
+// `NEGATIVE_FIXTURE_EXCLUSIONS` is empty.
 describe("formatting scope contract", function () {
-  it("covers every maintained JavaScript/MJS file with format and format:check", function () {
+  it("covers every maintained JavaScript/MJS file with format and format:check", async function () {
     const maintained = collectMaintainedJsFiles();
-    const covered = collectPrettierScope();
+    const covered = await collectPrettierScope();
 
     expectAllCovered(maintained, covered, ".js/.mjs");
   });
 
-  it("covers every maintained CSS file with format and format:check", function () {
+  it("covers every maintained CSS file with format and format:check", async function () {
     const maintained = collectMaintainedCssFiles();
-    const covered = collectPrettierScope();
+    const covered = await collectPrettierScope();
 
     expectAllCovered(maintained, covered, ".css");
   });
 
-  it("covers every maintained Markdown file with format and format:check", function () {
+  it("covers every maintained Markdown file with format and format:check", async function () {
     const maintained = collectMaintainedMarkdownFiles();
-    const covered = collectPrettierScope();
+    const covered = await collectPrettierScope();
 
     expectAllCovered(maintained, covered, ".md");
   });
 
-  it("keeps format and format:check targeting the exact same file set", function () {
-    const writeScope = collectPrettierScope();
-    const checkScope = collectPrettierScope();
+  it("keeps format and format:check targeting the exact same file set", async function () {
+    const writeScope = await collectPrettierScope();
+    const checkScope = await collectPrettierScope();
 
     expect(Array.from(writeScope).sort()).toEqual(Array.from(checkScope).sort());
   });
@@ -138,12 +153,13 @@ async function expectNoneEffectivelyIgnored(maintained) {
 }
 
 // `format` and `format:check` both run `tools/quality-policy/run-format.mjs` against the exact
-// same generated `format-scope.json`, so there is exactly one Prettier-scope source to read.
-/** @returns {Set<string>} */
-function collectPrettierScope() {
-  const scope = JSON.parse(fs.readFileSync(path.join(root, "tools/quality-policy/format-scope.json"), "utf8"));
+// same in-process `buildFormatScope()` classification, so there is exactly one Prettier-scope
+// source to read.
+/** @returns {Promise<Set<string>>} */
+async function collectPrettierScope() {
+  const { buildFormatScope } = await loadGenerator();
   const covered = new Set();
-  scope.rows.forEach(function (/** @type {any} */ row) {
+  buildFormatScope(root).forEach(function (/** @type {any} */ row) {
     if (row.owner === "prettier") covered.add(row.path);
   });
   return covered;

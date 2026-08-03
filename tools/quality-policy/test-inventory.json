@@ -1354,9 +1354,6 @@
     "tests/tools/check-generic-surface.test.js": {
       "classification": "strict"
     },
-    "tests/tools/create-avnav-plugin-starter.test.js": {
-      "classification": "strict"
-    },
     "tests/tools/check-patterns-atomicity.test.js": {
       "classification": "strict"
     },

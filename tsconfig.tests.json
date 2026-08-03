@@ -464,7 +464,6 @@
     "tests/tools/complexity-capture-integrity.test.js",
     "tests/tools/coverage-inventory-policy.test.js",
     "tests/tools/coverage-inventory.test.js",
-    "tests/tools/create-avnav-plugin-starter.test.js",
     "tests/tools/eslint-config.test.mjs",
     "tests/tools/hooks.test.js",
     "tests/tools/install-script.test.js",

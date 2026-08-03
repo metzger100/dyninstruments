@@ -3,7 +3,6 @@ const os = require("node:os");
 const path = require("node:path");
 
 const root = process.cwd();
-const SCOPE_PATH = path.join(root, "tools/quality-policy/format-scope.json");
 const VALID_OWNERS = new Set(["prettier", "unsupported"]);
 
 describe("format-scope contract", function () {
@@ -31,13 +30,6 @@ describe("format-scope contract", function () {
       });
   });
 
-  it("keeps the committed scope matching fresh discovery", async function () {
-    const fresh = await freshRows();
-    const committed = JSON.parse(fs.readFileSync(SCOPE_PATH, "utf8"));
-
-    expect(committed.rows, "format-scope.json is stale; rerun npm run format:scope").toEqual(fresh);
-  });
-
   it("classifies known families as expected", async function () {
     const byPath = await freshRowsByPath();
 
@@ -62,7 +54,22 @@ describe("format-scope contract", function () {
 
     expect(paths.has("releases/dyninstruments-1.0.0.zip")).toBe(false);
     expect(paths.has("releases/dyninstruments-1.0.0.md")).toBe(false);
-    expect(paths.has("exec-plans/completed/PLAN10.md")).toBe(false);
+
+    const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "format-scope-completed-"));
+    fs.mkdirSync(path.join(fixtureRoot, "exec-plans/completed"), { recursive: true });
+    fs.writeFileSync(path.join(fixtureRoot, "exec-plans/completed/PLAN9001.md"), "# Seeded completed plan\n");
+    fs.mkdirSync(path.join(fixtureRoot, "tools/quality-policy"), { recursive: true });
+    fs.copyFileSync(
+      path.join(root, "tools/quality-policy/project-format-scope.json"),
+      path.join(fixtureRoot, "tools/quality-policy/project-format-scope.json")
+    );
+
+    try {
+      const seededPaths = buildFormatScope(fixtureRoot).map((/** @type {{ path: string }} */ row) => row.path);
+      expect(seededPaths).not.toContain("exec-plans/completed/PLAN9001.md");
+    } finally {
+      fs.rmSync(fixtureRoot, { recursive: true, force: true });
+    }
   });
 
   it("fails closed on a seeded unclassifiable file extension", async function () {

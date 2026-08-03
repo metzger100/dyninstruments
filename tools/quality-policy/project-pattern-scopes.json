@@ -100,7 +100,6 @@
           "tools/test-data/**",
           "tools/portable-core/**",
           "tools/quality-policy/**",
-          "tools/starter-templates.mjs",
           "tools/check-patterns/shared-suppressions.mjs"
         ]
       },

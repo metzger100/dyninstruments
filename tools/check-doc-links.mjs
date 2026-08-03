@@ -9,17 +9,16 @@ import fs from "node:fs";
 import path from "node:path";
 import { check } from "linkinator";
 import { runDocumentationLinkPolicy } from "./portable-core/doc-link-engine.mjs";
+import { buildFormatScope } from "./quality-policy/generate-format-scope.mjs";
 
 /**
  * @param {string} root
  * @returns {string[]}
  */
 export function discoverSeedMarkdownFiles(root) {
-  const scopePath = path.join(root, "tools", "quality-policy", "format-scope.json");
-  const scope = JSON.parse(fs.readFileSync(scopePath, "utf8"));
-  return scope.rows
-    .filter((/** @type {{owner: string, path: string}} */ row) => row.owner === "prettier" && row.path.endsWith(".md"))
-    .map((/** @type {{path: string}} */ row) => row.path)
+  return buildFormatScope(root)
+    .filter((row) => row.owner === "prettier" && row.path.endsWith(".md"))
+    .map((row) => row.path)
     .sort();
 }
 

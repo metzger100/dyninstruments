@@ -4,6 +4,8 @@ artifacts/
 .kilo/
 releases/*.zip
 assets/fonts/*.woff2
+# Kept excluded even while empty, so a future completed plan can be archived here without
+# reconfiguring this file.
 exec-plans/completed/
 .codex/
 .quality-cache/

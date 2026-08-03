@@ -9,7 +9,8 @@ required baseline for consistent first-attempt implementation success.
 
 ## Key Details
 
-- Active plans live in `exec-plans/active/`; completed plans move to `exec-plans/completed/`.
+- Active plans live in `exec-plans/active/`. When a plan completes, delete it from the working tree; Git history is the
+  archive.
 - Plan filenames use sequential numbering: `PLAN{N}.md`.
 - For complex tasks, the plan is the implementation source of truth until completion.
 
@@ -70,7 +71,6 @@ required baseline for consistent first-attempt implementation success.
 
 ## Related
 
-- [PLAN6.md](../../exec-plans/completed/PLAN6.md)
 - [../conventions/coding-standards.md](../conventions/coding-standards.md)
 - [../conventions/documentation-format.md](../conventions/documentation-format.md)
 - [documentation-maintenance.md](documentation-maintenance.md)

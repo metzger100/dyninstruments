@@ -10,7 +10,6 @@ import path from "node:path";
 import { readVersionedProfile } from "./profile-schema.mjs";
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..", "..");
-const OUTPUT_PATH = path.join(ROOT, "tools", "quality-policy", "format-scope.json");
 const PROFILE_PATH = "tools/quality-policy/project-format-scope.json";
 
 /**
@@ -87,13 +86,10 @@ function discoverMaintainedFiles(projectRoot) {
 /** @typedef {{ pattern: string, owner: "prettier" | "unsupported", reason?: string, alternateValidation?: string }} FormatRule */
 /** @typedef {{ historicalExclusionPatterns: string[], gitkeepPaths: string[], rules: FormatRule[] }} FormatScopeProfile */
 
-function main() {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const rows = buildFormatScope();
   /** @type {Record<string, number>} */
   const byOwner = {};
   for (const row of rows) byOwner[row.owner] = (byOwner[row.owner] || 0) + 1;
-  fs.writeFileSync(OUTPUT_PATH, JSON.stringify({ rows, countByOwner: byOwner }, null, 2) + "\n");
-  console.log(`format-scope: wrote ${rows.length} rows (${JSON.stringify(byOwner)}) to ${OUTPUT_PATH}`);
+  console.log(`format-scope: ${rows.length} rows (${JSON.stringify(byOwner)})`);
 }
-
-if (import.meta.url === `file://${process.argv[1]}`) main();
