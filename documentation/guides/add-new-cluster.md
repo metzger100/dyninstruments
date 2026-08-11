@@ -238,11 +238,13 @@ For a new `kind` in an existing cluster:
 - [ ] Mapper module added/updated in `cluster/mappers/`
 - [ ] Module entry added in `config/components/registry-cluster.js`
 - [ ] Route metadata added/updated in `config/cluster-routes/<cluster>.js`
-- [ ] Renderer component registered if the route needs a new renderer
-- [ ] For new/visually changed kinds, `tests/layouts/gpspage-all-widgets.json` and
-      `tests/layouts/gpspage-all-widgets.test.js` updated
-- [ ] Every formatter-bearing kind has documented tuple
-      (`kind -> key -> raw unit/type -> formatter -> formatterParameters`) in core contract docs
+
+## Quality Artifact Closure
+
+After implementation and focused tests, run `npm run inventory:write` to regenerate owned test, coverage, source, and
+skill-lock artifacts. If theme tokens or input variables changed, update `tests/css/theme-token-extremes.user.css`; if a
+kind has new user-visible visuals or layout behavior, update `tests/layouts/gpspage-all-widgets.json` and
+`tests/layouts/gpspage-all-widgets.test.js`. Finish with `npm run check:all`.
 
 ## Related
 

@@ -150,6 +150,14 @@ Recommended grouped keys:
 
 Renderer modules consume these grouped payload branches and keep presentation logic out of mappers.
 
+## Quality Artifact Closure
+
+After the implementation and focused tests are complete, run `npm run inventory:write` to regenerate owned test,
+coverage, source, and skill-lock artifacts. If theme tokens or input variables changed, update
+`tests/css/theme-token-extremes.user.css`; if a kind has new user-visible visuals or layout behavior, update
+`tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js`. Finish with
+`npm run check:all`.
+
 ## Related
 
 - ../architecture/html-renderer-lifecycle.md

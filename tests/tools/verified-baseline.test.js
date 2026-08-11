@@ -79,11 +79,11 @@ describe("pre-tightening quality baseline", function () {
   });
 
   it("keeps the quality-gate policy counts synchronized with their asserted data", function () {
-    expect(Object.keys(testInventory.entries)).toHaveLength(562);
+    expect(Object.keys(testInventory.entries)).toHaveLength(556);
     expect(Object.keys(testExceptionBaseline.entries)).toHaveLength(20);
     expect(complexityBaseline.entries).toHaveLength(175);
     expect(Object.keys(coverageFloors.entries)).toHaveLength(228);
-    expect(qualityGates).toContain("(562 entries)");
+    expect(qualityGates).toContain("(556 entries)");
     expect(qualityGates).toContain("(20 captured non-strict paths)");
     expect(qualityGates).toContain("228 measured entries");
     expect(qualityGates).toContain("175-entry active ledger");

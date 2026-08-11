@@ -238,40 +238,14 @@ if (p.kind === "depthLinear") {
 
 For `centered180` and `fixed360` kinds, omit `*MinValue` / `*MaxValue` props from mapper output.
 
-## Step 7: Validate
+## Quality Artifact Closure
 
-Required checks:
-
-- Wrapper unit test (`tests/widgets/linear/*LinearWidget.test.js`)
-- Mapper test (`tests/cluster/mappers/*Mapper.test.js`)
-- Cluster static config test updates (`tests/config/clusters/*.test.js`)
-- Full gate: `npm run check:all`
-
-Manual checks:
-
-- Resize: `high`, `normal`, `flat`
-- Pointer tracks value and clamps at axis edges
-- Sector behavior matches selected profile
-- Day/night colors are correct
-- `disconnect === true` shows the shared state-screen (`GPS Lost`) on a cleared canvas (no gauge visible behind it)
-
-## Checklist
-
-- [ ] Kind defaults added in `config/shared/kind-defaults.js`
-- [ ] Cluster `kind` select extended in `config/clusters/<cluster>.js`
-- [ ] Editable parameter conditions added for new linear keys
-- [ ] Wrapper module added in `widgets/linear/`
-- [ ] Component registered in `config/components/registry-widgets-gauge.js`
-- [ ] Route metadata updated in `config/cluster-routes/<cluster>.js`
-- [ ] Mapper routes kind to expected props
-- [ ] Formatter tuple docs updated for formatter-bearing kinds:
-  - [../architecture/plugin-core-contracts.md](../architecture/plugin-core-contracts.md)
-  - [../avnav-api/core-formatter-catalog.md](../avnav-api/core-formatter-catalog.md)
-  - [../avnav-api/core-key-catalog.md](../avnav-api/core-key-catalog.md)
-- [ ] `npm run check:all` passes
+After implementation and focused tests, run `npm run inventory:write` to regenerate owned test, coverage, source, and
+skill-lock artifacts. If theme tokens or input variables changed, update `tests/css/theme-token-extremes.user.css`; if a
+kind has new user-visible visuals or layout behavior, update `tests/layouts/gpspage-all-widgets.json` and
+`tests/layouts/gpspage-all-widgets.test.js`. Finish with `npm run check:all`.
 
 ## Related
 
-- [add-new-cluster.md](add-new-cluster.md)
+- [add-new-gauge.md](add-new-gauge.md)
 - [../linear/linear-gauge-style-guide.md](../linear/linear-gauge-style-guide.md)
-- [../linear/linear-shared-api.md](../linear/linear-shared-api.md)
