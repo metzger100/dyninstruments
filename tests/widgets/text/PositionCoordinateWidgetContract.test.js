@@ -2,7 +2,7 @@ const { loadFresh } = require("../../helpers/load-umd");
 const { createMockCanvas, createMockContext2D } = require("../../helpers/mock-canvas");
 const { createComponentContextMock } = require("../../helpers/component-context-mock");
 
-describe("PositionCoordinateWidget phase 4", function () {
+describe("PositionCoordinateWidget contract", function () {
   /** @type {any} */
   let previousAvnav;
 

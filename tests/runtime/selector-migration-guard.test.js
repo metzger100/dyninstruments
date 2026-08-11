@@ -1,7 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-describe("phase 4 selector migration guard", function () {
+describe("selector migration guard", function () {
   /** @param {string} dir @returns {string[]} */
   function collectFiles(dir) {
     if (!fs.existsSync(dir)) {
