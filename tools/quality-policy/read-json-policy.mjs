@@ -24,6 +24,19 @@ export function readJsonPolicy(filePath) {
   return JSON.parse(source);
 }
 
+/** @param {string} configPath @param {string[]} files @param {any} fallbackConfig */
+export function writeFilesArray(configPath, files, fallbackConfig) {
+  const source = fs.readFileSync(configPath, "utf8");
+  const replacement = `  "files": [\n${files.map((file) => `    ${JSON.stringify(file)}`).join(",\n")}\n  ]`;
+  const pattern = /[\u0020]{2}"files": \[[\s\S]*?\n[\u0020]{2}\]/;
+  const next = source.replace(pattern, replacement);
+  fs.writeFileSync(
+    configPath,
+    pattern.test(source) ? `${next.trimEnd()}\n` : `${JSON.stringify(fallbackConfig, null, 2)}\n`,
+    "utf8"
+  );
+}
+
 /** @param {import("jsonc-parser").Node} node @param {string[]} parentPath @param {string[]} out */
 function collectDuplicateKeys(node, parentPath, out) {
   if (node.type === "object") {

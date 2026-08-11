@@ -80,6 +80,11 @@ and fixtures must remain type-safe in their own declared boundary; `fixture` fil
 at all. `npm run typecheck` runs both boundaries: `typecheck:source` (production, `tsconfig.checkjs.json`) followed by
 `typecheck:tests` (test inventory check plus `tsc -p tsconfig.tests.json`).
 
+Use `npm run inventory:write` after adding or removing maintained files. It updates the test inventory and strict
+TypeScript list, coverage inventory and source TypeScript list, and the local skill digest lock. The generator keeps
+`types/test-harness.d.ts` and `vitest.config.js` as explicit contract-owned deltas; `tsconfig.tools.json` remains the
+hand-edited exception discovered by its inventory contract.
+
 `eslint.config.mjs` reads `test-inventory.json` at config-load time and scopes the relaxed
 `no-empty`/`no-undef`/`no-unused-vars`/`no-useless-assignment` rule set to exactly the non-strict inventory entries list
 — every `strict` test file gets the same real Vitest/Node/browser globals (`testGlobals`) and the same enforcement as

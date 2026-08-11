@@ -23,15 +23,15 @@ describe("TypeScript checkJs inventory", function () {
     );
 
     expect(listed).toEqual(expected);
-    expect(listed.size).toBe(229);
+    expect(listed.size).toBe(expected.size);
   });
 
   it("keeps the ambient declaration files in the strict project", function () {
-    expect(
-      config.files.filter(function (/** @type {any} */ file) {
-        return file.endsWith(".d.ts");
-      })
-    ).toHaveLength(34);
+    const declarationFiles = config.files.filter(function (/** @type {any} */ file) {
+      return file.endsWith(".d.ts");
+    });
+    const expectedDeclarationFiles = collectDeclarationFiles("types");
+    expect(declarationFiles.sort()).toEqual(expectedDeclarationFiles.sort());
   });
 });
 
@@ -46,6 +46,26 @@ function collectJavaScriptFiles(relativeRoot) {
       const absolutePath = path.join(directory, entry.name);
       if (entry.isDirectory() && entry.name !== "lint-fixtures") visit(absolutePath);
       else if (entry.isFile() && entry.name.endsWith(".js")) {
+        files.push(/** @type {any} */ (path.relative(root, absolutePath)).replaceAll(path.sep, "/"));
+      }
+    }
+  }
+
+  visit(absoluteRoot);
+  return files;
+}
+
+/** @param {string} relativeRoot */
+function collectDeclarationFiles(relativeRoot) {
+  const absoluteRoot = path.join(root, relativeRoot);
+  const files = /** @type {string[]} */ ([]);
+
+  /** @param {string} directory */
+  function visit(directory) {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const absolutePath = path.join(directory, entry.name);
+      if (entry.isDirectory() && entry.name !== "pending") visit(absolutePath);
+      else if (entry.isFile() && entry.name.endsWith(".d.ts") && entry.name !== "test-harness.d.ts") {
         files.push(/** @type {any} */ (path.relative(root, absolutePath)).replaceAll(path.sep, "/"));
       }
     }

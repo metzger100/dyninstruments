@@ -1,0 +1,12 @@
+{
+  "entries": {
+    "config/example.js": {
+      "lines": 80,
+      "branches": 65
+    },
+    "plugin.js": {
+      "lines": 80,
+      "branches": 65
+    }
+  }
+}

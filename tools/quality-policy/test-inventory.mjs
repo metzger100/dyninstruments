@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
-import { readJsonPolicy } from "./read-json-policy.mjs";
+import { readJsonPolicy, writeFilesArray } from "./read-json-policy.mjs";
 import { readVersionedProfile } from "./profile-schema.mjs";
 import { runTestInventoryPolicy } from "../portable-core/test-inventory-engine.mjs";
 
@@ -14,8 +14,9 @@ const NON_STRICT_CLASSIFICATIONS = new Set(["harness-fragment", "split-spec-frag
 const FIXTURE_ROOT = "tests/tools/lint-fixtures/";
 const FIXTURE_OWNER = "tests/tools/quality-owners.test.js";
 
-/** @param {{root?: string}} [options] @returns {{ok: boolean, errors: string[], entryCount: number}} */
+/** @param {{root?: string, write?: boolean, print?: boolean}} [options] @returns {{ok: boolean, errors: string[], entryCount: number}} */
 export function runTestInventoryCheck(options = {}) {
+  if (options.write) return writeTestInventory(options);
   const projectRoot = options.root || root;
   const projectPolicy = readVersionedProfile(
     path.join(projectRoot, "tools/quality-policy/project-test-inventory-policy.json"),
@@ -56,6 +57,51 @@ export function runTestInventoryCheck(options = {}) {
   }
 
   return { ok: errors.length === 0, errors, entryCount: Object.keys(entries).length };
+}
+
+/**
+ * Regenerate the strict test inventory and its TypeScript files list.
+ * Non-strict entries are captured debt and cannot be invented or removed by this command.
+ * @param {{root?: string, print?: boolean}} [options]
+ * @returns {{ok: boolean, errors: string[], entryCount: number}}
+ */
+export function writeTestInventory(options = {}) {
+  const projectRoot = options.root || root;
+  const inventoryPath = path.join(projectRoot, "tools/quality-policy/test-inventory.json");
+  const inventory = readJsonPolicy(inventoryPath);
+  const entries = { ...(inventory.entries || {}) };
+  const liveFiles = collectLiveTestFiles(projectRoot);
+  const errors = [];
+  for (const [relativePath, entry] of Object.entries(entries)) {
+    if (liveFiles.has(relativePath)) continue;
+    if (entry.classification !== "strict") {
+      errors.push(`Cannot remove non-strict test classification for '${relativePath}'.`);
+      continue;
+    }
+    delete entries[relativePath];
+  }
+  for (const relativePath of liveFiles) {
+    if (!Object.prototype.hasOwnProperty.call(entries, relativePath))
+      entries[relativePath] = { classification: "strict" };
+  }
+  if (errors.length > 0) return { ok: false, errors, entryCount: Object.keys(entries).length };
+  const sortedEntries = Object.fromEntries(
+    Object.entries(entries).sort(([left], [right]) => left.localeCompare(right))
+  );
+  const nextInventory = { ...inventory, entries: sortedEntries };
+  fs.writeFileSync(inventoryPath, `${JSON.stringify(nextInventory, null, 2)}\n`, "utf8");
+  const strictFiles = Object.entries(sortedEntries)
+    .filter(([, entry]) => entry.classification === "strict")
+    .map(([relativePath]) => relativePath)
+    .sort();
+  const testConfigPath = path.join(projectRoot, "tsconfig.tests.json");
+  const testConfig = JSON.parse(fs.readFileSync(testConfigPath, "utf8"));
+  // The test harness declaration is intentionally outside test-inventory.json but belongs in tsc's files list.
+  testConfig.files = ["types/test-harness.d.ts", ...strictFiles];
+  writeFilesArray(testConfigPath, testConfig.files, testConfig);
+  const result = { ok: true, errors: [], entryCount: Object.keys(sortedEntries).length };
+  if (options.print !== false) console.log(`SUMMARY_JSON=${JSON.stringify(result)}`);
+  return result;
 }
 
 /** @returns {void} */
@@ -123,8 +169,12 @@ export function discoverExecutableTestHelpers(projectRoot = process.cwd()) {
 /** @param {string} projectRoot @returns {Set<string>} */
 function collectLiveTestFiles(projectRoot) {
   const files = new Set();
+  const profilePath = path.join(projectRoot, "tools/quality-policy/project-test-inventory-policy.json");
+  const profile = fs.existsSync(profilePath) ? readJsonPolicy(profilePath) : {};
+  const transient = new Set(profile.transientAllowOnlyProofFiles || []);
   collectJavaScriptFiles(path.join(projectRoot, "tests")).forEach(function (file) {
-    files.add(path.relative(projectRoot, file).replaceAll(path.sep, "/"));
+    const relativePath = path.relative(projectRoot, file).replaceAll(path.sep, "/");
+    if (!transient.has(relativePath)) files.add(relativePath);
   });
   return files;
 }
@@ -312,5 +362,11 @@ function isCliEntrypoint() {
 }
 
 if (isCliEntrypoint()) {
-  runTestInventoryCheckCli();
+  if (process.argv.includes("--write")) {
+    const result = writeTestInventory();
+    if (!result.ok) {
+      result.errors.forEach((message) => console.error(message));
+      process.exitCode = 1;
+    }
+  } else runTestInventoryCheckCli();
 }

@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "productionRoots": ["config"],
+  "entrypoints": ["plugin.js"],
+  "legacyBelowDefaultFloors": {}
+}

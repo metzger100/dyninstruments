@@ -1,0 +1,1 @@
+// Seeded coverage-inventory fixture.

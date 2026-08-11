@@ -26,6 +26,8 @@ function createWorkspace() {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-test-inventory-"));
   writeFile(path.join(tempRoot, "tests/example.test.js"), "// example\n");
   writeFile(path.join(tempRoot, "tests/helper.js"), "// helper\n");
+  writeFile(path.join(tempRoot, "types/test-harness.d.ts"), "declare const testHarness: unknown;\n");
+  writeJson(path.join(tempRoot, "tsconfig.tests.json"), { files: ["types/test-harness.d.ts"] });
   writeJson(path.join(tempRoot, "tools/quality-policy/test-exception-baseline.json"), { entries: {} });
   fs.copyFileSync(
     path.join(root, "tools/quality-policy/project-test-inventory-policy.json"),
@@ -37,6 +39,15 @@ function createWorkspace() {
 /** @param {string} tempRoot */
 function runChecker(tempRoot) {
   return spawnSync(process.execPath, [scriptPath], {
+    cwd: tempRoot,
+    env: childEnv(),
+    encoding: "utf8"
+  });
+}
+
+/** @param {string} tempRoot @param {string[]} args */
+function runWriter(tempRoot, args = ["--write"]) {
+  return spawnSync(process.execPath, [scriptPath, ...args], {
     cwd: tempRoot,
     env: childEnv(),
     encoding: "utf8"
@@ -383,6 +394,56 @@ describe("tools/quality-policy/test-inventory.mjs", function () {
 
       expect(result.status).not.toBe(0);
       expect(result.stderr).toContain("Duplicate JSON object key");
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("writes new tests as strict and is idempotent", function () {
+    const tempRoot = createWorkspace();
+    try {
+      writeJson(path.join(tempRoot, "tools/quality-policy/test-inventory.json"), {
+        entries: {
+          "tests/example.test.js": { classification: "strict" },
+          "tests/helper.js": { classification: "strict" }
+        }
+      });
+      writeFile(path.join(tempRoot, "tests/new.test.js"), "// new test\n");
+
+      const first = runWriter(tempRoot);
+      expect(first.status).toBe(0);
+      const inventoryPath = path.join(tempRoot, "tools/quality-policy/test-inventory.json");
+      const configPath = path.join(tempRoot, "tsconfig.tests.json");
+      const firstInventory = fs.readFileSync(inventoryPath, "utf8");
+      const firstConfig = fs.readFileSync(configPath, "utf8");
+      const inventory = JSON.parse(firstInventory);
+      expect(inventory.entries["tests/new.test.js"]).toEqual({ classification: "strict" });
+      expect(JSON.parse(firstConfig).files).toContain("types/test-harness.d.ts");
+
+      const second = runWriter(tempRoot);
+      expect(second.status).toBe(0);
+      expect(fs.readFileSync(inventoryPath, "utf8")).toBe(firstInventory);
+      expect(fs.readFileSync(configPath, "utf8")).toBe(firstConfig);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("refuses to remove a stale non-strict classification", function () {
+    const tempRoot = createWorkspace();
+    try {
+      writeJson(path.join(tempRoot, "tools/quality-policy/test-inventory.json"), {
+        entries: {
+          "tests/example.test.js": { classification: "strict" },
+          "tests/helper.js": { classification: "fixture", ownerTest: "tests/example.test.js", reason: "captured" }
+        }
+      });
+      fs.rmSync(path.join(tempRoot, "tests/helper.js"));
+
+      const result = runWriter(tempRoot);
+
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toContain("Cannot remove non-strict test classification for 'tests/helper.js'");
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }

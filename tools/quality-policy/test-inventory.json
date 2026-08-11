@@ -355,6 +355,9 @@
     "tests/config/widget-definitions.test.js": {
       "classification": "strict"
     },
+    "tests/contract/add-new-guides-quality-contract.test.js": {
+      "classification": "strict"
+    },
     "tests/contract/ai-instruction-pointer-contract.test.js": {
       "classification": "strict"
     },
@@ -388,12 +391,6 @@
     "tests/contract/formatting-scope-contract.test.js": {
       "classification": "strict"
     },
-    "tests/contract/generic-tokens-single-owner-contract.test.js": {
-      "classification": "strict"
-    },
-    "tests/contract/generic-tokens-test-utils.js": {
-      "classification": "strict"
-    },
     "tests/contract/hotspot-budget-contract.test.js": {
       "classification": "strict"
     },
@@ -416,12 +413,6 @@
       "classification": "strict"
     },
     "tests/contract/route-points-render-model-scaling-contract.test.js": {
-      "classification": "strict"
-    },
-    "tests/contract/shared-core-manifest-contract.test.js": {
-      "classification": "strict"
-    },
-    "tests/contract/shared-instructions-block-contract.test.js": {
       "classification": "strict"
     },
     "tests/contract/skill-layer-contract.test.js": {
@@ -515,12 +506,6 @@
       "classification": "strict"
     },
     "tests/plugin/plugin-module-bootstrap.test.js": {
-      "classification": "strict"
-    },
-    "tests/portable-core/portable-core-contract.test.js": {
-      "classification": "strict"
-    },
-    "tests/portable-core/generic-rule-conformance.test.mjs": {
       "classification": "strict"
     },
     "tests/portable-core/portable-policy-engines.test.mjs": {
@@ -1351,9 +1336,6 @@
     "tests/tools/check-file-size.test.js": {
       "classification": "strict"
     },
-    "tests/tools/check-generic-surface.test.js": {
-      "classification": "strict"
-    },
     "tests/tools/check-patterns-atomicity.test.js": {
       "classification": "strict"
     },
@@ -1695,7 +1677,7 @@
     "tests/widgets/text/PositionCoordinateWidget.rendersStatusCircleOnTop.test.js": {
       "classification": "strict"
     },
-    "tests/widgets/text/PositionCoordinateWidgetPhase4.test.js": {
+    "tests/widgets/text/PositionCoordinateWidgetContract.test.js": {
       "classification": "strict"
     },
     "tests/widgets/text/ThreeValueTextWidget-setup.js": {

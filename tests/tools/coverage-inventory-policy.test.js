@@ -35,7 +35,31 @@ function runChecker(tempRoot) {
   });
 }
 
+/** @param {string} tempRoot */
+function runWriter(tempRoot) {
+  return spawnSync(process.execPath, [scriptPath, "--write"], {
+    cwd: tempRoot,
+    env: { ...process.env, LANG: "C", LANGUAGE: "C", LC_ALL: "C" },
+    encoding: "utf8"
+  });
+}
+
 describe("coverage inventory policy hardening", function () {
+  it("keeps the seeded below-floor failure list stable", function () {
+    const fixtureRoot = path.join(root, "tools/test-data/coverage-inventory-below-floor");
+    const expected = JSON.parse(fs.readFileSync(path.join(fixtureRoot, "expected-failures.json"), "utf8"));
+    const result = spawnSync(process.execPath, [scriptPath], {
+      cwd: fixtureRoot,
+      env: { ...process.env, LANG: "C", LANGUAGE: "C", LC_ALL: "C" },
+      encoding: "utf8"
+    });
+    const failures = result.stderr
+      .split("\n")
+      .filter((line) => line && !line.startsWith("coverage inventory check failed:"));
+    expect(result.status).not.toBe(0);
+    expect(failures).toEqual(expected);
+  });
+
   it("rejects baseline entries that do not reference a current measured file", function () {
     const tempRoot = createWorkspace();
     try {
@@ -185,6 +209,96 @@ describe("coverage inventory policy hardening", function () {
 
       expect(result.status).not.toBe(0);
       expect(result.stderr).toContain("Duplicate JSON object key");
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("adds shipped files at the default floor and is idempotent without touching the baseline", function () {
+    const tempRoot = createWorkspace();
+    try {
+      writeJson(path.join(tempRoot, "tools/quality-policy/coverage-floors.json"), {
+        entries: {
+          "plugin.js": { classification: "measured", lines: 80, branches: 65 },
+          "config/example.js": { classification: "measured", lines: 80, branches: 65 }
+        }
+      });
+      writeJson(path.join(tempRoot, "tools/quality-policy/coverage-floor-baseline.json"), {
+        entries: {
+          "plugin.js": { lines: 80, branches: 65 },
+          "config/example.js": { lines: 80, branches: 65 }
+        }
+      });
+      writeJson(path.join(tempRoot, "tsconfig.checkjs.json"), { files: ["types/example.d.ts"] });
+      const baselinePath = path.join(tempRoot, "tools/quality-policy/coverage-floor-baseline.json");
+      const baselineBefore = fs.readFileSync(baselinePath, "utf8");
+      const first = runWriter(tempRoot);
+      expect(first.status).toBe(0);
+      const floorsPath = path.join(tempRoot, "tools/quality-policy/coverage-floors.json");
+      const configPath = path.join(tempRoot, "tsconfig.checkjs.json");
+      const firstFloors = fs.readFileSync(floorsPath, "utf8");
+      const firstConfig = fs.readFileSync(configPath, "utf8");
+      expect(JSON.parse(firstFloors).generatedAgainstEntryCount).toBe(2);
+      expect(JSON.parse(firstConfig).files).toEqual([
+        "types/example.d.ts",
+        "config/example.js",
+        "plugin.js",
+        "vitest.config.js"
+      ]);
+      expect(fs.readFileSync(baselinePath, "utf8")).toBe(baselineBefore);
+      const second = runWriter(tempRoot);
+      expect(second.status).toBe(0);
+      expect(fs.readFileSync(floorsPath, "utf8")).toBe(firstFloors);
+      expect(fs.readFileSync(configPath, "utf8")).toBe(firstConfig);
+      expect(fs.readFileSync(baselinePath, "utf8")).toBe(baselineBefore);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("refuses a write that lowers a captured floor", function () {
+    const tempRoot = createWorkspace();
+    try {
+      writeJson(path.join(tempRoot, "tools/quality-policy/coverage-floors.json"), {
+        entries: {
+          "plugin.js": { classification: "measured", lines: 79, branches: 65 },
+          "config/example.js": { classification: "measured", lines: 80, branches: 65 }
+        }
+      });
+      writeJson(path.join(tempRoot, "tools/quality-policy/coverage-floor-baseline.json"), {
+        entries: {
+          "plugin.js": { lines: 80, branches: 65 },
+          "config/example.js": { lines: 80, branches: 65 }
+        }
+      });
+      const result = runWriter(tempRoot);
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toContain("Coverage floor reduction refused for 'plugin.js': lines 79%");
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("refuses to remove a stale contract-owned classification", function () {
+    const tempRoot = createWorkspace();
+    try {
+      writeJson(path.join(tempRoot, "tools/quality-policy/coverage-floors.json"), {
+        entries: {
+          "plugin.js": { classification: "measured", lines: 80, branches: 65 },
+          "config/example.js": {
+            classification: "contract-owned",
+            ownerTest: "tests/contract/example.test.js",
+            reason: "captured"
+          }
+        }
+      });
+      writeJson(path.join(tempRoot, "tools/quality-policy/coverage-floor-baseline.json"), {
+        entries: { "plugin.js": { lines: 80, branches: 65 } }
+      });
+      fs.rmSync(path.join(tempRoot, "config/example.js"));
+      const result = runWriter(tempRoot);
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toContain("Cannot remove coverage classification for 'config/example.js'");
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }

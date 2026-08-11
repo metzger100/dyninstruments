@@ -1,0 +1,14 @@
+{
+  "entries": {
+    "config/example.js": {
+      "classification": "measured",
+      "lines": 80,
+      "branches": 65
+    },
+    "plugin.js": {
+      "classification": "measured",
+      "lines": 79,
+      "branches": 65
+    }
+  }
+}

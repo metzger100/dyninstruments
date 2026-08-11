@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { createHash } from "node:crypto";
-import { readJsonPolicy } from "./read-json-policy.mjs";
+import { readJsonPolicy, writeFilesArray } from "./read-json-policy.mjs";
 import { readVersionedProfile } from "./profile-schema.mjs";
 import { readCoverageSummary } from "./coverage-summary-adapter.mjs";
 import { runCoveragePolicy } from "../portable-core/coverage-engine.mjs";
@@ -26,8 +26,9 @@ let projectCoveragePolicy;
 /** @type {string[]} */
 let errors;
 
-/** @param {{root?: string, print?: boolean}} [options] @returns {{summary: {ok: boolean, entryCount: number}, errors: string[]}} */
+/** @param {{root?: string, write?: boolean, print?: boolean}} [options] @returns {{summary: {ok: boolean, entryCount: number}, errors: string[]}} */
 export function runCoverageInventoryCheck(options = {}) {
+  if (options.write) return writeCoverageInventory(options);
   root = path.resolve(options.root || process.cwd());
   floorsPath = path.join(root, "tools/quality-policy/coverage-floors.json");
   baselinePath = path.join(root, "tools/quality-policy/coverage-floor-baseline.json");
@@ -52,7 +53,7 @@ export function runCoverageInventoryCheck(options = {}) {
   const liveFiles = collectLiveProductionFiles();
   checkTopLevelSchema(floors, "coverage inventory", errors);
   checkTopLevelSchema(baseline, "coverage floor baseline", errors);
-  checkInventoryCompleteness(floors, liveFiles, errors);
+  checkInventoryCompleteness({ data: floors, live: liveFiles, out: errors });
   checkEntrySchema(floors, errors);
   checkImmutableBaselineCapture(policy, errors);
   checkBaselineSchema(baseline, floors, errors);
@@ -64,8 +65,86 @@ export function runCoverageInventoryCheck(options = {}) {
   return reportResult(options.print !== false);
 }
 
-/** @param {boolean} print @returns {{summary: {ok: boolean, entryCount: number}, errors: string[]}} */
-function reportResult(print) {
+/** Add files at the default floor without writing the captured baseline. @param {{root?: string, print?: boolean}} [options] @returns {{ok: boolean, errors: string[], summary: {ok: boolean, entryCount: number}}} */
+export function writeCoverageInventory(options = {}) {
+  const projectRoot = path.resolve(options.root || process.cwd());
+  const inventoryPath = path.join(projectRoot, "tools/quality-policy/coverage-floors.json");
+  const baselineFile = path.join(projectRoot, "tools/quality-policy/coverage-floor-baseline.json");
+  const policyFile = path.join(projectRoot, "tools/quality-policy/project-coverage-inventory-policy.json");
+  const inventory = readJsonPolicy(inventoryPath);
+  const baselineData = readJsonPolicy(baselineFile);
+  const projectPolicy = readVersionedProfile(policyFile, [
+    "baselinePackageName",
+    "baselineSha256",
+    "productionRoots",
+    "entrypoints",
+    "legacyBelowDefaultFloors"
+  ]);
+  const live = collectLiveProductionFilesForRoot(projectRoot, projectPolicy);
+  const entries = { ...(inventory.entries || {}) };
+  const errors = [];
+  for (const [relativePath, entry] of Object.entries(entries)) {
+    if (live.has(relativePath)) continue;
+    if (entry.classification !== "measured") {
+      errors.push(`Cannot remove coverage classification for '${relativePath}'.`);
+      continue;
+    }
+    if (baselineData.entries?.[relativePath]) {
+      errors.push(`Cannot remove captured coverage baseline entry for '${relativePath}'.`);
+      continue;
+    }
+    delete entries[relativePath];
+  }
+  for (const relativePath of live) {
+    if (!Object.prototype.hasOwnProperty.call(entries, relativePath)) {
+      entries[relativePath] = { classification: "measured", lines: DEFAULT_LINES, branches: DEFAULT_BRANCHES };
+    }
+  }
+  for (const [relativePath, entry] of Object.entries(entries)) {
+    const baselineEntry = baselineData.entries?.[relativePath];
+    if (!baselineEntry || entry.classification !== "measured") continue;
+    const lines = baselineEntry.legacyBelowDefault ? baselineEntry.lines : Math.max(DEFAULT_LINES, baselineEntry.lines);
+    const branches = baselineEntry.legacyBelowDefault
+      ? baselineEntry.branches
+      : Math.max(DEFAULT_BRANCHES, baselineEntry.branches);
+    if (entry.lines < lines)
+      errors.push(`Coverage floor reduction refused for '${relativePath}': lines ${entry.lines}%.`);
+    if (entry.branches < branches) {
+      errors.push(`Coverage floor reduction refused for '${relativePath}': branches ${entry.branches}%.`);
+    }
+  }
+  if (errors.length > 0) return { ok: false, errors, summary: { ok: false, entryCount: Object.keys(entries).length } };
+  const next = {
+    ...inventory,
+    generatedAgainstEntryCount: Object.keys(entries).length,
+    entries: Object.fromEntries(Object.entries(entries).sort(([left], [right]) => left.localeCompare(right)))
+  };
+  fs.writeFileSync(inventoryPath, `${JSON.stringify(next, null, 2)}\n`, "utf8");
+  const configPath = path.join(projectRoot, "tsconfig.checkjs.json");
+  const config = /** @type {{files: string[]}} */ (JSON.parse(fs.readFileSync(configPath, "utf8")));
+  const declarations = config.files.filter((relativePath) => relativePath.endsWith(".d.ts"));
+  // vitest.config.js is typechecked but is not shipped and therefore never enters coverage-floors.json.
+  config.files = [...declarations, ...[...live].sort(), "vitest.config.js"];
+  writeFilesArray(configPath, config.files, config);
+  const summary = { ok: true, entryCount: Object.keys(entries).length };
+  if (options.print !== false) console.log(`SUMMARY_JSON=${JSON.stringify(summary)}`);
+  return { ok: true, errors: [], summary };
+}
+
+function collectLiveProductionFilesForRoot(/** @type {string} */ projectRoot, /** @type {any} */ projectPolicy) {
+  const files = new Set();
+  for (const entrypoint of projectPolicy.entrypoints || []) {
+    if (fs.existsSync(path.join(projectRoot, entrypoint))) files.add(entrypoint);
+  }
+  for (const relativeRoot of projectPolicy.productionRoots || []) {
+    for (const file of collectJavaScriptFiles(path.join(projectRoot, relativeRoot))) {
+      files.add(path.relative(projectRoot, file).replaceAll(path.sep, "/"));
+    }
+  }
+  return files;
+}
+
+function reportResult(/** @type {boolean} */ print) {
   const entryCount = Object.keys(floors?.entries || {}).length;
   const summary = { ok: errors.length === 0, entryCount };
   if (print) {
@@ -77,7 +156,6 @@ function reportResult(print) {
   return { summary, errors };
 }
 
-/** @returns {Set<string>} */
 function collectLiveProductionFiles() {
   const files = new Set();
   for (const entrypoint of policy.entrypoints || []) {
@@ -91,8 +169,7 @@ function collectLiveProductionFiles() {
   return files;
 }
 
-/** @param {string} absoluteRoot @returns {string[]} */
-function collectJavaScriptFiles(absoluteRoot) {
+function collectJavaScriptFiles(/** @type {string} */ absoluteRoot) {
   /** @type {string[]} */
   const files = [];
   if (!fs.existsSync(absoluteRoot)) return files;
@@ -110,8 +187,8 @@ function collectJavaScriptFiles(absoluteRoot) {
   return files;
 }
 
-/** @param {any} data @param {Set<string>} live @param {string[]} out */
-function checkInventoryCompleteness(data, live, out) {
+/** @param {{data: any, live: Set<string>, out: string[]}} options */
+function checkInventoryCompleteness({ data, live, out }) {
   const entries = data?.entries || {};
 
   for (const relativePath of Object.keys(entries)) {
@@ -138,7 +215,6 @@ function checkTopLevelSchema(data, label, out) {
   }
 }
 
-/** @param {string[]} out */
 /** @param {any} projectPolicy @param {string[]} out */
 function checkImmutableBaselineCapture(projectPolicy, out) {
   if (!projectPolicy.baselineSha256 || !projectPolicy.baselinePackageName) return;
@@ -327,5 +403,11 @@ function checkContractOwnedEntries(data, out) {
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
-  process.exitCode = runCoverageInventoryCheck().summary.ok ? 0 : 1;
+  if (process.argv.includes("--write")) {
+    const result = writeCoverageInventory();
+    if (!result.ok) {
+      result.errors.forEach((message) => console.error(message));
+      process.exitCode = 1;
+    }
+  } else process.exitCode = runCoverageInventoryCheck().summary.ok ? 0 : 1;
 }
