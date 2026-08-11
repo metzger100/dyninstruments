@@ -11,6 +11,11 @@
       "sourceType": "local",
       "computedHash": "cfe1fd3e85a1e10cdafc3da39d3fb988e10893e5d1367afa2d9242d7aed32647"
     },
+    "create-release": {
+      "source": ".agents/skills/create-release",
+      "sourceType": "local",
+      "computedHash": "cd2fd108bdb79d55dc9891ec8514529a456aa700dafc65e6e7d7282733c403e6"
+    },
     "doc-sync": {
       "source": ".agents/skills/doc-sync",
       "sourceType": "local",
