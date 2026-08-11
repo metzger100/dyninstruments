@@ -56,12 +56,6 @@ python3 ~/avnav-master/server/avnav_server.py \
 - Enter layout edit mode.
 - Confirm `dyninstruments_*` widgets are visible.
 
-For final manual validation, complete the full profile-aware checklist in
-[documentation/guides/manual-avnav-validation.md](documentation/guides/manual-avnav-validation.md): representative
-radial/linear/HTML widgets, day/night switching, route/AIS interactions, and package upgrade/rollback. Record the date,
-AvNav version, plugin commit/version, environment, and results before declaring a release validated; `release:prepare`
-prints this checklist's location as a reminder but never completes it automatically.
-
 ## 3) How to Prompt AI Effectively
 
 Use explicit prompts with scope, constraints, required checks, and documentation requirements.
@@ -232,9 +226,8 @@ In short: run `npm run release:prepare`, choose a full SemVer version, write not
 Tag publication uses the committed release artifacts created locally. GitHub validates tag/artifact identity and
 publishes the committed ZIP and notes without installing dependencies, rerunning quality, rebuilding, packaging,
 committing, or tagging. It publishes SemVer prerelease tags as GitHub prereleases and stable tags as normal releases.
-The documented manual AvNav validation supplements the blocking jsdom and VM contracts before release creation. Registry
-fragments require no release-only inventory update; the package builder discovers them from `config.bootstrapManifest`
-and fails when bootstrap, disk, dependencies, resources, or staging contents drift.
+Registry fragments require no release-only inventory update; the package builder discovers them from
+`config.bootstrapManifest` and fails when bootstrap, disk, dependencies, resources, or staging contents drift.
 
 ## 10) Pre-Merge Checklist
 

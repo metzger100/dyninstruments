@@ -314,10 +314,6 @@ only validates the tag and matching committed ZIP/notes before publishing them. 
 prereleases; stable tags publish as normal releases. GitHub does not install dependencies, rerun quality, rebuild,
 package, commit, or tag release artifacts.
 
-Before release creation, perform the manual AvNav smoke checklist in `CONTRIBUTING.md`: load the plugin, inspect
-representative radial/linear/HTML widgets in a bundled layout, switch day/night appearance, and exercise the interactive
-route/AIS controls.
-
 ## License
 
 Bundled Roboto and Roboto Mono font assets include Apache 2.0 license text and attribution in

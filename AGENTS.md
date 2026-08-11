@@ -146,9 +146,6 @@ only source of the directory structure and canonical documentation links.
       values, and every active complexity value exactly matches its current finding.
 - [ ] For releases, pushed only a locally created annotated tag; the tag workflow validates and publishes committed
       artifacts with the correct stable/prerelease classification without rerunning quality.
-- [ ] Completed the profile-aware manual AvNav validation checklist before release:
-      [documentation/guides/manual-avnav-validation.md](documentation/guides/manual-avnav-validation.md) (install/load,
-      representative radial/linear/HTML widgets, day/night switch, route/AIS interactions, package upgrade/rollback).
 
 ---
 

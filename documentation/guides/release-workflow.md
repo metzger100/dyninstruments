@@ -38,9 +38,6 @@ publishes the already-committed ZIP and notes.
 - `.github/workflows/publish-release.yml` pins `actions/checkout` and `softprops/action-gh-release` to reviewed exact
   commit SHAs; update both the workflow and `tests/contract/release-workflow-contract.test.js` together when the pinned
   versions change.
-- `release:prepare` prints the location of the manual AvNav validation checklist
-  ([documentation/guides/manual-avnav-validation.md](manual-avnav-validation.md)) as a reminder; completing that
-  checklist is separate, human evidence and is never inferred from a passing `check:all`.
 
 ## Prerequisites
 

@@ -15,8 +15,7 @@ the maintained release guide as the authority; this skill supplies execution ord
 
 1. Run the repository `preflight` skill before release work.
 2. Read `documentation/guides/release-workflow.md` completely.
-3. Read `documentation/guides/manual-avnav-validation.md` completely.
-4. Re-read either guide if it changed during the task.
+3. Re-read the guide if it changed during the task.
 
 Do not copy guide details into other documentation. Update this skill only when agent behavior changes; update the guide
 when the repository's release contract changes.
@@ -86,22 +85,9 @@ Create only `releases/dyninstruments-VERSION.md`. Use the guide's structure and 
 - Include upgrade action only when one is required.
 - Keep internal implementation details out unless they materially explain user impact.
 - Do not claim a fix or capability that is absent from the packaged production diff.
-- Record manual AvNav validation evidence or explicit unverified limitations without claiming completion.
 
 After writing notes, confirm `git status --short` contains only the canonical notes path. Any other dirty path blocks
 creation.
-
-## Handle Manual AvNav Evidence
-
-Use the exact checklist template in `documentation/guides/manual-avnav-validation.md`.
-
-- Accept only durable, reviewable evidence with every field completed.
-- Never convert automated gate results into manual AvNav evidence.
-- If no live AvNav environment is available, record the unverified areas and request validation explicitly.
-- Do not describe the release as fully validated or publish it while required manual evidence is missing.
-
-Local artifact creation may proceed when the user requested it and the missing manual evidence is explicit. Publication
-must remain blocked until the checklist is complete.
 
 ## Create and Verify the Local Release
 
@@ -123,11 +109,11 @@ After success, verify all postconditions:
 5. The tag resolves to the release commit.
 6. `git status --short` is clean.
 
-Report the version, artifact paths, gate result, commit, tag, and manual-validation status.
+Report the version, artifact paths, gate result, commit, and tag.
 
 ## Publish Only When Authorized
 
-Require complete manual AvNav evidence and explicit publication authorization, then push in the guide's order:
+Require explicit publication authorization, then push in the guide's order:
 
 ```bash
 git push origin main
@@ -147,5 +133,4 @@ Stop and report evidence instead of mutating around any of these conditions:
 - Missing, extra, or unreadable packaged production files.
 - Failed quality gate, ZIP integrity, commit, or annotated-tag verification.
 - Existing tag or artifact collision.
-- Missing manual validation when publication is requested.
 - Push not explicitly authorized.

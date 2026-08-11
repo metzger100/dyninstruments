@@ -152,8 +152,6 @@ export function runReleasePrepare(argv = process.argv.slice(2), options = {}) {
   return buildReleasePreparePayload({ ...options, runGit });
 }
 
-const MANUAL_VALIDATION_CHECKLIST_PATH = "documentation/guides/manual-avnav-validation.md";
-
 export function main(argv = process.argv.slice(2)) {
   try {
     const result = runReleasePrepare(argv);
@@ -162,7 +160,6 @@ export function main(argv = process.argv.slice(2)) {
       return;
     }
     process.stdout.write(JSON.stringify(result, null, 2) + "\n");
-    console.error(`Manual AvNav validation checklist (not run automatically): ${MANUAL_VALIDATION_CHECKLIST_PATH}`);
   } catch (error) {
     console.error(/** @type {any} */ (error).message || String(error));
     process.exit(1);

@@ -151,7 +151,7 @@ creation, bootstrap/registry parity, dependency/resource closure, release manife
 
 The tag-only publisher validates the tag and matching committed ZIP/notes, then uploads them. It does not install
 dependencies, rerun quality, build, package, commit, or tag. The shared SemVer tool classifies prereleases while all
-quality, manual AvNav validation, packaging, commits, and tag creation remain local.
+quality, packaging, commits, and tag creation remain local.
 
 `docs:check` runs `markdownlint-cli2`, Linkinator fixture proofs and the repository scan from `linkinator.config.json`,
 then the documentation-specific, format, and reachability contracts (`check:doclinks`, `check:docformat`,
