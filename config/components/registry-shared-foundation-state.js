@@ -48,7 +48,7 @@
     js: BASE + "shared/widget-kits/state/StateScreenMarkup.js",
     css: undefined,
     globalKey: "DyniStateScreenMarkup",
-    deps: ["HtmlWidgetUtils", "StateScreenLabels", "StateScreenTextFit"]
+    deps: ["HtmlWidgetUtils", "StateScreenLabels", "StateScreenTextFit", "ValueMath"]
   };
 
   sf.StateScreenCanvasOverlay = {
@@ -62,7 +62,7 @@
     js: BASE + "shared/widget-kits/html/HtmlDomPatchUtils.js",
     css: undefined,
     globalKey: "DyniHtmlDomPatchUtils",
-    deps: []
+    deps: ["ValueMath"]
   };
 
   sf.HtmlWidgetUtils = {

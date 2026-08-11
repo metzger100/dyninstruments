@@ -29,14 +29,14 @@
     js: BASE + "shared/widget-kits/radial/RadialCanvasPrimitives.js",
     css: undefined,
     globalKey: "DyniRadialCanvasPrimitives",
-    deps: ["RadialAngleMath"]
+    deps: ["RadialAngleMath", "ValueMath"]
   };
 
   sf.RadialFrameRenderer = {
     js: BASE + "shared/widget-kits/radial/RadialFrameRenderer.js",
     css: undefined,
     globalKey: "DyniRadialFrameRenderer",
-    deps: ["RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives"]
+    deps: ["RadialAngleMath", "RadialTickMath", "RadialCanvasPrimitives", "ValueMath"]
   };
 
   sf.ValueMath = {
@@ -146,7 +146,7 @@
     js: BASE + "shared/widget-kits/linear/LinearGaugeLabelFit.js",
     css: undefined,
     globalKey: "DyniLinearGaugeLabelFit",
-    deps: ["CanvasTextFitting", "HtmlWidgetUtils"]
+    deps: ["CanvasTextFitting", "HtmlWidgetUtils", "ValueMath"]
   };
 
   sf.LinearGaugeTextLayout = {

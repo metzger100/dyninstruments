@@ -12,13 +12,13 @@
 
   config.bootstrapManifest = [
     "runtime/namespace.js",
+    "shared/widget-kits/value/ValueMath.js",
     "runtime/format-runtime.js",
     "runtime/canvas-runtime.js",
     "runtime/dom-runtime.js",
     "runtime/editable-defaults.js",
     "runtime/theme/token-catalog.js",
     "runtime/theme/model.js",
-    "shared/widget-kits/value/ValueMath.js",
     "runtime/theme/resolver.js",
     "runtime/theme-runtime.js",
     "config/components/registry-shared-foundation-format.js",

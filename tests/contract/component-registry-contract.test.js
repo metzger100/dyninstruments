@@ -83,6 +83,25 @@ describe("component registry contract", function () {
     expect(contract.dependencyViolations(components)).toEqual([]);
   });
 
+  it("declares every componentContext requirement as a direct dependency", function () {
+    Object.keys(components).forEach(function (componentId) {
+      const entry = components[componentId];
+      const content = contract.readSource(contract.relJsPath(entry));
+      const requiredIds = Array.from(
+        content.matchAll(/componentContext\.components\.require\(\s*["']([^"']+)["']\s*\)/g),
+        function (match) {
+          return match[1];
+        }
+      );
+      const declaredIds = entry.deps || [];
+      const missingIds = requiredIds.filter(function (dependencyId) {
+        return declaredIds.indexOf(dependencyId) < 0;
+      });
+
+      expect(missingIds, componentId).toEqual([]);
+    });
+  });
+
   it("keeps runtime-owned services out of the component registry", function () {
     retiredOwners.FORBIDDEN_COMPONENT_IDS.forEach(function (componentId) {
       expect(components[componentId], componentId).toBeUndefined();

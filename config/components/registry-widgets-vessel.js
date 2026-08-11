@@ -45,7 +45,7 @@
     js: BASE + "shared/widget-kits/vessel/RegattaTimerModel.js",
     css: undefined,
     globalKey: "DyniRegattaTimerModel",
-    deps: []
+    deps: ["ValueMath"]
   };
 
   w.RegattaTimerAudio = {

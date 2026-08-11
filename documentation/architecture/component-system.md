@@ -25,6 +25,10 @@ Ownership split:
   `-gauge.js`, `registry-cluster.js`), each of which must also appear in `config.bootstrapManifest`.
 - Loader supports exactly two API shapes: `factory` (requires `create()`) and `module` (requires a direct module object
   API).
+- Every literal `componentContext.components.require("ComponentId")` request must name a direct dependency in the
+  owner's registry `deps`; transitive availability does not grant access.
+- Bootstrap manifest dependencies must precede their consumers. `shared/widget-kits/value/ValueMath.js` loads before
+  `runtime/format-runtime.js` because the formatter runtime resolves `ValueMath` during script evaluation.
 - `componentContext.theme.tokens.resolveForRoot(rootEl)` resolves immutable theme snapshots for component factories;
   `componentContext.hostActions` is the same function reference as `runtime.hostActions`.
 - `runtime.getAsset(key)` returns the preloaded asset value or `null` for a known-but-failed asset;

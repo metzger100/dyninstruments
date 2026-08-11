@@ -91,7 +91,8 @@
     VesselMapper: {
       js: BASE + "cluster/mappers/VesselMapper.js",
       css: undefined,
-      globalKey: "DyniVesselMapper"
+      globalKey: "DyniVesselMapper",
+      deps: ["ValueMath"]
     },
     EnvironmentMapper: {
       js: BASE + "cluster/mappers/EnvironmentMapper.js",

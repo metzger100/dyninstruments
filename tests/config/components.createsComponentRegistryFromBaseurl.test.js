@@ -199,6 +199,10 @@ describe("config/components.js", function () {
     expect(manifest).toContain("runtime/cluster/RouteActivationLatestWins.js");
     expect(manifest).toContain("runtime/cluster/RouteActivationController.js");
 
+    expect(manifest.indexOf("shared/widget-kits/value/ValueMath.js")).toBeLessThan(
+      manifest.indexOf("runtime/format-runtime.js")
+    );
+
     expect(manifest).not.toContain("shared/theme/ThemeModel.js");
     expect(manifest).not.toContain("shared/theme/ThemeResolver.js");
     expect(manifest).not.toContain("cluster/rendering/CanvasDomSurfaceAdapter.js");
