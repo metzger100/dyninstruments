@@ -3,38 +3,38 @@
   "skills": {
     "add-widget": {
       "source": ".agents/skills/add-widget",
-      "sourceType": "project-local",
+      "sourceType": "local",
       "computedHash": "91f42b04fbec7c834ee5fde9831e947bdef621b70642b4932ed2384bff759fcb"
     },
     "create-plan": {
       "source": ".agents/skills/create-plan",
-      "sourceType": "vendored-generic",
-      "computedHash": "67e91f8fe4a614d9d755023a4e5f33f1b36eeeda817336f1e19c40af57f51e37"
+      "sourceType": "local",
+      "computedHash": "59315f449c6780d930ad720ee2eb617e95f6e92097628c6a97a690e093e3391c"
     },
     "doc-sync": {
       "source": ".agents/skills/doc-sync",
-      "sourceType": "vendored-generic",
-      "computedHash": "9be9eb94f87bf31d2a893f89a566114aff7e11894492906ec3454630a79152a2"
+      "sourceType": "local",
+      "computedHash": "dd35136cef91fbe57445ebafd45b03e515a1165d0c17f4b219e897100baed088"
     },
     "grill-me-repo": {
       "source": ".agents/skills/grill-me-repo",
-      "sourceType": "vendored-generic",
-      "computedHash": "01dbea2ec180f575a51458bb012147c2f8859796d3ede608f8a18067cf9ddad6"
+      "sourceType": "local",
+      "computedHash": "2207b285b552b4eed35344fead7414c167cafa20aaa809f473f9b3bc57409603"
     },
     "mapper-review": {
       "source": ".agents/skills/mapper-review",
-      "sourceType": "project-local",
+      "sourceType": "local",
       "computedHash": "31214a002382de5c17903d00847d26d50f5f6a8ec6f2120b6bcf38fdbc425b5c"
     },
     "preflight": {
       "source": ".agents/skills/preflight",
-      "sourceType": "vendored-generic",
-      "computedHash": "0f499961c56210c47a9eb5d95309615981f9bb46e642c83eb3a897c406f4d2d5"
+      "sourceType": "local",
+      "computedHash": "af0e5f8be3f718fb10595368e251c9c0e966d813cb40ffc3789fcbc85e361994"
     },
     "scan-smells": {
       "source": ".agents/skills/scan-smells",
-      "sourceType": "vendored-generic",
-      "computedHash": "2b8ca3666e809adff6ba91f6f50879684743e36c564f9bccb9b5e32884f2f005"
+      "sourceType": "local",
+      "computedHash": "a982005641ba80b38b400dd89be1747ad8ff4305be97f9fa732ed273f079b974"
     }
   }
 }
