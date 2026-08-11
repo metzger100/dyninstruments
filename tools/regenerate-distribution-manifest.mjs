@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Deterministically materialize the neutral distribution manifest from its source-owner descriptor.
+ * Deterministically materialize the local distribution manifest from its source-owner descriptor.
  * This is maintainer tooling; required gates use --check and never rewrite repository state.
  */
 
@@ -10,13 +10,10 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
-import { runPortableCoreAttestation } from "./portable-core-attest.mjs";
-
 const SOURCE_PATH = "tools/quality-policy/distribution-source.json";
 const MANIFEST_PATH = "tools/quality-policy/distribution-manifest.json";
-const NEUTRAL_OWNER = "avnav-plugin-ai-environment";
-const MATERIALIZATION = "vendored-contract-output";
-const PRODUCT_TOKEN = /dyninstruments|polarrecorder|polar\s+recorder|viewer-widget|python-plus-browser/i;
+const SOURCE_OWNER = "dyninstruments";
+const MATERIALIZATION = "local-authored-quality-sources";
 
 /** @typedef {{schemaVersion: number, distributionVersion: string, sourceOwner: string, materialization: string, paths: string[]}} DistributionSource */
 
@@ -48,8 +45,8 @@ function readSource(root) {
 export function validateDistributionSource(source) {
   if (source.schemaVersion !== 1 || source.distributionVersion !== "1.0.0")
     throw new Error("unsupported distribution source version");
-  if (source.sourceOwner !== NEUTRAL_OWNER || source.materialization !== MATERIALIZATION)
-    throw new Error("distribution source owner/materialization is not neutral");
+  if (source.sourceOwner !== SOURCE_OWNER || source.materialization !== MATERIALIZATION)
+    throw new Error("distribution source owner/materialization is invalid");
   if (!Array.isArray(source.paths) || source.paths.length === 0)
     throw new Error("distribution source paths are required");
   const sorted = [...source.paths].sort();
@@ -58,7 +55,6 @@ export function validateDistributionSource(source) {
   if (new Set(source.paths).size !== source.paths.length) throw new Error("distribution source paths must be unique");
   if (source.paths.some((relativePath) => !isRelativePath(relativePath)))
     throw new Error("distribution source paths must be repository-relative");
-  if (PRODUCT_TOKEN.test(JSON.stringify(source))) throw new Error("distribution source contains a product token");
   return source;
 }
 
@@ -73,17 +69,11 @@ function buildManifest(root, source) {
       throw new Error(`distribution source path is missing: ${relativePath}`);
     paths[relativePath] = createHash("sha256").update(fs.readFileSync(absolutePath)).digest("hex");
   }
-  const attestation = runPortableCoreAttestation({ root, print: false });
   return {
     schemaVersion: 1,
     distributionVersion: source.distributionVersion,
     sourceOwner: source.sourceOwner,
     materialization: source.materialization,
-    portableCore: {
-      coreVersion: attestation.coreVersion,
-      manifestSha256: attestation.manifestSha256,
-      genericRulesSha256: attestation.genericRulesSha256
-    },
     paths
   };
 }

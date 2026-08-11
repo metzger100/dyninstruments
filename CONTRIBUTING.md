@@ -74,6 +74,7 @@ Implement this focused change only:
 - Out of scope: <what must not be changed>
 - Constraints: follow AGENTS.md rules and existing architecture boundaries
 - Validation required: npm run check:all
+- Inventory updates: npm run inventory:write after adding or removing maintained test or production files
 - Documentation requirement: update linked docs if behavior or configuration changed
 ```
 
@@ -211,15 +212,11 @@ contribution requirement.
 
 Do not merge with failing checks.
 
-## Greenfield environment contract
+## Local quality manifest
 
-This repository is one proof profile for the shared AvNav plugin AI environment; the sibling Python-plus-browser profile
-is validated by the same single execution plan. Keep neutral quality sources byte-identical. Run
-`npm run distribution:source:check` before a handoff, use `npm run distribution:source:write` only for an intentional
-source update, and prove both local and peer inventories with `npm run check:distribution` and
-`npm run check:alignment -- --peer /path/to/the/peer-repository`. A clean archive copy must pass `npm run check:all`
-without Git metadata, a sibling checkout, or inherited caches; generated runtime artifacts contain no development
-dependencies.
+Run `npm run distribution:source:check` before a handoff and use `npm run distribution:source:write` only for an
+intentional local manifest update. A clean archive copy must pass `npm run check:all` without Git metadata or inherited
+caches; generated runtime artifacts contain no development dependencies.
 
 ## 9) Releasing
 

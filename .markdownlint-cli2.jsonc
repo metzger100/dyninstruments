@@ -7,10 +7,7 @@
     // Kept excluded even while empty, so a future completed plan can be archived here without
     // reconfiguring this file.
     "exec-plans/completed/**",
-    "releases/**",
-    // Byte-for-byte extracted verbatim from AGENTS.md's SHARED_INSTRUCTIONS block; its leading
-    // blank lines are a mechanical artifact of the extraction boundary, not authored prose.
-    "tools/quality-policy/shared-instructions.md"
+    "releases/**"
   ],
   "config": {
     "default": true,

@@ -2,8 +2,6 @@
 
 This file is guidance for agents working in this repository.
 
-<!-- BEGIN SHARED_INSTRUCTIONS -->
-
 **Critical:** This file is a routing map. Use it to find focused documentation, not to store implementation details.
 
 ---
@@ -75,16 +73,13 @@ explicit README deliverables and exit conditions for these categories.
 Every maintained documentation page has a title, a plain `**Status:** Current.` line, and `## Overview`,
 `## Key Details`, and `## Related` sections. Additional interface material is optional when it helps explain a public
 contract. Keep documentation concise, concrete, and linked from the navigation index when it is new.
-<!-- END SHARED_INSTRUCTIONS -->
 
 ---
 
 ## 5. Project Constraints (AvNav Plugin Environment)
 
-- The signed portable quality core is local and standalone: `npm run check:shared-core` verifies the contract-derived
-  manifest, `npm run check:generic-surface` is blocking, `npm run check:suppressions` owns the independent zero-comment
-  scan, and `npm run portable-core:attest` emits only anonymous content digests. Required completion checks must also
-  pass from an isolated copy containing only this repository.
+- The local quality core is standalone: `npm run check:suppressions` owns the independent zero-comment scan, while the
+  remaining required checks run from this repository without external quality-source dependencies.
 - **No bundler, no runtime build step** - Raw JS loaded via `<script>` tags at runtime
 - **Dev-only npm tooling is allowed** - used for tests and quality checks; not part of plugin runtime loading
 - **UMD component pattern** - All components register on `window.DyniComponents.{globalKey}`

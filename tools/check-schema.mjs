@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @file check-schema - Ajv validation over the local schema profile and portable-core contract
+ * @file check-schema - Ajv validation over the local schema profile and quality profile
  * Documentation: documentation/conventions/quality-gates.md
  */
 
@@ -62,7 +62,7 @@ export function runSchemaCheck(options = {}) {
   ajv.addSchema(readJson(root, profile.baseSchema));
   const pluginSchema = readJson(root, profile.pluginSchema);
   const layoutSchema = readJson(root, profile.layoutSchema);
-  const portableCoreSchema = readJson(root, "schemas/portable-core-contract.schema.json");
+  const qualityProfileSchema = readJson(root, "schemas/portable-profile.schema.json");
 
   /** @type {string[]} */
   const failures = [];
@@ -72,13 +72,13 @@ export function runSchemaCheck(options = {}) {
     const failure = validateFile(ajv, layoutSchema, root, relPath);
     if (failure) failures.push(failure);
   }
-  const portableCoreFailure = validateFile(
+  const qualityProfileFailure = validateFile(
     ajv,
-    portableCoreSchema,
+    qualityProfileSchema,
     root,
-    "tools/quality-policy/portable-core-contract.json"
+    "tools/quality-policy/project-profile.json"
   );
-  if (portableCoreFailure) failures.push(portableCoreFailure);
+  if (qualityProfileFailure) failures.push(qualityProfileFailure);
 
   if (print) {
     if (failures.length > 0) {

@@ -5,9 +5,6 @@ const path = require("node:path");
 /** Ordered `npm run` leaves that check:core must reach, in exact composition order. */
 const REQUIRED_CHECK_CORE_GROUPS = [
   "standard",
-  "portable-core",
-  "generic-surface",
-  "standalone",
   "suppressions",
   "typing",
   "packaging",
@@ -74,7 +71,7 @@ describe("package command surface", function () {
       "vitest run tests/tools/operation-count-evaluator.test.js tests/contract/route-points-render-model-scaling-contract.test.js tests/shared/html/HtmlDomPatchUtils.scaling-contract.test.js tests/shared/text/TextLayoutPrimitives.scaling-contract.test.js"
     );
     expect(scripts["check:core"]).toBe(
-      "node tools/portable-core/gate-orchestrator.mjs --roles standard,portable-core,generic-surface,standalone,suppressions,typing,packaging,focus,smells,product-contracts,test-split,complexity,scaling,documentation,file-size"
+      "node tools/portable-core/gate-orchestrator.mjs --roles standard,suppressions,typing,packaging,focus,smells,product-contracts,test-split,complexity,scaling,documentation,file-size"
     );
   });
 

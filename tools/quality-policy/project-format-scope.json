@@ -66,12 +66,6 @@
       "alternateValidation": "npm run check:core"
     },
     {
-      "pattern": "^tools/quality-policy/shared-instructions\\.md$",
-      "owner": "unsupported",
-      "reason": "Extracted byte-for-byte verification artifact; whitespace is part of the checked content",
-      "alternateValidation": "shared-instructions-block contract test"
-    },
-    {
       "pattern": "^\\.codex/config\\.toml$",
       "owner": "unsupported",
       "reason": "TOML configuration without a maintained formatter",

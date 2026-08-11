@@ -238,33 +238,26 @@ those scoped tokens are explicitly overridden.
 dyninstruments is developed with AI-assisted tooling. See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup,
 architecture, coding standards, and release process.
 
-This repository is a viewer-profile quality role model: its shared quality-gate meanings (`check:fast`, `check:core`,
-`check:all`) are executed by the signed role graph, while its Vitest/coverage/complexity ratchets remain
-Dyninstruments-specific.
-
-The neutral quality distribution is vendored from one source owner. Verify its deterministic output with
-`npm run distribution:source:check`; maintainers regenerate it with `npm run distribution:source:write`, then run
-`npm run check:distribution` and `npm run check:alignment -- --peer /path/to/the/peer-repository`. Neither command
-requires Git metadata, a sibling checkout, or network access. Archive copies of this repository and both generated
-profiles are expected to pass their complete `npm run check:all` gate independently.
+The local quality gates (`check:fast`, `check:core`, and `check:all`) are executed by the signed role graph, while its
+Vitest, coverage, and complexity ratchets remain Dyninstruments-specific. Verify the local distribution manifest with
+`npm run distribution:source:check`; maintainers regenerate it with `npm run distribution:source:write`.
 
 Use Node 26 with npm 12.0.1. Run `npm run setup` once; it installs the locked dependencies and provisions the
 checksum-verified actionlint binary outside `node_modules`. An optional `.codex/config.toml` provides portable Codex CLI
 defaults (project-doc pickup, sandbox/approval mode, cached web search); it is contributor tooling only and is never
 required to run the quality gates.
 
-The standalone quality-core contract is checked with `npm run check:shared-core`; the blocking genericness check is
-`npm run check:generic-surface`, and `npm run check:suppressions` owns the zero-inline-suppression source scan.
-`npm run portable-core:attest` emits only anonymous contract, content, generic-rule, and conformance digests for local
-review. A completed change must also pass `npm run check:all` from an isolated copy containing only this repository. The
-canonical standalone command is `npm run check:standalone`; it checks product/configuration text and active project
-surfaces for external checkout references while leaving completed execution plans as archival records.
+`npm run check:suppressions` owns the zero-inline-suppression source scan. A completed change must also pass
+`npm run check:all` from an isolated copy containing only this repository.
 
 The complete local gate is:
 
 ```bash
 npm run check:all
 ```
+
+When adding or removing maintained files, run `npm run inventory:write` to regenerate owned test, coverage, source, and
+skill-lock artifacts before running the completion gate. The tools inventory remains a deliberate hand-edited exception.
 
 For fast local feedback during development:
 
@@ -300,7 +293,7 @@ new measured files start at 80% lines / 65% branches, and only 12 frozen legacy 
 history required, so shallow clones and source archives pass); a maintainer-only `npm run complexity:regenerate-audit`
 command still regenerates that capture from its recorded Git commit when auditing for drift. Every active complexity
 entry must exactly match its current over-limit metric. Test files likewise default to the separate strict
-`checkJs`/ESLint boundary. The hash-locked test-exception capture permits only the 229 existing non-strict paths to
+`checkJs`/ESLint boundary. The hash-locked test-exception capture permits only the 20 existing non-strict paths to
 remain exempt; temporary harness/split-spec debt requires an inventory-owned removal path, and negative fixtures must be
 referenced by their canonical owner test. An explicitly networked `npm run dependencies:audit` command is available for
 maintainer-run dependency advisory checks; it is never part of `check:all`.

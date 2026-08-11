@@ -34,9 +34,6 @@
   "adapters": {
     "setup": "npm run setup",
     "standard": "npm run check:standard",
-    "portable-core": "npm run check:shared-core && npm run check:profile",
-    "generic-surface": "npm run check:generic-surface",
-    "standalone": "npm run check:standalone",
     "suppressions": "npm run check:suppressions",
     "typing": "npm run typecheck",
     "packaging": "npm run package:check",

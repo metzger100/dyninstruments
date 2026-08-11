@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @file check-distribution - verifies the neutral vendored distribution manifest.
+ * @file check-distribution - verifies the local distribution manifest.
  * Documentation: documentation/conventions/quality-gates.md
  */
 
@@ -10,11 +10,9 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
-import { runPortableCoreAttestation } from "./portable-core-attest.mjs";
 import { runDistributionMaterialization } from "./regenerate-distribution-manifest.mjs";
 
 const MANIFEST_PATH = "tools/quality-policy/distribution-manifest.json";
-const PRODUCT_TOKENS = /dyninstruments|polarrecorder|polar\s+recorder|viewer-widget|python-plus-browser/i;
 
 /** @typedef {{path: string, kind: string, detail?: string}} DistributionFinding */
 
@@ -62,14 +60,8 @@ function inspect(root, findings) {
   if (manifest.schemaVersion !== 1 || manifest.distributionVersion !== "1.0.0") {
     findings.push({ path: MANIFEST_PATH, kind: "version", detail: "unsupported distribution version" });
   }
-  if (
-    manifest.sourceOwner !== "avnav-plugin-ai-environment" ||
-    manifest.materialization !== "vendored-contract-output"
-  ) {
-    findings.push({ path: MANIFEST_PATH, kind: "owner", detail: "neutral source owner/materialization is required" });
-  }
-  if (PRODUCT_TOKENS.test(JSON.stringify(manifest))) {
-    findings.push({ path: MANIFEST_PATH, kind: "product-token", detail: "distribution metadata must remain neutral" });
+  if (manifest.sourceOwner !== "dyninstruments" || manifest.materialization !== "local-authored-quality-sources") {
+    findings.push({ path: MANIFEST_PATH, kind: "owner", detail: "local source owner/materialization is required" });
   }
   const paths = manifest.paths;
   if (!paths || typeof paths !== "object" || Array.isArray(paths) || Object.keys(paths).length === 0) {
@@ -81,24 +73,6 @@ function inspect(root, findings) {
     }
     for (const [relativePath, expectedDigest] of Object.entries(paths))
       checkPath(root, relativePath, expectedDigest, findings);
-  }
-  try {
-    const attestation = runPortableCoreAttestation({ root, print: false });
-    if (JSON.stringify(attestation).includes("undefined")) findings.push({ path: MANIFEST_PATH, kind: "attestation" });
-    const attestationValues =
-      /** @type {{coreVersion?: string, manifestSha256?: string, genericRulesSha256?: string}} */ (attestation);
-    const attestationKeys = /** @type {Array<"coreVersion" | "manifestSha256" | "genericRulesSha256">} */ ([
-      "coreVersion",
-      "manifestSha256",
-      "genericRulesSha256"
-    ]);
-    for (const key of attestationKeys) {
-      if (manifest.portableCore?.[key] !== attestationValues[key]) {
-        findings.push({ path: MANIFEST_PATH, kind: "core-mismatch", detail: key });
-      }
-    }
-  } catch (error) {
-    findings.push({ path: MANIFEST_PATH, kind: "attestation", detail: errorMessage(error) });
   }
   return { manifest };
 }

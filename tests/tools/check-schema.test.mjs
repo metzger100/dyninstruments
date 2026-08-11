@@ -22,7 +22,7 @@ function makeFakeRoot() {
     "avnav-plugin-base.schema.json",
     "plugin.schema.json",
     "layout.schema.json",
-    "portable-core-contract.schema.json"
+    "portable-profile.schema.json"
   ]) {
     fs.copyFileSync(path.join(ROOT, "schemas", name), path.join(root, "schemas", name));
   }
@@ -32,8 +32,8 @@ function makeFakeRoot() {
     path.join(root, "tools/quality-policy/project-schema-profile.json")
   );
   fs.copyFileSync(
-    path.join(ROOT, "tools/quality-policy/portable-core-contract.json"),
-    path.join(root, "tools/quality-policy/portable-core-contract.json")
+    path.join(ROOT, "tools/quality-policy/project-profile.json"),
+    path.join(root, "tools/quality-policy/project-profile.json")
   );
   fs.copyFileSync(path.join(ROOT, "plugin.json"), path.join(root, "plugin.json"));
   return root;

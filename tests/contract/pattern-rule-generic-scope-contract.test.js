@@ -1,7 +1,6 @@
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const { loadProjectTokens } = require("./generic-tokens-test-utils");
 
 const root = process.cwd();
 
@@ -11,14 +10,36 @@ const root = process.cwd();
 // environment. Scope globs (e.g. "cluster/**/*.js") are structural file-location patterns, not
 // rule semantics, so they are deliberately excluded from this check.
 //
-// `generic-tokens.json` is the single owner of the canonical token list, shared with
-// shared-instructions-block-contract.test.js and skill-layer-contract.test.js. This block-severity
-// gate enforces the subset already proven clean (verified below to be a subset of the canonical
-// list). `npm run check:generic-surface` runs the full canonical list at warn severity over every
-// generic rule definition file; the remaining debt it reports (for example the domain token
-// 'widget' inside the `console-in-runtime` identifier) is tracked separately by the
-// generic-surface check until the full genericness promotion is complete.
-const CANONICAL_TOKENS = loadProjectTokens();
+// This test owns the canonical token list used to prove generic rule semantics do not rely on
+// product, domain, or host vocabulary.
+const CANONICAL_TOKENS = [
+  "dyni",
+  "dyninstruments",
+  "dynicomponents",
+  "dyniplugin",
+  "polar.json",
+  "windy",
+  "widget",
+  "cluster",
+  "gauge",
+  "renderer",
+  "mapper",
+  "viewer",
+  "layout profile",
+  "componentContext",
+  "ClusterWidget",
+  "ResponsiveScaleProfile",
+  "widget-kits",
+  "editable",
+  "pluginhandler",
+  "configcache",
+  "avnav",
+  "AVNAV_BASE_URL",
+  "avnav_api",
+  "plugin.py",
+  "plugin.js",
+  "plugin.mjs"
+];
 const PROJECT_TOKENS = [
   "Dyni",
   "componentContext",
@@ -60,7 +81,7 @@ const FAKE_ARGS = {
 };
 
 describe("pattern-rule generic/project scope contract", function () {
-  it("keeps its enforced token subset inside the generic-tokens.json canonical list", function () {
+  it("keeps its enforced token subset inside the canonical token list", function () {
     const lowerCanonical = CANONICAL_TOKENS.map((token) => token.toLowerCase());
     PROJECT_TOKENS.forEach(function (token) {
       expect(lowerCanonical, "canonical list must contain '" + token + "'").toContain(token.toLowerCase());
