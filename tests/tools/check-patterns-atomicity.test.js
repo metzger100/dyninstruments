@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
+const { countFindings } = require("./check-patterns.harness.js");
 
 describe("tools/check-patterns atomicity rules", function () {
   const toolPath = path.resolve(__dirname, "../../tools/check-patterns.mjs");
@@ -54,7 +55,7 @@ describe("tools/check-patterns atomicity rules", function () {
 
   /** @param {any} result @param {string} ruleName */
   function failureCount(result, ruleName) {
-    return result.summary.byRuleFailures[ruleName] || 0;
+    return countFindings(result, ruleName, "block");
   }
 
   it("blocks when widget renderer defaults duplicate config-owned defaults", function () {
@@ -300,7 +301,7 @@ draw({ strokeRect() {} });
 
     expect(result.summary.ok).toBe(false);
     expect(failureCount(result, "canvas-api-typeof-guard")).toBe(1);
-    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(1);
+    expect(countFindings(result, "invalid-lint-suppression", "block")).toBe(1);
   });
 
   it("rejects framework-method suppressions for ThemeResolver bootstrap boundaries", function () {
@@ -317,6 +318,6 @@ resolvePresetDefs({ getModule() { return null; } });
 
     expect(result.summary.ok).toBe(false);
     expect(failureCount(result, "framework-method-typeof-guard")).toBe(1);
-    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(2);
+    expect(countFindings(result, "invalid-lint-suppression", "block")).toBe(2);
   });
 });

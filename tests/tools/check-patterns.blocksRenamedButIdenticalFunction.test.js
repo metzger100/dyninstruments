@@ -1,5 +1,5 @@
 // @ts-check
-const { createWorkspace, joinMessages, runPatternCheck } = require("./check-patterns-setup");
+const { countFindings, createWorkspace, joinMessages, runPatternCheck } = require("./check-patterns-setup");
 
 describe("tools/check-patterns.mjs", function () {
   it("blocks renamed but identical function bodies across files", function () {
@@ -249,8 +249,8 @@ tiny();
     expect(result.summary.ok).toBe(false);
     expect(out).toContain("[legacy-component-loader-api]");
     expect(out).toContain("[runtime-service-reach-through]");
-    expect(result.summary.byRuleFailures["legacy-component-loader-api"]).toBeGreaterThan(0);
-    expect(result.summary.byRuleFailures["runtime-service-reach-through"]).toBeGreaterThan(0);
+    expect(countFindings(result, "legacy-component-loader-api", "block")).toBeGreaterThan(0);
+    expect(countFindings(result, "runtime-service-reach-through", "block")).toBeGreaterThan(0);
   });
 
   it("blocks dead unused helper functions", function () {

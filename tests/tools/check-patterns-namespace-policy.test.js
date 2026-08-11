@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
+const { countFindings } = require("./check-patterns.harness.js");
 
 describe("tools/check-patterns namespace-policy rule", function () {
   const toolPath = path.resolve(__dirname, "../../tools/check-patterns.mjs");
@@ -62,7 +63,7 @@ window.RogueGlobal = { id: "ThreeValueTextWidget" };
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["namespace-token-consistency"]).toBe(1);
+    expect(countFindings(result, "namespace-token-consistency", "block")).toBe(1);
     expect(findingMessages(result)).toContain("RogueGlobal");
   });
 
@@ -79,7 +80,7 @@ window.RogueGlobal = { id: "ThreeValueTextWidget" };
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["namespace-token-consistency"]).toBe(0);
+    expect(countFindings(result, "namespace-token-consistency", "block")).toBe(0);
   });
 
   it("fails on a CSS custom property outside the --dyni- prefix", function () {
@@ -94,7 +95,7 @@ window.RogueGlobal = { id: "ThreeValueTextWidget" };
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["namespace-token-consistency"]).toBe(1);
+    expect(countFindings(result, "namespace-token-consistency", "block")).toBe(1);
     expect(findingMessages(result)).toContain("--stray-scale");
   });
 
@@ -109,6 +110,6 @@ window.RogueGlobal = { id: "ThreeValueTextWidget" };
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["namespace-token-consistency"]).toBe(0);
+    expect(countFindings(result, "namespace-token-consistency", "block")).toBe(0);
   });
 });

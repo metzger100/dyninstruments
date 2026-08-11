@@ -239,3 +239,9 @@ Anchor decisions in `documentation/TABLEOFCONTENTS.md`, `documentation/core-prin
 `documentation/conventions/quality-gates.md`; inspect the active request in `exec-plans/active/` and user-facing impact
 in `README.md`. Validate the resulting decision with `npm run check:smells`, `npm run docs:check`, and
 `npm run check:all`.
+
+## Related
+
+- [TABLEOFCONTENTS.md](../../../documentation/TABLEOFCONTENTS.md)
+- [core-principles.md](../../../documentation/core-principles.md)
+- [quality-gates.md](../../../documentation/conventions/quality-gates.md)

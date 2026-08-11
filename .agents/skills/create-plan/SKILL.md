@@ -284,6 +284,10 @@ After the plan is fully implemented and verified, move it to the corresponding c
 Store active plans in `exec-plans/active/` and use `documentation/guides/exec-plan-authoring.md` for their required
 shape. Check policy ownership in `documentation/conventions/quality-gates.md`, user-facing impact in `README.md`, and
 repository routing in `AGENTS.md`. Before handoff run `npm run docs:check`, `npm run inventory:write` when artifacts are
-affected, and `npm run check:all`. </content>
+affected, and `npm run check:all`.
 
-</invoke>
+## Related
+
+- [exec-plan-authoring.md](../../../documentation/guides/exec-plan-authoring.md)
+- [quality-gates.md](../../../documentation/conventions/quality-gates.md)
+- [AGENTS.md](../../../AGENTS.md)

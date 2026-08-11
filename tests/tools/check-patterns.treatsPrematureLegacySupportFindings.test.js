@@ -1,5 +1,5 @@
 // @ts-check
-const { createWorkspace, joinMessages, runPatternCheck } = require("./check-patterns-setup");
+const { countFindings, createWorkspace, joinMessages, runPatternCheck } = require("./check-patterns-setup");
 
 describe("tools/check-patterns.mjs", function () {
   it("treats premature-legacy-support findings as blocking", function () {
@@ -20,8 +20,8 @@ describe("tools/check-patterns.mjs", function () {
     const out = joinMessages(result.findings);
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["premature-legacy-support"]).toBeGreaterThan(0);
-    expect(result.summary.byRuleWarnings["premature-legacy-support"]).toBe(0);
+    expect(countFindings(result, "premature-legacy-support", "block")).toBeGreaterThan(0);
+    expect(countFindings(result, "premature-legacy-support", "warn")).toBe(0);
     expect(out).toContain("[premature-legacy-support]");
   });
 
@@ -48,7 +48,7 @@ describe("tools/check-patterns.mjs", function () {
     const out = joinMessages(result.findings);
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBeGreaterThan(0);
+    expect(countFindings(result, "invalid-lint-suppression", "block")).toBeGreaterThan(0);
     expect(out).toContain("[invalid-lint-suppression]");
   });
 
@@ -71,7 +71,7 @@ describe("tools/check-patterns.mjs", function () {
     const out = joinMessages(result.findings);
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBeGreaterThan(0);
+    expect(countFindings(result, "invalid-lint-suppression", "block")).toBeGreaterThan(0);
     expect(out).toContain("[invalid-lint-suppression]");
     expect(out).toContain("not-a-real-rule");
   });
@@ -86,8 +86,8 @@ root["innerHTML"] = markup;
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(1);
-    expect(result.summary.byRuleFailures["unsafe-html-dom-sink"]).toBe(1);
+    expect(countFindings(result, "invalid-lint-suppression", "block")).toBe(1);
+    expect(countFindings(result, "unsafe-html-dom-sink", "block")).toBe(1);
   });
 
   it("accepts a valid permanent plugin-boundary marker for catch-fallback-without-suppression", function () {
@@ -112,8 +112,8 @@ root["innerHTML"] = markup;
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
     expect(result.summary.ok).toBe(true);
-    expect(result.summary.byRuleFailures["catch-fallback-without-suppression"]).toBe(0);
-    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(0);
+    expect(countFindings(result, "catch-fallback-without-suppression", "block")).toBe(0);
+    expect(countFindings(result, "invalid-lint-suppression", "block")).toBe(0);
   });
 
   it("accepts a valid temporary plugin-boundary marker with a future expiry", function () {
@@ -134,7 +134,7 @@ root["innerHTML"] = markup;
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
     expect(result.summary.ok).toBe(true);
-    expect(result.summary.byRuleFailures["catch-fallback-without-suppression"]).toBe(0);
+    expect(countFindings(result, "catch-fallback-without-suppression", "block")).toBe(0);
   });
 
   it("rejects an expired plugin-boundary marker", function () {
@@ -156,7 +156,7 @@ root["innerHTML"] = markup;
     const out = joinMessages(result.findings);
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBeGreaterThan(0);
+    expect(countFindings(result, "invalid-lint-suppression", "block")).toBeGreaterThan(0);
     expect(out).toContain("expired");
   });
 
@@ -179,7 +179,7 @@ root["innerHTML"] = markup;
     const out = joinMessages(result.findings);
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBeGreaterThan(0);
+    expect(countFindings(result, "invalid-lint-suppression", "block")).toBeGreaterThan(0);
     expect(out).toContain("owner");
   });
 
@@ -202,7 +202,7 @@ root["innerHTML"] = markup;
     const out = joinMessages(result.findings);
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["premature-legacy-support"]).toBeGreaterThan(0);
+    expect(countFindings(result, "premature-legacy-support", "block")).toBeGreaterThan(0);
     expect(out).toContain("[premature-legacy-support]");
   });
 
@@ -218,7 +218,7 @@ root["innerHTML"] = markup;
     });
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(0);
-    expect(result.summary.byRuleFailures["catch-fallback-without-suppression"]).toBe(1);
+    expect(countFindings(result, "invalid-lint-suppression", "block")).toBe(0);
+    expect(countFindings(result, "catch-fallback-without-suppression", "block")).toBe(1);
   });
 });

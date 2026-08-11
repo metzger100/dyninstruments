@@ -1,5 +1,5 @@
 // @ts-check
-const { createWorkspace, joinMessages, runPatternCheck } = require("./check-patterns-setup");
+const { countFindings, createWorkspace, joinMessages, runPatternCheck } = require("./check-patterns-setup");
 
 describe("tools/check-patterns.mjs", function () {
   it("blocks fallbackText wrappers that duplicate componentContext.format.applyFormatter defaults", function () {
@@ -28,7 +28,7 @@ describe("tools/check-patterns.mjs", function () {
     const out = joinMessages(result.findings);
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["redundant-internal-fallback"]).toBeGreaterThan(0);
+    expect(countFindings(result, "redundant-internal-fallback", "block")).toBeGreaterThan(0);
     expect(out).toContain("[redundant-internal-fallback]");
     expect(out).toContain("componentContext.format.applyFormatter");
   });
@@ -78,7 +78,7 @@ describe("tools/check-patterns.mjs", function () {
     const out = joinMessages(result.findings);
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["exec-plan-reference"]).toBeGreaterThan(0);
+    expect(countFindings(result, "exec-plan-reference", "block")).toBeGreaterThan(0);
     expect(out).toContain("[exec-plan-reference]");
   });
 
@@ -92,7 +92,7 @@ describe("tools/check-patterns.mjs", function () {
     const out = joinMessages(result.findings);
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["exec-plan-reference"]).toBeGreaterThan(0);
+    expect(countFindings(result, "exec-plan-reference", "block")).toBeGreaterThan(0);
     expect(out).toContain("[exec-plan-reference]");
   });
 });

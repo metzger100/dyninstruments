@@ -1,5 +1,5 @@
 // @ts-check
-const { createWorkspace, runPatternCheck } = require("./check-patterns-setup");
+const { countFindings, createWorkspace, runPatternCheck } = require("./check-patterns-setup");
 
 describe("tools/check-patterns.mjs", function () {
   it("blocks computed, compound, and attribute-based HTML sinks", function () {
@@ -28,7 +28,7 @@ patch({}, "<div></div>");
     });
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["unsafe-html-dom-sink"]).toBe(14);
+    expect(countFindings(result, "unsafe-html-dom-sink", "block")).toBe(14);
   });
 
   it("allows only the reviewed resource-loader event assignments", function () {
@@ -48,7 +48,7 @@ loadImage({}, {}, "code");
     });
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["unsafe-html-dom-sink"]).toBe(4);
+    expect(countFindings(result, "unsafe-html-dom-sink", "block")).toBe(4);
   });
 
   it("allows only the exact reviewed HtmlDomPatchUtils assignment targets", function () {
@@ -67,7 +67,7 @@ patchInnerHtml({}, {}, "<div></div>", function () {});
     });
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["unsafe-html-dom-sink"]).toBe(4);
+    expect(countFindings(result, "unsafe-html-dom-sink", "block")).toBe(4);
   });
 
   it("blocks Infinity and numeric magic sentinels in mapper output", function () {
@@ -92,7 +92,7 @@ patchInnerHtml({}, {}, "<div></div>", function () {});
     });
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["absent-numeric-sentinel"]).toBe(6);
+    expect(countFindings(result, "absent-numeric-sentinel", "block")).toBe(6);
   });
 
   it("blocks numeric and string prop normalization in every renderer file", function () {
@@ -112,7 +112,7 @@ buildModel({}, {});
     });
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["mapper-prop-renormalization"]).toBe(4);
+    expect(countFindings(result, "mapper-prop-renormalization", "block")).toBe(4);
   });
 
   it("blocks aliased, destructured, and delegated mapper-prop normalization", function () {
@@ -132,7 +132,7 @@ buildModel({}, {}, {});
     });
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["mapper-prop-renormalization"]).toBe(3);
+    expect(countFindings(result, "mapper-prop-renormalization", "block")).toBe(3);
   });
 
   it("allows ordinary zero-valued mapper counts", function () {
@@ -148,6 +148,6 @@ buildModel({}, {}, {});
     });
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["absent-numeric-sentinel"]).toBe(0);
+    expect(countFindings(result, "absent-numeric-sentinel", "block")).toBe(0);
   });
 });

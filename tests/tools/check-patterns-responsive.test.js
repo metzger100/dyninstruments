@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
+const { countFindings } = require("./check-patterns.harness.js");
 
 describe("tools/check-patterns responsive rules", function () {
   const toolPath = path.resolve(__dirname, "../../tools/check-patterns.mjs");
@@ -65,7 +66,7 @@ measureMetricTile({ h: 20 });
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["responsive-layout-hard-floor"]).toBe(1);
+    expect(countFindings(result, "responsive-layout-hard-floor", "block")).toBe(1);
     expect(findingMessages(result)).toContain("[responsive-layout-hard-floor]");
   });
 
@@ -82,7 +83,7 @@ compute({ h: 20 });
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["responsive-layout-hard-floor"]).toBe(1);
+    expect(countFindings(result, "responsive-layout-hard-floor", "block")).toBe(1);
     expect(findingMessages(result)).toContain("clampNumber(rect.h, 10, 50)");
   });
 
@@ -98,7 +99,7 @@ drawPointer(20);
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["responsive-layout-hard-floor"]).toBe(0);
+    expect(countFindings(result, "responsive-layout-hard-floor", "block")).toBe(0);
   });
 
   it("ignores 0/1/2 technical safety floors", function () {
@@ -113,7 +114,7 @@ measureMetricTile({ h: 20 });
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["responsive-layout-hard-floor"]).toBe(0);
+    expect(countFindings(result, "responsive-layout-hard-floor", "block")).toBe(0);
   });
 
   it("rejects generic suppressions for intentional technical floors", function () {
@@ -130,8 +131,8 @@ measureMetricTile({ h: 20 });
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["responsive-layout-hard-floor"]).toBe(1);
-    expect(result.summary.byRuleFailures["invalid-lint-suppression"]).toBe(1);
+    expect(countFindings(result, "responsive-layout-hard-floor", "block")).toBe(1);
+    expect(countFindings(result, "invalid-lint-suppression", "block")).toBe(1);
   });
 
   it("fails when an owner stops resolving ResponsiveScaleProfile", function () {
@@ -146,7 +147,7 @@ function create(def, Helpers) {
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["responsive-profile-ownership"]).toBe(1);
+    expect(countFindings(result, "responsive-profile-ownership", "block")).toBe(1);
     expect(findingMessages(result)).toContain("must resolve ResponsiveScaleProfile directly");
   });
 
@@ -165,7 +166,7 @@ function create(def, componentContext) {
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["responsive-profile-ownership"]).toBe(2);
+    expect(countFindings(result, "responsive-profile-ownership", "block")).toBe(2);
     expect(findingMessages(result)).toContain("profileApi.computeProfile");
     expect(findingMessages(result)).toContain("profileApi.computeInsetPx");
   });
@@ -182,7 +183,7 @@ function create(def, componentContext) {
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
     expect(result.summary.ok).toBe(false);
-    expect(result.summary.byRuleFailures["responsive-profile-ownership"]).toBe(1);
+    expect(countFindings(result, "responsive-profile-ownership", "block")).toBe(1);
     expect(findingMessages(result)).toContain("must not resolve ResponsiveScaleProfile directly");
   });
 
@@ -210,6 +211,6 @@ function render(layout) {
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
-    expect(result.summary.byRuleFailures["responsive-profile-ownership"]).toBe(0);
+    expect(countFindings(result, "responsive-profile-ownership", "block")).toBe(0);
   });
 });

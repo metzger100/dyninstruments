@@ -9,17 +9,17 @@
     "create-plan": {
       "source": ".agents/skills/create-plan",
       "sourceType": "local",
-      "computedHash": "59315f449c6780d930ad720ee2eb617e95f6e92097628c6a97a690e093e3391c"
+      "computedHash": "cfe1fd3e85a1e10cdafc3da39d3fb988e10893e5d1367afa2d9242d7aed32647"
     },
     "doc-sync": {
       "source": ".agents/skills/doc-sync",
       "sourceType": "local",
-      "computedHash": "dd35136cef91fbe57445ebafd45b03e515a1165d0c17f4b219e897100baed088"
+      "computedHash": "5eff88500e907f4eb329f53e03690e25320c7f30f262d0a7e7612fcc3eaf8a55"
     },
     "grill-me-repo": {
       "source": ".agents/skills/grill-me-repo",
       "sourceType": "local",
-      "computedHash": "2207b285b552b4eed35344fead7414c167cafa20aaa809f473f9b3bc57409603"
+      "computedHash": "c6989b121dc47a2c0424165d1290081176aa01539998863fd823b9fabb3c9e76"
     },
     "mapper-review": {
       "source": ".agents/skills/mapper-review",
@@ -29,12 +29,12 @@
     "preflight": {
       "source": ".agents/skills/preflight",
       "sourceType": "local",
-      "computedHash": "af0e5f8be3f718fb10595368e251c9c0e966d813cb40ffc3789fcbc85e361994"
+      "computedHash": "6d22eefaed32c9f030990f9bef7b10462d85d5fab1f10acad7fb582f7ed11aec"
     },
     "scan-smells": {
       "source": ".agents/skills/scan-smells",
       "sourceType": "local",
-      "computedHash": "a982005641ba80b38b400dd89be1747ad8ff4305be97f9fa732ed273f079b974"
+      "computedHash": "81cd15d58370430a5784195dcd28a77d0587a21b2fc9367a1ea90b63466fb351"
     }
   }
 }

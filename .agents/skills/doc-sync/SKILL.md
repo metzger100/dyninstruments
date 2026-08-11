@@ -10,7 +10,8 @@ description:
 ## Description
 
 Ensures documentation stays synchronized with code changes. Applies the touchpoint matrix from
-`documentation-maintenance.md` and enforces the documentation format from `documentation-format.md`.
+[documentation-maintenance.md](../../../documentation/guides/documentation-maintenance.md) and enforces the
+documentation format from [documentation-format.md](../../../documentation/conventions/documentation-format.md).
 
 ## When to Use
 
@@ -146,3 +147,9 @@ Non-zero exit means docs are not consistent. Fix all failures before proceeding.
 - ❌ Using more than 1-2 examples per concept
 - ❌ Leaving empty sections in docs
 - ❌ Duplicating the full AGENTS.md rule catalog into CLAUDE.md
+
+## Related
+
+- [documentation-maintenance.md](../../../documentation/guides/documentation-maintenance.md)
+- [documentation-format.md](../../../documentation/conventions/documentation-format.md)
+- [TABLEOFCONTENTS.md](../../../documentation/TABLEOFCONTENTS.md)

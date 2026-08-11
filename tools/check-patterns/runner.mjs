@@ -39,10 +39,6 @@ export function runPatternCheck(options) {
   const checkedFiles = new Set();
   /** @type {Record<string, number>} */
   const byRule = {};
-  /** @type {Record<string, number>} */
-  const byRuleFailures = {};
-  /** @type {Record<string, number>} */
-  const byRuleWarnings = {};
   for (const rule of options.rules) {
     const files = filesForScope(rule.scope);
     for (const file of files) checkedFiles.add(file);
@@ -50,7 +46,7 @@ export function runPatternCheck(options) {
     const ruleFindings = run(rule, files)
       .map(function (/** @type {Finding} */ finding) {
         const severity = finding.severity || rule.severity || "block";
-        return { ...finding, severity };
+        return { ...finding, rule: rule.name, severity };
       })
       .filter(function (/** @type {Finding} */ finding) {
         if (rule.name === "invalid-lint-suppression") return true;
@@ -63,8 +59,6 @@ export function runPatternCheck(options) {
     byRule[rule.name] = ruleFindings.length;
     const ruleFailures = ruleFindings.filter((/** @type {Finding} */ finding) => finding.severity === "block");
     const ruleWarns = ruleFindings.filter((/** @type {Finding} */ finding) => finding.severity === "warn");
-    byRuleFailures[rule.name] = ruleFailures.length;
-    byRuleWarnings[rule.name] = ruleWarns.length;
     findings.push(...ruleFailures);
     warnings.push(...ruleWarns);
   }
@@ -77,12 +71,6 @@ export function runPatternCheck(options) {
     warnings: warnings.length,
     byRule: Object.fromEntries(Object.entries(byRule).filter(([, count]) => count > 0))
   };
-  // Keep the programmatic compatibility view non-enumerable for existing callers; the emitted
-  // summary carries only non-zero rule counts and never repeats derived failure/warning maps.
-  Object.defineProperties(summary, {
-    byRuleFailures: { value: byRuleFailures, enumerable: false },
-    byRuleWarnings: { value: byRuleWarnings, enumerable: false }
-  });
   if (options.print !== false) printResult(findings, warnings, summary);
   return {
     summary,
@@ -125,9 +113,9 @@ function validateConfiguredExceptions(exceptions) {
 
 /** @param {Finding[]} findings @param {Finding[]} warnings @param {any} summary @returns {void} */
 function printResult(findings, warnings, summary) {
-  for (const warning of warnings) console.log(warning.message);
+  for (const warning of warnings) console.log(`${warning.file}:${warning.line}: ${warning.message}`);
   const print = getWarnMode() ? console.log : console.error;
-  for (const finding of findings) print(finding.message);
+  for (const finding of findings) print(`${finding.file}:${finding.line}: ${finding.message}`);
   if (findings.length || warnings.length) print("SUMMARY_JSON=" + JSON.stringify(summary));
   else {
     console.log("Pattern check passed.");

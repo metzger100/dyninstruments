@@ -137,3 +137,9 @@ absolute and take precedence over any plan document.
 - Starting implementation before completing preflight
 - Skipping the smell-prevention/anti-pattern document because "it's just a cleanup task"
 - Reading verbose examples when not implementing a matching pattern
+
+## Related
+
+- [TABLEOFCONTENTS.md](../../../documentation/TABLEOFCONTENTS.md)
+- [coding-standards.md](../../../documentation/conventions/coding-standards.md)
+- [smell-prevention.md](../../../documentation/conventions/smell-prevention.md)

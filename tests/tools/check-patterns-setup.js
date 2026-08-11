@@ -1,6 +1,7 @@
 const {
   toolPath,
   tempDirs,
+  countFindings,
   runPatternCheck,
   createWorkspace,
   joinMessages,
@@ -19,6 +20,7 @@ function reportMessages(result, severity) {
 
 module.exports = {
   createWorkspace,
+  countFindings,
   failFastRuleCases,
   joinMessages,
   joinWarningMessages,

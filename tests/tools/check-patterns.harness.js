@@ -4,7 +4,7 @@ const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 /**
- * @typedef {{file: string, line: number, message: string, [key: string]: unknown}} DyniPatternFinding
+ * @typedef {{file: string, line: number, rule: string, message: string, [key: string]: unknown}} DyniPatternFinding
  * @typedef {{root?: string, warnMode?: boolean, print?: boolean}} DyniPatternCheckOptions
  * @typedef {{
  *   ok: boolean,
@@ -12,9 +12,7 @@ const { pathToFileURL } = require("node:url");
  *   checkedFiles: number,
  *   failures: number,
  *   warnings: number,
- *   byRule: Record<string, number>,
- *   byRuleFailures: Record<string, number>,
- *   byRuleWarnings: Record<string, number>
+ *   byRule: Record<string, number>
  * }} DyniPatternCheckSummary
  * @typedef {{summary: DyniPatternCheckSummary, findings: DyniPatternFinding[], warnings: DyniPatternFinding[]}} DyniPatternCheckResult
  */
@@ -72,7 +70,14 @@ function joinWarningMessages(warnings) {
   return warnings.map((item) => item.message).join("\n");
 }
 
+/** @param {DyniPatternCheckResult} result @param {string} rule @param {"block"|"warn"} severity @returns {number} */
+function countFindings(result, rule, severity) {
+  const findings = severity === "warn" ? result.warnings : result.findings;
+  return findings.filter((finding) => finding.rule === rule).length;
+}
+
 module.exports = {
+  countFindings,
   toolPath,
   tempDirs,
   runPatternCheck,

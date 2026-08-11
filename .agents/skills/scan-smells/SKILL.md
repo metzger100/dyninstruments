@@ -353,3 +353,9 @@ Use the maintained catalog in `documentation/conventions/smell-prevention.md`, t
 `tools/check-patterns/rules.mjs`, and the suppression owner at `tools/portable-core/suppression-engine.mjs`. The
 contract test `tests/contract/smell-catalog-coverage-contract.test.js` proves that every live rule is documented. Run
 `npm run check:patterns`, `npm run check:suppressions`, `npm run check:smells`, and finally `npm run check:all`.
+
+## Related
+
+- [smell-prevention.md](../../../documentation/conventions/smell-prevention.md)
+- [smell-fix-playbooks.md](../../../documentation/conventions/smell-fix-playbooks.md)
+- [quality-gates.md](../../../documentation/conventions/quality-gates.md)

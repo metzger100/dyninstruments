@@ -1,5 +1,5 @@
 // @ts-check
-const { createWorkspace, joinMessages, runPatternCheck } = require("./check-patterns-setup");
+const { countFindings, createWorkspace, joinMessages, runPatternCheck } = require("./check-patterns-setup");
 
 describe("tools/check-patterns.mjs", function () {
   it("blocks truthy fallback on .default properties", function () {
@@ -150,8 +150,8 @@ describe("tools/check-patterns.mjs", function () {
     expect(result.summary.ok).toBe(false);
     expect(result.summary.failures).toBe(1);
     expect(result.summary.warnings).toBe(0);
-    expect(result.summary.byRuleFailures["mapper-output-complexity"]).toBe(1);
-    expect(result.summary.byRuleWarnings["mapper-output-complexity"]).toBe(0);
+    expect(countFindings(result, "mapper-output-complexity", "block")).toBe(1);
+    expect(countFindings(result, "mapper-output-complexity", "warn")).toBe(0);
     expect(failureOut).toContain("[mapper-output-complexity]");
     expect(failureOut).toContain("kind 'speedGraphic'");
   });
@@ -197,8 +197,8 @@ describe("tools/check-patterns.mjs", function () {
     expect(result.summary.ok).toBe(false);
     expect(result.summary.failures).toBe(1);
     expect(result.summary.warnings).toBe(0);
-    expect(result.summary.byRuleFailures["mapper-output-complexity"]).toBe(1);
-    expect(result.summary.byRuleWarnings["mapper-output-complexity"]).toBe(0);
+    expect(countFindings(result, "mapper-output-complexity", "block")).toBe(1);
+    expect(countFindings(result, "mapper-output-complexity", "warn")).toBe(0);
     expect(failureOut).toContain("[mapper-output-complexity]");
     expect(failureOut).toContain("kind 'speedGraphic'");
   });
@@ -312,7 +312,7 @@ describe("tools/check-patterns.mjs", function () {
 
     expect(result.summary.ok).toBe(false);
     expect(result.summary.byRule).toHaveProperty("redundant-internal-fallback");
-    expect(result.summary.byRuleFailures["redundant-internal-fallback"]).toBeGreaterThan(0);
+    expect(countFindings(result, "redundant-internal-fallback", "block")).toBeGreaterThan(0);
     expect(out).toContain("[redundant-internal-fallback]");
     expect(out).toContain("trackCaption");
     expect(out).toContain("trackUnit");
