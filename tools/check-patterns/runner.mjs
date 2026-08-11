@@ -75,10 +75,14 @@ export function runPatternCheck(options) {
     checkedFiles: checkedFiles.size,
     failures: findings.length,
     warnings: warnings.length,
-    byRule,
-    byRuleFailures,
-    byRuleWarnings
+    byRule: Object.fromEntries(Object.entries(byRule).filter(([, count]) => count > 0))
   };
+  // Keep the programmatic compatibility view non-enumerable for existing callers; the emitted
+  // summary carries only non-zero rule counts and never repeats derived failure/warning maps.
+  Object.defineProperties(summary, {
+    byRuleFailures: { value: byRuleFailures, enumerable: false },
+    byRuleWarnings: { value: byRuleWarnings, enumerable: false }
+  });
   if (options.print !== false) printResult(findings, warnings, summary);
   return {
     summary,

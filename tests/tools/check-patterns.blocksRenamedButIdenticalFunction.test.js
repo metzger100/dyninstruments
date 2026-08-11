@@ -124,8 +124,8 @@ computeValue(3);
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
     expect(result.summary.ok).toBe(true);
-    expect(result.summary.byRule["duplicate-functions"]).toBe(0);
-    expect(result.summary.byRule["duplicate-block-clones"]).toBe(0);
+    expect(result.summary.byRule["duplicate-functions"] || 0).toBe(0);
+    expect(result.summary.byRule["duplicate-block-clones"] || 0).toBe(0);
   });
 
   it("blocks long duplicated function blocks across files", function () {
@@ -220,8 +220,8 @@ tiny();
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
     expect(result.summary.ok).toBe(true);
-    expect(result.summary.byRule["duplicate-functions"]).toBe(0);
-    expect(result.summary.byRule["duplicate-block-clones"]).toBe(0);
+    expect(result.summary.byRule["duplicate-functions"] || 0).toBe(0);
+    expect(result.summary.byRule["duplicate-block-clones"] || 0).toBe(0);
   });
 
   it("blocks legacy component-loader helpers and direct runtime service reach-throughs", function () {

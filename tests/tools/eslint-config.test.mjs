@@ -14,6 +14,7 @@ import { test } from "vitest";
 
 const ROOT = process.cwd();
 const ESLINT_CLI = path.join(ROOT, "node_modules", "eslint", "bin", "eslint.js");
+let fixtureSerial = 0;
 
 /**
  * @param {unknown} error
@@ -33,10 +34,12 @@ function execErrorOutput(error) {
  * @returns {{ok: boolean, output: string}}
  */
 function runEslintOnFixture(relativePath, content) {
-  const absolutePath = path.join(ROOT, relativePath);
+  const extension = path.extname(relativePath);
+  const fixturePath = `${relativePath.slice(0, -extension.length)}.${process.pid}.${fixtureSerial++}${extension}`;
+  const absolutePath = path.join(ROOT, fixturePath);
   fs.writeFileSync(absolutePath, content);
   try {
-    execFileSync(process.execPath, [ESLINT_CLI, relativePath], { cwd: ROOT, stdio: "pipe" });
+    execFileSync(process.execPath, [ESLINT_CLI, fixturePath], { cwd: ROOT, stdio: "pipe" });
     return { ok: true, output: "" };
   } catch (error) {
     return { ok: false, output: execErrorOutput(error) };

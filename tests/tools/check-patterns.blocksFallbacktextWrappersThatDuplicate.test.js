@@ -52,7 +52,7 @@ describe("tools/check-patterns.mjs", function () {
 
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
     expect(result.summary.ok).toBe(true);
-    expect(result.summary.byRule["redundant-internal-fallback"]).toBe(0);
+    expect(result.summary.byRule["redundant-internal-fallback"] || 0).toBe(0);
   });
 
   it("allows a literal historical exec-plan filename reference", function () {
@@ -63,7 +63,7 @@ describe("tools/check-patterns.mjs", function () {
     const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
 
     expect(result.summary.ok).toBe(true);
-    expect(result.summary.byRule["exec-plan-reference"]).toBe(0);
+    expect(result.summary.byRule["exec-plan-reference"] || 0).toBe(0);
   });
 
   it("blocks a historical plan-number citation outside exec-plans/", function () {

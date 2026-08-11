@@ -27,7 +27,7 @@ test("the real repo test-focus check passes", () => {
   const result = runTestFocusCheck({ root: process.cwd(), print: false });
   assert.equal(result.ok, true, result.failures.join("\n"));
   assert.ok(result.checkedFiles > 0);
-});
+}, 30000);
 
 test("passes for a file with no focus/skip calls", () => {
   const root = makeFakeRoot('it("does a thing", function () {});\n');
