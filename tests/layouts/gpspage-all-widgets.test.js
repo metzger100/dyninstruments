@@ -247,7 +247,7 @@ describe("tests/layouts/gpspage-all-widgets.json", function () {
       caption_xteDisplayDst: "Distance To Waypoint",
       caption_xteDisplayBrg: "Bearing To Waypoint",
       showWpNameXteDisplay: true,
-      leadingZero: false
+      xteDisplayScale_nm: 0.1
     });
 
     expect(findWidget(page2, "zoom")).toMatchObject({

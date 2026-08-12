@@ -17,6 +17,8 @@ instrument widgets for navigation, wind, environment, alarms, and route handling
 | Anchor           | Anchor watch circle                                                                 |
 | Vessel           | Alarms, regatta timer, position coordinates, center display, three-value text       |
 
+Both XTE renderers clamp out-of-scale indicators to the edge and switch the indicator to the alarm color.
+
 <img width="1920" height="1080" alt="Bildschirmfoto vom 2026-07-08 20-29-00" src="https://github.com/user-attachments/assets/6be666cf-df3c-4832-9ba3-265f5497e152" />
 <img width="1920" height="1080" alt="Bildschirmfoto vom 2026-07-08 20-28-44" src="https://github.com/user-attachments/assets/097ad058-a6ca-43f8-b2bf-6879a877ef5d" />
 

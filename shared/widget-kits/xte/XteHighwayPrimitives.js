@@ -238,17 +238,8 @@
       ctx.strokeStyle = colors.pointer;
       strokeSegment(ctx, cx, horizonY, cx, baseY, centerlineWidth);
 
-      ctx.fillStyle = colors.pointer;
+      ctx.fillStyle = overflow ? colors.alarm : colors.pointer;
       drawBoatMarker(ctx, markerX, markerY, markerLength, markerBeam);
-
-      if (overflow) {
-        ctx.fillStyle = colors.alarm;
-        const edgeX = cx + (safeNorm >= 0 ? 1 : -1) * nearHalf * 0.93;
-        const edgeR = Math.max(1, Math.floor(markerLength * 0.3));
-        ctx.beginPath();
-        ctx.arc(edgeX, markerY - markerLength * 0.12, edgeR, 0, Math.PI * 2);
-        ctx.fill();
-      }
 
       ctx.restore();
     }

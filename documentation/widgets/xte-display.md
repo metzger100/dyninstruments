@@ -50,13 +50,13 @@ Layout ownership:
 - Layout owner: `shared/widget-kits/xte/XteHighwayLayout.js`; drawing/marker-visibility owner:
   `shared/widget-kits/xte/XteHighwayPrimitives.js`.
 - `xteScale` comes from the mapper-selected `xteDisplayScale_<token>` field (fallback `1`); marker position is clamped
-  and shown with an overflow alarm cue when `abs(xte) > xteScale`.
+  and the boat changes to the alarm color when `abs(xte) > xteScale`.
 - Layout thresholds: `layout.xteRatioThresholdNormal` default `0.85` (below -> `high`), `layout.xteRatioThresholdFlat`
   default `2.3` (above -> `flat`).
 - `layout.hideTextualMetrics` (default `false`) switches to a graphics-only layout branch (no metric tiles, no
   waypoint-name rect); state-screen selection is unaffected.
-- Only the `back` static highway layer is cached via `CanvasLayerCache`; the XTE marker, centerline overlay, overflow
-  cue, and live metric text are always redrawn.
+- Only the `back` static highway layer is cached via `CanvasLayerCache`; the XTE marker, centerline overlay, and live
+  metric text are always redrawn.
 - `stableDigits` (default `false`) enables stable-digit normalization with a reserved side-suffix slot for `XTE`.
 
 ## Module Registration
@@ -126,8 +126,8 @@ Theme is resolved once per frame via `const tokens = componentContext.theme.toke
 
 | Visual element                         | Token                                                                      |
 | -------------------------------------- | -------------------------------------------------------------------------- |
-| Boat marker + active centerline        | `tokens.colors.pointer`                                                    |
-| Out-of-scale clamp marker              | `tokens.colors.alarm`                                                      |
+| In-range boat + active centerline      | `tokens.colors.pointer`                                                    |
+| Out-of-scale boat                      | `tokens.colors.alarm`                                                      |
 | Road edge + horizon strokes            | `tokens.surface.fg`                                                        |
 | Perspective bars + center seam markers | `tokens.surface.fg`                                                        |
 | Highway line widths                    | internal factors via `GeometryScale.scaleStroke(..., strokeWeight)`        |
@@ -196,7 +196,8 @@ XTE marker placement uses a mapper-resolved full-scale range:
 - right edge = `+xteScale`
 - marker uses a boat hull glyph that scales with highway geometry (not fixed pixels)
 
-If `abs(xte) > xteScale`, marker position is clamped to the edge and overflow alarm cue is rendered.
+If `abs(xte) > xteScale`, marker position is clamped to the edge and the boat uses the alarm color. No separate overflow
+dot is rendered.
 
 Implementation note:
 
@@ -222,7 +223,6 @@ Dynamic elements are never cached:
 
 - current XTE marker position
 - active centerline overlay
-- overflow alarm cue
 - live metric text
 
 Offscreen layer transform contract:

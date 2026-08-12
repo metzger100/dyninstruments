@@ -359,7 +359,7 @@
           "caption_xteDisplayBrg": "Bearing To Waypoint",
           "unit_xteDisplayBrg": "degrees true",
           "showWpNameXteDisplay": true,
-          "leadingZero": false
+          "xteDisplayScale_nm": 0.1
         },
         {
           "kind": "zoom",

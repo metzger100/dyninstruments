@@ -133,9 +133,9 @@ describe("XteHighwayPrimitives", function () {
     expect(lineSegments).toBeGreaterThan(6);
   });
 
-  it("scales boat marker and overflow cue with highway size", function () {
+  it("scales the boat and uses its alarm color without an overflow dot", function () {
     const draw = create();
-    const colors = { pointer: "#f00", alarm: "#f00" };
+    const colors = { pointer: "#0f0", alarm: "#f00" };
     const smallCtx = createMockContext2D();
     const largeCtx = createMockContext2D();
 
@@ -148,8 +148,8 @@ describe("XteHighwayPrimitives", function () {
         nearHalf: 40
       },
       colors,
-      1.2,
-      true,
+      0.2,
+      false,
       40,
       1,
       1
@@ -173,16 +173,16 @@ describe("XteHighwayPrimitives", function () {
 
     const smallBoat = extractBoatPoints(smallCtx);
     const largeBoat = extractBoatPoints(largeCtx);
-    const smallArc = smallCtx.calls.find(function (/** @type {any} */ call) {
-      return call.name === "arc";
-    });
-    const largeArc = largeCtx.calls.find(function (/** @type {any} */ call) {
-      return call.name === "arc";
-    });
 
     expect(span(largeBoat, "y")).toBeGreaterThan(span(smallBoat, "y"));
     expect(span(largeBoat, "x")).toBeGreaterThan(span(smallBoat, "x"));
-    expect(largeArc.args[2]).toBeGreaterThan(smallArc.args[2]);
+    expect(smallCtx.fillStyle).toBe(colors.pointer);
+    expect(largeCtx.fillStyle).toBe(colors.alarm);
+    expect(
+      largeCtx.calls.some(function (/** @type {any} */ call) {
+        return call.name === "arc";
+      })
+    ).toBe(false);
   });
 
   it("scales the boat marker with configured pointerDepthWeight", function () {
