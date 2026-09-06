@@ -135,6 +135,7 @@ describe("package command surface", function () {
 
   it("keeps setup on the locked npm install path", function () {
     expect(scripts.setup).toContain("npm ci");
+    expect(scripts.setup).toContain("npm run hooks:install");
     expect(scripts.setup).toContain("tools/actionlint.sh --install");
   });
 

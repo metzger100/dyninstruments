@@ -4,7 +4,7 @@
   "private": true,
   "description": "Dev-only tooling for dyninstruments tests",
   "scripts": {
-    "setup": "npm ci && bash tools/actionlint.sh --install",
+    "setup": "npm ci && npm run hooks:install && bash tools/actionlint.sh --install",
     "hooks:install": "node tools/hooks-install.mjs",
     "hooks:doctor": "node tools/hooks-doctor.mjs",
     "docs:check": "npm run docs:lint && npm run docs:links:proof && npm run docs:links && npm run check:doclinks && npm run check:docformat && npm run check:reachability",

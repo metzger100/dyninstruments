@@ -28,8 +28,9 @@ cd ~/avnav-master/run/avnavdata/plugins/dyninstruments
 npm run setup
 ```
 
-The supported development runtime is Node 26 with npm 12.0.1. `npm run setup` runs the locked install and provisions the
-checksum-verified actionlint binary in the persistent cache outside `node_modules`.
+The supported development runtime is Node 26 with npm 12.0.1. `npm run setup` runs the locked install, activates the
+tracked pre-push hook for the clone, and provisions the checksum-verified actionlint binary in the persistent cache
+outside `node_modules`.
 
 ### 2.3 Install and watch AvNav viewer
 
@@ -156,7 +157,7 @@ New custom checker code is allowed only for irreducible AvNav contracts with a d
 
 ## 8) Execution and Validation Workflow
 
-Install the tracked local pre-push hook once per clone:
+The normal setup activates the tracked local pre-push hook for each clone. To repair or reinstall only the hook:
 
 ```bash
 npm run hooks:install
@@ -164,7 +165,8 @@ npm run hooks:doctor
 ```
 
 The hook runs `npm run check:all` before every push and blocks failures. Git does not activate a tracked hook directory
-automatically, so repeat this setup for each clone; `hooks:doctor` provides the repair command when it drifts.
+automatically, so `npm run setup` performs this clone-local step; `hooks:doctor` provides the repair command when it
+drifts.
 
 Run from repository root after implementation:
 

@@ -244,10 +244,10 @@ The local quality gates (`check:fast`, `check:core`, and `check:all`) are execut
 Vitest, coverage, and complexity ratchets remain Dyninstruments-specific. Verify the local distribution manifest with
 `npm run distribution:source:check`; maintainers regenerate it with `npm run distribution:source:write`.
 
-Use Node 26 with npm 12.0.1. Run `npm run setup` once; it installs the locked dependencies and provisions the
-checksum-verified actionlint binary outside `node_modules`. An optional `.codex/config.toml` provides portable Codex CLI
-defaults (project-doc pickup, sandbox/approval mode, cached web search); it is contributor tooling only and is never
-required to run the quality gates.
+Use Node 26 with npm 12.0.1. Run `npm run setup` once; it installs the locked dependencies, activates the tracked
+pre-push hook for the clone, and provisions the checksum-verified actionlint binary outside `node_modules`. An optional
+`.codex/config.toml` provides portable Codex CLI defaults (project-doc pickup, sandbox/approval mode, cached web
+search); it is contributor tooling only and is never required to run the quality gates.
 
 `npm run check:suppressions` owns the zero-inline-suppression source scan. A completed change must also pass
 `npm run check:all` from an isolated copy containing only this repository.
@@ -300,9 +300,9 @@ remain exempt; temporary harness/split-spec debt requires an inventory-owned rem
 referenced by their canonical owner test. An explicitly networked `npm run dependencies:audit` command is available for
 maintainer-run dependency advisory checks; it is never part of `check:all`.
 
-Install the tracked pre-push gate once per clone with `npm run hooks:install`, then verify it with
-`npm run hooks:doctor`. It runs `check:all` before each push. This is local enforcement: an unconfigured clone or an
-explicit Git bypass can skip it, so manual `check:all` remains the required completion gate.
+The normal `npm run setup` command installs the tracked pre-push gate for the clone. Repair it with
+`npm run hooks:install` and verify it with `npm run hooks:doctor`. It runs `check:all` before each push. This is local
+enforcement: an explicit Git bypass can skip it, so manual `check:all` remains the required completion gate.
 
 For test-environment work, `npm run test:split` runs the configured projects: `unit-node` for pure/tool tests without
 jsdom, `contract` for VM-based registry and bootstrap contracts, and `unit-dom` for jsdom/canvas-backed runtime/widget

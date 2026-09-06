@@ -92,8 +92,8 @@ This document defines smell rules and enforcement ownership. Blocking checks mus
 - Naming contract checks: `npm run test:contract`
 - Aggregated smell gate: `npm run check:smells`
 - Full gate: `npm run check:all` (includes `npm run check:smells` via `check:core`)
-- Clone-local push gate: `.githooks/pre-push` runs `npm run check:all` after `npm run hooks:install`; use
-  `npm run hooks:doctor` to verify or repair activation
+- Clone-local push gate: `.githooks/pre-push` runs `npm run check:all` after `npm run setup` activates it; use
+  `npm run hooks:install` to repair activation and `npm run hooks:doctor` to verify it
 - `check:filesize` runs fail-closed with `--oneliner=block` (used by `check:core`/`check:all`); it scans JS, `.mjs`,
   `.d.ts` type declarations, and Markdown across `plugin.js`, `plugin.mjs`, `runtime`, `cluster`, `config`, `shared`,
   `widgets`, `tests`, `documentation`, `tools` (excluding `tools/lint-fixtures/` and `tools/test-data/`), `types`, and
