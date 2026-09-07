@@ -27,7 +27,7 @@ comments, canonical templates, and shared-utility reuse rules.
 - Fail-fast / keep-it-simple: validate and default at boundaries, then trust the resulting internal contract.
 - Do not add speculative legacy/compat/fallback helpers or duplicate CSS/config defaults in runtime code.
 
-## Fail-fast / keep-it-simple
+## Boundary Validation
 
 Validate and default at boundaries, then trust the resulting internal contract.
 

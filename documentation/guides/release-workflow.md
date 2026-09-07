@@ -41,7 +41,7 @@ publishes the already-committed ZIP and notes.
 
 ## Prerequisites
 
-- Use Node 26 with npm 12.0.1, then run `npm run setup` from the plugin root. The first actionlint acquisition requires
+- Use Node 26 with npm 12.0.2, then run `npm run setup` from the plugin root. The first actionlint acquisition requires
   network access; later gates reuse the checksum-verified persistent cache.
 - Ensure `zip` command is available in `PATH`.
 

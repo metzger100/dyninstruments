@@ -150,11 +150,11 @@ immediately after `check:complexity`. It is Node/jsdom-only, offline, and fast (
 
 `vitest.config.js` `test.projects` split projects:
 
-| Project     | Environment | Scope                                                                                                                                      | Setup                         |
-| ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- |
-| `unit-node` | `node`      | Pure shared math/format/layout, mapper/viewmodel/config, and tool tests                                                                    | none                          |
-| `contract`  | `node`      | VM-based component registry, UMD registration/API-shape, dependency graph, plugin bootstrap, bundled layout, and runtime loading contracts | none                          |
-| `unit-dom`  | `jsdom`     | Remaining DOM/runtime/widget/integration tests                                                                                             | `tests/setup/vitest.setup.js` |
+| Project     | Environment | Scope                                                                                                                                                                        | Setup                         |
+| ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `unit-node` | `node`      | Pure shared math/format/layout, mapper/viewmodel/config, and tool tests; root config inheritance disabled                                                                    | none                          |
+| `contract`  | `node`      | VM-based component registry, UMD registration/API-shape, dependency graph, plugin bootstrap, bundled layout, and runtime loading contracts; root config inheritance disabled | none                          |
+| `unit-dom`  | `jsdom`     | Remaining DOM/runtime/widget/integration tests; root config inheritance disabled                                                                                             | `tests/setup/vitest.setup.js` |
 
 Commands:
 

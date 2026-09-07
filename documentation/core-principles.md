@@ -22,8 +22,7 @@ These rules are mandatory for all contributors and AI agents in this repository.
    [conventions/coding-standards.md](conventions/coding-standards.md#file-size-limits)
 6. Rule: Documentation must be updated in the same task as code/architecture changes.
 7. Rule: Public or complex runtime contracts need focused documentation or JSDoc; `Documentation:` header targets are
-   validated when present. →
-   [conventions/coding-standards.md](conventions/coding-standards.md#focused-file-doc-comments)
+   validated when present. → [conventions/coding-standards.md](conventions/coding-standards.md#file-overview-comments)
 8. Rule: Reusable logic goes in `shared/widget-kits/`, not duplicated widget-local helpers. →
    [conventions/coding-standards.md](conventions/coding-standards.md#shared-utilities)
 9. Rule: Widgets and cluster code must not access `window.avnav` directly; use the component-context boundaries
@@ -39,11 +38,11 @@ These rules are mandatory for all contributors and AI agents in this repository.
 15. Rule: Cache-owning modules must expose explicit invalidation APIs and mutation paths must invoke them when cached
     values become stale. → [conventions/coding-standards.md](conventions/coding-standards.md#key-details)
 16. Rule: Defaults and validation belong at boundaries; internal code should trust normalized contracts and fail fast. →
-    [conventions/coding-standards.md](conventions/coding-standards.md#fail-fast-keep-it-simple)
+    [conventions/coding-standards.md](conventions/coding-standards.md#fail-fast--keep-it-simple)
 17. Rule: Do not add speculative legacy, compatibility, or fallback support unless an active external boundary contract
-    requires it. → [conventions/coding-standards.md](conventions/coding-standards.md#fail-fast-keep-it-simple)
+    requires it. → [conventions/coding-standards.md](conventions/coding-standards.md#fail-fast--keep-it-simple)
 18. Rule: Do not duplicate CSS, theme-token, or declarative config defaults inside runtime/widget logic. →
-    [conventions/coding-standards.md](conventions/coding-standards.md#fail-fast-keep-it-simple)
+    [conventions/coding-standards.md](conventions/coding-standards.md#fail-fast--keep-it-simple)
 19. Rule: Inline suppression directives and boundary-marker exceptions are forbidden in maintained source, tests, tools,
     configuration comments, documentation examples, and plans. Record policy context in versioned profile data; keep
     source comments free of checker-control syntax. →

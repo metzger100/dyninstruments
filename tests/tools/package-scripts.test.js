@@ -146,9 +146,9 @@ describe("package command surface", function () {
   it("declares the supported Node and npm toolchain", function () {
     expect(packageJson.engines).toEqual({
       node: ">=26 <27",
-      npm: "12.0.1"
+      npm: "12.0.2"
     });
-    expect(packageJson.packageManager).toBe("npm@12.0.1");
+    expect(packageJson.packageManager).toBe("npm@12.0.2");
     expect(fs.readFileSync(path.join(process.cwd(), ".nvmrc"), "utf8").trim()).toBe("26");
   });
 
@@ -174,7 +174,7 @@ describe("package command surface", function () {
   });
 
   it("forces the vulnerable transitive js-yaml and fast-uri resolutions to tested fixed versions", function () {
-    expect(packageJson.overrides).toEqual({ "js-yaml": "5.2.2", "fast-uri": "3.1.4" });
+    expect(packageJson.overrides).toEqual({ "js-yaml": "5.4.1", "fast-uri": "4.1.4" });
 
     const root = process.cwd();
     const installedJsYaml = require(path.join(root, "node_modules/js-yaml/package.json"));

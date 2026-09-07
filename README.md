@@ -244,7 +244,7 @@ The local quality gates (`check:fast`, `check:core`, and `check:all`) are execut
 Vitest, coverage, and complexity ratchets remain Dyninstruments-specific. Verify the local distribution manifest with
 `npm run distribution:source:check`; maintainers regenerate it with `npm run distribution:source:write`.
 
-Use Node 26 with npm 12.0.1. Run `npm run setup` once; it installs the locked dependencies, activates the tracked
+Use Node 26 with npm 12.0.2. Run `npm run setup` once; it installs the locked dependencies, activates the tracked
 pre-push hook for the clone, and provisions the checksum-verified actionlint binary outside `node_modules`. An optional
 `.codex/config.toml` provides portable Codex CLI defaults (project-doc pickup, sandbox/approval mode, cached web
 search); it is contributor tooling only and is never required to run the quality gates.

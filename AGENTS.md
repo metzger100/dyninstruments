@@ -95,7 +95,7 @@ contract. Keep documentation concise, concrete, and linked from the navigation i
 - **Plugin runtime is browser-only** - No server-side runtime code
 - **Testing stack available** - Vitest configured projects for Node/jsdom tests, with native V8 coverage thresholds;
   required local/CI gates must not require an external browser binary or driver
-- **Development toolchain** - Use Node 26 with npm 12.0.1; run `npm run setup` to install the lockfile and provision the
+- **Development toolchain** - Use Node 26 with npm 12.0.2; run `npm run setup` to install the lockfile and provision the
   checksum-verified actionlint cache before gates
 
 ---

@@ -28,7 +28,7 @@ cd ~/avnav-master/run/avnavdata/plugins/dyninstruments
 npm run setup
 ```
 
-The supported development runtime is Node 26 with npm 12.0.1. `npm run setup` runs the locked install, activates the
+The supported development runtime is Node 26 with npm 12.0.2. `npm run setup` runs the locked install, activates the
 tracked pre-push hook for the clone, and provisions the checksum-verified actionlint binary in the persistent cache
 outside `node_modules`.
 

@@ -23,6 +23,7 @@ describe("vitest allowOnly:false configuration", function () {
       try {
         const args = [
           "run",
+          "--maxWorkers=1",
           "--coverage.enabled=false",
           "--coverage.reportsDirectory=" + path.join(tempDir, "coverage"),
           "--config",

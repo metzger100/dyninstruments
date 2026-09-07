@@ -85,11 +85,13 @@ module.exports = {
     },
     projects: [
       {
+        extends: false,
         test: {
           name: "unit-node",
           allowOnly: false,
           environment: "node",
           globals: true,
+          setupFiles: [],
           include: unitNodeTests,
           exclude: negativeFixtureTests,
           coverage: {
@@ -98,11 +100,13 @@ module.exports = {
         }
       },
       {
+        extends: false,
         test: {
           name: "contract",
           allowOnly: false,
           environment: "node",
           globals: true,
+          setupFiles: [],
           include: contractTests,
           coverage: {
             enabled: false
@@ -110,6 +114,7 @@ module.exports = {
         }
       },
       {
+        extends: false,
         test: {
           name: "unit-dom",
           allowOnly: false,
