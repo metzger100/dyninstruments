@@ -9,11 +9,11 @@ coverage status.
 
 - OBP60-style instruments:
   - graphical Roll/Pitch
-  - graphical Rudder
-  - graphical Keel
+  - graphical Rudder position
+  - graphical Keel position
 - C-net 2000 style multi instruments:
-  - history graphs for values where the value history is interesting like TWS or battery voltage
+  - history graphs for values where the value history is interesting like TWS or water temperature.
   - anchor nav plot showing the orientation and position of the vessel relative to the anchor on a "radar" like chart
-    with 2 rings around the anchor with configurable distance
-- Wind four-corner graphic for `TWA`/`TWS`/`AWA`/`AWS` with fixed layout for a widgets that have an estimate 1:1 aspect
-  ratio. It shows apparent wind in the graphical instrument.
+    with 2 rings around the anchor derived from the anchor distance value.
+- Wind radial graphic version for `TWA`/`TWS`/`AWA`/`AWS` in one radial wind instrument showing apparent wind and
+  displaying text tw and aw in one widget.
