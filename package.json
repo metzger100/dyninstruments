@@ -46,7 +46,7 @@
     "check:core": "node tools/portable-core/gate-orchestrator.mjs --roles standard,suppressions,typing,packaging,focus,smells,product-contracts,test-split,complexity,scaling,documentation,file-size",
     "release:prepare": "node tools/release-prepare.mjs",
     "release:create": "node tools/release-create.mjs",
-    "check:all": "npm run check:core && npm run test:coverage:check",
+    "check:all": "node tools/portable-core/gate-orchestrator.mjs --roles standard,suppressions,typing,packaging,focus,smells,complexity,scaling,documentation,file-size,coverage",
     "check:strict": "npm run check:all",
     "test": "vitest run",
     "test:contract": "vitest run --project contract",

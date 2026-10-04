@@ -18,9 +18,15 @@ const REQUIRED_CHECK_CORE_GROUPS = [
   "file-size"
 ];
 
+/** Roles whose test suites check:all reaches through the coverage run instead of running them twice. */
+const COVERAGE_OWNED_TEST_ROLES = ["product-contracts", "test-split"];
+const REQUIRED_CHECK_ALL_ROLES = REQUIRED_CHECK_CORE_GROUPS.filter(
+  (role) => !COVERAGE_OWNED_TEST_ROLES.includes(role)
+).concat(["coverage"]);
+
 /** @param {string} scriptBody @returns {string[]} */
-function orderedNpmRunTokens(scriptBody) {
-  return [...scriptBody.matchAll(/npm run ([\w:-]+)/g)].map((match) => match[1]);
+function orchestratedRoles(scriptBody) {
+  return scriptBody.split("--roles ")[1].split(",");
 }
 
 /**
@@ -29,7 +35,7 @@ function orderedNpmRunTokens(scriptBody) {
  * @param {string} checkCoreBody
  */
 function assertCompleteCheckCoreGraph(checkCoreBody) {
-  const orderedTokens = checkCoreBody.split("--roles ")[1].split(",");
+  const orderedTokens = orchestratedRoles(checkCoreBody);
   expect(orderedTokens).toEqual(REQUIRED_CHECK_CORE_GROUPS);
   expect(orderedTokens.filter((token) => token === "test-split")).toHaveLength(1);
   expect(orderedTokens).not.toContain("test-contract");
@@ -52,15 +58,31 @@ describe("package command surface", function () {
 
   it("keeps the complete gate free of the retired CI alias", function () {
     expect(scripts[["check", "ci"].join(":")]).toBeUndefined();
-    expect(scripts["check:all"]).toContain("npm run check:core");
-    expect(scripts["check:all"]).toContain("npm run test:coverage:check");
-    expect(scripts["check:all"]).toBe("npm run check:core && npm run test:coverage:check");
+    expect(scripts["check:all"]).toBe(
+      "node tools/portable-core/gate-orchestrator.mjs --roles " + REQUIRED_CHECK_ALL_ROLES.join(",")
+    );
   });
 
   it("keeps the coverage inventory policy check inside test:coverage:check", function () {
     expect(scripts["test:coverage:check"]).toBe("npm run test:coverage && npm run check:coverage-inventory");
     expect(scripts["check:coverage-inventory"]).toBe("node tools/quality-policy/check-coverage-inventory.mjs");
-    expect(scripts["check:all"]).toBe("npm run check:core && npm run test:coverage:check");
+  });
+
+  it("runs every non-test check:core role in canonical order, then every test project once through coverage", function () {
+    const profile = require("../../tools/quality-policy/project-profile.json");
+    const vitestConfig = require("../../vitest.config.js");
+    const checkAllRoles = orchestratedRoles(scripts["check:all"]);
+
+    expect(checkAllRoles).toEqual(REQUIRED_CHECK_ALL_ROLES);
+    expect(checkAllRoles[checkAllRoles.length - 1]).toBe("coverage");
+    COVERAGE_OWNED_TEST_ROLES.forEach((role) => expect(checkAllRoles).not.toContain(role));
+    expect(profile.adapters.coverage).toBe("npm run test:coverage:check");
+    expect(scripts["test:coverage"]).toBe("vitest run --coverage");
+    expect(vitestConfig.test.projects.map((/** @type {any} */ project) => project.test.name)).toEqual([
+      "unit-node",
+      "contract",
+      "unit-dom"
+    ]);
   });
 
   it("keeps complexity and scaling policy checks wired into check:core", function () {
@@ -100,25 +122,13 @@ describe("package command surface", function () {
     expect(projectNames).toEqual(["unit-node", "contract", "unit-dom"]);
   });
 
-  it("keeps every required core group reachable from check:all with no reference cycle", function () {
-    const visiting = new Set();
-    const reachable = new Set();
-
-    /** @param {string} name */
-    function visit(name) {
-      if (reachable.has(name) || !(name in scripts)) return;
-      if (visiting.has(name)) {
-        throw new Error(`cycle detected reaching ${name}`);
-      }
-      visiting.add(name);
-      orderedNpmRunTokens(scripts[name]).forEach(visit);
-      visiting.delete(name);
-      reachable.add(name);
-    }
-    visit("check:all");
+  it("keeps every required core group reachable from check:all directly or through the coverage run", function () {
+    const checkAllRoles = orchestratedRoles(scripts["check:all"]);
 
     REQUIRED_CHECK_CORE_GROUPS.forEach(function (group) {
       expect(scripts["check:core"], `${group} must be in the signed role graph`).toContain(group);
+      const reachedByCoverage = COVERAGE_OWNED_TEST_ROLES.includes(group) && checkAllRoles.includes("coverage");
+      expect(checkAllRoles.includes(group) || reachedByCoverage, `${group} must be reached by check:all`).toBe(true);
     });
     expect(scripts["check:core"]).toContain("test-split");
     expect(scripts["check:core"]).not.toContain("test-contract");
