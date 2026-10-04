@@ -133,4 +133,30 @@ describe("SpringEasing", function () {
     expect(value).toBeGreaterThanOrEqual(0);
     expect(value).toBeLessThanOrEqual(100);
   });
+
+  it("resets the motion on a missing target and snaps when the target returns", function () {
+    const springEasing = loadFresh("shared/widget-kits/anim/SpringEasing.js").create({}, createComponentContextMock());
+
+    [true, false].forEach(function (easingEnabled) {
+      const motion = springEasing.createMotion();
+      const canvas = {};
+
+      expect(motion.resolve(canvas, 10, easingEnabled, 0)).toBe(10);
+      expect(motion.resolve(canvas, undefined, easingEnabled, 16)).toBeNaN();
+      expect(motion.isActive(canvas)).toBe(false);
+      expect(motion.resolve(canvas, 20, easingEnabled, 32)).toBe(20);
+    });
+  });
+
+  it("keeps easing between consecutive finite targets", function () {
+    const springEasing = loadFresh("shared/widget-kits/anim/SpringEasing.js").create({}, createComponentContextMock());
+    const motion = springEasing.createMotion();
+    const canvas = {};
+
+    expect(motion.resolve(canvas, 10, true, 0)).toBe(10);
+    const eased = motion.resolve(canvas, 20, true, 16);
+    expect(eased).toBeGreaterThan(10);
+    expect(eased).toBeLessThan(20);
+    expect(motion.isActive(canvas)).toBe(true);
+  });
 });

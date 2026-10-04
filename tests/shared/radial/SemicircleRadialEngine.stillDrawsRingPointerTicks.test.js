@@ -22,4 +22,23 @@ describe("SemicircleRadialEngine", function () {
     expect(harness.sequence.filter((item) => item === "ticks")).toHaveLength(1);
     expect(harness.sequence.filter((item) => item === "labels")).toHaveLength(1);
   });
+
+  it("draws no pointer once the value disappears and draws it again when the value returns", function () {
+    const harness = createRenderOrderHarness([]);
+    const canvas = createMockCanvas({
+      rectWidth: 480,
+      rectHeight: 110,
+      ctx: createMockContext2D()
+    });
+    const pointerCount = () => harness.sequence.filter((item) => item === "pointer").length;
+
+    harness.renderer(canvas, { value: 12.3, caption: "SPD", unit: "kn" });
+    expect(pointerCount()).toBe(1);
+
+    harness.renderer(canvas, { value: undefined, caption: "SPD", unit: "kn" });
+    expect(pointerCount()).toBe(1);
+
+    harness.renderer(canvas, { value: 15, caption: "SPD", unit: "kn" });
+    expect(pointerCount()).toBe(2);
+  });
 });

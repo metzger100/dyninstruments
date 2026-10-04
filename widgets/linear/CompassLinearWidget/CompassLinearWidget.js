@@ -85,7 +85,7 @@
     function resolveAxis(props, range, defaultAxis) {
       const p = props || {};
       const heading = p.heading;
-      if (typeof heading !== "number") {
+      if (typeof heading !== "number" || !Number.isFinite(heading)) {
         return defaultAxis;
       }
       const compassRange = p.compassLinearRange === 180 ? 180 : 360;

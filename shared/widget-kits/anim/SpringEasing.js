@@ -173,17 +173,16 @@
        */
       function resolve(canvas, target, easingEnabled, nowMs) {
         const motion = getMotion(canvas);
-        const finiteTarget = Number.isFinite(Number(target));
-        if (!finiteTarget && !motion.ready) {
+        if (!Number.isFinite(Number(target))) {
+          motion.ready = false;
           return NaN;
         }
-        if (finiteTarget) {
-          motion.ready = true;
+        if (!motion.ready || !easingEnabled) {
+          motion.spring.reset(target);
+        } else {
           motion.spring.setTarget(target);
-          if (!easingEnabled) {
-            motion.spring.reset(target);
-          }
         }
+        motion.ready = true;
         return motion.spring.advance(nowMs);
       }
 

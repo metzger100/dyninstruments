@@ -110,6 +110,7 @@ describe("CompassLinearWidget", function () {
     const axisB = captured.resolveAxis({ heading: 40, compassLinearRange: 180 }, {}, { min: 0, max: 360 });
     expect(axisA).toEqual({ min: -170, max: 190 });
     expect(axisB).toEqual({ min: -50, max: 130 });
+    expect(captured.resolveAxis({ heading: NaN }, {}, { min: 0, max: 360 })).toEqual({ min: 0, max: 360 });
 
     const headingRatioA = (10 - axisA.min) / (axisA.max - axisA.min);
     const headingRatioB = (40 - axisB.min) / (axisB.max - axisB.min);
