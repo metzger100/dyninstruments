@@ -15,7 +15,8 @@ shared engine state.
 - Renderer file: `widgets/radial/WindRadialWidget/WindRadialWidget.js`; export id `"WindRadialWidget"`;
   `globalKey: "DyniWindRadialWidget"`.
 - Dual-value display: `angle` (AWA/TWA, ±180° range) on one side, `speed` (AWS/TWS) on the other; angle formatting via
-  `ValueMath.formatAngle180(v, leadingZero)`, `leadingZero` default `false`.
+  `ValueMath.formatAngle180(v, leadingZero)`, `leadingZero` default `false`; it rounds before choosing the sign, prints
+  a sign only for a non-zero result, and maps `180` to `-180`, matching the mapper's signed angle formatter.
 - Layline sectors gated by `layEnabled` (default `true`), bounded by `windRadialLayMin`/`windRadialLayMax` (both default
   `0`, range `0..180`); starboard uses `tokens.colors.laylineStb` (default `#2e9e6b`), port uses
   `tokens.colors.laylinePort` (default `#d9534a`).
@@ -32,7 +33,6 @@ shared engine state.
 // In config/components/registry-widgets-gauge.js (assembled by config/components.js)
 WindRadialWidget: {
   js: BASE + "widgets/radial/WindRadialWidget/WindRadialWidget.js",
-  css: undefined,
   globalKey: "DyniWindRadialWidget",
   deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]
 }

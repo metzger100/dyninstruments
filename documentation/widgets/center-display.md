@@ -16,7 +16,8 @@ It keeps core data parity with AvNav `CenterDisplay` while using a readability-f
   `minDim >= 180`
 - compact tiles also increase fitted text fill linearly so captions, coordinates, and relation values occupy more of
   each row without changing the normal-mode panel split
-- core visibility semantics handled in map-cluster `updateFunction`: visible only when `!lockPosition || editing`
+- widget visibility stays host-owned: AvNav strips `visible` from `updateFunction` results, so the map cluster has no
+  `updateFunction` and does not derive center-display visibility from `lockPosition`
 - Mapper payloads split formatter tokens from display labels: `formatUnits.marker` / `formatUnits.boat` /
   `formatUnits.measure` carry the formatter tokens while `units.*` stay display-only.
 
@@ -92,7 +93,6 @@ Contract notes:
 ```javascript
 CenterDisplayTextWidget: {
   js: BASE + "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
-  css: undefined,
   globalKey: "DyniCenterDisplayTextWidget",
   deps: [
     "runtime.theme",

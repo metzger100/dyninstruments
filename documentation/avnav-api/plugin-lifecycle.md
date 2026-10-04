@@ -32,10 +32,13 @@ Common callbacks:
 - Theme outputs are applied to the committed root before session reconcile.
 - dyninstruments HTML interaction relies on committed direct DOM listeners rather than AvNav's inline handler
   translation.
-- `updateFunction(values)` receives live store values, not editable config props; configured props such as `kind` are
-  available on the host `this` object instead.
-- `KEY` editables store their selected path in `storeKeys.<parameterName>`; for alias parameters (e.g. `depthKey`),
-  `updateFunction` must copy the live value onto the mapper-owned prop (e.g. `depth`).
+- AvNav calls `updateFunction` as a method of the widget props: `this` carries editable config props such as `kind`, and
+  the `values` argument holds only live store values. Cluster `updateFunction`s therefore read `kind` from `this`.
+- `KEY` editables store their selected path in `storeKeys.<parameterName>`; for alias parameters (`depthKey`, `tempKey`,
+  `pitchKey`, `rollKey`), `updateFunction` must copy the live value onto the mapper-owned prop (`depth`, `temp`,
+  `pitch`, `roll`).
+- AvNav deletes `storeKeys` and `visible` from the `updateFunction` result, so an `updateFunction` cannot rewrite store
+  subscriptions or widget visibility.
 
 ## dyninstruments Notes
 
@@ -56,9 +59,14 @@ Common callbacks:
 - theme outputs are applied to committed root before session reconcile
 - dyninstruments HTML interaction uses committed direct DOM listeners, not host inline handler translation
 - `updateFunction(values)` receives live store values, not editable config props; configured props such as `kind` are
-  available on the host `this` object in AvNav's widget call path.
+  available on the host `this` object in AvNav's widget call path. Tests call it in the host shape:
+  `def.updateFunction.call(widgetProps, storeValues)`.
 - `KEY` editables store selected paths in `storeKeys.<parameterName>`; if `<parameterName>` is an alias such as
-  `depthKey`, `updateFunction` must copy the live value to the mapper prop, for example `depth`.
+  `depthKey` or `pitchKey`, `updateFunction` must copy the live value to the mapper prop, for example `depth` or
+  `pitch`.
+- AvNav keeps every saved parameter that differs from its default, whatever its `condition`, so a `KEY` entered for one
+  kind stays subscribed after the kind changes. Mapper output therefore always carries `value` (an absent value is an
+  own `undefined`), so a raw leftover `value` can never be shown as another kind's value.
 
 ## Related
 

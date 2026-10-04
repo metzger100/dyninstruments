@@ -62,10 +62,9 @@ Run from repository root:
 npm run check:all
 ```
 
-`check:all` is the default completion gate and runs:
-
-- `npm run check:core`
-- `npm run test:coverage:check`
+`check:all` is the default completion gate. It runs every `check:core` role below except `test:contract` and
+`test:split`, in the same order, and finishes with `npm run test:coverage:check`, so every configured Vitest project
+runs exactly once, under coverage.
 
 For the full command graph and checker ownership map, see
 [../conventions/quality-gates.md](../conventions/quality-gates.md).
@@ -78,8 +77,8 @@ For the full command graph and checker ownership map, see
 - `npm run package:check` (Ajv schema validation plus bootstrap-derived registry closure, release manifest, and staging
   contract tests)
 - `npm run test:split` (the complete configured Vitest suite: `unit-node`, `contract`, and `unit-dom` projects, run
-  exactly once as ordinary non-coverage execution; `test:coverage:check` separately reruns the same suite under V8
-  instrumentation for coverage evidence, so the duplication is intentional)
+  exactly once as ordinary non-coverage execution with direct failures; `check:all` reaches the same projects through
+  its single coverage run instead)
 - `npm run test:focus:check` (fail-closed `.only` proof through the configured Vitest projects)
 - `npm run check:smells` (blocking static smell policy)
 - `npm run check:complexity` (regenerated historical capture verification plus stable-identity no-regression policy)

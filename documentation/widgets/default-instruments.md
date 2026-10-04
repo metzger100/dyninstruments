@@ -23,8 +23,8 @@ thin and pushes visual behavior into the existing renderers:
 - Cluster config file: `config/clusters/default.js`; cluster identifier: `dyni_Default_Instruments`.
 - Three kinds map to renderers: `text` -> `ThreeValueTextWidget`, `linearGauge` -> `DefaultLinearWidget`, `radialGauge`
   -> `DefaultRadialWidget`.
-- `value` is a `KEY` editable that trims the selected store path into `storeKeys.value` (for example `nav.gps.speed`,
-  `env.water.temperature`, `electrical.battery.house`); empty input removes `storeKeys.value`.
+- `value` is a `KEY` editable; AvNav stores the selected store path (for example `nav.gps.speed`,
+  `env.water.temperature`, `electrical.battery.house`) in `storeKeys.value` and passes the live store value as `value`.
 - Shared defaults: `captionUnitScale = 0.8`, `stableDigits = false`.
 - Gauge kinds default `min = 0`, `max = 100`, major tick `10`, minor tick `2`, `showEndLabels = false`, `easing = true`.
 - Sector model (both gauge kinds): four sectors — low alarm, low warning, high warning, high alarm — each with an enable
@@ -38,8 +38,9 @@ thin and pushes visual behavior into the existing renderers:
 The cluster exposes one dynamic key selector:
 
 - `value` is a `KEY` editable
-- the update function trims the selected path into `storeKeys.value`
-- empty input removes `storeKeys.value`
+- AvNav owns the subscription: it stores the selected path in `storeKeys.value` and passes the live value as `value`
+- the cluster has no `updateFunction`; AvNav strips `storeKeys` from `updateFunction` results, so a plugin cannot
+  rewrite the subscription
 
 Example store paths:
 

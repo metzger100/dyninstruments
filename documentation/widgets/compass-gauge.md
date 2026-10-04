@@ -34,7 +34,6 @@ from `FullCircleRadialLayout` through the shared engine state.
 // In config/components/registry-widgets-gauge.js (assembled by config/components.js)
 CompassRadialWidget: {
   js: BASE + "widgets/radial/CompassRadialWidget/CompassRadialWidget.js",
-  css: undefined,
   globalKey: "DyniCompassRadialWidget",
   deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "SpringEasing", "StableDigits"]
 }

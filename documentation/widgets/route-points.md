@@ -67,6 +67,10 @@ In .widgetContainer.vertical, RoutePoints natural sizing remains unresolved unti
 
 - shellRect from mount host remains authoritative
 - layoutSignature excludes non-authoritative vertical shell height churn
+- the resize signature includes the rendered texts (route name, point names, and info texts), so a changed text at the
+  same point count re-fits the rows, as the EditRoute and AIS signatures do
+- a row without a fit (for example when no shell rect was available to measure) renders the model's info text without
+  fit styles
 - postPatch may trigger one bounded relayout pass (for example scrollbar-gutter correction)
 
 ## Numeric Rendering Options

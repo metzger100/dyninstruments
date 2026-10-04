@@ -24,6 +24,9 @@ linear primary dimension (`min(trackBox.w, trackBox.h)`) into graphical pixels.
 - Core `spec` fields: `rawValueKey`, `unitDefault`, `tickProps: { major, minor, showEndLabels }`,
   `ratioProps: { normal, flat }`, `hideTextualMetricsProp`, `labelEdgePolicy: "inset" | "sliding"`,
   `springTarget: "pointer" | "axis"`, `springWrap` (numeric wrap span for `SpringEasing.createMotion()`).
+- On a `"centered180"` axis the engine maps the eased value back into `[-180, 180)` with `RadialAngleMath.norm180`
+  before drawing, so a wrapping spring (`springWrap: 360`) crosses the ±180 seam the short way and the pointer stays on
+  the axis; a value of exactly `180` sits at the `-180` end, as `formatAngle180` prints it.
 - Public UI label for `hideTextualMetricsProp` is `Hide textual metrics`, default `false`; shipped on Speed, Depth,
   Temperature, Voltage, Compass, Wind, and Default linear gauges.
 - Static background is cached in two layers, `back` and `front`, composited via `CanvasLayerCache.blitLayer()`; z-order
@@ -119,7 +122,7 @@ Common `spec` fields:
 - `springTarget`: `"pointer" | "axis"` (optional; compass wrappers use `"axis"` when the scale should ease around a
   fixed center pointer)
 - `springWrap`: numeric wrap span for `SpringEasing.createMotion()` when the spring should take the shortest wrapped arc
-  (optional; compass wrappers use `360`)
+  (optional; compass and wind wrappers use `360`)
 - `buildTicks(axis, tickMajor, tickMinor, props, api) -> { major, minor }` (optional)
 - `formatTickLabel(value, state, props, api) -> string` (optional)
 - `drawFrame(state, props, display, api)` (optional)

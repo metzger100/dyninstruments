@@ -135,8 +135,8 @@ only source of the directory structure and canonical documentation links.
 - [ ] Updated `tests/layouts/gpspage-all-widgets.json` and `tests/layouts/gpspage-all-widgets.test.js` when adding or
       changing a kind with new user-visible visuals/layout behavior.
 - [ ] Updated TABLEOFCONTENTS.md if new docs added.
-- [ ] Ran `npm run check:all` — no failures; required final gate (`check:core` plus native coverage threshold
-      enforcement).
+- [ ] Ran `npm run check:all` — no failures; required final gate (every non-test `check:core` role, then one native
+      coverage run with threshold enforcement).
 - [ ] New production files use a recognized coverage classification and do not lower the immutable per-file floor; new
       tests enter the strict inventory; only paths in the hash-locked test-exception capture may retain a checked
       temporary-fragment or negative-fixture classification.
@@ -153,7 +153,8 @@ only source of the directory structure and canonical documentation links.
 
 - Mandatory on every task: follow `documentation/conventions/coding-standards.md` and
   `documentation/conventions/smell-prevention.md` as binding rules.
-- Required completion gate: `npm run check:all` (`check:core` + `test:coverage:check`).
+- Required completion gate: `npm run check:all` (every `check:core` role except `product-contracts` and `test-split`,
+  then `test:coverage:check`, so every test project runs exactly once).
 - `check:core` includes `check:standard` (Prettier over maintained code/docs, agent skills, the lockfile, and active
   plans, checked against Prettier's real effective ignore resolution, plus ESLint, Stylelint, actionlint, and jscpd),
   `typecheck` (production/config `checkJs`, inventory-owned tests, and every maintained `tools/**/*.mjs` script),

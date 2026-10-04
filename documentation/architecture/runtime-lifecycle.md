@@ -54,8 +54,8 @@ Authoritative owners:
 5. The shared core calls `window.DyniPlugin.runtime.runInit()` exactly once per startup invocation.
 6. On the module path, bootstrap script IDs are generation-aware (derived from module base URL) so timestamped AvNav
    reloads load updated classic scripts instead of reusing stale IDs from an older generation.
-7. Component JS and CSS loads go through bootstrap-provided scoped loaders, keeping module timestamp reloads isolated
-   while allowing already-loaded static code to remain reusable.
+7. Component JS loads go through the bootstrap-provided scoped loader, keeping module timestamp reloads isolated while
+   allowing already-loaded static code to remain reusable.
 8. runtime/init.js creates the host-action bridge singleton for the current startup generation.
 9. runtime/init.js resolves required components via runtime/component-loader.js.
 10. runtime/init.js reads --dyni-theme-preset once from document.documentElement.
@@ -72,7 +72,22 @@ Authoritative owners:
   `runtime.componentLoader` state before registering widgets.
 - Shutdown clears only generation-bound state; loaded classic scripts, global component module objects, and declarative
   config remain reusable.
+- `runtime/namespace.js` resets `config.clusters` on every execution, as `config/cluster-routes.js` resets
+  `config.clusterRoutes`, so a timestamped `plugin.mjs` reload that re-executes the config scripts registers exactly the
+  new generation's nine widgets instead of failing on duplicate widget names.
 - Failed component loading clears generation state so a later startup can retry and register widgets.
+
+## Error Reporting
+
+- Script loaders in `plugin.js`, `plugin.mjs`, and the bootstrap core reject with an `Error` that names the failing URL
+  (`dyninstruments: failed to load <url>`), never with the raw DOM event.
+- The bootstrap core's `start()` catch is the single log owner for startup failures: `runtime/init.js` clears its
+  generation state and rethrows without logging. `plugin.js` and `plugin.mjs` route the bootstrap logger to the host
+  `api.log`, so each startup failure reaches the host log exactly once.
+- `routeActivation.reportActivationError(error, routeId)` logs one host-log line per failed route activation and
+  returns, so an activation failure never escapes as an exception or unhandled rejection. `ClusterWidget` attaches its
+  reconcile step once per pending activation promise, however many commits share it, and forgets the promise when it
+  settles.
 
 Startup does not scan plugin roots and does not apply per-root theme state. Startup does not preload renderer shadow
 CSS; route activation owns active-route shadow CSS preload.

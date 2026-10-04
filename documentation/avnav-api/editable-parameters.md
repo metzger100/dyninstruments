@@ -34,8 +34,9 @@ editableParameters define the widget configuration UI in AvNav's Layout Editor. 
   `condition` lists in `config/clusters/*.js`, not via a shared editable.
 - `hideSeconds` (BOOLEAN, default `false`) swaps `formatTime` for `formatClock`; defined only where time text is
   rendered (`nav.js`: `wpEta`, `rteEta`, `activeRoute`, `editRoute`; `vessel.js`: `clock`, `dateTime`, `timeStatus`).
-- Depth/temperature `KEY` aliases (`depthKey`, `tempKey`) must be copied onto the mapper-owned prop (`depth`, `temp`) in
-  `updateFunction`; default `depthKey` is `nav.gps.depthBelowKeel`.
+- `KEY` aliases (`depthKey`, `tempKey`, `pitchKey`, `rollKey`) must be copied onto the mapper-owned prop (`depth`,
+  `temp`, `pitch`, `roll`) in `updateFunction`, which reads the active `kind` from `this`; default `depthKey` is
+  `nav.gps.depthBelowKeel`.
 
 ## Parameter Definition
 
@@ -111,9 +112,10 @@ value: { type: "KEY", default: "" }
 
 Recommended editor captions for `KEY` parameters should describe the AvNav store-path override directly, for example
 `Depth store path`, `Temperature store path`, or `Voltage store path`. Environment depth kinds use `depthKey` with
-default `nav.gps.depthBelowKeel`; clearing it restores that below-keel default. Alias selectors such as `depthKey` and
-`tempKey` must copy the live `<parameterName>` value onto the mapper-owned prop (`depth`, `temp`) in `updateFunction`;
-they cannot rewrite `storeKeys` during render.
+default `nav.gps.depthBelowKeel`; clearing it restores that below-keel default. Alias selectors (`depthKey`, `tempKey`,
+`pitchKey`, `rollKey`) must copy the live `<parameterName>` value onto the mapper-owned prop (`depth`, `temp`, `pitch`,
+`roll`) in `updateFunction`; they cannot rewrite `storeKeys`, because AvNav strips `storeKeys` from the `updateFunction`
+result.
 
 ### COLOR Details
 

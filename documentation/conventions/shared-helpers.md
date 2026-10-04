@@ -51,61 +51,61 @@ Use these modules before adding local helper functions.
 
 This table is the reference for the `check-patterns` rule `canonical-helper-redefinition`.
 
-| Helper                            | Owner Module          | Description                            |
-| --------------------------------- | --------------------- | -------------------------------------- |
-| `toObject`                        | `ValueMath`           | object-or-empty helper                 |
-| `toText`                          | `ValueMath`           | null-safe text conversion              |
-| `clampNumber`                     | `ValueMath`           | coercion + bounded clamp with default  |
-| `isObject`                        | `ValueMath`           | object detection helper                |
-| `toSafeInteger`                   | `ValueMath`           | finite-number rounding helper          |
-| `hasText`                         | `ValueMath`           | non-empty trimmed text check           |
-| `toFiniteNumber`                  | `ValueMath`           | coercive finite-number conversion      |
-| `toOptionalFiniteNumber`          | `ValueMath`           | presence-preserving numeric conversion |
-| `isFiniteNumber`                  | `ValueMath`           | numeric finiteness check               |
-| `isNullish`                       | `ValueMath`           | null-or-undefined presence check       |
-| `trimText`                        | `ValueMath`           | canonical trim/coerce helper           |
-| `textLength`                      | `ValueMath`           | text-length helper                     |
-| `lerp`                            | `ValueMath`           | linear interpolation                   |
-| `appendUnit`                      | `ValueMath`           | value/unit concatenation helper        |
-| `keyToText`                       | `ValueMath`           | cache-key string conversion            |
-| `parseFontPx`                     | `HtmlMeasureUtils`    | parse pixel size from font shorthand   |
-| `createApproximateMeasureContext` | `HtmlMeasureUtils`    | fallback measure context for HTML fit  |
-| `resolveMeasureContext`           | `HtmlMeasureUtils`    | choose host/fallback measure context   |
-| `measurePx`                       | `HtmlMeasureUtils`    | HTML fit pixel measurement             |
-| `measureStyle`                    | `HtmlMeasureUtils`    | measurement-to-style wrapper           |
-| `toStyle`                         | `HtmlMeasureUtils`    | numeric px to CSS style helper         |
-| `resolveOwnerDocument`            | `HtmlMeasureUtils`    | document resolution for measure flows  |
-| `resolveFitCache`                 | `HtmlMeasureUtils`    | host fit-cache resolver                |
-| `resolveSurfacePolicy`            | `HtmlWidgetUtils`     | HTML surface policy selection          |
-| `escapeHtml`                      | `HtmlWidgetUtils`     | HTML escaping helper                   |
-| `toFontStyle`                     | `HtmlWidgetUtils`     | CSS font-size style helper             |
-| `buildTextOptions`                | `HtmlWidgetUtils`     | text option normalization helper       |
-| `resolveDefaultText`              | `HtmlWidgetUtils`     | default placeholder/text resolver      |
-| `toStyleText`                     | `HtmlWidgetUtils`     | style fragment assembly helper         |
-| `resolveMetricValueFamily`        | `HtmlWidgetUtils`     | metric font-family resolution          |
-| `resolveLabelEdgePolicy`          | `HtmlWidgetUtils`     | label-edge policy normalization        |
-| `toPx`                            | `HtmlWidgetUtils`     | CSS px-string helper                   |
-| `joinStyles`                      | `HtmlWidgetUtils`     | style-fragment concatenation           |
-| `resolveTextFillScale`            | `TextLayoutComposite` | normalized text fill scale             |
-| `clampTextFillScale`              | `TextLayoutComposite` | text fill scale clamp                  |
-| `scaleTextCeiling`                | `TextLayoutComposite` | text ceiling scaling helper            |
-| `resolveOpacity`                  | `TextLayoutComposite` | canonical opacity resolver             |
-| `resolveCompactGeometryScale`     | `TextLayoutComposite` | compact geometry scale helper          |
-| `scaleValueUnitFit`               | `TextLayoutComposite` | value/unit fit scaling helper          |
-| `scaleInlineFit`                  | `TextLayoutComposite` | inline caption/value/unit fit scaling  |
-| `resolveFamily`                   | `CanvasTextLayout`    | font family resolver                   |
-| `makeFitCacheKey`                 | `TextLayoutEngine`    | fit-cache key construction             |
-| `writeFitCache`                   | `TextLayoutEngine`    | fit-cache writer                       |
-| `readFitCache`                    | `TextLayoutEngine`    | fit-cache reader                       |
-| `createFitCache`                  | `TextLayoutEngine`    | fit-cache initializer                  |
-| `setFont`                         | `CanvasTextFitting`   | canonical canvas font setter           |
-| `setCanvasFont`                   | `CanvasTextFitting`   | alias for canonical font setter        |
-| `measureTextWidth`                | `CanvasTextFitting`   | cached text width measurement          |
-| `fitSingleTextPx`                 | `CanvasTextFitting`   | single-line fit-size resolver          |
-| `splitRow`                        | `LayoutRectMath`      | split rect into columns                |
-| `splitStack`                      | `LayoutRectMath`      | split rect into rows                   |
-| `buildValueTickAngles`            | `RadialValueMath`     | radial tick-angle construction         |
-| `valueToAngleFlat`                | `RadialAngleMath`     | flat-arg angle conversion wrapper      |
+| Helper                            | Owner Module          | Description                                                              |
+| --------------------------------- | --------------------- | ------------------------------------------------------------------------ |
+| `toObject`                        | `ValueMath`           | object-or-empty helper                                                   |
+| `toText`                          | `ValueMath`           | null-safe text conversion                                                |
+| `clampNumber`                     | `ValueMath`           | coercion + bounded clamp with default                                    |
+| `isObject`                        | `ValueMath`           | object detection helper                                                  |
+| `toSafeInteger`                   | `ValueMath`           | finite-number rounding helper                                            |
+| `hasText`                         | `ValueMath`           | non-empty trimmed text check                                             |
+| `toFiniteNumber`                  | `ValueMath`           | coercive finite-number conversion                                        |
+| `toOptionalFiniteNumber`          | `ValueMath`           | presence-preserving numeric conversion                                   |
+| `isFiniteNumber`                  | `ValueMath`           | numeric finiteness check                                                 |
+| `isNullish`                       | `ValueMath`           | null-or-undefined presence check                                         |
+| `trimText`                        | `ValueMath`           | canonical trim/coerce helper                                             |
+| `textLength`                      | `ValueMath`           | text-length helper                                                       |
+| `lerp`                            | `ValueMath`           | linear interpolation                                                     |
+| `appendUnit`                      | `ValueMath`           | value/unit concatenation helper                                          |
+| `keyToText`                       | `ValueMath`           | cache-key string conversion                                              |
+| `parseFontPx`                     | `HtmlMeasureUtils`    | parse pixel size from font shorthand                                     |
+| `createApproximateMeasureContext` | `HtmlMeasureUtils`    | fallback measure context for HTML fit                                    |
+| `resolveMeasureContext`           | `HtmlMeasureUtils`    | choose host/fallback measure context                                     |
+| `measurePx`                       | `HtmlMeasureUtils`    | HTML fit pixel measurement                                               |
+| `measureStyle`                    | `HtmlMeasureUtils`    | measurement-to-style wrapper                                             |
+| `toStyle`                         | `HtmlMeasureUtils`    | numeric px to CSS style helper                                           |
+| `resolveOwnerDocument`            | `HtmlMeasureUtils`    | document resolution for measure flows                                    |
+| `resolveFitCache`                 | `HtmlMeasureUtils`    | host fit-cache resolver                                                  |
+| `resolveSurfacePolicy`            | `HtmlWidgetUtils`     | HTML surface policy selection                                            |
+| `escapeHtml`                      | `HtmlWidgetUtils`     | HTML escaping helper                                                     |
+| `toFontStyle`                     | `HtmlWidgetUtils`     | CSS font-size style helper                                               |
+| `buildTextOptions`                | `HtmlWidgetUtils`     | text option normalization helper                                         |
+| `resolveDefaultText`              | `HtmlWidgetUtils`     | default placeholder/text resolver                                        |
+| `toStyleText`                     | `HtmlWidgetUtils`     | style fragment assembly helper                                           |
+| `resolveMetricValueFamily`        | `HtmlWidgetUtils`     | metric font-family resolution                                            |
+| `resolveLabelEdgePolicy`          | `HtmlWidgetUtils`     | label-edge policy normalization                                          |
+| `toPx`                            | `HtmlWidgetUtils`     | CSS px-string helper                                                     |
+| `joinStyles`                      | `HtmlWidgetUtils`     | style-fragment concatenation                                             |
+| `resolveTextFillScale`            | `TextLayoutComposite` | normalized text fill scale                                               |
+| `clampTextFillScale`              | `TextLayoutComposite` | text fill scale clamp                                                    |
+| `scaleTextCeiling`                | `TextLayoutComposite` | text ceiling scaling helper                                              |
+| `resolveOpacity`                  | `TextLayoutComposite` | canonical opacity resolver                                               |
+| `resolveCompactGeometryScale`     | `TextLayoutComposite` | compact geometry scale helper                                            |
+| `scaleValueUnitFit`               | `TextLayoutComposite` | value/unit fit scaling helper                                            |
+| `scaleInlineFit`                  | `TextLayoutComposite` | inline caption/value/unit fit scaling                                    |
+| `resolveFamily`                   | `CanvasTextLayout`    | font family resolver                                                     |
+| `makeFitCacheKey`                 | `TextLayoutEngine`    | fit-cache key construction                                               |
+| `writeFitCache`                   | `TextLayoutEngine`    | fit-cache writer                                                         |
+| `readFitCache`                    | `TextLayoutEngine`    | fit-cache reader                                                         |
+| `createFitCache`                  | `TextLayoutEngine`    | fit-cache initializer                                                    |
+| `setFont`                         | `CanvasTextFitting`   | canonical canvas font setter                                             |
+| `setCanvasFont`                   | `CanvasTextFitting`   | alias for canonical font setter                                          |
+| `measureTextWidth`                | `CanvasTextFitting`   | cached text width measurement (per-context cache capped at 2048 entries) |
+| `fitSingleTextPx`                 | `CanvasTextFitting`   | single-line fit-size resolver                                            |
+| `splitRow`                        | `LayoutRectMath`      | split rect into columns                                                  |
+| `splitStack`                      | `LayoutRectMath`      | split rect into rows                                                     |
+| `buildValueTickAngles`            | `RadialValueMath`     | radial tick-angle construction                                           |
+| `valueToAngleFlat`                | `RadialAngleMath`     | flat-arg angle conversion wrapper                                        |
 
 ## Radial Wrappers
 

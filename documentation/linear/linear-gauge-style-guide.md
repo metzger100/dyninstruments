@@ -24,7 +24,8 @@ Use this guide to keep visual behavior and editable parameter contracts consiste
 - Compass linear sets `labelEdgePolicy: "sliding"` so tick labels behave like a moving tape: they stay centered on their
   natural positions, clip at the viewport, and do not force the row to shrink when edge labels drift in or out.
 - Wind linear (`angleTrueLinear`, `angleApparentLinear`) renders angle+speed together and supports mirrored layline
-  sectors.
+  sectors. It uses `springWrap: 360`, so an angle moving from `179` to `-179` eases 2° across the ±180 seam instead of
+  358° through `0`.
 - Wind linear overrides the generic `normal` / `high` text geometry: `normal` uses the stacked dual block below the
   gauge, and `high` uses inline top metric + middle gauge + inline bottom metric.
 - `hideTextualMetrics` is the public `Hide textual metrics` toggle, defaults to `false`, and applies to Speed, Depth,

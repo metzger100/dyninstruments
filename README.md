@@ -283,9 +283,9 @@ release/package contract via `npm run package:check`, the complete configured Vi
 never timing). It verifies `.only` rejection through the direct Vitest configuration and every configured project. The
 package contract derives component registry fragments from the browser bootstrap manifest and proves complete
 dependency/resource closure plus exact release staging contents. Documentation checks run through `npm run docs:check`,
-including the markdownlint baseline. `npm run test:coverage:check` separately reruns the same three Vitest projects
-under V8 instrumentation afterward; this duplication with `check:core` is intentional — the ordinary run gives direct
-failures, the instrumented run owns coverage evidence.
+including the markdownlint baseline. `check:all` runs every non-test `check:core` role in the same order and then
+`npm run test:coverage:check`, which runs the three Vitest projects exactly once under V8 instrumentation; `check:core`
+stays available for direct, uninstrumented test failures while iterating.
 
 Scaling measurements fail closed unless every observed operation count is a non-negative finite integer.
 

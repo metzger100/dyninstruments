@@ -49,7 +49,8 @@ ownership contract, then use this file for exact function/field signatures.
 Key signatures:
 
 - `setFont(ctx, px, weight, family)`
-- `measureTextWidth(ctx, text)`
+- `measureTextWidth(ctx, text)` (widths are cached per canvas context by font and text; the cache is capped at 2048
+  entries and cleared when it overflows)
 - `fitTextPx(ctx, text, maxW, maxH, family, weight)`
 - `fitSingleTextPx(ctx, text, basePx, maxW, maxH, family, weight)`
 - Composite helpers (`measureValueUnitFit`, `drawValueUnitWithFit`, `fitInlineCapValUnit`, `drawInlineCapValUnit`,

@@ -51,7 +51,8 @@ Bundled layout integration:
   - high mode share: display `0.68`, controls `0.32`
   - normal mode share: display `0.62`, controls `0.38`
   - flat mode share: display `1.0`, controls `1.0`
-  - fit cache key: `__dyniRegattaTimerHtmlFitCache`
+  - fit cache key: `__dyniRegattaTimerHtmlFitCache`; the cached signature includes the surface `fontMetricsEpoch`, so
+    the fit is recomputed once web fonts finish loading
 
 ## State Machine
 
@@ -64,16 +65,29 @@ Bundled layout integration:
 Transitions:
 
 - `idle` -> `countdown`: `start()`
-- `countdown` -> `elapsed`: countdown reaches `0:00`
-- `countdown` -> `countdown`: `sync()` snaps to lower signal point
+- `countdown` -> `elapsed`: countdown reaches `0:00`; elapsed time counts from the countdown end
+- `countdown` -> `countdown`: `sync()` snaps to a signal point (see below)
 - `*` -> `idle`: `reset()`
 
 ## Sync Algorithm
 
 - Signal points are derived from duration and include: `duration:00`, `(duration-1):00`, `4:00`, `1:00`, `0:00` (deduped
-  and range-clamped).
-- `sync()` selects the highest point strictly below the current value, using `SYNC_GRACE_SECONDS = 1`.
-- If target is `0`, the model transitions immediately to `elapsed`.
+  and range-clamped), for example `6:00`, `5:00`, `4:00`, `1:00`, `0:00` for a 6-minute duration and `5:00`, `4:00`,
+  `1:00`, `0:00` for a 5-minute duration.
+- Let `remaining` be the unrounded seconds left. `sync()` targets the highest signal point `p` with `p <= remaining + 1`
+  (`SYNC_SNAP_TOLERANCE_SECONDS = 1`): within ±1 s of a point it snaps to that point, otherwise it snaps to the next
+  lower point. For a 6-minute duration, 299.2 s and 301.0 s snap to `05:00`, 298.9 s snaps to `04:00`, 59.2 s snaps to
+  `01:00`, and 58.5 s starts the elapsed phase.
+- If the target is `0`, the model transitions immediately to `elapsed`, with elapsed time starting at the press.
+
+## Elapsed Time and Missed Signals
+
+- Elapsed time is anchored to the countdown end (`endTimeMs`), both for the natural transition and when a countdown
+  snapshot whose end already passed is restored after a remount, so a late tick or a remount shows the true time since
+  the start instead of restarting at `00:00`.
+- A tick that skipped at most 2 countdown seconds still emits the minute and final-ten-second signals it crossed; a
+  later tick drops them instead of replaying a burst of stale beeps.
+- The start tone plays only when the tick that observes the countdown end is at most 2 s late.
 
 ## Audio Signal Contract
 
@@ -86,8 +100,14 @@ Transitions:
 Audio engine details:
 
 - Web Audio owner: `shared/widget-kits/vessel/RegattaTimerAudio.js`
-- `AudioContext` is created lazily via `ensureContext()` on user interaction.
+- One `AudioContext` per page lives in the audio module scope and is shared by every engine. The widget creates a new
+  engine on every mount, so signals keep playing after a remount.
+- `ensureContext()` creates the shared context on first use and resumes it when it is suspended; the widget calls it
+  from the `START`, `SYNC`, and `RESET` handlers, which run inside a user gesture.
+- `destroy()` releases an engine but never closes the shared context.
 - Tone shaping uses `GainNode` envelope (`ATTACK_SECONDS = 0.005`, `RELEASE_SECONDS = 0.01`).
+- The click handler is rebound whenever the interaction state changes, so a wrapper kept across patches stops
+  intercepting clicks as soon as the widget becomes passive (layout editing).
 
 ## Theme Tokens
 

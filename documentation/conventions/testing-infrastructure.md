@@ -165,9 +165,9 @@ Commands:
 - `npm run test:split` — all configured Vitest projects
 
 `npm run check:core` runs `test:split` exactly once as its complete ordinary-execution proof, replacing the former
-direct `test:contract` position. `npm run test:coverage:check` separately reruns the same three projects under V8
-instrumentation afterward for coverage evidence; the two owners intentionally duplicate test execution because ordinary
-`check:core` gives direct failures without instrumentation overhead, while `test:coverage:check` owns coverage.
+direct `test:contract` position, and gives direct failures without instrumentation overhead. `npm run check:all` skips
+the two test roles of `check:core` and instead runs the same three projects exactly once under V8 instrumentation
+through `npm run test:coverage:check`, which owns coverage evidence.
 
 ## Global Setup (`tests/setup/vitest.setup.js`)
 

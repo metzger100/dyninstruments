@@ -194,8 +194,8 @@ tests, and every maintained `tools/**/*.mjs` script under `tsconfig.tools.json`)
 configured Vitest suite exactly once via `test:split` (`unit-node` + `contract` + `unit-dom`), `check:complexity` (a
 portable, Git-free digest proof plus the complexity no-regression budget; `npm run complexity:regenerate-audit` is the
 maintainer-only Git-based regeneration audit), `check:scaling` (deterministic operation-count contracts, never timing),
-and `docs:check`. `test:coverage:check` separately reruns the same three Vitest projects under V8 instrumentation
-afterward for coverage evidence; the duplication with `check:core`'s ordinary run is intentional. `package:check`
+and `docs:check`. `check:all` runs every non-test `check:core` role in the same order and then `test:coverage:check`,
+which runs the three Vitest projects exactly once under V8 instrumentation for coverage evidence. `package:check`
 derives registry fragments from the browser bootstrap manifest and proves component dependency/resource closure and
 exact release staging contents. `npm run dependencies:audit` runs a networked `npm audit`; run it after dependency
 updates and during scheduled maintenance, never as part of `check:all`.

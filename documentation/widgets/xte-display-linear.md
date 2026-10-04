@@ -30,7 +30,6 @@ first, then gauge + metrics in `data` state.
 ```javascript
 XteDisplayLinearWidget: {
   js: BASE + "widgets/text/XteDisplayLinearWidget/XteDisplayLinearWidget.js",
-  css: undefined,
   globalKey: "DyniXteDisplayLinearWidget",
   deps: [
     "GaugeToolkit",

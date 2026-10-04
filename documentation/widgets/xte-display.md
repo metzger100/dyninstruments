@@ -64,7 +64,6 @@ Layout ownership:
 ```javascript
 XteDisplayWidget: {
   js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
-  css: undefined,
   globalKey: "DyniXteDisplayWidget",
   deps: [
     "GaugeToolkit",

@@ -35,7 +35,6 @@ This renderer uses the shared text compaction contract from `TextLayoutEngine.co
 // In config/components/registry-widgets-vessel.js (assembled by config/components.js)
 ThreeValueTextWidget: {
   js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
-  css: undefined,
   globalKey: "DyniThreeValueTextWidget",
   deps: [
     "runtime.theme",

@@ -163,7 +163,8 @@ ClusterWidget creates angle formatters for wind kinds:
 function makeAngleFormatter(isDirection, leadingZero, fallback) {
   return function (raw) {
     // isDirection=true  → 0..360 (TWD)
-    // isDirection=false → -180..+180 (TWA, AWA)
+    // isDirection=false → delegates to ValueMath.formatAngle180 (TWA, AWA): [-180, 180),
+    //                     rounded before the sign is chosen, so -0.4 prints "0" and 179.6 prints "-180"
   };
 }
 ```

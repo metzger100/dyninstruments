@@ -21,6 +21,10 @@ post-activation shadow CSS sizing and layout.
   `box-sizing:border-box`.
 - `shared/widget-kits/html/PreparedPayloadModelCache.js` caches by payload `revision`, `props` identity, and
   `shellRect.width`/`shellRect.height`; renderers must clear it on `detach` and `destroy`.
+- When `document.fonts` is still loading at attach, the controller schedules one refresh on `document.fonts.ready`: it
+  increments `fontMetricsEpoch` and re-renders the latest payload with `layoutChanged: true`, so text-fitting renderers
+  re-fit with the loaded fonts. Fit modules that cache results (`ActiveRouteHtmlFit`, `MapZoomHtmlFit`,
+  `RegattaTimerHtmlFit`, `AlarmHtmlFit`) include `fontMetricsEpoch` in their cache signature.
 - `HtmlWidgetUtils.patchInnerHtml(rootEl, markup)` is the shared DOM patch boundary; it stores the last patched markup
   in non-enumerable `__dyniLastPatchedMarkup` and is a no-op for identical markup.
 - Session-persistence patterns for remounts: `hostContext[SESSION_KEY]` snapshot (same surface session), or a

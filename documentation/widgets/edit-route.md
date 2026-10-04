@@ -23,6 +23,9 @@ EditRouteTextHtmlWidget is a committed HTML renderer for the nav editRoute kind.
   metric value spans.
 - Time option `hideSeconds` (default `false`) swaps the ETA metric formatter from `formatTime` to `formatClock`.
 - Interaction action target: `surfacePolicy.actions.routeEditor.openEditRoute()`.
+- Total distance prefers the route's own `computeLength`; without a usable one, `EditRouteViewModel` sums the legs. A
+  leg that cannot be computed makes the total `undefined` (rendered as the placeholder) instead of a total that is too
+  short; a one-point route totals `0`.
 
 ## State Screens
 

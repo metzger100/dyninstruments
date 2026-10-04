@@ -20,11 +20,12 @@ Remediation playbooks for smell rules defined in `smell-prevention.md`. Consult 
 2. Call `invalidateRoot(rootEl)` directly from every runtime mutation path that updates a specific widget root.
 3. Add/adjust tests for mutation -> invalidation -> refreshed resolve.
 
-### Dynamic key stale state
+### Stale KEY value leak
 
-1. In cluster `updateFunction`, branch on empty key input.
-2. Remove stale `storeKeys.<dynamic>` when empty.
-3. Add config-cluster tests for empty-key cleanup.
+1. Map every kind's value explicitly through `ClusterMapperToolkit.out(...)`, which always carries `value`; never rely
+   on omitting `value` from mapper output.
+2. Add a mapper test where a raw leftover `value` is present and the kind's own value is missing, and assert an own
+   `undefined` `value` (`toEqual` ignores undefined properties, so assert the key explicitly).
 
 ### Absolute user-home path leak
 

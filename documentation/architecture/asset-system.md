@@ -23,7 +23,7 @@ either `plugin.js` (legacy) or `plugin.mjs` (module) startup.
   `audio` -> `ArrayBuffer` via `fetch(...).arrayBuffer()`; `json` -> parsed object via `fetch(...).json()`; `font` ->
   `FontFace` (from a fetched `ArrayBuffer`) added to `document.fonts`.
 - Duplicate asset keys, unsupported types, and malformed declarations all throw during preload.
-- Preloading runs after JS/CSS load completion and before component API validation in the component loader.
+- Preloading runs after JS load completion and before component API validation in the component loader.
 - Route-specific assets load during route activation, not startup, and stay cached for the plugin session.
 - Plugin-wide Roboto/Roboto Mono fonts stay declared via `@font-face` in `plugin.css`, resolve from `assets/fonts/`, and
   are never routed through the component registry or `runtime.getAsset()`.
@@ -37,7 +37,6 @@ Component registry entries may include an optional `assets` array:
 ```js
 SomeComponent: {
   js: BASE + "path/to/component.js",
-  css: undefined,
   globalKey: "DyniSomeComponent",
   deps: ["OtherComponent"],
   assets: [
@@ -75,7 +74,7 @@ Error contract:
 - Duplicate asset keys throw during preload
 - Unsupported asset types or malformed declarations throw during preload
 
-The component loader preloads declared assets after JS/CSS load completion and before component API validation.
+The component loader preloads declared assets after JS load completion and before component API validation.
 
 Route-specific assets are component-owned: they are loaded during route activation, not startup, and the loaded results
 stay cached for the plugin session.

@@ -1,5 +1,5 @@
 /**
- * @file DyniPlugin Component Loader - Dynamic JS/CSS loading and scoped component instantiation
+ * @file DyniPlugin Component Loader - Dynamic JS loading and scoped component instantiation
  * Documentation: documentation/architecture/component-system.md
  */
 (function (root) {

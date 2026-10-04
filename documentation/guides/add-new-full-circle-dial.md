@@ -138,7 +138,6 @@ Add module entry:
 ```javascript
 NewDialWidget: {
   js: BASE + "widgets/radial/NewDialWidget/NewDialWidget.js",
-  css: undefined,
   globalKey: "DyniNewDialWidget",
   deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout"]
 }

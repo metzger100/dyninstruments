@@ -13,7 +13,7 @@ Ownership split:
 - plugin.js (legacy) and plugin.mjs (modern module) are thin adapters that delegate to the shared bootstrap core
 - config/components/registry-*.js defines registry fragments
 - config/components.js assembles fragments into config.components
-- runtime/component-loader.js resolves dependencies and loads JS/CSS
+- runtime/component-loader.js resolves dependencies and loads JS
 - runtime/asset-preloader.js preloads declared assets and exposes runtime asset lookup
 - runtime/cluster/RouteActivationController.js builds activated route payloads on demand
 - runtime/init.js requests required components and registers widgets
@@ -33,8 +33,9 @@ Ownership split:
   `componentContext.hostActions` is the same function reference as `runtime.hostActions`.
 - `runtime.getAsset(key)` returns the preloaded asset value or `null` for a known-but-failed asset;
   `runtime.assetUrl(relativePath)` resolves a plugin-relative path to a full URL.
-- Loader flow: resolve dependencies recursively -> load CSS (`runtime.loadCssOnce`) -> load JS
-  (`runtime.loadScriptOnce`) -> preload declared assets -> validate API shape -> cache resolved component promise.
+- Loader flow: resolve dependencies recursively -> load JS (`runtime.loadScriptOnce`) -> preload declared assets ->
+  validate API shape -> cache resolved component promise. Registry entries have no `css` field; widget styles load
+  through `shadowCss`.
 - Global `plugin.css` is linked in document head; committed-HTML `shadowCss` bundles are preloaded as text and injected
   only into the active renderer's shadow root by `HtmlSurfaceController`, never linked globally.
 - `ClusterWidget.deps` is intentionally `[]`; route roots are loaded lazily by `RouteActivationController`, not at
@@ -113,7 +114,7 @@ Committed HTML CSS:
 
 Runtime assets:
 
-- component loader preloads declared assets after JS/CSS load completion
+- component loader preloads declared assets after JS load completion
 - `runtime.getAsset(key)` returns the preloaded asset value or null for a known-but-failed asset
 - `runtime.assetUrl(relativePath)` resolves a plugin-relative asset path to a full URL
 - plugin-wide bundled fonts remain in `plugin.css` and are not registered as component assets
@@ -121,11 +122,10 @@ Runtime assets:
 ## Loader Flow
 
 1. resolve dependencies recursively
-2. load CSS when component declares css through `runtime.loadCssOnce`
-3. load JS script once through `runtime.loadScriptOnce`
-4. preload declared assets, if any
-5. validate API shape
-6. cache resolved component promise
+2. load JS script once through `runtime.loadScriptOnce`
+3. preload declared assets, if any
+4. validate API shape
+5. cache resolved component promise
 
 ## Runtime Init Notes
 

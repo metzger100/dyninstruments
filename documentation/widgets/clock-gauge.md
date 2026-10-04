@@ -32,7 +32,6 @@ easing. Digital time display uses the shared `FullCircleRadialTextLayout.drawSin
 // In config/components/registry-widgets-gauge.js
 ClockRadialWidget: {
   js: BASE + "widgets/radial/ClockRadialWidget/ClockRadialWidget.js",
-  css: undefined,
   globalKey: "DyniClockRadialWidget",
   deps: ["FullCircleRadialEngine", "FullCircleRadialTextLayout", "GeometryScale", "PlaceholderNormalize"]
 }

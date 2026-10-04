@@ -91,7 +91,6 @@ Add module entry:
 ```javascript
 NewGaugeWidget: {
   js: BASE + "widgets/radial/NewGaugeWidget/NewGaugeWidget.js",
-  css: undefined,
   globalKey: "DyniNewGaugeWidget",
   deps: ["SemicircleRadialEngine"]
 }
