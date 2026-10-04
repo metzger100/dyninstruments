@@ -349,52 +349,38 @@ describe("config/clusters/nav.js", function () {
   it("sets disconnect for waypoint-dependent kinds when wpServer is false", function () {
     const def = loadNavDef();
 
-    const a = def.updateFunction({ kind: "dst", wpServer: false });
+    const a = def.updateFunction.call({ kind: "dst" }, { wpServer: false });
     expect(a.disconnect).toBe(true);
 
-    const b = def.updateFunction({ kind: "positionWp", wpServer: false });
+    const b = def.updateFunction.call({ kind: "positionWp" }, { wpServer: false });
     expect(b.disconnect).toBe(true);
 
-    const x = def.updateFunction({ kind: "xteDisplay", wpServer: false });
+    const x = def.updateFunction.call({ kind: "xteDisplay" }, { wpServer: false });
     expect(x.disconnect).toBe(true);
 
-    const xl = def.updateFunction({ kind: "xteDisplayLinear", wpServer: false });
+    const xl = def.updateFunction.call({ kind: "xteDisplayLinear" }, { wpServer: false });
     expect(xl.disconnect).toBe(true);
 
-    const c = def.updateFunction({ kind: "wpEta", wpServer: false, disconnect: true });
+    const c = def.updateFunction.call({ kind: "wpEta" }, { wpServer: false, disconnect: true });
     expect(c.disconnect).toBeUndefined();
   });
 
   it("does not derive disconnect for activeRoute kinds in updateFunction", function () {
     const def = loadNavDef();
 
-    const serverDown = def.updateFunction({
-      kind: "activeRoute",
-      wpServer: false,
-      activeRouteName: "Harbor Run"
-    });
+    const serverDown = def.updateFunction.call(
+      { kind: "activeRoute" },
+      { wpServer: false, activeRouteName: "Harbor Run" }
+    );
     expect(serverDown.disconnect).toBeUndefined();
 
-    const emptyName = def.updateFunction({
-      kind: "activeRoute",
-      wpServer: true,
-      activeRouteName: "   "
-    });
+    const emptyName = def.updateFunction.call({ kind: "activeRoute" }, { wpServer: true, activeRouteName: "   " });
     expect(emptyName.disconnect).toBeUndefined();
 
-    const staleDisconnect = def.updateFunction({
-      kind: "activeRoute",
-      wpServer: true,
-      activeRouteName: "Harbor Run",
-      disconnect: true
-    });
+    const staleDisconnect = def.updateFunction.call(
+      { kind: "activeRoute" },
+      { wpServer: true, activeRouteName: "Harbor Run", disconnect: true }
+    );
     expect(staleDisconnect.disconnect).toBeUndefined();
-  });
-
-  it("clears stale visible state on nav kinds", function () {
-    const def = loadNavDef();
-
-    const cleared = def.updateFunction({ kind: "wpEta", visible: true });
-    expect(cleared.visible).toBeUndefined();
   });
 });

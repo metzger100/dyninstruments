@@ -36,6 +36,7 @@ describe("config/clusters/map.js", function () {
     expect(def.storeKeys.target).toBe("nav.ais.nearest");
     expect(def.storeKeys.trackedMmsi).toBe("nav.ais.trackedMmsi");
     expect(def.storeKeys.aisMarkAllWarning).toBe("properties.aisMarkAllWarning");
+    expect(def.updateFunction).toBeUndefined();
 
     expect(def.editableParameters.kind.default).toBe("centerDisplay");
     expect(def.editableParameters.kind.list).toEqual([
@@ -89,21 +90,5 @@ describe("config/clusters/map.js", function () {
     expect(def.editableParameters.unit_centerDisplayMeasure_nm.default).toBe("nm");
     expect(def.editableParameters.unit_aisTargetDst).toBeUndefined();
     expect(def.editableParameters.unit_aisTargetCpa).toBeUndefined();
-  });
-
-  it("applies center-display visibility semantics and clears stale visible state for zoom", function () {
-    const def = loadMapDef();
-
-    const unlocked = def.updateFunction({ kind: "centerDisplay", lockPosition: false, editing: false });
-    expect(unlocked.visible).toBe(true);
-
-    const lockedEditing = def.updateFunction({ kind: "centerDisplay", lockPosition: true, editing: true });
-    expect(lockedEditing.visible).toBe(true);
-
-    const locked = def.updateFunction({ kind: "centerDisplay", lockPosition: true, editing: false });
-    expect(locked.visible).toBe(false);
-
-    const zoom = def.updateFunction({ kind: "zoom", visible: true });
-    expect(zoom.visible).toBeUndefined();
   });
 });

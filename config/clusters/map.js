@@ -5,7 +5,6 @@
 (function (root) {
   "use strict";
 
-  /** @typedef {Record<string, unknown> & { kind?: unknown, lockPosition?: unknown, editing?: unknown, visible?: unknown }} DyniMapValues */
   /** @typedef {DyniPluginSharedConfig & { makePerKindCaptionParams: (map: DyniPerKindTextParameterMap) => DyniEditableParameters, makePerKindTextParams: (map: DyniPerKindTextParameterMap) => DyniEditableParameters, makeUnitAwareTextParams: (map: DyniPerKindTextParameterMap, bindings: Readonly<Record<string, DyniUnitFormatBinding>>) => DyniEditableParameters, opt: (name: unknown, value: unknown) => DyniEditableOption, kindMaps: Record<string, DyniPerKindTextParameterMap>, unitFormatFamilies: DyniUnitFormatCatalog }} DyniMapSharedConfig */
   /** @typedef {{ DyniPlugin: DyniPluginNamespace & { config: DyniPluginConfig & { clusters: DyniWidgetDefinition[] } } }} DyniMapRoot */
 
@@ -114,17 +113,6 @@
         ...makePerKindCaptionParams(MAP_UNIT_AWARE_KIND),
         ...makeUnitAwareTextParams(MAP_UNIT_AWARE_KIND, mapBindings),
         ...makePerKindTextParams(MAP_TEXT_KIND)
-      },
-      /** @param {DyniMapValues | null | undefined} values @returns {DyniMapValues} */
-      updateFunction: function (values) {
-        const out = /** @type {DyniMapValues} */ (values ? { ...values } : {});
-        const kind = (values && values.kind) || "centerDisplay";
-        if (kind === "centerDisplay") {
-          out.visible = !(values && values.lockPosition) || !!(values && values.editing);
-        } else if (Object.prototype.hasOwnProperty.call(out, "visible")) {
-          delete out.visible;
-        }
-        return out;
       }
     }
   });

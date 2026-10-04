@@ -338,13 +338,11 @@
       /** @this {DyniClusterConfigValues} @param {DyniClusterConfigValues | null | undefined} values @returns {DyniClusterConfigValues} */
       updateFunction: function (values) {
         const out = /** @type {DyniClusterConfigValues} */ (values ? { ...values } : {});
-        const kind = (values && values.kind) || "wpEta";
+        const source = /** @type {DyniClusterConfigValues} */ (this && typeof this === "object" ? this : {});
+        const kind = source.kind || "wpEta";
         const needsWp = kind === "dst" || kind === "positionWp" || kind === "xteDisplay" || kind === "xteDisplayLinear";
         if (needsWp && values && values.wpServer === false) out.disconnect = true;
         else if (Object.prototype.hasOwnProperty.call(out, "disconnect")) delete out.disconnect;
-        if (Object.prototype.hasOwnProperty.call(out, "visible")) {
-          delete out.visible;
-        }
         return out;
       }
     }

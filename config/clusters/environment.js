@@ -33,7 +33,7 @@
       updateFunction: function (values) {
         const out = /** @type {DyniEnvironmentValues} */ (values ? { ...values } : {});
         const source = /** @type {DyniEnvironmentValues} */ (this && typeof this === "object" ? this : {});
-        const kind = (values && values.kind) || source.kind || "depth";
+        const kind = source.kind || "depth";
 
         if (!out.storeKeys) out.storeKeys = {};
 

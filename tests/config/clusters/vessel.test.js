@@ -163,20 +163,20 @@ describe("config/clusters/vessel.js", function () {
 
   it("injects selected voltage path into storeKeys.value for voltage kinds", function () {
     const def = loadVesselDef();
-    const out = def.updateFunction({ kind: "voltage", value: " electrical.battery.house " });
+    const out = def.updateFunction.call({ kind: "voltage" }, { value: " electrical.battery.house " });
     expect(out.storeKeys.value).toBe("electrical.battery.house");
   });
 
   it("removes stale voltage value key when voltage key is cleared", function () {
     const def = loadVesselDef();
-    const out = def.updateFunction({ kind: "voltageLinear", value: " ", storeKeys: { value: "old.path" } });
+    const out = def.updateFunction.call({ kind: "voltageLinear" }, { value: " ", storeKeys: { value: "old.path" } });
     expect(out.storeKeys.value).toBeUndefined();
     expect(Object.prototype.hasOwnProperty.call(out.storeKeys, "value")).toBe(false);
   });
 
   it("removes dynamic value store key when non-voltage kind is active", function () {
     const def = loadVesselDef();
-    const out = def.updateFunction({ kind: "clock", storeKeys: { value: "a", clock: "b" } });
+    const out = def.updateFunction.call({ kind: "clock" }, { storeKeys: { value: "a", clock: "b" } });
     expect(out.storeKeys.value).toBeUndefined();
     expect(out.storeKeys.clock).toBe("b");
   });
@@ -184,16 +184,29 @@ describe("config/clusters/vessel.js", function () {
   it("sets pitch/roll keys from editable KEYs and falls back to defaults when empty", function () {
     const def = loadVesselDef();
 
-    const pitchExplicit = def.updateFunction({ kind: "pitch", pitchKey: " sensors.attitude.pitch " });
+    const pitchExplicit = def.updateFunction.call({ kind: "pitch" }, { pitchKey: " sensors.attitude.pitch " });
     expect(pitchExplicit.storeKeys.pitch).toBe("sensors.attitude.pitch");
 
-    const pitchFallback = def.updateFunction({ kind: "pitch", pitchKey: "  " });
+    const pitchFallback = def.updateFunction.call({ kind: "pitch" }, { pitchKey: "  " });
     expect(pitchFallback.storeKeys.pitch).toBe("nav.gps.signalk.navigation.attitude.pitch");
 
-    const rollExplicit = def.updateFunction({ kind: "roll", rollKey: " sensors.attitude.roll " });
+    const rollExplicit = def.updateFunction.call({ kind: "roll" }, { rollKey: " sensors.attitude.roll " });
     expect(rollExplicit.storeKeys.roll).toBe("sensors.attitude.roll");
 
-    const rollFallback = def.updateFunction({ kind: "roll", rollKey: "" });
+    const rollFallback = def.updateFunction.call({ kind: "roll" }, { rollKey: "" });
     expect(rollFallback.storeKeys.roll).toBe("nav.gps.signalk.navigation.attitude.roll");
+  });
+
+  it("uses live pitchKey and rollKey values for custom attitude store paths at runtime", function () {
+    const def = loadVesselDef();
+
+    const pitch = def.updateFunction.call({ kind: "pitch" }, { pitch: 0.01, pitchKey: 0.2 });
+    expect(pitch.pitch).toBe(0.2);
+
+    const roll = def.updateFunction.call({ kind: "roll" }, { roll: 0.01, rollKey: -0.3 });
+    expect(roll.roll).toBe(-0.3);
+
+    const voltage = def.updateFunction.call({ kind: "voltage" }, { pitch: 0.01, pitchKey: 0.2 });
+    expect(voltage.pitch).toBe(0.01);
   });
 });

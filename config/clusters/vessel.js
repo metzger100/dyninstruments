@@ -14,6 +14,24 @@
   const VESSEL_KIND = shared.kindMaps.VESSEL_KIND;
   const DEFAULT_PITCH_KEY = "nav.gps.signalk.navigation.attitude.pitch";
   const DEFAULT_ROLL_KEY = "nav.gps.signalk.navigation.attitude.roll";
+  const hasOwn = Object.prototype.hasOwnProperty;
+
+  /**
+   * Copies the live value of an attitude KEY editable onto the metric the mapper reads.
+   * @param {DyniClusterConfigValues} out
+   * @param {string} valueKey
+   * @param {string} aliasKey
+   * @param {string} defaultPath
+   */
+  function applyAttitudeKey(out, valueKey, aliasKey, defaultPath) {
+    if (hasOwn.call(out, aliasKey)) {
+      out[valueKey] = out[aliasKey];
+    }
+
+    const selectedPath = out[aliasKey];
+    const storePath = typeof selectedPath === "string" && selectedPath.trim() ? selectedPath.trim() : defaultPath;
+    out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), [valueKey]: storePath };
+  }
 
   config.clusters.push({
     widget: "ClusterWidget",
@@ -284,7 +302,8 @@
       /** @this {DyniClusterConfigValues} @param {DyniClusterConfigValues | null | undefined} values @returns {DyniClusterConfigValues} */
       updateFunction: function (values) {
         const out = /** @type {DyniClusterConfigValues} */ (values ? { ...values } : {});
-        const kind = (values && values.kind) || "voltage";
+        const source = /** @type {DyniClusterConfigValues} */ (this && typeof this === "object" ? this : {});
+        const kind = source.kind || "voltage";
 
         if (!out.storeKeys) out.storeKeys = {};
 
@@ -306,19 +325,11 @@
         }
 
         if (kind === "pitch") {
-          if (typeof out.pitchKey === "string" && out.pitchKey.trim()) {
-            out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), pitch: out.pitchKey.trim() };
-          } else {
-            out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), pitch: DEFAULT_PITCH_KEY };
-          }
+          applyAttitudeKey(out, "pitch", "pitchKey", DEFAULT_PITCH_KEY);
         }
 
         if (kind === "roll") {
-          if (typeof out.rollKey === "string" && out.rollKey.trim()) {
-            out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), roll: out.rollKey.trim() };
-          } else {
-            out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), roll: DEFAULT_ROLL_KEY };
-          }
+          applyAttitudeKey(out, "roll", "rollKey", DEFAULT_ROLL_KEY);
         }
 
         return out;
