@@ -92,17 +92,39 @@ describe("RegattaTimerModel", function () {
     expect(timer.getState().displayTime).toBe("04:00");
   });
 
-  it("sync at exact minute boundary advances to the next lower signal point", function () {
+  it("sync snaps to a signal point within one second of it, otherwise to the next lower point", function () {
     const createTimerModel = createFactory();
-    const timer = createTimerModel({ durationMinutes: 5 });
+    /** @type {Array<[number, number, string]>} */
+    const cases = [
+      [6, 301.5, "05:00"],
+      [6, 301.0, "05:00"],
+      [6, 300.8, "05:00"],
+      [6, 299.2, "05:00"],
+      [6, 299.0, "05:00"],
+      [6, 298.9, "04:00"],
+      [6, 240.5, "04:00"],
+      [6, 239.4, "04:00"],
+      [6, 150.0, "01:00"],
+      [6, 60.6, "01:00"],
+      [6, 59.2, "01:00"],
+      [6, 58.5, "elapsed"],
+      [5, 240.3, "04:00"]
+    ];
 
-    timer.start();
-    vi.advanceTimersByTime(35000);
-    timer.sync();
-    expect(timer.getState().displayTime).toBe("04:00");
+    cases.forEach(function ([durationMinutes, remainingSeconds, expected]) {
+      const startMs = Date.now();
+      const timer = createTimerModel({ durationMinutes: durationMinutes });
+      timer.start();
+      vi.setSystemTime(startMs + Math.round((durationMinutes * 60 - remainingSeconds) * 1000));
 
-    timer.sync();
-    expect(timer.getState().displayTime).toBe("01:00");
+      timer.sync();
+
+      const state = timer.getState();
+      const observed = state.phase === "elapsed" ? "elapsed" : state.displayTime;
+      expect(observed, durationMinutes + " min, " + remainingSeconds + " s remaining").toBe(expected);
+      timer.destroy();
+      vi.setSystemTime(startMs);
+    });
   });
 
   it("sync below one minute snaps to immediate elapsed start", function () {

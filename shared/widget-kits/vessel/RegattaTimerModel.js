@@ -13,7 +13,7 @@
 
   const DEFAULT_DURATION_MINUTES = 5;
   const TICK_INTERVAL_MS = 100;
-  const SYNC_GRACE_SECONDS = 1;
+  const SYNC_SNAP_TOLERANCE_SECONDS = 1;
   const MAX_CATCH_UP_SECONDS = 2;
   const MAX_START_SIGNAL_DELAY_MS = 2000;
   const LOW_TONE_HZ = 440;
@@ -325,7 +325,7 @@
 
         for (i = 0; i < syncPoints.length; i += 1) {
           const point = syncPoints[i];
-          if (remainingSeconds - point > SYNC_GRACE_SECONDS) {
+          if (point <= remainingSeconds + SYNC_SNAP_TOLERANCE_SECONDS) {
             targetSeconds = point;
             break;
           }
