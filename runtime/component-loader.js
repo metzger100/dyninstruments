@@ -13,23 +13,19 @@
   /** @typedef {{ components: DyniLoaderComponentDependencies, theme: DyniLoaderTheme, format: DyniRuntimeNamespace["format"], canvas: DyniRuntimeNamespace["canvas"], dom: DyniRuntimeNamespace["dom"], hostActions: DyniRuntimeNamespace["hostActions"] }} DyniLoaderComponentContext */
   /** @typedef {{ widget: string }} DyniLoaderWidgetReference */
   /** @typedef {{ loadComponent(id: string): Promise<unknown>, uniqueComponents(definitions: DyniLoaderWidgetReference[]): string[], areComponentsLoaded(ids: unknown): boolean, createInstance(id: string, definition: DyniWidgetDefinitionData): unknown }} DyniLoader */
-  /** @typedef {DyniRuntimeNamespace & { createAssetPreloader: (baseUrl: string) => DyniAssetPreloader, loadScriptOnce: (assetId: string, url: string) => Promise<void>, loadCssOnce: (assetId: string, url: string | undefined) => Promise<void>, theme: { tokens: DyniLoaderThemeTokens } }} DyniLoaderRuntime */
+  /** @typedef {DyniRuntimeNamespace & { createAssetPreloader: (baseUrl: string) => DyniAssetPreloader, loadScriptOnce: (assetId: string, url: string) => Promise<void>, theme: { tokens: DyniLoaderThemeTokens } }} DyniLoaderRuntime */
   /** @typedef {DyniPluginNamespace & { baseUrl: string, runtime: DyniLoaderRuntime }} DyniLoaderRoot */
 
   const ns = /** @type {DyniLoaderRoot} */ (root.DyniPlugin);
   const runtime = ns.runtime;
   const createAssetPreloader = runtime.createAssetPreloader;
   const runtimeLoadScriptOnce = runtime.loadScriptOnce;
-  const runtimeLoadCssOnce = runtime.loadCssOnce;
 
   if (typeof createAssetPreloader !== "function") {
     throw new Error("dyninstruments: runtime.createAssetPreloader missing before runtime/component-loader.js load");
   }
   if (typeof runtimeLoadScriptOnce !== "function") {
     throw new Error("dyninstruments: runtime.loadScriptOnce missing before runtime/component-loader.js load");
-  }
-  if (typeof runtimeLoadCssOnce !== "function") {
-    throw new Error("dyninstruments: runtime.loadCssOnce missing before runtime/component-loader.js load");
   }
 
   const assetPreloader = createAssetPreloader(ns.baseUrl);
@@ -152,10 +148,7 @@
       const deps = componentDef.deps || [];
       const promise = Promise.all(deps.map(loadComponent))
         .then(function () {
-          return Promise.all([
-            runtimeLoadCssOnce("dyni-css-" + id, componentDef.css),
-            runtimeLoadScriptOnce("dyni-js-" + id, componentDef.js)
-          ]);
+          return runtimeLoadScriptOnce("dyni-js-" + id, componentDef.js);
         })
         .then(function () {
           const assetDecls = componentDef.assets || [];

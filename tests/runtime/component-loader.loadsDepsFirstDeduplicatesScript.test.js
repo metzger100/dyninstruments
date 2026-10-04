@@ -8,11 +8,11 @@ const {
 } = require("./component-loader-setup");
 
 describe("runtime/component-loader.js", function () {
-  it("loads deps first and deduplicates script/css loads", async function () {
+  it("loads deps first, deduplicates script loads, and appends no stylesheet links", async function () {
     const { runtime, dom } = setupComponentLoader();
     const loader = runtime.createComponentLoader({
-      A: { js: "/a.js", css: "/a.css", globalKey: "DyniA", deps: ["B"] },
-      B: { js: "/b.js", css: undefined, globalKey: "DyniB" }
+      A: { js: "/a.js", globalKey: "DyniA", deps: ["B"] },
+      B: { js: "/b.js", globalKey: "DyniB" }
     });
 
     const first = loader.loadComponent("A");
@@ -23,7 +23,7 @@ describe("runtime/component-loader.js", function () {
     await flushPromises();
 
     expect(dom.appendedScripts.map((/** @type {any} */ s) => s.id)).toEqual(["dyni-js-B", "dyni-js-A"]);
-    expect(dom.appendedLinks.map((/** @type {any} */ l) => l.id)).toEqual(["dyni-css-A"]);
+    expect(dom.appendedLinks).toEqual([]);
   });
 
   it("throws for unknown component", function () {
@@ -40,7 +40,7 @@ describe("runtime/component-loader.js", function () {
     context.DyniComponents.Broken = { id: "Broken" };
 
     const loader = runtime.createComponentLoader({
-      Broken: { js: "/broken.js", css: undefined, globalKey: "Broken" }
+      Broken: { js: "/broken.js", globalKey: "Broken" }
     });
 
     await expect(loader.loadComponent("Broken")).rejects.toThrow("Component not found or invalid");
@@ -58,7 +58,6 @@ describe("runtime/component-loader.js", function () {
     const loader = runtime.createComponentLoader({
       ThemeModel: {
         js: "/theme-model.js",
-        css: undefined,
         globalKey: "ThemeModel",
         apiShape: "module"
       }
@@ -74,7 +73,6 @@ describe("runtime/component-loader.js", function () {
     const loader = runtime.createComponentLoader({
       Weird: {
         js: "/weird.js",
-        css: undefined,
         globalKey: "Weird",
         apiShape: "mystery"
       }
@@ -98,14 +96,12 @@ describe("runtime/component-loader.js", function () {
   it("reuses runtime.loadScriptOnce when plugin bootstrap already provided it", async function () {
     const dom = createDomHarness();
     const runtimeLoadScriptOnce = vi.fn(() => Promise.resolve());
-    const runtimeLoadCssOnce = vi.fn(() => Promise.resolve());
     const context = createScriptContext({
       document: dom.document,
       DyniPlugin: {
         baseUrl: "http://host/plugins/dyninstruments/",
         runtime: {
-          loadScriptOnce: runtimeLoadScriptOnce,
-          loadCssOnce: runtimeLoadCssOnce
+          loadScriptOnce: runtimeLoadScriptOnce
         },
         state: {},
         config: { shared: {}, clusters: [] }
@@ -118,7 +114,7 @@ describe("runtime/component-loader.js", function () {
     runIifeScript("runtime/asset-preloader.js", context);
     runIifeScript("runtime/component-loader.js", context);
     const loader = context.DyniPlugin.runtime.createComponentLoader({
-      A: { js: "/a.js", css: undefined, globalKey: "DyniA" }
+      A: { js: "/a.js", globalKey: "DyniA" }
     });
 
     await loader.loadComponent("A");
@@ -172,7 +168,6 @@ describe("runtime/component-loader.js", function () {
       }
       return Promise.resolve();
     });
-    const runtimeLoadCssOnce = vi.fn(() => Promise.resolve());
     const context = createScriptContext({
       document: {
         ...dom.document,
@@ -191,8 +186,7 @@ describe("runtime/component-loader.js", function () {
       },
       DyniPlugin: {
         runtime: {
-          loadScriptOnce: runtimeLoadScriptOnce,
-          loadCssOnce: runtimeLoadCssOnce
+          loadScriptOnce: runtimeLoadScriptOnce
         },
         state: {},
         config: { shared: {}, clusters: [] },
@@ -209,7 +203,6 @@ describe("runtime/component-loader.js", function () {
     const loader = context.DyniPlugin.runtime.createComponentLoader({
       A: {
         js: "/a.js",
-        css: undefined,
         globalKey: "DyniA",
         assets: [
           { key: "svg-icon", path: "assets/icon.svg", type: "svg" },

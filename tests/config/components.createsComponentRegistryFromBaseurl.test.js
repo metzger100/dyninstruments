@@ -87,8 +87,7 @@ describe("config/components.js", function () {
       DyniPlugin: {
         baseUrl: "http://host/plugins/dyninstruments/",
         runtime: {
-          loadScriptOnce: vi.fn(() => Promise.resolve()),
-          loadCssOnce: vi.fn(() => Promise.resolve())
+          loadScriptOnce: vi.fn(() => Promise.resolve())
         },
         state: {},
         config: {

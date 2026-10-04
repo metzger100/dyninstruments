@@ -43,41 +43,16 @@ function createRuntimeScriptLoader(dom) {
   });
 }
 
-/** @param {DyniLoaderDom} dom @returns {(id: string, href: string | undefined) => Promise<void>} */
-function createRuntimeCssLoader(dom) {
-  return vi.fn((id, href) => {
-    if (!href || dom.document.getElementById(id)) {
-      return Promise.resolve();
-    }
-
-    return /** @type {Promise<void>} */ (
-      new Promise(function (resolve, reject) {
-        const link = dom.document.createElement("link");
-        link.id = id;
-        link.rel = "stylesheet";
-        link.href = href;
-        link.onload = function () {
-          resolve();
-        };
-        link.onerror = reject;
-        dom.document.head.appendChild(link);
-      })
-    );
-  });
-}
-
 /** @param {import("../helpers/mock-dom.js").DomHarnessOptions} [options] */
 function setupComponentLoader(options) {
   const dom = createDomHarness(options);
   const runtimeLoadScriptOnce = createRuntimeScriptLoader(dom);
-  const runtimeLoadCssOnce = createRuntimeCssLoader(dom);
   const context = createScriptContext({
     document: dom.document,
     DyniPlugin: {
       baseUrl: "http://host/plugins/dyninstruments/",
       runtime: {
-        loadScriptOnce: runtimeLoadScriptOnce,
-        loadCssOnce: runtimeLoadCssOnce
+        loadScriptOnce: runtimeLoadScriptOnce
       },
       state: {},
       config: { shared: {}, clusters: [] }
@@ -95,8 +70,7 @@ function setupComponentLoader(options) {
     dom,
     runtime: context.DyniPlugin.runtime,
     context,
-    runtimeLoadScriptOnce,
-    runtimeLoadCssOnce
+    runtimeLoadScriptOnce
   };
 }
 

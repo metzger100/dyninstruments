@@ -21,86 +21,73 @@
 
   sf.StateScreenLabels = {
     js: BASE + "shared/widget-kits/state/StateScreenLabels.js",
-    css: undefined,
     globalKey: "DyniStateScreenLabels"
   };
 
   sf.StateScreenPrecedence = {
     js: BASE + "shared/widget-kits/state/StateScreenPrecedence.js",
-    css: undefined,
     globalKey: "DyniStateScreenPrecedence"
   };
 
   sf.StateScreenInteraction = {
     js: BASE + "shared/widget-kits/state/StateScreenInteraction.js",
-    css: undefined,
     globalKey: "DyniStateScreenInteraction"
   };
 
   sf.StateScreenTextFit = {
     js: BASE + "shared/widget-kits/state/StateScreenTextFit.js",
-    css: undefined,
     globalKey: "DyniStateScreenTextFit",
     deps: ["ValueMath", "HtmlWidgetUtils", "HtmlMeasureUtils", "CanvasTextFitting"]
   };
 
   sf.StateScreenMarkup = {
     js: BASE + "shared/widget-kits/state/StateScreenMarkup.js",
-    css: undefined,
     globalKey: "DyniStateScreenMarkup",
     deps: ["HtmlWidgetUtils", "StateScreenLabels", "StateScreenTextFit", "ValueMath"]
   };
 
   sf.StateScreenCanvasOverlay = {
     js: BASE + "shared/widget-kits/state/StateScreenCanvasOverlay.js",
-    css: undefined,
     globalKey: "DyniStateScreenCanvasOverlay",
     deps: ["StateScreenLabels", "CanvasTextFitting"]
   };
 
   sf.HtmlDomPatchUtils = {
     js: BASE + "shared/widget-kits/html/HtmlDomPatchUtils.js",
-    css: undefined,
     globalKey: "DyniHtmlDomPatchUtils",
     deps: ["ValueMath"]
   };
 
   sf.HtmlWidgetUtils = {
     js: BASE + "shared/widget-kits/html/HtmlWidgetUtils.js",
-    css: undefined,
     globalKey: "DyniHtmlWidgetUtils",
     deps: ["ValueMath", "HtmlDomPatchUtils"]
   };
 
   sf.PreparedPayloadModelCache = {
     js: BASE + "shared/widget-kits/html/PreparedPayloadModelCache.js",
-    css: undefined,
     globalKey: "DyniPreparedPayloadModelCache"
   };
 
   sf.CanvasLayerCache = {
     js: BASE + "shared/widget-kits/canvas/CanvasLayerCache.js",
-    css: undefined,
     globalKey: "DyniCanvasLayerCache",
     deps: ["ValueMath"]
   };
 
   sf.SpringEasing = {
     js: BASE + "shared/widget-kits/anim/SpringEasing.js",
-    css: undefined,
     globalKey: "DyniSpringEasing",
     deps: ["ValueMath"]
   };
 
   sf.HtmlWidgetLifecycle = {
     js: BASE + "shared/widget-kits/html/HtmlWidgetLifecycle.js",
-    css: undefined,
     globalKey: "DyniHtmlWidgetLifecycle"
   };
 
   sf.CenterDisplayStateAdapter = {
     js: BASE + "shared/widget-kits/text/CenterDisplayStateAdapter.js",
-    css: undefined,
     globalKey: "DyniCenterDisplayStateAdapter",
     deps: ["StateScreenLabels", "StateScreenPrecedence", "StateScreenCanvasOverlay"]
   };

@@ -21,14 +21,12 @@
 
   w.AlarmRenderModel = {
     js: BASE + "shared/widget-kits/vessel/AlarmRenderModel.js",
-    css: undefined,
     globalKey: "DyniAlarmRenderModel",
     deps: ["HtmlWidgetUtils", "ValueMath"]
   };
 
   w.AlarmTextHtmlWidget = {
     js: BASE + "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.js",
-    css: undefined,
     shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AlarmTextHtmlWidget/AlarmTextHtmlWidget.css"],
     globalKey: "DyniAlarmTextHtmlWidget",
     deps: ["AlarmHtmlFit", "HtmlWidgetUtils", "AlarmRenderModel", "AlarmMarkup", "ValueMath"]
@@ -36,42 +34,36 @@
 
   w.AlarmMarkup = {
     js: BASE + "shared/widget-kits/vessel/AlarmMarkup.js",
-    css: undefined,
     globalKey: "DyniAlarmMarkup",
     deps: ["HtmlWidgetUtils", "ValueMath"]
   };
 
   w.RegattaTimerModel = {
     js: BASE + "shared/widget-kits/vessel/RegattaTimerModel.js",
-    css: undefined,
     globalKey: "DyniRegattaTimerModel",
     deps: ["ValueMath"]
   };
 
   w.RegattaTimerAudio = {
     js: BASE + "shared/widget-kits/vessel/RegattaTimerAudio.js",
-    css: undefined,
     globalKey: "DyniRegattaTimerAudio",
     deps: []
   };
 
   w.RegattaTimerSessionStore = {
     js: BASE + "shared/widget-kits/vessel/RegattaTimerSessionStore.js",
-    css: undefined,
     globalKey: "DyniRegattaTimerSessionStore",
     deps: ["ValueMath"]
   };
 
   w.RegattaTimerMarkup = {
     js: BASE + "shared/widget-kits/vessel/RegattaTimerMarkup.js",
-    css: undefined,
     globalKey: "DyniRegattaTimerMarkup",
     deps: ["HtmlWidgetUtils", "RegattaTimerPhase"]
   };
 
   w.RegattaTimerTextHtmlWidget = {
     js: BASE + "widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.js",
-    css: undefined,
     shadowCss: [
       SHARED_HTML_SHADOW_CSS,
       BASE + "widgets/text/RegattaTimerTextHtmlWidget/RegattaTimerTextHtmlWidget.css"
@@ -90,7 +82,6 @@
 
   w.PositionCoordinateWidget = {
     js: BASE + "widgets/text/PositionCoordinateWidget/PositionCoordinateWidget.js",
-    css: undefined,
     globalKey: "DyniPositionCoordinateWidget",
     deps: [
       "TextLayoutEngine",
@@ -105,7 +96,6 @@
 
   w.ThreeValueTextWidget = {
     js: BASE + "widgets/text/ThreeValueTextWidget/ThreeValueTextWidget.js",
-    css: undefined,
     globalKey: "DyniThreeValueTextWidget",
     deps: [
       "TextLayoutEngine",
@@ -119,7 +109,6 @@
 
   w.XteDisplayWidget = {
     js: BASE + "widgets/text/XteDisplayWidget/XteDisplayWidget.js",
-    css: undefined,
     globalKey: "DyniXteDisplayWidget",
     deps: [
       "GaugeToolkit",
@@ -139,7 +128,6 @@
 
   w.XteDisplayLinearWidget = {
     js: BASE + "widgets/text/XteDisplayLinearWidget/XteDisplayLinearWidget.js",
-    css: undefined,
     globalKey: "DyniXteDisplayLinearWidget",
     deps: [
       "GaugeToolkit",

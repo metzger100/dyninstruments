@@ -28,9 +28,7 @@ function runSignedGenericRule(rule, files) {
       ],
       "runtime/plugin-bootstrap-core.js": [
         { pattern: "\\bscriptEl\\.onload", count: 1 },
-        { pattern: "\\bscriptEl\\.onerror", count: 1 },
-        { pattern: "\\blinkEl\\.onload", count: 1 },
-        { pattern: "\\blinkEl\\.onerror", count: 1 }
+        { pattern: "\\bscriptEl\\.onerror", count: 1 }
       ]
     }
   }).map((finding) => ({

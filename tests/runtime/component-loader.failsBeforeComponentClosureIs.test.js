@@ -7,7 +7,7 @@ describe("runtime/component-loader.js createInstance", function () {
     installComponentContextRuntime(runtime);
 
     const loader = runtime.createComponentLoader({
-      A: { js: "/a.js", css: undefined, globalKey: "DyniA" }
+      A: { js: "/a.js", globalKey: "DyniA" }
     });
 
     expect(function () {
@@ -38,8 +38,8 @@ describe("runtime/component-loader.js createInstance", function () {
     };
 
     const loader = runtime.createComponentLoader({
-      A: { js: "/a.js", css: undefined, globalKey: "DyniA", deps: ["Dep"] },
-      Dep: { js: "/dep.js", css: undefined, globalKey: "DyniDep" }
+      A: { js: "/a.js", globalKey: "DyniA", deps: ["Dep"] },
+      Dep: { js: "/dep.js", globalKey: "DyniDep" }
     });
 
     await loader.loadComponent("A");
@@ -70,7 +70,7 @@ describe("runtime/component-loader.js createInstance", function () {
     };
 
     const loader = runtime.createComponentLoader({
-      A: { js: "/a.js", css: undefined, globalKey: "DyniA" }
+      A: { js: "/a.js", globalKey: "DyniA" }
     });
     await loader.loadComponent("A");
 
@@ -87,8 +87,8 @@ describe("runtime/component-loader.js createInstance", function () {
     context.DyniComponents.DyniB = { create: vi.fn(() => ({})) };
 
     const loader = runtime.createComponentLoader({
-      A: { js: "/a.js", css: undefined, globalKey: "DyniA", deps: ["B"] },
-      B: { js: "/b.js", css: undefined, globalKey: "DyniB", deps: ["A"] }
+      A: { js: "/a.js", globalKey: "DyniA", deps: ["B"] },
+      B: { js: "/b.js", globalKey: "DyniB", deps: ["A"] }
     });
 
     expect(function () {

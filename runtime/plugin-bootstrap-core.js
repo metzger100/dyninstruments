@@ -119,41 +119,15 @@
     }
   }
 
-  /** @param {Document} documentRef @param {string} cssId @param {string} href @returns {Promise<void>} */
-  function loadCssOnceById(documentRef, cssId, href) {
-    if (!href) {
-      return Promise.resolve();
-    }
-    if (documentRef.getElementById(cssId)) {
-      return Promise.resolve();
-    }
-
-    return new Promise(function (/** @type {() => void} */ resolve, /** @type {(reason?: unknown) => void} */ reject) {
-      var linkEl = documentRef.createElement("link");
-      linkEl.id = cssId;
-      linkEl.rel = "stylesheet";
-      linkEl.href = href;
-      linkEl.onload = function () {
-        resolve();
-      };
-      linkEl.onerror = function () {
-        removeElement(linkEl);
-        reject(new Error("dyninstruments: failed to load " + href));
-      };
-      documentRef.head.appendChild(linkEl);
-    });
-  }
-
   /**
    * @param {DyniBootstrapRoot} rootRef
    * @param {string} baseUrl
    * @param {unknown} hostApi
    * @param {DyniBootstrapLoader} loadScriptOnce
-   * @param {DyniBootstrapLoader} loadCssOnce
    * @param {DyniBootstrapGeneration} generation
    * @returns {DyniBootstrapNamespace}
    */
-  function prepareNamespace(rootRef, baseUrl, hostApi, loadScriptOnce, loadCssOnce, generation) {
+  function prepareNamespace(rootRef, baseUrl, hostApi, loadScriptOnce, generation) {
     var win = rootRef.window || rootRef;
     var ns = /** @type {DyniBootstrapNamespace} */ (win.DyniPlugin || {});
     win.DyniPlugin = ns;
@@ -164,7 +138,6 @@
     ns.state = ns.state || {};
     ns.startupGeneration = generation;
     ns.runtime.loadScriptOnce = loadScriptOnce;
-    ns.runtime.loadCssOnce = loadCssOnce;
     return ns;
   }
 
@@ -240,23 +213,12 @@
       return loadScriptOnceById(activeDocument, makeScriptId(scriptId, scope), src);
     };
     /** @type {DyniBootstrapLoader} */
-    var loadCssOnceByScopedId = function (cssId, href) {
-      return loadCssOnceById(activeDocument, makeScriptId(cssId, scope), href);
-    };
-    /** @type {DyniBootstrapLoader} */
     var loadScriptById = function (scriptId, src) {
       return loadScriptOnceById(activeDocument, scriptId, src);
     };
 
     var rootRef = /** @type {DyniBootstrapRoot} */ (opts.root || resolveGlobalRoot());
-    var ns = prepareNamespace(
-      rootRef,
-      baseUrl,
-      opts.hostApi || null,
-      loadScriptOnceByScopedId,
-      loadCssOnceByScopedId,
-      generation
-    );
+    var ns = prepareNamespace(rootRef, baseUrl, opts.hostApi || null, loadScriptOnceByScopedId, generation);
 
     return loadScriptById(makeScriptId(BOOTSTRAP_BUNDLE_PATH, scope), baseUrl + BOOTSTRAP_BUNDLE_PATH)
       .then(

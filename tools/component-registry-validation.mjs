@@ -24,7 +24,6 @@ export function collectComponentRegistryResources(rootDir, registry) {
       continue;
     }
     collectRequiredResource(rootDir, resources, errors, componentId, "js", component.js);
-    collectOptionalResource(rootDir, resources, errors, componentId, "css", component.css);
     collectResourceArray(rootDir, resources, errors, componentId, "shadowCss", component.shadowCss);
     collectAssetResources(rootDir, resources, errors, componentId, component.assets);
     validateDependencyList(registry, errors, componentId, component.deps);
@@ -57,21 +56,6 @@ function collectRequiredResource(rootDir, resources, errors, componentId, field,
     return;
   }
   collectResource(rootDir, resources, errors, componentId, field, rawValue);
-}
-
-/**
- * @param {string} rootDir
- * @param {Set<string>} resources
- * @param {string[]} errors
- * @param {string} componentId
- * @param {string} field
- * @param {unknown} rawValue
- */
-function collectOptionalResource(rootDir, resources, errors, componentId, field, rawValue) {
-  if (typeof rawValue === "undefined") {
-    return;
-  }
-  collectRequiredResource(rootDir, resources, errors, componentId, field, rawValue);
 }
 
 /**

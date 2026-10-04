@@ -20,7 +20,6 @@ interface DyniBootstrapConfig {
 
 interface DyniBootstrapRuntime {
   loadScriptOnce: DyniBootstrapLoader;
-  loadCssOnce: DyniBootstrapLoader;
   runInit?: () => Promise<(() => void) | undefined>;
   [key: string]: unknown;
 }

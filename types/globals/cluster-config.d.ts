@@ -20,7 +20,6 @@ interface DyniClusterRoutesConfig {
 
 interface DyniComponentDefinition {
   js: string;
-  css?: undefined;
   shadowCss?: string[];
   globalKey: string;
   deps?: string[];

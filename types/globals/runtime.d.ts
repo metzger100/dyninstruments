@@ -16,7 +16,6 @@ interface DyniRuntimeNamespace {
   assetUrl?: (relativePath: string) => string;
   getAsset?: (key: string) => unknown;
   loadScriptOnce?: DyniBootstrapLoader;
-  loadCssOnce?: DyniBootstrapLoader;
   createComponentLoader?: (components: DyniComponentRegistryGroup) => DyniComponentLoader;
   componentLoader?: DyniComponentLoader | null;
   clusterShellRenderer?: DyniClusterShellRendererApi;

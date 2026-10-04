@@ -21,14 +21,12 @@
 
   w.NavInteractionPolicy = {
     js: BASE + "shared/widget-kits/nav/NavInteractionPolicy.js",
-    css: undefined,
     globalKey: "DyniNavInteractionPolicy",
     deps: ["HtmlWidgetUtils", "ValueMath"]
   };
 
   w.AisTargetRenderModel = {
     js: BASE + "shared/widget-kits/nav/AisTargetRenderModel.js",
-    css: undefined,
     globalKey: "DyniAisTargetRenderModel",
     deps: [
       "AisTargetLayout",
@@ -45,14 +43,12 @@
 
   w.AisTargetMarkup = {
     js: BASE + "shared/widget-kits/nav/AisTargetMarkup.js",
-    css: undefined,
     globalKey: "DyniAisTargetMarkup",
     deps: ["StateScreenMarkup", "ValueMath"]
   };
 
   w.AisTargetTextHtmlWidget = {
     js: BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.js",
-    css: undefined,
     shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/AisTargetTextHtmlWidget/AisTargetTextHtmlWidget.css"],
     globalKey: "DyniAisTargetTextHtmlWidget",
     deps: [
@@ -67,7 +63,6 @@
 
   w.ActiveRouteTextHtmlWidget = {
     js: BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.js",
-    css: undefined,
     shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/ActiveRouteTextHtmlWidget/ActiveRouteTextHtmlWidget.css"],
     globalKey: "DyniActiveRouteTextHtmlWidget",
     deps: [
@@ -87,7 +82,6 @@
 
   w.EditRouteRenderModel = {
     js: BASE + "shared/widget-kits/nav/EditRouteRenderModel.js",
-    css: undefined,
     globalKey: "DyniEditRouteRenderModel",
     deps: [
       "EditRouteLayout",
@@ -105,14 +99,12 @@
 
   w.EditRouteMarkup = {
     js: BASE + "shared/widget-kits/nav/EditRouteMarkup.js",
-    css: undefined,
     globalKey: "DyniEditRouteMarkup",
     deps: ["StateScreenMarkup", "ValueMath"]
   };
 
   w.EditRouteTextHtmlWidget = {
     js: BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.js",
-    css: undefined,
     shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/EditRouteTextHtmlWidget/EditRouteTextHtmlWidget.css"],
     globalKey: "DyniEditRouteTextHtmlWidget",
     deps: ["EditRouteHtmlFit", "HtmlWidgetUtils", "HtmlWidgetLifecycle", "EditRouteRenderModel", "EditRouteMarkup"]
@@ -120,7 +112,6 @@
 
   w.RoutePointsRenderModel = {
     js: BASE + "shared/widget-kits/nav/RoutePointsRenderModel.js",
-    css: undefined,
     globalKey: "DyniRoutePointsRenderModel",
     deps: [
       "CenterDisplayMath",
@@ -139,21 +130,18 @@
 
   w.RoutePointsMarkup = {
     js: BASE + "shared/widget-kits/nav/RoutePointsMarkup.js",
-    css: undefined,
     globalKey: "DyniRoutePointsMarkup",
     deps: ["StateScreenMarkup", "ValueMath"]
   };
 
   w.RoutePointsDomEffects = {
     js: BASE + "shared/widget-kits/nav/RoutePointsDomEffects.js",
-    css: undefined,
     globalKey: "DyniRoutePointsDomEffects",
     deps: ["HtmlWidgetUtils", "ValueMath"]
   };
 
   w.RoutePointsTextHtmlWidget = {
     js: BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.js",
-    css: undefined,
     shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/RoutePointsTextHtmlWidget/RoutePointsTextHtmlWidget.css"],
     globalKey: "DyniRoutePointsTextHtmlWidget",
     deps: [
@@ -169,14 +157,12 @@
 
   w.MapZoomMarkup = {
     js: BASE + "shared/widget-kits/nav/MapZoomMarkup.js",
-    css: undefined,
     globalKey: "DyniMapZoomMarkup",
     deps: ["HtmlWidgetUtils", "StateScreenLabels", "StateScreenMarkup"]
   };
 
   w.MapZoomTextHtmlWidget = {
     js: BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
-    css: undefined,
     shadowCss: [SHARED_HTML_SHADOW_CSS, BASE + "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.css"],
     globalKey: "DyniMapZoomTextHtmlWidget",
     deps: [
@@ -196,7 +182,6 @@
 
   w.CenterDisplayTextWidget = {
     js: BASE + "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
-    css: undefined,
     globalKey: "DyniCenterDisplayTextWidget",
     deps: [
       "TextLayoutEngine",
