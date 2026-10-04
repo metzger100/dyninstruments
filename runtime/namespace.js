@@ -10,7 +10,7 @@
   ns.state = ns.state || {};
   ns.config = ns.config || {};
   ns.config.shared = ns.config.shared || {};
-  ns.config.clusters = ns.config.clusters || [];
+  ns.config.clusters = [];
 
   /** @param {unknown} rootRef @returns {unknown} */
   runtime.getAvnavApi =

@@ -26,4 +26,25 @@ describe("runtime/namespace.js", function () {
     context.DyniPlugin.avnavApi = null;
     expect(context.DyniPlugin.runtime.getAvnavApi(context)).toBe(null);
   });
+
+  it("resets the cluster list so every bootstrap generation yields exactly nine widget definitions", function () {
+    const manifestContext = createScriptContext({ DyniPlugin: { config: {} } });
+    runIifeScript("config/bootstrap-manifest.js", manifestContext);
+    const manifest = manifestContext.DyniPlugin.config.bootstrapManifest;
+    const generationScripts = manifest.slice(
+      manifest.indexOf("runtime/namespace.js"),
+      manifest.indexOf("config/widget-definitions.js") + 1
+    );
+    const context = createScriptContext({ DyniPlugin: { baseUrl: "http://host/plugins/dyninstruments/" } });
+
+    for (let generation = 0; generation < 2; generation += 1) {
+      generationScripts.forEach(function (/** @type {string} */ scriptPath) {
+        runIifeScript(scriptPath, context);
+      });
+      const definitions = context.DyniPlugin.config.widgetDefinitions;
+      const names = new Set(definitions.map((/** @type {any} */ entry) => entry.def.name));
+      expect(definitions).toHaveLength(9);
+      expect(names.size).toBe(9);
+    }
+  });
 });
