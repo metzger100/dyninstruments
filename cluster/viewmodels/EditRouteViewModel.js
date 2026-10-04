@@ -15,7 +15,7 @@
   const LOCAL_ROUTE_PREFIX = "local@";
 
   /** @typedef {{ name?: unknown, points: unknown[], computeLength?: (fromIndex: number, useRhumbLine: boolean) => unknown } & Record<string, unknown>} DyniEditRouteSource */
-  /** @typedef {{ rawName: string, displayName: string, pointCount: number, totalDistance: number, isLocalRoute: boolean, isServerRoute: boolean, sourceRoute: DyniEditRouteSource }} DyniEditRouteSummary */
+  /** @typedef {{ rawName: string, displayName: string, pointCount: number, totalDistance: number | undefined, isLocalRoute: boolean, isServerRoute: boolean, sourceRoute: DyniEditRouteSource }} DyniEditRouteSummary */
   /** @typedef {{ editingRoute?: unknown, useRhumbLine?: unknown, activeName?: unknown, rteDistance?: unknown, rteEta?: unknown, hideSeconds?: unknown }} DyniEditRouteProps */
   /** @typedef {{ route: DyniEditRouteSummary | null, hasRoute: boolean, isActiveRoute: boolean, remainingDistance: number | undefined, rteEta: unknown, hideSeconds: boolean }} DyniEditRouteViewModelOutput */
   /** @typedef {{ id: "EditRouteViewModel", build: (props?: DyniEditRouteProps) => DyniEditRouteViewModelOutput }} DyniEditRouteViewModelApi */
@@ -43,17 +43,16 @@
     return typeof rawName === "string" && rawName !== "" && rawName.indexOf(LOCAL_ROUTE_PREFIX) !== 0;
   }
 
-  /** @param {unknown} previousPoint @param {unknown} currentPoint @param {boolean} useRhumbLine @param {DyniCenterDisplayMathApi} centerMath @returns {number} */
+  /** @param {unknown} previousPoint @param {unknown} currentPoint @param {boolean} useRhumbLine @param {DyniCenterDisplayMathApi} centerMath @returns {number | undefined} */
   function computeLegDistance(previousPoint, currentPoint, useRhumbLine, centerMath) {
     const leg = centerMath.computeCourseDistance(previousPoint, currentPoint, useRhumbLine === true);
-    if (!leg || typeof leg !== "object") {
-      return 0;
-    }
-    const distance = toOptionalFiniteNumber(leg.distance);
-    return typeof distance === "number" ? distance : 0;
+    return leg && typeof leg === "object" ? toOptionalFiniteNumber(leg.distance) : undefined;
   }
 
-  /** @param {unknown[]} points @param {boolean} useRhumbLine @param {DyniCenterDisplayMathApi} centerMath @returns {number} */
+  /**
+   * Sums the legs; a leg that cannot be computed makes the total unknown instead of too short.
+   * @param {unknown[]} points @param {boolean} useRhumbLine @param {DyniCenterDisplayMathApi} centerMath @returns {number | undefined}
+   */
   function computeLegSumDistance(points, useRhumbLine, centerMath) {
     if (!Array.isArray(points) || points.length <= 1) {
       return 0;
@@ -61,12 +60,16 @@
 
     let totalDistance = 0;
     for (let index = 1; index < points.length; index += 1) {
-      totalDistance += computeLegDistance(points[index - 1], points[index], useRhumbLine, centerMath);
+      const legDistance = computeLegDistance(points[index - 1], points[index], useRhumbLine, centerMath);
+      if (typeof legDistance !== "number") {
+        return undefined;
+      }
+      totalDistance += legDistance;
     }
     return totalDistance;
   }
 
-  /** @param {unknown} sourceRoute @param {unknown[]} points @param {boolean} useRhumbLine @param {DyniCenterDisplayMathApi} centerMath @returns {number} */
+  /** @param {unknown} sourceRoute @param {unknown[]} points @param {boolean} useRhumbLine @param {DyniCenterDisplayMathApi} centerMath @returns {number | undefined} */
   function computeTotalDistance(sourceRoute, points, useRhumbLine, centerMath) {
     if (isObject(sourceRoute) && typeof sourceRoute.computeLength === "function") {
       try {
@@ -85,7 +88,7 @@
     try {
       return computeLegSumDistance(points, useRhumbLine, centerMath);
     } catch (err) {
-      return 0;
+      return undefined;
     }
   }
 

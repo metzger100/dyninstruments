@@ -30,7 +30,7 @@
     },
     {
       "file": "cluster/viewmodels/EditRouteViewModel.js",
-      "line": 87,
+      "line": 90,
       "rule": "catch-fallback-without-suppression",
       "owner": "route-boundary",
       "reason": "Malformed route points fail closed to the empty summary."

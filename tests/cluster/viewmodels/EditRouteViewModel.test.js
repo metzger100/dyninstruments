@@ -213,7 +213,7 @@ describe("EditRouteViewModel", function () {
       },
       useRhumbLine: true
     });
-    expect(throwingComputeLength.route.totalDistance).toBe(20);
+    expect(throwingComputeLength.route.totalDistance).toBeUndefined();
 
     expect(calls).toEqual([false, false, true, true, true, true, true, true]);
   });
@@ -267,7 +267,7 @@ describe("EditRouteViewModel", function () {
         }
       }
     });
-    expect(out.route.totalDistance).toBe(0);
+    expect(out.route.totalDistance).toBeUndefined();
     expect(out.hasRoute).toBe(true);
   });
 });
