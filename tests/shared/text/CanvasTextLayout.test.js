@@ -189,4 +189,28 @@ describe("CanvasTextLayout", function () {
     expect(ctx.fillCalls[1].alpha).toBe(1);
     expect(ctx.fillCalls[2].alpha).toBe(0.5);
   });
+
+  it("keeps the shared per-context text-width cache bounded and still returns correct widths", function () {
+    const fitting = loadFresh("shared/widget-kits/text/CanvasTextFitting.js").create(
+      {},
+      createComponentContextMock({ modules: { ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js") } })
+    );
+    const ctx = createCtx();
+    const measureText = ctx.measureText;
+    let measureCalls = 0;
+    ctx.measureText = function (/** @type {any} */ text) {
+      measureCalls += 1;
+      return measureText.call(this, text);
+    };
+
+    for (let i = 0; i < 2100; i += 1) {
+      const text = "w" + i;
+      expect(fitting.measureTextWidth(ctx, text)).toBe(text.length * 10);
+      expect(Object.keys(ctx.__dyniRadialTextWidthCache).length).toBeLessThanOrEqual(2048);
+    }
+
+    expect(measureCalls).toBe(2100);
+    expect(fitting.measureTextWidth(ctx, "w2099")).toBe(50);
+    expect(measureCalls).toBe(2100);
+  });
 });

@@ -1150,13 +1150,6 @@
       "limit": 6
     },
     {
-      "file": "widgets/text/CenterDisplayTextWidget/CenterDisplayTextWidget.js",
-      "identity": "anonymous#2.measureCachedTextWidth",
-      "metric": "max-params",
-      "value": 7,
-      "limit": 6
-    },
-    {
       "file": "widgets/text/MapZoomTextHtmlWidget/MapZoomTextHtmlWidget.js",
       "identity": "anonymous#2.buildModel",
       "metric": "complexity",

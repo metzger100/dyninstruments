@@ -49,8 +49,7 @@ type DyniCenterDisplayMeasureTextWidth = (
   text: unknown,
   family: unknown,
   weight: unknown,
-  px: unknown,
-  frameWidthCache: unknown
+  px: unknown
 ) => number;
 
 interface DyniCenterDisplayMeasurementHintArgs {
@@ -67,7 +66,6 @@ interface DyniCenterDisplayMeasurementHintArgs {
   labelWeight: unknown;
   valueWeight: unknown;
   gap: number;
-  frameWidthCache: unknown;
   positionCaption?: unknown;
   latText?: unknown;
   lonText?: unknown;

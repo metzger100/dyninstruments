@@ -40,49 +40,17 @@
     const baseRowLabelPx = Math.max(1, Math.floor(cfg.contentRect.h / Math.max(3, rows.length + 1)));
     const baseRowValuePx = Math.max(1, Math.floor(baseRowLabelPx * 1.18));
     const positionCaptionWidth = cfg.positionCaption
-      ? measureTextWidth(
-          cfg.ctx,
-          cfg.textApi,
-          cfg.positionCaption,
-          cfg.labelFamily,
-          cfg.labelWeight,
-          baseCaptionPx,
-          cfg.frameWidthCache
-        )
+      ? measureTextWidth(cfg.ctx, cfg.textApi, cfg.positionCaption, cfg.labelFamily, cfg.labelWeight, baseCaptionPx)
       : 0;
     const coordWidth = Math.max(
-      measureTextWidth(
-        cfg.ctx,
-        cfg.textApi,
-        cfg.latText,
-        cfg.coordFamily,
-        cfg.valueWeight,
-        baseCoordPx,
-        cfg.frameWidthCache
-      ),
-      measureTextWidth(
-        cfg.ctx,
-        cfg.textApi,
-        cfg.lonText,
-        cfg.coordFamily,
-        cfg.valueWeight,
-        baseCoordPx,
-        cfg.frameWidthCache
-      )
+      measureTextWidth(cfg.ctx, cfg.textApi, cfg.latText, cfg.coordFamily, cfg.valueWeight, baseCoordPx),
+      measureTextWidth(cfg.ctx, cfg.textApi, cfg.lonText, cfg.coordFamily, cfg.valueWeight, baseCoordPx)
     );
     let rowBlockWidth = 0;
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       const labelWidth = row.caption
-        ? measureTextWidth(
-            cfg.ctx,
-            cfg.textApi,
-            row.caption,
-            cfg.labelFamily,
-            cfg.labelWeight,
-            baseRowLabelPx,
-            cfg.frameWidthCache
-          )
+        ? measureTextWidth(cfg.ctx, cfg.textApi, row.caption, cfg.labelFamily, cfg.labelWeight, baseRowLabelPx)
         : 0;
       const valueWidth = Math.min(
         measureTextWidth(
@@ -91,8 +59,7 @@
           row.fullValueText,
           cfg.relationValueFamily,
           cfg.valueWeight,
-          baseRowValuePx,
-          cfg.frameWidthCache
+          baseRowValuePx
         ),
         measureTextWidth(
           cfg.ctx,
@@ -100,8 +67,7 @@
           row.compactValueText,
           cfg.relationValueFamily,
           cfg.valueWeight,
-          baseRowValuePx,
-          cfg.frameWidthCache
+          baseRowValuePx
         )
       );
       rowBlockWidth = Math.max(rowBlockWidth, labelWidth + cfg.gap + valueWidth);

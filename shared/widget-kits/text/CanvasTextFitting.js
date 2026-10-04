@@ -16,6 +16,8 @@
   const WIDTH_EPSILON = 0.01;
   const FONT_STATE_KEY = "__dyniRadialTextFontState";
   const WIDTH_CACHE_KEY = "__dyniRadialTextWidthCache";
+  const WIDTH_CACHE_SIZE_KEY = "__dyniRadialTextWidthCacheSize";
+  const MAX_WIDTH_CACHE_ENTRIES = 2048;
 
   /**
    * @param {unknown} def
@@ -36,6 +38,22 @@
         store[WIDTH_CACHE_KEY] = Object.create(null);
       }
       return /** @type {Record<string, number>} */ (store[WIDTH_CACHE_KEY]);
+    }
+
+    /**
+     * Stores a measured width; a full cache is cleared first, so it never exceeds MAX_WIDTH_CACHE_ENTRIES.
+     * @param {DyniAugmentedCanvas} store
+     * @param {string} cacheKey
+     * @param {number} width
+     */
+    function rememberWidth(store, cacheKey, width) {
+      let size = Number(store[WIDTH_CACHE_SIZE_KEY]) || 0;
+      if (size >= MAX_WIDTH_CACHE_ENTRIES) {
+        store[WIDTH_CACHE_KEY] = Object.create(null);
+        size = 0;
+      }
+      /** @type {Record<string, number>} */ (store[WIDTH_CACHE_KEY])[cacheKey] = width;
+      store[WIDTH_CACHE_SIZE_KEY] = size + 1;
     }
 
     /**
@@ -71,7 +89,7 @@
       }
       const width = ctx.measureText(content).width;
       if (widthCache) {
-        widthCache[cacheKey] = width;
+        rememberWidth(/** @type {DyniAugmentedCanvas} */ (/** @type {unknown} */ (ctx)), cacheKey, width);
       }
       return width;
     }

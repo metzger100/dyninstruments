@@ -12,21 +12,11 @@
   "use strict";
   /** @typedef {{ resolveForRoot(rootEl: unknown): { font: { family: string, familyMono?: string, weight: unknown, labelWeight: unknown }, surface: { fg: string }, opacity?: { caption?: unknown, unit?: unknown } } }} DyniCenterDisplayThemeResolver */
   /** @typedef {DyniComponentContext & { theme: { tokens: DyniCenterDisplayThemeResolver }, canvas: DyniCanvasHostApi }} DyniCenterDisplayWidgetContext */
-  /** @typedef {{ ctx: CanvasRenderingContext2D, radialText: DyniCanvasTextLayoutApi, tileLayout: DyniTextTileLayoutApi, textFillScale: number, captionOpacity: unknown, layoutApi: DyniCenterDisplayLayoutApi, responsive: DyniResponsiveScaleProfile, frameWidthCache: Record<string, number> }} DyniCenterDisplayRenderState */
-  const hasOwn = Object.prototype.hasOwnProperty;
-  /** @param {CanvasRenderingContext2D} ctx @param {DyniCanvasTextLayoutApi} textApi @param {string} text @param {unknown} family @param {unknown} weight @param {unknown} px @param {Record<string, number>} frameWidthCache */
-  function measureCachedTextWidth(ctx, textApi, text, family, weight, px, frameWidthCache) {
+  /** @typedef {{ ctx: CanvasRenderingContext2D, radialText: DyniCanvasTextLayoutApi, tileLayout: DyniTextTileLayoutApi, textFillScale: number, captionOpacity: unknown, layoutApi: DyniCenterDisplayLayoutApi, responsive: DyniResponsiveScaleProfile }} DyniCenterDisplayRenderState */
+  /** Widths are cached per canvas context by the shared CanvasTextFitting measurement. @param {CanvasRenderingContext2D} ctx @param {DyniCanvasTextLayoutApi} textApi @param {string} text @param {unknown} family @param {unknown} weight @param {unknown} px */
+  function measureCachedTextWidth(ctx, textApi, text, family, weight, px) {
     textApi.setFont(ctx, Math.max(1, Math.floor(Number(px) || 0)), weight, family);
-    const content = String(text || "");
-    const cacheKey = String(ctx.font || "") + "\n" + content;
-    if (frameWidthCache && hasOwn.call(frameWidthCache, cacheKey)) {
-      return frameWidthCache[cacheKey];
-    }
-    const width = textApi.measureTextWidth(ctx, content);
-    if (frameWidthCache) {
-      frameWidthCache[cacheKey] = width;
-    }
-    return width;
+    return textApi.measureTextWidth(ctx, String(text || ""));
   }
   /** @param {DyniRect} rect @param {number} ratio @param {number} fillScale */
   function computeResponsiveLineMaxPx(rect, ratio, fillScale) {
@@ -132,15 +122,7 @@
     const labelMaxPx = computeResponsiveLineMaxPx(rect, 0.58, textFillScale);
     const valueMaxPx = computeResponsiveLineMaxPx(rect, 0.66, textFillScale);
     const desiredLabelWidth = row.caption
-      ? measureCachedTextWidth(
-          state.ctx,
-          state.radialText,
-          row.caption,
-          labelFamily,
-          labelWeight,
-          labelMaxPx,
-          state.frameWidthCache
-        )
+      ? measureCachedTextWidth(state.ctx, state.radialText, row.caption, labelFamily, labelWeight, labelMaxPx)
       : 0;
     const fullValueWidth = measureCachedTextWidth(
       state.ctx,
@@ -148,8 +130,7 @@
       row.fullValueText,
       valueFamily,
       valueWeight,
-      valueMaxPx,
-      state.frameWidthCache
+      valueMaxPx
     );
     const compactValueWidth = measureCachedTextWidth(
       state.ctx,
@@ -157,8 +138,7 @@
       row.compactValueText,
       valueFamily,
       valueWeight,
-      valueMaxPx,
-      state.frameWidthCache
+      valueMaxPx
     );
     const maxLabelWidth = Math.floor(rect.w * 0.4);
     const minValueWidth = Math.floor(rect.w * 0.42);
@@ -288,8 +268,6 @@
         /** @type {Record<string, unknown>} */ (/** @type {unknown} */ (insets))
       );
       const displayState = centerDisplayRenderModel.buildDisplayState(p, math, defaultText);
-      /** @type {Record<string, number>} */
-      const frameWidthCache = Object.create(null);
       const hints = centerDisplayRenderModel.computeMeasurementHints({
         ctx: ctx,
         textApi: radialText,
@@ -304,7 +282,6 @@
         relationValueFamily: relationValueFamily,
         valueWeight: valueWeight,
         labelWeight: labelWeight,
-        frameWidthCache: frameWidthCache,
         measureTextWidth: measureCachedTextWidth,
         computeResponsiveLineMaxPx: computeResponsiveLineMaxPx,
         clampShare: clampShare
@@ -328,8 +305,7 @@
         textFillScale: layout.responsive.textFillScale || 1,
         captionOpacity: captionOpacity,
         layoutApi: layoutApi,
-        responsive: layout.responsive,
-        frameWidthCache: frameWidthCache
+        responsive: layout.responsive
       };
       drawCenterPanel(layout, renderState, displayState, family, centerValueFamily, valueWeight, labelWeight, color);
       drawRelationRows(
