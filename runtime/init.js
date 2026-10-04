@@ -64,7 +64,7 @@
   /** @param {string} generationId @returns {() => void} */
   function createShutdown(generationId) {
     let shutdownDone = false;
-    return function () {
+    return function shutdownDyniPlugin() {
       if (shutdownDone) {
         return;
       }

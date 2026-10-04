@@ -22,6 +22,13 @@ import {
 } from "./generic-rule-common.mjs";
 
 const HOME_PATH = /(?:\/home\/[A-Za-z0-9_.-]+\/|\/Users\/[A-Za-z0-9_.-]+\/)/;
+// A `function name(` preceded by one of these tokens is a named function expression, not a declaration.
+const FUNCTION_EXPRESSION_CONTEXT = /(?:\breturn|&&|\|\||[(,:?=![])\s*$/;
+// Member names that read as module functions; data properties such as `cfg.rootEl || cfg.shellEl` stay allowed.
+const FUNCTION_MEMBER_NAME =
+  /^(?:to|is|has|resolve|build|measure|set|fit|format|append|read|write|create|make|clamp|scale|split|valueTo|angleTo|normalize)[A-Z_]/;
+const MEMBER_OR_FUNCTION = /([A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)\s*\|\|\s*function\s*\(/g;
+const MEMBER_OR_MEMBER = /([A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)\s*\|\|\s*\1\.([A-Za-z_$][\w$]*)/g;
 const PLAN_REFERENCE = /\bPLAN\d+\b(?!\.md)|\bPhase\s?\d+[A-Za-z]?\b/;
 
 /** @typedef {{path: string, content: string}} GenericFile */
@@ -32,22 +39,46 @@ function runRegex(ruleId, file, pattern) {
   return matches(ruleId, file, pattern, () => `canonical generic rule '${ruleId}' rejected the source`);
 }
 
+/**
+ * Paranoid module-member fallbacks: `X.member || function (...)` and `X.memberA || X.memberB`.
+ * @param {string} ruleId @param {GenericFile} file @returns {GenericFinding[]}
+ */
+function runMemberFallbacks(ruleId, file) {
+  const source = masked(file.content);
+  /** @type {GenericFinding[]} */
+  const out = [];
+  for (const match of source.matchAll(MEMBER_OR_FUNCTION))
+    out.push(
+      finding(ruleId, file, lineAt(file.content, match.index), `member fallback '${match[1]}.${match[2]} || function'`)
+    );
+  for (const match of source.matchAll(MEMBER_OR_MEMBER)) {
+    if (!FUNCTION_MEMBER_NAME.test(match[2]) || !FUNCTION_MEMBER_NAME.test(match[3])) continue;
+    const expression = `${match[1]}.${match[2]} || ${match[1]}.${match[3]}`;
+    out.push(finding(ruleId, file, lineAt(file.content, match.index), `cross-member fallback '${expression}'`));
+  }
+  return out;
+}
+
+/** @param {string} ruleId @param {GenericFile} file @param {any} options @returns {GenericFinding[]} */
+function runPrematureLegacySupport(ruleId, file, options) {
+  const keywords = /** @type {string[]} */ (
+    options.prematureKeywords || ["legacy", "compat", "deprecated", "fallback"]
+  );
+  const declarations = file.content.split(/\r?\n/).flatMap((line, index) => {
+    const match = /\b(?:function|const|let|var)\s+([A-Za-z_$][\w$]*)/.exec(line);
+    const isFunction = /\bfunction\s+/.test(line);
+    return match &&
+      !(isFunction && countIdentifier(masked(file.content), match[1]) === 1) &&
+      keywords.some((keyword) => match[1].toLowerCase().includes(keyword.toLowerCase()))
+      ? [finding(ruleId, file, index + 1, `premature compatibility declaration '${match[1]}'`)]
+      : [];
+  });
+  return declarations.concat(runMemberFallbacks(ruleId, file));
+}
+
 /** @param {string} ruleId @param {GenericFile} file @param {GenericFile[]} _files @param {any} options @returns {GenericFinding[]} */
 function runSimple(ruleId, file, _files, options) {
-  if (ruleId === "premature-legacy-support") {
-    const keywords = /** @type {string[]} */ (
-      options.prematureKeywords || ["legacy", "compat", "deprecated", "fallback"]
-    );
-    return file.content.split(/\r?\n/).flatMap((line, index) => {
-      const match = /\b(?:function|const|let|var)\s+([A-Za-z_$][\w$]*)/.exec(line);
-      const isFunction = /\bfunction\s+/.test(line);
-      return match &&
-        !(isFunction && countIdentifier(masked(file.content), match[1]) === 1) &&
-        keywords.some((keyword) => match[1].toLowerCase().includes(keyword.toLowerCase()))
-        ? [finding(ruleId, file, index + 1, `premature compatibility declaration '${match[1]}'`)]
-        : [];
-    });
-  }
+  if (ruleId === "premature-legacy-support") return runPrematureLegacySupport(ruleId, file, options);
   /** @type {Record<string, RegExp>} */
   const patterns = {
     "absolute-home-path": HOME_PATH,
@@ -109,7 +140,7 @@ function runDeadCode(ruleId, file, options = {}) {
   let match;
   while ((match = declaration.exec(source))) {
     const name = match[1];
-    if (/=\s*$/.test(source.slice(Math.max(0, match.index - 4), match.index))) continue;
+    if (FUNCTION_EXPRESSION_CONTEXT.test(source.slice(Math.max(0, match.index - 40), match.index))) continue;
     if (/\bexport\s+default(?:\s+async)?\s*$/.test(source.slice(Math.max(0, match.index - 40), match.index))) continue;
     if (GENERIC_FUNCTION_ALLOWLIST.has(name) || countIdentifier(source, name) > 1) continue;
     pushOnce(

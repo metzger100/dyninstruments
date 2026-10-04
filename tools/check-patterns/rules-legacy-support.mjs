@@ -1,15 +1,10 @@
-// Legacy-support rule family: speculative compat/legacy naming, canonical-helper
-// redefinition outside the owner module, and editable ratio/threshold internal-flag drift.
+// Legacy-support project rule family: canonical-helper redefinition outside the owner module
+// and editable ratio/threshold internal-flag drift. Speculative compat/legacy naming and
+// paranoid member fallbacks are owned by the generic premature-legacy-support rule.
 
 import { findMatchingBrace, getFileData, lineAt } from "./shared.mjs";
 
-const PREMATURE_MEMBER_OR_FUNCTION_RE =
-  /([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*\|\|\s*function\s*\(/g;
-const PREMATURE_MEMBER_OR_MEMBER_RE =
-  /([A-Za-z_$][A-Za-z0-9_$]*)\.([A-Za-z_$][A-Za-z0-9_$]*)\s*\|\|\s*\1\.([A-Za-z_$][A-Za-z0-9_$]*)/g;
-
 /** @typedef {import("./shared.mjs").Rule} Rule */
-/** @typedef {import("./shared.mjs").FileData} FileData */
 
 /** @type {Record<string, string>} */
 const CANONICAL_HELPERS = {
@@ -110,159 +105,6 @@ const CANONICAL_HELPER_DECL_RE = new RegExp(
   "gm"
 );
 
-/** @type {Record<string, Set<string>>} */
-const PREMATURE_LEGACY_SUPPORT_ALLOWLIST = {
-  // runtime/theme/token-catalog.js and runtime/theme/resolver.js implement the
-  // documented, permanent deprecated-CSS-alias contract (Regatta camelCase input
-  // vars) so existing user.css files keep working; the "deprecated..." naming here
-  // correctly describes required backward compatibility, not speculative support.
-  "runtime/theme/token-catalog.js": new Set(["deprecatedInputVar"]),
-  "runtime/theme/resolver.js": new Set(["deprecatedAliasInputVar"])
-};
-
-/** @param {Rule} rule @param {string[]} files @returns {any[]} */
-export function runPrematureLegacySupportRule(rule, files) {
-  const out = [];
-  const functionDecl = /\bfunction\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(([^)]*)\)/g;
-  const variableDecl = /\b(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\b/g;
-  const compatibilityExpr = /\btypeof\s+([A-Za-z_$][A-Za-z0-9_$.]+)\s*!==\s*["']undefined["']\s*\?\s*\1\s*:/g;
-
-  for (const file of files) {
-    const data = getFileData(file);
-    const seen = new Set();
-    const allowlisted = PREMATURE_LEGACY_SUPPORT_ALLOWLIST[file] || new Set();
-    let match;
-
-    while ((match = functionDecl.exec(data.maskedText))) {
-      const line = lineAt(match.index, data.lineStarts);
-      const params = match[2]
-        .split(",")
-        .map(function (item) {
-          return item.trim();
-        })
-        .filter(Boolean);
-      const allNames = [match[1]].concat(params);
-      for (const name of allNames) {
-        if (!/(legacy|compat|deprecated|fallback)/i.test(name) || allowlisted.has(name)) {
-          continue;
-        }
-        const key = `${file}:${line}:${name}`;
-        if (seen.has(key)) {
-          continue;
-        }
-        seen.add(key);
-        out.push({
-          file,
-          line,
-          message: rule.message({
-            file,
-            line,
-            expression: name
-          })
-        });
-      }
-    }
-
-    while ((match = variableDecl.exec(data.maskedText))) {
-      const name = match[1];
-      if (!/(legacy|compat|deprecated|fallback)/i.test(name) || allowlisted.has(name)) {
-        continue;
-      }
-      const line = lineAt(match.index, data.lineStarts);
-      const key = `${file}:${line}:${name}`;
-      if (seen.has(key)) {
-        continue;
-      }
-      seen.add(key);
-      out.push({
-        file,
-        line,
-        message: rule.message({
-          file,
-          line,
-          expression: name
-        })
-      });
-    }
-
-    while ((match = compatibilityExpr.exec(data.maskedText))) {
-      const line = lineAt(match.index, data.lineStarts);
-      const key = `${file}:${line}:${match[1]}`;
-      if (seen.has(key)) {
-        continue;
-      }
-      seen.add(key);
-      out.push({
-        file,
-        line,
-        message: rule.message({
-          file,
-          line,
-          expression: `${match[1]} ?? compat-source`
-        })
-      });
-    }
-
-    if (normalizePath(file) !== "runtime/namespace.js") {
-      while ((match = PREMATURE_MEMBER_OR_FUNCTION_RE.exec(data.maskedText))) {
-        if (!isLikelyFunctionMemberName(match[2])) {
-          continue;
-        }
-        const line = lineAt(match.index, data.lineStarts);
-        const sourceLine = readLineText(data, line);
-        if (sourceLine.includes('define === "function"')) {
-          continue;
-        }
-        const expression = `${match[1]}.${match[2]} || function(...)`;
-        const key = `${file}:${line}:${expression}`;
-        if (seen.has(key)) {
-          continue;
-        }
-        seen.add(key);
-        out.push({
-          file,
-          line,
-          severity: "block",
-          message: rule.message({
-            file,
-            line,
-            expression
-          })
-        });
-      }
-
-      while ((match = PREMATURE_MEMBER_OR_MEMBER_RE.exec(data.maskedText))) {
-        if (!isLikelyFunctionMemberName(match[2]) || !isLikelyFunctionMemberName(match[3])) {
-          continue;
-        }
-        const line = lineAt(match.index, data.lineStarts);
-        const sourceLine = readLineText(data, line);
-        if (sourceLine.includes('define === "function"')) {
-          continue;
-        }
-        const expression = `${match[1]}.${match[2]} || ${match[1]}.${match[3]}`;
-        const key = `${file}:${line}:${expression}`;
-        if (seen.has(key)) {
-          continue;
-        }
-        seen.add(key);
-        out.push({
-          file,
-          line,
-          severity: "block",
-          message: rule.message({
-            file,
-            line,
-            expression
-          })
-        });
-      }
-    }
-  }
-
-  return out;
-}
-
 /** @param {Rule} rule @param {string[]} files @returns {any[]} */
 export function runCanonicalHelperRedefinitionRule(rule, files) {
   const out = [];
@@ -362,18 +204,4 @@ export function runEditableThresholdInternalRule(rule, files) {
 /** @param {string} value @returns {string} */
 function normalizePath(value) {
   return String(value || "").replace(/\\/g, "/");
-}
-
-/** @param {FileData} data @param {number} line @returns {string} */
-function readLineText(data, line) {
-  const start = data.lineStarts[Math.max(0, line - 1)] || 0;
-  const end = line < data.lineStarts.length ? data.lineStarts[line] - 1 : data.text.length;
-  return data.text.slice(start, end);
-}
-
-/** @param {string} name @returns {boolean} */
-function isLikelyFunctionMemberName(name) {
-  return /^(to|is|has|resolve|build|measure|set|fit|format|append|read|write|create|make|clamp|scale|split|valueTo|angleTo|normalize)[A-Z_]/.test(
-    String(name || "")
-  );
 }

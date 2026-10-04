@@ -221,4 +221,49 @@ root["innerHTML"] = markup;
     expect(countFindings(result, "invalid-lint-suppression", "block")).toBe(0);
     expect(countFindings(result, "catch-fallback-without-suppression", "block")).toBe(1);
   });
+
+  it("does not report a returned named function expression as dead code", function () {
+    const cwd = createWorkspace({
+      "shared/example.js": `
+(function () {
+  "use strict";
+  function createHandler() {
+    return function handleClick() {
+      return 1;
+    };
+  }
+  createHandler();
+}());
+`
+    });
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+
+    expect(countFindings(result, "dead-code", "block")).toBe(0);
+  });
+
+  it("blocks member-or-function and cross-member module fallbacks but not data fallbacks", function () {
+    const cwd = createWorkspace({
+      "shared/example.js": `
+(function () {
+  "use strict";
+  function run(x, valueMath, cfg) {
+    const pick = x.a || function () {
+      return 1;
+    };
+    const toNumber = valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber;
+    const target = cfg.rootEl || cfg.shellEl;
+    return [pick, toNumber, target];
+  }
+  run({}, {}, {});
+}());
+`
+    });
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+    const out = joinMessages(result.findings);
+
+    expect(countFindings(result, "premature-legacy-support", "block")).toBe(2);
+    expect(out).toContain("member fallback 'x.a || function'");
+    expect(out).toContain("cross-member fallback 'valueMath.toOptionalFiniteNumber || valueMath.toFiniteNumber'");
+    expect(out).not.toContain("cfg.rootEl");
+  });
 });

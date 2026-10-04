@@ -24,7 +24,7 @@
      * @param {Record<string, unknown>} [insets]
      * @returns {DyniRect}
      */
-    return function (W, H, insets) {
+    return function createInsetContentRect(W, H, insets) {
       const padX = Math.max(0, Number(insets && insets[padXKey]) || 0);
       const padY = Math.max(0, Number(insets && insets[padYKey]) || 0);
       return makeRect(
@@ -48,7 +48,7 @@
      * @param {DyniResponsiveScaleProfile | undefined} responsive
      * @returns {DyniIntrinsicTileSpacing}
      */
-    return function (rect, responsive) {
+    return function computeMetricTileSpacing(rect, responsive) {
       return profileApi.computeIntrinsicTileSpacing(responsive, rect, tilePadRatio, captionRatio);
     };
   }

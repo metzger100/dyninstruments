@@ -40,11 +40,13 @@ function runUnsafeSink(ruleId, file, options) {
   };
   for (const match of source.matchAll(
     options.unsafeInlineHandlers === false
-      ? /\b[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*\.(innerHTML|outerHTML)\s*(?:\+?=)/g
-      : /\b[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*\.(innerHTML|outerHTML|on[a-z][\w-]*)\s*(?:\+?=)/g
+      ? /\b[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*\.(innerHTML|outerHTML)\s*(?:\+?=)(?!=)/g
+      : /\b[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*\.(innerHTML|outerHTML|on[a-z][\w-]*)\s*(?:\+?=)(?!=)/g
   ))
     add(match.index, match[1], file.content.slice(match.index, match.index + 180));
-  for (const match of file.content.matchAll(/\b[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*\s*\[[^\]]+\]\s*(?:\+?=)/g)) {
+  for (const match of file.content.matchAll(
+    /\b[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*\s*\[[^\]]+\]\s*(?:\+?=)(?!=)/g
+  )) {
     const text = file.content.slice(match.index, match.index + 180);
     if (
       /innerHTML|outerHTML|htmlSink|["'`]\s*\+|\+\s*["'`]/i.test(text) ||

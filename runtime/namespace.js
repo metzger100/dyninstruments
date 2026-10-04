@@ -13,12 +13,10 @@
   ns.config.clusters = [];
 
   /** @param {unknown} rootRef @returns {unknown} */
-  runtime.getAvnavApi =
-    runtime.getAvnavApi ||
-    function (rootRef) {
-      if (ns.avnavApi) {
-        return ns.avnavApi;
-      }
-      return null;
-    };
+  runtime.getAvnavApi = function (rootRef) {
+    if (ns.avnavApi) {
+      return ns.avnavApi;
+    }
+    return null;
+  };
 })(this);

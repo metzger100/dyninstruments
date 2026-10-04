@@ -150,4 +150,21 @@ buildModel({}, {}, {});
 
     expect(countFindings(result, "absent-numeric-sentinel", "block")).toBe(0);
   });
+
+  it("does not report computed-member comparisons next to string concatenation or on-words as sinks", function () {
+    const cwd = createWorkspace({
+      "runtime/example.js": `
+function describeHandler(map, key) {
+  if (map[key] === 1 || map[key] == 2) {
+    return "handler " + key + " runs onload";
+  }
+  return root.onclick === null ? "none" : "on" + key;
+}
+describeHandler({}, "onload");
+`
+    });
+    const result = runPatternCheck({ root: cwd, warnMode: false, print: false });
+
+    expect(countFindings(result, "unsafe-html-dom-sink", "block")).toBe(0);
+  });
 });
