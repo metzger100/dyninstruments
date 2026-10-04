@@ -996,13 +996,6 @@
       "limit": 10
     },
     {
-      "file": "shared/widget-kits/vessel/RegattaTimerModel.js",
-      "identity": "anonymous#2.create.createTimerModel.handleCountdownTick",
-      "metric": "complexity",
-      "value": 11,
-      "limit": 10
-    },
-    {
       "file": "shared/widget-kits/vessel/RegattaTimerSessionStore.js",
       "identity": "anonymous#2.create.resolveRouteIdFromPayload",
       "metric": "complexity",

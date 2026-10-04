@@ -244,6 +244,25 @@ describe("RegattaTimerTextHtmlWidget", function () {
     expect(modeSig).not.toBe(shellSig);
   });
 
+  it("stops intercepting clicks when the kept wrapper switches from dispatch to passive", function () {
+    const mounted = createMountedRenderer({
+      ownerDocument: document.implementation.createHTMLDocument("regatta"),
+      props: withSurfacePolicy(makeProps(), "dispatch")
+    });
+    const dispatchWrapper = mounted.wrapper();
+    mounted.update(withSurfacePolicy(makeProps(), "passive"));
+    const parentClick = vi.fn();
+    mounted.mountEl.addEventListener("click", parentClick);
+
+    mounted.clickAction("regatta-start");
+
+    expect(mounted.wrapper()).toBe(dispatchWrapper);
+    expect(mounted.html()).toContain("dyni-regatta-open-passive");
+    expect(mounted.html()).toContain("dyni-regatta-phase-idle");
+    expect(parentClick).toHaveBeenCalledTimes(1);
+    expect(parentClick.mock.calls[0][0].defaultPrevented).toBe(false);
+  });
+
   it("gates tone playback from regattaSoundEnabled", function () {
     const silent = createMountedRenderer({
       props: withSurfacePolicy(

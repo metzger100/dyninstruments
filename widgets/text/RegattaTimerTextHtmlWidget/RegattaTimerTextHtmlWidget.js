@@ -94,6 +94,7 @@
       let wrapperEl = null;
       /** @type {((ev: Event) => void) | null} */
       let clickHandler = null;
+      let boundInteractionState = "";
       /** @type {DyniRegattaTimerModel | null} */
       let timerModel = null;
       /** @type {DyniRegattaTimerAudioEngine | null} */
@@ -133,6 +134,7 @@
           wrapperEl.removeEventListener("click", clickHandler);
         }
         clickHandler = null;
+        boundInteractionState = "";
       }
 
       /** @param {DyniRegattaTimerResourceOptions} options */
@@ -231,10 +233,10 @@
         const prevWrapperEl = wrapperEl;
         wrapperEl = htmlUtils.patchInnerHtml(rootEl, markupHtml);
         lastFit = fit;
-        const wrapperChanged = wrapperEl !== prevWrapperEl;
 
-        if (wrapperChanged || !clickHandler) {
+        if (wrapperEl !== prevWrapperEl || interactionState !== boundInteractionState) {
           unbindClickHandler();
+          boundInteractionState = interactionState;
           if (wrapperEl && interactionState === "dispatch") {
             clickHandler = function onClick(ev) {
               ev.preventDefault();
@@ -249,10 +251,10 @@
               }
 
               const action = actionEl.getAttribute("data-dyni-action");
+              if (audioEngine) {
+                audioEngine.ensureContext();
+              }
               if (action === "regatta-start") {
-                if (audioEngine) {
-                  audioEngine.ensureContext();
-                }
                 timerModel.start();
                 sessionStore.persistSnapshot(timerModel.getSnapshot());
                 return;

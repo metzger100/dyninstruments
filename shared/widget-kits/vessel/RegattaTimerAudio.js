@@ -19,6 +19,12 @@
   const ATTACK_SECONDS = 0.005;
   const RELEASE_SECONDS = 0.01;
 
+  // One AudioContext per page: engines are recreated on every widget remount, while browsers
+  // only let a context start or resume from a user gesture, so the context outlives the engines.
+  /** @type {AudioContext | null} */
+  let sharedAudioContext = null;
+  let audioUnavailable = false;
+
   /** @returns {DyniRegattaTimerAudioGlobal} */
   function resolveGlobalRoot() {
     if (typeof globalThis !== "undefined") {
@@ -41,42 +47,61 @@
     return null;
   }
 
+  /** @param {DyniRegattaTimerAudioGlobal} globalRoot @returns {AudioContext | null} */
+  function createSharedContext(globalRoot) {
+    const AudioContextCtor = resolveAudioContextCtor(globalRoot);
+    if (!AudioContextCtor) {
+      audioUnavailable = true;
+      return null;
+    }
+
+    try {
+      return new AudioContextCtor();
+    } catch (error) {
+      audioUnavailable = true;
+      return null;
+    }
+  }
+
+  /** @param {AudioContext} audioContext @returns {void} */
+  function resumeSuspendedContext(audioContext) {
+    if (audioContext.state !== "suspended") {
+      return;
+    }
+    const resumeResult = audioContext.resume();
+    if (resumeResult && typeof resumeResult.then === "function") {
+      resumeResult.then(
+        function () {},
+        function () {
+          // Intentional no-op: a refused resume leaves the context suspended until the next user gesture.
+        }
+      );
+    }
+  }
+
   /** @param {unknown} def @param {DyniComponentContext} componentContext @returns {DyniRegattaTimerAudioApi} */
   function create(def, componentContext) {
     /** @returns {DyniRegattaTimerAudioEngine} */
     function createAudioEngine() {
       const globalRoot = resolveGlobalRoot();
-      /** @type {AudioContext | null} */
-      let audioContext = null;
-      let audioUnavailable = false;
+      let destroyed = false;
 
       /** @returns {boolean} */
       function ensureContext() {
-        if (audioContext) {
-          return true;
+        if (!sharedAudioContext && !audioUnavailable) {
+          sharedAudioContext = createSharedContext(globalRoot);
         }
-        if (audioUnavailable) {
+        if (!sharedAudioContext) {
           return false;
         }
-        const AudioContextCtor = resolveAudioContextCtor(globalRoot);
-        if (!AudioContextCtor) {
-          audioUnavailable = true;
-          return false;
-        }
-
-        try {
-          audioContext = new AudioContextCtor();
-          return true;
-        } catch (error) {
-          audioContext = null;
-          audioUnavailable = true;
-          return false;
-        }
+        resumeSuspendedContext(sharedAudioContext);
+        return true;
       }
 
       /** @param {unknown} frequency @param {unknown} durationMs @returns {void} */
       function playTone(frequency, durationMs) {
-        if (!audioContext) {
+        const audioContext = sharedAudioContext;
+        if (destroyed || !audioContext) {
           return;
         }
 
@@ -112,25 +137,9 @@
         }
       }
 
-      /** @returns {void} */
+      /** Releases this engine; the page-wide context stays open for the engine of the next mount. @returns {void} */
       function destroy() {
-        if (!audioContext) {
-          return;
-        }
-        try {
-          const closeResult = audioContext.close();
-          if (closeResult && typeof closeResult.then === "function") {
-            closeResult.then(
-              function () {},
-              function () {
-                // Intentional no-op: close failure is non-fatal during widget teardown.
-              }
-            );
-          }
-        } catch (error) {
-          // Silent by contract: tear-down failures are ignored.
-        }
-        audioContext = null;
+        destroyed = true;
       }
 
       return {

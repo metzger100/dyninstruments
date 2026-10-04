@@ -11,8 +11,8 @@ const { createComponentContextMock } = require("../../helpers/component-context-
  * @typedef {{ destroy: () => void, ensureContext: () => boolean, playTone: (frequency?: unknown, durationMs?: unknown) => void }} AudioEngine
  * @typedef {{ destroy: () => void, detach: (options?: Record<string, unknown>) => void, layoutSignature: (payload: Record<string, unknown>) => string, mount: (mountHostEl: HTMLElement, payload: Record<string, unknown>) => void, postPatch: (payload?: Record<string, unknown>) => boolean, update: (payload: Record<string, unknown>) => void }} CommittedRenderer
  * @typedef {{ createCommittedRenderer: (context: Record<string, unknown>) => CommittedRenderer, id: string, wantsHideNativeHead?: boolean }} RendererSpec
- * @typedef {{ audioEngine: AudioEngine, rendererSpec: RendererSpec }} RendererBundle
- * @typedef {{ hostContext?: Record<string, unknown>, props?: RegattaProps, rendererBundle?: RendererBundle, rendererOptions?: unknown, shellSize?: ShellRect }} CreateMountedRendererOptions
+ * @typedef {{ audioEngines: AudioEngine[], playedTones: number[], rendererSpec: RendererSpec }} RendererBundle
+ * @typedef {{ hostContext?: Record<string, unknown>, ownerDocument?: Document, props?: RegattaProps, rendererBundle?: RendererBundle, rendererOptions?: unknown, shellSize?: ShellRect }} CreateMountedRendererOptions
  * @typedef {{ maxH: number, maxW: number, text: string }} FitSingleLineBinaryArgs
  */
 
@@ -52,6 +52,40 @@ function toTimerSeconds(displayText) {
   return NaN;
 }
 
+/**
+ * Stubs the Web Audio context the real RegattaTimerAudio engine uses; every started oscillator
+ * records its frequency, so a played tone is observable end to end.
+ * @param {number[]} playedTones
+ */
+function stubAudioContext(playedTones) {
+  vi.stubGlobal("AudioContext", function AudioContextStub() {
+    return {
+      currentTime: 0,
+      state: "running",
+      destination: {},
+      resume: vi.fn(() => Promise.resolve()),
+      close: vi.fn(() => Promise.resolve()),
+      createOscillator() {
+        return {
+          type: "",
+          frequency: {
+            /** @param {number} frequencyHz */
+            setValueAtTime(frequencyHz) {
+              playedTones.push(frequencyHz);
+            }
+          },
+          connect() {},
+          start() {},
+          stop() {}
+        };
+      },
+      createGain() {
+        return { gain: { setValueAtTime() {}, linearRampToValueAtTime() {} }, connect() {} };
+      }
+    };
+  });
+}
+
 /** @param {unknown} [options] @returns {RendererBundle} */
 function buildRenderer(options) {
   const measureCtx = {
@@ -63,19 +97,25 @@ function buildRenderer(options) {
       return { width: String(text || "").length * px * 0.52 };
     }
   };
-  const audioEngine = {
-    ensureContext: vi.fn(function () {
-      return true;
-    }),
-    playTone: vi.fn(),
-    destroy: vi.fn()
-  };
+  const audioEngines = /** @type {AudioEngine[]} */ ([]);
+  const playedTones = /** @type {number[]} */ ([]);
+  stubAudioContext(playedTones);
+  const realAudio = loadFresh("shared/widget-kits/vessel/RegattaTimerAudio.js");
   const audioModule = {
-    create() {
+    /** @param {unknown} def @param {unknown} audioContext */
+    create(def, audioContext) {
+      const audioApi = realAudio.create(def, audioContext);
       return {
         id: "RegattaTimerAudio",
         createAudioEngine() {
-          return audioEngine;
+          const engine = /** @type {AudioEngine} */ (audioApi.createAudioEngine());
+          const spiedEngine = {
+            ensureContext: vi.fn(engine.ensureContext),
+            playTone: vi.fn(engine.playTone),
+            destroy: vi.fn(engine.destroy)
+          };
+          audioEngines.push(spiedEngine);
+          return spiedEngine;
         }
       };
     }
@@ -156,7 +196,8 @@ function buildRenderer(options) {
   );
   return {
     rendererSpec: rendererSpec,
-    audioEngine: audioEngine
+    audioEngines: audioEngines,
+    playedTones: playedTones
   };
 }
 
@@ -208,13 +249,14 @@ function createMountedRenderer(options) {
   const shellSize = opts.shellSize || { width: 260, height: 130 };
   const hostContext = opts.hostContext || {};
   const rendererBundle = opts.rendererBundle || buildRenderer(opts.rendererOptions);
-  const { rendererSpec, audioEngine } = rendererBundle;
-  const rootEl = document.createElement("div");
+  const { rendererSpec, audioEngines } = rendererBundle;
+  const ownerDocument = opts.ownerDocument || document;
+  const rootEl = ownerDocument.createElement("div");
   rootEl.className = "widget dyniplugin";
-  const shellEl = document.createElement("div");
+  const shellEl = ownerDocument.createElement("div");
   shellEl.className = "widgetData dyni-shell";
   shellEl.setAttribute("data-dyni-route", "vessel/regattaTimer");
-  const mountEl = document.createElement("div");
+  const mountEl = ownerDocument.createElement("div");
   mountEl.className = "dyni-surface-html-mount";
   rootEl.appendChild(shellEl);
   shellEl.appendChild(mountEl);
@@ -251,7 +293,7 @@ function createMountedRenderer(options) {
     rendererSpec: rendererSpec,
     committed: committed,
     mountEl: mountEl,
-    audioEngine: audioEngine,
+    audioEngine: audioEngines[audioEngines.length - 1],
     currentProps: initialProps,
     currentRevision: 1,
     /** @param {RegattaProps} nextProps @param {number} nextRevision @param {ShellRect} [nextShellRect] */
@@ -297,6 +339,7 @@ function installFakeTimerHooks() {
 
   afterEach(function () {
     vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 }
 

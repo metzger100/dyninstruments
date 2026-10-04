@@ -14,6 +14,8 @@
   const DEFAULT_DURATION_MINUTES = 5;
   const TICK_INTERVAL_MS = 100;
   const SYNC_GRACE_SECONDS = 1;
+  const MAX_CATCH_UP_SECONDS = 2;
+  const MAX_START_SIGNAL_DELAY_MS = 2000;
   const LOW_TONE_HZ = 440;
   const HIGH_TONE_HZ = 880;
   const MINUTE_BEEP_MS = 300;
@@ -197,6 +199,27 @@
         }
       }
 
+      /**
+       * Emits the minute and final-ten-second signals crossed since the last tick, unless the tick
+       * arrived so late that replaying them would only produce a burst of stale beeps.
+       * @param {number} fromSecond
+       * @param {number} toSecond
+       */
+      function emitCatchUpSignals(fromSecond, toSecond) {
+        if (fromSecond - toSecond > MAX_CATCH_UP_SECONDS) {
+          return;
+        }
+        let second;
+        for (second = fromSecond - 1; second >= toSecond; second -= 1) {
+          if (second > 0 && second % 60 === 0) {
+            emitSignal("low", LOW_TONE_HZ, MINUTE_BEEP_MS);
+          }
+          if (second >= 1 && second <= 10) {
+            emitSignal("high", HIGH_TONE_HZ, SECOND_BEEP_MS);
+          }
+        }
+      }
+
       /** @param {number} nowMs */
       function handleCountdownTick(nowMs) {
         if (phase !== PHASE_COUNTDOWN) {
@@ -209,20 +232,12 @@
         const currentSecond = Math.max(0, Math.ceil(remainingMs / 1000));
 
         if (lastCountdownSecond !== null && currentSecond < lastCountdownSecond) {
-          let second;
-          for (second = lastCountdownSecond - 1; second >= currentSecond; second -= 1) {
-            if (second > 0 && second % 60 === 0) {
-              emitSignal("low", LOW_TONE_HZ, MINUTE_BEEP_MS);
-            }
-            if (second >= 1 && second <= 10) {
-              emitSignal("high", HIGH_TONE_HZ, SECOND_BEEP_MS);
-            }
-          }
+          emitCatchUpSignals(lastCountdownSecond, currentSecond);
         }
         lastCountdownSecond = currentSecond;
 
         if (currentSecond <= 0) {
-          beginElapsed(nowMs, true);
+          beginElapsed(endTimeMs, nowMs - endTimeMs <= MAX_START_SIGNAL_DELAY_MS);
         }
       }
 
@@ -362,7 +377,7 @@
 
       applySnapshot(snapshot);
       if (phase === PHASE_COUNTDOWN && !isNullish(endTimeMs) && endTimeMs <= Date.now()) {
-        beginElapsed(Date.now(), false);
+        beginElapsed(endTimeMs, false);
       }
       if (phase !== PHASE_IDLE) {
         ensureTimer();

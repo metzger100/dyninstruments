@@ -22,10 +22,12 @@ describe("RegattaTimerAudio", function () {
     const AudioContextMock = vi.fn().mockImplementation(function () {
       const instance = {
         currentTime: 10,
+        state: "running",
         destination: { id: "destination" },
         oscillatorNodes: /** @type {any[]} */ ([]),
         gainNodes: /** @type {any[]} */ ([]),
         close: vi.fn().mockResolvedValue(undefined),
+        resume: vi.fn().mockResolvedValue(undefined),
         createOscillator: vi.fn(function () {
           const oscillator = {
             type: "",
@@ -132,27 +134,6 @@ describe("RegattaTimerAudio", function () {
     }).not.toThrow();
   });
 
-  it("destroy closes the active context", function () {
-    const harness = installAudioContextMock();
-    const engine = createAudioEngine();
-    engine.ensureContext();
-
-    engine.destroy();
-
-    expect(harness.instances[0].close).toHaveBeenCalledTimes(1);
-  });
-
-  it("destroy is idempotent", function () {
-    const harness = installAudioContextMock();
-    const engine = createAudioEngine();
-    engine.ensureContext();
-
-    engine.destroy();
-    engine.destroy();
-
-    expect(harness.instances[0].close).toHaveBeenCalledTimes(1);
-  });
-
   it("ensureContext falls back to webkitAudioContext when AudioContext is unavailable", function () {
     const harness = installAudioContextMock();
     /** @type {any} */ (globalThis).webkitAudioContext = harness.AudioContextMock;
@@ -206,41 +187,36 @@ describe("RegattaTimerAudio", function () {
     }).not.toThrow();
   });
 
-  it("destroy tolerates a close() result that is not a thenable", function () {
-    /** @type {any} */ (globalThis).AudioContext = vi.fn().mockImplementation(function () {
-      return {
-        currentTime: 10,
-        destination: {},
-        close: vi.fn().mockReturnValue(undefined),
-        createOscillator: vi.fn(),
-        createGain: vi.fn()
-      };
-    });
-    const engine = createAudioEngine();
-    engine.ensureContext();
+  it("keeps one page-wide context open across engines so a remounted engine still plays", function () {
+    const harness = installAudioContextMock();
+    const api = loadFresh("shared/widget-kits/vessel/RegattaTimerAudio.js").create({}, createComponentContextMock());
+    const firstEngine = api.createAudioEngine();
+    firstEngine.ensureContext();
 
-    expect(function () {
-      engine.destroy();
-    }).not.toThrow();
+    firstEngine.destroy();
+    firstEngine.playTone(440, 300);
+    const secondEngine = api.createAudioEngine();
+    secondEngine.playTone(880, 150);
+
+    expect(harness.instances).toHaveLength(1);
+    expect(harness.instances[0].close).not.toHaveBeenCalled();
+    expect(harness.instances[0].createOscillator).toHaveBeenCalledTimes(1);
+    expect(harness.instances[0].oscillatorNodes[0].frequency.setValueAtTime).toHaveBeenCalledWith(880, 10);
+    expect(secondEngine.ensureContext()).toBe(true);
+    expect(harness.AudioContextMock).toHaveBeenCalledTimes(1);
   });
 
-  it("destroy swallows errors thrown while closing the context", function () {
-    /** @type {any} */ (globalThis).AudioContext = vi.fn().mockImplementation(function () {
-      return {
-        currentTime: 10,
-        destination: {},
-        close: vi.fn().mockImplementation(function () {
-          throw new Error("close failure");
-        }),
-        createOscillator: vi.fn(),
-        createGain: vi.fn()
-      };
-    });
+  it("ensureContext resumes a suspended context and tolerates a refused resume", async function () {
+    const harness = installAudioContextMock();
     const engine = createAudioEngine();
     engine.ensureContext();
+    const context = harness.instances[0];
 
-    expect(function () {
-      engine.destroy();
-    }).not.toThrow();
+    expect(context.resume).not.toHaveBeenCalled();
+    context.state = "suspended";
+    context.resume.mockRejectedValueOnce(new Error("no user gesture"));
+    expect(engine.ensureContext()).toBe(true);
+    expect(context.resume).toHaveBeenCalledTimes(1);
+    await Promise.resolve();
   });
 });

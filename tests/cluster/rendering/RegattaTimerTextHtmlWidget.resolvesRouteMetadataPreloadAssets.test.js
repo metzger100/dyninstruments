@@ -232,6 +232,31 @@ describe("RegattaTimerTextHtmlWidget", function () {
     expect(remounted.html()).toContain("dyni-regatta-phase-elapsed");
     expect(remounted.html()).not.toContain("dyni-regatta-phase-idle");
     expect(remounted.html()).not.toContain("05:00");
+    expect(remounted.timeText()).toBe("00:02");
+  });
+
+  it("keeps playing countdown signals after a destroy/remount", function () {
+    const props = withSurfacePolicy(makeProps(), "dispatch");
+    const rendererBundle = buildRenderer();
+    const mounted = createMountedRenderer({
+      rendererBundle: rendererBundle,
+      hostContext: { name: "first" },
+      props: props
+    });
+    mounted.clickAction("regatta-start");
+    mounted.committed.destroy();
+
+    const remounted = createMountedRenderer({
+      rendererBundle: rendererBundle,
+      hostContext: { name: "second" },
+      props: props
+    });
+    const tonesBeforeMinuteSignal = rendererBundle.playedTones.length;
+    vi.advanceTimersByTime(61000);
+
+    expect(remounted.audioEngine).not.toBe(mounted.audioEngine);
+    expect(remounted.audioEngine.playTone).toHaveBeenCalled();
+    expect(rendererBundle.playedTones.slice(tonesBeforeMinuteSignal)).toEqual([440]);
   });
 
   it("restores active countdown after destroy/remount with a new hostContext", function () {

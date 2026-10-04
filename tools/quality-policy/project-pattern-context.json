@@ -100,24 +100,17 @@
     },
     {
       "file": "shared/widget-kits/vessel/RegattaTimerAudio.js",
-      "line": 70,
+      "line": 60,
       "rule": "catch-fallback-without-suppression",
       "owner": "audio-boundary",
       "reason": "Unavailable audio construction fails closed without affecting rendering."
     },
     {
       "file": "shared/widget-kits/vessel/RegattaTimerAudio.js",
-      "line": 110,
+      "line": 135,
       "rule": "catch-fallback-without-suppression",
       "owner": "audio-boundary",
       "reason": "Best-effort audio playback cannot interrupt rendering."
-    },
-    {
-      "file": "shared/widget-kits/vessel/RegattaTimerAudio.js",
-      "line": 130,
-      "rule": "catch-fallback-without-suppression",
-      "owner": "audio-boundary",
-      "reason": "Audio teardown failures are intentionally non-fatal."
     }
   ]
 }

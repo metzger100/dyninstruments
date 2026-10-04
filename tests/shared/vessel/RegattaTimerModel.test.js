@@ -139,6 +139,46 @@ describe("RegattaTimerModel", function () {
     expect(timer.getState().displayTime).toBe("00:03");
   });
 
+  it("anchors restored elapsed time to the countdown end instead of the restore time", function () {
+    const createTimerModel = createFactory();
+    const timer = createTimerModel({
+      snapshot: {
+        phase: "countdown",
+        durationMinutes: 5,
+        endTimeMs: Date.now() - 120000,
+        elapsedStartMs: null,
+        lastCountdownSecond: 3
+      }
+    });
+
+    expect(timer.getState().phase).toBe("elapsed");
+    expect(timer.getState().displayTime).toBe("02:00");
+    timer.destroy();
+  });
+
+  it("drops the missed signals of a single late tick and still counts elapsed time from the gun", function () {
+    const signals = /** @type {any[]} */ ([]);
+    const createTimerModel = createFactory();
+    const timer = createTimerModel({
+      durationMinutes: 3,
+      /** @param {any} type */
+      onSignal(type) {
+        signals.push(type);
+      }
+    });
+
+    timer.start();
+    vi.advanceTimersByTime(150000);
+    const signalsBeforeLateTick = signals.length;
+
+    vi.setSystemTime(Date.now() + 40000);
+    vi.advanceTimersByTime(100);
+
+    expect(signals.slice(signalsBeforeLateTick)).toEqual([]);
+    expect(timer.getState().phase).toBe("elapsed");
+    expect(timer.getState().displayTime).toBe("00:10");
+  });
+
   it("formats elapsed display as H:MM:SS after one hour", function () {
     const createTimerModel = createFactory();
     const timer = createTimerModel({ durationMinutes: 1 });
