@@ -227,6 +227,7 @@ interface DyniMapZoomSignatureArgs {
   labelWeight: unknown;
   mode: string;
   secScale: number;
+  fontMetricsEpoch?: unknown;
   model: DyniMapZoomFitModel;
 }
 
@@ -275,6 +276,7 @@ interface DyniMapZoomHtmlFitArgs {
   hostContext?: unknown;
   shellRect?: DyniHtmlShellRect | null;
   targetEl?: unknown;
+  fontMetricsEpoch?: unknown;
 }
 
 interface DyniMapZoomHtmlFitResult {

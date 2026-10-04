@@ -120,6 +120,7 @@ interface DyniActiveRouteHtmlFitArgs {
   shellRect?: DyniHtmlShellRect | null;
   hostContext?: unknown;
   targetEl?: unknown;
+  fontMetricsEpoch?: unknown;
 }
 
 interface DyniActiveRouteFitSignatureArgs {
@@ -129,6 +130,7 @@ interface DyniActiveRouteFitSignatureArgs {
   valueFamily?: string;
   valueWeight?: unknown;
   labelWeight?: unknown;
+  fontMetricsEpoch?: unknown;
   model?: DyniActiveRouteRenderModel | null;
 }
 

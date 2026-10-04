@@ -245,6 +245,9 @@ describe("RegattaTimerHtmlFit", function () {
 
     const third = computeFit(fit, args);
     expect(third).not.toBe(first);
+
+    const fontMetricsMiss = computeFit(fit, Object.assign({}, args, { fontMetricsEpoch: 1 }));
+    expect(fontMetricsMiss).not.toBe(third);
   });
 
   it("invalidates cached fit output when stableDigits state changes", function () {

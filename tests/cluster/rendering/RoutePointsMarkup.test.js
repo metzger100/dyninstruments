@@ -113,6 +113,21 @@ describe("RoutePointsMarkup", function () {
     expect(html).toContain("dyni-route-points-ordinal");
   });
 
+  it("renders rows with the model info text and no fit styles when the fit has no row fits", function () {
+    const markup = createMarkup();
+    let html = "";
+
+    expect(function () {
+      html = markup.render({
+        model: makeModel(),
+        fit: makeFit({ rowFits: [] }),
+        htmlUtils: createHtmlUtils()
+      });
+    }).not.toThrow();
+    expect(html).toContain("DIR:89°/DST:2:nm");
+    expect(html).not.toContain("font-size:10px;");
+  });
+
   it("renders lat/lon rows with coordinatesTabular enabled", function () {
     const markup = createMarkup();
     const model = makeModel({

@@ -104,6 +104,7 @@
       let lastShellRect = null;
       /** @type {HTMLElement | null} */
       let lastHostRootEl = null;
+      let lastFontMetricsEpoch = /** @type {unknown} */ (0);
       /** @type {DyniRegattaTimerHtmlFitResult} */
       let lastFit = BASELINE_FIT;
       let lastRenderedDisplayTime = "";
@@ -213,7 +214,8 @@
             mode: mode,
             stableDigitsEnabled: stableDigitsEnabled,
             hostContext: hostContext,
-            targetEl: lastHostRootEl
+            targetEl: lastHostRootEl,
+            fontMetricsEpoch: lastFontMetricsEpoch
           }) ||
           lastFit ||
           BASELINE_FIT;
@@ -289,9 +291,7 @@
         timerModel = timerModelFactory.createTimerModel({
           durationMinutes: hasActiveSession ? session.durationMinutes : durationMinutes,
           snapshot: hasActiveSession ? session : null,
-          onTick: function onTick(state) {
-            patchDomFromState(state);
-          },
+          onTick: patchDomFromState,
           onSignal: function onSignal(type, frequency, durationMs) {
             if (config.soundEnabled !== true || !audioEngine) {
               return;
@@ -343,6 +343,7 @@
         lastProps = nextProps;
         lastShellRect = nextPayload.shellRect || null;
         lastHostRootEl = nextPayload.rootEl || null;
+        lastFontMetricsEpoch = nextPayload.fontMetricsEpoch;
         sessionStore.syncIdentity(lastProps, nextPayload);
         config = nextConfig;
         lastFit = BASELINE_FIT;

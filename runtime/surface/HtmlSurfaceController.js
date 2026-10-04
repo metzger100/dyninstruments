@@ -300,7 +300,7 @@
             }
             state.fontMetricsEpoch += 1;
             const latestPayload = state.latestPayload;
-            const rendererPayload = createRendererPayload(state, latestPayload, false, 0);
+            const rendererPayload = createRendererPayload(state, latestPayload, true, 0);
             state.renderer.update(rendererPayload);
             runPostPatch(latestPayload, rendererPayload);
           },

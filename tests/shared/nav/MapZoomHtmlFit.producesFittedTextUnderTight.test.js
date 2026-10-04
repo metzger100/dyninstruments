@@ -127,6 +127,10 @@ describe("MapZoomHtmlFit", function () {
     expect(semanticMiss).not.toBe(geometryMiss);
     expect(h.calls.normal).toHaveLength(3);
     expect(h.calls.singleLine.length).toBeGreaterThanOrEqual(9);
+
+    const fontMetricsMiss = h.fit.compute(Object.assign({}, stableArgs, { fontMetricsEpoch: 1 }));
+    expect(fontMetricsMiss).not.toBe(semanticMiss);
+    expect(h.calls.normal).toHaveLength(4);
   });
 
   it("avoids cache collisions when semantic text contains delimiter characters", function () {

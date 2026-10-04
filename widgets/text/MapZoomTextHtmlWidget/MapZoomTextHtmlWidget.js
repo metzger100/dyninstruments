@@ -12,7 +12,7 @@
 })(this, function () {
   "use strict";
   /** @typedef {DyniComponentContext & { theme: { tokens: DyniMapZoomThemeResolver } }} DyniMapZoomWidgetContext */
-  /** @typedef {{ props: DyniWidgetValues, shellRect?: DyniHtmlShellRect | null, rootEl?: HTMLElement | null }} DyniMapZoomWidgetPayload */
+  /** @typedef {{ props: DyniWidgetValues, shellRect?: DyniHtmlShellRect | null, rootEl?: HTMLElement | null, fontMetricsEpoch?: number }} DyniMapZoomWidgetPayload */
 
   const DEFAULT_RATIO_THRESHOLD_NORMAL = 1.0;
   const DEFAULT_RATIO_THRESHOLD_FLAT = 3.0;
@@ -273,7 +273,8 @@
               model: /** @type {DyniMapZoomFitModel} */ (baseModel),
               hostContext: hostContext,
               targetEl: payload.rootEl,
-              shellRect: shellRect
+              shellRect: shellRect,
+              fontMetricsEpoch: payload.fontMetricsEpoch
             }) || EMPTY_FIT
           : lastFit;
 

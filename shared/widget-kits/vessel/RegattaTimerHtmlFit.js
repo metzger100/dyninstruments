@@ -80,41 +80,22 @@
   }
 
   /**
-   * @param {number} width
-   * @param {number} height
-   * @param {DyniRegattaTimerFitMode} mode
-   * @param {DyniRegattaPhase} phase
-   * @param {string} displayTime
-   * @param {boolean} stableDigitsEnabled
-   * @param {unknown} family
-   * @param {unknown} valueWeight
-   * @param {unknown} labelWeight
-   * @param {unknown} strokeWeight
+   * @param {{ width: number, height: number, mode: DyniRegattaTimerFitMode, phase: DyniRegattaPhase, displayTime: string, stableDigitsEnabled: boolean, family: unknown, valueWeight: unknown, labelWeight: unknown, strokeWeight: unknown, fontMetricsEpoch: unknown }} args
    * @returns {string}
    */
-  function buildSignature(
-    width,
-    height,
-    mode,
-    phase,
-    displayTime,
-    stableDigitsEnabled,
-    family,
-    valueWeight,
-    labelWeight,
-    strokeWeight
-  ) {
+  function buildSignature(args) {
     return JSON.stringify([
-      width,
-      height,
-      mode,
-      phase,
-      String(displayTime || "").length,
-      stableDigitsEnabled === true,
-      family || "",
-      valueWeight,
-      labelWeight,
-      strokeWeight
+      args.width,
+      args.height,
+      args.mode,
+      args.phase,
+      String(args.displayTime || "").length,
+      args.stableDigitsEnabled === true,
+      args.family || "",
+      args.valueWeight,
+      args.labelWeight,
+      args.strokeWeight,
+      args.fontMetricsEpoch
     ]);
   }
 
@@ -180,18 +161,19 @@
       const displayTime = isNullish(model.displayTime) ? "00:00" : String(model.displayTime);
       const stableDigitsEnabled = cfg.stableDigitsEnabled === true;
       const cache = resolveRegattaCacheEntry(cfg.hostContext);
-      const signature = buildSignature(
-        width,
-        height,
-        mode,
-        phase,
-        displayTime,
-        stableDigitsEnabled,
-        family,
-        valueWeight,
-        labelWeight,
-        strokeWeight
-      );
+      const signature = buildSignature({
+        width: width,
+        height: height,
+        mode: mode,
+        phase: phase,
+        displayTime: displayTime,
+        stableDigitsEnabled: stableDigitsEnabled,
+        family: family,
+        valueWeight: valueWeight,
+        labelWeight: labelWeight,
+        strokeWeight: strokeWeight,
+        fontMetricsEpoch: cfg.fontMetricsEpoch
+      });
       if (cache && cache.signature === signature && cache.result) {
         return cache.result;
       }

@@ -229,6 +229,7 @@
       cfg.labelWeight,
       cfg.mode,
       cfg.secScale,
+      cfg.fontMetricsEpoch,
       model.showRequired ? 1 : 0,
       model.stableDigitsEnabled ? 1 : 0,
       model.caption,
@@ -304,6 +305,7 @@
         labelWeight: labelWeight,
         mode: mode,
         secScale: secScale,
+        fontMetricsEpoch: cfg.fontMetricsEpoch,
         model: model
       });
       if (fitCache && fitCache.signature === fitSignature && fitCache.result) {

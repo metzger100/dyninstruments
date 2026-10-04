@@ -136,6 +136,7 @@
       cfg.valueFamily,
       cfg.valueWeight,
       cfg.labelWeight,
+      cfg.fontMetricsEpoch,
       model.mode,
       model.isApproaching ? 1 : 0,
       model.disconnect ? 1 : 0,
@@ -235,6 +236,7 @@
         valueFamily: valueFamily,
         valueWeight: valueWeight,
         labelWeight: labelWeight,
+        fontMetricsEpoch: cfg.fontMetricsEpoch,
         model: model
       });
       if (fitCache && fitCache.signature === fitSignature && fitCache.result) {

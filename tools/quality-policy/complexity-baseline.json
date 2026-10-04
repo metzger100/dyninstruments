@@ -969,13 +969,6 @@
     },
     {
       "file": "shared/widget-kits/vessel/RegattaTimerHtmlFit.js",
-      "identity": "anonymous#2.buildSignature",
-      "metric": "max-params",
-      "value": 10,
-      "limit": 6
-    },
-    {
-      "file": "shared/widget-kits/vessel/RegattaTimerHtmlFit.js",
       "identity": "anonymous#2.create.compute",
       "metric": "complexity",
       "value": 32,

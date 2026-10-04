@@ -22,6 +22,8 @@
   let toFiniteNumber = /** @type {DyniValueMathApi["toFiniteNumber"]} */ (/** @type {unknown} */ (null));
   /** @type {DyniValueMathApi["toObject"]} */
   let toObject = /** @type {DyniValueMathApi["toObject"]} */ (/** @type {unknown} */ (null));
+  /** @type {DyniValueMathApi["toText"]} */
+  let toText = /** @type {DyniValueMathApi["toText"]} */ (/** @type {unknown} */ (null));
   /** @type {DyniValueMathApi["toSafeInteger"]} */
   let toSafeInteger = /** @type {DyniValueMathApi["toSafeInteger"]} */ (/** @type {unknown} */ (null));
   /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */
@@ -64,6 +66,21 @@
     );
   }
 
+  /**
+   * Appends the rendered texts, so a changed route name, point name, or info text re-fits the rows.
+   * @param {Array<string | number>} parts
+   * @param {DyniRoutePointsRenderModel | Partial<DyniRoutePointsRenderModel>} model
+   * @returns {Array<string | number>}
+   */
+  function appendRenderedTextParts(parts, model) {
+    const rows = model.points || [];
+    parts.push("R:" + toText(model.routeNameText));
+    for (let i = 0; i < rows.length; i += 1) {
+      parts.push("N:" + toText(rows[i].nameText), "I:" + toText(rows[i].infoText));
+    }
+    return parts;
+  }
+
   /** @param {DyniRoutePointsRenderModel | Partial<DyniRoutePointsRenderModel>} model @returns {Array<string | number>} */
   function buildRoutePointsSignatureParts(model) {
     const m = model || {};
@@ -96,32 +113,38 @@
     }
 
     if (m.isVerticalContainer === true) {
-      return [
-        1,
-        shellWidth,
+      return appendRenderedTextParts(
+        [
+          1,
+          shellWidth,
+          toSafeInteger(m.pointCount, 0),
+          m.showHeader ? 1 : 0,
+          m.showLatLon ? 1 : 0,
+          m.stableDigitsEnabled === true ? 1 : 0,
+          toSafeOptionalInteger(m.selectedIndex, -1),
+          m.canActivateRoutePoint ? 1 : 0,
+          scrollbarGutterPx
+        ],
+        m
+      );
+    }
+
+    return appendRenderedTextParts(
+      [
         toSafeInteger(m.pointCount, 0),
+        m.mode || "normal",
         m.showHeader ? 1 : 0,
         m.showLatLon ? 1 : 0,
         m.stableDigitsEnabled === true ? 1 : 0,
         toSafeOptionalInteger(m.selectedIndex, -1),
         m.canActivateRoutePoint ? 1 : 0,
-        scrollbarGutterPx
-      ];
-    }
-
-    return [
-      toSafeInteger(m.pointCount, 0),
-      m.mode || "normal",
-      m.showHeader ? 1 : 0,
-      m.showLatLon ? 1 : 0,
-      m.stableDigitsEnabled === true ? 1 : 0,
-      toSafeOptionalInteger(m.selectedIndex, -1),
-      m.canActivateRoutePoint ? 1 : 0,
-      shellWidth,
-      shellHeight,
-      scrollbarGutterPx,
-      0
-    ];
+        shellWidth,
+        shellHeight,
+        scrollbarGutterPx,
+        0
+      ],
+      m
+    );
   }
 
   /** @param {string[]} parts @param {string} label @param {unknown} value */
@@ -205,6 +228,7 @@
     const valueMath = componentContext.components.require("ValueMath");
     toFiniteNumber = valueMath.toFiniteNumber;
     toObject = valueMath.toObject;
+    toText = valueMath.toText;
     toSafeInteger = valueMath.toSafeInteger;
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
 

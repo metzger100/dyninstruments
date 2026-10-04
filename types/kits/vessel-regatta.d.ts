@@ -166,6 +166,7 @@ interface DyniRegattaTimerHtmlFitArgs {
   hostContext?: unknown;
   mode?: unknown;
   stableDigitsEnabled?: unknown;
+  fontMetricsEpoch?: unknown;
 }
 
 interface DyniRegattaTimerHtmlFitResult {

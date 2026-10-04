@@ -240,7 +240,8 @@ describe("runtime/surface/HtmlSurfaceController.js", function () {
     expect(rendererInstance.update.mock.calls[1][0]).toEqual(
       expect.objectContaining({
         props: { sig: "b" },
-        fontMetricsEpoch: 1
+        fontMetricsEpoch: 1,
+        layoutChanged: true
       })
     );
   });

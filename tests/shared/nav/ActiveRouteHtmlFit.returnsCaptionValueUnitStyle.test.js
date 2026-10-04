@@ -118,6 +118,15 @@ describe("ActiveRouteHtmlFit", function () {
       hostContext: hostContext
     });
     expect(geometryMiss).not.toBe(semanticMiss);
+
+    const fontMetricsMiss = h.fit.compute({
+      model: baseModel,
+      shellRect: { width: 360, height: 180 },
+      targetEl: targetEl,
+      hostContext: hostContext,
+      fontMetricsEpoch: 1
+    });
+    expect(fontMetricsMiss).not.toBe(geometryMiss);
   });
 
   it("uses mono value family and invalidates cache when stableDigits toggles", function () {

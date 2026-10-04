@@ -13,6 +13,19 @@
 
   /** @type {DyniValueMathApi["toText"]} */
   let toText;
+  /** @type {DyniRoutePointMarkupRowFit} */
+  const NO_ROW_FIT = Object.freeze({});
+
+  /**
+   * A row without a fit (for example when no shell rect was available to measure) renders the
+   * model's info text without fit styles.
+   * @param {DyniRoutePointMarkupRowFit[]} rowFits
+   * @param {number} index
+   * @returns {DyniRoutePointMarkupRowFit}
+   */
+  function resolveRowFit(rowFits, index) {
+    return rowFits[index] || NO_ROW_FIT;
+  }
 
   /**
    * @param {DyniRoutePointsMarkupModel} model
@@ -76,7 +89,7 @@
     for (let i = 0; i < rows.length; i += 1) {
       const row = rows[i];
       const geom = rowGeometry[i];
-      const rowFit = rowFits[i];
+      const rowFit = resolveRowFit(rowFits, i);
       const rowClasses = ["dyni-route-points-row"];
       const markerClasses = ["dyni-route-points-marker"];
 
