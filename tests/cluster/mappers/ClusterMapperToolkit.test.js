@@ -100,7 +100,7 @@ describe("ClusterMapperToolkit", function () {
     expect(invalidTokenToolkit.formatUnit("sog", "speed")).toBe("kmh");
   });
 
-  it("uses injected RadialAngleMath helpers when provided", function () {
+  it("uses injected RadialAngleMath for directions and the shared ValueMath formatter for signed angles", function () {
     const mod = loadFresh("cluster/mappers/ClusterMapperToolkit.js");
     const toolkit = mod.create(
       {},
@@ -125,6 +125,8 @@ describe("ClusterMapperToolkit", function () {
     const direction = toolkit.makeAngleFormatter(true, true, "NA");
     const relative = toolkit.makeAngleFormatter(false, true, "NA");
     expect(direction(123)).toBe("042");
-    expect(relative(123)).toBe("-007");
+    expect(relative(123)).toBe("123");
+    expect(relative(190)).toBe("-170");
+    expect(relative(-0.4)).toBe("000");
   });
 });

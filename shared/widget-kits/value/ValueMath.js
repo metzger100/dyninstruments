@@ -319,18 +319,23 @@
     return resolveTickSteps(range, "voltage");
   }
 
-  /** @param {unknown} value @param {boolean | undefined} leadingZero @returns {string} */
+  /**
+   * Formats a signed angle in [-180, 180): normalizes, rounds, prints a sign only for a non-zero
+   * negative result, and maps 180 to -180, so -0.4 prints "0" and 179.6 prints "-180".
+   * @param {unknown} value @param {boolean | undefined} leadingZero @returns {string}
+   */
   function formatAngle180(value, leadingZero) {
     const n = toOptionalFiniteNumber(value);
     if (typeof n !== "number") {
       return "";
     }
-    let a = ((((n + 180) % 360) + 360) % 360) - 180;
-    if (a === 180) a = -180;
-    const rounded = Math.round(Math.abs(a));
-    let out = String(rounded);
+    const a = ((((n + 180) % 360) + 360) % 360) - 180;
+    const magnitude = Math.round(Math.abs(a));
+    let rounded = a < 0 ? -magnitude : magnitude;
+    if (rounded === 180) rounded = -180;
+    let out = String(Math.abs(rounded));
     if (leadingZero) out = out.padStart(3, "0");
-    if (a < 0) out = "-" + out;
+    if (rounded < 0) out = "-" + out;
     return out;
   }
 

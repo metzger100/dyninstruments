@@ -19,6 +19,8 @@
   let toFiniteNumber;
   /** @type {DyniValueMathApi["toOptionalFiniteNumber"]} */
   let toOptionalFiniteNumber;
+  /** @type {DyniValueMathApi["formatAngle180"]} */
+  let formatAngle180;
 
   /** @this {unknown} @returns {typeof globalThis} */
   function getGlobalRoot() {
@@ -38,19 +40,12 @@
       if (typeof n !== "number") {
         return defaultText;
       }
-      let a = isDirection ? angleMath.norm360(n) : angleMath.norm180(n);
-      let out;
-      if (isDirection) {
-        out = ((Math.round(a) % 360) + 360) % 360;
-      } else {
-        const r = Math.round(Math.abs(a));
-        out = a < 0 ? -r : r;
-        if (out === 180) out = -180;
+      if (!isDirection) {
+        return formatAngle180(n, leadingZero);
       }
-      let s = String(Math.abs(out));
-      if (leadingZero) s = s.padStart(3, "0");
-      if (!isDirection && out < 0) s = "-" + s;
-      return s;
+      const out = ((Math.round(angleMath.norm360(n)) % 360) + 360) % 360;
+      const s = String(out);
+      return leadingZero ? s.padStart(3, "0") : s;
     };
   }
 
@@ -176,6 +171,7 @@
     const valueMath = componentContext.components.require("ValueMath");
     toFiniteNumber = valueMath.toFiniteNumber;
     toOptionalFiniteNumber = valueMath.toOptionalFiniteNumber;
+    formatAngle180 = valueMath.formatAngle180;
     const catalog = getSharedCatalog();
 
     return {

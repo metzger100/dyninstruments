@@ -14,35 +14,7 @@ describe("WindLinearWidget", function () {
         modules: {
           StableDigits: loadFresh("shared/widget-kits/format/StableDigits.js"),
           PlaceholderNormalize: loadFresh("shared/widget-kits/format/PlaceholderNormalize.js"),
-          ValueMath: {
-            create() {
-              return {
-                /** @param {any} value @param {any} lo @param {any} hi */
-                clamp(value, lo, hi) {
-                  const n = Number(value);
-                  if (!isFinite(n)) return lo;
-                  return Math.max(lo, Math.min(hi, n));
-                },
-                /** @param {any} value */
-                toOptionalFiniteNumber(value) {
-                  if (value === null || value === undefined) return undefined;
-                  if (typeof value === "string" && value.trim() === "") return undefined;
-                  const n = Number(value);
-                  return Number.isFinite(n) ? n : undefined;
-                },
-                /** @param {any} value @param {any} leadingZero */
-                formatAngle180(value, leadingZero) {
-                  const n = Number(value);
-                  if (!isFinite(n)) return "---";
-                  let wrapped = ((((n + 180) % 360) + 360) % 360) - 180;
-                  if (wrapped === 180) wrapped = -180;
-                  const abs = Math.abs(Math.round(wrapped));
-                  const base = leadingZero ? String(abs).padStart(3, "0") : String(abs);
-                  return wrapped < 0 ? "-" + base : base;
-                }
-              };
-            }
-          },
+          ValueMath: loadFresh("shared/widget-kits/value/ValueMath.js"),
           LinearGaugeEngine: {
             create() {
               return {

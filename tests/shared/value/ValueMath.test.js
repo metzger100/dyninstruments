@@ -134,6 +134,26 @@ describe("ValueMath", function () {
     expect(value.formatAngle180("-15", false)).toBe("-15");
   });
 
+  it("formats signed angles by rounding first, signing only non-zero results, and mapping 180 to -180", function () {
+    const value = createValueMath();
+    /** @type {Array<[number, string, string]>} */
+    const cases = [
+      [-0.4, "0", "000"],
+      [0.4, "0", "000"],
+      [179.6, "-180", "-180"],
+      [180, "-180", "-180"],
+      [-179.6, "-180", "-180"],
+      [359.6, "0", "000"],
+      [181, "-179", "-179"],
+      [-5, "-5", "-005"]
+    ];
+
+    cases.forEach(function ([angle, plain, padded]) {
+      expect(value.formatAngle180(angle, false), String(angle)).toBe(plain);
+      expect(value.formatAngle180(angle, true), String(angle) + " with leading zero").toBe(padded);
+    });
+  });
+
   it("exposes renamed tick-step resolvers and compatibility aliases", function () {
     const value = createValueMath();
 
