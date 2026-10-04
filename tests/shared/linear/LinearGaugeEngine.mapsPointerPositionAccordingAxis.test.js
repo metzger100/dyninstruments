@@ -93,6 +93,7 @@ describe("LinearGaugeEngine", function () {
     ).x;
 
     expect(xRange).toBeCloseTo(xFixed, 0);
-    expect(xCentered).toBeGreaterThan(xFixed);
+    // centered180 maps values into [-180, 180), so 180 sits at the -180 end, as formatAngle180 prints it.
+    expect(xCentered).toBeLessThan(xFixed);
   });
 });

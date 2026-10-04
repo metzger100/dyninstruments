@@ -167,6 +167,7 @@
       rawValueKey: "angle",
       unitDefault: "°",
       axisMode: "centered180",
+      springWrap: 360,
       hideTextualMetricsProp: "windLinearHideTextualMetrics",
       layout: {
         normalVariant: "stacked",

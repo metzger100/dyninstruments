@@ -31,6 +31,7 @@
       componentContext.components.require("CanvasLayerCache")
     );
     const primitives = componentContext.components.require("LinearCanvasPrimitives");
+    const angleMath = componentContext.components.require("RadialAngleMath");
     const drawing = componentContext.components.require("LinearGaugeEngineDrawing");
     const math = componentContext.components.require("LinearGaugeMath");
     const layoutApi = componentContext.components.require("LinearGaugeLayout");
@@ -83,6 +84,14 @@
       const springMotion = componentContext.components
         .require("SpringEasing")
         .createMotion(Number.isFinite(springWrap) ? { wrap: springWrap } : {});
+      /**
+       * A wrapping spring on a centered180 axis may ease past +/-180 on the short way round;
+       * map the eased value back onto the [-180, 180) axis before it is drawn.
+       * @param {number} easedValue @returns {number}
+       */
+      function alignEasedValue(easedValue) {
+        return axisMode === "centered180" ? angleMath.norm180(easedValue) : easedValue;
+      }
       const layoutCfg = hasOwn.call(cfg, "layout") ? cfg.layout : null;
       const resolveAxisFn = typeof cfg.resolveAxis === "function" ? cfg.resolveAxis : null;
       const buildTicksFn = typeof cfg.buildTicks === "function" ? cfg.buildTicks : null;
@@ -184,7 +193,7 @@
         const display = formatDisplay(raw, p, unit);
         const easingEnabled = p.easing !== false;
         const nowMs = Date.now();
-        const easedDisplayNum = springMotion.resolve(canvasElement, display.num, easingEnabled, nowMs);
+        const easedDisplayNum = alignEasedValue(springMotion.resolve(canvasElement, display.num, easingEnabled, nowMs));
         const axisProps = springTarget === "axis" ? Object.assign({}, p) : p;
         if (springTarget === "axis") {
           if (cfg.rawValueKey && cfg.rawValueKey !== "value") {

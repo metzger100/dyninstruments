@@ -32,6 +32,7 @@ describe("WindLinearWidget", function () {
     );
 
     expect(captured.axisMode).toBe("centered180");
+    expect(captured.springWrap).toBe(360);
     expect(captured.hideTextualMetricsProp).toBe("windLinearHideTextualMetrics");
     expect(captured.ratioProps).toEqual({
       normal: "windLinearRatioThresholdNormal",
