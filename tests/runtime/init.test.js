@@ -328,26 +328,39 @@ describe("runtime/init.js", function () {
     await expect(context.DyniPlugin.runtime.runInit()).resolves.toBeUndefined();
   });
 
-  it("is idempotent once init has started", async function () {
-    const initPromise = Promise.resolve("done");
+  it("returns the same init promise for repeated runInit calls in one generation", async function () {
+    const { createTemporaryHostActionBridge } = createBridgeRuntimeMock();
+    const createComponentLoader = vi.fn(() => ({
+      uniqueComponents: vi.fn(() => ["A"]),
+      loadComponent: vi.fn(() => Promise.resolve({})),
+      createInstance: vi.fn(() => ({ id: "WidgetSpec" }))
+    }));
     const context = createScriptContext({
-      avnav: { api: { registerWidget: vi.fn(), log: vi.fn() } },
       DyniPlugin: {
+        avnavApi: { registerWidget: vi.fn(), log: vi.fn() },
         runtime: {
           theme: createThemeRuntimeMock(),
-          clusterShellRenderer: createShellRendererMock()
+          createTemporaryHostActionBridge,
+          clusterShellRenderer: createShellRendererMock(),
+          createComponentLoader,
+          registerWidget: vi.fn()
         },
-        state: { initStarted: true, initPromise },
+        state: {},
         config: {
           shared: {},
-          clusters: [],
           components: {},
-          widgetDefinitions: []
+          widgetDefinitions: [{ widget: "A", def: { name: "dyni_A_Instruments" } }]
         }
       }
     });
 
     loadInitRuntime(context);
-    await expect(context.DyniPlugin.runtime.runInit()).resolves.toBe("done");
+    const first = context.DyniPlugin.runtime.runInit();
+    const second = context.DyniPlugin.runtime.runInit();
+
+    expect(second).toBe(first);
+    expect(createComponentLoader).toHaveBeenCalledTimes(1);
+    expect(createTemporaryHostActionBridge).toHaveBeenCalledTimes(1);
+    await expect(first).resolves.toEqual(expect.any(Function));
   });
 });

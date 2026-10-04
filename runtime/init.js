@@ -99,10 +99,6 @@
       clearGenerationState(state.initGenerationId);
     }
 
-    if (state.initStarted) {
-      return /** @type {Promise<(() => void) | undefined>} */ (state.initPromise);
-    }
-
     const avnavApi = requireAvnavApi();
     if (!avnavApi) {
       return Promise.resolve(undefined);
