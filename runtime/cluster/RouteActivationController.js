@@ -33,6 +33,12 @@
     return /** @type {Record<string, unknown>} */ (valueMath.ensureObject(value, "RouteActivationController: " + name));
   };
 
+  /** @param {unknown} error @returns {string} */
+  function describeActivationError(error) {
+    const record = /** @type {{ message?: unknown } | null} */ (error && typeof error === "object" ? error : null);
+    return record && typeof record.message === "string" ? record.message : String(error);
+  }
+
   /** @param {unknown} def */
   function createWidgetController(def) {
     const widgetDef = ensureObject(def || {}, "def");
@@ -268,9 +274,19 @@
   /** @type {DyniRuntimeNamespace & Record<string, unknown>} */ (runtime).routeActivation = Object.freeze({
     DISCARDED_ACTIVATION: DISCARDED_ACTIVATION,
     createWidgetController: createWidgetController,
-    /** @param {unknown} error */
-    reportActivationError: function (error) {
-      throw error;
+    /**
+     * Logs one host-log line per failed activation and returns, so a failure never escapes as an
+     * exception or unhandled rejection while the committed shell stays usable.
+     * @param {unknown} error
+     * @param {unknown} [routeId]
+     */
+    reportActivationError: function (error, routeId) {
+      const getAvnavApi = /** @type {(rootRef: unknown) => unknown} */ (runtime.getAvnavApi);
+      const avnavApi = /** @type {{ log: (message: string) => void } | null} */ (getAvnavApi(root));
+      const routeText = typeof routeId === "string" && routeId ? " for route " + routeId : "";
+      if (avnavApi) {
+        avnavApi.log("dyninstruments route activation failed" + routeText + ": " + describeActivationError(error));
+      }
     }
   });
 })(this);

@@ -45,9 +45,9 @@
       scriptEl.onload = function () {
         resolve();
       };
-      scriptEl.onerror = function (error) {
+      scriptEl.onerror = function () {
         removeElement(scriptEl);
-        reject(error);
+        reject(new Error("dyninstruments: failed to load " + src));
       };
       document.head.appendChild(scriptEl);
     });

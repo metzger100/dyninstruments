@@ -14,9 +14,9 @@
   /** @typedef {{ activateCommittedRoute: (options: unknown) => unknown, invalidateMemoState: () => void, destroy: () => void }} DyniClusterActivationController */
   /** @typedef {{ initState: () => DyniHostCommitState, recordRender: (props: unknown) => number, scheduleCommit: (callbacks?: DyniHostCommitCallbacks) => boolean, cleanup: () => void, getState: () => DyniHostCommitState }} DyniClusterHostCommitController */
   /** @typedef {{ initState: () => unknown, reconcileSession: (payload: unknown) => boolean, recordCommittedRevision: (revision: number) => number, detachForShellReplacement: () => void, getState: () => { activeController?: unknown, shellEl?: unknown }, destroy: () => unknown }} DyniClusterSurfaceSessionController */
-  /** @typedef {{ hostCommitController: DyniClusterHostCommitController, surfaceSessionController: DyniClusterSurfaceSessionController, activationController: DyniClusterActivationController }} DyniClusterRuntimeState */
+  /** @typedef {{ hostCommitController: DyniClusterHostCommitController, surfaceSessionController: DyniClusterSurfaceSessionController, activationController: DyniClusterActivationController, pendingActivation: Promise<unknown> | null }} DyniClusterRuntimeState */
   /** @typedef {{ revision: number, props: unknown, rootEl: HTMLElement, shellEl: HTMLElement, state?: DyniHostCommitState }} DyniClusterCommitPayload */
-  /** @typedef {DyniRuntimeNamespace & { createHostCommitController: () => DyniClusterHostCommitController, createSurfaceSessionController: (options: { surfaces: DyniSurfaceRuntimeApi }) => DyniClusterSurfaceSessionController, routeActivation: { DISCARDED_ACTIVATION: unknown, createWidgetController: (def: Record<string, unknown>) => DyniClusterActivationController, reportActivationError: (error: unknown) => void }, clusterShellRenderer: DyniClusterShellRendererApi, theme: { applyToRoot: (rootEl: HTMLElement) => void }, surfaces: DyniSurfaceRuntimeApi }} DyniClusterRuntime */
+  /** @typedef {DyniRuntimeNamespace & { createHostCommitController: () => DyniClusterHostCommitController, createSurfaceSessionController: (options: { surfaces: DyniSurfaceRuntimeApi }) => DyniClusterSurfaceSessionController, routeActivation: { DISCARDED_ACTIVATION: unknown, createWidgetController: (def: Record<string, unknown>) => DyniClusterActivationController, reportActivationError: (error: unknown, routeId?: unknown) => void }, clusterShellRenderer: DyniClusterShellRendererApi, theme: { applyToRoot: (rootEl: HTMLElement) => void }, surfaces: DyniSurfaceRuntimeApi }} DyniClusterRuntime */
   /** @typedef {DyniClusterShellHostContext & { __dyniClusterState?: DyniClusterRuntimeState | null, __dyniHostCommitState?: DyniHostCommitState | null }} DyniClusterWidgetContext */
   /** @typedef {{ DyniPlugin?: DyniPluginNamespace }} DyniClusterGlobalRoot */
 
@@ -174,7 +174,8 @@
       ctx.__dyniClusterState = {
         hostCommitController: hostCommitController,
         surfaceSessionController: surfaceSessionController,
-        activationController: activationController
+        activationController: activationController,
+        pendingActivation: null
       };
 
       return ctx.__dyniClusterState;
@@ -204,7 +205,7 @@
           hostContext: hostContext
         });
       } catch (error) {
-        runtimeApi.routeActivation.reportActivationError(error);
+        runtimeApi.routeActivation.reportActivationError(error, routeFrame.__dyniRouteId);
         return;
       }
 
@@ -220,9 +221,21 @@
         activation && typeof activation === "object" ? /** @type {Record<string, unknown>} */ (activation) : null;
       if (activationRecord && typeof activationRecord.then === "function") {
         const activationPromise = /** @type {Promise<unknown>} */ (activation);
-        activationPromise.then(reconcile).catch(function (error) {
-          runtimeApi.routeActivation.reportActivationError(error);
-        });
+        // A pending cold activation is shared by every commit until it settles; reconcile it once.
+        if (state.pendingActivation === activationPromise) {
+          return;
+        }
+        state.pendingActivation = activationPromise;
+        activationPromise
+          .then(reconcile)
+          .catch(function (error) {
+            runtimeApi.routeActivation.reportActivationError(error, routeFrame.__dyniRouteId);
+          })
+          .then(function () {
+            if (state.pendingActivation === activationPromise) {
+              state.pendingActivation = null;
+            }
+          });
         return;
       }
 

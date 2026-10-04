@@ -23,17 +23,17 @@
   "catchFallbackExceptions": [
     {
       "file": "cluster/ClusterWidget.js",
-      "line": 206,
+      "line": 207,
       "rule": "catch-fallback-without-suppression",
       "owner": "cluster-boundary",
-      "reason": "Host activation errors are reported while the committed shell remains usable."
+      "reason": "A synchronous activation failure is logged once to the host log by routeActivation.reportActivationError while the committed shell remains usable."
     },
     {
       "file": "cluster/ClusterWidget.js",
-      "line": 223,
+      "line": 231,
       "rule": "catch-fallback-without-suppression",
       "owner": "cluster-boundary",
-      "reason": "Host activation rejections are reported while the committed shell remains usable."
+      "reason": "A rejected activation is logged once to the host log by routeActivation.reportActivationError instead of escaping as an unhandled rejection."
     },
     {
       "file": "cluster/viewmodels/EditRouteViewModel.js",

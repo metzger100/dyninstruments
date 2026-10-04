@@ -185,6 +185,28 @@ describe("plugin.mjs bootstrap", function () {
     expect(runInit).toHaveBeenCalledOnce();
   });
 
+  it("routes bootstrap failures to api.log once with the failing script URL", async function () {
+    const baseUrl = "http://host/plugins/dyninstruments-module/";
+    const scope = bootstrapCore.resolveScriptScope({ entrypoint: "module" }, baseUrl);
+    const dom = createDomHarness({
+      failScriptIds: [
+        bootstrapCore.makeScriptId("bootstrap-bundle.js", scope),
+        bootstrapCore.makeScriptId("config/bootstrap-manifest.js", scope)
+      ]
+    });
+    const api = createModuleApi(baseUrl);
+
+    await withBootstrapGlobals({ document: dom.document }, async function () {
+      const mod = await importPluginModule();
+      await mod.default(api);
+    });
+
+    expect(api.log).toHaveBeenCalledTimes(1);
+    expect(api.log.mock.calls[0][0]).toContain(
+      "dyninstruments: failed to load " + baseUrl + "config/bootstrap-manifest.js"
+    );
+  });
+
   it("deduplicates same-base module loads and creates distinct script IDs for timestamped base changes", async function () {
     const dom = createDomHarness();
     const runInit = vi.fn(() => Promise.resolve());
@@ -297,7 +319,9 @@ describe("plugin.mjs bootstrap", function () {
         contextWindow = global.window;
         const mod = await importPluginModule();
 
-        await expect(mod.default(api)).rejects.toThrow("script load failed");
+        await expect(mod.default(api)).rejects.toThrow(
+          "dyninstruments: failed to load http://host/plugins/dyninstruments/runtime/plugin-bootstrap-core.js"
+        );
         await mod.default(api);
       }
     );

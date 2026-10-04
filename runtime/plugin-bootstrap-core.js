@@ -97,9 +97,9 @@
       scriptEl.onload = function () {
         resolve();
       };
-      scriptEl.onerror = function (error) {
+      scriptEl.onerror = function () {
         removeElement(scriptEl);
-        reject(error);
+        reject(new Error("dyninstruments: failed to load " + src));
       };
       documentRef.head.appendChild(scriptEl);
     });
@@ -136,9 +136,9 @@
       linkEl.onload = function () {
         resolve();
       };
-      linkEl.onerror = function (error) {
+      linkEl.onerror = function () {
         removeElement(linkEl);
-        reject(error);
+        reject(new Error("dyninstruments: failed to load " + href));
       };
       documentRef.head.appendChild(linkEl);
     });
@@ -173,17 +173,12 @@
    * @param {Document} documentRef
    * @param {string} baseUrl
    * @param {string} scope
-   * @param {DyniBootstrapLogger} logger
    * @param {DyniBootstrapLoader} loadScriptOnce
    * @returns {Promise<void>}
    */
-  function loadBootstrapManifest(ns, documentRef, baseUrl, scope, logger, loadScriptOnce) {
-    return loadScriptOnce(makeScriptId(BOOTSTRAP_MANIFEST_PATH, scope), baseUrl + BOOTSTRAP_MANIFEST_PATH)
-      .catch(function (error) {
-        logger.error("dyninstruments: failed to load bootstrap manifest at config/bootstrap-manifest.js");
-        throw error;
-      })
-      .then(function () {
+  function loadBootstrapManifest(ns, documentRef, baseUrl, scope, loadScriptOnce) {
+    return loadScriptOnce(makeScriptId(BOOTSTRAP_MANIFEST_PATH, scope), baseUrl + BOOTSTRAP_MANIFEST_PATH).then(
+      function () {
         var manifest = ns.config && ns.config.bootstrapManifest;
 
         if (!Array.isArray(manifest)) {
@@ -195,7 +190,8 @@
             return loadScriptOnce(makeScriptId(relativePath, scope), baseUrl + relativePath);
           });
         }, Promise.resolve());
-      });
+      }
+    );
   }
 
   /** @returns {DyniBootstrapRoot} */
@@ -268,7 +264,7 @@
           return runInit(ns);
         },
         function () {
-          return loadBootstrapManifest(ns, activeDocument, baseUrl, scope, logger, loadScriptById).then(function () {
+          return loadBootstrapManifest(ns, activeDocument, baseUrl, scope, loadScriptById).then(function () {
             return runInit(ns);
           });
         }

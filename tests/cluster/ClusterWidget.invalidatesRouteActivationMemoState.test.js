@@ -7,6 +7,29 @@ const {
   createRuntimeHarness,
   flushPromises
 } = require("./ClusterWidget-setup");
+const { createScriptContext, runIifeScript } = require("../helpers/eval-iife");
+
+const SOG_ROUTE_META = {
+  routeId: "speed/sog",
+  cluster: "speed",
+  kind: "sog",
+  mapperId: "SpeedMapper",
+  rendererId: "SpeedLinearWidget",
+  surface: "canvas-dom",
+  shellSizing: { kind: "ratio", aspectRatio: 1.5 }
+};
+
+/** @param {{ log: (message: string) => void }} hostApi @returns {(error: unknown, routeId?: unknown) => void} */
+function loadRealActivationErrorReporter(hostApi) {
+  const context = createScriptContext({ DyniPlugin: { runtime: { getAvnavApi: () => hostApi } } });
+  runIifeScript("runtime/cluster/RouteActivationController.js", context);
+  return context.DyniPlugin.runtime.routeActivation.reportActivationError;
+}
+
+/** @param {{ resolve: unknown }} deferred @param {unknown} value */
+function resolveDeferred(deferred, value) {
+  /** @type {(value?: unknown) => void} */ (deferred.resolve)(value);
+}
 
 describe("ClusterWidget", function () {
   it("invalidates route-activation memo state when detaching for a diagnostic route so a same-signature return can remount", function () {
@@ -234,7 +257,72 @@ describe("ClusterWidget", function () {
     expect(html).toBe('<div class="dyni-shell">shell</div>');
     expect(harness.runtime.theme.applyToRoot).toHaveBeenCalledWith({ id: "root-1" });
     expect(harness.surfaceSessionController.detachForShellReplacement).not.toHaveBeenCalled();
-    expect(harness.runtime.routeActivation.reportActivationError).toHaveBeenCalledWith(activationError);
+    expect(harness.runtime.routeActivation.reportActivationError).toHaveBeenCalledWith(activationError, "speed/sog");
     expect(harness.surfaceSessionController.reconcileSession).not.toHaveBeenCalled();
+  });
+
+  it("logs a rejected activation once without throwing or leaving an unhandled rejection", async function () {
+    const hostApi = { log: vi.fn() };
+    const harness = createRuntimeHarness({
+      routeMeta: SOG_ROUTE_META,
+      activationController: createActivationControllerMock(function () {
+        return Promise.reject(new Error("component load failed"));
+      })
+    });
+    harness.runtime.routeActivation.reportActivationError = vi.fn(loadRealActivationErrorReporter(hostApi));
+    const unhandledRejection = vi.fn();
+    process.on("unhandledRejection", unhandledRejection);
+    const widget = createClusterWidget({ cluster: "speed" });
+    const widgetContext = {};
+    const routeFrame = widget.translateFunction({ kind: "sog" });
+    widget.initFunction.call(widgetContext);
+
+    try {
+      expect(function () {
+        widget.renderHtml.call(widgetContext, routeFrame);
+      }).not.toThrow();
+      await new Promise(function (resolve) {
+        setTimeout(resolve, 0);
+      });
+    } finally {
+      process.off("unhandledRejection", unhandledRejection);
+    }
+
+    expect(hostApi.log).toHaveBeenCalledTimes(1);
+    expect(hostApi.log).toHaveBeenCalledWith(
+      "dyninstruments route activation failed for route speed/sog: component load failed"
+    );
+    expect(unhandledRejection).not.toHaveBeenCalled();
+    expect(harness.surfaceSessionController.reconcileSession).not.toHaveBeenCalled();
+  });
+
+  it("reconciles a pending activation shared by several commits once and forgets it when it settles", async function () {
+    let pending = createDeferred();
+    const harness = createRuntimeHarness({
+      routeMeta: SOG_ROUTE_META,
+      activationController: createActivationControllerMock(function () {
+        return pending.promise;
+      })
+    });
+    const widget = createClusterWidget({ cluster: "speed" });
+    const widgetContext = {};
+    const routeFrame = widget.translateFunction({ kind: "sog" });
+    widget.initFunction.call(widgetContext);
+
+    widget.renderHtml.call(widgetContext, routeFrame);
+    widget.renderHtml.call(widgetContext, routeFrame);
+    widget.renderHtml.call(widgetContext, routeFrame);
+    resolveDeferred(pending, { shellEl: { id: "shell-3" } });
+    await flushPromises(8);
+
+    expect(harness.activationController.activateCommittedRoute).toHaveBeenCalledTimes(3);
+    expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledTimes(1);
+
+    pending = createDeferred();
+    widget.renderHtml.call(widgetContext, routeFrame);
+    resolveDeferred(pending, { shellEl: { id: "shell-4" } });
+    await flushPromises(8);
+
+    expect(harness.surfaceSessionController.reconcileSession).toHaveBeenCalledTimes(2);
   });
 });

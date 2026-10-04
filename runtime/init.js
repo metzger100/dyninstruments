@@ -151,7 +151,6 @@
       })
       .catch(function (error) {
         clearGenerationState(generation.id);
-        avnavApi.log("dyninstruments init failed: " + String(error));
         throw error;
       });
 

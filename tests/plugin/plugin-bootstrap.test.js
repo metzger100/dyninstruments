@@ -182,17 +182,18 @@ describe("plugin.js bootstrap", function () {
     expect(dom.appendedScripts.length).toBe(0);
   });
 
-  it("logs a clear error when bootstrap manifest cannot be loaded", async function () {
+  it("logs the failing bootstrap manifest URL exactly once when the manifest cannot be loaded", async function () {
     const dom = createDomHarness({
       failScriptIds: ["dyni-internal-legacy-bootstrap-bundle-js", "dyni-internal-legacy-config-bootstrap-manifest-js"]
     });
+    const hostApi = createHostApi();
 
     const context = createScriptContext({
       document: dom.document,
       AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
-      avnav: { api: createHostApi() },
+      avnav: { api: hostApi },
       window: {
-        avnav: { api: createHostApi() },
+        avnav: { api: hostApi },
         DyniPluginBootstrapCore: bootstrapCore
       }
     });
@@ -201,6 +202,100 @@ describe("plugin.js bootstrap", function () {
     await flushPromises(60);
 
     expect(dom.appendedScripts).toHaveLength(2);
+    expect(hostApi.log).toHaveBeenCalledTimes(1);
+    expect(hostApi.log.mock.calls[0][0]).toContain(
+      "dyninstruments: failed to load http://host/plugins/dyninstruments/config/bootstrap-manifest.js"
+    );
+  });
+
+  it("rejects a failing scoped component script load with an error naming its URL", async function () {
+    const dom = createDomHarness({
+      shouldFailScript(node) {
+        return node.src.endsWith("/bootstrap-bundle.js") || node.src.endsWith("/widgets/broken.js");
+      }
+    });
+    const hostApi = createHostApi();
+    const context = createScriptContext({
+      document: dom.document,
+      AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
+      avnav: { api: hostApi },
+      window: {
+        avnav: { api: hostApi },
+        DyniPluginBootstrapCore: bootstrapCore,
+        DyniPlugin: {
+          config: { bootstrapManifest: BOOTSTRAP_MANIFEST },
+          runtime: { runInit: vi.fn(() => Promise.resolve()) }
+        }
+      }
+    });
+
+    runIifeScript("plugin.js", context);
+    await flushPromises(60);
+
+    await expect(
+      context.window.DyniPlugin.runtime.loadScriptOnce(
+        "dyni-js-Broken",
+        "http://host/plugins/dyninstruments/widgets/broken.js"
+      )
+    ).rejects.toThrow("dyninstruments: failed to load http://host/plugins/dyninstruments/widgets/broken.js");
+    expect(hostApi.log).not.toHaveBeenCalled();
+  });
+
+  it("logs a missing runtime.runInit exactly once", async function () {
+    const dom = createDomHarness({
+      failScriptIds: ["dyni-internal-legacy-bootstrap-bundle-js"]
+    });
+    const hostApi = createHostApi();
+    const context = createScriptContext({
+      document: dom.document,
+      AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
+      avnav: { api: hostApi },
+      window: {
+        avnav: { api: hostApi },
+        DyniPluginBootstrapCore: bootstrapCore,
+        DyniPlugin: {
+          config: { bootstrapManifest: [] },
+          runtime: {}
+        }
+      }
+    });
+
+    runIifeScript("plugin.js", context);
+    await flushPromises(60);
+
+    expect(hostApi.log).toHaveBeenCalledTimes(1);
+    expect(hostApi.log.mock.calls[0][0]).toContain("dyninstruments: runtime.runInit missing");
+  });
+
+  it("logs the failing manifest-listed script URL exactly once", async function () {
+    const dom = createDomHarness({
+      failScriptIds: ["dyni-internal-legacy-bootstrap-bundle-js", "dyni-internal-legacy-runtime-namespace-js"]
+    });
+    const hostApi = createHostApi();
+    const runInit = vi.fn(() => Promise.resolve());
+
+    const context = createScriptContext({
+      document: dom.document,
+      AVNAV_BASE_URL: "http://host/plugins/dyninstruments/",
+      avnav: { api: hostApi },
+      window: {
+        avnav: { api: hostApi },
+        DyniPluginBootstrapCore: bootstrapCore,
+        DyniPlugin: {
+          config: { bootstrapManifest: BOOTSTRAP_MANIFEST },
+          runtime: { runInit }
+        }
+      }
+    });
+
+    runIifeScript("plugin.js", context);
+    await flushPromises(60);
+
+    expect(runInit).not.toHaveBeenCalled();
+    expect(hostApi.log).toHaveBeenCalledTimes(1);
+    expect(hostApi.log.mock.calls[0][0]).toContain(
+      "dyninstruments: failed to load http://host/plugins/dyninstruments/runtime/namespace.js"
+    );
   });
 
   it("loads runtime/plugin-bootstrap-core.js when the shared core is not preloaded", async function () {

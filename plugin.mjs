@@ -45,9 +45,9 @@ function loadScriptOnce(scriptId, src) {
     scriptEl.async = true;
     scriptEl.src = src;
     scriptEl.onload = () => resolve();
-    scriptEl.onerror = (error) => {
+    scriptEl.onerror = () => {
       removeElement(scriptEl);
-      reject(error);
+      reject(new Error(`dyninstruments: failed to load ${src}`));
     };
     document.head.appendChild(scriptEl);
   });
@@ -110,7 +110,9 @@ export default async function initDyniPlugin(api) {
   return core.start({
     root: window,
     document,
-    logger: console,
+    logger: {
+      error: (...args) => api.log(args.join(" "))
+    },
     baseUrl,
     hostApi: api,
     entrypoint: "module"
