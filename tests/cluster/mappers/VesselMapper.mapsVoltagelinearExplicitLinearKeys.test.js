@@ -143,7 +143,8 @@ describe("VesselMapper", function () {
     expect(nullOut.formatter).toBe("formatDecimal");
 
     const undefinedOut = mapper.translate({ kind: "voltage", value: undefined }, routeContext("voltage", toolkit));
-    expect(Object.prototype.hasOwnProperty.call(undefinedOut, "value")).toBe(false);
+    expect(Object.prototype.hasOwnProperty.call(undefinedOut, "value")).toBe(true);
+    expect(undefinedOut.value).toBeUndefined();
     expect(undefinedOut.formatter).toBe("formatDecimal");
 
     const blankOut = mapper.translate({ kind: "voltage", value: "" }, routeContext("voltage", toolkit));

@@ -325,6 +325,15 @@ describe("EnvironmentMapper", function () {
     );
   });
 
+  it("maps a missing depth to an own undefined value so a stale KEY value cannot leak through", function () {
+    const mapper = loadFresh("cluster/mappers/EnvironmentMapper.js").create();
+    const out = mapper.translate({ kind: "depth", value: 101325 }, routeContext("depth", makeToolkit()));
+
+    expect(Object.prototype.hasOwnProperty.call(out, "value")).toBe(true);
+    expect(out.value).toBeUndefined();
+    expect(out.formatter).toBe("formatDistance");
+  });
+
   it("rejects legacy graphic kind names", function () {
     const mapper = loadFresh("cluster/mappers/EnvironmentMapper.js").create();
     expect(mapper.translate({ kind: "depthGraphic", depth: 3 }, routeContext("depthGraphic", makeToolkit()))).toEqual(

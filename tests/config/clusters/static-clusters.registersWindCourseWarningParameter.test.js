@@ -3,7 +3,7 @@ const { loadClusters } = require("./static-clusters-setup");
 
 /**
  * @typedef {{ condition?: unknown, internal?: boolean, default?: unknown, name?: string, list?: { value: unknown }[] }} EditableParamEntry
- * @typedef {{ cluster: string, editableParameters: Record<string, EditableParamEntry>, updateFunction: (props: Record<string, unknown>) => { storeKeys?: Record<string, unknown> } }} ClusterDef
+ * @typedef {{ cluster: string, editableParameters: Record<string, EditableParamEntry> }} ClusterDef
  */
 
 describe("static cluster configs", function () {
@@ -298,34 +298,5 @@ describe("static cluster configs", function () {
         condition: { kind: "xteDisplayLinear", formatUnit_xteDisplayLinearXte: "yd" }
       })
     );
-  });
-
-  it("updates default cluster storeKeys.value from the KEY editable", function () {
-    /** @type {ClusterDef[]} */
-    const defs = loadClusters();
-    const def = defs.find((item) => item.cluster === "default");
-    if (!def) {
-      throw new Error("Expected the default cluster def.");
-    }
-
-    const updated = def.updateFunction({
-      kind: "text",
-      value: " nav.gps.speed "
-    });
-    if (!updated.storeKeys) {
-      throw new Error("Expected storeKeys on the updated props.");
-    }
-    expect(updated.storeKeys.value).toBe("nav.gps.speed");
-
-    const cleared = def.updateFunction({
-      kind: "text",
-      value: "   ",
-      storeKeys: { value: "old.path" }
-    });
-    if (!cleared.storeKeys) {
-      throw new Error("Expected storeKeys on the cleared props.");
-    }
-    expect(cleared.storeKeys.value).toBeUndefined();
-    expect(Object.prototype.hasOwnProperty.call(cleared.storeKeys, "value")).toBe(false);
   });
 });

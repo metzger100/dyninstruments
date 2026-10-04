@@ -5,7 +5,6 @@
 (function (root) {
   "use strict";
 
-  /** @typedef {Record<string, unknown> & { value?: unknown, storeKeys?: Record<string, unknown> }} DyniDefaultValues */
   /** @typedef {DyniPluginSharedConfig & { makePerKindTextParams: (map: DyniPerKindTextParameterMap) => DyniEditableParameters, opt: (name: unknown, value: unknown) => DyniEditableOption, kindMaps: Record<string, DyniPerKindTextParameterMap>, buildDefaultRadialEditableParameters: () => DyniEditableParameters }} DyniDefaultSharedConfig */
   /** @typedef {{ DyniPlugin: DyniPluginNamespace & { config: DyniPluginConfig & { clusters: DyniWidgetDefinition[] } } }} DyniDefaultRoot */
 
@@ -250,22 +249,6 @@
         ...shared.buildDefaultRadialEditableParameters(),
 
         ...makePerKindTextParams(DEFAULT_KIND)
-      },
-      /** @param {DyniDefaultValues | null | undefined} values @returns {DyniDefaultValues} */
-      updateFunction: function (values) {
-        const out = /** @type {DyniDefaultValues} */ (values ? { ...values } : {});
-
-        if (!out.storeKeys) out.storeKeys = {};
-
-        if (typeof out.value === "string" && out.value.trim()) {
-          out.storeKeys = { ...out.storeKeys, value: out.value.trim() };
-        } else if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
-          const sk = { ...out.storeKeys };
-          delete sk.value;
-          out.storeKeys = sk;
-        }
-
-        return out;
       }
     }
   });

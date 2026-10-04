@@ -161,42 +161,6 @@ describe("config/clusters/vessel.js", function () {
     expect(def.editableParameters.unit_regattaTimer).toBe(false);
   });
 
-  it("injects selected voltage path into storeKeys.value for voltage kinds", function () {
-    const def = loadVesselDef();
-    const out = def.updateFunction.call({ kind: "voltage" }, { value: " electrical.battery.house " });
-    expect(out.storeKeys.value).toBe("electrical.battery.house");
-  });
-
-  it("removes stale voltage value key when voltage key is cleared", function () {
-    const def = loadVesselDef();
-    const out = def.updateFunction.call({ kind: "voltageLinear" }, { value: " ", storeKeys: { value: "old.path" } });
-    expect(out.storeKeys.value).toBeUndefined();
-    expect(Object.prototype.hasOwnProperty.call(out.storeKeys, "value")).toBe(false);
-  });
-
-  it("removes dynamic value store key when non-voltage kind is active", function () {
-    const def = loadVesselDef();
-    const out = def.updateFunction.call({ kind: "clock" }, { storeKeys: { value: "a", clock: "b" } });
-    expect(out.storeKeys.value).toBeUndefined();
-    expect(out.storeKeys.clock).toBe("b");
-  });
-
-  it("sets pitch/roll keys from editable KEYs and falls back to defaults when empty", function () {
-    const def = loadVesselDef();
-
-    const pitchExplicit = def.updateFunction.call({ kind: "pitch" }, { pitchKey: " sensors.attitude.pitch " });
-    expect(pitchExplicit.storeKeys.pitch).toBe("sensors.attitude.pitch");
-
-    const pitchFallback = def.updateFunction.call({ kind: "pitch" }, { pitchKey: "  " });
-    expect(pitchFallback.storeKeys.pitch).toBe("nav.gps.signalk.navigation.attitude.pitch");
-
-    const rollExplicit = def.updateFunction.call({ kind: "roll" }, { rollKey: " sensors.attitude.roll " });
-    expect(rollExplicit.storeKeys.roll).toBe("sensors.attitude.roll");
-
-    const rollFallback = def.updateFunction.call({ kind: "roll" }, { rollKey: "" });
-    expect(rollFallback.storeKeys.roll).toBe("nav.gps.signalk.navigation.attitude.roll");
-  });
-
   it("uses live pitchKey and rollKey values for custom attitude store paths at runtime", function () {
     const def = loadVesselDef();
 

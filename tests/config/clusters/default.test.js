@@ -29,6 +29,7 @@ describe("config/clusters/default.js", function () {
     expect(def.unit).toBe("");
     expect(def.default).toBe("---");
     expect(def.storeKeys).toEqual({});
+    expect(def.updateFunction).toBeUndefined();
     expect(def.editableParameters.kind.default).toBe("text");
     expect(def.editableParameters.kind.list.map((/** @type {any} */ entry) => entry.value)).toEqual([
       "text",
@@ -160,23 +161,5 @@ describe("config/clusters/default.js", function () {
       kind: "radialGauge",
       defaultRadialWarningHighEnabled: true
     });
-  });
-
-  it("writes trimmed storeKeys.value and removes it again when the KEY is blank", function () {
-    const def = loadDefaultCluster();
-
-    const updated = def.updateFunction({
-      value: "  nav.gps.speed  ",
-      storeKeys: { legacy: "keep" }
-    });
-    expect(updated.storeKeys.value).toBe("nav.gps.speed");
-    expect(updated.storeKeys.legacy).toBe("keep");
-
-    const cleared = def.updateFunction({
-      value: "  ",
-      storeKeys: { value: "old.path", legacy: "keep" }
-    });
-    expect(cleared.storeKeys.value).toBeUndefined();
-    expect(cleared.storeKeys.legacy).toBe("keep");
   });
 });

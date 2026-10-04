@@ -111,42 +111,6 @@ describe("config/clusters/environment.js", function () {
     expect(keys.indexOf("depthRadialWarningFrom_nm")).toBeLessThan(keys.indexOf("depthRadialAlarmFrom_nm"));
   });
 
-  it("injects pressure store key from value when pressure kind is active", function () {
-    const def = loadEnvDef();
-    const out = def.updateFunction.call({ kind: "pressure" }, { value: " sensors.pressure.main " });
-    expect(out.storeKeys.value).toBe("sensors.pressure.main");
-  });
-
-  it("removes stale pressure value key when pressure key is cleared", function () {
-    const def = loadEnvDef();
-    const out = def.updateFunction.call({ kind: "pressure" }, { value: "  ", storeKeys: { value: "old.path" } });
-    expect(out.storeKeys.value).toBeUndefined();
-    expect(Object.prototype.hasOwnProperty.call(out.storeKeys, "value")).toBe(false);
-  });
-
-  it("removes pressure store key when non-pressure kind is active", function () {
-    const def = loadEnvDef();
-    const out = def.updateFunction.call({ kind: "temp" }, { storeKeys: { value: "x", temp: "t" } });
-    expect(out.storeKeys.value).toBeUndefined();
-    expect(out.storeKeys.temp).toBe("nav.gps.waterTemp");
-  });
-
-  it("sets depth source from depthKey or defaults to depth below keel", function () {
-    const def = loadEnvDef();
-
-    const text = def.updateFunction.call({ kind: "depth" }, { depthKey: " nav.gps.depthBelowWaterline " });
-    expect(text.storeKeys.depth).toBe("nav.gps.depthBelowWaterline");
-
-    const linear = def.updateFunction.call({ kind: "depthLinear" }, { depthKey: "nav.gps.depthBelowTransducer" });
-    expect(linear.storeKeys.depth).toBe("nav.gps.depthBelowTransducer");
-
-    const radial = def.updateFunction.call({ kind: "depthRadial" }, { depthKey: " nav.gps.depthBelowKeel " });
-    expect(radial.storeKeys.depth).toBe("nav.gps.depthBelowKeel");
-
-    const fallback = def.updateFunction.call({ kind: "depth" }, { depthKey: "  " });
-    expect(fallback.storeKeys.depth).toBe("nav.gps.depthBelowKeel");
-  });
-
   it("uses live depthKey values for custom depth store paths at runtime", function () {
     const def = loadEnvDef();
 
@@ -190,19 +154,6 @@ describe("config/clusters/environment.js", function () {
     );
 
     expect(out.depth).toBeUndefined();
-  });
-
-  it("sets temperature source from tempKey or defaults to waterTemp", function () {
-    const def = loadEnvDef();
-
-    const explicit = def.updateFunction.call({ kind: "tempRadial" }, { tempKey: "env.temp.engine" });
-    expect(explicit.storeKeys.temp).toBe("env.temp.engine");
-
-    const explicitLinear = def.updateFunction.call({ kind: "tempLinear" }, { tempKey: "env.temp.linear" });
-    expect(explicitLinear.storeKeys.temp).toBe("env.temp.linear");
-
-    const fallback = def.updateFunction.call({ kind: "temp" }, { tempKey: "" });
-    expect(fallback.storeKeys.temp).toBe("nav.gps.waterTemp");
   });
 
   it("uses live tempKey values for custom temperature store paths at runtime", function () {

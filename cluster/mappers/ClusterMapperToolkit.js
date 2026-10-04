@@ -57,7 +57,7 @@
   /** @param {unknown} v @param {unknown} cap @param {unknown} unit @param {unknown} formatter @param {unknown} formatterParameters @returns {Record<string, unknown>} */
   function out(v, cap, unit, formatter, formatterParameters) {
     const o = {};
-    if (typeof v !== "undefined") o.value = v;
+    o.value = v;
     if (typeof cap !== "undefined") o.caption = cap;
     if (typeof unit !== "undefined") o.unit = unit;
     if (typeof formatter !== "undefined") o.formatter = formatter;

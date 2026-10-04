@@ -20,7 +20,7 @@ describe("ClusterMapperToolkit", function () {
     expect(relative("x")).toBe("NA");
   });
 
-  it("out only includes fields that are explicitly provided", function () {
+  it("out always carries value and only includes the other fields when they are provided", function () {
     const mod = loadFresh("cluster/mappers/ClusterMapperToolkit.js");
     const toolkit = mod.create();
 
@@ -36,6 +36,9 @@ describe("ClusterMapperToolkit", function () {
     expect(two).toEqual({
       caption: "SOG"
     });
+    expect("value" in two).toBe(true);
+    expect(two.value).toBeUndefined();
+    expect(Object.keys(two).sort()).toEqual(["caption", "value"]);
   });
 
   it("createToolkit resolves cap/unit accessors from props", function () {

@@ -82,7 +82,7 @@
       "file": "config/clusters/environment.js",
       "identity": "anonymous",
       "metric": "complexity",
-      "value": 23,
+      "value": 13,
       "limit": 10
     },
     {
@@ -90,13 +90,6 @@
       "identity": "anonymous",
       "metric": "complexity",
       "value": 12,
-      "limit": 10
-    },
-    {
-      "file": "config/clusters/vessel.js",
-      "identity": "anonymous",
-      "metric": "complexity",
-      "value": 15,
       "limit": 10
     },
     {

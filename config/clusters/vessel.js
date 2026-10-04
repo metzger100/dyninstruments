@@ -16,23 +16,6 @@
   const DEFAULT_ROLL_KEY = "nav.gps.signalk.navigation.attitude.roll";
   const hasOwn = Object.prototype.hasOwnProperty;
 
-  /**
-   * Copies the live value of an attitude KEY editable onto the metric the mapper reads.
-   * @param {DyniClusterConfigValues} out
-   * @param {string} valueKey
-   * @param {string} aliasKey
-   * @param {string} defaultPath
-   */
-  function applyAttitudeKey(out, valueKey, aliasKey, defaultPath) {
-    if (hasOwn.call(out, aliasKey)) {
-      out[valueKey] = out[aliasKey];
-    }
-
-    const selectedPath = out[aliasKey];
-    const storePath = typeof selectedPath === "string" && selectedPath.trim() ? selectedPath.trim() : defaultPath;
-    out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), [valueKey]: storePath };
-  }
-
   config.clusters.push({
     widget: "ClusterWidget",
     def: {
@@ -305,31 +288,12 @@
         const source = /** @type {DyniClusterConfigValues} */ (this && typeof this === "object" ? this : {});
         const kind = source.kind || "voltage";
 
-        if (!out.storeKeys) out.storeKeys = {};
-
-        // attach selected SK path into storeKeys.value (required!)
-        if (kind === "voltage" || kind === "voltageLinear" || kind === "voltageRadial") {
-          if (typeof out.value === "string" && out.value.trim()) {
-            out.storeKeys = { .../** @type {Record<string, unknown>} */ (out.storeKeys), value: out.value.trim() };
-          } else if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
-            const sk = { .../** @type {Record<string, unknown>} */ (out.storeKeys) };
-            delete sk.value;
-            out.storeKeys = sk;
-          }
-        } else {
-          if (Object.prototype.hasOwnProperty.call(out.storeKeys, "value")) {
-            const sk = { .../** @type {Record<string, unknown>} */ (out.storeKeys) };
-            delete sk.value;
-            out.storeKeys = sk;
-          }
+        if (kind === "pitch" && hasOwn.call(out, "pitchKey")) {
+          out.pitch = out.pitchKey;
         }
 
-        if (kind === "pitch") {
-          applyAttitudeKey(out, "pitch", "pitchKey", DEFAULT_PITCH_KEY);
-        }
-
-        if (kind === "roll") {
-          applyAttitudeKey(out, "roll", "rollKey", DEFAULT_ROLL_KEY);
+        if (kind === "roll" && hasOwn.call(out, "rollKey")) {
+          out.roll = out.rollKey;
         }
 
         return out;
