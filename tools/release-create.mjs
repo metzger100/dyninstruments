@@ -96,6 +96,7 @@ export function createRelease(options) {
 
   createReleaseZip({
     rootDir,
+    version,
     manifestFiles,
     outputZipAbs: zipAbs,
     runCommand,
@@ -205,9 +206,9 @@ function runRequiredCheck(runCommand, rootDir, args, label) {
 }
 
 /**
- * @param {{ rootDir: string, manifestFiles: string[], outputZipAbs: string, runCommand: RunCommand, bundleBuilder: (rootDir: string) => string }} params
+ * @param {{ rootDir: string, version: string, manifestFiles: string[], outputZipAbs: string, runCommand: RunCommand, bundleBuilder: (rootDir: string) => string }} params
  */
-function createReleaseZip({ rootDir, manifestFiles, outputZipAbs, runCommand, bundleBuilder }) {
+function createReleaseZip({ rootDir, version, manifestFiles, outputZipAbs, runCommand, bundleBuilder }) {
   const stageParent = fs.mkdtempSync(path.join(os.tmpdir(), "dyni-release-"));
   const stageRoot = path.join(stageParent, "dyninstruments");
 
@@ -218,6 +219,11 @@ function createReleaseZip({ rootDir, manifestFiles, outputZipAbs, runCommand, bu
       fs.mkdirSync(path.dirname(targetAbs), { recursive: true });
       fs.copyFileSync(sourceAbs, targetAbs);
     }
+
+    const pluginManifestPath = path.join(stageRoot, "plugin.json");
+    const pluginManifest = JSON.parse(fs.readFileSync(pluginManifestPath, "utf8"));
+    pluginManifest.version = version;
+    fs.writeFileSync(pluginManifestPath, JSON.stringify(pluginManifest, null, 2) + "\n", "utf8");
 
     const bundleAbs = path.join(stageRoot, "bootstrap-bundle.js");
     fs.mkdirSync(path.dirname(bundleAbs), { recursive: true });

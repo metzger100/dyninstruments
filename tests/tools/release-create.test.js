@@ -106,11 +106,14 @@ describe("release-create", function () {
     const version = "1.2.3-beta.1";
     const tag = `v${version}`;
     const notesRel = `releases/dyninstruments-${version}.md`;
+    const pluginManifest = { layouts: [{ name: "Test layout", file: "layouts/test.json" }] };
 
     try {
       writeFile(tempRoot, "plugin.js", "console.log('plugin');\n");
       writeFile(tempRoot, "plugin.mjs", "export default function () {}\n");
       writeFile(tempRoot, "plugin.css", "body {}\n");
+      writeFile(tempRoot, "plugin.json", JSON.stringify(pluginManifest));
+      writeFile(tempRoot, "layouts/test.json", "{}\n");
       writeFile(tempRoot, "runtime/plugin-bootstrap-core.js", "console.log('bootstrap core');\n");
       writeFile(tempRoot, "runtime/init.js", "console.log('init');\n");
       writeFile(tempRoot, "config/bootstrap-manifest.js", "(function(){})();\n");
@@ -128,6 +131,8 @@ describe("release-create", function () {
         "plugin.js",
         "plugin.mjs",
         "plugin.css",
+        "plugin.json",
+        "layouts/test.json",
         "runtime/plugin-bootstrap-core.js",
         "runtime/init.js",
         "config/bootstrap-manifest.js",
@@ -160,6 +165,8 @@ describe("release-create", function () {
             const outputZipAbs = args[2];
             const stageRoot = path.join(options.cwd, "dyninstruments");
             zippedEntries = listRelativeFiles(stageRoot);
+            const stagedManifest = JSON.parse(fs.readFileSync(path.join(stageRoot, "plugin.json"), "utf8"));
+            expect(stagedManifest).toEqual({ ...pluginManifest, version });
             fs.mkdirSync(path.dirname(outputZipAbs), { recursive: true });
             fs.writeFileSync(outputZipAbs, "fake zip\n" + zippedEntries.join("\n"));
             return { status: 0, stdout: "", stderr: "", error: null };
@@ -217,12 +224,15 @@ describe("release-create", function () {
         "assets/fonts/Roboto-Regular.woff2",
         "bootstrap-bundle.js",
         "config/bootstrap-manifest.js",
+        "layouts/test.json",
         "plugin.css",
         "plugin.js",
+        "plugin.json",
         "plugin.mjs",
         "runtime/init.js",
         "runtime/plugin-bootstrap-core.js"
       ]);
+      expect(JSON.parse(fs.readFileSync(path.join(tempRoot, "plugin.json"), "utf8"))).toEqual(pluginManifest);
 
       const headMessage = runReal("git", ["log", "-1", "--pretty=%s"], tempRoot).trim();
       expect(headMessage).toBe("release: v1.2.3-beta.1");

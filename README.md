@@ -79,7 +79,8 @@ dyninstruments ships all current AvNav plugin surfaces:
 
 - `plugin.js` is the conservative legacy entrypoint for older AvNav versions.
 - `plugin.mjs` is the modern entrypoint used by current/future AvNav versions when available.
-- `plugin.json` is declarative metadata for bundled layouts and does not duplicate widget runtime registration.
+- `plugin.json` registers the bundled layouts. Release ZIPs include a `version` field in this manifest for the
+  [AvNav Plugin Catalog](https://wellenvogel.github.io/avnav-plugin-catalog/en/list.html).
 - `plugin.css` is loaded by AvNav as the plugin-wide stylesheet.
 
 On AvNav versions that load `plugin.mjs` first, `plugin.js` is not used as an in-browser fallback. Module startup treats

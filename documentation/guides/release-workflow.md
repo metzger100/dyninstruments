@@ -26,6 +26,10 @@ publishes the already-committed ZIP and notes.
   the complete acyclic dependency/resource graph, and requires every declared component resource.
 - Before invoking `zip`, release creation verifies that the staging tree contains exactly the generated release manifest
   plus `bootstrap-bundle.js`.
+- Release creation writes `version` into the staged `dyninstruments/plugin.json` using the release SemVer without the
+  `v` prefix. The Dyninstruments catalog entry can track GitHub releases with `update: github`,
+  `release_pattern: 'v#semver#'`, and `filename: dyninstruments-$version.zip`.
+  [AvNav Plugin Catalog update rules](https://wellenvogel.github.io/avnav-plugin-catalog/en/developer.html#github-updates)
 - Release artifacts written to `releases/`:
   - `releases/dyninstruments-VERSION.zip`
   - `releases/dyninstruments-VERSION.md`
